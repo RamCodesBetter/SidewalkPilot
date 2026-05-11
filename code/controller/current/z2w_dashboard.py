@@ -789,7 +789,12 @@ def parse_args():
     parser.add_argument("--max7219-device", type=int, default=0)
     parser.add_argument("--max7219-devices", type=int, default=4)
     parser.add_argument("--max7219-intensity", type=int, default=10)
-    parser.add_argument("--idle-exit-sec", type=float, default=10.0)
+    parser.add_argument(
+        "--idle-exit-sec",
+        type=float,
+        default=10.0,
+        help="Exit after this many seconds without telemetry; use 0 to disable.",
+    )
     return parser.parse_args()
 
 
@@ -882,7 +887,7 @@ def main():
         max7219.render(left_signal_visible, right_signal_visible)
 
     def handle_idle() -> int | None:
-        if args.idle_exit_sec > 0.0 and have_received_payload and time.monotonic() - last_packet_time >= args.idle_exit_sec:
+        if args.idle_exit_sec > 0.0 and time.monotonic() - last_packet_time >= args.idle_exit_sec:
             print(
                 "Dashboard receiver exiting after telemetry idle timeout "
                 f"({args.idle_exit_sec:.1f}s)."

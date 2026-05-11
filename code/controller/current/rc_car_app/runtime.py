@@ -1077,7 +1077,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     calculate_speed(state, metrics, dt)
 
 
-def run(model_choice=None):
+def run(model_choice=None, no_lidar: bool = False):
     global photo_status
     print("RC Car Controller Starting...")
     active_model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
@@ -1113,9 +1113,12 @@ def run(model_choice=None):
             f"Controller axis debug enabled. steer={STEERING_AXIS}, throttle={THROTTLE_AXIS}, brake={BRAKE_AXIS}"
         )
 
-    lidar_parser = LidarParser(SERIAL_PORT, BAUD_RATE)
-    lidar_parser.start()
-    print("LiDAR reader running in background; runtime will keep retrying if disconnected.")
+    if no_lidar:
+        print("LiDAR disabled by --no-lidar.")
+    else:
+        lidar_parser = LidarParser(SERIAL_PORT, BAUD_RATE)
+        lidar_parser.start()
+        print("LiDAR reader running in background; runtime will keep retrying if disconnected.")
 
     gps_reader = GpsReader()
     gps_reader.start()

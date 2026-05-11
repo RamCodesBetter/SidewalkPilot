@@ -1,12 +1,14 @@
 #!/usr/bin/python3
+import glob
 import math
+import os
 import struct
 import threading
 import time
 
 import serial
 
-SERIAL_PORT = "/dev/ttyUSB0"
+SERIAL_PORT = os.environ.get("RC_CAR_LIDAR_SERIAL_PORT", "/dev/ttyUSB0")
 BAUD_RATE = 230400
 PACKET_LENGTH = 47
 MEASUREMENT_POINTS_PER_PACKET = 12
@@ -14,8 +16,15 @@ MAX_LIDAR_RANGE_M = 12.0
 OBSTACLE_STOP_THRESHOLD_M = 0.6
 OBSTACLE_WARN_THRESHOLD_M = 1.2
 RECONNECT_INTERVAL_SEC = 1.5
+MISSING_PORT_RECONNECT_INTERVAL_SEC = 5.0
+CONNECT_ERROR_LOG_INTERVAL_SEC = 15.0
 READ_LOOP_SLEEP_SEC = 0.01
 SCAN_STALE_SEC = 1.0
+SCAN_TTYACM_PORTS = os.environ.get("RC_CAR_LIDAR_SCAN_TTYACM", "").strip().lower() in {"1", "true", "yes", "on"}
+AUTO_PORT_GLOBS = tuple(
+    ["/dev/serial/by-id/*", "/dev/ttyUSB*"]
+    + (["/dev/ttyACM*"] if SCAN_TTYACM_PORTS else [])
+)
 
 
 class LidarPoint:
@@ -37,6 +46,7 @@ class LidarPoint:
 class LidarParser:
     def __init__(self, port, baudrate):
         self.ser = None
+        self.configured_port = str(port or "").strip()
         self.port = port
         self.baudrate = baudrate
         self.buffer = b""
@@ -44,24 +54,80 @@ class LidarParser:
         self.last_full_scan_points = []
         self.lock = threading.Lock()
         self.last_reconnect_attempt = 0.0
+        self.last_connect_error_log = 0.0
+        self.last_connect_error_key = None
+        self.last_connect_had_candidates = True
         self.last_scan_time = 0.0
         self.connected = False
         self.running = False
         self.thread = None
 
+    def candidate_ports(self):
+        configured = self.configured_port
+        if configured and configured.lower() != "auto" and os.path.exists(configured):
+            return [configured]
+
+        candidates = []
+        for pattern in AUTO_PORT_GLOBS:
+            candidates.extend(sorted(glob.glob(pattern)))
+
+        dashboard_port = os.environ.get("RC_CAR_DASHBOARD_SERIAL_PORT", "/dev/ttyACM0").strip()
+        dashboard_port_real = os.path.realpath(dashboard_port) if dashboard_port else ""
+        unique_candidates = []
+        seen = set()
+        for candidate in candidates:
+            candidate_real = os.path.realpath(candidate)
+            if dashboard_port and (candidate == dashboard_port or candidate_real == dashboard_port_real):
+                continue
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            unique_candidates.append(candidate)
+        return unique_candidates
+
+    def log_connect_failure(self, message, key) -> None:
+        now = time.monotonic()
+        if key != self.last_connect_error_key or now - self.last_connect_error_log >= CONNECT_ERROR_LOG_INTERVAL_SEC:
+            print(message)
+            self.last_connect_error_key = key
+            self.last_connect_error_log = now
+
     def connect(self):
-        try:
-            self.disconnect()
-            self.ser = serial.Serial(self.port, self.baudrate, timeout=0)
-            self.buffer = b""
-            self.connected = True
-            print(f"Connected to LiDAR on {self.port} at {self.baudrate} baud.")
-            return True
-        except (OSError, serial.SerialException) as e:
+        self.disconnect()
+        candidates = self.candidate_ports()
+        self.last_connect_had_candidates = bool(candidates)
+        if not candidates:
+            configured = self.configured_port or "auto"
             self.connected = False
             self.ser = None
-            print(f"Error opening serial port {self.port}: {e}")
+            self.log_connect_failure(
+                f"LiDAR serial port not found. Configured={configured}; checked {', '.join(AUTO_PORT_GLOBS)}. "
+                "Will keep retrying quietly.",
+                ("missing", configured),
+            )
             return False
+
+        errors = []
+        for candidate in candidates:
+            try:
+                self.ser = serial.Serial(candidate, self.baudrate, timeout=0)
+                self.port = candidate
+                self.buffer = b""
+                self.connected = True
+                self.last_connect_error_key = None
+                print(f"Connected to LiDAR on {self.port} at {self.baudrate} baud.")
+                return True
+            except (OSError, serial.SerialException) as e:
+                self.connected = False
+                self.ser = None
+                errors.append(f"{candidate}: {e}")
+
+        self.log_connect_failure(
+            f"LiDAR serial ports found but none opened. Last error: {errors[-1] if errors else 'unknown'}. "
+            "Will keep retrying quietly.",
+            ("open-failed", tuple(errors)),
+        )
+        return False
 
     def disconnect(self):
         if self.ser:
@@ -93,18 +159,25 @@ class LidarParser:
             try:
                 self._read_data_once()
             except Exception as exc:
-                print(f"LiDAR reader loop error ignored: {exc}")
+                self.log_connect_failure(
+                    f"LiDAR reader loop error ignored: {exc}",
+                    ("reader-loop", type(exc).__name__, str(exc)),
+                )
                 self.mark_fault(exc)
             time.sleep(READ_LOOP_SLEEP_SEC)
 
     def mark_fault(self, error) -> None:
-        print(f"LiDAR serial error: {error}. Will retry connection.")
+        self.log_connect_failure(
+            f"LiDAR serial error: {error}. Will retry connection.",
+            ("serial-fault", type(error).__name__, str(error)),
+        )
         self.disconnect()
         self.buffer = b""
 
     def maybe_reconnect(self) -> None:
         now = time.monotonic()
-        if now - self.last_reconnect_attempt < RECONNECT_INTERVAL_SEC:
+        interval = RECONNECT_INTERVAL_SEC if self.last_connect_had_candidates else MISSING_PORT_RECONNECT_INTERVAL_SEC
+        if now - self.last_reconnect_attempt < interval:
             return
         self.last_reconnect_attempt = now
         self.connect()
