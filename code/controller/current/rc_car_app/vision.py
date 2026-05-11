@@ -47,6 +47,8 @@ STEERING_MODEL_VERSIONS = (
     "2.2b",
     "2.3",
     "2.3b",
+    "2.4",
+    "2.4b",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", "1.0")
