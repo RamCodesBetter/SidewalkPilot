@@ -36,9 +36,9 @@ Project code and documentation are maintained in the GitHub repo:
 
 | Item | Count |
 |---|---:|
-| JPG images | 1,464 |
-| Steering label entries | 1,464 |
-| Label sources | 10 |
+| JPG images | 2,224 |
+| Steering label entries | 2,224 |
+| Label sources | 13 |
 | Steering range | 0 to 180 degrees |
 
 ## Label Format
@@ -56,7 +56,7 @@ Example entry:
 
 ```json
 {
-  "image": "photo_20260425_145756.jpg",
+  "image": "sidewalkpilot_dataset/photo_20260425_145756.jpg",
   "steering": 110.0,
   "repeat": 50,
   "source": "manual_20260425_street_test"
@@ -78,11 +78,11 @@ The steering label is a servo angle in degrees.
 | Steering bucket | Count |
 |---|---:|
 | 0-45 hard left | 69 |
-| 45-75 left | 106 |
-| 75-85 soft left | 196 |
-| 85-95 straight | 429 |
-| 95-105 soft right | 302 |
-| 105-135 right | 163 |
+| 45-75 left | 128 |
+| 75-85 soft left | 281 |
+| 85-95 straight | 678 |
+| 95-105 soft right | 547 |
+| 105-135 right | 311 |
 | 135-180 hard right | 199 |
 
 ## Source Breakdown
@@ -91,6 +91,9 @@ The steering label is a servo angle in degrees.
 |---|---:|---|
 | `D0328_first_dataset_relabel` | 315 | First Dataset relabel, March 28 |
 | `D0329_first_dataset_relabel` | 413 | First Dataset relabel, March 29 |
+| `D0510_v2_3_field_run_1` | 167 | SidewalkPilot v2.3 field-run capture, run 1 |
+| `D0510_v2_3_field_run_2` | 8 | SidewalkPilot v2.3 field-run capture, run 2 |
+| `D0510_v2_3_field_run_3` | 585 | SidewalkPilot v2.3 field-run capture, run 3 |
 | `manual_20260425_street_test` | 65 | Street test images |
 | `manual_20260426_curves_shadows` | 53 | Curves and shadow cases |
 | `manual_20260427_curved_curb` | 72 | Curved curb behavior |
@@ -104,7 +107,7 @@ The steering label is a servo angle in degrees.
 
 | Resolution | Count |
 |---|---:|
-| 1280 x 720 | 736 |
+| 1280 x 720 | 1,496 |
 | 1920 x 1080 | 413 |
 | 320 x 240 | 315 |
 
