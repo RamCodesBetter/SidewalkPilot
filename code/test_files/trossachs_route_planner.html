@@ -1,0 +1,2222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trossachs Fast Route Planner</title>
+  <script src="trossachs_nav_graph_embed.js"></script>
+  <style>
+    :root {
+      --bg: #edf1f5;
+      --panel: #fff;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #cbd5e1;
+      --road: #667085;
+      --footway: #2176d2;
+      --path: #19984f;
+      --house: #c77700;
+      --route: #e11d48;
+      --start: #16a34a;
+      --goal: #dc2626;
+      --focus: #0284c7;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --panel: #111827;
+      --ink: #e5e7eb;
+      --muted: #94a3b8;
+      --line: #334155;
+      --road: #94a3b8;
+      --footway: #60a5fa;
+      --path: #34d399;
+      --house: #f59e0b;
+      --route: #fb7185;
+      --focus: #38bdf8;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Aptos", "Inter", "SF Pro Text", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 390px 1fr;
+    }
+
+    aside {
+      min-height: 0;
+      overflow: hidden;
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 10px;
+    }
+
+    main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1 { margin: 0 0 6px; font-size: 25px; line-height: 1.12; letter-spacing: 0; }
+    h2 {
+      margin: 18px 0 8px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.42; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+    pre {
+      margin: 8px 0 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      border-radius: 7px;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 10px;
+    }
+
+    label { display: block; margin: 15px 0 7px; font-size: 14px; font-weight: 800; }
+    input, select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--ink);
+      font: inherit;
+      padding: 8px 10px;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(2,132,199,.12);
+    }
+
+    button {
+      height: 42px;
+      border: 1px solid #0369a1;
+      border-radius: 6px;
+      background: #0284c7;
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      padding: 0 12px;
+    }
+    button.secondary { background: var(--panel); color: var(--ink); border-color: var(--line); }
+    button.icon { width: 42px; padding: 0; font-size: 19px; line-height: 1; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .mini-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+    .mini-tools button { font-size: 13px; padding: 0 8px; }
+    .feature-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .feature-tools button { height: 38px; font-size: 12.5px; padding: 0 8px; }
+
+    .brand p { margin-bottom: 2px; }
+    .side-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .side-tabs button {
+      height: 36px;
+      padding: 0 6px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .side-tabs button.active {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #fff;
+    }
+    .tab-panel {
+      display: none;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .tab-panel.active { display: block; }
+
+    .preview-card {
+      display: grid;
+      gap: 8px;
+    }
+    .progress-shell {
+      height: 9px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--line), var(--panel) 55%);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--route);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: #94a3b8; }
+    .dot.ready { background: #16a34a; }
+    .dot.error { background: #dc2626; }
+
+    .card {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 10px;
+    }
+
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric { border: 1px solid var(--line); border-radius: 7px; padding: 8px; background: color-mix(in srgb, var(--panel), var(--bg) 42%); }
+    .metric strong { display: block; font-size: 18px; line-height: 1.12; }
+    .metric span { color: var(--muted); font-size: 13px; }
+
+    .node-line {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: baseline;
+      border-bottom: 1px solid var(--line);
+      padding: 7px 0;
+      font-size: 14px;
+    }
+    .node-line:last-child { border-bottom: 0; }
+    .node-id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 900; color: var(--ink); }
+    .node-meta { color: var(--muted); text-align: right; overflow-wrap: anywhere; }
+
+    .directions { margin: 8px 0 0; padding-left: 22px; font-size: 14px; line-height: 1.5; }
+    .directions li { margin: 5px 0; }
+
+    .suggestions {
+      display: none;
+      max-height: 176px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      margin-top: 6px;
+    }
+    .suggestions button {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: var(--panel);
+      color: var(--ink);
+      text-align: left;
+      font-weight: 600;
+      padding: 8px 10px;
+    }
+    .suggestions button:hover { background: color-mix(in srgb, var(--panel), var(--focus) 9%); }
+
+    .layers { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 12px; font-size: 14px; }
+    .layers label { display: flex; align-items: center; gap: 7px; margin: 0; font-weight: 650; }
+    .layers input { width: auto; height: auto; }
+
+    .map-wrap {
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background: #e6edf4;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+    canvas.dragging { cursor: grabbing; }
+
+    .map-hud, .legend, .node-popup {
+      position: absolute;
+      background: rgba(255,255,255,.95);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(15,23,42,.10);
+    }
+    .map-hud { left: 14px; top: 14px; padding: 9px 11px; color: var(--muted); font-size: 13px; }
+    .scale-bar { height: 6px; background: #0f172a; margin-top: 5px; }
+    .legend { right: 14px; bottom: 14px; display: grid; gap: 7px; padding: 10px 11px; font-size: 13px; }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .swatch { width: 12px; height: 12px; border-radius: 999px; display: inline-block; }
+    .node-popup {
+      left: 14px;
+      bottom: 14px;
+      width: min(370px, calc(100% - 28px));
+      padding: 12px;
+      display: none;
+      font-size: 14px;
+    }
+    .node-popup h3 { margin: 0 0 7px; font-size: 18px; }
+    .node-popup .node-line { grid-template-columns: 92px 1fr; }
+    .recent-list { display: grid; gap: 6px; }
+    .recent-list button {
+      width: 100%;
+      height: auto;
+      min-height: 36px;
+      text-align: left;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      font-weight: 650;
+      padding: 7px 9px;
+    }
+    .hint { margin-top: 7px; font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100vh; grid-template-columns: 1fr; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); min-height: 560px; }
+      main { height: 74vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <h1 id="brandTitle">Trossachs Route Planner</h1>
+        <p>Search by address, node ID, house number plus street, or <code>HOME</code>. Click the map for node details.</p>
+      </div>
+
+      <label for="mapSelect">Map</label>
+      <select id="mapSelect">
+        <option value="trossachs" selected>Trossachs</option>
+        <option value="sammamish">Sammamish</option>
+        <option value="issaquah">Issaquah</option>
+      </select>
+
+      <div class="side-tabs" role="tablist">
+        <button class="active" data-tab="route" type="button">Route</button>
+        <button data-tab="layers" type="button">Layers</button>
+        <button data-tab="stats" type="button">Stats</button>
+        <button data-tab="directions" type="button">Steps</button>
+        <button data-tab="tools" type="button">Tools</button>
+      </div>
+
+      <section class="tab-panel active" data-panel="route">
+        <label for="start">Start</label>
+        <input id="start" value="HOME" autocomplete="off" placeholder="HOME, address, or node ID">
+        <div id="startSuggestions" class="suggestions"></div>
+
+        <label for="goal">Destination</label>
+        <input id="goal" value="" autocomplete="off" placeholder="Address, house number, or node ID">
+        <div id="goalSuggestions" class="suggestions"></div>
+
+        <div class="row">
+          <button id="routeBtn">Plan Route</button>
+          <button id="swapBtn" class="secondary" type="button">Swap</button>
+        </div>
+        <div class="mini-tools">
+          <button id="homeBtn" class="secondary" type="button">Locate HOME</button>
+          <button id="locateMeBtn" class="secondary" type="button">Locate Me</button>
+          <button id="fitRouteBtn" class="secondary" type="button">Fit Route</button>
+          <button id="followCarBtn" class="secondary" type="button">Follow Car</button>
+          <button id="copyCmdBtn" class="secondary" type="button">Copy Shell Cmd</button>
+          <button id="clearRouteBtn" class="secondary" type="button">Clear Route</button>
+        </div>
+
+        <h2>Route Preview</h2>
+        <div class="card preview-card">
+          <div class="row three">
+            <button id="playPreviewBtn" type="button">Play</button>
+            <button id="pausePreviewBtn" class="secondary" type="button">Pause</button>
+            <button id="restartPreviewBtn" class="secondary" type="button">Restart</button>
+          </div>
+          <select id="previewSpeed">
+            <option value="16">Preview 16x speed</option>
+            <option value="8">Preview 8x speed</option>
+            <option value="32">Preview 32x speed</option>
+            <option value="64">Preview 64x speed</option>
+          </select>
+          <div class="progress-shell"><div id="previewProgress" class="progress-fill"></div></div>
+          <p id="previewStatus">Preview follows the planned route at 4 mph average.</p>
+        </div>
+
+        <h2>Route IDs</h2>
+        <div class="card">
+          <div class="node-line"><span>Start</span><span id="startNode" class="node-id">-</span></div>
+          <div class="node-line"><span>Destination</span><span id="goalNode" class="node-id">-</span></div>
+          <pre id="shellCommand">python3 astar_nav.py START_NODE GOAL_NODE</pre>
+        </div>
+
+        <h2>Route Stats</h2>
+        <div class="card metric-grid">
+          <div class="metric"><strong id="distanceMetric">-</strong><span>Distance</span></div>
+          <div class="metric"><strong id="etaMetric">-</strong><span>ETA at 4 mph avg</span></div>
+          <div class="metric"><strong id="checkpointMetric">-</strong><span>Checkpoints</span></div>
+          <div class="metric"><strong id="renderMetric">-</strong><span>Features drawn</span></div>
+          <div class="metric"><strong id="healthMetric">-</strong><span>Route health</span></div>
+          <div class="metric"><strong id="helperMetric">-</strong><span>Transfers used</span></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="layers">
+        <h2>Units</h2>
+        <select id="unitSelect">
+          <option value="metric">Metric: meters / kilometers</option>
+          <option value="imperial" selected>Imperial: feet / miles</option>
+        </select>
+
+        <h2>Performance</h2>
+        <select id="performanceSelect">
+          <option value="balanced">Balanced detail</option>
+          <option value="fast">Fast mode</option>
+          <option value="detail">Full detail</option>
+        </select>
+        <div class="card layers">
+          <label><input id="darkModeToggle" type="checkbox"> Dark mode</label>
+          <label><input id="routeLabelsOnly" type="checkbox"> Route labels only</label>
+        </div>
+
+        <h2>Map Layers</h2>
+        <div class="card layers">
+          <label><input id="showFootways" type="checkbox" checked> Footways</label>
+          <label><input id="showHouses" type="checkbox" checked> Houses</label>
+          <label><input id="showLabels" type="checkbox" checked> Labels</label>
+          <label><input id="showConnectors" type="checkbox" checked> Connectors</label>
+          <label><input id="showGraphLinks" type="checkbox"> Transfers</label>
+          <label><input id="showRoute" type="checkbox" checked> Route</label>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="stats">
+        <h2>Recent Routes</h2>
+        <div id="recentRoutes" class="card recent-list"><p>No recent routes yet.</p></div>
+
+        <h2>Matches / Selection</h2>
+        <div id="matches" class="card"></div>
+      </section>
+
+      <section class="tab-panel" data-panel="directions">
+        <h2>Directions</h2>
+        <div class="card">
+          <p id="summary">Load the graph, then plan a route.</p>
+          <ol id="directions" class="directions"></ol>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="tools">
+        <h2>Quick Tools</h2>
+        <div class="card feature-tools">
+          <button data-action="plan" type="button">Plan</button>
+          <button data-action="play" type="button">Play Preview</button>
+          <button data-action="locate" type="button">Locate Me</button>
+          <button data-action="follow-car" type="button">Follow Car</button>
+          <button data-action="follow-me" type="button">Follow Me</button>
+          <button data-action="pause" type="button">Pause Preview</button>
+          <button data-action="restart" type="button">Restart Preview</button>
+          <button data-action="fit" type="button">Fit Route</button>
+          <button data-action="home" type="button">Find HOME</button>
+          <button data-action="copy" type="button">Copy CLI</button>
+          <button data-action="export" type="button">Export JSON</button>
+          <button data-action="print" type="button">Print Map</button>
+          <button data-action="swap" type="button">Swap Ends</button>
+          <button data-action="clear" type="button">Clear Route</button>
+          <button data-action="metric" type="button">Metric</button>
+          <button data-action="imperial" type="button">Miles</button>
+          <button data-action="fast" type="button">Fast Mode</button>
+          <button data-action="detail" type="button">Full Detail</button>
+          <button data-action="balanced" type="button">Balanced</button>
+          <button data-action="dark" type="button">Dark Mode</button>
+          <button data-action="labels" type="button">Labels</button>
+          <button data-action="houses" type="button">Houses</button>
+          <button data-action="connectors" type="button">Connectors</button>
+          <button data-action="transfers" type="button">Transfers</button>
+          <button data-action="route-labels" type="button">Route Labels</button>
+        </div>
+      </section>
+    </aside>
+
+    <main>
+      <header>
+        <div class="status"><span id="statusDot" class="dot"></span><span id="statusText">Loading graph...</span></div>
+        <div class="toolbar">
+          <button id="zoomOutBtn" class="secondary icon" title="Zoom out">−</button>
+          <button id="zoomInBtn" class="secondary icon" title="Zoom in">+</button>
+          <button id="mapLocateBtn" class="secondary">Locate</button>
+          <button id="resetViewBtn" class="secondary">Reset</button>
+          <span class="status"><span id="nodeCount">0 nodes</span><span id="edgeCount">0 edges</span><span id="zoomCount">1.00x</span></span>
+        </div>
+      </header>
+
+      <div class="map-wrap">
+        <canvas id="map"></canvas>
+        <div class="map-hud"><span id="scaleText">Scale</span><div id="scaleBar" class="scale-bar"></div></div>
+        <div id="nodePopup" class="node-popup"></div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--house)"></i> House</span>
+        <span><i class="swatch" style="background:var(--footway)"></i> Footway</span>
+        <span><i class="swatch" style="background:var(--path)"></i> Path / trail</span>
+          <span><i class="swatch" style="background:#8b5cf6"></i> Transfer</span>
+        <span><i class="swatch" style="background:var(--route)"></i> Planned route</span>
+      </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const MAP_CONFIG = {
+      trossachs: { label: "Trossachs", graph: "trossachs_nav_graph.json", embed: "trossachs_nav_graph_embed.js" },
+      sammamish: { label: "Sammamish", graph: "sammamish_nav_graph.json", embed: "sammamish_nav_graph_embed.js" },
+      issaquah: { label: "Issaquah", graph: "issaquah_nav_graph.json", embed: "issaquah_nav_graph_embed.js" },
+    };
+    let currentMapKey = "trossachs";
+    let graphLoadToken = 0;
+    let HOME = "PNX";
+    const AVG_SPEED_MPS = 4 * 1609.344 / 3600;
+    const WORLD_W = 6400;
+    const WORLD_H = 7800;
+    const PAD = 420;
+    const BUCKET = 260;
+    const RECENT_KEY = "navigation_recent_routes_v2";
+
+    let nodes = {};
+    let edges = [];
+    let adjacency = new Map();
+    let addressIndex = [];
+    let bounds = null;
+    let world = new Map();
+    let edgeFeatures = [];
+    let nodeFeatures = [];
+    let roadLabels = [];
+    let edgeByPair = new Map();
+    let edgeBuckets = new Map();
+    let nodeBuckets = new Map();
+    let currentPath = [];
+    let currentRawPath = [];
+    let currentDistance = NaN;
+    let routeSegments = [];
+    let selectedNode = null;
+    let camera = { x: 0, y: 0, scale: 1 };
+    let dragging = false;
+    let dragStart = null;
+    let needsDraw = false;
+    let routeCache = new Map();
+    let recentRoutes = [];
+    let preview = { playing: false, distance: 0, lastTime: 0 };
+    let indexReady = false;
+    let currentLocation = null;
+    let locationWatchId = null;
+    let followCar = false;
+    let followLocation = false;
+    let pointerReady = false;
+    let tabsReady = false;
+
+    const canvas = document.getElementById("map");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const brandTitle = document.getElementById("brandTitle");
+    const nodeCount = document.getElementById("nodeCount");
+    const edgeCount = document.getElementById("edgeCount");
+    const zoomCount = document.getElementById("zoomCount");
+    const startInput = document.getElementById("start");
+    const goalInput = document.getElementById("goal");
+    const startSuggestions = document.getElementById("startSuggestions");
+    const goalSuggestions = document.getElementById("goalSuggestions");
+    const startNode = document.getElementById("startNode");
+    const goalNode = document.getElementById("goalNode");
+    const shellCommand = document.getElementById("shellCommand");
+    const mapSelect = document.getElementById("mapSelect");
+    const unitSelect = document.getElementById("unitSelect");
+    const performanceSelect = document.getElementById("performanceSelect");
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const routeLabelsOnly = document.getElementById("routeLabelsOnly");
+    const distanceMetric = document.getElementById("distanceMetric");
+    const etaMetric = document.getElementById("etaMetric");
+    const checkpointMetric = document.getElementById("checkpointMetric");
+    const renderMetric = document.getElementById("renderMetric");
+    const healthMetric = document.getElementById("healthMetric");
+    const helperMetric = document.getElementById("helperMetric");
+    const summary = document.getElementById("summary");
+    const directionsList = document.getElementById("directions");
+    const matches = document.getElementById("matches");
+    const nodePopup = document.getElementById("nodePopup");
+    const scaleText = document.getElementById("scaleText");
+    const scaleBar = document.getElementById("scaleBar");
+    const recentRoutesBox = document.getElementById("recentRoutes");
+    const previewSpeed = document.getElementById("previewSpeed");
+    const previewProgress = document.getElementById("previewProgress");
+    const previewStatus = document.getElementById("previewStatus");
+    const followCarBtn = document.getElementById("followCarBtn");
+
+    const layers = {
+      roads: { checked: false },
+      footways: document.getElementById("showFootways"),
+      houses: document.getElementById("showHouses"),
+      labels: document.getElementById("showLabels"),
+      connectors: document.getElementById("showConnectors"),
+      graphLinks: document.getElementById("showGraphLinks"),
+      route: document.getElementById("showRoute"),
+    };
+    layers.connectors.checked = true;
+    layers.graphLinks.checked = false;
+
+    function setStatus(text, mode = "") {
+      statusText.textContent = text;
+      statusDot.className = `dot ${mode}`;
+    }
+
+    function perf() {
+      const mode = performanceSelect.value;
+      if (mode === "fast") return { nodeBoost: 2.4, labelBoost: 0.45, connectorAlpha: 0.22, houseLabelZoom: 9.3, routeNodeLabels: false };
+      if (mode === "detail") return { nodeBoost: 0.55, labelBoost: 1.7, connectorAlpha: 0.48, houseLabelZoom: 6.1, routeNodeLabels: true };
+      return { nodeBoost: 1, labelBoost: 1, connectorAlpha: 0.42, houseLabelZoom: 7.2, routeNodeLabels: true };
+    }
+
+    function setupTabs() {
+      if (tabsReady) return;
+      tabsReady = true;
+      const buttons = [...document.querySelectorAll(".side-tabs button")];
+      const panels = [...document.querySelectorAll(".tab-panel")];
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          buttons.forEach(b => b.classList.toggle("active", b === button));
+          panels.forEach(panel => panel.classList.toggle("active", panel.dataset.panel === button.dataset.tab));
+        });
+      }
+    }
+
+    function norm(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[.,]/g, " ")
+        .replace(/\bse\b/g, "southeast")
+        .replace(/\bst\b/g, "street")
+        .replace(/\bpl\b/g, "place")
+        .replace(/\bave\b/g, "avenue")
+        .replace(/\bct\b/g, "court")
+        .replace(/\bdr\b/g, "drive")
+        .replace(/\bln\b/g, "lane")
+        .replace(/\bwy\b/g, "way")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    }
+
+    function addressText(id, node) {
+      if (node.type === "house" && node.house) return `${node.house} ${node.street || node.road}`;
+      return `${id} ${node.road}`;
+    }
+
+    function displayRoad(node) {
+      if (node.type === "house") return node.street || node.road;
+      return node.road;
+    }
+
+    function makeAddressIndex() {
+      addressIndex = Object.entries(nodes).map(([id, node]) => {
+        const address = addressText(id, node);
+        return { id, node, address, normalized: norm(`${id} ${address} ${node.house || ""} ${node.street || ""} ${node.road || ""}`) };
+      });
+    }
+
+    function scoreMatch(entry, pieces) {
+      let score = 0;
+      const words = entry.normalized.split(" ");
+      for (const piece of pieces) score += words.includes(piece) ? 4 : entry.normalized.includes(piece) ? 1 : 0;
+      if (entry.node.type === "house") score += 3;
+      return score;
+    }
+
+    function entryFor(id) {
+      return addressIndex.find(entry => entry.id === id) || { id, node: nodes[id], address: id, normalized: id.toLowerCase() };
+    }
+
+    function resolveTarget(raw) {
+      const direct = String(raw || "").trim().toUpperCase();
+      const query = norm(raw);
+      if (direct === "HOME") return { id: HOME, matches: [entryFor(HOME)] };
+      if (nodes[direct]) return { id: direct, matches: [entryFor(direct)] };
+      const exact = addressIndex.filter(entry => norm(entry.address) === query);
+      if (exact.length === 1) return { id: exact[0].id, matches: exact };
+      if (exact.length > 1) return { id: null, matches: exact };
+      const pieces = query.split(" ").filter(Boolean);
+      const fuzzy = addressIndex
+        .filter(entry => pieces.every(piece => entry.normalized.includes(piece)))
+        .sort((a, b) => scoreMatch(b, pieces) - scoreMatch(a, pieces));
+      if (fuzzy.length === 1) return { id: fuzzy[0].id, matches: fuzzy };
+      if (fuzzy.length > 1) return { id: null, matches: fuzzy.slice(0, 30) };
+      return { id: null, matches: [] };
+    }
+
+    function haversine(a, b) {
+      const radius = 6371000;
+      const lat1 = a.lat * Math.PI / 180, lon1 = a.lon * Math.PI / 180;
+      const lat2 = b.lat * Math.PI / 180, lon2 = b.lon * Math.PI / 180;
+      const dlat = lat2 - lat1, dlon = lon2 - lon1;
+      const x = Math.sin(dlat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlon / 2) ** 2;
+      return 2 * radius * Math.asin(Math.sqrt(x));
+    }
+
+    function bearing(a, b) {
+      const lat1 = a.lat * Math.PI / 180, lat2 = b.lat * Math.PI / 180;
+      const dlon = (b.lon - a.lon) * Math.PI / 180;
+      const x = Math.sin(dlon) * Math.cos(lat2);
+      const y = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlon);
+      return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+    }
+
+    function turnText(prevBearing, nextBearing) {
+      const diff = ((nextBearing - prevBearing + 540) % 360) - 180;
+      const amount = Math.abs(diff);
+      if (amount < 20) return "continue straight";
+      if (amount < 45) return diff > 0 ? "slight right" : "slight left";
+      if (amount < 120) return diff > 0 ? "turn right" : "turn left";
+      return diff > 0 ? "sharp right" : "sharp left";
+    }
+
+    function formatDistance(meters) {
+      if (unitSelect.value === "imperial") {
+        const feet = meters * 3.28084;
+        if (feet < 1000) return `${feet.toFixed(0)} ft`;
+        return `${(meters / 1609.344).toFixed(2)} mi`;
+      }
+      if (meters < 1000) return `${meters.toFixed(1)} m`;
+      return `${(meters / 1000).toFixed(2)} km`;
+    }
+
+    function formatEta(meters) {
+      const seconds = meters / AVG_SPEED_MPS;
+      const minutes = Math.floor(seconds / 60);
+      const rem = Math.round(seconds % 60);
+      if (minutes < 1) return `${Math.round(seconds)} sec`;
+      if (minutes < 60) return `${minutes}m ${rem}s`;
+      return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+    }
+
+    class MinHeap {
+      constructor() { this.items = []; }
+      push(item) { this.items.push(item); this.bubble(this.items.length - 1); }
+      pop() {
+        if (this.items.length === 1) return this.items.pop();
+        const top = this.items[0];
+        this.items[0] = this.items.pop();
+        this.sink(0);
+        return top;
+      }
+      get size() { return this.items.length; }
+      bubble(i) {
+        while (i > 0) {
+          const p = Math.floor((i - 1) / 2);
+          if (this.items[p][0] <= this.items[i][0]) break;
+          [this.items[p], this.items[i]] = [this.items[i], this.items[p]];
+          i = p;
+        }
+      }
+      sink(i) {
+        while (true) {
+          const l = i * 2 + 1, r = l + 1;
+          let s = i;
+          if (l < this.items.length && this.items[l][0] < this.items[s][0]) s = l;
+          if (r < this.items.length && this.items[r][0] < this.items[s][0]) s = r;
+          if (s === i) break;
+          [this.items[s], this.items[i]] = [this.items[i], this.items[s]];
+          i = s;
+        }
+      }
+    }
+
+    function astar(start, goal) {
+      const frontier = new MinHeap();
+      const startKey = stateKey(null, start);
+      frontier.push([0, 0, null, start]);
+      const came = new Map();
+      const cost = new Map([[startKey, 0]]);
+      let goalKey = null;
+      while (frontier.size) {
+        const [, currentCost, prev, current] = frontier.pop();
+        const currentKey = stateKey(prev, current);
+        if (currentCost > cost.get(currentKey)) continue;
+        if (current === goal) {
+          goalKey = currentKey;
+          break;
+        }
+        for (const edge of adjacency.get(current) || []) {
+          if (nodes[edge.to].type === "house" && edge.to !== start && edge.to !== goal) continue;
+          const nextKey = stateKey(current, edge.to);
+          const nextCost = currentCost + edge.cost + turnPenalty(prev, current, edge.to);
+          if (!cost.has(nextKey) || nextCost < cost.get(nextKey)) {
+            cost.set(nextKey, nextCost);
+            frontier.push([nextCost + haversine(nodes[edge.to], nodes[goal]), nextCost, current, edge.to]);
+            came.set(nextKey, currentKey);
+          }
+        }
+      }
+      if (start !== goal && !goalKey) return { path: [], rawPath: [], distance: Infinity };
+      const rawPath = [];
+      let key = goalKey || startKey;
+      while (key) {
+        rawPath.push(currentFromStateKey(key));
+        if (key === startKey) break;
+        key = came.get(key);
+      }
+      rawPath.reverse();
+      return { path: smoothPath(rawPath), rawPath, distance: pathDistance(rawPath) };
+    }
+
+    function stateKey(prev, current) {
+      return `${prev || ""}|${current}`;
+    }
+
+    function currentFromStateKey(key) {
+      return key.split("|")[1];
+    }
+
+    function pathDistance(path) {
+      let total = 0;
+      for (let i = 1; i < path.length; i++) total += haversine(nodes[path[i - 1]], nodes[path[i]]);
+      return total;
+    }
+
+    function turnAmount(prevNode, currentNode, nextNode) {
+      const before = bearing(prevNode, currentNode);
+      const after = bearing(currentNode, nextNode);
+      return Math.abs(((after - before + 540) % 360) - 180);
+    }
+
+    function turnPenalty(prevId, currentId, nextId) {
+      if (!prevId) return 0;
+      const amount = turnAmount(nodes[prevId], nodes[currentId], nodes[nextId]);
+      if (amount < 25) return 0;
+      if (amount < 45) return 3;
+      if (amount < 90) return 10;
+      if (amount < 135) return 24;
+      return 44;
+    }
+
+    function smoothPath(path) {
+      if (path.length <= 2) return path;
+      const smoothed = [path[0]];
+      for (let i = 1; i < path.length - 1; i++) {
+        const prevId = smoothed[smoothed.length - 1];
+        const curId = path[i];
+        const nextId = path[i + 1];
+        const prev = nodes[prevId], cur = nodes[curId], next = nodes[nextId];
+        const roadChanges = displayRoad(cur) !== displayRoad(prev) || displayRoad(cur) !== displayRoad(next);
+        const importantNode = cur.type === "house";
+        const sharpTurn = turnAmount(prev, cur, next) >= 28;
+        const longSkip = haversine(prev, next) > 85;
+        if (roadChanges || importantNode || sharpTurn || longSkip) smoothed.push(curId);
+      }
+      smoothed.push(path[path.length - 1]);
+      return smoothed;
+    }
+
+    function buildDirections(path, distance) {
+      if (!path.length) return { steps: ["No path found."], summaryText: "No path found." };
+      const steps = [];
+      const first = nodes[path[0]];
+      steps.push(`Start at ${path[0]}${first.house ? ` house ${first.house}` : ""} on ${displayRoad(first)}`);
+      let prevBearing = null, prevRoad = displayRoad(first), lastHouse = first.house;
+      for (let i = 1; i < path.length; i++) {
+        const prevId = path[i - 1], curId = path[i];
+        const prev = nodes[prevId], cur = nodes[curId];
+        const curBearing = bearing(prev, cur);
+        const segmentDistance = haversine(prev, cur);
+        const road = displayRoad(cur);
+        if (road !== prevRoad) {
+          const instruction = prevBearing === null ? `Enter ${road} at ${curId}` : `${cap(turnText(prevBearing, curBearing))} onto ${road} at ${curId}`;
+          steps.push(`${instruction}, then continue ${formatDistance(segmentDistance)}`);
+          prevRoad = road;
+        } else if (prevBearing !== null) {
+          const turn = turnText(prevBearing, curBearing);
+          if (turn !== "continue straight") steps.push(`${cap(turn)} at ${curId}, continue on ${road}`);
+        }
+        if (cur.house && cur.house !== lastHouse) {
+          steps.push(`Pass house ${cur.house} at node ${curId}`);
+          lastHouse = cur.house;
+        }
+        prevBearing = curBearing;
+      }
+      const last = nodes[path[path.length - 1]];
+      steps.push(`Arrive at ${path[path.length - 1]}${last.house ? ` house ${last.house}` : ""} on ${displayRoad(last)}`);
+      return { steps, summaryText: `${formatDistance(distance)}, ${formatEta(distance)} at 4 mph, ${path.length} checkpoints` };
+    }
+
+    function cap(text) { return text.charAt(0).toUpperCase() + text.slice(1); }
+
+    function buildAdjacency() {
+      adjacency = new Map();
+      for (const edge of edges) {
+        const [a, b] = edge;
+        if (!nodes[a] || !nodes[b]) continue;
+        if (!routeEdgeAllowed(edge)) continue;
+        if (!adjacency.has(a)) adjacency.set(a, []);
+        if (!adjacency.has(b)) adjacency.set(b, []);
+        const cost = effectiveEdgeCost(edge);
+        adjacency.get(a).push({ to: b, cost });
+        adjacency.get(b).push({ to: a, cost });
+      }
+    }
+
+    function isSidewalkNode(node) {
+      return ["footway", "pedestrian", "steps", "crosswalk"].includes(node.type);
+    }
+
+    function isCrosswalkNode(node) {
+      return node.type === "crosswalk" || node.way_role === "crosswalk";
+    }
+
+    function isCrosswalkEndpoint(node) {
+      return !isCrosswalkNode(node) || Boolean(node.crosswalk_endpoint);
+    }
+
+    function helperEdgeAllowed(kind, na, nb) {
+      if (!isCrosswalkEndpoint(na) || !isCrosswalkEndpoint(nb)) return false;
+      if (kind !== "intersection" && kind !== "osm_gap") return true;
+      return displayRoad(na) === displayRoad(nb) || isCrosswalkNode(na) || isCrosswalkNode(nb);
+    }
+
+    function effectiveEdgeCost(edge) {
+      const [a, b, cost, kind = "way"] = edge;
+      const na = nodes[a], nb = nodes[b];
+      if (kind === "crosswalk_transfer") return cost + 220;
+      if (kind === "inferred_crosswalk") return cost + 36;
+      if (kind === "intersection" || kind === "osm_gap") {
+        return cost + 48;
+      }
+      return cost;
+    }
+
+    function routeEdgeAllowed(edge) {
+      const [a, b,, kind = "way"] = edge;
+      const na = nodes[a], nb = nodes[b];
+      if (!na || !nb) return false;
+      if (["sidewalk", "crosswalk", "sidewalk_split"].includes(kind)) {
+        return isSidewalkNode(na) && isSidewalkNode(nb);
+      }
+      if (kind === "inferred_crosswalk") {
+        return isSidewalkNode(na) && isSidewalkNode(nb);
+      }
+      if (["intersection", "crosswalk_transfer", "osm_gap"].includes(kind)) {
+        return isSidewalkNode(na) && isSidewalkNode(nb) && helperEdgeAllowed(kind, na, nb);
+      }
+      if (kind === "house_access" || kind === "house_access_fallback") {
+        return (na.type === "house" && isSidewalkNode(nb)) || (nb.type === "house" && isSidewalkNode(na));
+      }
+      return false;
+    }
+
+    function routeDrawAllowed(kind = "way") {
+      return ["sidewalk", "crosswalk", "sidewalk_split", "inferred_crosswalk", "house_access", "house_access_fallback"].includes(kind);
+    }
+
+    function routeEdgeDrawAllowed(edge) {
+      const [a, b, cost, kind = "way"] = edge;
+      if (routeDrawAllowed(kind)) return true;
+      if (!["osm_gap", "intersection"].includes(kind)) return false;
+      if (cost > 10) return false;
+      const na = nodes[a], nb = nodes[b];
+      return Boolean(na && nb && (isCrosswalkNode(na) || isCrosswalkNode(nb)));
+    }
+
+    function nearestSidewalkNode(id) {
+      const source = nodes[id];
+      let best = null, bestDistance = Infinity;
+      for (const [candidateId, candidate] of Object.entries(nodes)) {
+        if (!isSidewalkNode(candidate)) continue;
+        const dist = haversine(source, candidate);
+        if (dist < bestDistance) {
+          best = candidateId;
+          bestDistance = dist;
+        }
+      }
+      return { id: best, distance: bestDistance };
+    }
+
+    function snapEndpointToSidewalk(id) {
+      const node = nodes[id];
+      if (!node) return { id, snappedFrom: null, distance: 0 };
+      if (node.type === "house" && node.stop_for_house && nodes[node.stop_for_house]) {
+        return { id: node.stop_for_house, snappedFrom: id, distance: node.connector_distance_m || 0 };
+      }
+      if (isSidewalkNode(node)) return { id, snappedFrom: null, distance: 0 };
+      const nearest = nearestSidewalkNode(id);
+      return { id: nearest.id || id, snappedFrom: id, distance: nearest.distance };
+    }
+
+    function computeBounds() {
+      const values = Object.values(nodes);
+      bounds = {
+        minLon: Math.min(...values.map(n => n.lon)),
+        maxLon: Math.max(...values.map(n => n.lon)),
+        minLat: Math.min(...values.map(n => n.lat)),
+        maxLat: Math.max(...values.map(n => n.lat))
+      };
+    }
+
+    function project(node) {
+      const graphW = bounds.maxLon - bounds.minLon;
+      const graphH = bounds.maxLat - bounds.minLat;
+      const scale = Math.min((WORLD_W - PAD * 2) / graphW, (WORLD_H - PAD * 2) / graphH);
+      const mapW = graphW * scale, mapH = graphH * scale;
+      const xOffset = (WORLD_W - mapW) / 2, yOffset = (WORLD_H - mapH) / 2;
+      return { x: xOffset + (node.lon - bounds.minLon) * scale, y: yOffset + (bounds.maxLat - node.lat) * scale };
+    }
+
+    function locationToWorld(location) {
+      if (!bounds || !location) return null;
+      return project({ lat: location.lat, lon: location.lon });
+    }
+
+    function preprocessGeometry() {
+      world.clear();
+      edgeByPair = new Map();
+      nodeFeatures = Object.entries(nodes).map(([id, node]) => {
+        const p = project(node);
+        world.set(id, p);
+        return { id, node, x: p.x, y: p.y, cls: nodeClass(node) };
+      });
+
+      edgeFeatures = edges
+        .filter(edge => nodes[edge[0]] && nodes[edge[1]])
+        .map(edge => {
+          const [a, b, cost, kind = "way"] = edge;
+          const key = pairKey(a, b);
+          const previous = edgeByPair.get(key);
+          const previousKind = previous ? previous[3] || "way" : "way";
+          if (!previous || routeDrawAllowed(kind) || !routeDrawAllowed(previousKind)) edgeByPair.set(key, edge);
+          const pa = world.get(a), pb = world.get(b);
+          return { a, b, cost, kind, x1: pa.x, y1: pa.y, x2: pb.x, y2: pb.y, cls: edgeClass(nodes[a], nodes[b], kind, cost) };
+        });
+
+      buildBuckets();
+      computeRoadLabels();
+    }
+
+    function nodeClass(node) {
+      if (node.type === "house") return "house";
+      if (node.type === "footway") return "footway";
+      if (["path", "track", "cycleway", "steps"].includes(node.type)) return "path";
+      return "road";
+    }
+
+    function edgeClass(a, b, kind = "way", cost = 0) {
+      if (kind === "inferred_crosswalk") return "path";
+      if (kind === "intersection" || kind === "crosswalk_transfer" || kind === "osm_gap") return "nearby";
+      if (kind === "house_access") return "connector";
+      if (kind === "house_access_fallback") return cost <= 160 ? "connector" : "nearby";
+      const types = new Set([a.type, b.type]);
+      if (types.has("house")) return "connector";
+      if (types.has("crosswalk")) return "path";
+      if (types.has("footway")) return "footway";
+      if (["path", "track", "cycleway", "steps"].some(t => types.has(t))) return "path";
+      return "road";
+    }
+
+    function bucketKey(x, y) { return `${Math.floor(x / BUCKET)},${Math.floor(y / BUCKET)}`; }
+    function addBucket(map, key, item) {
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(item);
+    }
+
+    function buildBuckets() {
+      edgeBuckets = new Map();
+      nodeBuckets = new Map();
+      for (const edge of edgeFeatures) {
+        const minX = Math.min(edge.x1, edge.x2), maxX = Math.max(edge.x1, edge.x2);
+        const minY = Math.min(edge.y1, edge.y2), maxY = Math.max(edge.y1, edge.y2);
+        for (let bx = Math.floor(minX / BUCKET); bx <= Math.floor(maxX / BUCKET); bx++) {
+          for (let by = Math.floor(minY / BUCKET); by <= Math.floor(maxY / BUCKET); by++) addBucket(edgeBuckets, `${bx},${by}`, edge);
+        }
+      }
+      for (const node of nodeFeatures) addBucket(nodeBuckets, bucketKey(node.x, node.y), node);
+    }
+
+    function visibleItems(bucketMap, pad = 80) {
+      const inv = 1 / camera.scale;
+      const minX = -camera.x * inv - pad;
+      const minY = -camera.y * inv - pad;
+      const maxX = (canvas.clientWidth - camera.x) * inv + pad;
+      const maxY = (canvas.clientHeight - camera.y) * inv + pad;
+      const seen = new Set();
+      const out = [];
+      for (let bx = Math.floor(minX / BUCKET); bx <= Math.floor(maxX / BUCKET); bx++) {
+        for (let by = Math.floor(minY / BUCKET); by <= Math.floor(maxY / BUCKET); by++) {
+          const list = bucketMap.get(`${bx},${by}`) || [];
+          for (const item of list) {
+            if (seen.has(item)) continue;
+            seen.add(item);
+            out.push(item);
+          }
+        }
+      }
+      return out;
+    }
+
+    function computeRoadLabels() {
+      roadLabels = [];
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!camera.scale) resetView();
+      requestDraw();
+    }
+
+    function resetView() {
+      const sx = canvas.clientWidth / WORLD_W;
+      const sy = canvas.clientHeight / WORLD_H;
+      camera.scale = Math.min(sx, sy) * 0.96;
+      camera.x = (canvas.clientWidth - WORLD_W * camera.scale) / 2;
+      camera.y = (canvas.clientHeight - WORLD_H * camera.scale) / 2;
+      requestDraw();
+    }
+
+    function zoomAt(factor, sx = canvas.clientWidth / 2, sy = canvas.clientHeight / 2) {
+      const before = screenToWorld(sx, sy);
+      camera.scale = Math.max(0.18, Math.min(18, camera.scale * factor));
+      camera.x = sx - before.x * camera.scale;
+      camera.y = sy - before.y * camera.scale;
+      requestDraw();
+    }
+
+    function screenToWorld(sx, sy) {
+      return { x: (sx - camera.x) / camera.scale, y: (sy - camera.y) / camera.scale };
+    }
+
+    function worldToScreen(x, y) {
+      return { x: x * camera.scale + camera.x, y: y * camera.scale + camera.y };
+    }
+
+    function worldToLatLon(x, y) {
+      const graphW = bounds.maxLon - bounds.minLon;
+      const graphH = bounds.maxLat - bounds.minLat;
+      const scale = Math.min((WORLD_W - PAD * 2) / graphW, (WORLD_H - PAD * 2) / graphH);
+      const mapW = graphW * scale, mapH = graphH * scale;
+      const xOffset = (WORLD_W - mapW) / 2, yOffset = (WORLD_H - mapH) / 2;
+      return {
+        lon: bounds.minLon + (x - xOffset) / scale,
+        lat: bounds.maxLat - (y - yOffset) / scale
+      };
+    }
+
+    function colorFor(cls) {
+      if (cls === "house") return "#c77700";
+      if (cls === "footway") return "#2176d2";
+      if (cls === "path") return "#19984f";
+      if (cls === "connector") return "#d28a19";
+      if (cls === "nearby") return "#8b5cf6";
+      return "#667085";
+    }
+
+    function edgeWidth(cls) {
+      if (cls === "road") return 4.2;
+      if (cls === "footway") return 2.4;
+      if (cls === "path") return 2.2;
+      if (cls === "nearby") return 1.1;
+      return 1.5;
+    }
+
+    function layerVisible(cls) {
+      const zoom = zoomLevel();
+      if (zoom < 1.4 && (cls === "connector" || cls === "nearby" || cls === "house")) return false;
+      if (zoom < 2.2 && cls === "connector") return false;
+      if (cls === "road") return false;
+      if (cls === "footway") return layers.footways.checked;
+      if (cls === "path") return layers.footways.checked;
+      if (cls === "connector") return layers.connectors.checked;
+      if (cls === "nearby") return layers.graphLinks.checked;
+      if (cls === "house") return layers.houses.checked;
+      return true;
+    }
+
+    function requestDraw() {
+      if (needsDraw) return;
+      needsDraw = true;
+      requestAnimationFrame(draw);
+    }
+
+    function draw() {
+      needsDraw = false;
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#e7eef5";
+      ctx.fillRect(0, 0, w, h);
+
+      drawGrid(w, h);
+      const visibleEdges = visibleItems(edgeBuckets);
+      const visibleNodes = visibleItems(nodeBuckets);
+      let drawn = 0;
+      const zoom = zoomLevel();
+      const lowDetail = zoom < 1.35 || performanceSelect.value === "fast";
+
+      ctx.save();
+      ctx.translate(camera.x, camera.y);
+      ctx.scale(camera.scale, camera.scale);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (!lowDetail) {
+        for (const edge of visibleEdges) {
+          if (!layerVisible(edge.cls)) continue;
+          const width = edgeWidth(edge.cls) / camera.scale;
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = width + 3.2 / camera.scale;
+          ctx.beginPath();
+          ctx.moveTo(edge.x1, edge.y1);
+          ctx.lineTo(edge.x2, edge.y2);
+          ctx.stroke();
+        }
+      }
+
+      for (const edge of visibleEdges) {
+        if (!layerVisible(edge.cls)) continue;
+        ctx.strokeStyle = colorFor(edge.cls);
+        ctx.globalAlpha = edge.cls === "connector" ? perf().connectorAlpha : edge.cls === "nearby" ? 0.24 : 0.88;
+        ctx.lineWidth = edgeWidth(edge.cls) / camera.scale;
+        if (edge.cls === "connector") ctx.setLineDash([4 / camera.scale, 6 / camera.scale]);
+        else if (edge.cls === "nearby") ctx.setLineDash([2 / camera.scale, 8 / camera.scale]);
+        else if (edge.cls === "path") ctx.setLineDash([8 / camera.scale, 6 / camera.scale]);
+        else ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(edge.x1, edge.y1);
+        ctx.lineTo(edge.x2, edge.y2);
+        ctx.stroke();
+        drawn++;
+      }
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+
+      const densityBoost = perf().nodeBoost;
+      const nodeModulo = zoom < 1.4 ? Math.ceil(24 * densityBoost) : zoom < 2.5 ? Math.ceil(8 * densityBoost) : zoom < 3.8 ? Math.ceil(3 * densityBoost) : 1;
+      for (const f of visibleNodes) {
+        if (!layerVisible(f.cls)) continue;
+        if (lowDetail && f.cls !== "house" && f.cls !== "road" && hashId(f.id) % 4 !== 0) continue;
+        if (f.cls !== "house" && nodeModulo > 1 && hashId(f.id) % nodeModulo !== 0) continue;
+        const r = (f.cls === "house" ? 4.4 : 2.8) / camera.scale;
+        ctx.fillStyle = colorFor(f.cls);
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, r, 0, Math.PI * 2);
+        ctx.fill();
+        if (f.cls === "house") {
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1.2 / camera.scale;
+          ctx.stroke();
+        }
+        drawn++;
+      }
+
+      drawRouteWorld();
+      drawCurrentLocationWorld();
+      if (!lowDetail) drawLabelsWorld(visibleNodes);
+      ctx.restore();
+
+      renderMetric.textContent = drawn.toLocaleString();
+      zoomCount.textContent = `${zoom.toFixed(2)}x`;
+      updateScale();
+    }
+
+    function drawGrid(w, h) {
+      const spacing = Math.max(44, Math.min(160, 70 * zoomLevel()));
+      ctx.strokeStyle = "rgba(148,163,184,.28)";
+      ctx.lineWidth = 1;
+      const startX = ((camera.x % spacing) + spacing) % spacing;
+      const startY = ((camera.y % spacing) + spacing) % spacing;
+      for (let x = startX; x < w; x += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = startY; y < h; y += spacing) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawRouteWorld() {
+      if (!layers.route.checked || routeSegments.length === 0) return;
+      const physicalSegments = routeDrawableSegments();
+      ctx.setLineDash([]);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 10 / camera.scale;
+      for (const [a, b] of physicalSegments) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "#e11d48";
+      ctx.lineWidth = 5 / camera.scale;
+      for (const [a, b] of physicalSegments) {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      const checkpointPoints = currentPath.map(id => world.get(id)).filter(Boolean);
+      checkpointPoints.forEach((p, i) => {
+        ctx.fillStyle = i === 0 ? "#16a34a" : i === checkpointPoints.length - 1 ? "#dc2626" : "#e11d48";
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2.5 / camera.scale;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (i === 0 || i === checkpointPoints.length - 1 ? 8 : 4.5) / camera.scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+      drawPreviewCar(physicalSegments);
+    }
+
+    function routeDrawableSegments() {
+      const physicalSegments = [];
+      for (let i = 1; i < currentRawPath.length; i++) {
+        const a = currentRawPath[i - 1], b = currentRawPath[i];
+        const edge = edgeByPair.get(pairKey(a, b));
+        const pa = world.get(a), pb = world.get(b);
+        if (!pa || !pb) continue;
+        if (edge && routeEdgeDrawAllowed(edge)) physicalSegments.push([pa, pb]);
+      }
+      return physicalSegments;
+    }
+
+    function routeDrawableLength(segments = routeDrawableSegments()) {
+      return segments.reduce((sum, [a, b]) => sum + Math.hypot(b.x - a.x, b.y - a.y), 0);
+    }
+
+    function previewPointAt(segments, distance) {
+      let remaining = distance;
+      for (const [a, b] of segments) {
+        const length = Math.hypot(b.x - a.x, b.y - a.y);
+        if (length <= 0) continue;
+        if (remaining <= length) {
+          const t = remaining / length;
+          return {
+            x: a.x + (b.x - a.x) * t,
+            y: a.y + (b.y - a.y) * t,
+            angle: Math.atan2(b.y - a.y, b.x - a.x)
+          };
+        }
+        remaining -= length;
+      }
+      const last = segments[segments.length - 1];
+      if (!last) return null;
+      return { x: last[1].x, y: last[1].y, angle: Math.atan2(last[1].y - last[0].y, last[1].x - last[0].x) };
+    }
+
+    function drawPreviewCar(segments) {
+      if (!segments.length || (!preview.playing && preview.distance <= 0)) return;
+      const total = routeDrawableLength(segments);
+      if (!total) return;
+      const point = previewPointAt(segments, Math.min(preview.distance, total));
+      if (!point) return;
+      const size = 14 / camera.scale;
+      ctx.save();
+      ctx.translate(point.x, point.y);
+      ctx.rotate(point.angle);
+      ctx.fillStyle = "#111827";
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2.2 / camera.scale;
+      ctx.beginPath();
+      ctx.moveTo(size, 0);
+      ctx.lineTo(-size * .75, -size * .58);
+      ctx.lineTo(-size * .45, 0);
+      ctx.lineTo(-size * .75, size * .58);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCurrentLocationWorld() {
+      const point = locationToWorld(currentLocation);
+      if (!point) return;
+      const accuracyMeters = Math.max(8, Math.min(80, currentLocation.accuracy || 20));
+      const metersPerWorld = currentLocationMetersPerWorldUnit(point);
+      const accuracyRadius = Math.max(10 / camera.scale, Math.min(90 / camera.scale, accuracyMeters / metersPerWorld));
+      ctx.save();
+      ctx.fillStyle = "rgba(14,165,233,.16)";
+      ctx.strokeStyle = "rgba(2,132,199,.35)";
+      ctx.lineWidth = 2 / camera.scale;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, accuracyRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#0ea5e9";
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 3 / camera.scale;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 8 / camera.scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function currentLocationMetersPerWorldUnit(point) {
+      const a = worldToLatLon(point.x, point.y);
+      const b = worldToLatLon(point.x + 1, point.y);
+      return Math.max(0.01, haversine(a, b));
+    }
+
+    function drawLabelsWorld(visibleNodes) {
+      if (!layers.labels.checked) return;
+      const zoom = zoomLevel();
+      const profile = perf();
+      const routeOnly = routeLabelsOnly.checked;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      ctx.lineJoin = "round";
+      const placedRects = [];
+      function canPlaceRect(rect) {
+        return !placedRects.some(p => !(rect.x2 < p.x1 || rect.x1 > p.x2 || rect.y2 < p.y1 || rect.y1 > p.y2));
+      }
+      function addLabelRect(x, y, text, fontPx, padX = 18, padY = 7) {
+        const screen = worldToScreen(x, y);
+        const width = ctx.measureText(text).width * camera.scale + padX;
+        const height = fontPx * camera.scale + padY;
+        const rect = { x1: screen.x - width / 2, x2: screen.x + width / 2, y1: screen.y - height / 2, y2: screen.y + height / 2 };
+        if (!canPlaceRect(rect)) return false;
+        placedRects.push(rect);
+        return true;
+      }
+      if (!routeOnly && zoom >= profile.houseLabelZoom) {
+        ctx.textAlign = "left";
+        const houseFont = Math.max(9.5, 18 / camera.scale);
+        ctx.font = `850 ${houseFont}px "Aptos", "Inter", Arial`;
+        let count = 0;
+        for (const f of visibleNodes) {
+          if (f.cls !== "house" || !f.node.house) continue;
+          const text = String(f.node.house);
+          const x = f.x + 12 / camera.scale, y = f.y - 10 / camera.scale;
+          const rectX = x + ctx.measureText(text).width / 2;
+          if (!addLabelRect(rectX, y, text, houseFont, 12, 5)) continue;
+          if (count++ > 900 * profile.labelBoost && zoom < 8) break;
+          ctx.strokeStyle = "rgba(255,255,255,.95)";
+          ctx.lineWidth = 6 / camera.scale;
+          ctx.fillStyle = "#7c2d12";
+          ctx.strokeText(text, x, y);
+          ctx.fillText(text, x, y);
+        }
+      }
+      if (currentPath.length && profile.routeNodeLabels) {
+        ctx.textAlign = "left";
+        const routeFont = Math.max(11, 22 / camera.scale);
+        ctx.font = `850 ${routeFont}px "Aptos", "Inter", Arial`;
+        for (const id of currentPath) {
+          const p = world.get(id);
+          if (!p) continue;
+          const x = p.x + 18 / camera.scale, y = p.y + 4 / camera.scale;
+          const rectX = x + ctx.measureText(id).width / 2;
+          if (!addLabelRect(rectX, y, id, routeFont, 18, 8)) continue;
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 7 / camera.scale;
+          ctx.fillStyle = "#7f1d1d";
+          ctx.strokeText(id, x, y);
+          ctx.fillText(id, x, y);
+        }
+      }
+    }
+
+    function isWorldVisible(x, y, pad = 0) {
+      const inv = 1 / camera.scale;
+      return x >= -camera.x * inv - pad &&
+        x <= (canvas.clientWidth - camera.x) * inv + pad &&
+        y >= -camera.y * inv - pad &&
+        y <= (canvas.clientHeight - camera.y) * inv + pad;
+    }
+
+    function hashId(id) {
+      let n = 0;
+      for (let i = 0; i < id.length; i++) n = (n * 31 + id.charCodeAt(i)) >>> 0;
+      return n;
+    }
+
+    function zoomLevel() {
+      const fitScale = Math.min(canvas.clientWidth / WORLD_W, canvas.clientHeight / WORLD_H) * 0.96;
+      return camera.scale / fitScale;
+    }
+
+    function updateScale() {
+      if (!bounds) return;
+      const centerLat = (bounds.minLat + bounds.maxLat) / 2;
+      const px = 130;
+      const worldA = screenToWorld(20, 20);
+      const worldB = screenToWorld(20 + px, 20);
+      const lonA = bounds.minLon + (worldA.x / WORLD_W) * (bounds.maxLon - bounds.minLon);
+      const lonB = bounds.minLon + (worldB.x / WORLD_W) * (bounds.maxLon - bounds.minLon);
+      const meters = haversine({ lon: lonA, lat: centerLat }, { lon: lonB, lat: centerLat });
+      const nice = niceDistance(meters);
+      const width = Math.max(50, Math.min(220, px * nice / meters));
+      scaleText.textContent = formatDistance(nice);
+      scaleBar.style.width = `${width}px`;
+    }
+
+    function niceDistance(meters) {
+      return [5,10,20,25,50,100,200,250,500,1000,2000,5000].find(v => v >= meters) || 10000;
+    }
+
+    function showNode(id) {
+      selectedNode = id;
+      const node = nodes[id];
+      const neighbors = adjacency.get(id) || [];
+      const address = node.type === "house" && node.house ? `${node.house} ${node.street || node.road}` : node.road;
+      nodePopup.style.display = "block";
+      nodePopup.innerHTML = `
+        <h3><span class="node-id">${escapeHtml(id)}</span> ${escapeHtml(address)}</h3>
+        <div class="node-line"><span>Type</span><span>${escapeHtml(node.type)}</span></div>
+        <div class="node-line"><span>Street</span><span>${escapeHtml(node.road)}</span></div>
+        <div class="node-line"><span>House</span><span>${escapeHtml(node.house || "-")}</span></div>
+        <div class="node-line"><span>Stop For</span><span>${escapeHtml(node.stop_for_house || "-")}</span></div>
+        <div class="node-line"><span>Connector</span><span>${node.connector_distance_m ? escapeHtml(formatDistance(node.connector_distance_m)) : "-"}</span></div>
+        <div class="node-line"><span>Way ID</span><span>${escapeHtml(node.way_id || "-")}</span></div>
+        <div class="node-line"><span>Region</span><span>${escapeHtml(node.region ?? "-")}</span></div>
+        <div class="node-line"><span>Lat/Lon</span><span>${node.lat.toFixed(7)}, ${node.lon.toFixed(7)}</span></div>
+        <div class="node-line"><span>Neighbors</span><span>${neighbors.length}</span></div>
+        <div class="row"><button type="button" onclick="setStartFromSelected()">Set Start</button><button type="button" onclick="setGoalFromSelected()">Set Goal</button></div>
+      `;
+      matches.innerHTML = locationLine(id, node);
+      requestDraw();
+    }
+
+    window.setStartFromSelected = function() {
+      if (!selectedNode) return;
+      startInput.value = selectedNode;
+      planRoute();
+    };
+    window.setGoalFromSelected = function() {
+      if (!selectedNode) return;
+      goalInput.value = selectedNode;
+      planRoute();
+    };
+
+    function hitTest(sx, sy) {
+      const w = screenToWorld(sx, sy);
+      const search = 13 / camera.scale;
+      let best = null, bestD = Infinity;
+      const bx0 = Math.floor((w.x - search) / BUCKET), bx1 = Math.floor((w.x + search) / BUCKET);
+      const by0 = Math.floor((w.y - search) / BUCKET), by1 = Math.floor((w.y + search) / BUCKET);
+      for (let bx = bx0; bx <= bx1; bx++) {
+        for (let by = by0; by <= by1; by++) {
+          for (const f of nodeBuckets.get(`${bx},${by}`) || []) {
+            const dx = f.x - w.x, dy = f.y - w.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < bestD && d <= search) { best = f; bestD = d; }
+          }
+        }
+      }
+      return best;
+    }
+
+    function locationLine(id, node) {
+      if (!node) {
+        return `<div class="node-line"><span class="node-id">${escapeHtml(id || "-")}</span><span class="node-meta">missing after graph rebuild</span></div>`;
+      }
+      const address = node.type === "house" && node.house ? `${node.house} ${node.street || node.road}` : node.road;
+      return `<div class="node-line"><span class="node-id">${escapeHtml(id)}</span><span class="node-meta">${escapeHtml(address)} · ${escapeHtml(node.type)}</span></div>`;
+    }
+
+    function showMatches(startResolution, goalResolution) {
+      const rows = [];
+      rows.push(`<div class="node-line"><strong>Start matches</strong><span class="node-meta">${startResolution.matches.length}</span></div>`);
+      for (const match of startResolution.matches.slice(0, 10)) rows.push(locationLine(match.id, match.node));
+      rows.push(`<div class="node-line"><strong>Destination matches</strong><span class="node-meta">${goalResolution.matches.length}</span></div>`);
+      for (const match of goalResolution.matches.slice(0, 10)) rows.push(locationLine(match.id, match.node));
+      matches.innerHTML = rows.join("");
+    }
+
+    function updateMetrics() {
+      distanceMetric.textContent = Number.isFinite(currentDistance) ? formatDistance(currentDistance) : "-";
+      etaMetric.textContent = Number.isFinite(currentDistance) ? formatEta(currentDistance) : "-";
+      checkpointMetric.textContent = currentPath.length ? String(currentPath.length) : "-";
+      const health = routeHealth(currentRawPath);
+      healthMetric.textContent = currentPath.length ? (health.warnings.length ? "Check" : "OK") : "-";
+      helperMetric.textContent = currentPath.length ? String(health.helperLinks) : "-";
+      if (currentPath.length) {
+        const route = buildDirections(currentPath, currentDistance);
+        summary.textContent = route.summaryText;
+        const warnings = health.warnings.map(warning => `Warning: ${warning}`);
+        directionsList.innerHTML = [...warnings, ...route.steps].map(step => `<li>${escapeHtml(step)}</li>`).join("");
+      }
+    }
+
+    function pairKey(a, b) {
+      return a < b ? `${a}|${b}` : `${b}|${a}`;
+    }
+
+    function routeHealth(path) {
+      const warnings = [];
+      let helperLinks = 0;
+      if (!path.length) return { warnings, helperLinks };
+      for (const id of path.slice(1, -1)) {
+        if (!isSidewalkNode(nodes[id])) warnings.push(`non-sidewalk intermediate ${id} (${nodes[id].type})`);
+      }
+      for (let i = 1; i < path.length; i++) {
+        const a = path[i - 1], b = path[i];
+        const edge = edgeByPair.get(pairKey(a, b));
+        if (!edge) {
+          warnings.push(`missing edge metadata ${a}->${b}`);
+          continue;
+        }
+        const kind = edge[3] || "way";
+        if (kind === "intersection" || kind === "crosswalk_transfer" || kind === "osm_gap" || kind === "inferred_crosswalk") helperLinks++;
+        if ((kind === "house_access" || kind === "house_access_fallback") && edge[2] > 30) warnings.push(`long house connector ${a}->${b}: ${formatDistance(edge[2])}`);
+      }
+      if (helperLinks) warnings.push(`uses ${helperLinks} sidewalk transfer(s)`);
+      return { warnings, helperLinks };
+    }
+
+    function recentRoutesKey() {
+      return `${RECENT_KEY}_${currentMapKey}`;
+    }
+
+    function loadRecentRoutes() {
+      try { recentRoutes = JSON.parse(localStorage.getItem(recentRoutesKey()) || "[]"); }
+      catch { recentRoutes = []; }
+      renderRecentRoutes();
+    }
+
+    function saveRecentRoute(startId, goalId) {
+      if (!startId || !goalId || !currentPath.length) return;
+      const item = {
+        start: startId,
+        goal: goalId,
+        distance: currentDistance,
+        checkpoints: currentPath.length,
+        label: `${startId} → ${goalId}`,
+        savedAt: Date.now()
+      };
+      recentRoutes = [item, ...recentRoutes.filter(r => !(r.start === startId && r.goal === goalId))].slice(0, 8);
+      try { localStorage.setItem(recentRoutesKey(), JSON.stringify(recentRoutes)); } catch {}
+      renderRecentRoutes();
+    }
+
+    function renderRecentRoutes() {
+      if (!recentRoutes.length) {
+        recentRoutesBox.innerHTML = "<p>No recent routes yet.</p>";
+        return;
+      }
+      recentRoutesBox.innerHTML = recentRoutes.map((r, i) => `
+        <button type="button" data-recent="${i}">
+          ${escapeHtml(r.label)} · ${escapeHtml(formatDistance(r.distance || 0))} · ${r.checkpoints || 0} checkpoints
+        </button>
+      `).join("");
+    }
+
+    function clearRoute() {
+      stopPreview(true);
+      currentPath = [];
+      currentRawPath = [];
+      routeSegments = [];
+      currentDistance = NaN;
+      startNode.textContent = "-";
+      goalNode.textContent = "-";
+      shellCommand.textContent = "python3 astar_nav.py START_NODE GOAL_NODE";
+      summary.textContent = "Route cleared.";
+      directionsList.innerHTML = "";
+      updateMetrics();
+      requestDraw();
+    }
+
+    function updatePreviewUi() {
+      const total = routeDrawableLength();
+      const pct = total ? Math.max(0, Math.min(100, preview.distance / total * 100)) : 0;
+      previewProgress.style.width = `${pct}%`;
+      if (!currentRawPath.length) previewStatus.textContent = "Plan a route before previewing.";
+      else if (preview.playing) previewStatus.textContent = `Driving preview at ${previewSpeed.value}x simulated speed.`;
+      else previewStatus.textContent = pct >= 99.9 ? "Preview finished." : "Preview paused.";
+    }
+
+    function startPreview() {
+      const total = routeDrawableLength();
+      if (!total || !Number.isFinite(currentDistance)) {
+        previewStatus.textContent = "Plan a route before previewing.";
+        return;
+      }
+      if (preview.distance >= total) preview.distance = 0;
+      preview.playing = true;
+      preview.lastTime = performance.now();
+      updatePreviewUi();
+      requestAnimationFrame(tickPreview);
+    }
+
+    function stopPreview(reset = false) {
+      preview.playing = false;
+      if (reset) preview.distance = 0;
+      updatePreviewUi();
+      requestDraw();
+    }
+
+    function restartPreview() {
+      preview.distance = 0;
+      startPreview();
+    }
+
+    function tickPreview(now) {
+      if (!preview.playing) return;
+      const segments = routeDrawableSegments();
+      const totalWorld = routeDrawableLength(segments);
+      if (!segments.length || !totalWorld || !Number.isFinite(currentDistance) || currentDistance <= 0) {
+        stopPreview(true);
+        return;
+      }
+      const dt = Math.min(0.08, Math.max(0, (now - preview.lastTime) / 1000));
+      preview.lastTime = now;
+      const speedMultiplier = Number(previewSpeed.value || 16);
+      preview.distance += (AVG_SPEED_MPS * speedMultiplier * dt / currentDistance) * totalWorld;
+      if (followCar) {
+        const point = previewPointAt(segments, Math.min(preview.distance, totalWorld));
+        if (point) centerOnWorldPoint(point);
+      }
+      if (preview.distance >= totalWorld) {
+        preview.distance = totalWorld;
+        preview.playing = false;
+      }
+      updatePreviewUi();
+      requestDraw();
+      if (preview.playing) requestAnimationFrame(tickPreview);
+    }
+
+    function copyShellCommand() {
+      const text = shellCommand.textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+      summary.textContent = `Copied shell command: ${text}`;
+    }
+
+    function exportRouteJson() {
+      if (!currentPath.length) {
+        summary.textContent = "Plan a route before exporting.";
+        return;
+      }
+      const payload = {
+        start: currentPath[0],
+        goal: currentPath[currentPath.length - 1],
+        distance_m: currentDistance,
+        eta_seconds_at_4mph: currentDistance / AVG_SPEED_MPS,
+        path: currentPath,
+        raw_path: currentRawPath,
+        health: routeHealth(currentRawPath),
+        checkpoints: currentPath.map((id, index) => {
+          const current = nodes[id];
+          const nextId = currentPath[index + 1];
+          const next = nextId ? nodes[nextId] : null;
+          return {
+            id,
+            ...current,
+            distance_to_next_m: next ? haversine(current, next) : 0,
+            heading_to_next_deg: next ? bearing(current, next) : null,
+            target_speed_mph: 4
+          };
+        })
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `route_${payload.start}_to_${payload.goal}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function zoomToNode(id, targetZoom = 7.5) {
+      const p = world.get(id);
+      if (!p) return;
+      const fitScale = Math.min(canvas.clientWidth / WORLD_W, canvas.clientHeight / WORLD_H) * 0.96;
+      camera.scale = Math.max(camera.scale, fitScale * targetZoom);
+      camera.x = canvas.clientWidth / 2 - p.x * camera.scale;
+      camera.y = canvas.clientHeight / 2 - p.y * camera.scale;
+      showNode(id);
+      requestDraw();
+    }
+
+    function centerOnWorldPoint(point, targetZoom = null) {
+      if (!point) return;
+      const fitScale = Math.min(canvas.clientWidth / WORLD_W, canvas.clientHeight / WORLD_H) * 0.96;
+      if (targetZoom) camera.scale = Math.max(camera.scale, fitScale * targetZoom);
+      camera.x = canvas.clientWidth / 2 - point.x * camera.scale;
+      camera.y = canvas.clientHeight / 2 - point.y * camera.scale;
+      requestDraw();
+    }
+
+    function requestCurrentLocation(center = true) {
+      if (!navigator.geolocation) {
+        summary.textContent = "This browser does not support current location.";
+        return;
+      }
+      setStatus("Requesting current location...", "");
+      navigator.geolocation.getCurrentPosition(
+        pos => updateCurrentLocation(pos, center),
+        err => {
+          setStatus("Location unavailable", "error");
+          summary.textContent = `Location error: ${err.message}`;
+        },
+        { enableHighAccuracy: true, timeout: 9000, maximumAge: 5000 }
+      );
+      if (locationWatchId === null) {
+        locationWatchId = navigator.geolocation.watchPosition(
+          pos => updateCurrentLocation(pos, followLocation),
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 4000 }
+        );
+      }
+    }
+
+    function focusCurrentLocation() {
+      if (currentLocation) centerOnWorldPoint(locationToWorld(currentLocation), 8);
+      requestCurrentLocation(true);
+    }
+
+    function updateCurrentLocation(pos, center = false) {
+      currentLocation = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+        timestamp: pos.timestamp
+      };
+      setStatus("Location active", "ready");
+      if (center || followLocation) centerOnWorldPoint(locationToWorld(currentLocation), 8);
+      requestDraw();
+    }
+
+    function toggleFollowCar() {
+      followCar = !followCar;
+      followLocation = false;
+      if (followCarBtn) followCarBtn.textContent = followCar ? "Following Car" : "Follow Car";
+      if (followCar) {
+        const point = previewPointAt(routeDrawableSegments(), preview.distance);
+        if (point) centerOnWorldPoint(point);
+      }
+    }
+
+    function toggleFollowLocation() {
+      followLocation = !followLocation;
+      followCar = false;
+      if (followCarBtn) followCarBtn.textContent = "Follow Car";
+      if (!currentLocation) requestCurrentLocation(true);
+      else centerOnWorldPoint(locationToWorld(currentLocation), 8);
+    }
+
+    function planRoute() {
+      if (!indexReady) {
+        summary.textContent = "Map is ready. Route index is still loading.";
+        setStatus("Building route index...", "");
+        return;
+      }
+      stopPreview(true);
+      const startResolution = resolveTarget(startInput.value);
+      const goalResolution = resolveTarget(goalInput.value);
+      showMatches(startResolution, goalResolution);
+      if (!startResolution.id || !goalResolution.id) {
+        summary.textContent = "Pick an exact node when the address has multiple matches.";
+        directionsList.innerHTML = "";
+        currentPath = [];
+        currentRawPath = [];
+        routeSegments = [];
+        currentDistance = NaN;
+        startNode.textContent = startResolution.id || "-";
+        goalNode.textContent = goalResolution.id || "-";
+        shellCommand.textContent = "python3 astar_nav.py START_NODE GOAL_NODE";
+        updateMetrics();
+        requestDraw();
+        return;
+      }
+      const routeStart = snapEndpointToSidewalk(startResolution.id);
+      const routeGoal = snapEndpointToSidewalk(goalResolution.id);
+      const cacheKey = `${routeStart.id}|${routeGoal.id}`;
+      let result = routeCache.get(cacheKey);
+      if (!result) {
+        result = astar(routeStart.id, routeGoal.id);
+        routeCache.set(cacheKey, result);
+      }
+      currentPath = result.path;
+      currentRawPath = result.rawPath || result.path;
+      currentDistance = result.distance;
+      routeSegments = currentRawPath.map(id => world.get(id)).filter(Boolean);
+      startNode.textContent = routeStart.snappedFrom ? `${routeStart.snappedFrom} -> ${routeStart.id}` : routeStart.id;
+      goalNode.textContent = routeGoal.snappedFrom ? `${routeGoal.snappedFrom} -> ${routeGoal.id}` : routeGoal.id;
+      shellCommand.textContent = `python3 astar_nav.py ${routeStart.id} ${routeGoal.id}`;
+      if (!currentPath.length) {
+        summary.textContent = "No route found between those two nodes.";
+        directionsList.innerHTML = "";
+        requestDraw();
+        return;
+      }
+      updateMetrics();
+      if (routeStart.snappedFrom || routeGoal.snappedFrom) {
+        const notes = [];
+        if (routeStart.snappedFrom) notes.push(`start snapped ${formatDistance(routeStart.distance)} to ${routeStart.id}`);
+        if (routeGoal.snappedFrom) notes.push(`goal snapped ${formatDistance(routeGoal.distance)} to ${routeGoal.id}`);
+        summary.textContent += ` (${notes.join("; ")})`;
+      }
+      saveRecentRoute(routeStart.id, routeGoal.id);
+      zoomToRoute();
+      requestDraw();
+    }
+
+    function zoomToRoute() {
+      if (!routeSegments.length) return;
+      const minX = Math.min(...routeSegments.map(p => p.x));
+      const maxX = Math.max(...routeSegments.map(p => p.x));
+      const minY = Math.min(...routeSegments.map(p => p.y));
+      const maxY = Math.max(...routeSegments.map(p => p.y));
+      const pad = 75;
+      const targetW = Math.max(460, maxX - minX + pad * 2);
+      const targetH = Math.max(340, maxY - minY + pad * 2);
+      const scale = Math.min(canvas.clientWidth / targetW, canvas.clientHeight / targetH);
+      camera.scale = Math.max(0.55, Math.min(24, scale));
+      camera.x = canvas.clientWidth / 2 - ((minX + maxX) / 2) * camera.scale;
+      camera.y = canvas.clientHeight / 2 - ((minY + maxY) / 2) * camera.scale;
+    }
+
+    function setupSuggestions(input, box) {
+      input.addEventListener("input", () => {
+        const query = norm(input.value);
+        if (!query) { box.style.display = "none"; return; }
+        const pieces = query.split(" ").filter(Boolean);
+        const found = addressIndex
+          .filter(entry => pieces.every(piece => entry.normalized.includes(piece)))
+          .sort((a, b) => scoreMatch(b, pieces) - scoreMatch(a, pieces))
+          .slice(0, 12);
+        box.innerHTML = found.map(entry => {
+          const label = `${entry.id} - ${entry.address}`;
+          return `<button type="button" data-label="${escapeHtml(entry.address)}">${escapeHtml(label)}</button>`;
+        }).join("");
+        box.style.display = found.length ? "block" : "none";
+      });
+      box.addEventListener("click", event => {
+        const button = event.target.closest("button");
+        if (!button) return;
+        input.value = button.dataset.label;
+        box.style.display = "none";
+      });
+    }
+
+    function initPointer() {
+      if (pointerReady) return;
+      pointerReady = true;
+      canvas.addEventListener("wheel", event => {
+        event.preventDefault();
+        zoomAt(event.deltaY < 0 ? 1.032 : 0.969, event.offsetX, event.offsetY);
+      }, { passive: false });
+      canvas.addEventListener("pointerdown", event => {
+        dragging = true;
+        dragStart = { x: event.clientX, y: event.clientY, cam: { ...camera } };
+        canvas.classList.add("dragging");
+        canvas.setPointerCapture(event.pointerId);
+      });
+      canvas.addEventListener("pointermove", event => {
+        if (!dragging) return;
+        camera.x = dragStart.cam.x + event.clientX - dragStart.x;
+        camera.y = dragStart.cam.y + event.clientY - dragStart.y;
+        requestDraw();
+      });
+      canvas.addEventListener("pointerup", event => {
+        canvas.classList.remove("dragging");
+        canvas.releasePointerCapture(event.pointerId);
+        const moved = Math.hypot(event.clientX - dragStart.x, event.clientY - dragStart.y);
+        dragging = false;
+        if (moved < 4) {
+          const hit = hitTest(event.offsetX, event.offsetY);
+          if (hit) showNode(hit.id);
+          else nodePopup.style.display = "none";
+        }
+      });
+      canvas.addEventListener("pointercancel", () => {
+        dragging = false;
+        canvas.classList.remove("dragging");
+      });
+    }
+
+    function toggleChecked(input) {
+      if (!input || typeof input.checked !== "boolean") return;
+      input.checked = !input.checked;
+      input.dispatchEvent(new Event("change"));
+      requestDraw();
+    }
+
+    function runToolAction(action) {
+      const actions = {
+        plan: planRoute,
+        play: startPreview,
+        pause: () => stopPreview(false),
+        restart: restartPreview,
+        fit: () => { if (routeSegments.length) zoomToRoute(); else resetView(); requestDraw(); },
+        home: () => { startInput.value = "HOME"; zoomToNode(HOME); },
+        locate: () => focusCurrentLocation(),
+        "follow-car": toggleFollowCar,
+        "follow-me": toggleFollowLocation,
+        copy: copyShellCommand,
+        export: exportRouteJson,
+        print: () => window.print(),
+        swap: () => { [startInput.value, goalInput.value] = [goalInput.value, startInput.value]; planRoute(); },
+        clear: clearRoute,
+        metric: () => { unitSelect.value = "metric"; updateMetrics(); },
+        imperial: () => { unitSelect.value = "imperial"; updateMetrics(); },
+        fast: () => { performanceSelect.value = "fast"; requestDraw(); },
+        detail: () => { performanceSelect.value = "detail"; requestDraw(); },
+        balanced: () => { performanceSelect.value = "balanced"; requestDraw(); },
+        dark: () => toggleChecked(darkModeToggle),
+        labels: () => toggleChecked(layers.labels),
+        houses: () => toggleChecked(layers.houses),
+        connectors: () => toggleChecked(layers.connectors),
+        transfers: () => toggleChecked(layers.graphLinks),
+        "route-labels": () => toggleChecked(routeLabelsOnly),
+      };
+      if (actions[action]) actions[action]();
+    }
+
+    function deferWork(fn) {
+      if ("requestIdleCallback" in window) requestIdleCallback(fn, { timeout: 900 });
+      else setTimeout(fn, 20);
+    }
+
+    function postNativeReady(config) {
+      try {
+        window.webkit?.messageHandlers?.ready?.postMessage({ map: currentMapKey, label: config.label });
+      } catch {}
+    }
+
+    function resetRuntimeForMap(config) {
+      stopPreview(true);
+      indexReady = false;
+      adjacency = new Map();
+      addressIndex = [];
+      edgeByPair = new Map();
+      routeCache = new Map();
+      recentRoutes = [];
+      currentPath = [];
+      currentRawPath = [];
+      currentDistance = NaN;
+      routeSegments = [];
+      selectedNode = null;
+      camera = { x: 0, y: 0, scale: 0 };
+      if (nodePopup) nodePopup.style.display = "none";
+      startNode.textContent = "-";
+      goalNode.textContent = "-";
+      shellCommand.textContent = "python3 astar_nav.py START_NODE GOAL_NODE";
+      summary.textContent = `Loading ${config.label} graph...`;
+      directionsList.innerHTML = "";
+      matches.innerHTML = "";
+      updateMetrics();
+      requestDraw();
+    }
+
+    function loadGraphEmbed(mapKey, config) {
+      if (window.__NAV_GRAPHS__ && window.__NAV_GRAPHS__[mapKey]) {
+        return Promise.resolve(window.__NAV_GRAPHS__[mapKey]);
+      }
+      if (mapKey === "trossachs" && window.__TROSSACHS_GRAPH__) {
+        return Promise.resolve(window.__TROSSACHS_GRAPH__);
+      }
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[data-map-embed="${mapKey}"]`);
+        if (existing) {
+          const data = window.__NAV_GRAPHS__?.[mapKey] || (mapKey === "trossachs" ? window.__TROSSACHS_GRAPH__ : null);
+          if (data) {
+            resolve(data);
+            return;
+          }
+          existing.addEventListener("load", () => resolve(window.__NAV_GRAPHS__?.[mapKey]), { once: true });
+          existing.addEventListener("error", reject, { once: true });
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = config.embed;
+        script.dataset.mapEmbed = mapKey;
+        script.onload = () => {
+          const data = window.__NAV_GRAPHS__?.[mapKey] || (mapKey === "trossachs" ? window.__TROSSACHS_GRAPH__ : null);
+          data ? resolve(data) : reject(new Error(`Graph embed did not register ${mapKey}`));
+        };
+        script.onerror = () => reject(new Error(`Could not load ${config.embed}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadGraphData(mapKey = currentMapKey) {
+      const safeMapKey = MAP_CONFIG[mapKey] ? mapKey : "trossachs";
+      const config = MAP_CONFIG[safeMapKey];
+
+      try {
+        return await loadGraphEmbed(safeMapKey, config);
+      } catch (_) {}
+
+      const urls = [
+        `${config.graph}?v=map-switch-1`,
+        config.graph,
+      ];
+
+      let lastError = null;
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Graph fetch failed: ${response.status}`);
+          return await response.json();
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error("Could not load graph");
+    }
+
+    async function init(mapKey = mapSelect?.value || currentMapKey) {
+      const token = ++graphLoadToken;
+      currentMapKey = MAP_CONFIG[mapKey] ? mapKey : "trossachs";
+      if (mapSelect && mapSelect.value !== currentMapKey) mapSelect.value = currentMapKey;
+      const config = MAP_CONFIG[currentMapKey] || MAP_CONFIG.trossachs;
+      if (brandTitle) brandTitle.textContent = `${config.label} Route Planner`;
+      document.title = `${config.label} Fast Route Planner`;
+      resetRuntimeForMap(config);
+      try {
+        setStatus(`Loading ${config.label} graph...`, "");
+        const data = await loadGraphData(currentMapKey);
+        if (token !== graphLoadToken) return;
+        nodes = data.nodes || {};
+        edges = data.edges || [];
+        HOME = (data.home_candidates && data.home_candidates.length) ? data.home_candidates[0] : "";
+        if (!HOME && startInput.value.trim().toUpperCase() === "HOME") startInput.value = "";
+        if (HOME && !startInput.value.trim()) startInput.value = "HOME";
+        nodeCount.textContent = `${Object.keys(nodes).length.toLocaleString()} nodes`;
+        edgeCount.textContent = `${edges.length.toLocaleString()} edges`;
+        computeBounds();
+        preprocessGeometry();
+        resizeCanvas();
+        initPointer();
+        setupTabs();
+        setStatus("Map visible. Indexing routes...", "ready");
+        requestDraw();
+        deferWork(() => requestCurrentLocation(true));
+        deferWork(() => {
+          if (token !== graphLoadToken) return;
+          buildAdjacency();
+          makeAddressIndex();
+          loadRecentRoutes();
+          indexReady = true;
+          clearRoute();
+          setStatus(`${config.label} route index ready`, "ready");
+          postNativeReady(config);
+        });
+      } catch (error) {
+        console.error(error);
+        setStatus(`Could not load ${config.label} graph. Keep its embed file next to the HTML.`, "error");
+      }
+    }
+
+    window.setNavigationMap = mapKey => {
+      if (!MAP_CONFIG[mapKey]) return false;
+      init(mapKey);
+      return true;
+    };
+    window.getNavigationMap = () => currentMapKey;
+
+    window.addEventListener("resize", resizeCanvas);
+    function on(id, event, handler) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(event, handler);
+    }
+
+    on("routeBtn", "click", planRoute);
+    on("playPreviewBtn", "click", startPreview);
+    on("pausePreviewBtn", "click", () => stopPreview(false));
+    on("restartPreviewBtn", "click", restartPreview);
+    on("zoomInBtn", "click", () => zoomAt(1.10));
+    on("zoomOutBtn", "click", () => zoomAt(0.91));
+    on("mapLocateBtn", "click", focusCurrentLocation);
+    on("resetViewBtn", "click", resetView);
+    on("swapBtn", "click", () => {
+      [startInput.value, goalInput.value] = [goalInput.value, startInput.value];
+      planRoute();
+    });
+    on("homeBtn", "click", () => {
+      startInput.value = "HOME";
+      zoomToNode(HOME);
+    });
+    on("locateMeBtn", "click", focusCurrentLocation);
+    on("followCarBtn", "click", toggleFollowCar);
+    on("fitRouteBtn", "click", () => {
+      if (routeSegments.length) zoomToRoute();
+      else resetView();
+      requestDraw();
+    });
+    on("clearRouteBtn", "click", clearRoute);
+    on("copyCmdBtn", "click", copyShellCommand);
+    on("exportRouteBtn", "click", exportRouteJson);
+    document.querySelector(".feature-tools")?.addEventListener("click", event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      runToolAction(button.dataset.action);
+    });
+    recentRoutesBox.addEventListener("click", event => {
+      const button = event.target.closest("button[data-recent]");
+      if (!button) return;
+      const item = recentRoutes[Number(button.dataset.recent)];
+      if (!item) return;
+      startInput.value = item.start;
+      goalInput.value = item.goal;
+      planRoute();
+    });
+    for (const input of [startInput, goalInput]) {
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") planRoute();
+      });
+    }
+    unitSelect.addEventListener("change", updateMetrics);
+    performanceSelect.addEventListener("change", requestDraw);
+    if (mapSelect) mapSelect.addEventListener("change", () => init(mapSelect.value));
+    routeLabelsOnly.addEventListener("change", requestDraw);
+    darkModeToggle.addEventListener("change", () => {
+      document.body.classList.toggle("dark", darkModeToggle.checked);
+      requestDraw();
+    });
+    for (const input of Object.values(layers)) {
+      if (input && typeof input.addEventListener === "function") input.addEventListener("change", requestDraw);
+    }
+    setupSuggestions(startInput, startSuggestions);
+    setupSuggestions(goalInput, goalSuggestions);
+    const initialMapKey = new URLSearchParams(window.location.search).get("map");
+    if (initialMapKey && MAP_CONFIG[initialMapKey] && mapSelect) mapSelect.value = initialMapKey;
+    init(initialMapKey && MAP_CONFIG[initialMapKey] ? initialMapKey : undefined);
+  </script>
+</body>
+</html>

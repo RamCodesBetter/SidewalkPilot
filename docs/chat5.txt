@@ -1,0 +1,1049 @@
+• The evaluation is running on CPU. It may take a bit because it is testing 20 checkpoints over the expanded 1.9 eval set.
+
+• Waited for background terminal · PYTHONPATH=/tmp/eval313:/Users/ramsabavat/.local/lib/python3.13/site-packages /opt/homebrew/bin/python3.13 - <<'PY'
+import json, time, re
+from pathlib import Path
+import numpy as np
+import cv2
+import torch
+import torch.nn as nn
+ROOT = Path('/Users/ramsabavat/Desktop/rc_car_code')
+DATA = ROOT / 'code/ai_models_data/manual_sidewalk_detection_mixed.coco-segmentation/train'
+LABELS = DATA / 'labels.json'
+CORR = ROOT / 'code/ai_models_data/steering_corrections.json'
+MODELS_DIR = ROOT / 'code/ai_models'
+OUT = Path('/tmp/model_compare_1_0_to_1_9.json')
+WIDTH, HEIGHT = 200, 66
+class SteeringAutonomyV2(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.backbone = nn.Sequential(
+            nn.Conv2d(3, 24, 5, stride=2), nn.BatchNorm2d(24), nn.ELU(inplace=True),
+            nn.Conv2d(24, 36, 5, stride=2), nn.BatchNorm2d(36), nn.ELU(inplace=True),
+            nn.Conv2d(36, 48, 5, stride=2), nn.BatchNorm2d(48), nn.ELU(inplace=True),
+            nn.Conv2d(48, 64, 3, stride=1), nn.BatchNorm2d(64), nn.ELU(inplace=True),
+            nn.Conv2d(64, 64, 3, stride=1), nn.BatchNorm2d(64), nn.ELU(inplace=True),
+        )
+        self.head = nn.Sequential(
+            nn.AdaptiveAvgPool2d((4, 8)), nn.Flatten(),
+            nn.Linear(64 * 4 * 8, 256), nn.ELU(inplace=True), nn.Dropout(p=0.10),
+            nn.Linear(256, 64), nn.ELU(inplace=True), nn.Linear(64, 1), nn.Tanh(),
+        )
+    def forward(self, x):
+        return 90.0 + 86.0 * self.head(self.backbone(x))
+def norm_rel(p):
+    s = str(p).replace('\\', '/')
+    marker = 'manual_sidewalk_detection_mixed.coco-segmentation/train/'
+    if marker in s:
+        return s.split(marker, 1)[1]
+    return Path(s).name
+def to_servo(v):
+    v = float(v)
+    if -1.0001 <= v <= 1.0001:
+        return (v + 1.0) * 90.0
+    return v
+def read_labels():
+    merged = {}
+    raw = json.loads(LABELS.read_text())
+    if isinstance(raw, dict):
+        for k, v in raw.items():
+            val = v.get('steering', v.get('angle', v.get('label'))) if isinstance(v, dict) else v
+            if val is not None:
+                merged[norm_rel(k)] = to_servo(val)
+    elif isinstance(raw, list):
+        for x in raw:
+            img = x.get('image') or x.get('file') or x.get('path') or x.get('filename')
+            val = x.get('steering', x.get('angle', x.get('label')))
+            if img and val is not None:
+                merged[norm_rel(img)] = to_servo(val)
+    corr = json.loads(CORR.read_text())
+    for x in corr:
+        merged[norm_rel(x['image'])] = to_servo(x['steering'])
+    return merged, len(corr), corr
+def preprocess(path):
+    img = cv2.imread(str(path), cv2.IMREAD_COLOR)
+    if img is None:
+        return None
+    img = cv2.resize(img, (WIDTH, HEIGHT), interpolation=cv2.INTER_AREA)
+    img = img.astype(np.float32) / 255.0
+    img = (img - 0.5) / 0.5
+    img = np.transpose(img, (2, 0, 1))
+    return torch.from_numpy(img).float()
+def load_state(path):
+    try:
+        obj = torch.load(path, map_location='cpu', weights_only=False)
+    except TypeError:
+        obj = torch.load(path, map_location='cpu')
+    if isinstance(obj, dict):
+        for key in ['model_state_dict', 'state_dict', 'model']:
+            if key in obj and isinstance(obj[key], dict):
+                return obj[key]
+    return obj
+def pct(a, q):
+    return float(np.percentile(a, q))
+def buckets(vals):
+    vals = np.asarray(vals)
+    return {
+        '0_to_45': int(np.sum(vals < 45)),
+        '45_to_75': int(np.sum((vals >= 45) & (vals < 75))),
+        '75_to_85': int(np.sum((vals >= 75) & (vals < 85))),
+        '85_to_95': int(np.sum((vals >= 85) & (vals <= 95))),
+        '95_to_105': int(np.sum((vals > 95) & (vals <= 105))),
+        '105_to_135': int(np.sum((vals > 105) & (vals <= 135))),
+        '135_to_180': int(np.sum(vals > 135)),
+    }
+def subset_mask(names, pattern):
+    return np.array([pattern in n for n in names], dtype=bool)
+def model_meta(path):
+    name = path.name
+    m = re.search(r'_best_(\d+\.\d+)\.pth$', name)
+    if m:
+        return m.group(1), 'best'
+    m = re.search(r'_(\d+\.\d+)\.pth$', name)
+    if m:
+        return m.group(1), 'final'
+    return 'unknown', 'unknown'
+labels, corr_count, corr = read_labels()
+rows, failed = [], []
+for rel, target in sorted(labels.items()):
+    path = DATA / rel
+    ten = preprocess(path) if path.exists() else None
+    if ten is None:
+        failed.append(rel)
+    else:
+        rows.append((rel, float(target), ten))
+names = [r[0] for r in rows]
+targets = np.array([r[1] for r in rows], dtype=np.float32)
+batch = torch.stack([r[2] for r in rows])
+subsets = {
+    '20260426_curves_shadows': subset_mask(names, 'photo_20260426'),
+    '20260427_curved_curb': subset_mask(names, 'photo_20260427'),
+    '20260428_driveway': subset_mask(names, 'photo_20260428'),
+    '20260429_driveway_shadow': subset_mask(names, 'photo_20260429'),
+    '20260502_12_shadow': subset_mask(names, 'photo_20260502_12'),
+    '20260502_19_hard_turn_curb_smooth': subset_mask(names, 'photo_20260502_19'),
+}
+model_paths = sorted(MODELS_DIR.glob('SidewalkPilot*.pth'), key=lambda p: p.name)
+model_paths = [p for p in model_paths if re.search(r'_(best_)?1\.[0-9]+\.pth$', p.name)]
+print('eval_set', len(rows), 'failed', len(failed), 'models', len(model_paths))
+results = []
+for mp in model_paths:
+    version, kind = model_meta(mp)
+    model = SteeringAutonomyV2()
+    model.load_state_dict(load_state(mp))
+    model.eval()
+    preds = []
+    with torch.no_grad():
+        for i in range(0, len(batch), 128):
+            preds.append(model(batch[i:i+128]).squeeze(1).clamp(0, 180).numpy())
+    preds = np.concatenate(preds).astype(np.float32)
+    err = preds - targets
+    ae = np.abs(err)
+    score = np.maximum(0.0, 100.0 * (1.0 - ae / 180.0))
+    subs = {}
+    for key, mask in subsets.items():
+        if not bool(mask.sum()):
+            continue
+        sae = ae[mask]; sscore = score[mask]; serr = err[mask]
+        idxs = np.where(mask)[0]
+        worst_local = np.argsort(-sae)[:5]
+        subs[key] = {
+            'n': int(mask.sum()),
+            'score_mean': float(sscore.mean()),
+            'score_median': float(np.median(sscore)),
+            'score_min': float(sscore.min()),
+            'mae': float(sae.mean()),
+            'median_ae': float(np.median(sae)),
+            'max_ae': float(sae.max()),
+            'signed_error_mean': float(serr.mean()),
+            'within5': int((sae <= 5).sum()),
+            'within10': int((sae <= 10).sum()),
+            'worst': [[names[int(idxs[j])], float(preds[int(idxs[j])]), float(targets[int(idxs[j])]), float(err[int(idxs[j])]), float(ae[int(idxs[j])])] for j in worst_local],
+        }
+    worst = np.argsort(-ae)[:5]
+    results.append({
+        'name': mp.name,
+        'version': version,
+        'kind': kind,
+        'mtime': mp.stat().st_mtime,
+        'score_mean': float(score.mean()),
+        'score_median': float(np.median(score)),
+        'score_min': float(score.min()),
+        'mae': float(ae.mean()),
+        'median_ae': float(np.median(ae)),
+        'max_ae': float(ae.max()),
+        'signed_error_mean': float(err.mean()),
+        'within2': int((ae <= 2).sum()),
+        'within5': int((ae <= 5).sum()),
+        'within10': int((ae <= 10).sum()),
+        'within20': int((ae <= 20).sum()),
+        'pred_min': float(preds.min()),
+        'pred_max': float(preds.max()),
+        'pred_mean': float(preds.mean()),
+        'pred_median': float(np.median(preds)),
+        'pred_p05': pct(preds, 5),
+        'pred_p25': pct(preds, 25),
+        'pred_p75': pct(preds, 75),
+        'pred_p95': pct(preds, 95),
+        'pred_buckets': buckets(preds),
+        'subsets': subs,
+        'worst_5': [[names[int(i)], float(preds[int(i)]), float(targets[int(i)]), float(err[int(i)]), float(ae[int(i)]), float(score[int(i)])] for i in worst],
+    })
+    print(mp.name, f"score={score.mean():.3f}", f"mae={ae.mean():.3f}", f"w5={(ae<=5).sum()}")
+results.sort(key=lambda r: (-r['score_mean'], r['mae'], r['name']))
+out = {
+    'generated_at': time.strftime('%Y-%m-%d %H:%M:%S'),
+    'eval_set': {
+        'unique_labels': len(labels),
+        'processed': len(rows),
+        'failed': len(failed),
+        'corrections': corr_count,
+        'input': f'{WIDTH}x{HEIGHT}',
+        'preprocessing': 'OpenCV BGR, resize INTER_AREA, normalize (x/255 - 0.5)/0.5',
+        'target_buckets': buckets(targets),
+        'subsets': {k: int(v.sum()) for k, v in subsets.items()},
+    },
+    'results': results,
+}
+OUT.write_text(json.dumps(out, indent=2))
+print('wrote', OUT)
+print('top5')
+for r in results[:5]:
+    print(r['name'], r['version'], r['kind'], f"{r['score_mean']:.3f}", f"MAE={r['mae']:.3f}")
+PY
+
+• Ran PYTHONPATH=/tmp/eval313:/Users/ramsabavat/.local/lib/python3.13/site-packages /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json, time, re
+  │ from pathlib import Path
+  │ … +222 lines
+  └ eval_set 1287 failed 0 models 20
+    SidewalkPilot-v1.0.pth score=88.339 mae=20.990 w5=423
+    … +24 lines (ctrl + t to view transcript)
+    SidewalkPilot-v1.8b.pth 1.8 best 95.697 MAE=7.746
+    SidewalkPilot-v1.7b.pth 1.7 best 94.979 MAE=9.039
+
+• Waited for background terminal
+
+─ Worked for 2m 08s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• 1.9 evaluated cleanly. It is now the top model on the expanded 1,287-image set: 1.9 final scored 96.753% with MAE 5.845; 1.9 best is almost tied at 96.749%. I’m using those measured numbers to rebuild the docs.
+
+• Ran PYTHONPATH=/tmp/eval313 /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +13 lines
+  └ eval {'unique_labels': 1287, 'processed': 1287, 'failed': 0, 'corrections': 564, 'input': '200x66', 'preprocessing': 'OpenCV BGR, resize INTER_AREA, normalize (x/255 - 0.5)/0.5', 'target_buckets': {'0_to_45': 72, '45_to_75': 238, '75_to_85': 132,
+    '85_to_95': 329, '95_to_105': 126, '105_to_135': 186, '135_to_180': 204}, 'subsets': {'20260426_curves_shadows': 53, '20260427_curved_curb': 72, '20260428_driveway': 6, '20260429_driveway_shadow': 53, '20260502_12_shadow': 154,
+    … +50 lines (ctrl + t to view transcript)
+    19 1.0 final SidewalkPilot-v1.0.pth 88.339 20.990 423
+    20 1.0 best SidewalkPilot-v1.0b.pth 88.292 21.075 410
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I have the 1.9 numbers now. I’m rebuilding the report as a styled PDF with the expanded 1,287-image eval set, 1.9 at the top of rankings, and updated version/category tables. No .md or .html report source will be left behind.
+
+• Ran PYTHONPATH=/tmp/eval313:/tmp/codex_pdf /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +274 lines
+  └ /Users/ramsabavat/Desktop/rc_car_code/docs/steering_model_report.pdf
+
+─ Worked for 1m 53s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The styled PDF is rebuilt. I’m updating the README now with table-only growth: no graph assets, no graph section, and 1.9 included in the summary/ranking/subset/distribution/update tables.
+
+• Ran PYTHONPATH=/tmp/eval313 /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +25 lines
+  └ SUMMARY
+    | `1.0` | `SidewalkPilot-v1.0.pth` | `88.339%` | `20.990` | `9.934` | `151.830` | `-7.262` | `202 / 1287` | `423 / 1287` | `648 / 1287` | `869 / 1287` |
+    … +53 lines (ctrl + t to view transcript)
+    | `1.8` | `4.27` | `1.42` | `2.19` | `0.96` | `1.08` | `22.20` |
+    | `1.9` | `4.61` | `1.74` | `1.92` | `1.41` | `1.32` | `2.32` |
+
+• Added docs/huggingface_sidewalkpilot_v1.0_README.md (+230 -0)
+      1 +---
+      2 +license: apache-2.0
+      3 +language:
+      4 +- en
+      5 +library_name: pytorch
+      6 +tags:
+      7 +- rc_car
+      8 +- robotics
+      9 +- autonomous-driving
+     10 +- sidewalk-navigation
+     11 +- computer-vision
+     12 +- steering
+     13 +- pytorch
+     14 +- raspberry-pi
+     15 +---
+     16 +
+     17 +# SidewalkPilot-v1.0
+     18 +
+     19 +SidewalkPilot-v1.0 is a PyTorch steering model family for a small autonomous RC car. It takes a full camera frame as input and predicts a steering servo angle from `0` to `180` degrees.
+     20 +
+     21 +The model is used for camera-based sidewalk/path following. In the full RC car stack, LiDAR runs above the model as a safety layer for obstacle avoidance, LiDAR override steering, and hard braking.
+     22 +
+     23 +## Model Details
+     24 +
+     25 +- **Developed by:** Ram Shreyas Naik Sabavat
+     26 +- **Model type:** CNN steering regression model
+     27 +- **Library:** PyTorch
+     28 +- **License:** Apache 2.0
+     29 +- **Input:** Full camera frame, resized/normalized before inference
+     30 +- **Evaluation input format:** `200x66`, OpenCV BGR
+     31 +- **Output:** Steering servo angle from `0` to `180`
+     32 +- **Current offline leader:** `SidewalkPilot-v1.9.pth`
+     33 +
+     34 +## Output Meaning
+     35 +
+     36 +| Output | Meaning |
+     37 +|---:|---|
+     38 +| `0` | full left |
+     39 +| `90` | straight |
+     40 +| `180` | full right |
+     41 +
+     42 +## Evaluation Report
+     43 +
+     44 +Full styled report:
+     45 +
+     46 +[steering_model_report.pdf](steering_model_report.pdf)
+     47 +
+     48 +The PDF contains the full model-growth report, graphs, ranking, update history, and comparison tables. This README keeps the table data only. As new model descriptions are added, the tables grow one row at a time.
+     49 +
+     50 +## Evaluation Setup
+     51 +
+     52 +- **Eval set:** `1,287` images
+     53 +- **Failed samples:** `0`
+     54 +- **Corrections included:** `564`
+     55 +- **Input format:** `200x66`, OpenCV BGR
+     56 +- **Output scale:** servo angle `0..180`
+     57 +- **Error unit:** servo degrees
+     58 +- **Score formula:** `max(0, 100 * (1 - absolute_error / 180))`
+     59 +
+     60 +## Version Update Categories
+     61 +
+     62 +| Version | Main update category | Data/status | Result |
+     63 +|---|---|---|---|
+     64 +| `1.0` | Baseline steering | initial mixed sidewalk/CARLA set | complete |
+     65 +| `1.1` | Street-test correction pass | manual street corrections | complete |
+     66 +| `1.2` | Best early field behavior | no-weather tuning + manual corrections | complete |
+     67 +| `1.3` | Smoothness / aggression tuning | same dataset family | complete |
+     68 +| `1.4` | Curves + sloped shadow fixes | `photo_20260426` | complete |
+     69 +| `1.5` | Curved curb interpreted as sidewalk | `photo_20260427` | complete |
+     70 +| `1.6` | Driveway failure fix | `photo_20260428` | complete |
+     71 +| `1.7 / 1.7b` | Driveway + shadow field fixes | `photo_20260429` | field validated: `0.6 mi`, `0 overtakes` |
+     72 +| `1.8` | Mainly shadow fixes | `photo_20260502_12` | offline leader before `1.9` |
+     73 +| `1.9` | Right hard turns, small curb hugging, smoother drive | `_19` / `photo_20260502_19` | new offline leader |
+     74 +
+     75 +## Evaluation Summary
+     76 +
+     77 +| Model | Checkpoint | Full Score | MAE | Median AE | Max AE | Signed Error | Within 2° | Within 5° | Within 10° | Within 20° |
+     78 +|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+     79 +| `1.0` | `SidewalkPilot-v1.0.pth` | `88.339%` | `20.990` | `9.934` | `151.830` | `-7.262` | `202 / 1287` | `423 / 1287` | `648 / 1287` | `869 / 1287` |
+     80 +| `1.1b` | `SidewalkPilot-v1.1b.pth` | `92.372%` | `13.730` | `3.886` | `144.676` | `-6.197` | `434 / 1287` | `746 / 1287` | `916 / 1287` | `1044 / 1287` |
+     81 +| `1.2` | `SidewalkPilot-v1.2.pth` | `93.634%` | `11.459` | `1.018` | `140.617` | `-5.314` | `748 / 1287` | `843 / 1287` | `945 / 1287` | `1058 / 1287` |
+     82 +| `1.3` | `SidewalkPilot-v1.3.pth` | `93.502%` | `11.697` | `1.765` | `148.944` | `-5.557` | `670 / 1287` | `845 / 1287` | `955 / 1287` | `1069 / 1287` |
+     83 +| `1.4` | `SidewalkPilot-v1.4.pth` | `94.079%` | `10.657` | `2.194` | `132.078` | `-4.997` | `613 / 1287` | `899 / 1287` | `1008 / 1287` | `1102 / 1287` |
+     84 +| `1.5b` | `SidewalkPilot-v1.5b.pth` | `94.337%` | `10.193` | `3.711` | `112.289` | `-3.734` | `443 / 1287` | `766 / 1287` | `1011 / 1287` | `1123 / 1287` |
+     85 +| `1.6` | `SidewalkPilot-v1.6.pth` | `94.540%` | `9.828` | `3.953` | `131.186` | `-2.877` | `442 / 1287` | `776 / 1287` | `1013 / 1287` | `1124 / 1287` |
+     86 +| `1.7b` | `SidewalkPilot-v1.7b.pth` | `94.979%` | `9.039` | `3.470` | `109.148` | `-2.887` | `470 / 1287` | `804 / 1287` | `1007 / 1287` | `1150 / 1287` |
+     87 +| `1.8` | `SidewalkPilot-v1.8.pth` | `95.702%` | `7.737` | `3.273` | `110.699` | `-3.228` | `510 / 1287` | `831 / 1287` | `1054 / 1287` | `1198 / 1287` |
+     88 +| `1.9` | `SidewalkPilot-v1.9.pth` | `96.753%` | `5.845` | `2.601` | `94.329` | `-2.176` | `554 / 1287` | `886 / 1287` | `1096 / 1287` | `1229 / 1287` |
+     89 +
+     90 +Negative signed error means the model is left-biased on average.
+     91 +
+     92 +## Prediction Distribution
+     93 +
+     94 +| Model | Pred Min | Pred Max | Pred Mean | Pred Median | Pred P05 | Pred P25 | Pred P75 | Pred P95 |
+     95 +|---|---:|---:|---:|---:|---:|---:|---:|---:|
+     96 +| `1.0` | `8.459` | `174.146` | `89.579` | `89.676` | `37.520` | `68.904` | `108.229` | `145.649` |
+     97 +| `1.1b` | `4.000` | `176.000` | `90.643` | `89.761` | `37.944` | `72.754` | `106.427` | `152.011` |
+     98 +| `1.2` | `4.000` | `176.000` | `91.526` | `91.271` | `41.237` | `72.686` | `108.045` | `149.390` |
+     99 +| `1.3` | `4.000` | `176.000` | `91.283` | `90.486` | `40.523` | `73.660` | `106.509` | `149.883` |
+    100 +| `1.4` | `4.000` | `176.000` | `91.843` | `90.920` | `40.737` | `74.986` | `106.295` | `154.155` |
+    101 +| `1.5b` | `4.000` | `176.000` | `93.107` | `90.536` | `41.311` | `74.592` | `109.059` | `162.565` |
+    102 +| `1.6` | `4.000` | `176.000` | `93.963` | `92.289` | `40.245` | `73.353` | `109.929` | `167.733` |
+    103 +| `1.7b` | `4.000` | `176.000` | `93.954` | `91.184` | `38.861` | `74.424` | `110.936` | `164.965` |
+    104 +| `1.8` | `4.000` | `176.000` | `93.613` | `90.857` | `38.486` | `73.404` | `109.949` | `165.694` |
+    105 +| `1.9` | `4.000` | `176.000` | `94.664` | `90.169` | `38.173` | `73.304` | `114.332` | `172.109` |
+    106 +
+    107 +## Ranking
+    108 +
+    109 +| Rank | Model | Checkpoint | Score | MAE | Median AE | Max AE | Within 5° | Within 10° | Signed Error |
+    110 +|---:|---|---|---:|---:|---:|---:|---:|---:|---:|
+    111 +| `1` | `1.9` | `SidewalkPilot-v1.9.pth` | `96.753%` | `5.845` | `2.601` | `94.329` | `886 / 1287` | `1096 / 1287` | `-2.176` |
+    112 +| `2` | `1.9b` | `SidewalkPilot-v1.9b.pth` | `96.749%` | `5.851` | `2.516` | `94.336` | `889 / 1287` | `1091 / 1287` | `-2.157` |
+    113 +| `3` | `1.8` | `SidewalkPilot-v1.8.pth` | `95.702%` | `7.737` | `3.273` | `110.699` | `831 / 1287` | `1054 / 1287` | `-3.228` |
+    114 +| `4` | `1.8b` | `SidewalkPilot-v1.8b.pth` | `95.697%` | `7.746` | `3.171` | `110.106` | `828 / 1287` | `1055 / 1287` | `-3.220` |
+    115 +| `5` | `1.7b` | `SidewalkPilot-v1.7b.pth` | `94.979%` | `9.039` | `3.470` | `109.148` | `804 / 1287` | `1007 / 1287` | `-2.887` |
+    116 +| `6` | `1.7` | `SidewalkPilot-v1.7.pth` | `94.956%` | `9.079` | `3.523` | `108.732` | `801 / 1287` | `1007 / 1287` | `-2.665` |
+    117 +| `7` | `1.6` | `SidewalkPilot-v1.6.pth` | `94.540%` | `9.828` | `3.953` | `131.186` | `776 / 1287` | `1013 / 1287` | `-2.877` |
+    118 +| `8` | `1.6b` | `SidewalkPilot-v1.6b.pth` | `94.522%` | `9.860` | `3.848` | `130.713` | `774 / 1287` | `1006 / 1287` | `-3.025` |
+    119 +| `9` | `1.5` | `SidewalkPilot-v1.5.pth` | `94.337%` | `10.193` | `3.711` | `112.289` | `766 / 1287` | `1011 / 1287` | `-3.734` |
+    120 +| `10` | `1.5b` | `SidewalkPilot-v1.5b.pth` | `94.337%` | `10.193` | `3.711` | `112.289` | `766 / 1287` | `1011 / 1287` | `-3.734` |
+    121 +| `11` | `1.4` | `SidewalkPilot-v1.4.pth` | `94.079%` | `10.657` | `2.194` | `132.078` | `899 / 1287` | `1008 / 1287` | `-4.997` |
+    122 +| `12` | `1.4b` | `SidewalkPilot-v1.4b.pth` | `93.840%` | `11.087` | `2.960` | `131.227` | `845 / 1287` | `1012 / 1287` | `-5.101` |
+    123 +| `13` | `1.2` | `SidewalkPilot-v1.2.pth` | `93.634%` | `11.459` | `1.018` | `140.617` | `843 / 1287` | `945 / 1287` | `-5.314` |
+    124 +| `14` | `1.2b` | `SidewalkPilot-v1.2b.pth` | `93.585%` | `11.548` | `1.281` | `140.920` | `849 / 1287` | `948 / 1287` | `-5.296` |
+    125 +| `15` | `1.3` | `SidewalkPilot-v1.3.pth` | `93.502%` | `11.697` | `1.765` | `148.944` | `845 / 1287` | `955 / 1287` | `-5.557` |
+    126 +| `16` | `1.3b` | `SidewalkPilot-v1.3b.pth` | `93.223%` | `12.199` | `3.005` | `140.762` | `823 / 1287` | `961 / 1287` | `-5.423` |
+    127 +| `17` | `1.1` | `SidewalkPilot-v1.1.pth` | `92.372%` | `13.730` | `3.886` | `144.676` | `746 / 1287` | `916 / 1287` | `-6.197` |
+    128 +| `18` | `1.1b` | `SidewalkPilot-v1.1b.pth` | `92.372%` | `13.730` | `3.886` | `144.676` | `746 / 1287` | `916 / 1287` | `-6.197` |
+    129 +| `19` | `1.0` | `SidewalkPilot-v1.0.pth` | `88.339%` | `20.990` | `9.934` | `151.830` | `423 / 1287` | `648 / 1287` | `-7.262` |
+    130 +| `20` | `1.0b` | `SidewalkPilot-v1.0b.pth` | `88.292%` | `21.075` | `10.234` | `152.629` | `410 / 1287` | `640 / 1287` | `-6.691` |
+    131 +
+    132 +## Field Case Comparison
+    133 +
+    134 +| Model | D26 curves/shadows MAE | D27 curved curb MAE | D28 driveway MAE | D29 driveway/shadow MAE | 20260502_12 shadow MAE | 20260502_19 hard/curb/smooth MAE |
+    135 +|---|---:|---:|---:|---:|---:|---:|
+    136 +| `1.0` | `44.12` | `53.69` | `56.18` | `37.44` | `29.57` | `29.57` |
+    137 +| `1.1b` | `38.93` | `36.60` | `83.08` | `33.44` | `21.42` | `26.13` |
+    138 +| `1.2` | `36.54` | `31.76` | `64.48` | `25.38` | `20.86` | `22.74` |
+    139 +| `1.3` | `35.00` | `34.06` | `74.95` | `25.26` | `19.51` | `22.92` |
+    140 +| `1.4` | `3.66` | `31.68` | `70.03` | `25.83` | `18.73` | `24.32` |
+    141 +| `1.5b` | `3.98` | `0.99` | `87.18` | `25.74` | `18.59` | `21.06` |
+    142 +| `1.6` | `3.93` | `1.10` | `2.36` | `26.32` | `18.91` | `22.37` |
+    143 +| `1.7b` | `4.13` | `1.22` | `1.95` | `1.01` | `17.43` | `22.25` |
+    144 +| `1.8` | `4.27` | `1.42` | `2.19` | `0.96` | `1.08` | `22.20` |
+    145 +| `1.9` | `4.61` | `1.74` | `1.92` | `1.41` | `1.32` | `2.32` |
+    146 +
+    147 +## Intended Use
+    148 +
+    149 +This model is intended for:
+    150 +
+    151 +- RC car autonomy experiments
+    152 +- Sidewalk/path steering research
+    153 +- Raspberry Pi robotics projects
+    154 +- Small-scale computer vision control systems
+    155 +- Testing steering regression from camera images
+    156 +
+    157 +## Out-of-Scope Use
+    158 +
+    159 +This model is not intended for:
+    160 +
+    161 +- Real cars
+    162 +- Public road vehicles
+    163 +- Human transportation
+    164 +- Safety-critical systems
+    165 +- Fully autonomous deployment without external safety layers
+    166 +
+    167 +## System Context
+    168 +
+    169 +The full RC car autonomy stack uses layered control:
+    170 +
+    171 +```text
+    172 +camera frame
+    173 +-> resize/normalize image
+    174 +-> PyTorch steering model
+    175 +-> predicted servo angle (0-180)
+    176 +-> runtime decision logic
+    177 +-> LiDAR safety override if needed
+    178 +-> final steering/throttle/brake command
+    179 +-> servo + motor controller
+    180 +```
+    181 +
+    182 +LiDAR runs as a higher-priority safety layer:
+    183 +
+    184 +```text
+    185 +LiDAR clear
+    186 +-> use model steering
+    187 +
+    188 +LiDAR obstacle
+    189 +-> LiDAR override mode
+    190 +
+    191 +LiDAR blocked/too close
+    192 +-> hard brake
+    193 +```
+    194 +
+    195 +The model handles normal path following, while LiDAR handles obstacle avoidance and emergency behavior.
+    196 +
+    197 +## Training Data
+    198 +
+    199 +The model was trained on camera images collected from the RC car driving in sidewalk-like environments. Labels represent steering servo angles from `0` to `180` degrees.
+    200 +
+    201 +Detailed dataset composition should live in the dataset README, not this model card.
+    202 +
+    203 +## Preprocessing
+    204 +
+    205 +During inference/evaluation, the pipeline:
+    206 +
+    207 +1. Captures the full camera frame.
+    208 +2. Resizes the image to `200x66`.
+    209 +3. Uses OpenCV BGR image ordering.
+    210 +4. Normalizes pixel values with `(x / 255 - 0.5) / 0.5`.
+    211 +5. Runs the PyTorch model.
+    212 +6. Clamps the output to `0..180`.
+    213 +
+    214 +The model sees the whole frame, not a cropped region.
+    215 +
+    216 +## Limitations
+    217 +
+    218 +SidewalkPilot can fail when lighting, sidewalk shape, camera angle, shadows, driveway cuts, curved curbs, hard turns, or curb-hugging cases differ from the training data.
+    219 +
+    220 +The model does not understand obstacles by itself and should not be trusted as the only safety system.
+    221 +
+    222 +Use with external safety logic, manual override, and obstacle detection.
+    223 +
+    224 +## Safety Recommendation
+    225 +
+    226 +Do not use this model alone to control a robot. In the original project, LiDAR has priority over the model and can override steering or trigger hard braking.
+    227 +
+    228 +## Model Card Contact
+    229 +
+    230 +Ram Shreyas Naik Sabavat
+
+─ Worked for 1m 58s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The README has been rewritten to table-only growth and now includes 1.9 across the summary, distribution, ranking, field-case, and update-category tables. I’m running final checks for stale graph references, report source leftovers, and PDF content.
+
+• Explored
+  └ Search steering_model_report.md in docs
+    Search Model Growth Preview|hf_readme_assets|\.svg|graph|SidewalkPilot v1.0 full score graph|SidewalkPilot v1.0 error graph in huggingface_sidewalkpilot_v1.0_README.md
+    List steering_model_report.pdf
+    Search 1\.9|96\.753|5\.845|photo_20260502_19|Right hard turns|Model Growth Preview|hf_readme_assets in huggingface_sidewalkpilot_v1.0_README.md
+
+• Ran pdftotext docs/steering_model_report.pdf - | rg -n "1\.9|96\.753|5\.845|Right hard turns|photo_20260502_19|new offline leader|1\.8 role|Mainly shadow"
+  └ 2:Updated 2026-05-02 · expanded through 1.9 · OpenCV BGR 200x66 · servo output 0..180
+    3:Focus: model growth, rankings, field-failure subsets, and 1.9 hard-right / curb-hugging / smoothness results.
+    … +29 lines (ctrl + t to view transcript)
+    1541:Next field-test order: 1.9 final first, then 1.9 best only if final has a behavior issue. Watch hard-right turns, curb hugging, and smoothness
+    1542:because those are the cases the 1.9 labels directly target.
+
+• Edited docs/huggingface_sidewalkpilot_v1.0_README.md (+1 -1)
+    47
+    48 -The PDF contains the full model-growth report, graphs, ranking, update history, and comparison tables. This README keeps the table data only. As new model descriptions are added, the tables grow one row at a time.
+    48 +The PDF contains the full styled model-growth report, ranking, update history, and comparison tables. This README keeps the table data only. As new model descriptions are added, the tables grow one row at a time.
+    49
+
+• Explored
+  └ Search steering_model_report.md in docs
+    Search Model Growth Preview|hf_readme_assets|\.svg|graph|SidewalkPilot v1.0 full score graph|SidewalkPilot v1.0 error graph in huggingface_sidewalkpilot_v1.0_README.md
+    List steering_model_report.pdf
+
+• Ran python3 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +7 lines
+  └ eval_processed 1287
+    eval_failed 0
+    … +2 lines (ctrl + t to view transcript)
+    SidewalkPilot-v1.9b.pth score=96.749 mae=5.851
+    SidewalkPilot-v1.8.pth score=95.702 mae=7.737
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Updated docs only.
+
+  - docs/steering_model_report.pdf regenerated with styled report layout, updated rankings/tables, and 1.9 results.
+  - docs/huggingface_sidewalkpilot_v1.0_README.md updated to table-only growth, no graph/assets references.
+  - No steering_model_report.md or .html left behind.
+  - No code/training files changed.
+
+  1.9 results on current eval set:
+
+  - Eval set: 1287 processed, 0 failed, 564 corrections
+  - SidewalkPilot-v1.9.pth: 96.753%, MAE 5.845
+  - SidewalkPilot-v1.9b.pth: 96.749%, MAE 5.851
+  - 1.9 is now ranked above 1.8 in both PDF and README.
+
+
+› [Image #1] fix this and update readme with new values
+
+
+• I’ll fix the PDF table overflow by rebuilding the report with wrapped table cells and shorter 1.9 labels, then verify the README still has the current 1.9 values.
+
+• Explored
+  └ Read huggingface_sidewalkpilot_v1.0_README.md
+    Search steering_model_report.md in docs
+
+• Ran test -f /tmp/model_compare_1_0_to_1_9.json && python3 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +5 lines
+  └ {'unique_labels': 1287, 'processed': 1287, 'failed': 0, 'corrections': 564, 'input': '200x66', 'preprocessing': 'OpenCV BGR, resize INTER_AREA, normalize (x/255 - 0.5)/0.5', 'target_buckets': {'0_to_45': 72, '45_to_75': 238, '75_to_85': 132,
+    '85_to_95': 329, '95_to_105': 126, '105_to_135': 186, '135_to_180': 204}, 'subsets': {'20260426_curves_shadows': 53, '20260427_curved_curb': 72, '20260428_driveway': 6, '20260429_driveway_shadow': 53, '20260502_12_shadow': 154,
+    … +2 lines (ctrl + t to view transcript)
+    SidewalkPilot-v1.9b.pth 96.74940490722656 5.851066589355469
+    SidewalkPilot-v1.8.pth 95.7015380859375 7.737235069274902
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The README already has the 1.9 values. The PDF overflow is from long plain-string table cells in portrait width. I’m rebuilding the PDF tables with wrapped Paragraph cells and shorter 1.9 wording so that row cannot visually collide.
+
+• Ran PYTHONPATH=/tmp/eval313:/tmp/codex_pdf /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +250 lines
+  └ /Users/ramsabavat/Desktop/rc_car_code/docs/steering_model_report.pdf
+
+/status
+
+╭────────────────────────────────────────────────────────────────────────────────╮
+│  >_ OpenAI Codex (v0.124.0)                                                    │
+│                                                                                │
+│ Visit https://chatgpt.com/codex/settings/usage for up-to-date                  │
+│ information on rate limits and credits                                         │
+│                                                                                │
+│  Model:                gpt-5.5 (reasoning high, summaries auto)                │
+│  Directory:            ~/Desktop/rc_car_code                                   │
+│  Permissions:          Custom (workspace-write, on-request)                    │
+│  Agents.md:            <none>                                                  │
+│  Account:              vasanth.sabavat@gmail.com (Plus)                        │
+│  Collaboration mode:   Default                                                 │
+│  Session:              019db8b5-619c-74a1-b161-8e787ab0f6cc                    │
+│                                                                                │
+│  Context window:       44% left (150K used / 258K)                             │
+│  5h limit:             [███████████████░░░░░] 73% left (resets 04:05 on 3 May) │
+│  Weekly limit:         [█░░░░░░░░░░░░░░░░░░░] 7% left (resets 23:17 on 4 May)  │
+│  premium limit:                                                                │
+│  Warning:              limits may be stale - run /status again shortly.        │
+╰────────────────────────────────────────────────────────────────────────────────╯
+
+• The PDF was rebuilt with wrapped cells and shortened labels, specifically fixing the 1.9 update row that overlapped. I’m checking text extraction and file state now.
+
+• Explored
+  └ Search steering_model_report.md in docs
+    List steering_model_report.pdf
+    Search 96\.753|5\.845|photo_20260502_19|Right hard turns|1\.9 in huggingface_sidewalkpilot_v1.0_README.md
+
+
+› color code pdf and in readme in 1.0 description show only 1.0 values oin tables, 1.0b show 1.0 and 1.0b, 1.1 show 1.0, 1.0b 1.1b so on so forth
+
+
+• Ran pdftotext docs/steering_model_report.pdf - | rg -n "smoother_19|smoothness_19|Hard-right|curb hugging|photo_20260502_19|96\.753|5\.845"
+  └ 26:1.9 is the new offline leader on the expanded 1,287-image evaluation set. It is the first checkpoint trained with the photo_20260502_19 hard-right /
+    54:Hard-right turns, curb hugging, smooth drive from photo_20260502_19
+    … +4 lines (ctrl + t to view transcript)
+    1482:1.9 final = SidewalkPilot-v1.9.pth, score 96.753%, MAE 5.845.
+    1488:Next field-test order: 1.9 final first, then 1.9 best only if final has a behavior issue. Watch hard-right turns, curb hugging, and smoothness because
+
+─ Worked for 1m 56s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I’ll split the responsibilities correctly: the PDF stays the full all-model comparison and gets stronger color coding; the v1.0 README tables go back to only 1.0 rows using the current 1,287-image eval values. Later README/model-card pages can append
+  rows progressively.
+
+• Added docs/huggingface_sidewalkpilot_v1.0_README.md (+175 -0)
+      1 +---
+      2 +license: apache-2.0
+      3 +language:
+      4 +- en
+      5 +library_name: pytorch
+      6 +tags:
+      7 +- rc_car
+      8 +- robotics
+      9 +- autonomous-driving
+     10 +- sidewalk-navigation
+     11 +- computer-vision
+     12 +- steering
+     13 +- pytorch
+     14 +- raspberry-pi
+     15 +---
+     16 +
+     17 +# SidewalkPilot-v1.0
+     18 +
+     19 +SidewalkPilot-v1.0 is a PyTorch steering model for a small autonomous RC car. It takes a full camera frame as input and predicts a steering servo angle from `0` to `180` degrees.
+     20 +
+     21 +The model is used for camera-based sidewalk/path following. In the full RC car stack, LiDAR runs above the model as a safety layer for obstacle avoidance, LiDAR override steering, and hard braking.
+     22 +
+     23 +## Model Details
+     24 +
+     25 +- **Developed by:** Ram Shreyas Naik Sabavat
+     26 +- **Model type:** CNN steering regression model
+     27 +- **Library:** PyTorch
+     28 +- **License:** Apache 2.0
+     29 +- **Checkpoint:** `SidewalkPilot-v1.0.pth`
+     30 +- **Input:** Full camera frame, resized/normalized before inference
+     31 +- **Evaluation input format:** `200x66`, OpenCV BGR
+     32 +- **Output:** Steering servo angle from `0` to `180`
+     33 +
+     34 +## Output Meaning
+     35 +
+     36 +| Output | Meaning |
+     37 +|---:|---|
+     38 +| `0` | full left |
+     39 +| `90` | straight |
+     40 +| `180` | full right |
+     41 +
+     42 +## Evaluation Report
+     43 +
+     44 +Full styled report:
+     45 +
+     46 +[steering_model_report.pdf](steering_model_report.pdf)
+     47 +
+     48 +The PDF contains the full all-model comparison. This README is the `1.0` model description, so its tables show only `1.0`. Later descriptions should grow progressively: `1.0b` shows `1.0` + `1.0b`, `1.1` shows prior rows plus `1.1`, and so on.
+     49 +
+     50 +## Evaluation Setup
+     51 +
+     52 +- **Eval set:** `1,287` images
+     53 +- **Failed samples:** `0`
+     54 +- **Corrections included:** `564`
+     55 +- **Input format:** `200x66`, OpenCV BGR
+     56 +- **Output scale:** servo angle `0..180`
+     57 +- **Error unit:** servo degrees
+     58 +- **Score formula:** `max(0, 100 * (1 - absolute_error / 180))`
+     59 +
+     60 +## Version Update Categories
+     61 +
+     62 +| Version | Main update category | Data/status | Result |
+     63 +|---|---|---|---|
+     64 +| `1.0` | Baseline steering | initial mixed sidewalk/CARLA set | complete |
+     65 +
+     66 +## Evaluation Summary
+     67 +
+     68 +| Model | Checkpoint | Full Score | MAE | Median AE | Max AE | Signed Error | Within 2° | Within 5° | Within 10° | Within 20° |
+     69 +|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+     70 +| `1.0` | `SidewalkPilot-v1.0.pth` | `88.339%` | `20.990` | `9.934` | `151.830` | `-7.262` | `202 / 1287` | `423 / 1287` | `648 / 1287` | `869 / 1287` |
+     71 +
+     72 +Negative signed error means the model is left-biased on average.
+     73 +
+     74 +## Prediction Distribution
+     75 +
+     76 +| Model | Pred Min | Pred Max | Pred Mean | Pred Median | Pred P05 | Pred P25 | Pred P75 | Pred P95 |
+     77 +|---|---:|---:|---:|---:|---:|---:|---:|---:|
+     78 +| `1.0` | `8.459` | `174.146` | `89.579` | `89.676` | `37.520` | `68.904` | `108.229` | `145.649` |
+     79 +
+     80 +## Ranking
+     81 +
+     82 +| Full Report Rank | Model | Checkpoint | Score | MAE | Median AE | Max AE | Within 5° | Within 10° | Signed Error |
+     83 +|---:|---|---|---:|---:|---:|---:|---:|---:|---:|
+     84 +| `19` | `1.0` | `SidewalkPilot-v1.0.pth` | `88.339%` | `20.990` | `9.934` | `151.830` | `423 / 1287` | `648 / 1287` | `-7.262` |
+     85 +
+     86 +## Field Case Comparison
+     87 +
+     88 +| Model | D26 curves/shadows MAE | D27 curved curb MAE | D28 driveway MAE | D29 driveway/shadow MAE | 20260502_12 shadow MAE | 20260502_19 hard/curb/smooth MAE |
+     89 +|---|---:|---:|---:|---:|---:|---:|
+     90 +| `1.0` | `44.12` | `53.69` | `56.18` | `37.44` | `29.57` | `29.57` |
+     91 +
+     92 +## Intended Use
+     93 +
+     94 +This model is intended for:
+     95 +
+     96 +- RC car autonomy experiments
+     97 +- Sidewalk/path steering research
+     98 +- Raspberry Pi robotics projects
+     99 +- Small-scale computer vision control systems
+    100 +- Testing steering regression from camera images
+    101 +
+    102 +## Out-of-Scope Use
+    103 +
+    104 +This model is not intended for:
+    105 +
+    106 +- Real cars
+    107 +- Public road vehicles
+    108 +- Human transportation
+    109 +- Safety-critical systems
+    110 +- Fully autonomous deployment without external safety layers
+    111 +
+    112 +## System Context
+    113 +
+    114 +The full RC car autonomy stack uses layered control:
+    115 +
+    116 +```text
+    117 +camera frame
+    118 +-> resize/normalize image
+    119 +-> PyTorch steering model
+    120 +-> predicted servo angle (0-180)
+    121 +-> runtime decision logic
+    122 +-> LiDAR safety override if needed
+    123 +-> final steering/throttle/brake command
+    124 +-> servo + motor controller
+    125 +```
+    126 +
+    127 +LiDAR runs as a higher-priority safety layer:
+    128 +
+    129 +```text
+    130 +LiDAR clear
+    131 +-> use model steering
+    132 +
+    133 +LiDAR obstacle
+    134 +-> LiDAR override mode
+    135 +
+    136 +LiDAR blocked/too close
+    137 +-> hard brake
+    138 +```
+    139 +
+    140 +The model handles normal path following, while LiDAR handles obstacle avoidance and emergency behavior.
+    141 +
+    142 +## Training Data
+    143 +
+    144 +The model was trained on camera images collected from the RC car driving in sidewalk-like environments. Labels represent steering servo angles from `0` to `180` degrees.
+    145 +
+    146 +Detailed dataset composition should live in the dataset README, not this model card.
+    147 +
+    148 +## Preprocessing
+    149 +
+    150 +During inference/evaluation, the pipeline:
+    151 +
+    152 +1. Captures the full camera frame.
+    153 +2. Resizes the image to `200x66`.
+    154 +3. Uses OpenCV BGR image ordering.
+    155 +4. Normalizes pixel values with `(x / 255 - 0.5) / 0.5`.
+    156 +5. Runs the PyTorch model.
+    157 +6. Clamps the output to `0..180`.
+    158 +
+    159 +The model sees the whole frame, not a cropped region.
+    160 +
+    161 +## Limitations
+    162 +
+    163 +SidewalkPilot-v1.0 is a baseline checkpoint. It can fail when lighting, sidewalk shape, camera angle, shadows, driveway cuts, curved curbs, hard turns, or curb-hugging cases differ from the training data.
+    164 +
+    165 +The model does not understand obstacles by itself and should not be trusted as the only safety system.
+    166 +
+    167 +Use with external safety logic, manual override, and obstacle detection.
+    168 +
+    169 +## Safety Recommendation
+    170 +
+    171 +Do not use this model alone to control a robot. In the original project, LiDAR has priority over the model and can override steering or trigger hard braking.
+    172 +
+    173 +## Model Card Contact
+    174 +
+    175 +Ram Shreyas Naik Sabavat
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The README is now back to a true 1.0 model-card page: every table has only the 1.0 row, using the current 1,287-image eval values. I’m regenerating the PDF with color-coded tables now.
+
+• Ran PYTHONPATH=/tmp/eval313:/tmp/codex_pdf /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +161 lines
+  └ /Users/ramsabavat/Desktop/rc_car_code/docs/steering_model_report.pdf
+
+─ Worked for 1m 39s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The PDF is now color-coded by model generation and ranking strength: 1.9/top rows green, older weak baselines red/orange, targeted fix phases blue/purple, and ground-count rows gold. I’m doing final consistency checks.
+
+• Ran pdftotext docs/steering_model_report.pdf - | rg -n "smoother_19|smoothness_19|Hard-right|photo_20260502_19|96\.753|5\.845"
+  └ 26:1.9 is the new offline leader on the expanded 1,287-image evaluation set. It is the first checkpoint trained with the photo_20260502_19 hard-right /
+    54:Hard-right turns, curb hugging, smooth drive from photo_20260502_19
+    … +3 lines (ctrl + t to view transcript)
+    509:96.753%
+    1478:1.9 final = SidewalkPilot-v1.9.pth, score 96.753%, MAE 5.845.
+
+• Explored
+  └ Search steering_model_report.md in docs
+
+• Ran rg -n "\| `1\.[1-9]|1\.0b|1\.9|96\.753|5\.845|SidewalkPilot_1\.0\.pth" docs/huggingface_sidewalkpilot_v1.0_README.md
+  └ zsh:1: unmatched "
+
+• Explored
+  └ List steering_model_report.pdf
+    Search 1\.0b|1\.1|1\.2|1\.3|1\.4|1\.5|1\.6|1\.7|1\.8|1\.9|96\.753|5\.845 in huggingface_sidewalkpilot_v1.0_README.md
+    Search 88\.339|20\.990|SidewalkPilot_1\.0\.pth|423 / 1287|44\.12 in huggingface_sidewalkpilot_v1.0_README.md
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Fixed.
+
+  - docs/steering_model_report.pdf is rebuilt with color-coded tables.
+  - The overlapping smoother_19 / photo... PDF row is fixed.
+  - docs/huggingface_sidewalkpilot_v1.0_README.md now shows only 1.0 rows in the tables.
+  - No steering_model_report.md or .html leftovers.
+
+  The README still has one explanatory sentence saying future pages should grow progressively: 1.0b, 1.1, etc. The actual tables only contain 1.0 values.
+
+
+› do it for all now SidewalkPilot-v1.#(b) and add more details on what the model is fixing and what issues arose (so also redo 1.0 i edited some stuff so keep those edits)
+
+
+• I’ll generate progressive Hugging Face README/model-card drafts for every SidewalkPilot-v1.# and v1.#b version, while preserving your current v1.0 edits. First I’m reading the current README and available model/eval data so the generated pages use the
+  exact same measured values.I’ll generate version-specific Hugging Face README drafts for every SidewalkPilot v1.x / v1.xb checkpoint using the current eval data, while preserving your current 1.0 README text and only expanding its model-history/detail
+  sections. First I’m checking the existing docs and available model/eval files.
+
+• Explored
+  └ List docs
+    Search *huggingface*README*.md in docs
+    Search SidewalkPilot*.pth in ai_models
+    Read huggingface_sidewalkpilot_v1.0_README.md
+
+• Ran python3 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +7 lines
+  └ exists True
+    processed 1287 corrections 564 results 20
+    ['1.9', '1.9b', '1.8', '1.8b', '1.7b', '1.7', '1.6', '1.6b']
+
+─ Worked for 1m 10s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I found only the current v1.0 README. I’m going to generate a full set of versioned README drafts under docs/, one per checkpoint, using the current comparison JSON and preserving the edited wording/style from your v1.0 file.
+
+• Ran PYTHONPATH=/tmp/eval313 /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +4 lines
+  └ 1.0 final SidewalkPilot-v1.0.pth 88.33861541748047 20.990488052368164 29.56526756286621
+    1.0 best SidewalkPilot-v1.0b.pth 88.291748046875 21.074844360351562 29.757631301879883
+    … +16 lines (ctrl + t to view transcript)
+    1.9 final SidewalkPilot-v1.9.pth 96.7525405883789 5.84542989730835 2.3180932998657227
+    1.9 best SidewalkPilot-v1.9b.pth 96.74940490722656 5.851066589355469 2.308811664581299
+
+• Working (1m 23s • esc to interrupt)
+
+
+› Explain this codebase
+
+  gpt-5.5 high · ~/Desktop/rc_car_code
+
+
+
+
+
+
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I’m going to build the README drafts from the current 1.0 wording: each version page will include only the progressive rows up to that version, plus a version-specific “Fixes / issues” section. For example, 1.0b includes 1.0 + 1.0b; 1.1
+  includes 1.0 + 1.0b + 1.1; continuing through 1.9b.
+
+• Ran PYTHONPATH=/tmp/eval313 /opt/homebrew/bin/python3.13 - <<'PY'
+  │ import json
+  │ from pathlib import Path
+  │ … +391 lines
+  └ written 20
+    huggingface_sidewalkpilot_v1.0_README.md
+    … +17 lines (ctrl + t to view transcript)
+    huggingface_sidewalkpilot_v1.9_README.md
+    huggingface_sidewalkpilot_v1.9b_README.md
+
+─ Worked for 1m 46s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The 20 README drafts are generated. I’m checking the progressive-row rule now: 1.0 should have 1 table row, 1.0b should have 2, and 1.9b should have all 20 checkpoint rows.
+
+• Explored
+  └ Read huggingface_sidewalkpilot_v1.0_README.md, huggingface_sidewalkpilot_v1.9b_README.md
+
+• Ran python3 - <<'PY'
+  │ from pathlib import Path
+  │ files=sorted(Path('docs').glob('huggingface_sidewalkpilot_v1.*_README.md'))
+  │ … +7 lines
+  └ huggingface_sidewalkpilot_v1.0_README.md 1 `1.0`
+    huggingface_sidewalkpilot_v1.0b_README.md 2 `1.0b`
+    … +16 lines (ctrl + t to view transcript)
+    huggingface_sidewalkpilot_v1.9_README.md 19 `1.9`
+    huggingface_sidewalkpilot_v1.9b_README.md 20 `1.9b`
+
+• Explored
+  └ Search steering_model_report.md in docs
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Created/updated all Hugging Face README drafts:
+
+  - docs/huggingface_sidewalkpilot_v1.0_README.md
+  - docs/huggingface_sidewalkpilot_v1.0b_README.md
+  - docs/huggingface_sidewalkpilot_v1.1_README.md
+  - docs/huggingface_sidewalkpilot_v1.1b_README.md
+  - continuing through docs/huggingface_sidewalkpilot_v1.9b_README.md
+
+  Each README now follows the progressive rule:
+
+  - 1.0 shows only 1.0
+  - 1.0b shows 1.0, 1.0b
+  - 1.1 shows 1.0, 1.0b, 1.1
+  - continues up to 1.9b with all rows
+
+  Also added per-version sections:
+
+  - What This Version Fixes
+  - Issues Observed / Remaining
+  - Current Version Snapshot
+
+  I kept the edited 1.0 structure/style, including Evaluation Report Of All Models, and expanded it with the new detail sections. No steering_model_report.md or .html leftovers.
+
+
+› remove ## Progressive Table Rule
+  and ## Evaluation Report Of All Models
+  sections
+
+
+⚠ Heads up, you have less than 5% of your weekly limit left. Run /status for a breakdown.
+
+• I’ll remove those two sections from every generated SidewalkPilot README without touching the PDF or code.
+
+• Ran python3 - <<'PY'
+  │ from pathlib import Path
+  │ files=sorted(Path('docs').glob('huggingface_sidewalkpilot_v1.*_README.md'))
+  │ … +15 lines
+  └ updated 20
+    docs/huggingface_sidewalkpilot_v1.0_README.md
+    … +17 lines (ctrl + t to view transcript)
+    docs/huggingface_sidewalkpilot_v1.9_README.md
+    docs/huggingface_sidewalkpilot_v1.9b_README.md
+
+• Explored
+  └ Read huggingface_sidewalkpilot_v1.0_README.md, huggingface_sidewalkpilot_v1.9b_README.md
+    Search Progressive Table Rule|Evaluation Report Of All Models in huggingface_sidewalkpilot_v1.*_README.md
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Removed both sections from all 20 README files:
+
+  - ## Progressive Table Rule
+  - ## Evaluation Report Of All Models
+
+  Verified no matches remain in docs/huggingface_sidewalkpilot_v1.*_README.md.
+
+
+› 🏠 Home & Overviewindex.md: The 30-second elevator pitch and Hero Video of the car in action.  layered-autonomy.md: High-level diagram showing how A*, GPS, NN, and LiDAR interact.  the-journey.md: Your timeline from a middle school
+  obsession to a full-stack robotics project.  🏎️ Hardware & Electronicshardware-overview.md: The $1,300 Bill of Materials (BOM) and chassis modifications.  compute-and-control.md: Raspberry Pi setup, PCA9685, and motor driver
+  configuration.  sensor-lidar.md: Technical details on serial packet parsing and obstacle region grouping.  sensor-gps.md: BN-880 NMEA parsing, GGA messages, and outdoor tracking.  dashboard.md: Real-time Hub75 telemetry display for
+  field debugging.  🤖 Neural Network (SidewalkPilot)model-architecture.md: CNN layers, Batch Norm, ELU activations, and the Tanh output scaling.  preprocessing.md: Normalization (0-1), resizing to 1280x720, and tensor transposition.
+  the-dataset.md: Dataset card for the 1,287 manually labeled images.  evaluation-metrics.md: Explaining MAE (Mean Absolute Error), Signed Error, and Max Error.  📚 The Model Zoo (14+ Iterations)model-history-overview.md: Why iteration
+  is the core of your engineering loop.  era-1-baseline.md: v1.0 through v1.2b – Establishing basic steering.  era-2-refinement.md: v1.3 through v1.6b – Handling curves, driveway cuts, and sloped shadows.  era-3-field-ready.md: v1.7b
+  (The Rollback Model) and v1.9 (Best current for hard turns and curb hugging).  🗺️ Navigation & Safety (The Runtime)a-star-planning.md: The sidewalk graph, haversine heuristics, and turn penalties.  route-following.md: The logic for
+  combining A* route intent with local visual steering.  safety-arbitration.md: The priority logic—why LiDAR always overrides the Neural Network.  the-runtime-loop.md: Step-by-step breakdown of runtime.py from sense to act.  🧪 Field
+  Testing & Failurestesting-strategy.md: Your 10-layer "Bottom-Up" testing philosophy.  the-failure-gallery.md: Deep dives into specific failures like "shadow edges" and "driveway confusion".  field-logs.md: Chronological logs including
+  manual takeover counts and weather conditions.  🎓 Engineering Philosophysafety-and-limits.md: Honest limitations—why this is a research platform, not a commercial product.  ai-disclosure.md: Your "Technical Assistant" philosophy on
+  using AI for code and docs.  system-integrity.md: How you ensure the camera frames aren't stale and confidence stays high.  🚀 Future Roadmapreproducibility.md: Dependency files and setup for making the project open-source.  next-
+  steps.md: Plans for IMU fusion, wheel odometry, and high-school research goals.   mnake it like this (without the emojis tho and dont write anything yet! just make the trre
+
+
+■ You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at May 4th, 2026 11:17 PM.
+
+/status
+
+╭────────────────────────────────────────────────────────────────────────────────╮
+│  >_ OpenAI Codex (v0.124.0)                                                    │
+│                                                                                │
+│ Visit https://chatgpt.com/codex/settings/usage for up-to-date                  │
+│ information on rate limits and credits                                         │
+│                                                                                │
+│  Model:                gpt-5.5 (reasoning high, summaries auto)                │
+│  Directory:            ~/Desktop/rc_car_code                                   │
+│  Permissions:          Custom (workspace-write, on-request)                    │
+│  Agents.md:            <none>                                                  │
+│  Account:              vasanth.sabavat@gmail.com (Plus)                        │
+│  Collaboration mode:   Default                                                 │
+│  Session:              019db8b5-619c-74a1-b161-8e787ab0f6cc                    │
+│                                                                                │
+│  Context window:       31% left (182K used / 258K)                             │
+│  5h limit:             [██████████░░░░░░░░░░] 48% left (resets 04:05 on 3 May) │
+│  Weekly limit:         [█░░░░░░░░░░░░░░░░░░░] 3% left (resets 23:17 on 4 May)  │
+│  premium limit:                                                                │
+│  Warning:              limits may be stale - run /status again shortly.        │
+╰────────────────────────────────────────────────────────────────────────────────╯
+
+
+› 🏠 Home & Overviewindex.md: The 30-second elevator pitch and Hero Video of the car in action.  layered-autonomy.md: High-level diagram showing how A*, GPS, NN, and LiDAR interact.  the-journey.md: Your timeline from a middle school
+  obsession to a full-stack robotics project.  🏎️ Hardware & Electronicshardware-overview.md: The $1,300 Bill of Materials (BOM) and chassis modifications.  compute-and-control.md: Raspberry Pi setup, PCA9685, and motor driver
+  configuration.  sensor-lidar.md: Technical details on serial packet parsing and obstacle region grouping.  sensor-gps.md: BN-880 NMEA parsing, GGA messages, and outdoor tracking.  dashboard.md: Real-time Hub75 telemetry display for
+  field debugging.  🤖 Neural Network (SidewalkPilot)model-architecture.md: CNN layers, Batch Norm, ELU activations, and the Tanh output scaling.  preprocessing.md: Normalization (0-1), resizing to 1280x720, and tensor transposition.
+  the-dataset.md: Dataset card for the 1,287 manually labeled images.  evaluation-metrics.md: Explaining MAE (Mean Absolute Error), Signed Error, and Max Error.  📚 The Model Zoo (14+ Iterations)model-history-overview.md: Why iteration
+  is the core of your engineering loop.  era-1-baseline.md: v1.0 through v1.2b – Establishing basic steering.  era-2-refinement.md: v1.3 through v1.6b – Handling curves, driveway cuts, and sloped shadows.  era-3-field-ready.md: v1.7b
+  (The Rollback Model) and v1.9 (Best current for hard turns and curb hugging).  🗺️ Navigation & Safety (The Runtime)a-star-planning.md: The sidewalk graph, haversine heuristics, and turn penalties.  route-following.md: The logic for
+  combining A* route intent with local visual steering.  safety-arbitration.md: The priority logic—why LiDAR always overrides the Neural Network.  the-runtime-loop.md: Step-by-step breakdown of runtime.py from sense to act.  🧪 Field
+  Testing & Failurestesting-strategy.md: Your 10-layer "Bottom-Up" testing philosophy.  the-failure-gallery.md: Deep dives into specific failures like "shadow edges" and "driveway confusion".  field-logs.md: Chronological logs including
+  manual takeover counts and weather conditions.  🎓 Engineering Philosophysafety-and-limits.md: Honest limitations—why this is a research platform, not a commercial product.  ai-disclosure.md: Your "Technical Assistant" philosophy on
+  using AI for code and docs.  system-integrity.md: How you ensure the camera frames aren't stale and confidence stays high.  🚀 Future Roadmapreproducibility.md: Dependency files and setup for making the project open-source.  next-
+  steps.md: Plans for IMU fusion, wheel odometry, and high-school research goals.
+
+
+■ You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at May 4th, 2026 11:17 PM.
+
+
+› Explain this codebase
+
+  gpt-5.5 high · ~/Desktop/rc_car_code
