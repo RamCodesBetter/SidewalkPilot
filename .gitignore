@@ -16,6 +16,3 @@ __pycache__/
 # IDEs
 .vscode/
 .idea/
-
-# git internal / accidental nested repos
-*.git
