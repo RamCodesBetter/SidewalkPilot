@@ -370,8 +370,6 @@ nav:
     - Public Roads: safety-and-ethics/public-roads.md
   - Roadmap:
     - Next Steps: roadmap/next-steps.md
-    - D0328 Relabel: roadmap/d0328-relabel.md
-    - D0329 Relabel: roadmap/d0329-relabel.md
     - Retraining: roadmap/retraining.md
     - Sensor Fusion: roadmap/sensor-fusion.md
     - Reproducibility: roadmap/reproducibility.md
