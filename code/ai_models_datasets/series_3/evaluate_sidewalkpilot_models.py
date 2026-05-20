@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[1]
+REPO_ROOT = SCRIPT_DIR.parents[2]
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
 CORRECTIONS_PATH = SCRIPT_DIR / "steering_corrections.json"
 DOCS_DIR = REPO_ROOT / "docs"
@@ -185,7 +185,7 @@ def resolve_image_path(corrections_path, item):
     candidates = [
         corrections_path.parent / path,
         REPO_ROOT / path,
-        REPO_ROOT / "code" / "ai_models_dataset" / path,
+        REPO_ROOT / "code" / "ai_models_datasets" / "series_3" / path,
     ]
     for candidate in candidates:
         if candidate.is_file():
