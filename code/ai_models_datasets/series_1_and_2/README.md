@@ -59,7 +59,7 @@ Example entry:
   "image": "sidewalkpilot_dataset/photo_20260425_145756.jpg",
   "steering": 110.0,
   "repeat": 50,
-  "source": "manual_20260425_street_test"
+  "source": "D0425_street_test"
 }
 ```
 
@@ -89,19 +89,19 @@ The steering label is a servo angle in degrees.
 
 | Source | Count | Purpose |
 |---|---:|---|
-| `D0328_first_dataset_relabel` | 315 | First Dataset relabel, March 28 |
-| `D0329_first_dataset_relabel` | 413 | First Dataset relabel, March 29 |
-| `D0510_v2_3_field_run_1` | 167 | SidewalkPilot v2.3 field-run capture, run 1 |
-| `D0510_v2_3_field_run_2` | 8 | SidewalkPilot v2.3 field-run capture, run 2 |
-| `D0510_v2_3_field_run_3` | 585 | SidewalkPilot v2.3 field-run capture, run 3 |
-| `manual_20260425_street_test` | 65 | Street test images |
-| `manual_20260426_curves_shadows` | 53 | Curves and shadow cases |
-| `manual_20260427_curved_curb` | 72 | Curved curb behavior |
-| `manual_20260429_driveway_shadow_fix` | 53 | Driveway and shadow cases |
-| `manual_20260502_shadow_fix` | 154 | Shadow robustness |
-| `manual_20260502_19_hard_turn_curb_smoothness_fix` | 156 | Hard turns, curb hugging, and smoothness |
-| `manual_20260503_harsh_sidewalk` | 159 | Harsh sidewalk surface cases |
-| `manual_20260506_8pm_sidewalk` | 24 | Evening / low-light sidewalk cases |
+| `D0328_first_dataset_relabel` | 315 | First dataset relabel |
+| `D0329_first_dataset_relabel` | 413 | First dataset relabel |
+| `D0510_v2_3_run_1` | 167 | SidewalkPilot v2.3 field-run capture, run 1 |
+| `D0510_v2_3_run_2` | 8 | SidewalkPilot v2.3 field-run capture, run 2 |
+| `D0510_v2_3_run_3` | 585 | SidewalkPilot v2.3 field-run capture, run 3 |
+| `D0425_street_test` | 65 | Street test images |
+| `D0426_curves_shadows` | 53 | Curves and shadow cases |
+| `D0427_curved_curb` | 72 | Curved curb behavior |
+| `D0429_driveway_shadow_fix` | 53 | Driveway and shadow cases |
+| `D0502_shadow_fix` | 154 | Shadow robustness |
+| `D0502_19_hard_turn_curb_smoothness_fix` | 156 | Hard turns, curb hugging, and smoothness |
+| `D0503_harsh_sidewalk` | 159 | Harsh sidewalk surface cases |
+| `D0506_8pm_sidewalk` | 24 | Evening / low-light sidewalk cases |
 
 ## Image Sizes
 
