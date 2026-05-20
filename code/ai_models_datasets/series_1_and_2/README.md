@@ -21,7 +21,7 @@ Project code and documentation are maintained in the GitHub repo:
 | Resource | Link |
 |---|---|
 | GitHub repository | `https://github.com/RamCodesBetter/SidewalkPilot` |
-| Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_m1_2` |
+| Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_v1_and_v2` |
 | Hugging Face model namespace | `https://huggingface.co/ram-shreyas-naik-sabavat` |
 
 ## Dataset Contents
