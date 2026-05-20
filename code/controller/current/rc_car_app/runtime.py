@@ -765,7 +765,17 @@ def cleanup_photo_run_dir() -> None:
     current_photo_run_dir = None
 
 
-def save_photo_run_label(run_dir: Path, photo_name: str, servo_degrees: float) -> None:
+def current_forward_throttle_label(state) -> float:
+    if state is None:
+        return 0.0
+    try:
+        motor_pwm = float(state.get("current_motor_pwm", state.get("throttle", 0.0)))
+    except (TypeError, ValueError):
+        motor_pwm = 0.0
+    return max(0.0, min(1.0, motor_pwm))
+
+
+def save_photo_run_label(run_dir: Path, photo_name: str, servo_degrees: float, throttle: float) -> None:
     label_path = run_dir / f"{run_dir.name}.json"
     try:
         if label_path.exists():
@@ -774,10 +784,13 @@ def save_photo_run_label(run_dir: Path, photo_name: str, servo_degrees: float) -
                 labels = {}
         else:
             labels = {}
-        labels[photo_name] = int(round(clamp_servo_degrees(servo_degrees)))
+        labels[photo_name] = {
+            "steering": int(round(clamp_servo_degrees(servo_degrees))),
+            "throttle": round(max(0.0, min(1.0, float(throttle))), 4),
+        }
         label_path.write_text(json.dumps(labels, indent=2) + "\n")
     except Exception as exc:
-        print(f"Failed to save photo steering label {label_path}: {exc}")
+        print(f"Failed to save photo steering/throttle label {label_path}: {exc}")
 
 
 def take_photo(webcam_vision=None, state=None):
@@ -794,7 +807,7 @@ def take_photo(webcam_vision=None, state=None):
             servo_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
             if state is not None:
                 servo_degrees = float(state.get("steering_servo_deg", servo_degrees))
-            save_photo_run_label(current_photo_run_dir, photo_name, servo_degrees)
+            save_photo_run_label(current_photo_run_dir, photo_name, servo_degrees, current_forward_throttle_label(state))
             photo_status = "SAVE"
             print(f"Photo captured from live Pi camera stream: {message}")
             return True

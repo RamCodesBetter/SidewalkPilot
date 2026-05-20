@@ -1,5 +1,5 @@
 ---
-pretty_name: SidewalkPilot Steering Dataset
+pretty_name: SidewalkPilot Series 1 and 2 Steering Dataset
 size_categories:
 - 1K<n<10K
 tags:
@@ -12,16 +12,16 @@ tags:
 - pytorch
 ---
 
-# SidewalkPilot Steering Dataset
+# SidewalkPilot Series 1 and 2 Steering Dataset
 
-SidewalkPilot is a camera-to-steering dataset for training and evaluating a small autonomous RC car that drives on sidewalks. The dataset pairs real field images with steering servo labels in degrees, so a model can learn to map a camera frame to a steering command.
+SidewalkPilot Series 1 and 2 is the finalized camera-to-steering dataset for the baseline and failure/iteration model series. The dataset pairs real field images with steering servo labels in degrees, so a model can learn to map a camera frame to a steering command.
 
 Project code and documentation are maintained in the GitHub repo:
 
 | Resource | Link |
 |---|---|
 | GitHub repository | `https://github.com/RamCodesBetter/SidewalkPilot` |
-| Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot` |
+| Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_m1_2` |
 | Hugging Face model namespace | `https://huggingface.co/ram-shreyas-naik-sabavat` |
 
 ## Dataset Contents
@@ -160,6 +160,6 @@ The dataset is used to compare SidewalkPilot model checkpoints on the same label
 
 ## Intended Scope
 
-This dataset supports a research and portfolio robotics project. It is meant for steering-model experimentation, field-test analysis, and documenting the iteration process behind SidewalkPilot.
+This dataset supports the closed Series 1.x and 2.x research cycle. Series 1.x was the baseline working series, while Series 2.x pushed the same steering-only architecture to its limits and recorded the failure/iteration data used to design Series 3.x.
 
-The dataset is updated as new field photos are labeled and merged into `steering_corrections.json`.
+This dataset is finalized for the Series 1/2 Hugging Face release. New steering+throttle data should go into the separate Series 3 dataset instead.

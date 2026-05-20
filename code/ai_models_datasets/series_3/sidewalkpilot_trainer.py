@@ -256,7 +256,15 @@ def load_correction_items(correction_paths):
             if isinstance(data.get("samples"), list):
                 data = data["samples"]
             else:
-                data = [{"image": image, "steering": steering} for image, steering in data.items()]
+                normalized = []
+                for image, label in data.items():
+                    if isinstance(label, dict):
+                        item = dict(label)
+                        item.setdefault("image", image)
+                    else:
+                        item = {"image": image, "steering": label}
+                    normalized.append(item)
+                data = normalized
 
         if not isinstance(data, list):
             raise ValueError(f"{path} must be a list, a samples dict, or an image-to-steering dict")

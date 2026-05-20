@@ -1,67 +1,78 @@
 ---
-pretty_name: SidewalkPilot Steering Dataset
+pretty_name: SidewalkPilot Series 3 Steering and Throttle Dataset
 size_categories:
-- 1K<n<10K
+- n<1K
 tags:
 - robotics
 - autonomous-driving
 - rc-car
 - computer-vision
 - steering-regression
+- throttle-regression
 - sidewalk-navigation
 - pytorch
 ---
 
-# SidewalkPilot Steering Dataset
+# SidewalkPilot Series 3 Steering and Throttle Dataset
 
-SidewalkPilot is a camera-to-steering dataset for training and evaluating a small autonomous RC car that drives on sidewalks. The dataset pairs real field images with steering servo labels in degrees, so a model can learn to map a camera frame to a steering command.
+SidewalkPilot Series 3 is the empty seed dataset for the Jetson-only heavy model series. Series 3.x changes the learning target from steering-only control to joint steering and throttle control.
+
+The dataset is intentionally empty until new smooth human-driving captures and controlled CARLA samples are collected. Series 3 should not be seeded with autonomous/model-predicted labels from the old Series 2.x runs.
 
 Project code and documentation are maintained in the GitHub repo:
 
 | Resource | Link |
 |---|---|
 | GitHub repository | `https://github.com/RamCodesBetter/SidewalkPilot` |
-| Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot` |
+| Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_m3` |
 | Hugging Face model namespace | `https://huggingface.co/ram-shreyas-naik-sabavat` |
 
 ## Dataset Contents
 
 | File or folder | What it contains |
 |---|---|
-| `sidewalkpilot_dataset/` | JPG field images used for steering training and evaluation |
-| `steering_corrections.json` | Steering labels, source names, and repeat weights for each labeled image |
-| `sidewalkpilot_trainer.py` | Training script used with the labeled image dataset |
+| `sidewalkpilot_dataset/` | Empty image folder reserved for Series 3 captures |
+| `steering_corrections.json` | Empty list-style correction file for merged Series 3 labels |
+| `sidewalkpilot_trainer.py` | Series 3 training script |
 
 ## Current Size
 
 | Item | Count |
 |---|---:|
-| JPG images | 2,224 |
-| Steering label entries | 2,224 |
-| Label sources | 13 |
+| JPG images | 0 |
+| Steering/throttle label entries | 0 |
+| Label sources | 0 |
 | Steering range | 0 to 180 degrees |
+| Throttle range | 0.00 to 1.00 |
 
 ## Label Format
 
-`steering_corrections.json` is a JSON list. Each entry points to one image and stores the steering target used for training.
+`steering_corrections.json` starts as an empty JSON list:
+
+```json
+[]
+```
+
+During Series 3 data collection, raw photo-run label files are saved separately as dict-style JSON files named like `2026_05_20_run_1.json`. Those files map each captured image to the final steering and throttle commands at that frame.
 
 | Field | Type | Meaning |
 |---|---|---|
-| `image` | string | Relative image path used by the training code |
-| `steering` | number | Servo angle label in degrees |
-| `repeat` | integer | Training repeat/weight value for that sample |
-| `source` | string | Dataset source or field-test group for the image |
+| image filename key | string | Captured image filename |
+| `steering` | number | Final steering servo angle in degrees |
+| `throttle` | number | Final forward motor command |
 
 Example entry:
 
 ```json
 {
-  "image": "sidewalkpilot_dataset/photo_20260425_145756.jpg",
-  "steering": 110.0,
-  "repeat": 50,
-  "source": "manual_20260425_street_test"
+  "photo_20260520_123456.jpg": {
+    "steering": 92,
+    "throttle": 0.37
+  }
 }
 ```
+
+When run data is promoted into `steering_corrections.json`, it may be converted into the trainer's list-style correction format.
 
 ## Steering Label Meaning
 
@@ -73,45 +84,26 @@ The steering label is a servo angle in degrees.
 | 90 | Straight / center |
 | 180 | Hard right |
 
-## Steering Distribution
+## Throttle Label Meaning
 
-| Steering bucket | Count |
-|---|---:|
-| 0-45 hard left | 69 |
-| 45-75 left | 128 |
-| 75-85 soft left | 281 |
-| 85-95 straight | 678 |
-| 95-105 soft right | 547 |
-| 105-135 right | 311 |
-| 135-180 hard right | 199 |
+The throttle label is the final forward motor command used by the car at the frame.
 
-## Source Breakdown
+| Throttle value | Meaning |
+|---:|---|
+| 0.00 | Stop |
+| 1.00 | Full forward |
 
-| Source | Count | Purpose |
-|---|---:|---|
-| `D0328_first_dataset_relabel` | 315 | First Dataset relabel, March 28 |
-| `D0329_first_dataset_relabel` | 413 | First Dataset relabel, March 29 |
-| `D0510_v2_3_field_run_1` | 167 | SidewalkPilot v2.3 field-run capture, run 1 |
-| `D0510_v2_3_field_run_2` | 8 | SidewalkPilot v2.3 field-run capture, run 2 |
-| `D0510_v2_3_field_run_3` | 585 | SidewalkPilot v2.3 field-run capture, run 3 |
-| `manual_20260425_street_test` | 65 | Street test images |
-| `manual_20260426_curves_shadows` | 53 | Curves and shadow cases |
-| `manual_20260427_curved_curb` | 72 | Curved curb behavior |
-| `manual_20260429_driveway_shadow_fix` | 53 | Driveway and shadow cases |
-| `manual_20260502_shadow_fix` | 154 | Shadow robustness |
-| `manual_20260502_19_hard_turn_curb_smoothness_fix` | 156 | Hard turns, curb hugging, and smoothness |
-| `manual_20260503_harsh_sidewalk` | 159 | Harsh sidewalk surface cases |
-| `manual_20260506_8pm_sidewalk` | 24 | Evening / low-light sidewalk cases |
+Reverse is not a Series 3 model output. Braking, stopping, and reverse behavior remain runtime/safety responsibilities.
 
-## Image Sizes
+## Planned Data Sources
 
-| Resolution | Count |
-|---|---:|
-| 1280 x 720 | 1,496 |
-| 1920 x 1080 | 413 |
-| 320 x 240 | 315 |
+| Source | Status | Purpose |
+|---|---|---|
+| Smooth human driving | Planned | Main real-world imitation-learning labels |
+| CARLA 50k with shadows | Planned | Controlled synthetic shadow and route coverage |
+| Data augmentation | Planned | Training-time robustness, not stored as fake raw labels |
 
-The training pipeline resizes images before inference/training, so mixed capture resolutions are expected.
+Old Series 2.x autonomous/model-predicted labels are not valid Series 3 training labels.
 
 ## Basic Loading Example
 
@@ -122,17 +114,24 @@ import json
 dataset_root = Path("sidewalkpilot_dataset")
 labels = json.loads(Path("steering_corrections.json").read_text())
 
-first = labels[0]
-image_name = Path(first["image"]).name
-image_path = dataset_root / image_name
-steering_degrees = float(first["steering"])
+if labels:
+    first = labels[0]
+    image_path = dataset_root / Path(first["image"]).name
+    steering_degrees = float(first["steering"])
+    throttle = float(first["throttle"])
 
-print(image_path, steering_degrees)
+    print(image_path, steering_degrees, throttle)
 ```
 
 ## Training Use
 
-The labels are intended for the SidewalkPilot steering trainer. The current training setup uses the image folder plus `steering_corrections.json` as the correction/label source.
+The labels are intended for the SidewalkPilot Series 3 trainer. The training target is:
+
+```text
+image -> [steering, throttle]
+```
+
+Labels are stored in physical units. The trainer normalizes steering and throttle internally to the `tanh` range before loss calculation.
 
 Typical local training flow:
 
@@ -140,26 +139,25 @@ Typical local training flow:
 python3 sidewalkpilot_trainer.py \
   --roots sidewalkpilot_dataset \
   --corrections steering_corrections.json \
-  --model-version 2.4
+  --model-version 3.0
 ```
 
-Exact training commands may differ depending on whether CARLA data, source weighting, shadow augmentation, or other augmentation settings are being used.
+Exact training commands may differ depending on CARLA data, source weighting, shadow augmentation, ONNX export, TensorRT conversion, and INT8 calibration.
 
 ## Evaluation Use
 
-The dataset is used to compare SidewalkPilot model checkpoints on the same labeled image set. Common metrics include:
+Series 3 evaluation should compare joint steering/throttle prediction quality. Common metrics should include:
 
 | Metric | Meaning |
 |---|---|
-| MAE | Mean absolute steering error in degrees |
-| Median AE | Median absolute steering error in degrees |
-| Max AE | Largest steering error in degrees |
-| Signed Error | Directional bias of model predictions |
-| Within 2 / 5 / 10 / 20 degrees | Count of predictions inside each tolerance band |
-| Subset MAE | MAE grouped by field-test source |
+| Steering MAE | Mean absolute steering error in degrees |
+| Throttle MAE | Mean absolute throttle-command error |
+| Signed steering error | Directional steering bias |
+| Signed throttle error | Over-driving or under-driving bias |
+| Field subset metrics | Metrics grouped by route, lighting, source, or capture mode |
 
 ## Intended Scope
 
-This dataset supports a research and portfolio robotics project. It is meant for steering-model experimentation, field-test analysis, and documenting the iteration process behind SidewalkPilot.
+This dataset supports the Series 3 Jetson-only research direction for SidewalkPilot. It is meant for heavy custom CNN regression models deployed through ONNX/TensorRT with INT8 optimization when calibration data is available.
 
-The dataset is updated as new field photos are labeled and merged into `steering_corrections.json`.
+The dataset should be updated only with synchronized image, steering, and throttle labels from smooth human driving or controlled CARLA collection.
