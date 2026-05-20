@@ -44,7 +44,7 @@ This is the first **Series 2** checkpoint. Series 2 differs from Series 1 becaus
 
 - Field tested around 8pm and failed to drive smoothly enough for deployment.
 - Observed field failures: sidewalk swerving, road entry, and driveway entry.
-- `photo_20260506` 8pm images were collected after this failure and merged as `manual_20260506_8pm_sidewalk`.
+- `photo_20260506` 8pm images were collected after this failure and merged as `D0506_8pm_sidewalk`.
 - The `1,446`-image card metrics did not include those new 8pm corrections.
 
 ## Output Meaning

@@ -44,7 +44,7 @@ This checkpoint belongs to **Series 2**, meaning it expects HSV/CLAHE brightness
 
 - Field tested around 8pm and failed to drive smoothly enough for deployment.
 - Observed field failures: sidewalk swerving, road entry, and driveway entry.
-- `photo_20260506` 8pm images were collected after this field test and merged afterward as `manual_20260506_8pm_sidewalk`.
+- `photo_20260506` 8pm images were collected after this field test and merged afterward as `D0506_8pm_sidewalk`.
 - Best-checkpoint selection did not solve the real 8pm lighting distribution shift.
 
 ## Output Meaning

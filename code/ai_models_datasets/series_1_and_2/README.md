@@ -91,9 +91,6 @@ The steering label is a servo angle in degrees.
 |---|---:|---|
 | `D0328_first_dataset_relabel` | 315 | First dataset relabel |
 | `D0329_first_dataset_relabel` | 413 | First dataset relabel |
-| `D0510_v2_3_run_1` | 167 | SidewalkPilot v2.3 field-run capture, run 1 |
-| `D0510_v2_3_run_2` | 8 | SidewalkPilot v2.3 field-run capture, run 2 |
-| `D0510_v2_3_run_3` | 585 | SidewalkPilot v2.3 field-run capture, run 3 |
 | `D0425_street_test` | 65 | Street test images |
 | `D0426_curves_shadows` | 53 | Curves and shadow cases |
 | `D0427_curved_curb` | 72 | Curved curb behavior |
@@ -102,6 +99,9 @@ The steering label is a servo angle in degrees.
 | `D0502_19_hard_turn_curb_smoothness_fix` | 156 | Hard turns, curb hugging, and smoothness |
 | `D0503_harsh_sidewalk` | 159 | Harsh sidewalk surface cases |
 | `D0506_8pm_sidewalk` | 24 | Evening / low-light sidewalk cases |
+| `D0510_v2_3_run_1` | 167 | SidewalkPilot v2.3 field-run capture, run 1 |
+| `D0510_v2_3_run_2` | 8 | SidewalkPilot v2.3 field-run capture, run 2 |
+| `D0510_v2_3_run_3` | 585 | SidewalkPilot v2.3 field-run capture, run 3 |
 
 ## Image Sizes
 
