@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import argparse
+import importlib.util
 import json
 import math
 import random
+import shutil
+import subprocess
 import time
 from collections import Counter
 from glob import glob
@@ -28,6 +31,33 @@ def clamp_servo(x):
     return float(max(0.0, min(180.0, float(x))))
 
 
+def clamp_throttle(x):
+    return float(max(0.0, min(1.0, float(x))))
+
+
+def servo_to_unit(steer):
+    return clamp((clamp_servo(steer) - 90.0) / 90.0)
+
+
+def unit_to_servo(value):
+    return clamp_servo(90.0 + 90.0 * clamp(value))
+
+
+def throttle_to_unit(throttle):
+    return clamp(clamp_throttle(throttle) * 2.0 - 1.0)
+
+
+def unit_to_throttle(value):
+    return clamp_throttle((clamp(value) + 1.0) * 0.5)
+
+
+def decode_controls(values):
+    values = torch.clamp(values, -1.0, 1.0)
+    steering = 90.0 + 90.0 * values[:, 0:1]
+    throttle = (values[:, 1:2] + 1.0) * 0.5
+    return steering, throttle
+
+
 def label_to_servo(raw_steer, label_mode="auto"):
     raw_steer = float(raw_steer)
     if label_mode == "normalized":
@@ -41,6 +71,25 @@ def label_to_servo(raw_steer, label_mode="auto"):
 
 def get_raw_steering(item, default=None):
     return item.get("steering", item.get("steer", item.get("control_steer", default)))
+
+
+def get_raw_throttle(item, default=None):
+    for key in (
+        "throttle",
+        "ttle",
+        "motor",
+        "motor_pwm",
+        "current_motor_pwm",
+        "control_throttle",
+        "final_throttle",
+    ):
+        if key in item:
+            return item.get(key)
+    return default
+
+
+def label_to_throttle(raw_throttle):
+    return clamp_throttle(float(raw_throttle))
 
 
 def infer_label_mode(items):
@@ -230,6 +279,15 @@ def get_label_container(data):
         for key in ("samples", "labels", "data"):
             if isinstance(data.get(key), list):
                 return data[key]
+        normalized = []
+        for image, label in data.items():
+            if isinstance(label, dict):
+                item = dict(label)
+                item.setdefault("image", image)
+            else:
+                item = {"image": image, "steering": label}
+            normalized.append(item)
+        return normalized
 
     raise ValueError("labels.json must be a list or dict with samples/labels/data")
 
@@ -301,7 +359,7 @@ def resolve_image_path(root, item):
     return None
 
 
-def resize_image_uint8(img, width=160, height=120, crop_top_ratio=0.0):
+def resize_image_uint8(img, width=320, height=180, crop_top_ratio=0.0):
     if crop_top_ratio > 0:
         crop_y = int(img.shape[0] * crop_top_ratio)
         img = img[crop_y:, :]
@@ -316,7 +374,7 @@ def image_to_tensor(img):
     return torch.from_numpy(img).float()
 
 
-def preprocess_image(img, width=160, height=120, crop_top_ratio=0.0):
+def preprocess_image(img, width=320, height=180, crop_top_ratio=0.0):
     return image_to_tensor(resize_image_uint8(img, width, height, crop_top_ratio))
 
 
@@ -831,8 +889,8 @@ class SteeringDataset(Dataset):
         self,
         roots,
         correction_items=None,
-        width=160,
-        height=120,
+        width=320,
+        height=180,
         crop_top_ratio=0.0,
         augment=False,
         flip_aug_probability=0.0,
@@ -856,6 +914,7 @@ class SteeringDataset(Dataset):
         self.stage_name = stage_name
         self.samples = []
         self.targets = []
+        self.throttle_targets = []
         self.sources = []
         correction_items = correction_items or []
         correction_image_paths = set()
@@ -879,11 +938,12 @@ class SteeringDataset(Dataset):
             root_missing = 0
             root_bad = 0
             root_targets = []
+            root_throttles = []
             label_mode = infer_label_mode(items)
 
             print(
                 f"[{self.stage_name}] scanning root={root} labels={len(items)} "
-                f"label_mode={label_mode} output_scale=servo_degrees_0_180 augment={self.augment} "
+                f"label_mode={label_mode} output_scale=unit_controls_steer_throttle augment={self.augment} "
                 f"source={source_name} flip_aug_prob={self.flip_aug_probability:.2f} "
                 f"shadow_aug_prob={self.shadow_aug_probability:.2f} "
                 f"carla_domain_randomize_prob={self.carla_domain_randomize_probability:.2f} "
@@ -903,9 +963,11 @@ class SteeringDataset(Dataset):
                     continue
 
                 raw_steer = get_raw_steering(item, 0.0)
+                raw_throttle = get_raw_throttle(item, None)
                 try:
                     raw_steer = float(raw_steer)
                     steer = label_to_servo(raw_steer, label_mode)
+                    throttle = label_to_throttle(raw_throttle)
                 except (TypeError, ValueError):
                     skipped_bad += 1
                     root_bad += 1
@@ -914,22 +976,27 @@ class SteeringDataset(Dataset):
                 if label_mode == "normalized" or abs(raw_steer - steer) > 1e-8:
                     clipped_labels += 1
 
-                self.samples.append((img_path, steer))
+                self.samples.append((img_path, steer, throttle))
                 self.targets.append(steer)
+                self.throttle_targets.append(throttle)
                 self.sources.append(source_name)
                 root_targets.append(steer)
+                root_throttles.append(throttle)
                 root_used += 1
 
                 if index % self.scan_log_every == 0 or index == len(items):
                     elapsed = time.time() - root_start
                     rate = index / max(elapsed, 1e-6)
                     target_summary = summarize_array(root_targets)
+                    throttle_summary = summarize_array(root_throttles)
                     print(
                         f"[{self.stage_name}] root={root.name} scanned={index}/{len(items)} "
                         f"used={root_used} missing={root_missing} bad={root_bad} "
                         f"rate={rate:.1f}/s elapsed={fmt_time(elapsed)} "
                         f"target_mean={target_summary['mean']:.4f} "
-                        f"target_range=[{target_summary['min']:.4f},{target_summary['max']:.4f}]",
+                        f"target_range=[{target_summary['min']:.4f},{target_summary['max']:.4f}] "
+                        f"throttle_mean={throttle_summary['mean']:.4f} "
+                        f"throttle_range=[{throttle_summary['min']:.4f},{throttle_summary['max']:.4f}]",
                         flush=True,
                     )
 
@@ -959,16 +1026,19 @@ class SteeringDataset(Dataset):
                 continue
 
             raw_steer = get_raw_steering(item, None)
+            raw_throttle = get_raw_throttle(item, None)
             try:
                 steer = label_to_servo(raw_steer, correction_label_mode)
+                throttle = label_to_throttle(raw_throttle)
             except (TypeError, ValueError):
                 correction_bad += 1
                 continue
 
             repeat = max(1, int(item.get("repeat", 6)))
             for _ in range(repeat):
-                self.samples.append((img_path, steer))
+                self.samples.append((img_path, steer, throttle))
                 self.targets.append(steer)
+                self.throttle_targets.append(throttle)
                 self.sources.append("correction")
             correction_used += repeat
 
@@ -983,6 +1053,7 @@ class SteeringDataset(Dataset):
             raise FileNotFoundError("No usable samples found.")
 
         t = np.array(self.targets, dtype=np.float32)
+        th = np.array(self.throttle_targets, dtype=np.float32)
         print(f"[{self.stage_name}] loaded samples: {len(self.samples)}")
         print(f"[{self.stage_name}] skipped missing images: {skipped_missing}")
         print(f"[{self.stage_name}] skipped bad labels: {skipped_bad}")
@@ -991,6 +1062,11 @@ class SteeringDataset(Dataset):
         print(
             f"[{self.stage_name}] target range: min={t.min():.6f} max={t.max():.6f} "
             f"mean={t.mean():.6f} std={t.std():.6f}",
+            flush=True,
+        )
+        print(
+            f"[{self.stage_name}] throttle range: min={th.min():.6f} max={th.max():.6f} "
+            f"mean={th.mean():.6f} std={th.std():.6f}",
             flush=True,
         )
         print(f"[{self.stage_name}] target straight 85..95: {int(((t >= 85.0) & (t <= 95.0)).sum())}")
@@ -1004,7 +1080,7 @@ class SteeringDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        img_path, steer = self.samples[idx]
+        img_path, steer, throttle = self.samples[idx]
         source = self.sources[idx]
         img = cv2.imread(str(img_path), cv2.IMREAD_COLOR)
         if img is None:
@@ -1029,48 +1105,57 @@ class SteeringDataset(Dataset):
             )
 
         img = image_to_tensor(img)
-        steer = torch.tensor([clamp_servo(steer)], dtype=torch.float32)
-        return img, steer
+        target = torch.tensor([servo_to_unit(steer), throttle_to_unit(throttle)], dtype=torch.float32)
+        return img, target
 
 
-class SteeringAutonomyV2(nn.Module):
+class SidewalkPilotV3(nn.Module):
     def __init__(self):
         super().__init__()
 
-        # Steering depends on where features are in the image, so keep a coarse
-        # spatial grid instead of collapsing everything to a single global point.
+        # Series 3 is Jetson-only, so this backbone is intentionally heavier
+        # than the 1.x/2.x Pi-friendly steering-only CNN.
         self.backbone = nn.Sequential(
-            nn.Conv2d(3, 24, 5, stride=2),
-            nn.BatchNorm2d(24),
+            nn.Conv2d(3, 32, 5, stride=2, padding=2),
+            nn.BatchNorm2d(32),
             nn.ELU(inplace=True),
-            nn.Conv2d(24, 36, 5, stride=2),
-            nn.BatchNorm2d(36),
-            nn.ELU(inplace=True),
-            nn.Conv2d(36, 48, 5, stride=2),
+            nn.Conv2d(32, 48, 5, stride=2, padding=2),
             nn.BatchNorm2d(48),
             nn.ELU(inplace=True),
-            nn.Conv2d(48, 64, 3, stride=1),
+            nn.Conv2d(48, 64, 5, stride=2, padding=2),
             nn.BatchNorm2d(64),
             nn.ELU(inplace=True),
-            nn.Conv2d(64, 64, 3, stride=1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(64, 96, 3, stride=2, padding=1),
+            nn.BatchNorm2d(96),
+            nn.ELU(inplace=True),
+            nn.Conv2d(96, 128, 3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ELU(inplace=True),
+            nn.Conv2d(128, 160, 3, stride=1, padding=1),
+            nn.BatchNorm2d(160),
             nn.ELU(inplace=True),
         )
         self.head = nn.Sequential(
-            nn.AdaptiveAvgPool2d((4, 8)),
+            nn.AdaptiveAvgPool2d((6, 10)),
             nn.Flatten(),
-            nn.Linear(64 * 4 * 8, 256),
+            nn.Linear(160 * 6 * 10, 512),
             nn.ELU(inplace=True),
-            nn.Dropout(p=0.10),
+            nn.Dropout(p=0.18),
+            nn.Linear(512, 256),
+            nn.ELU(inplace=True),
+            nn.Dropout(p=0.12),
             nn.Linear(256, 64),
             nn.ELU(inplace=True),
-            nn.Linear(64, 1),
+            nn.Linear(64, 2),
             nn.Tanh(),
         )
 
     def forward(self, x):
         x = self.backbone(x)
-        return 90.0 + 85.0 * self.head(x)
+        return self.head(x)
+
+
+SteeringAutonomyV2 = SidewalkPilotV3
 
 
 SERVO_BUCKETS = [
@@ -1177,13 +1262,24 @@ def build_loader(dataset, batch_size, num_workers, shuffle=False, sampler=None, 
     return DataLoader(dataset, **kwargs)
 
 
-def evaluate(model, loader, loss_fn):
+def control_loss(raw, preds, targets, steering_loss_weight=1.0, throttle_loss_weight=0.5):
+    target_turn = torch.abs(targets[:, 0])
+    steering_weights = (1.0 + 2.0 * target_turn) * float(steering_loss_weight)
+    throttle_weights = torch.full_like(steering_weights, float(throttle_loss_weight))
+    weighted = torch.stack((raw[:, 0] * steering_weights, raw[:, 1] * throttle_weights), dim=1)
+    return weighted.mean()
+
+
+def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_weight=0.5):
     model.eval()
     val_total = 0.0
-    mae_total = 0.0
+    steering_mae_total = 0.0
+    throttle_mae_total = 0.0
     count = 0
-    pred_values = []
-    target_values = []
+    pred_steering_values = []
+    target_steering_values = []
+    pred_throttle_values = []
+    target_throttle_values = []
 
     with torch.no_grad():
         for imgs, targets in loader:
@@ -1191,40 +1287,130 @@ def evaluate(model, loader, loss_fn):
             targets = targets.to(DEVICE, non_blocking=True)
 
             preds = model(imgs)
-            preds = torch.clamp(preds, 0.0, 180.0)
+            preds = torch.clamp(preds, -1.0, 1.0)
 
             raw = loss_fn(preds, targets)
-            target_turn = torch.abs(targets - 90.0) / 90.0
-            weights = 1.0 + 2.0 * target_turn
-            vloss = (raw * weights).mean()
+            vloss = control_loss(raw, preds, targets, steering_loss_weight, throttle_loss_weight)
+            pred_steering, pred_throttle = decode_controls(preds)
+            target_steering, target_throttle = decode_controls(targets)
 
             val_total += vloss.item()
-            mae_total += torch.mean(torch.abs(preds - targets)).item()
+            steering_mae_total += torch.mean(torch.abs(pred_steering - target_steering)).item()
+            throttle_mae_total += torch.mean(torch.abs(pred_throttle - target_throttle)).item()
             count += 1
-            pred_values.append(preds.detach().cpu().numpy().reshape(-1))
-            target_values.append(targets.detach().cpu().numpy().reshape(-1))
+            pred_steering_values.append(pred_steering.detach().cpu().numpy().reshape(-1))
+            target_steering_values.append(target_steering.detach().cpu().numpy().reshape(-1))
+            pred_throttle_values.append(pred_throttle.detach().cpu().numpy().reshape(-1))
+            target_throttle_values.append(target_throttle.detach().cpu().numpy().reshape(-1))
 
-    pred_values = np.concatenate(pred_values) if pred_values else np.array([0.0], dtype=np.float32)
-    target_values = np.concatenate(target_values) if target_values else np.array([0.0], dtype=np.float32)
+    pred_steering_values = np.concatenate(pred_steering_values) if pred_steering_values else np.array([0.0], dtype=np.float32)
+    target_steering_values = np.concatenate(target_steering_values) if target_steering_values else np.array([0.0], dtype=np.float32)
+    pred_throttle_values = np.concatenate(pred_throttle_values) if pred_throttle_values else np.array([0.0], dtype=np.float32)
+    target_throttle_values = np.concatenate(target_throttle_values) if target_throttle_values else np.array([0.0], dtype=np.float32)
 
     return {
         "loss": val_total / max(1, count),
-        "mae": mae_total / max(1, count),
-        "pred_min": float(pred_values.min()),
-        "pred_max": float(pred_values.max()),
-        "pred_mean": float(pred_values.mean()),
-        "pred_straight_85_95": int(((pred_values >= 85.0) & (pred_values <= 95.0)).sum()),
-        "pred_values": pred_values,
-        "target_min": float(target_values.min()),
-        "target_max": float(target_values.max()),
-        "target_mean": float(target_values.mean()),
-        "target_values": target_values,
+        "steering_mae": steering_mae_total / max(1, count),
+        "throttle_mae": throttle_mae_total / max(1, count),
+        "pred_steering_min": float(pred_steering_values.min()),
+        "pred_steering_max": float(pred_steering_values.max()),
+        "pred_steering_mean": float(pred_steering_values.mean()),
+        "pred_straight_85_95": int(((pred_steering_values >= 85.0) & (pred_steering_values <= 95.0)).sum()),
+        "pred_values": pred_steering_values,
+        "target_steering_min": float(target_steering_values.min()),
+        "target_steering_max": float(target_steering_values.max()),
+        "target_steering_mean": float(target_steering_values.mean()),
+        "target_values": target_steering_values,
+        "pred_throttle_min": float(pred_throttle_values.min()),
+        "pred_throttle_max": float(pred_throttle_values.max()),
+        "pred_throttle_mean": float(pred_throttle_values.mean()),
+        "target_throttle_min": float(target_throttle_values.min()),
+        "target_throttle_max": float(target_throttle_values.max()),
+        "target_throttle_mean": float(target_throttle_values.mean()),
     }
+
+
+def load_state_dict_for_model(checkpoint_path, device=DEVICE):
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    state = checkpoint
+    if isinstance(checkpoint, dict):
+        for key in ("model_state_dict", "state_dict", "model"):
+            if key in checkpoint and isinstance(checkpoint[key], dict):
+                state = checkpoint[key]
+                break
+    return {key.removeprefix("module."): value for key, value in state.items()}
+
+
+def export_onnx(checkpoint_path, output_path, width=320, height=180, opset=17):
+    if importlib.util.find_spec("onnx") is None:
+        raise RuntimeError("ONNX export requires the Python package 'onnx' to be installed in this environment.")
+
+    checkpoint_path = Path(checkpoint_path).expanduser()
+    output_path = Path(output_path).expanduser()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    model = SidewalkPilotV3().to(DEVICE)
+    model.load_state_dict(load_state_dict_for_model(checkpoint_path, DEVICE), strict=True)
+    model.eval()
+    dummy = torch.zeros(1, 3, int(height), int(width), dtype=torch.float32, device=DEVICE)
+    torch.onnx.export(
+        model,
+        dummy,
+        str(output_path),
+        export_params=True,
+        opset_version=int(opset),
+        do_constant_folding=True,
+        input_names=["image"],
+        output_names=["control_norm"],
+        dynamic_axes={"image": {0: "batch"}, "control_norm": {0: "batch"}},
+    )
+    print(f"[export] ONNX saved: {output_path}", flush=True)
+    return output_path
+
+
+def build_tensorrt_engine(
+    onnx_path,
+    engine_path,
+    precision="int8",
+    trtexec="trtexec",
+    workspace_mb=2048,
+    calibration_cache=None,
+):
+    trtexec_path = shutil.which(trtexec) or trtexec
+    if shutil.which(trtexec) is None and "/" not in str(trtexec):
+        raise FileNotFoundError("trtexec was not found. Run this on the Jetson with TensorRT installed.")
+
+    precision = str(precision).lower()
+    command = [
+        trtexec_path,
+        f"--onnx={Path(onnx_path).expanduser()}",
+        f"--saveEngine={Path(engine_path).expanduser()}",
+        f"--memPoolSize=workspace:{int(workspace_mb)}",
+    ]
+    if precision in {"fp16", "int8"}:
+        command.append("--fp16")
+    if precision == "int8":
+        command.append("--int8")
+        if calibration_cache:
+            command.append(f"--calib={Path(calibration_cache).expanduser()}")
+        else:
+            print(
+                "[trt] INT8 requested without a calibration cache. This works only if TensorRT can calibrate/build "
+                "from the model or the ONNX already has quantization info.",
+                flush=True,
+            )
+    elif precision != "fp32":
+        raise ValueError("--trt-precision must be fp32, fp16, or int8")
+
+    print("[trt] " + " ".join(str(part) for part in command), flush=True)
+    subprocess.run(command, check=True)
+    print(f"[trt] engine saved: {engine_path}", flush=True)
+    return Path(engine_path)
 
 
 def train(roots, args):
     start_time = time.time()
-    print("[start] train_autonomy_v2.py", flush=True)
+    print("[start] train_sidewalkpilot_v3.py", flush=True)
     print(f"[start] device={DEVICE}", flush=True)
     print(f"[start] roots={[str(r) for r in roots]}", flush=True)
     correction_items = load_correction_items(args.corrections)
@@ -1232,7 +1418,9 @@ def train(roots, args):
         print(f"[start] correction samples={len(correction_items)} files={args.corrections}", flush=True)
     print(
         f"[start] epochs={args.epochs} batch_size={args.batch_size} workers={args.workers} "
-        f"lr={args.lr} weight_decay={args.weight_decay} grad_clip={args.grad_clip}",
+        f"lr={args.lr} weight_decay={args.weight_decay} grad_clip={args.grad_clip} "
+        f"loss_weights steering={args.steering_loss_weight:.2f} throttle={args.throttle_loss_weight:.2f} "
+        f"input={args.width}x{args.height}",
         flush=True,
     )
     print(
@@ -1311,7 +1499,7 @@ def train(roots, args):
         drop_last=False,
     )
 
-    model = SteeringAutonomyV2().to(DEVICE)
+    model = SidewalkPilotV3().to(DEVICE)
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(1, args.epochs))
     loss_fn = nn.SmoothL1Loss(reduction="none")
@@ -1356,22 +1544,23 @@ def train(roots, args):
             targets = targets.to(DEVICE, non_blocking=True)
 
             preds = model(imgs)
-            preds = torch.clamp(preds, 0.0, 180.0)
+            preds = torch.clamp(preds, -1.0, 1.0)
 
             raw = loss_fn(preds, targets)
-            target_turn = torch.abs(targets - 90.0) / 90.0
-            pred_turn = torch.abs(preds - 90.0) / 85.0
-            weights = 1.0 + 2.0 * target_turn
-            regression_loss = (raw * weights).mean()
-            oversteer_penalty = torch.mean(torch.relu(pred_turn - target_turn - 0.18) ** 2)
-            left_drift_penalty = torch.mean(
-                torch.relu(targets - 75.0) * torch.relu(75.0 - preds) / 180.0
+            target_turn = torch.abs(targets[:, 0])
+            pred_turn = torch.abs(preds[:, 0])
+            regression_loss = control_loss(
+                raw,
+                preds,
+                targets,
+                args.steering_loss_weight,
+                args.throttle_loss_weight,
             )
+            oversteer_penalty = torch.mean(torch.relu(pred_turn - target_turn - 0.18) ** 2)
             saturation_penalty = torch.mean(torch.relu(pred_turn - 0.92) ** 2)
             loss = (
                 regression_loss
                 + 4.0 * oversteer_penalty
-                + 2.0 * left_drift_penalty
                 + 15.0 * saturation_penalty
             )
 
@@ -1391,12 +1580,16 @@ def train(roots, args):
                 elapsed = time.time() - start_time
                 steps_per_sec = global_step / max(elapsed, 1e-6)
                 eta = (total_steps - global_step) / max(steps_per_sec, 1e-6)
-                pred_min = float(preds.min().item())
-                pred_max = float(preds.max().item())
-                pred_mean = float(preds.mean().item())
-                target_min = float(targets.min().item())
-                target_max = float(targets.max().item())
-                target_mean = float(targets.mean().item())
+                pred_steering, pred_throttle = decode_controls(preds.detach())
+                target_steering, target_throttle = decode_controls(targets.detach())
+                pred_min = float(pred_steering.min().item())
+                pred_max = float(pred_steering.max().item())
+                pred_mean = float(pred_steering.mean().item())
+                target_min = float(target_steering.min().item())
+                target_max = float(target_steering.max().item())
+                target_mean = float(target_steering.mean().item())
+                pred_throttle_mean = float(pred_throttle.mean().item())
+                target_throttle_mean = float(target_throttle.mean().item())
                 lr = float(optimizer.param_groups[0]["lr"])
 
                 print(
@@ -1405,13 +1598,20 @@ def train(roots, args):
                     f"lr={lr:.7f} grad={grad_norm:.4f} "
                     f"pred_deg=[{pred_min:.2f},{pred_max:.2f}] mean={pred_mean:.2f} "
                     f"target_deg=[{target_min:.2f},{target_max:.2f}] mean={target_mean:.2f} "
+                    f"pred_throttle={pred_throttle_mean:.3f} target_throttle={target_throttle_mean:.3f} "
                     f"speed={img_per_sec:.1f} img/s elapsed={fmt_time(elapsed)} eta={fmt_time(eta)} "
                     f"{gpu_status()}",
                     flush=True,
                 )
 
         scheduler.step()
-        metrics = evaluate(model, val_loader, loss_fn)
+        metrics = evaluate(
+            model,
+            val_loader,
+            loss_fn,
+            args.steering_loss_weight,
+            args.throttle_loss_weight,
+        )
         avg_train = train_total / max(1, len(train_loader))
         epoch_elapsed = time.time() - epoch_start
         total_elapsed = time.time() - start_time
@@ -1420,11 +1620,14 @@ def train(roots, args):
         print(
             f"Epoch {epoch} DONE | "
             f"Train {avg_train:.6f} | Val {metrics['loss']:.6f} | "
-            f"MAE_deg {metrics['mae']:.6f} | "
-            f"PredDegRange [{metrics['pred_min']:.6f}, {metrics['pred_max']:.6f}] | "
-            f"PredDegMean {metrics['pred_mean']:.6f} | "
+            f"SteerMAE_deg {metrics['steering_mae']:.6f} | "
+            f"ThrottleMAE {metrics['throttle_mae']:.6f} | "
+            f"PredDegRange [{metrics['pred_steering_min']:.6f}, {metrics['pred_steering_max']:.6f}] | "
+            f"PredDegMean {metrics['pred_steering_mean']:.6f} | "
+            f"PredThrottleMean {metrics['pred_throttle_mean']:.6f} | "
             f"Pred straight 85..95 {metrics['pred_straight_85_95']} | "
-            f"TargetDegRange [{metrics['target_min']:.6f}, {metrics['target_max']:.6f}] | "
+            f"TargetDegRange [{metrics['target_steering_min']:.6f}, {metrics['target_steering_max']:.6f}] | "
+            f"TargetThrottleMean {metrics['target_throttle_mean']:.6f} | "
             f"EpochTime {fmt_time(epoch_elapsed)} | Total {fmt_time(total_elapsed)}"
         )
 
@@ -1440,6 +1643,33 @@ def train(roots, args):
     torch.save(model.state_dict(), final_path)
     print("Saved:", final_path)
     print("Saved best:", best_path)
+
+    export_checkpoint = best_path if args.export_checkpoint == "best" else final_path
+    onnx_path = None
+    if args.export_onnx or args.build_tensorrt:
+        if args.onnx_output:
+            onnx_path = Path(args.onnx_output).expanduser()
+        else:
+            onnx_path = export_checkpoint.with_suffix(".onnx")
+        export_onnx(export_checkpoint, onnx_path, args.width, args.height, args.onnx_opset)
+
+    if args.build_tensorrt:
+        if onnx_path is None:
+            raise RuntimeError("TensorRT build requested but no ONNX path was produced.")
+        if args.trt_output:
+            engine_path = Path(args.trt_output).expanduser()
+        else:
+            suffix = f"-{args.trt_precision}.engine"
+            engine_path = onnx_path.with_name(onnx_path.stem + suffix)
+        build_tensorrt_engine(
+            onnx_path,
+            engine_path,
+            args.trt_precision,
+            args.trtexec,
+            args.trt_workspace_mb,
+            args.calibration_cache,
+        )
+
     print(f"[done] total_time={fmt_time(time.time() - start_time)} best_val={best_val:.6f}", flush=True)
 
 
@@ -1453,8 +1683,8 @@ def main():
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--val-split", type=float, default=0.10)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--width", type=int, default=200)
-    parser.add_argument("--height", type=int, default=66)
+    parser.add_argument("--width", type=int, default=320)
+    parser.add_argument("--height", type=int, default=180)
     parser.add_argument("--crop-top-ratio", type=float, default=0.0)
     parser.add_argument("--log-every", type=int, default=50)
     parser.add_argument("--bucket-every", type=int, default=5)
@@ -1469,13 +1699,25 @@ def main():
     parser.add_argument("--real-sample-weight", type=float, default=2.0)
     parser.add_argument("--carla-sample-weight", type=float, default=0.6)
     parser.add_argument("--correction-sample-weight", type=float, default=3.0)
+    parser.add_argument("--steering-loss-weight", type=float, default=1.0)
+    parser.add_argument("--throttle-loss-weight", type=float, default=0.5)
     parser.add_argument(
         "--model-version",
         default=None,
-        help="version suffix for SidewalkPilot checkpoint names, e.g. 2.4 -> SidewalkPilot-v2.4.pth and SidewalkPilot-v2.4b.pth",
+        help="version suffix for SidewalkPilot checkpoint names, e.g. 3.0 -> SidewalkPilot-v3.0.pth and SidewalkPilot-v3.0b.pth",
     )
     parser.add_argument("--final-output", default=None, help="explicit final checkpoint path")
     parser.add_argument("--best-output", default=None, help="explicit best checkpoint path")
+    parser.add_argument("--export-onnx", action="store_true", help="export the selected checkpoint to ONNX after training")
+    parser.add_argument("--export-checkpoint", choices=["best", "final"], default="best")
+    parser.add_argument("--onnx-output", default=None, help="explicit ONNX output path")
+    parser.add_argument("--onnx-opset", type=int, default=17)
+    parser.add_argument("--build-tensorrt", action="store_true", help="run trtexec after ONNX export")
+    parser.add_argument("--trt-output", default=None, help="explicit TensorRT engine output path")
+    parser.add_argument("--trt-precision", choices=["fp32", "fp16", "int8"], default="int8")
+    parser.add_argument("--trtexec", default="trtexec")
+    parser.add_argument("--trt-workspace-mb", type=int, default=2048)
+    parser.add_argument("--calibration-cache", default=None, help="optional TensorRT INT8 calibration cache")
     parser.add_argument("--convert-labels-to-servo", action="store_true")
     parser.add_argument("--roots", nargs="*", default=None)
     args = parser.parse_args()

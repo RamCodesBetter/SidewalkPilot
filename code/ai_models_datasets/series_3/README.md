@@ -33,7 +33,7 @@ Project code and documentation are maintained in the GitHub repo:
 |---|---|
 | `sidewalkpilot_dataset/` | Empty image folder reserved for Series 3 captures |
 | `steering_corrections.json` | Empty list-style correction file for merged Series 3 labels |
-| `sidewalkpilot_trainer.py` | Series 3 training script |
+| `sidewalkpilot_trainer.py` | Series 3 training, ONNX export, and TensorRT build script |
 
 ## Current Size
 
@@ -133,16 +133,48 @@ image -> [steering, throttle]
 
 Labels are stored in physical units. The trainer normalizes steering and throttle internally to the `tanh` range before loss calculation.
 
+Series 3 defaults to `320x180` model input size. Throttle is required for every Series 3 training label; samples without throttle are skipped as bad labels.
+
 Typical local training flow:
 
 ```bash
 python3 sidewalkpilot_trainer.py \
   --roots sidewalkpilot_dataset \
   --corrections steering_corrections.json \
-  --model-version 3.0
+  --model-version 3.0 \
+  --export-onnx
+```
+
+Jetson TensorRT INT8 build flow:
+
+```bash
+python3 sidewalkpilot_trainer.py \
+  --roots sidewalkpilot_dataset \
+  --corrections steering_corrections.json \
+  --model-version 3.0 \
+  --export-onnx \
+  --build-tensorrt \
+  --trt-precision int8
+```
+
+The trainer outputs normalized control vectors:
+
+```text
+control_norm[0] = steering tanh output, -1.0 to 1.0
+control_norm[1] = throttle tanh output, -1.0 to 1.0
 ```
 
 Exact training commands may differ depending on CARLA data, source weighting, shadow augmentation, ONNX export, TensorRT conversion, and INT8 calibration.
+
+## Augmentation Preview
+
+Use the test helper to preview Series 3 augmentation variations before training:
+
+```bash
+python3 ../../test_files/preview_series3_augmentations.py \
+  sidewalkpilot_dataset/example.jpg \
+  --output /tmp/series3_augmentations.jpg
+```
 
 ## Evaluation Use
 
