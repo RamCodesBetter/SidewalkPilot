@@ -1,12 +1,15 @@
 #!/usr/bin/python3
 import math
+import os
 import struct
 import threading
 import time
+from glob import glob
 
 import serial
 
-SERIAL_PORT = "/dev/ttyUSB0"
+DEFAULT_LIDAR_SERIAL_PORT = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
+SERIAL_PORT = os.environ.get("RC_CAR_LIDAR_SERIAL_PORT", "auto").strip() or "auto"
 BAUD_RATE = 230400
 PACKET_LENGTH = 47
 MEASUREMENT_POINTS_PER_PACKET = 12
@@ -14,8 +17,35 @@ MAX_LIDAR_RANGE_M = 12.0
 OBSTACLE_STOP_THRESHOLD_M = 0.6
 OBSTACLE_WARN_THRESHOLD_M = 1.2
 RECONNECT_INTERVAL_SEC = 1.5
+RECONNECT_INTERVAL_MAX_SEC = 10.0
+RECONNECT_LOG_INTERVAL_SEC = 15.0
 READ_LOOP_SLEEP_SEC = 0.01
 SCAN_STALE_SEC = 1.0
+
+
+def _candidate_ports():
+    candidates = []
+    candidates.extend(sorted(glob("/dev/serial/by-id/*CP2102*")))
+    candidates.extend(sorted(glob("/dev/serial/by-id/*Silicon_Labs*")))
+    candidates.append(DEFAULT_LIDAR_SERIAL_PORT)
+    candidates.extend(sorted(glob("/dev/ttyUSB*")))
+    candidates.extend(sorted(glob("/dev/ttyACM*")))
+    return candidates
+
+
+def resolve_lidar_serial_port(port):
+    configured = str(port or "").strip()
+    if configured and configured.lower() != "auto":
+        return configured
+
+    seen = set()
+    for candidate in _candidate_ports():
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        if os.path.exists(candidate) and os.access(candidate, os.R_OK | os.W_OK):
+            return candidate
+    return None
 
 
 class LidarPoint:
@@ -44,23 +74,43 @@ class LidarParser:
         self.last_full_scan_points = []
         self.lock = threading.Lock()
         self.last_reconnect_attempt = 0.0
+        self.reconnect_interval = RECONNECT_INTERVAL_SEC
+        self.last_connect_log_time = 0.0
+        self.last_connect_log_message = ""
         self.last_scan_time = 0.0
         self.connected = False
         self.running = False
         self.thread = None
 
+    def log_connect_status(self, message, force=False):
+        now = time.monotonic()
+        if force or message != self.last_connect_log_message or now - self.last_connect_log_time >= RECONNECT_LOG_INTERVAL_SEC:
+            print(message)
+            self.last_connect_log_message = message
+            self.last_connect_log_time = now
+
     def connect(self):
+        port = resolve_lidar_serial_port(self.port)
+        if not port:
+            self.connected = False
+            self.ser = None
+            self.reconnect_interval = min(RECONNECT_INTERVAL_MAX_SEC, self.reconnect_interval * 1.5)
+            self.log_connect_status("LiDAR serial port not ready; waiting for CP2102 /dev/serial/by-id or ttyUSB device.")
+            return False
         try:
             self.disconnect()
-            self.ser = serial.Serial(self.port, self.baudrate, timeout=0)
+            self.ser = serial.Serial(port, self.baudrate, timeout=0)
             self.buffer = b""
             self.connected = True
-            print(f"Connected to LiDAR on {self.port} at {self.baudrate} baud.")
+            self.reconnect_interval = RECONNECT_INTERVAL_SEC
+            self.last_connect_log_message = ""
+            print(f"Connected to LiDAR on {port} at {self.baudrate} baud.")
             return True
         except (OSError, serial.SerialException) as e:
             self.connected = False
             self.ser = None
-            print(f"Error opening serial port {self.port}: {e}")
+            self.reconnect_interval = min(RECONNECT_INTERVAL_MAX_SEC, self.reconnect_interval * 1.5)
+            self.log_connect_status(f"Error opening serial port {port}: {e}")
             return False
 
     def disconnect(self):
@@ -101,10 +151,12 @@ class LidarParser:
         print(f"LiDAR serial error: {error}. Will retry connection.")
         self.disconnect()
         self.buffer = b""
+        self.last_reconnect_attempt = time.monotonic()
+        self.reconnect_interval = max(self.reconnect_interval, RECONNECT_INTERVAL_SEC)
 
     def maybe_reconnect(self) -> None:
         now = time.monotonic()
-        if now - self.last_reconnect_attempt < RECONNECT_INTERVAL_SEC:
+        if now - self.last_reconnect_attempt < self.reconnect_interval:
             return
         self.last_reconnect_attempt = now
         self.connect()
