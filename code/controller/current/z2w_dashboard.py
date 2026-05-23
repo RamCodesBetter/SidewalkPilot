@@ -837,6 +837,7 @@ def main():
     nav_status: Dict[str, object] = {}
     last_packet_time = time.monotonic()
     have_received_payload = False
+    telemetry_stale_reported = False
     active_notifications: List[Dict[str, object]] = []
 
     def prune_expired_notifications(now: float) -> None:
@@ -851,7 +852,7 @@ def main():
         prune_expired_notifications(now)
         return [list(notification.get("cells", [""] * 8))[:8] for notification in active_notifications]
 
-    def render_current_state() -> None:
+    def render_current_state(status_override: str | None = None) -> None:
         notification_rows = update_notification_rows()
         renderer.render(
             {
@@ -874,7 +875,7 @@ def main():
                 "photos_run": photos_run,
                 "photos_all": photos_all,
                 "camera_fps": camera_fps,
-                "system_status": system_status,
+                "system_status": status_override or system_status,
                 "nav_status": nav_status,
             },
             notification_rows,
@@ -882,12 +883,16 @@ def main():
         max7219.render(left_signal_visible, right_signal_visible)
 
     def handle_idle() -> int | None:
+        nonlocal telemetry_stale_reported
         if args.idle_exit_sec > 0.0 and have_received_payload and time.monotonic() - last_packet_time >= args.idle_exit_sec:
-            print(
-                "Dashboard receiver exiting after telemetry idle timeout "
-                f"({args.idle_exit_sec:.1f}s)."
-            )
-            return 0
+            if not telemetry_stale_reported:
+                print(
+                    "Dashboard telemetry idle; keeping last state displayed "
+                    f"({args.idle_exit_sec:.1f}s without packets)."
+                )
+                telemetry_stale_reported = True
+            render_current_state("LINK")
+            return None
         render_current_state()
         return None
 
@@ -916,12 +921,14 @@ def main():
         nonlocal camera_fps
         nonlocal system_status
         nonlocal nav_status
+        nonlocal telemetry_stale_reported
 
         if payload.get("shutdown"):
             print("Dashboard receiver shutdown requested by controller.")
             return 0
 
         have_received_payload = True
+        telemetry_stale_reported = False
         last_packet_time = time.monotonic()
         latest_speed = float(payload.get("speed_mph", latest_speed))
         latest_gear = str(payload.get("gear", latest_gear))[:1]
