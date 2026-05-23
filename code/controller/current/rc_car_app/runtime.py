@@ -100,6 +100,50 @@ current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
 
 
+class AsyncDashboardSender:
+    def __init__(self, sender: Hub75DashboardSender):
+        self.sender = sender
+        self.lock = threading.Lock()
+        self.latest_args = None
+        self.latest_kwargs = None
+        self.last_send_ok = False
+        self.running = True
+        self.thread = threading.Thread(target=self._run, daemon=True)
+        self.thread.start()
+
+    def send(self, *args, **kwargs):
+        with self.lock:
+            self.latest_args = args
+            self.latest_kwargs = dict(kwargs)
+            return self.last_send_ok
+
+    def queue_notification(self, cells: list[str], duration_sec: float = 2.0):
+        with self.lock:
+            self.sender.queue_notification(cells, duration_sec=duration_sec)
+
+    def send_shutdown(self):
+        with self.lock:
+            self.sender.send_shutdown()
+
+    def close(self):
+        self.running = False
+        self.thread.join(timeout=1.0)
+        with self.lock:
+            self.sender.close()
+
+    def _run(self):
+        while self.running:
+            with self.lock:
+                args = self.latest_args
+                kwargs = dict(self.latest_kwargs or {})
+                if args is None:
+                    sent = False
+                else:
+                    sent = self.sender.send(*args, **kwargs)
+                    self.last_send_ok = bool(sent)
+            time.sleep(max(0.01, HUB75_DASHBOARD_SEND_INTERVAL_SEC * 0.25))
+
+
 def print_controls():
     print("Controls:")
     print(f"  Left stick X (axis {STEERING_AXIS}): steering")
@@ -1139,14 +1183,14 @@ def run(model_choice=None):
 
     csv_file, csv_writer = init_csv_logger(CSV_FILENAME, CSV_HEADERS)
     if ENABLE_HUB75_DASHBOARD_TELEMETRY:
-        dashboard_sender = Hub75DashboardSender(
+        dashboard_sender = AsyncDashboardSender(Hub75DashboardSender(
             transport=HUB75_DASHBOARD_TRANSPORT,
             baud_rate=HUB75_DASHBOARD_BAUD_RATE,
             send_interval_sec=HUB75_DASHBOARD_SEND_INTERVAL_SEC,
             serial_port=HUB75_DASHBOARD_SERIAL_PORT,
             udp_host=HUB75_DASHBOARD_HOST,
             udp_port=HUB75_DASHBOARD_UDP_PORT,
-        )
+        ))
         if HUB75_DASHBOARD_TRANSPORT == "udp":
             print(
                 "Hub75 dashboard telemetry transport: UDP "
