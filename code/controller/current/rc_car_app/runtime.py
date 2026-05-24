@@ -209,30 +209,6 @@ def center_steering(state):
     state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
 
 
-def format_lidar_dashboard_points(lidar_scan, max_points: int = 180) -> list[list[float]]:
-    if not lidar_scan:
-        return []
-    valid_points = [
-        point
-        for point in lidar_scan
-        if getattr(point, "is_valid", False)
-        and getattr(point, "distance_mm", 0) > 0
-        and getattr(point, "confidence", 0) >= 150
-    ]
-    if not valid_points:
-        return []
-    stride = max(1, len(valid_points) // max_points)
-    dashboard_points = []
-    for point in valid_points[::stride][:max_points]:
-        dashboard_points.append(
-            [
-                round(float(getattr(point, "angle_deg", 0.0)), 1),
-                round(float(getattr(point, "distance_mm", 0.0)) / 1000.0, 2),
-            ]
-        )
-    return dashboard_points
-
-
 def get_dashboard_drive_mode(state) -> str:
     if state.get("lidar_override_active"):
         return "LDR"
@@ -1488,7 +1464,7 @@ def run(model_choice=None):
                     throttle_percent=state["dashboard_throttle_percent"],
                     brake_percent=state["dashboard_brake_percent"],
                     drive_mode=get_dashboard_drive_mode(state),
-                    lidar_points=format_lidar_dashboard_points(latest_scan),
+                    lidar_points=[],
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,

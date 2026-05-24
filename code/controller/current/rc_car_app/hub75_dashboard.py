@@ -134,7 +134,7 @@ class Hub75DashboardSender:
             "throttle_percent": max(0, min(100, int(throttle_percent))),
             "brake_percent": max(0, min(100, int(brake_percent))),
             "drive_mode": str(drive_mode)[:3],
-            "lidar_points": lidar_points or [],
+            "lidar_points": [],
             "model_choice": str(model_choice)[:4],
             "camera_confidence_percent": max(0, min(100, int(camera_confidence_percent))),
             "cpu_temp_c": round(max(0.0, min(99.0, float(cpu_temp_c))), 1),
