@@ -122,6 +122,8 @@ class AsyncDashboardSender:
             self.sender.queue_notification(cells, duration_sec=duration_sec)
 
     def send_shutdown(self):
+        self.running = False
+        self.thread.join(timeout=1.0)
         with self.lock:
             self.sender.send_shutdown()
 

@@ -158,11 +158,14 @@ class Hub75DashboardSender:
     def send_shutdown(self):
         if not self._ensure_connected():
             return
-        try:
-            self._write_payload({"shutdown": True, "timestamp": time.time()}, time.monotonic())
-        except Exception as exc:
-            print(f"Hub75 dashboard telemetry shutdown write failed: {exc}")
-            self.close()
+        for _ in range(5):
+            try:
+                self._write_payload({"shutdown": True, "timestamp": time.time()}, time.monotonic())
+                time.sleep(0.05)
+            except Exception as exc:
+                print(f"Hub75 dashboard telemetry shutdown write failed: {exc}")
+                self.close()
+                return
 
     def queue_notification(self, cells: List[str], duration_sec: float = 2.0):
         normalized_cells = [str(cell)[:2] for cell in cells[:8]]
