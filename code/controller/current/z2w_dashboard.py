@@ -864,12 +864,11 @@ def main():
         if args.idle_exit_sec > 0.0 and have_received_payload and time.monotonic() - last_packet_time >= args.idle_exit_sec:
             if not telemetry_stale_reported:
                 print(
-                    "Dashboard telemetry idle; waiting for shutdown command "
+                    "Dashboard telemetry idle; exiting "
                     f"({args.idle_exit_sec:.1f}s without packets)."
                 )
                 telemetry_stale_reported = True
-            render_current_state("LINK")
-            return None
+            return 0
         render_current_state()
         return None
 
