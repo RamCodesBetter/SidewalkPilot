@@ -70,6 +70,7 @@ def log_data_to_csv(csv_file, csv_writer, state, metrics, cpu_percent, memory_pe
         int(state["camera_right_edge_found"]),
         f"{state['camera_corridor_width_px']:.2f}",
         int(state["driveway_cut_suspected"]),
+        state.get("dashboard_payload_json", ""),
     ]
     try:
         csv_writer.writerow(row)

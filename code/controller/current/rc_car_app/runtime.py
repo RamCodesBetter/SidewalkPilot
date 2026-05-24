@@ -106,6 +106,7 @@ class AsyncDashboardSender:
         self.lock = threading.Lock()
         self.latest_args = None
         self.latest_kwargs = None
+        self.last_payload_json = ""
         self.last_send_ok = False
         self.running = True
         self.thread = threading.Thread(target=self._run, daemon=True)
@@ -120,6 +121,10 @@ class AsyncDashboardSender:
     def queue_notification(self, cells: list[str], duration_sec: float = 2.0):
         with self.lock:
             self.sender.queue_notification(cells, duration_sec=duration_sec)
+
+    def get_last_payload_json(self) -> str:
+        with self.lock:
+            return self.last_payload_json
 
     def send_shutdown(self):
         self.running = False
@@ -143,6 +148,8 @@ class AsyncDashboardSender:
                 else:
                     sent = self.sender.send(*args, **kwargs)
                     self.last_send_ok = bool(sent)
+                    if sent:
+                        self.last_payload_json = self.sender.last_payload_json
             time.sleep(max(0.01, HUB75_DASHBOARD_SEND_INTERVAL_SEC * 0.25))
 
 
@@ -209,6 +216,28 @@ def joystick_steer_to_servo_degrees(raw_value: float) -> float:
 def center_steering(state):
     state["steer"] = 0.0
     state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+
+
+def format_lidar_dashboard_points(lidar_scan, max_points: int = 180) -> list[list[float]]:
+    if not lidar_scan:
+        return []
+    valid_points = [
+        point
+        for point in lidar_scan
+        if getattr(point, "is_valid", False)
+        and getattr(point, "distance_mm", 0) > 0
+        and getattr(point, "confidence", 0) >= 150
+    ]
+    if not valid_points:
+        return []
+    stride = max(1, len(valid_points) // max_points)
+    return [
+        [
+            round(float(getattr(point, "angle_deg", 0.0)), 1),
+            round(float(getattr(point, "distance_mm", 0.0)) / 1000.0, 2),
+        ]
+        for point in valid_points[::stride][:max_points]
+    ]
 
 
 def get_dashboard_drive_mode(state) -> str:
@@ -1452,6 +1481,9 @@ def run(model_choice=None):
             camera_pixels = []
             if state["dashboard_page"] == 12 and webcam_vision is not None:
                 camera_pixels = webcam_vision.get_dashboard_camera_pixels()
+            lidar_dashboard_points = []
+            if state["dashboard_page"] == 11:
+                lidar_dashboard_points = format_lidar_dashboard_points(latest_scan)
             if dashboard_sender is not None:
                 dashboard_sent = dashboard_sender.send(
                     metrics.smoothed_speed_mph,
@@ -1466,7 +1498,7 @@ def run(model_choice=None):
                     throttle_percent=state["dashboard_throttle_percent"],
                     brake_percent=state["dashboard_brake_percent"],
                     drive_mode=get_dashboard_drive_mode(state),
-                    lidar_points=[],
+                    lidar_points=lidar_dashboard_points,
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
@@ -1483,6 +1515,8 @@ def run(model_choice=None):
                         photo_status = "GOOD"
 
             if current_loop_time - last_log_time >= LOG_INTERVAL_SEC:
+                if dashboard_sender is not None:
+                    state["dashboard_payload_json"] = dashboard_sender.get_last_payload_json()
                 log_data_to_csv(
                     csv_file,
                     csv_writer,
@@ -1500,6 +1534,8 @@ def run(model_choice=None):
         state["event_quit_pressed"] = True
     finally:
         shutdown_flag.set()
+        if dashboard_sender is not None:
+            state["dashboard_payload_json"] = dashboard_sender.get_last_payload_json()
         if state["event_quit_pressed"] and csv_writer:
             log_data_to_csv(
                 csv_file,

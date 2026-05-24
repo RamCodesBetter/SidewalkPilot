@@ -147,6 +147,7 @@ CSV_HEADERS = [
     "Camera Right Edge Found",
     "Camera Corridor Width (px)",
     "Driveway Cut Suspected",
+    "Dashboard JSON Payload",
 ]
 
 GEARS = ["P", "R", "N", "D"]
@@ -228,6 +229,7 @@ def create_state():
         "dpad_y_value": 0,
         "dashboard_throttle_percent": 0,
         "dashboard_brake_percent": 0,
+        "dashboard_payload_json": "",
     }
 
 

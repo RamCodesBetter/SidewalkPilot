@@ -350,10 +350,33 @@ class DashboardRenderer:
     def _draw_page_five(self, payload: Dict[str, object], y_offset_px: int = 0):
         center_x = PANEL_WIDTH // 2
         center_y = (PANEL_HEIGHT // 2) + y_offset_px
+        scale = 2.5
         for row in range(0, PANEL_HEIGHT, 8):
             self._set_pixel(center_x, row + y_offset_px, (0, 35, 35))
         for col in range(0, PANEL_WIDTH, 8):
             self._set_pixel(col, center_y, (0, 35, 35))
+        raw_points = payload.get("lidar_points", [])
+        if isinstance(raw_points, list):
+            for raw_point in raw_points:
+                if not isinstance(raw_point, list) or len(raw_point) < 2:
+                    continue
+                try:
+                    angle_deg = float(raw_point[0])
+                    distance_m = max(0.0, min(6.0, float(raw_point[1])))
+                except (TypeError, ValueError):
+                    continue
+                angle_rad = math.radians(angle_deg)
+                x = int(round(center_x + math.sin(angle_rad) * distance_m * scale))
+                y = int(round(center_y - math.cos(angle_rad) * distance_m * scale))
+                if distance_m < 0.6:
+                    color = LIDAR_POINT_RED
+                elif distance_m < 1.2:
+                    color = LIDAR_POINT_YELLOW
+                elif distance_m < 3.0:
+                    color = LIDAR_POINT_GREEN
+                else:
+                    color = LIDAR_POINT_BLUE
+                self._set_pixel(x, y, color)
         for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
             self._set_pixel(center_x + dx, center_y + dy, LIDAR_CAR)
 
@@ -844,7 +867,7 @@ def main():
                 "throttle_percent": throttle_percent,
                 "brake_percent": brake_percent,
                 "drive_mode": drive_mode,
-                "lidar_points": [],
+                "lidar_points": lidar_points,
                 "model_choice": model_choice,
                 "camera_confidence_percent": camera_confidence_percent,
                 "cpu_temp_c": cpu_temp_c,
@@ -921,7 +944,9 @@ def main():
         model_choice = str(payload.get("model_choice", model_choice))[:4]
         camera_confidence_percent = max(0, min(100, int(payload.get("camera_confidence_percent", camera_confidence_percent))))
         cpu_temp_c = max(0.0, min(99.0, float(payload.get("cpu_temp_c", cpu_temp_c))))
-        lidar_points = []
+        raw_lidar_points = payload.get("lidar_points", lidar_points)
+        if isinstance(raw_lidar_points, list):
+            lidar_points = raw_lidar_points[:180]
         raw_camera_pixels = payload.get("camera_pixels", camera_pixels)
         if isinstance(raw_camera_pixels, list):
             camera_pixels = [str(row)[: PANEL_WIDTH * 4] for row in raw_camera_pixels[:PANEL_HEIGHT]]

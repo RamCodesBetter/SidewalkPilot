@@ -30,6 +30,7 @@ class Hub75DashboardSender:
         self.socket_handle = None
         self.udp_target = None
         self.last_send_time = 0.0
+        self.last_payload_json = ""
         self.last_connect_attempt = 0.0
         self.connect_retry_sec = 2.0
         self.import_error_reported = False
@@ -134,7 +135,7 @@ class Hub75DashboardSender:
             "throttle_percent": max(0, min(100, int(throttle_percent))),
             "brake_percent": max(0, min(100, int(brake_percent))),
             "drive_mode": str(drive_mode)[:3],
-            "lidar_points": [],
+            "lidar_points": lidar_points or [],
             "model_choice": str(model_choice)[:4],
             "camera_confidence_percent": max(0, min(100, int(camera_confidence_percent))),
             "cpu_temp_c": round(max(0.0, min(99.0, float(cpu_temp_c))), 1),
@@ -180,7 +181,8 @@ class Hub75DashboardSender:
 
     def _write_payload(self, payload, send_time_monotonic: float) -> bool:
         try:
-            encoded = (json.dumps(payload) + "\n").encode("utf-8")
+            payload_json = json.dumps(payload, separators=(",", ":"), sort_keys=True)
+            encoded = (payload_json + "\n").encode("utf-8")
             if self.transport == "udp":
                 if self.socket_handle is None or self.udp_target is None:
                     return False
@@ -190,6 +192,7 @@ class Hub75DashboardSender:
                     return False
                 self.serial_handle.write(encoded)
             self.last_send_time = send_time_monotonic
+            self.last_payload_json = payload_json
             return True
         except Exception as exc:
             print(f"Hub75 dashboard telemetry write failed: {exc}")
