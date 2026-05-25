@@ -58,6 +58,7 @@ LEFT_TURN_SIGNAL_INDEX = 29
 COLON_GLYPH_INDEX = 17
 AT_GLYPH_INDEX = 22
 PERCENT_GLYPH_INDEX = 4
+LESS_THAN_GLYPH_INDEX = 8
 ALL_GLYPH_INDEX = 57
 MIN_VISIBLE_BRIGHTNESS_PERCENT = 5
 
@@ -87,6 +88,7 @@ def build_letter_map() -> Dict[str, Glyph]:
     letter_map[":"] = sign_glyphs[COLON_GLYPH_INDEX]
     letter_map["@"] = sign_glyphs[AT_GLYPH_INDEX]
     letter_map["%"] = sign_glyphs[PERCENT_GLYPH_INDEX]
+    letter_map["<"] = sign_glyphs[LESS_THAN_GLYPH_INDEX]
     letter_map["ALL"] = sign_glyphs[ALL_GLYPH_INDEX]
     return letter_map
 
@@ -451,6 +453,25 @@ class DashboardRenderer:
         self._draw_text_row(2, ["O", "D", "O", ":", *odo_cells], ARROW_YELLOW, y_offset_px)
         self._draw_text_row(3, ["S", "S", "T", ":", *sts_cells], sts_color, y_offset_px)
 
+    def _photo_run_stats(self, payload: Dict[str, object]) -> Dict[str, int]:
+        raw_stats = payload.get("photo_run_stats", {})
+        if not isinstance(raw_stats, dict):
+            raw_stats = {}
+        stats = {}
+        for key in ("left", "center", "right", "throttle_below_50"):
+            try:
+                stats[key] = max(0, int(raw_stats.get(key, 0)))
+            except (TypeError, ValueError):
+                stats[key] = 0
+        return stats
+
+    def _draw_photo_run_stats_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        stats = self._photo_run_stats(payload)
+        self._draw_text_row(0, ["L", "P", ":", *self._digits(stats["left"], 5)], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["C", "P", ":", *self._digits(stats["center"], 5)], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
+        self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
+
     def _draw_nav_entry_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         nav = self._nav_payload(payload)
         if bool(nav.get("arrived_visible", False)):
@@ -565,7 +586,7 @@ class DashboardRenderer:
             self._draw_nav_entry_page(payload, y_offset_px)
             return
         if page == 6:
-            self._draw_gps_odo_sts_page(payload, y_offset_px)
+            self._draw_photo_run_stats_page(payload, y_offset_px)
             return
         if page == 7:
             self._draw_route_nodes_page(payload, y_offset_px)
@@ -832,6 +853,7 @@ def main():
     camera_pixels: List[str] = []
     photos_run = 0
     photos_all = 0
+    photo_run_stats: Dict[str, int] = {}
     camera_fps = 0.0
     system_status = "GOOD"
     nav_status: Dict[str, object] = {}
@@ -874,6 +896,7 @@ def main():
                 "camera_pixels": camera_pixels,
                 "photos_run": photos_run,
                 "photos_all": photos_all,
+                "photo_run_stats": photo_run_stats,
                 "camera_fps": camera_fps,
                 "system_status": status_override or system_status,
                 "nav_status": nav_status,
@@ -917,6 +940,7 @@ def main():
         nonlocal camera_pixels
         nonlocal photos_run
         nonlocal photos_all
+        nonlocal photo_run_stats
         nonlocal camera_fps
         nonlocal system_status
         nonlocal nav_status
@@ -952,6 +976,9 @@ def main():
             camera_pixels = [str(row)[: PANEL_WIDTH * 4] for row in raw_camera_pixels[:PANEL_HEIGHT]]
         photos_run = max(0, int(payload.get("photos_run", photos_run)))
         photos_all = max(0, int(payload.get("photos_all", photos_all)))
+        raw_photo_run_stats = payload.get("photo_run_stats", photo_run_stats)
+        if isinstance(raw_photo_run_stats, dict):
+            photo_run_stats = dict(raw_photo_run_stats)
         camera_fps = max(0.0, float(payload.get("camera_fps", camera_fps)))
         system_status = str(payload.get("system_status", system_status))[:4].upper() or "GOOD"
         raw_nav_status = payload.get("nav_status", nav_status)

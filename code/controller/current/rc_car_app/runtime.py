@@ -755,7 +755,44 @@ def get_system_status(state, model_frame_is_stale: bool = False) -> str:
 def count_photos_run() -> int:
     if current_photo_run_dir is None or not current_photo_run_dir.exists():
         return 0
-    return sum(1 for f in current_photo_run_dir.iterdir() if f.is_file())
+    return sum(1 for f in current_photo_run_dir.iterdir() if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
+
+
+def photo_run_stats() -> dict[str, int]:
+    stats = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
+    if current_photo_run_dir is None or not current_photo_run_dir.exists():
+        return stats
+    label_path = current_photo_run_dir / f"{current_photo_run_dir.name}.json"
+    if not label_path.exists():
+        return stats
+    try:
+        labels = json.loads(label_path.read_text())
+    except Exception as exc:
+        print(f"Failed to read photo run stats {label_path}: {exc}")
+        return stats
+    if not isinstance(labels, dict):
+        return stats
+    for label in labels.values():
+        if not isinstance(label, dict):
+            continue
+        try:
+            steering = float(label.get("steering"))
+        except (TypeError, ValueError):
+            steering = None
+        if steering is not None:
+            if steering < 85.0:
+                stats["left"] += 1
+            elif steering > 95.0:
+                stats["right"] += 1
+            else:
+                stats["center"] += 1
+        try:
+            throttle = float(label.get("throttle"))
+        except (TypeError, ValueError):
+            throttle = None
+        if throttle is not None and throttle < 0.50:
+            stats["throttle_below_50"] += 1
+    return stats
 
 
 def count_photos_all() -> int:
@@ -1505,6 +1542,7 @@ def run(model_choice=None):
                     camera_pixels=camera_pixels,
                     photos_run=count_photos_run(),
                     photos_all=count_photos_all(),
+                    photo_run_stats=photo_run_stats(),
                     camera_fps=webcam_vision.camera_fps if webcam_vision is not None else 0.0,
                     system_status=get_system_status(state),
                     nav_status=latest_nav,
