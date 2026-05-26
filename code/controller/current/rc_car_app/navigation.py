@@ -520,27 +520,19 @@ class NavigationManager:
     def adjust_current(self, direction: int) -> None:
         if time.monotonic() < self.entry_error_until:
             return
-        if self.phase == "confirm":
-            self.confirm_yes = not self.confirm_yes
-            return
         chars = self.end_chars  # only end is user-editable now
         idx = NODE_CHARS.index(chars[self.cursor]) if chars[self.cursor] in NODE_CHARS else 0
         chars[self.cursor] = NODE_CHARS[(idx + direction) % len(NODE_CHARS)]
 
+    def move_cursor(self, direction: int) -> None:
+        if time.monotonic() < self.entry_error_until or self.active:
+            return
+        self.cursor = (self.cursor + int(direction)) % len(self.end_chars)
+
     def advance(self) -> Optional[str]:
         if time.monotonic() < self.entry_error_until:
             return None
-        if self.phase == "confirm":
-            if not self.confirm_yes:
-                self.reset_entry()
-                return None
-            return self.start_route()
-        self.cursor += 1
-        if self.cursor < 3:
-            return None
-        self.cursor = 0
-        self.phase = "confirm"  # end entry done → confirm
-        return None
+        return self.start_route()
 
     def start_route(self) -> Optional[str]:
         start_raw = self.start_id.upper()

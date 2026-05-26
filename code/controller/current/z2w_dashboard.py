@@ -486,16 +486,13 @@ class DashboardRenderer:
         phase = str(nav.get("entry_phase", "end"))
         confirm_yes = bool(nav.get("confirm_yes", True))
         if bool(nav.get("active", False)):
-            confirm_cells = ["C", "A", "N", "C", "E", "L", ":", "A"]
+            confirm_cells = ["C", "A", "N", "C", "E", "L", ":", "X"]
             confirm_color = TEXT_ORANGE if confirm_yes else ALERT_RED_DIM
         elif bool(nav.get("entry_error", False)):
-            confirm_cells = ["C", "F", "R", "M", ":", "E", "R", "R"]
+            confirm_cells = ["E", "R", "R", "O", "R", "", "", ""]
             confirm_color = ALERT_RED_DIM
-        elif phase == "confirm":
-            confirm_cells = ["C", "F", "R", "M", ":", "Y", "E", "S"] if confirm_yes else ["C", "F", "R", "M", ":", "", "N", "O"]
-            confirm_color = TEXT_GREEN if confirm_yes else ALERT_RED_DIM
         else:
-            confirm_cells = ["C", "F", "R", "M", ":", "_", "_", "_"]
+            confirm_cells = ["S", "T", "A", "R", "T", ":", "X", ""]
             confirm_color = TEXT_ORANGE
         self._draw_text_row(0, list("NAVIGATE"), TEXT_CYAN, y_offset_px)
         self._draw_text_row(1, ["F", "R", "M", ":", "", *start_cells], TEXT_GREEN, y_offset_px)

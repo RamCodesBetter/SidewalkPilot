@@ -162,14 +162,14 @@ def print_controls():
         print("  Trigger mode: shared axis")
     print(f"  Button {AUTONOMY_TOGGLE_BUTTON} (A): toggle autonomous driving")
     print(f"  Button {PHOTO_BUTTON} (B): take photo")
-    print(f"  Button {NAV_SELECT_BUTTON} (X): navigation teleport/select")
+    print(f"  Button {NAV_SELECT_BUTTON} (X): navigation page/start/stop")
     print(f"  Buttons {CRUISE_TOGGLE_BUTTONS} (Y): cruise control toggle")
     print(f"  Button {SHIFT_DOWN_BUTTON} (LB): shift down PRND")
     print(f"  Button {SHIFT_UP_BUTTON} (RB): shift up PRND")
     print(f"  Button {HAZARD_BUTTON} (View): hazard lights")
     print(f"  Button {AEB_TOGGLE_BUTTON} (RSB): toggle AEB")
     print(f"  Button {QUIT_BUTTON} (Share): quit")
-    print("  D-pad left/right: left/right indicator")
+    print("  D-pad left/right: left/right indicator; move nav cursor on NAVIGATE page")
     print("  D-pad up/down: edit nav entry, cycle model, adjust cruise/brightness")
     print(
         f"  D-pad hold: repeat starts after {DPAD_SCROLL_REPEAT_START_SEC:.1f}s; "
@@ -449,11 +449,7 @@ def handle_dpad_y_action(
     if current_page == 5:
         if navigation.active:
             return active_model_choice
-        if navigation.phase == "confirm":
-            if not repeated:
-                navigation.confirm_yes = not navigation.confirm_yes
-        else:
-            navigation.adjust_current(-1 if direction == 1 else 1)
+        navigation.adjust_current(-1 if direction == 1 else 1)
     elif current_page == 3:
         active_model_choice = cycle_steering_model(webcam_vision, active_model_choice, 1 if direction == 1 else -1)
     elif direction == 1 and state["cc_active"]:
@@ -1415,10 +1411,13 @@ def run(model_choice=None):
                         shutdown_flag.set()
                 elif event.type == pygame.JOYHATMOTION:
                     hat_x, hat_y = event.value
-                    if hat_x == -1:
-                        toggle_turn_signal(state, metrics, "left")
-                    elif hat_x == 1:
-                        toggle_turn_signal(state, metrics, "right")
+                    if hat_x:
+                        if int(state.get("dashboard_page", 1)) == 5 and not navigation.active:
+                            navigation.move_cursor(int(hat_x))
+                        elif hat_x == -1:
+                            toggle_turn_signal(state, metrics, "left")
+                        elif hat_x == 1:
+                            toggle_turn_signal(state, metrics, "right")
                     state["dpad_y_value"] = int(hat_y)
                     if hat_y:
                         active_model_choice = handle_dpad_y_action(
@@ -1435,7 +1434,6 @@ def run(model_choice=None):
             nav_letter_repeat = (
                 int(state.get("dashboard_page", 1)) == 5
                 and not navigation.active
-                and navigation.phase != "confirm"
             )
             dpad_repeat_direction = dpad_y_repeat_direction(
                 state,
