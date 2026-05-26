@@ -36,7 +36,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 12
+DASHBOARD_PAGE_COUNT = 13
 
 DIGIT_BLUE: Color = (0, 0, 255)
 GEAR_RED_DIM: Color = (220, 0, 0)
@@ -586,7 +586,7 @@ class DashboardRenderer:
             self._draw_nav_entry_page(payload, y_offset_px)
             return
         if page == 6:
-            self._draw_photo_run_stats_page(payload, y_offset_px)
+            self._draw_gps_odo_sts_page(payload, y_offset_px)
             return
         if page == 7:
             self._draw_route_nodes_page(payload, y_offset_px)
@@ -605,6 +605,9 @@ class DashboardRenderer:
             return
         if page == 12:
             self._draw_page_six(payload, y_offset_px)
+            return
+        if page == 13:
+            self._draw_photo_run_stats_page(payload, y_offset_px)
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),

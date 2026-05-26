@@ -333,6 +333,7 @@ DASHBOARD_PAGE_COORDS = {
     10: (5, 2),
     11: (6, 1),
     12: (6, 2),
+    13: (2, 3),
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
