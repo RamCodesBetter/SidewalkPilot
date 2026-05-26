@@ -160,26 +160,28 @@ def print_controls():
     print(f"  Left trigger (axis {BRAKE_AXIS}): brake")
     if SHARED_TRIGGER_AXIS:
         print("  Trigger mode: shared axis")
-    print(f"  Buttons {CRUISE_TOGGLE_BUTTONS}: cruise control toggle")
-    print(f"  Button {SHIFT_DOWN_BUTTON}: shift down")
-    print(f"  Button {SHIFT_UP_BUTTON}: shift up")
-    print(f"  Button {AUTONOMY_TOGGLE_BUTTON}: toggle autonomous mode")
-    print(f"  Button {AEB_TOGGLE_BUTTON}: toggle AEB")
-    print(f"  Button {PHOTO_BUTTON}: take photo")
-    print(f"  Button {NAV_SELECT_BUTTON}: advance/confirm navigation node entry on dashboard page 3:1")
-    print(f"  Button {QUIT_BUTTON}: quit")
-    print("  D-pad up/down: edit navigation node on page 3:1, cycle model on page 2:1, adjust cruise/brightness elsewhere")
+    print(f"  Button {AUTONOMY_TOGGLE_BUTTON} (A): toggle autonomous driving")
+    print(f"  Button {PHOTO_BUTTON} (B): take photo")
+    print(f"  Button {NAV_SELECT_BUTTON} (X): navigation teleport/select")
+    print(f"  Buttons {CRUISE_TOGGLE_BUTTONS} (Y): cruise control toggle")
+    print(f"  Button {SHIFT_DOWN_BUTTON} (LB): shift down PRND")
+    print(f"  Button {SHIFT_UP_BUTTON} (RB): shift up PRND")
+    print(f"  Button {HAZARD_BUTTON} (View): hazard lights")
+    print(f"  Button {AEB_TOGGLE_BUTTON} (RSB): toggle AEB")
+    print(f"  Button {QUIT_BUTTON} (Share): quit")
+    print("  D-pad left/right: left/right indicator")
+    print("  D-pad up/down: edit nav entry, cycle model, adjust cruise/brightness")
     print(
         f"  D-pad hold: repeat starts after {DPAD_SCROLL_REPEAT_START_SEC:.1f}s; "
         f"nav letters repeat after {NAV_LETTER_REPEAT_START_SEC:.2f}s"
     )
     print(
         f"  Right stick Y (axis {DASHBOARD_PAGE_AXIS}): threshold {DASHBOARD_PAGE_AXIS_THRESHOLD:.2f}, "
-        f"first page move after {DASHBOARD_PAGE_HOLD_SEC:.1f}s, repeat after {DASHBOARD_SCROLL_REPEAT_START_SEC:.1f}s"
+        f"move up/down pages after {DASHBOARD_PAGE_HOLD_SEC:.1f}s, repeat after {DASHBOARD_SCROLL_REPEAT_START_SEC:.1f}s"
     )
     print(
         f"  Right stick X (axis {DASHBOARD_PAGE_HORIZONTAL_AXIS}): threshold {DASHBOARD_PAGE_AXIS_THRESHOLD:.2f}, "
-        f"first page move after {DASHBOARD_PAGE_HOLD_SEC:.1f}s, repeat after {DASHBOARD_SCROLL_REPEAT_START_SEC:.1f}s"
+        f"move left/right page columns after {DASHBOARD_PAGE_HOLD_SEC:.1f}s, repeat after {DASHBOARD_SCROLL_REPEAT_START_SEC:.1f}s"
     )
 
 
