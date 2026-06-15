@@ -174,6 +174,9 @@ SHIFT_UP_BUTTON = 7
 AUTONOMY_TOGGLE_BUTTON = 0
 AEB_TOGGLE_BUTTON = 14
 PHOTO_BUTTON = 1
+AUTO_PHOTO_BUTTON = 11
+AUTO_PHOTO_MIN_INTERVAL_SEC = 3
+AUTO_PHOTO_MAX_INTERVAL_SEC = 5
 NAV_SELECT_BUTTON = 3
 QUIT_BUTTON = 15
 
@@ -230,6 +233,7 @@ def create_state():
         "dashboard_throttle_percent": 0,
         "dashboard_brake_percent": 0,
         "dashboard_payload_json": "",
+        "auto_photo_enabled": False,
     }
 
 
@@ -269,3 +273,7 @@ class Metrics:
     dashboard_page_transition: str = ""
     dashboard_cpu_temp_c: float = 0.0
     dashboard_cpu_temp_last_sample_time: float = 0.0
+    auto_photo_next_time: float = 0.0
+    servo_error_count: int = 0
+    servo_error_last_log_time: float = 0.0
+    servo_fault_until: float = 0.0

@@ -2,6 +2,7 @@
 import datetime
 import json
 import os
+import random
 import socket
 import subprocess
 import sys
@@ -18,6 +19,9 @@ from .config import (
     AUTONOMOUS_CRUISE_PWM,
     AUTONOMOUS_LIDAR_OVERRIDE_PWM,
     AUTONOMOUS_TURN_PWM,
+    AUTO_PHOTO_BUTTON,
+    AUTO_PHOTO_MAX_INTERVAL_SEC,
+    AUTO_PHOTO_MIN_INTERVAL_SEC,
     BRAKE_RATE,
     CM_PER_SEC_TO_MPH,
     COASTING_RATE,
@@ -162,6 +166,10 @@ def print_controls():
         print("  Trigger mode: shared axis")
     print(f"  Button {AUTONOMY_TOGGLE_BUTTON} (A): toggle autonomous driving")
     print(f"  Button {PHOTO_BUTTON} (B): take photo")
+    print(
+        f"  Button {AUTO_PHOTO_BUTTON} (Menu): toggle auto photo "
+        f"({AUTO_PHOTO_MIN_INTERVAL_SEC}-{AUTO_PHOTO_MAX_INTERVAL_SEC}s random interval)"
+    )
     print(f"  Button {NAV_SELECT_BUTTON} (X): navigation page/start/stop")
     print(f"  Buttons {CRUISE_TOGGLE_BUTTONS} (Y): cruise control toggle")
     print(f"  Button {SHIFT_DOWN_BUTTON} (LB): shift down PRND")
@@ -641,6 +649,13 @@ def queue_aeb_toggle_notification(dashboard_sender, enabled: bool):
         queue_dashboard_notification(dashboard_sender, ["A", "E", "B", ":", "", "O", "F", "F"])
 
 
+def queue_auto_photo_notification(dashboard_sender, enabled: bool):
+    if enabled:
+        queue_dashboard_notification(dashboard_sender, ["A", "P", "H", ":", "", "", "O", "N"])
+    else:
+        queue_dashboard_notification(dashboard_sender, ["A", "P", "H", ":", "", "O", "F", "F"])
+
+
 def format_brightness_cells(brightness_percent: int) -> list[str]:
     clamped = max(0, min(100, int(brightness_percent)))
     if clamped >= 100:
@@ -886,7 +901,13 @@ def take_photo(webcam_vision=None, state=None):
         current_photo_run_dir = create_photo_run_dir()
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     photo_name = f"photo_{timestamp}.jpg"
-    filename = str(current_photo_run_dir / photo_name)
+    photo_path = current_photo_run_dir / photo_name
+    suffix = 1
+    while photo_path.exists():
+        photo_name = f"photo_{timestamp}_{suffix}.jpg"
+        photo_path = current_photo_run_dir / photo_name
+        suffix += 1
+    filename = str(photo_path)
     if webcam_vision:
         photo_status = "CTRE"
         success, message = webcam_vision.save_current_frame(filename)
@@ -904,6 +925,73 @@ def take_photo(webcam_vision=None, state=None):
         photo_status = "ERR"
         print("Pi camera stream photo capture unavailable: no active camera stream")
     return False
+
+
+def random_auto_photo_delay_sec() -> int:
+    min_interval = int(AUTO_PHOTO_MIN_INTERVAL_SEC)
+    max_interval = int(AUTO_PHOTO_MAX_INTERVAL_SEC)
+    if max_interval < min_interval:
+        min_interval, max_interval = max_interval, min_interval
+    return random.randint(min_interval, max_interval)
+
+
+def schedule_next_auto_photo(metrics, now: float | None = None) -> int:
+    delay_sec = random_auto_photo_delay_sec()
+    metrics.auto_photo_next_time = (time.time() if now is None else now) + delay_sec
+    return delay_sec
+
+
+def toggle_auto_photo(state, metrics, dashboard_sender=None):
+    state["auto_photo_enabled"] = not bool(state.get("auto_photo_enabled", False))
+    if state["auto_photo_enabled"]:
+        delay_sec = schedule_next_auto_photo(metrics)
+        print(f"Auto photo ENABLED. First capture in {delay_sec}s.")
+    else:
+        metrics.auto_photo_next_time = 0.0
+        print("Auto photo DISABLED.")
+    queue_auto_photo_notification(dashboard_sender, state["auto_photo_enabled"])
+
+
+def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
+    if not state.get("auto_photo_enabled"):
+        return
+    now = time.time()
+    if metrics.auto_photo_next_time <= 0.0:
+        schedule_next_auto_photo(metrics, now)
+        return
+    if now < metrics.auto_photo_next_time:
+        return
+    take_photo(webcam_vision, state)
+    delay_sec = schedule_next_auto_photo(metrics, now)
+    print(f"Next auto photo in {delay_sec}s.")
+
+
+def write_steering_servo_safely(state, metrics, hardware, servo_degrees: float) -> bool:
+    try:
+        if getattr(hardware.steering_servo, "value", None) != servo_degrees:
+            hardware.steering_servo.value = servo_degrees
+        if metrics.servo_fault_until:
+            metrics.servo_fault_until = 0.0
+            print("Steering servo write recovered.")
+        return True
+    except OSError as exc:
+        metrics.servo_error_count += 1
+        metrics.servo_fault_until = time.time() + 0.5
+        now = time.time()
+        if now - metrics.servo_error_last_log_time >= 2.0:
+            print(f"Steering servo I2C write failed; braking until it recovers: {exc}")
+            metrics.servo_error_last_log_time = now
+        state["stop_reason"] = "servo_i2c_fault"
+        return False
+    except Exception as exc:
+        metrics.servo_error_count += 1
+        metrics.servo_fault_until = time.time() + 0.5
+        now = time.time()
+        if now - metrics.servo_error_last_log_time >= 2.0:
+            print(f"Steering servo write failed; braking until it recovers: {exc}")
+            metrics.servo_error_last_log_time = now
+        state["stop_reason"] = "servo_fault"
+        return False
 
 
 def calculate_speed(state, metrics, dt):
@@ -1098,15 +1186,12 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     if abs(servo_degrees - center_degrees) < (float(STEERING_SERVO_ACTUATION_RANGE_DEG) * 0.015):
         servo_degrees = center_degrees
-    try:
-        if getattr(hardware.steering_servo, "value", None) != servo_degrees:
-            hardware.steering_servo.value = servo_degrees
-    except Exception:
-        hardware.steering_servo.value = servo_degrees
+    servo_write_ok = write_steering_servo_safely(state, metrics, hardware, servo_degrees)
 
     effective_brake = effective_brake_from_input
     desired_pwm_final = desired_pwm_from_input
     current_brake_rate = BRAKE_RATE
+    servo_fault_active = not servo_write_ok or time.time() < metrics.servo_fault_until
 
     aeb_stop_active = metrics.aeb_enabled and state["gear_mode"] != "R" and is_stop_brake_condition(state)
     if aeb_stop_active:
@@ -1129,6 +1214,12 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         effective_brake = effective_brake_force > 0.1
         desired_pwm_final = desired_pwm_from_input
         current_brake_rate = BRAKE_RATE 
+
+    if servo_fault_active:
+        effective_brake = True
+        effective_brake_force = 1.0
+        desired_pwm_final = 0.0
+        current_brake_rate = AEB_BRAKE_RATE
 
     state["brake"] = effective_brake
     state["brake_force"] = effective_brake_force if effective_brake else 0.0
@@ -1385,6 +1476,8 @@ def run(model_choice=None):
                         queue_aeb_toggle_notification(dashboard_sender, metrics.aeb_enabled)
                     elif event.button == PHOTO_BUTTON:
                         take_photo(webcam_vision, state)
+                    elif event.button == AUTO_PHOTO_BUTTON:
+                        toggle_auto_photo(state, metrics, dashboard_sender)
                     elif event.button == NAV_SELECT_BUTTON:
                         if int(state.get("dashboard_page", 1)) != 5:
                             set_dashboard_page(state, 5)
@@ -1453,9 +1546,15 @@ def run(model_choice=None):
                     repeated=True,
                 )
 
+            update_auto_photo(state, metrics, webcam_vision, dashboard_sender)
+
             latest_scan = []
             if lidar_parser:
-                latest_scan = lidar_parser.get_latest_scan()
+                try:
+                    latest_scan = lidar_parser.get_latest_scan()
+                except Exception as exc:
+                    print(f"LiDAR latest scan unavailable; ignoring LiDAR this loop: {exc}")
+                    latest_scan = []
                 obstacle_stop_threshold_m, obstacle_warn_threshold_m, hard_stop_threshold_m = (
                     get_speed_scaled_lidar_thresholds(metrics.smoothed_speed_mph)
                 )

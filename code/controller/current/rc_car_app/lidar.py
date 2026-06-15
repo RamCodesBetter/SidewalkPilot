@@ -148,9 +148,13 @@ class LidarParser:
             time.sleep(READ_LOOP_SLEEP_SEC)
 
     def mark_fault(self, error) -> None:
-        print(f"LiDAR serial error: {error}. Will retry connection.")
+        self.log_connect_status(f"LiDAR serial error: {error}. Ignoring LiDAR until reconnect succeeds.")
         self.disconnect()
         self.buffer = b""
+        with self.lock:
+            self.current_scan_points = []
+            self.last_full_scan_points = []
+            self.last_scan_time = 0.0
         self.last_reconnect_attempt = time.monotonic()
         self.reconnect_interval = max(self.reconnect_interval, RECONNECT_INTERVAL_SEC)
 
