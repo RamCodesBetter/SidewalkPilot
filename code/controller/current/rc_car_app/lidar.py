@@ -9,6 +9,7 @@ from glob import glob
 import serial
 
 DEFAULT_LIDAR_SERIAL_PORT = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
+DEFAULT_GPIO_LIDAR_SERIAL_PORT = "/dev/ttyAMA3"
 SERIAL_PORT = os.environ.get("RC_CAR_LIDAR_SERIAL_PORT", "auto").strip() or "auto"
 BAUD_RATE = 230400
 PACKET_LENGTH = 47
@@ -29,6 +30,7 @@ def _candidate_ports():
     candidates.extend(sorted(glob("/dev/serial/by-id/*Silicon_Labs*")))
     candidates.append(DEFAULT_LIDAR_SERIAL_PORT)
     candidates.extend(sorted(glob("/dev/ttyUSB*")))
+    candidates.append(DEFAULT_GPIO_LIDAR_SERIAL_PORT)
     candidates.extend(sorted(glob("/dev/ttyACM*")))
     return candidates
 
@@ -95,7 +97,9 @@ class LidarParser:
             self.connected = False
             self.ser = None
             self.reconnect_interval = min(RECONNECT_INTERVAL_MAX_SEC, self.reconnect_interval * 1.5)
-            self.log_connect_status("LiDAR serial port not ready; waiting for CP2102 /dev/serial/by-id or ttyUSB device.")
+            self.log_connect_status(
+                "LiDAR serial port not ready; waiting for CP2102, ttyUSB, or GPIO UART /dev/ttyAMA3."
+            )
             return False
         try:
             self.disconnect()
