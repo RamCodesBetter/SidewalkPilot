@@ -4,13 +4,11 @@ import os
 import struct
 import threading
 import time
-from glob import glob
 
 import serial
 
-DEFAULT_LIDAR_SERIAL_PORT = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
-DEFAULT_GPIO_LIDAR_SERIAL_PORT = "/dev/ttyAMA3"
-SERIAL_PORT = os.environ.get("RC_CAR_LIDAR_SERIAL_PORT", "auto").strip() or "auto"
+DEFAULT_LIDAR_SERIAL_PORT = "/dev/ttyAMA3"
+SERIAL_PORT = os.environ.get("RC_CAR_LIDAR_SERIAL_PORT", DEFAULT_LIDAR_SERIAL_PORT).strip() or DEFAULT_LIDAR_SERIAL_PORT
 BAUD_RATE = 230400
 PACKET_LENGTH = 47
 MEASUREMENT_POINTS_PER_PACKET = 12
@@ -24,29 +22,12 @@ READ_LOOP_SLEEP_SEC = 0.01
 SCAN_STALE_SEC = 1.0
 
 
-def _candidate_ports():
-    candidates = []
-    candidates.extend(sorted(glob("/dev/serial/by-id/*CP2102*")))
-    candidates.extend(sorted(glob("/dev/serial/by-id/*Silicon_Labs*")))
-    candidates.append(DEFAULT_LIDAR_SERIAL_PORT)
-    candidates.extend(sorted(glob("/dev/ttyUSB*")))
-    candidates.append(DEFAULT_GPIO_LIDAR_SERIAL_PORT)
-    candidates.extend(sorted(glob("/dev/ttyACM*")))
-    return candidates
-
-
 def resolve_lidar_serial_port(port):
     configured = str(port or "").strip()
-    if configured and configured.lower() != "auto":
+    if not configured or configured.lower() == "auto":
+        configured = DEFAULT_LIDAR_SERIAL_PORT
+    if os.path.exists(configured) and os.access(configured, os.R_OK | os.W_OK):
         return configured
-
-    seen = set()
-    for candidate in _candidate_ports():
-        if candidate in seen:
-            continue
-        seen.add(candidate)
-        if os.path.exists(candidate) and os.access(candidate, os.R_OK | os.W_OK):
-            return candidate
     return None
 
 
@@ -97,9 +78,7 @@ class LidarParser:
             self.connected = False
             self.ser = None
             self.reconnect_interval = min(RECONNECT_INTERVAL_MAX_SEC, self.reconnect_interval * 1.5)
-            self.log_connect_status(
-                "LiDAR serial port not ready; waiting for CP2102, ttyUSB, or GPIO UART /dev/ttyAMA3."
-            )
+            self.log_connect_status("LiDAR GPIO UART serial port not ready; waiting for /dev/ttyAMA3.")
             return False
         try:
             self.disconnect()
