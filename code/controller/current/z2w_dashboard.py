@@ -928,7 +928,7 @@ def main():
         now = time.monotonic()
         if not have_received_payload:
             if now - receiver_start_time >= 3.0:
-                notification_rows.insert(0, ["N", "O", "L", "I", "N", "K", "", ""])
+                notification_rows.insert(0, ["N", "O", "", "L", "I", "N", "K", ""])
                 status_override = status_override or "LINK"
         elif now - last_packet_time >= 2.0:
             notification_rows.insert(0, ["S", "T", "A", "L", "E", "", "", ""])
