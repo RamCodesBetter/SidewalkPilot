@@ -13,7 +13,7 @@ except Exception:
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Direct SidewalkPilot GPIO UART LiDAR test")
-    parser.add_argument("--port", default="/dev/ttyAMA3")
+    parser.add_argument("--port", default="/dev/ttyAMA2")
     parser.add_argument("--baud", type=int, default=230400)
     parser.add_argument("--seconds", type=float, default=10.0)
     parser.add_argument("--enable-gpio", type=int, default=18)
