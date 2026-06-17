@@ -628,9 +628,9 @@ def queue_aeb_toggle_notification(dashboard_sender, enabled: bool):
 
 def queue_auto_photo_notification(dashboard_sender, enabled: bool):
     if enabled:
-        queue_dashboard_notification(dashboard_sender, ["A", "P", "H", ":", "", "", "O", "N"])
+        queue_dashboard_notification(dashboard_sender, ["A", "T", "C", "P", ":", "", "O", "N"])
     else:
-        queue_dashboard_notification(dashboard_sender, ["A", "P", "H", ":", "", "O", "F", "F"])
+        queue_dashboard_notification(dashboard_sender, ["A", "T", "C", "P", ":", "O", "F", "F"])
 
 
 def format_brightness_cells(brightness_percent: int) -> list[str]:

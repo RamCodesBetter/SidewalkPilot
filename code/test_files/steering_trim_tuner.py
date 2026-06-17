@@ -86,9 +86,7 @@ def init_servo():
 
 
 def init_joystick():
-    pygame.init()
     pygame.display.init()
-    pygame.display.set_mode((1, 1))
     pygame.joystick.init()
     if pygame.joystick.get_count() == 0:
         print("No joystick detected.")
@@ -106,7 +104,7 @@ def main() -> int:
         return 1
 
     servo = init_servo()
-    init_joystick()
+    joystick = init_joystick()
 
     start_angle = clamp(args.start, args.min_angle, args.max_angle)
     angle = start_angle
@@ -121,30 +119,42 @@ def main() -> int:
     print_trim(angle)
 
     clock = pygame.time.Clock()
+    previous_hat_x = 0
+    previous_buttons = {
+        QUIT_BUTTON: False,
+        RESET_BUTTON: False,
+        PRINT_BUTTON: False,
+    }
     try:
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return 0
-                if event.type == pygame.JOYBUTTONDOWN:
-                    if event.button == QUIT_BUTTON:
+            pygame.event.pump()
+
+            for button in list(previous_buttons):
+                pressed = joystick.get_numbuttons() > button and bool(joystick.get_button(button))
+                if pressed and not previous_buttons[button]:
+                    if button == QUIT_BUTTON:
                         return 0
-                    if event.button == RESET_BUTTON:
+                    if button == RESET_BUTTON:
                         angle = clamp(DEFAULT_START_ANGLE_DEG, args.min_angle, args.max_angle)
                         servo.angle = angle
                         print_trim(angle)
-                    elif event.button == PRINT_BUTTON:
+                    elif button == PRINT_BUTTON:
                         print_trim(angle)
-                elif event.type == pygame.JOYHATMOTION:
-                    hat_x, _ = event.value
-                    if hat_x == -1:
-                        angle = clamp(angle - step, args.min_angle, args.max_angle)
-                        servo.angle = angle
-                        print_trim(angle)
-                    elif hat_x == 1:
-                        angle = clamp(angle + step, args.min_angle, args.max_angle)
-                        servo.angle = angle
-                        print_trim(angle)
+                previous_buttons[button] = pressed
+
+            hat_x = 0
+            if joystick.get_numhats() > 0:
+                hat_x, _ = joystick.get_hat(0)
+            if hat_x != previous_hat_x:
+                if hat_x == -1:
+                    angle = clamp(angle - step, args.min_angle, args.max_angle)
+                    servo.angle = angle
+                    print_trim(angle)
+                elif hat_x == 1:
+                    angle = clamp(angle + step, args.min_angle, args.max_angle)
+                    servo.angle = angle
+                    print_trim(angle)
+            previous_hat_x = hat_x
             clock.tick(30)
     except KeyboardInterrupt:
         return 0
