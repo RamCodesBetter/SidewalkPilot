@@ -56,6 +56,9 @@ from .config import (
     PULSES_PER_REVOLUTION,
     SPEED_SMOOTHING_ALPHA,
     STEERING_AXIS,
+    STEERING_CENTER_SETTLE_DURATION_SEC,
+    STEERING_CENTER_SETTLE_OVERSHOOT_DEG,
+    STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
     THROTTLE_AXIS,
@@ -229,6 +232,20 @@ def joystick_steer_to_servo_degrees(raw_value: float) -> float:
 def center_steering(state):
     state["steer"] = 0.0
     state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+    state["steering_center_settle_until"] = 0.0
+
+
+def start_manual_steering_center_settle(state, previous_servo_degrees: float) -> None:
+    center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+    previous_delta = float(previous_servo_degrees) - center_degrees
+    if abs(previous_delta) < float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
+        state["steering_center_settle_until"] = 0.0
+        return
+    overshoot_direction = -1.0 if previous_delta > 0.0 else 1.0
+    state["steering_center_settle_deg"] = clamp_servo_degrees(
+        center_degrees + (overshoot_direction * float(STEERING_CENTER_SETTLE_OVERSHOOT_DEG))
+    )
+    state["steering_center_settle_until"] = time.time() + max(0.0, float(STEERING_CENTER_SETTLE_DURATION_SEC))
 
 
 def get_dashboard_drive_mode(state) -> str:
@@ -1232,6 +1249,14 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     if abs(servo_degrees - center_degrees) < (float(STEERING_SERVO_ACTUATION_RANGE_DEG) * 0.015):
         servo_degrees = center_degrees
+    if (
+        not state["autonomous_mode"]
+        and servo_degrees == center_degrees
+        and current_time < float(state.get("steering_center_settle_until", 0.0))
+    ):
+        servo_degrees = clamp_servo_degrees(state.get("steering_center_settle_deg", center_degrees))
+    elif current_time >= float(state.get("steering_center_settle_until", 0.0)):
+        state["steering_center_settle_until"] = 0.0
     servo_write_ok = write_steering_servo_safely(state, metrics, hardware, servo_degrees)
 
     effective_brake = effective_brake_from_input
@@ -1428,8 +1453,20 @@ def run(model_choice=None):
                                 center=False,
                             )
                         if not state["autonomous_mode"]:
-                            state["steer"] = 0.0 if abs(raw_steer_val) < 0.1 else raw_steer_val
-                            state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
+                            previous_servo_degrees = float(
+                                state.get(
+                                    "steering_servo_deg",
+                                    float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0,
+                                )
+                            )
+                            if abs(raw_steer_val) < 0.1:
+                                state["steer"] = 0.0
+                                state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+                                start_manual_steering_center_settle(state, previous_servo_degrees)
+                            else:
+                                state["steer"] = raw_steer_val
+                                state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
+                                state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
                         state["throttle"], state["brake_force"] = split_shared_trigger_axis(event.value)
                         state["manual_brake_force"] = state["brake_force"]

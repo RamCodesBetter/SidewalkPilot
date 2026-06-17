@@ -53,6 +53,9 @@ STEERING_SERVO_ACTUATION_RANGE_DEG = 180
 STEERING_SERVO_CENTER_OFFSET = 0.06
 STEERING_SERVO_CENTER_PRELOAD = 0.04
 STEERING_SERVO_CENTER_PRELOAD_WINDOW = 0.12
+STEERING_CENTER_SETTLE_OVERSHOOT_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_OVERSHOOT_DEG", "4.0"))
+STEERING_CENTER_SETTLE_DURATION_SEC = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "0.10"))
+STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_RELEASE_MIN_DEG", "12.0"))
 
 # Reduce the stronger side below 1.0 if the car pulls while steering is centered.
 LEFT_MOTOR_PWM_SCALE = 1.0
@@ -189,6 +192,8 @@ def create_state():
         "steering_trim_total_deg": (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
         + (STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
         "steering_center_offset": STEERING_SERVO_CENTER_OFFSET,
+        "steering_center_settle_until": 0.0,
+        "steering_center_settle_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "throttle": 0.0,
         "brake": False,
         "brake_force": 0.0,
