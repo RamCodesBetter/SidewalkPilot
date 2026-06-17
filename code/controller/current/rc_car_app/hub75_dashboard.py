@@ -133,7 +133,7 @@ class Hub75DashboardSender:
             "right_signal_visible": bool(right_signal_visible),
             "dashboard_alert": str(dashboard_alert)[:4],
             "brightness_percent": max(0, min(100, int(brightness_percent))),
-            "dashboard_page": max(1, min(13, int(dashboard_page))),
+            "dashboard_page": max(1, min(14, int(dashboard_page))),
             "dashboard_page_transition": str(dashboard_page_transition)[:8],
             "servo_deg": round(max(0.0, min(180.0, float(servo_deg))), 1),
             "throttle_percent": max(0, min(100, int(throttle_percent))),

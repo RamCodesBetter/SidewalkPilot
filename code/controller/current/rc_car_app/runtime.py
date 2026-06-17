@@ -250,20 +250,26 @@ def get_speed_scaled_lidar_thresholds(speed_mph: float) -> tuple[float, float, f
     )
 
 
-def apply_lidar_unavailable_state(state):
-    state["direction_arrow"] = " "
-    state["lidar_front_dist"] = MAX_LIDAR_RANGE_M
-    state["lidar_left_dist"] = MAX_LIDAR_RANGE_M
-    state["lidar_right_dist"] = MAX_LIDAR_RANGE_M
-    state["lidar_back_dist"] = MAX_LIDAR_RANGE_M
-    state["lidar_stop_threshold_m"] = FORWARD_OBSTACLE_STOP_DISTANCE_M
-    state["lidar_warn_threshold_m"] = OBSTACLE_WARN_THRESHOLD_M
-    state["lidar_best_heading_deg"] = 0.0
-    state["lidar_heading_confidence"] = 0.0
-    state["lidar_forward_clearance_m"] = MAX_LIDAR_RANGE_M
-    state["lidar_override_active"] = False
-    state["lidar_override_side"] = ""
-    state["num_lidar_points"] = 0
+def format_lidar_dashboard_points(lidar_scan, max_points: int = 180) -> list[list[float]]:
+    if not lidar_scan:
+        return []
+    valid_points = [
+        point
+        for point in lidar_scan
+        if getattr(point, "is_valid", False)
+        and getattr(point, "distance_mm", 0) > 0
+        and getattr(point, "confidence", 0) >= 150
+    ]
+    if not valid_points:
+        return []
+    stride = max(1, len(valid_points) // max_points)
+    return [
+        [
+            round(float(getattr(point, "angle_deg", 0.0)), 1),
+            round(float(getattr(point, "distance_mm", 0.0)) / 1000.0, 2),
+        ]
+        for point in valid_points[::stride][:max_points]
+    ]
 
 
 def cycle_steering_model(webcam_vision, current_choice: str, direction: int) -> str:
@@ -341,10 +347,12 @@ DASHBOARD_PAGE_COORDS = {
     11: (6, 1),
     12: (2, 3),
     13: (6, 2),
+    14: (6, 3),
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
 STEERING_TRIM_DASHBOARD_PAGE = 13
+LIDAR_DASHBOARD_PAGE = 14
 STEERING_TRIM_STEP_DEG = 1.0
 
 
@@ -1306,7 +1314,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     calculate_speed(state, metrics, dt)
 
 
-def run(model_choice=None, enable_lidar=True):
+def run(model_choice=None):
     global photo_status
     print("RC Car Controller Starting...")
     active_model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
@@ -1342,13 +1350,9 @@ def run(model_choice=None, enable_lidar=True):
             f"Controller axis debug enabled. steer={STEERING_AXIS}, throttle={THROTTLE_AXIS}, brake={BRAKE_AXIS}"
         )
 
-    if enable_lidar:
-        lidar_parser = LidarParser(SERIAL_PORT, BAUD_RATE)
-        lidar_parser.start()
-        print("LiDAR reader running in background; runtime will keep retrying if disconnected.")
-    else:
-        apply_lidar_unavailable_state(state)
-        print("LiDAR disabled by --no-lidar; runtime will ignore LiDAR hardware.")
+    lidar_parser = LidarParser(SERIAL_PORT, BAUD_RATE)
+    lidar_parser.start()
+    print("LiDAR reader running in background; runtime will keep retrying if disconnected.")
 
     gps_reader = GpsReader()
     gps_reader.start()
@@ -1621,7 +1625,14 @@ def run(model_choice=None, enable_lidar=True):
                 state["lidar_warn_threshold_m"] = obstacle_warn_threshold_m
                 state["num_lidar_points"] = len(latest_scan)
             else:
-                apply_lidar_unavailable_state(state)
+                state["direction_arrow"] = " "
+                state["lidar_front_dist"] = MAX_LIDAR_RANGE_M
+                state["lidar_left_dist"] = MAX_LIDAR_RANGE_M
+                state["lidar_right_dist"] = MAX_LIDAR_RANGE_M
+                state["lidar_back_dist"] = MAX_LIDAR_RANGE_M
+                state["lidar_stop_threshold_m"] = FORWARD_OBSTACLE_STOP_DISTANCE_M
+                state["lidar_warn_threshold_m"] = OBSTACLE_WARN_THRESHOLD_M
+                state["num_lidar_points"] = 0
 
             update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender)
             update_turn_signal_blink(state, metrics)
@@ -1656,6 +1667,9 @@ def run(model_choice=None, enable_lidar=True):
             camera_pixels = []
             if state["dashboard_page"] == 11 and webcam_vision is not None:
                 camera_pixels = webcam_vision.get_dashboard_camera_pixels()
+            lidar_dashboard_points = []
+            if state["dashboard_page"] == LIDAR_DASHBOARD_PAGE:
+                lidar_dashboard_points = format_lidar_dashboard_points(latest_scan)
             if dashboard_sender is not None:
                 dashboard_sent = dashboard_sender.send(
                     metrics.smoothed_speed_mph,
@@ -1670,7 +1684,7 @@ def run(model_choice=None, enable_lidar=True):
                     throttle_percent=state["dashboard_throttle_percent"],
                     brake_percent=state["dashboard_brake_percent"],
                     drive_mode=get_dashboard_drive_mode(state),
-                    lidar_points=[],
+                    lidar_points=lidar_dashboard_points,
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
