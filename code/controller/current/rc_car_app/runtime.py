@@ -247,6 +247,22 @@ def get_speed_scaled_lidar_thresholds(speed_mph: float) -> tuple[float, float, f
     )
 
 
+def apply_lidar_unavailable_state(state):
+    state["direction_arrow"] = " "
+    state["lidar_front_dist"] = MAX_LIDAR_RANGE_M
+    state["lidar_left_dist"] = MAX_LIDAR_RANGE_M
+    state["lidar_right_dist"] = MAX_LIDAR_RANGE_M
+    state["lidar_back_dist"] = MAX_LIDAR_RANGE_M
+    state["lidar_stop_threshold_m"] = FORWARD_OBSTACLE_STOP_DISTANCE_M
+    state["lidar_warn_threshold_m"] = OBSTACLE_WARN_THRESHOLD_M
+    state["lidar_best_heading_deg"] = 0.0
+    state["lidar_heading_confidence"] = 0.0
+    state["lidar_forward_clearance_m"] = MAX_LIDAR_RANGE_M
+    state["lidar_override_active"] = False
+    state["lidar_override_side"] = ""
+    state["num_lidar_points"] = 0
+
+
 def cycle_steering_model(webcam_vision, current_choice: str, direction: int) -> str:
     choices = tuple(STEERING_MODEL_CHOICES.keys())
     if not choices:
@@ -1245,7 +1261,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     calculate_speed(state, metrics, dt)
 
 
-def run(model_choice=None):
+def run(model_choice=None, enable_lidar=True):
     global photo_status
     print("RC Car Controller Starting...")
     active_model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
@@ -1281,9 +1297,13 @@ def run(model_choice=None):
             f"Controller axis debug enabled. steer={STEERING_AXIS}, throttle={THROTTLE_AXIS}, brake={BRAKE_AXIS}"
         )
 
-    lidar_parser = LidarParser(SERIAL_PORT, BAUD_RATE)
-    lidar_parser.start()
-    print("LiDAR reader running in background; runtime will keep retrying if disconnected.")
+    if enable_lidar:
+        lidar_parser = LidarParser(SERIAL_PORT, BAUD_RATE)
+        lidar_parser.start()
+        print("LiDAR reader running in background; runtime will keep retrying if disconnected.")
+    else:
+        apply_lidar_unavailable_state(state)
+        print("LiDAR disabled by --no-lidar; runtime will ignore LiDAR hardware.")
 
     gps_reader = GpsReader()
     gps_reader.start()
@@ -1553,14 +1573,7 @@ def run(model_choice=None):
                 state["lidar_warn_threshold_m"] = obstacle_warn_threshold_m
                 state["num_lidar_points"] = len(latest_scan)
             else:
-                state["direction_arrow"] = " "
-                state["lidar_front_dist"] = MAX_LIDAR_RANGE_M
-                state["lidar_left_dist"] = MAX_LIDAR_RANGE_M
-                state["lidar_right_dist"] = MAX_LIDAR_RANGE_M
-                state["lidar_back_dist"] = MAX_LIDAR_RANGE_M
-                state["lidar_stop_threshold_m"] = FORWARD_OBSTACLE_STOP_DISTANCE_M
-                state["lidar_warn_threshold_m"] = OBSTACLE_WARN_THRESHOLD_M
-                state["num_lidar_points"] = 0
+                apply_lidar_unavailable_state(state)
 
             update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender)
             update_turn_signal_blink(state, metrics)
