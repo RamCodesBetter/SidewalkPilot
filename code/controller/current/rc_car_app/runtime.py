@@ -57,6 +57,7 @@ from .config import (
     SPEED_SMOOTHING_ALPHA,
     STEERING_AXIS,
     STEERING_CENTER_SETTLE_DURATION_SEC,
+    STEERING_CENTER_SETTLE_LEFT_OVERSHOOT_DEG,
     STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
@@ -87,6 +88,8 @@ from .config import (
     RIGHT_MOTOR_PWM_SCALE,
     SHARED_TRIGGER_AXIS,
     STEERING_DEADZONE,
+    STEERING_LEFT_GAIN,
+    STEERING_RIGHT_GAIN,
     HUB75_DASHBOARD_IDLE_EXIT_SEC,
 )
 from .hardware import Hardware
@@ -172,7 +175,11 @@ class AsyncDashboardSender:
 
 def print_controls():
     print("Controls:")
-    print(f"  Left stick X (axis {STEERING_AXIS}): steering, scaled deadzone {STEERING_DEADZONE:.2f}")
+    print(
+        f"  Left stick X (axis {STEERING_AXIS}): steering, "
+        f"scaled deadzone {STEERING_DEADZONE:.2f}, "
+        f"left/right gain {STEERING_LEFT_GAIN:.2f}/{STEERING_RIGHT_GAIN:.2f}"
+    )
     print(f"  Right trigger (axis {THROTTLE_AXIS}): throttle")
     print(f"  Left trigger (axis {BRAKE_AXIS}): brake")
     if SHARED_TRIGGER_AXIS:
@@ -243,6 +250,10 @@ def apply_steering_deadzone(raw_value: float) -> float:
 
 def joystick_steer_to_servo_degrees(normalized_value: float) -> float:
     clamped = max(-1.0, min(1.0, float(normalized_value)))
+    if clamped < 0.0:
+        clamped *= max(0.0, min(1.0, float(STEERING_LEFT_GAIN)))
+    elif clamped > 0.0:
+        clamped *= max(0.0, min(1.0, float(STEERING_RIGHT_GAIN)))
     return ((clamped + 1.0) / 2.0) * float(STEERING_SERVO_ACTUATION_RANGE_DEG)
 
 
@@ -258,11 +269,12 @@ def start_manual_steering_center_settle(state, previous_servo_degrees: float) ->
     if abs(previous_delta) < float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
         state["steering_center_settle_until"] = 0.0
         return
-    if previous_delta <= 0.0:
-        state["steering_center_settle_until"] = 0.0
-        return
-    overshoot_direction = -1.0
-    overshoot_degrees = float(STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG)
+    if previous_delta < 0.0:
+        overshoot_direction = 1.0
+        overshoot_degrees = float(STEERING_CENTER_SETTLE_LEFT_OVERSHOOT_DEG)
+    else:
+        overshoot_direction = -1.0
+        overshoot_degrees = float(STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG)
     state["steering_center_settle_deg"] = clamp_servo_degrees(
         center_degrees + (overshoot_direction * overshoot_degrees)
     )
