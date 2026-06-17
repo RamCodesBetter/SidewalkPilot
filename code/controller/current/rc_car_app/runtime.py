@@ -86,6 +86,7 @@ from .config import (
     QUIT_BUTTON,
     RIGHT_MOTOR_PWM_SCALE,
     SHARED_TRIGGER_AXIS,
+    STEERING_DEADZONE,
     HUB75_DASHBOARD_IDLE_EXIT_SEC,
 )
 from .hardware import Hardware
@@ -171,7 +172,7 @@ class AsyncDashboardSender:
 
 def print_controls():
     print("Controls:")
-    print(f"  Left stick X (axis {STEERING_AXIS}): steering")
+    print(f"  Left stick X (axis {STEERING_AXIS}): steering, scaled deadzone {STEERING_DEADZONE:.2f}")
     print(f"  Right trigger (axis {THROTTLE_AXIS}): throttle")
     print(f"  Left trigger (axis {BRAKE_AXIS}): brake")
     if SHARED_TRIGGER_AXIS:
@@ -230,8 +231,18 @@ def steering_degrees_to_normalized(servo_degrees: float) -> float:
     return max(-1.0, min(1.0, (float(servo_degrees) - center_degrees) / center_degrees))
 
 
-def joystick_steer_to_servo_degrees(raw_value: float) -> float:
+def apply_steering_deadzone(raw_value: float) -> float:
     clamped = max(-1.0, min(1.0, float(raw_value)))
+    deadzone = max(0.0, min(0.95, float(STEERING_DEADZONE)))
+    magnitude = abs(clamped)
+    if magnitude <= deadzone:
+        return 0.0
+    scaled = (magnitude - deadzone) / (1.0 - deadzone)
+    return scaled if clamped > 0.0 else -scaled
+
+
+def joystick_steer_to_servo_degrees(normalized_value: float) -> float:
+    clamped = max(-1.0, min(1.0, float(normalized_value)))
     return ((clamped + 1.0) / 2.0) * float(STEERING_SERVO_ACTUATION_RANGE_DEG)
 
 
@@ -1463,10 +1474,10 @@ def run(model_choice=None):
                         raw_steer_val = event.value
                         if (
                             navigation_manual_input_should_cancel(navigation, latest_nav, navigation_operator_last)
-                            and abs(raw_steer_val) > 0.1
+                            and abs(raw_steer_val) > STEERING_DEADZONE
                         ):
                             cancel_navigation_route(state, metrics, navigation, "Navigation cancelled by steering input.")
-                        if state["autonomous_mode"] and abs(raw_steer_val) > 0.1:
+                        if state["autonomous_mode"] and abs(raw_steer_val) > STEERING_DEADZONE:
                             cancel_autonomous_mode(
                                 state,
                                 metrics,
@@ -1480,12 +1491,13 @@ def run(model_choice=None):
                                     float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0,
                                 )
                             )
-                            if abs(raw_steer_val) < 0.1:
+                            scaled_steer_val = apply_steering_deadzone(raw_steer_val)
+                            if scaled_steer_val == 0.0:
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
                                 start_manual_steering_center_settle(state, previous_servo_degrees)
                             else:
-                                state["steer"] = raw_steer_val
+                                state["steer"] = scaled_steer_val
                                 state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
                                 state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
