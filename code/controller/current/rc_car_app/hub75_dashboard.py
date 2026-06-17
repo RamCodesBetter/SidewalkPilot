@@ -116,6 +116,9 @@ class Hub75DashboardSender:
         camera_fps: float = 0.0,
         system_status: str = "",
         nav_status: Dict[str, object] | None = None,
+        steering_trim_delta_deg: float = 0.0,
+        steering_trim_total_deg: float = 90.0,
+        steering_center_offset: float = 0.0,
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -147,6 +150,9 @@ class Hub75DashboardSender:
             "camera_fps": round(max(0.0, float(camera_fps)), 2),
             "system_status": str(system_status)[:4],
             "nav_status": nav_status or {},
+            "steering_trim_delta_deg": round(max(-180.0, min(180.0, float(steering_trim_delta_deg))), 2),
+            "steering_trim_total_deg": round(max(0.0, min(180.0, float(steering_trim_total_deg))), 2),
+            "steering_center_offset": round(max(-1.0, min(1.0, float(steering_center_offset))), 4),
             "timestamp": time.time(),
         }
         notification_sent = False

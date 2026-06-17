@@ -158,7 +158,7 @@ THROTTLE_AXIS = 4
 BRAKE_AXIS = 5
 SHARED_TRIGGER_AXIS = False
 DEBUG_CONTROLLER_INPUTS = False
-DASHBOARD_PAGE_COUNT = 12
+DASHBOARD_PAGE_COUNT = 13
 DASHBOARD_PAGE_AXIS_THRESHOLD = 0.65
 DASHBOARD_PAGE_HOLD_SEC = 0.05
 DASHBOARD_SCROLL_REPEAT_START_SEC = 0.6
@@ -185,6 +185,10 @@ def create_state():
     return {
         "steer": 0.0,
         "steering_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
+        "steering_trim_delta_deg": STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0),
+        "steering_trim_total_deg": (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
+        + (STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
+        "steering_center_offset": STEERING_SERVO_CENTER_OFFSET,
         "throttle": 0.0,
         "brake": False,
         "brake_force": 0.0,

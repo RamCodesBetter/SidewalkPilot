@@ -36,7 +36,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 12
+DASHBOARD_PAGE_COUNT = 13
 
 DIGIT_BLUE: Color = (0, 0, 255)
 GEAR_RED_DIM: Color = (220, 0, 0)
@@ -55,6 +55,8 @@ AT_GLYPH_INDEX = 22
 PERCENT_GLYPH_INDEX = 4
 LESS_THAN_GLYPH_INDEX = 8
 ALL_GLYPH_INDEX = 57
+PLUS_GLYPH_INDEX = 0
+MINUS_GLYPH_INDEX = 1
 MIN_VISIBLE_BRIGHTNESS_PERCENT = 5
 
 
@@ -81,6 +83,8 @@ def build_letter_map() -> Dict[str, Glyph]:
         letter_map[label] = glyph
     letter_map[" "] = [0x00] * 8
     letter_map[":"] = sign_glyphs[COLON_GLYPH_INDEX]
+    letter_map["+"] = sign_glyphs[PLUS_GLYPH_INDEX]
+    letter_map["-"] = sign_glyphs[MINUS_GLYPH_INDEX]
     letter_map["@"] = sign_glyphs[AT_GLYPH_INDEX]
     letter_map["%"] = sign_glyphs[PERCENT_GLYPH_INDEX]
     letter_map["<"] = sign_glyphs[LESS_THAN_GLYPH_INDEX]
@@ -226,6 +230,28 @@ class DashboardRenderer:
         if clamped >= 100:
             return ["10", "0", "%"]
         return [str(clamped // 10), str(clamped % 10), "%"]
+
+    def _signed_two_digit_cells(self, value: float) -> List[str]:
+        rounded = int(round(float(value)))
+        sign = "-" if rounded < 0 else "+"
+        magnitude = max(0, min(99, abs(rounded)))
+        tens = "" if magnitude < 10 else str(magnitude // 10)
+        return [sign, tens, str(magnitude % 10)]
+
+    def _optional_three_digit_cells(self, value: float) -> List[str]:
+        rounded = max(0, min(999, int(round(float(value)))))
+        hundreds = "" if rounded < 100 else str(rounded // 100)
+        tens = "" if rounded < 10 else str((rounded // 10) % 10)
+        return [hundreds, tens, str(rounded % 10)]
+
+    def _signed_offset_cells(self, value: float) -> List[str]:
+        clamped = max(-0.9999, min(0.9999, float(value)))
+        sign = "-" if clamped < 0 else "+"
+        scaled = int(round(abs(clamped) * 10000))
+        if scaled > 9999:
+            scaled = 9999
+        digits = f"{scaled:05d}"
+        return [sign, f"{digits[0]}.", digits[1], digits[2], digits[3], digits[4], "", ""]
 
     def _nav_payload(self, payload: Dict[str, object]) -> Dict[str, object]:
         raw_nav = payload.get("nav_status", {})
@@ -434,6 +460,15 @@ class DashboardRenderer:
         self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
 
+    def _draw_steering_trim_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        delta_cells = self._signed_two_digit_cells(float(payload.get("steering_trim_delta_deg", 0.0)))
+        total_cells = self._optional_three_digit_cells(float(payload.get("steering_trim_total_deg", 90.0)))
+        offset_cells = self._signed_offset_cells(float(payload.get("steering_center_offset", 0.0)))
+        self._draw_text_row(0, ["D", "E", "L", "T", ":", *delta_cells], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["T", "T", "L", "E", ":", *total_cells], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["V", "A", "R", "I", ":", "", "", ""], ARROW_YELLOW, y_offset_px)
+        self._draw_text_row(3, offset_cells, TEXT_ORANGE, y_offset_px)
+
     def _draw_nav_entry_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         nav = self._nav_payload(payload)
         if bool(nav.get("arrived_visible", False)):
@@ -564,6 +599,9 @@ class DashboardRenderer:
             return
         if page == 12:
             self._draw_photo_run_stats_page(payload, y_offset_px)
+            return
+        if page == 13:
+            self._draw_steering_trim_page(payload, y_offset_px)
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),
@@ -816,6 +854,9 @@ def main():
     camera_fps = 0.0
     system_status = "GOOD"
     nav_status: Dict[str, object] = {}
+    steering_trim_delta_deg = 0.0
+    steering_trim_total_deg = 90.0
+    steering_center_offset = 0.0
     last_packet_time = time.monotonic()
     have_received_payload = False
     telemetry_stale_reported = False
@@ -859,6 +900,9 @@ def main():
                 "camera_fps": camera_fps,
                 "system_status": status_override or system_status,
                 "nav_status": nav_status,
+                "steering_trim_delta_deg": steering_trim_delta_deg,
+                "steering_trim_total_deg": steering_trim_total_deg,
+                "steering_center_offset": steering_center_offset,
             },
             notification_rows,
         )
@@ -903,6 +947,9 @@ def main():
         nonlocal camera_fps
         nonlocal system_status
         nonlocal nav_status
+        nonlocal steering_trim_delta_deg
+        nonlocal steering_trim_total_deg
+        nonlocal steering_center_offset
         nonlocal telemetry_stale_reported
 
         if payload.get("shutdown"):
@@ -943,6 +990,18 @@ def main():
         raw_nav_status = payload.get("nav_status", nav_status)
         if isinstance(raw_nav_status, dict):
             nav_status = dict(raw_nav_status)
+        steering_trim_delta_deg = max(
+            -180.0,
+            min(180.0, float(payload.get("steering_trim_delta_deg", steering_trim_delta_deg))),
+        )
+        steering_trim_total_deg = max(
+            0.0,
+            min(180.0, float(payload.get("steering_trim_total_deg", steering_trim_total_deg))),
+        )
+        steering_center_offset = max(
+            -1.0,
+            min(1.0, float(payload.get("steering_center_offset", steering_center_offset))),
+        )
         renderer.set_brightness(brightness_percent)
         max7219.set_brightness_percent(brightness_percent)
         notification = payload.get("dashboard_notification")

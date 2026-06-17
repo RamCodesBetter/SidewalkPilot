@@ -57,6 +57,7 @@ from .config import (
     SPEED_SMOOTHING_ALPHA,
     STEERING_AXIS,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
+    STEERING_SERVO_CENTER_OFFSET,
     THROTTLE_AXIS,
     TURN_SIGNAL_BLINK_INTERVAL_SEC,
     ENABLE_HUB75_DASHBOARD_TELEMETRY,
@@ -177,7 +178,7 @@ def print_controls():
     print(f"  Button {HAZARD_BUTTON} (View): hazard lights")
     print(f"  Button {AEB_TOGGLE_BUTTON} (RSB): toggle AEB")
     print(f"  Button {QUIT_BUTTON} (Share): quit")
-    print("  D-pad left/right: left/right indicator; move nav cursor on NAVIGATE page")
+    print("  D-pad left/right: left/right indicator; move nav cursor on NAVIGATE page; trim on v6h2")
     print("  D-pad up/down: edit nav entry, cycle model, adjust cruise/brightness")
     print(
         f"  D-pad hold: repeat starts after {DPAD_SCROLL_REPEAT_START_SEC:.1f}s; "
@@ -337,9 +338,12 @@ DASHBOARD_PAGE_COORDS = {
     10: (5, 2),
     11: (6, 1),
     12: (2, 3),
+    13: (6, 2),
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
+STEERING_TRIM_DASHBOARD_PAGE = 13
+STEERING_TRIM_STEP_DEG = 1.0
 
 
 def dashboard_page_to_coords(page: int) -> tuple[int, int]:
@@ -359,6 +363,45 @@ def set_dashboard_page(state, page: int) -> None:
     state["dashboard_page"] = page
     state["dashboard_page_vertical"] = vertical_page
     state["dashboard_page_horizontal"] = horizontal_page
+
+
+def steering_center_degrees() -> float:
+    return float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+
+
+def sync_steering_trim_state(state, center_offset: float) -> None:
+    center_degrees = steering_center_degrees()
+    clamped_offset = max(-1.0, min(1.0, float(center_offset)))
+    delta_degrees = clamped_offset * center_degrees
+    state["steering_center_offset"] = clamped_offset
+    state["steering_trim_delta_deg"] = delta_degrees
+    state["steering_trim_total_deg"] = center_degrees + delta_degrees
+
+
+def adjust_steering_center_trim(state, hardware, direction: int) -> None:
+    center_degrees = steering_center_degrees()
+    current_delta = float(
+        state.get(
+            "steering_trim_delta_deg",
+            STEERING_SERVO_CENTER_OFFSET * center_degrees,
+        )
+    )
+    next_delta = max(-center_degrees, min(center_degrees, current_delta + (int(direction) * STEERING_TRIM_STEP_DEG)))
+    next_offset = next_delta / center_degrees if center_degrees else 0.0
+    sync_steering_trim_state(state, next_offset)
+    servo = getattr(hardware, "steering_servo", None)
+    if hasattr(servo, "set_center_offset"):
+        try:
+            servo.set_center_offset(next_offset)
+        except Exception as exc:
+            print(f"Steering trim update failed: {exc}")
+            return
+    print(
+        "Steering trim -> "
+        f"delta {state['steering_trim_delta_deg']:+.1f} deg, "
+        f"total {state['steering_trim_total_deg']:.1f} deg, "
+        f"STEERING_SERVO_CENTER_OFFSET={state['steering_center_offset']:+.4f}"
+    )
 
 
 def dashboard_axis_direction(axis_value: float) -> int:
@@ -1502,7 +1545,10 @@ def run(model_choice=None, enable_lidar=True):
                 elif event.type == pygame.JOYHATMOTION:
                     hat_x, hat_y = event.value
                     if hat_x:
-                        if int(state.get("dashboard_page", 1)) == 5 and not navigation.active:
+                        current_dashboard_page = int(state.get("dashboard_page", 1))
+                        if current_dashboard_page == STEERING_TRIM_DASHBOARD_PAGE:
+                            adjust_steering_center_trim(state, hardware, int(hat_x))
+                        elif current_dashboard_page == 5 and not navigation.active:
                             navigation.move_cursor(int(hat_x))
                         elif hat_x == -1:
                             toggle_turn_signal(state, metrics, "left")
@@ -1633,6 +1679,9 @@ def run(model_choice=None, enable_lidar=True):
                     camera_fps=webcam_vision.camera_fps if webcam_vision is not None else 0.0,
                     system_status=get_system_status(state),
                     nav_status=latest_nav,
+                    steering_trim_delta_deg=state["steering_trim_delta_deg"],
+                    steering_trim_total_deg=state["steering_trim_total_deg"],
+                    steering_center_offset=state["steering_center_offset"],
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""

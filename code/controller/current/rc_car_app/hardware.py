@@ -103,6 +103,10 @@ class CenteredServoAdapter:
     def value(self):
         return self._value
 
+    def set_center_offset(self, center_offset: float):
+        self._center_offset = max(-1.0, min(1.0, float(center_offset)))
+        self.value = self._value
+
     @value.setter
     def value(self, raw_value):
         clamped = max(0.0, min(self._actuation_range_deg, float(raw_value)))
@@ -149,6 +153,10 @@ class PCA9685SteeringServo:
     @property
     def value(self):
         return self._value
+
+    def set_center_offset(self, center_offset: float):
+        self._center_offset = max(-1.0, min(1.0, float(center_offset)))
+        self.value = self._value
 
     @value.setter
     def value(self, raw_value):
