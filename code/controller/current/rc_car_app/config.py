@@ -3,7 +3,7 @@ import datetime
 import math
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # --- SELF-DRIVING BUILD FLAGS ---
 ENABLE_HALL_SENSOR = True
@@ -296,6 +296,12 @@ class Metrics:
     dashboard_page_transition: str = ""
     dashboard_cpu_temp_c: float = 0.0
     dashboard_cpu_temp_last_sample_time: float = 0.0
+    dashboard_photos_run: int = 0
+    dashboard_photos_all: int = 0
+    dashboard_photo_run_stats: dict = field(
+        default_factory=lambda: {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
+    )
+    dashboard_photo_stats_last_sample_time: float = 0.0
     auto_photo_next_time: float = 0.0
     servo_error_count: int = 0
     servo_error_last_log_time: float = 0.0

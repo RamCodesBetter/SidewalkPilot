@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import json
 import socket
-import subprocess
 import time
 from typing import Dict, List
 
@@ -30,10 +29,8 @@ class Hub75DashboardSender:
         self.serial_handle = None
         self.socket_handle = None
         self.udp_targets = []
-        self.active_udp_target_index = 0
-        self.last_udp_target_probe_time = 0.0
-        self.udp_target_probe_interval_sec = 2.0
         self.last_udp_target_log = ""
+        self.last_udp_send_error_time = 0.0
         self.last_send_time = 0.0
         self.last_payload_json = ""
         self.last_connect_attempt = 0.0
@@ -60,6 +57,7 @@ class Hub75DashboardSender:
                 return False
             try:
                 targets = []
+                seen_targets = set()
                 for host in [part.strip() for part in str(self.udp_host).split(",") if part.strip()]:
                     try:
                         addrinfo = socket.getaddrinfo(
@@ -71,7 +69,11 @@ class Hub75DashboardSender:
                     except Exception as exc:
                         print(f"Hub75 dashboard telemetry UDP target unavailable {host}:{self.udp_port}: {exc}")
                         continue
-                    targets.append((host, addrinfo[0][4]))
+                    target = addrinfo[0][4]
+                    if target in seen_targets:
+                        continue
+                    seen_targets.add(target)
+                    targets.append((host, target))
                 if not targets:
                     self.socket_handle = None
                     self.udp_targets = []
@@ -108,39 +110,8 @@ class Hub75DashboardSender:
             self.serial_handle = None
             return False
 
-    def _probe_udp_host(self, host: str) -> bool:
-        try:
-            result = subprocess.run(
-                ["ping", "-c", "1", "-W", "1", host],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=1.5,
-                check=False,
-            )
-            return result.returncode == 0
-        except Exception:
-            return False
-
-    def _select_udp_target(self, now: float):
-        if not self.udp_targets:
-            return None
-        if self.active_udp_target_index >= len(self.udp_targets):
-            self.active_udp_target_index = 0
-
-        if now - self.last_udp_target_probe_time >= self.udp_target_probe_interval_sec:
-            self.last_udp_target_probe_time = now
-            selected_index = None
-            for index, (host, _) in enumerate(self.udp_targets):
-                if self._probe_udp_host(host):
-                    selected_index = index
-                    break
-            self.active_udp_target_index = selected_index if selected_index is not None else 0
-
-        host, target = self.udp_targets[self.active_udp_target_index]
-        if host != self.last_udp_target_log:
-            print(f"Hub75 dashboard telemetry active UDP target: {host}:{self.udp_port}.")
-            self.last_udp_target_log = host
-        return target
+    def _udp_target_summary(self) -> str:
+        return ", ".join(f"{host}:{self.udp_port}" for host, _ in self.udp_targets)
 
     def send(
         self,
@@ -247,11 +218,23 @@ class Hub75DashboardSender:
             if self.transport == "udp":
                 if self.socket_handle is None or not self.udp_targets:
                     return False
-                target = self._select_udp_target(send_time_monotonic)
-                if target is None:
-                    self.close()
+                target_summary = self._udp_target_summary()
+                if target_summary != self.last_udp_target_log:
+                    print(f"Hub75 dashboard telemetry active UDP targets: {target_summary}.")
+                    self.last_udp_target_log = target_summary
+                sent_any = False
+                last_error = None
+                for _, target in self.udp_targets:
+                    try:
+                        self.socket_handle.sendto(encoded, target)
+                        sent_any = True
+                    except OSError as exc:
+                        last_error = exc
+                if not sent_any:
+                    if send_time_monotonic - self.last_udp_send_error_time >= 2.0:
+                        print(f"Hub75 dashboard telemetry UDP send failed for all targets: {last_error}")
+                        self.last_udp_send_error_time = send_time_monotonic
                     return False
-                self.socket_handle.sendto(encoded, target)
             else:
                 if self.serial_handle is None:
                     return False
@@ -278,5 +261,4 @@ class Hub75DashboardSender:
                 pass
             self.socket_handle = None
             self.udp_targets = []
-            self.active_udp_target_index = 0
             self.last_udp_target_log = ""

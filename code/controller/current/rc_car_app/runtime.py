@@ -107,6 +107,7 @@ from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, Webca
 shutdown_flag = threading.Event()
 current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
+DASHBOARD_PHOTO_STATS_INTERVAL_SEC = 5.0
 
 
 class AsyncDashboardSender:
@@ -888,6 +889,16 @@ def count_photos_all() -> int:
     if not base.exists():
         return 0
     return sum(1 for f in base.rglob("*") if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
+
+
+def update_dashboard_photo_stats(metrics, now: float | None = None, force: bool = False) -> None:
+    current_time = time.time() if now is None else now
+    if not force and current_time - metrics.dashboard_photo_stats_last_sample_time < DASHBOARD_PHOTO_STATS_INTERVAL_SEC:
+        return
+    metrics.dashboard_photos_run = count_photos_run()
+    metrics.dashboard_photos_all = count_photos_all()
+    metrics.dashboard_photo_run_stats = photo_run_stats()
+    metrics.dashboard_photo_stats_last_sample_time = current_time
 
 
 def is_stop_brake_condition(state) -> bool:
@@ -1689,6 +1700,7 @@ def run(model_choice=None):
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
                 metrics.dashboard_cpu_temp_c = get_cpu_temp()
                 metrics.dashboard_cpu_temp_last_sample_time = current_loop_time
+            update_dashboard_photo_stats(metrics, current_loop_time)
             gps_state = gps_reader.get_state() if gps_reader is not None else {"fix": False, "sats": 0}
             latest_nav = navigation.update(
                 gps_state,
@@ -1739,9 +1751,9 @@ def run(model_choice=None):
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
                     camera_pixels=camera_pixels,
-                    photos_run=count_photos_run(),
-                    photos_all=count_photos_all(),
-                    photo_run_stats=photo_run_stats(),
+                    photos_run=metrics.dashboard_photos_run,
+                    photos_all=metrics.dashboard_photos_all,
+                    photo_run_stats=metrics.dashboard_photo_run_stats,
                     camera_fps=webcam_vision.camera_fps if webcam_vision is not None else 0.0,
                     system_status=get_system_status(state),
                     nav_status=latest_nav,

@@ -37,6 +37,7 @@ CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
 DASHBOARD_PAGE_COUNT = 14
+TELEMETRY_STALE_DISPLAY_SEC = 4.0
 
 DIGIT_BLUE: Color = (0, 0, 255)
 GEAR_RED_DIM: Color = (220, 0, 0)
@@ -930,7 +931,7 @@ def main():
             if now - receiver_start_time >= 3.0:
                 notification_rows.insert(0, ["N", "O", "", "L", "I", "N", "K", ""])
                 status_override = status_override or "LINK"
-        elif now - last_packet_time >= 2.0:
+        elif now - last_packet_time >= TELEMETRY_STALE_DISPLAY_SEC:
             notification_rows.insert(0, ["S", "T", "A", "L", "E", "", "", ""])
             status_override = status_override or "LINK"
         notification_rows = notification_rows[:2]
