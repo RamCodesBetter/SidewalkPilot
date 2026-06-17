@@ -132,6 +132,8 @@ class AsyncDashboardSender:
             return self.last_payload_json
 
     def send_shutdown(self):
+        with self.lock:
+            self.sender.send_shutdown()
         self.running = False
         self.thread.join(timeout=1.0)
         with self.lock:
@@ -1720,6 +1722,10 @@ def run(model_choice=None, enable_lidar=True):
                 psutil.virtual_memory().percent,
                 get_cpu_temp(),
             )
+        dashboard_shutdown_sent = False
+        if dashboard_sender:
+            dashboard_sender.send_shutdown()
+            dashboard_shutdown_sent = True
         if lidar_parser:
             lidar_parser.stop()
         if gps_reader:
@@ -1727,7 +1733,8 @@ def run(model_choice=None, enable_lidar=True):
         if webcam_vision:
             webcam_vision.stop()
         if dashboard_sender:
-            dashboard_sender.send_shutdown()
+            if not dashboard_shutdown_sent:
+                dashboard_sender.send_shutdown()
             dashboard_sender.close()
         hardware.cleanup()
         if csv_file:
