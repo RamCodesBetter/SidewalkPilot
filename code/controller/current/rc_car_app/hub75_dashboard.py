@@ -28,7 +28,7 @@ class Hub75DashboardSender:
         self.udp_port = udp_port
         self.serial_handle = None
         self.socket_handle = None
-        self.udp_target = None
+        self.udp_targets = []
         self.last_send_time = 0.0
         self.last_payload_json = ""
         self.last_connect_attempt = 0.0
@@ -39,7 +39,7 @@ class Hub75DashboardSender:
     def _ensure_connected(self):
         if self.transport == "serial" and self.serial_handle is not None:
             return True
-        if self.transport == "udp" and self.socket_handle is not None and self.udp_target is not None:
+        if self.transport == "udp" and self.socket_handle is not None and self.udp_targets:
             return True
 
         now = time.monotonic()
@@ -54,20 +54,32 @@ class Hub75DashboardSender:
                     self.import_error_reported = True
                 return False
             try:
-                addrinfo = socket.getaddrinfo(
-                    self.udp_host,
-                    self.udp_port,
-                    type=socket.SOCK_DGRAM,
-                )
-                family, socktype, proto, _, sockaddr = addrinfo[0]
-                self.socket_handle = socket.socket(family, socktype, proto)
-                self.udp_target = sockaddr
-                print(f"Hub75 dashboard telemetry sending UDP to {self.udp_host}:{self.udp_port}.")
+                targets = []
+                for host in [part.strip() for part in str(self.udp_host).split(",") if part.strip()]:
+                    try:
+                        addrinfo = socket.getaddrinfo(
+                            host,
+                            self.udp_port,
+                            family=socket.AF_INET,
+                            type=socket.SOCK_DGRAM,
+                        )
+                    except Exception as exc:
+                        print(f"Hub75 dashboard telemetry UDP target unavailable {host}:{self.udp_port}: {exc}")
+                        continue
+                    targets.append((host, addrinfo[0][4]))
+                if not targets:
+                    self.socket_handle = None
+                    self.udp_targets = []
+                    return False
+                self.socket_handle = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self.udp_targets = targets
+                target_names = ", ".join(f"{host}:{self.udp_port}" for host, _ in targets)
+                print(f"Hub75 dashboard telemetry sending UDP to {target_names}.")
                 return True
             except Exception as exc:
                 print(f"Hub75 dashboard telemetry UDP setup failed for {self.udp_host}:{self.udp_port}: {exc}")
                 self.socket_handle = None
-                self.udp_target = None
+                self.udp_targets = []
                 return False
 
         if self.transport != "serial":
@@ -192,9 +204,18 @@ class Hub75DashboardSender:
             payload_json = json.dumps(payload, separators=(",", ":"), sort_keys=True)
             encoded = (payload_json + "\n").encode("utf-8")
             if self.transport == "udp":
-                if self.socket_handle is None or self.udp_target is None:
+                if self.socket_handle is None or not self.udp_targets:
                     return False
-                self.socket_handle.sendto(encoded, self.udp_target)
+                sent_any = False
+                for _, target in self.udp_targets:
+                    try:
+                        self.socket_handle.sendto(encoded, target)
+                        sent_any = True
+                    except Exception as exc:
+                        print(f"Hub75 dashboard telemetry UDP write failed for {target}: {exc}")
+                if not sent_any:
+                    self.close()
+                    return False
             else:
                 if self.serial_handle is None:
                     return False
@@ -220,4 +241,4 @@ class Hub75DashboardSender:
             except Exception:
                 pass
             self.socket_handle = None
-            self.udp_target = None
+            self.udp_targets = []

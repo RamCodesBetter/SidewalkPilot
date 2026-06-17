@@ -366,6 +366,7 @@ class DashboardRenderer:
             "GOOD": TEXT_GREEN,
             "CTRE": TEXT_CYAN,
             "SAVE": ARROW_YELLOW,
+            "LINK": ALERT_RED_DIM,
             "ERR":  ALERT_RED_DIM,
         }
         sts_color = sts_colors.get(sts, TEXT_GREEN)
@@ -898,6 +899,7 @@ def main():
     steering_trim_delta_deg = 0.0
     steering_trim_total_deg = 90.0
     steering_center_offset = 0.0
+    receiver_start_time = time.monotonic()
     last_packet_time = time.monotonic()
     have_received_payload = False
     telemetry_stale_reported = False
@@ -917,6 +919,15 @@ def main():
 
     def render_current_state(status_override: str | None = None) -> None:
         notification_rows = update_notification_rows()
+        now = time.monotonic()
+        if not have_received_payload:
+            if now - receiver_start_time >= 3.0:
+                notification_rows.insert(0, ["N", "O", "L", "I", "N", "K", "", ""])
+                status_override = status_override or "LINK"
+        elif now - last_packet_time >= 2.0:
+            notification_rows.insert(0, ["S", "T", "A", "L", "E", "", "", ""])
+            status_override = status_override or "LINK"
+        notification_rows = notification_rows[:2]
         renderer.render(
             {
                 "speed_mph": latest_speed,

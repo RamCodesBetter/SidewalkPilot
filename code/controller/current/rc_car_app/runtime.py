@@ -1401,11 +1401,12 @@ def run(model_choice=None):
                 "Hub75 dashboard telemetry transport: UDP "
                 f"({HUB75_DASHBOARD_HOST}:{HUB75_DASHBOARD_UDP_PORT})."
             )
-            try:
-                resolved = socket.gethostbyname(HUB75_DASHBOARD_HOST)
-                print(f"Hub75 dashboard host resolves to {resolved}.")
-            except OSError as exc:
-                print(f"Hub75 dashboard host '{HUB75_DASHBOARD_HOST}' not yet resolvable: {exc}")
+            for dashboard_host in [part.strip() for part in HUB75_DASHBOARD_HOST.split(",") if part.strip()]:
+                try:
+                    resolved = socket.gethostbyname(dashboard_host)
+                    print(f"Hub75 dashboard host {dashboard_host} resolves to {resolved}.")
+                except OSError as exc:
+                    print(f"Hub75 dashboard host '{dashboard_host}' not yet resolvable: {exc}")
         else:
             print(
                 "Hub75 dashboard telemetry transport: serial "

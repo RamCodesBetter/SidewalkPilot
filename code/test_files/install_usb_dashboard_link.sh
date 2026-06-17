@@ -112,6 +112,66 @@ configure_usb0_static_ip() {
   run ip addr replace "$address" dev usb0 || true
 }
 
+install_usb0_keeper() {
+  local role="$1"
+  local address="$2"
+  local peer="$3"
+
+  cat >/usr/local/sbin/sidewalkpilot-usb0-keeper <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+ADDRESS="${1:?missing local address}"
+PEER="${2:?missing peer address}"
+FAILURES=0
+
+while true; do
+  if ip link show usb0 >/dev/null 2>&1; then
+    ip link set usb0 up || true
+    ip addr replace "$ADDRESS" dev usb0 || true
+
+    if ping -I usb0 -c 1 -W 1 "$PEER" >/dev/null 2>&1; then
+      FAILURES=0
+    else
+      FAILURES=$((FAILURES + 1))
+      ip neigh flush dev usb0 || true
+
+      if [[ "$FAILURES" -ge 3 ]]; then
+        ip link set usb0 down || true
+        sleep 1
+        ip link set usb0 up || true
+        ip addr replace "$ADDRESS" dev usb0 || true
+        FAILURES=0
+      fi
+    fi
+  fi
+
+  sleep 2
+done
+EOF
+  chmod 0755 /usr/local/sbin/sidewalkpilot-usb0-keeper
+
+  cat >/etc/systemd/system/sidewalkpilot-usb0-keeper.service <<EOF
+[Unit]
+Description=SidewalkPilot USB dashboard link keeper (${role})
+After=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/sidewalkpilot-usb0-keeper ${address} ${peer}
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  run systemctl daemon-reload
+  run systemctl enable sidewalkpilot-usb0-keeper.service
+  run systemctl restart sidewalkpilot-usb0-keeper.service || true
+}
+
 configure_z2w_gadget() {
   local config_txt
   local cmdline_txt
@@ -187,11 +247,13 @@ verify_link() {
 case "$ROLE" in
   rpi)
     configure_usb0_static_ip rpi "$RPI_IP"
+    install_usb0_keeper rpi "$RPI_IP" "$Z2W_PEER"
     echo "RPi side installed. Reboot recommended."
     ;;
   z2w)
     configure_z2w_gadget
     configure_usb0_static_ip z2w "$Z2W_IP"
+    install_usb0_keeper z2w "$Z2W_IP" "$RPI_PEER"
     echo "Z2W side installed. Reboot required for gadget boot config."
     ;;
   verify-rpi)
