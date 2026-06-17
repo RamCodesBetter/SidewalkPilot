@@ -385,6 +385,11 @@ class DashboardRenderer:
         for col in range(0, PANEL_WIDTH, 8):
             self._set_pixel(col, center_y, (0, 35, 35))
         raw_points = payload.get("lidar_points", [])
+        point_count = max(0, int(payload.get("lidar_point_count", 0)))
+        if not raw_points:
+            self._draw_text_row(0, ["L", "D", "R", ":", "N", "O", "N", "E"], ALERT_RED_DIM, y_offset_px)
+            count_cells = self._format_three_digits(point_count)
+            self._draw_text_row(3, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
         if isinstance(raw_points, list):
             for raw_point in raw_points:
                 if not isinstance(raw_point, list) or len(raw_point) < 2:
@@ -886,6 +891,7 @@ def main():
     brake_percent = 0
     drive_mode = "MAN"
     lidar_points: List[List[float]] = []
+    lidar_point_count = 0
     model_choice = ""
     camera_confidence_percent = 0
     cpu_temp_c = 0.0
@@ -942,6 +948,7 @@ def main():
                 "brake_percent": brake_percent,
                 "drive_mode": drive_mode,
                 "lidar_points": lidar_points,
+                "lidar_point_count": lidar_point_count,
                 "model_choice": model_choice,
                 "camera_confidence_percent": camera_confidence_percent,
                 "cpu_temp_c": cpu_temp_c,
@@ -989,6 +996,7 @@ def main():
         nonlocal brake_percent
         nonlocal drive_mode
         nonlocal lidar_points
+        nonlocal lidar_point_count
         nonlocal model_choice
         nonlocal camera_confidence_percent
         nonlocal cpu_temp_c
@@ -1029,6 +1037,7 @@ def main():
         raw_lidar_points = payload.get("lidar_points", lidar_points)
         if isinstance(raw_lidar_points, list):
             lidar_points = raw_lidar_points[:180]
+        lidar_point_count = max(0, int(payload.get("lidar_point_count", len(lidar_points))))
         raw_camera_pixels = payload.get("camera_pixels", camera_pixels)
         if isinstance(raw_camera_pixels, list):
             camera_pixels = [str(row)[: PANEL_WIDTH * 4] for row in raw_camera_pixels[:PANEL_HEIGHT]]
@@ -1065,9 +1074,19 @@ def main():
                     cells.extend([""] * (8 - len(cells)))
                 now = time.monotonic()
                 prune_expired_notifications(now)
+                duration_sec = max(0.1, float(notification.get("duration_sec", 2.0)))
+                duplicate_notification = False
+                for active_notification in active_notifications:
+                    if list(active_notification.get("cells", []))[:8] == cells:
+                        active_notification["duration_sec"] = duration_sec
+                        active_notification["expires_at"] = now + duration_sec
+                        duplicate_notification = True
+                        break
+                if duplicate_notification:
+                    render_current_state()
+                    return None
                 if len(active_notifications) >= 2:
                     active_notifications.pop(0)
-                duration_sec = max(0.1, float(notification.get("duration_sec", 2.0)))
                 active_notifications.append(
                     {
                         "cells": cells,

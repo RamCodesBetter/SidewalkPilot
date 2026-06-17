@@ -113,6 +113,7 @@ class AsyncDashboardSender:
     def __init__(self, sender: Hub75DashboardSender):
         self.sender = sender
         self.lock = threading.Lock()
+        self.sender_lock = threading.Lock()
         self.latest_args = None
         self.latest_kwargs = None
         self.last_payload_json = ""
@@ -128,7 +129,7 @@ class AsyncDashboardSender:
             return self.last_send_ok
 
     def queue_notification(self, cells: list[str], duration_sec: float = 2.0):
-        with self.lock:
+        with self.sender_lock:
             self.sender.queue_notification(cells, duration_sec=duration_sec)
 
     def get_last_payload_json(self) -> str:
@@ -136,17 +137,17 @@ class AsyncDashboardSender:
             return self.last_payload_json
 
     def send_shutdown(self):
-        with self.lock:
+        with self.sender_lock:
             self.sender.send_shutdown()
         self.running = False
         self.thread.join(timeout=1.0)
-        with self.lock:
+        with self.sender_lock:
             self.sender.send_shutdown()
 
     def close(self):
         self.running = False
         self.thread.join(timeout=1.0)
-        with self.lock:
+        with self.sender_lock:
             self.sender.close()
 
     def _run(self):
@@ -154,13 +155,17 @@ class AsyncDashboardSender:
             with self.lock:
                 args = self.latest_args
                 kwargs = dict(self.latest_kwargs or {})
-                if args is None:
-                    sent = False
-                else:
+            if args is None:
+                sent = False
+            else:
+                with self.sender_lock:
                     sent = self.sender.send(*args, **kwargs)
+                    payload_json = self.sender.last_payload_json
+            with self.lock:
+                if args is not None:
                     self.last_send_ok = bool(sent)
                     if sent:
-                        self.last_payload_json = self.sender.last_payload_json
+                        self.last_payload_json = payload_json
             time.sleep(max(0.01, HUB75_DASHBOARD_SEND_INTERVAL_SEC * 0.25))
 
 
@@ -281,7 +286,7 @@ def format_lidar_dashboard_points(lidar_scan, max_points: int = 180) -> list[lis
         for point in lidar_scan
         if getattr(point, "is_valid", False)
         and getattr(point, "distance_mm", 0) > 0
-        and getattr(point, "confidence", 0) >= 150
+        and getattr(point, "confidence", 0) > 0
     ]
     if not valid_points:
         return []
@@ -1729,6 +1734,7 @@ def run(model_choice=None):
                     brake_percent=state["dashboard_brake_percent"],
                     drive_mode=get_dashboard_drive_mode(state),
                     lidar_points=lidar_dashboard_points,
+                    lidar_point_count=state["num_lidar_points"],
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,

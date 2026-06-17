@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import json
 import socket
+import subprocess
 import time
 from typing import Dict, List
 
@@ -29,6 +30,10 @@ class Hub75DashboardSender:
         self.serial_handle = None
         self.socket_handle = None
         self.udp_targets = []
+        self.active_udp_target_index = 0
+        self.last_udp_target_probe_time = 0.0
+        self.udp_target_probe_interval_sec = 2.0
+        self.last_udp_target_log = ""
         self.last_send_time = 0.0
         self.last_payload_json = ""
         self.last_connect_attempt = 0.0
@@ -103,6 +108,40 @@ class Hub75DashboardSender:
             self.serial_handle = None
             return False
 
+    def _probe_udp_host(self, host: str) -> bool:
+        try:
+            result = subprocess.run(
+                ["ping", "-c", "1", "-W", "1", host],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=1.5,
+                check=False,
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def _select_udp_target(self, now: float):
+        if not self.udp_targets:
+            return None
+        if self.active_udp_target_index >= len(self.udp_targets):
+            self.active_udp_target_index = 0
+
+        if now - self.last_udp_target_probe_time >= self.udp_target_probe_interval_sec:
+            self.last_udp_target_probe_time = now
+            selected_index = None
+            for index, (host, _) in enumerate(self.udp_targets):
+                if self._probe_udp_host(host):
+                    selected_index = index
+                    break
+            self.active_udp_target_index = selected_index if selected_index is not None else 0
+
+        host, target = self.udp_targets[self.active_udp_target_index]
+        if host != self.last_udp_target_log:
+            print(f"Hub75 dashboard telemetry active UDP target: {host}:{self.udp_port}.")
+            self.last_udp_target_log = host
+        return target
+
     def send(
         self,
         speed_mph: float,
@@ -118,6 +157,7 @@ class Hub75DashboardSender:
         brake_percent: int = 0,
         drive_mode: str = "MAN",
         lidar_points: List[List[float]] | None = None,
+        lidar_point_count: int = 0,
         model_choice: str = "",
         camera_confidence_percent: int = 0,
         cpu_temp_c: float = 0.0,
@@ -152,6 +192,7 @@ class Hub75DashboardSender:
             "brake_percent": max(0, min(100, int(brake_percent))),
             "drive_mode": str(drive_mode)[:3],
             "lidar_points": lidar_points or [],
+            "lidar_point_count": max(0, int(lidar_point_count)),
             "model_choice": str(model_choice)[:4],
             "camera_confidence_percent": max(0, min(100, int(camera_confidence_percent))),
             "cpu_temp_c": round(max(0.0, min(99.0, float(cpu_temp_c))), 1),
@@ -206,16 +247,11 @@ class Hub75DashboardSender:
             if self.transport == "udp":
                 if self.socket_handle is None or not self.udp_targets:
                     return False
-                sent_any = False
-                for _, target in self.udp_targets:
-                    try:
-                        self.socket_handle.sendto(encoded, target)
-                        sent_any = True
-                    except Exception as exc:
-                        print(f"Hub75 dashboard telemetry UDP write failed for {target}: {exc}")
-                if not sent_any:
+                target = self._select_udp_target(send_time_monotonic)
+                if target is None:
                     self.close()
                     return False
+                self.socket_handle.sendto(encoded, target)
             else:
                 if self.serial_handle is None:
                     return False
@@ -242,3 +278,5 @@ class Hub75DashboardSender:
                 pass
             self.socket_handle = None
             self.udp_targets = []
+            self.active_udp_target_index = 0
+            self.last_udp_target_log = ""
