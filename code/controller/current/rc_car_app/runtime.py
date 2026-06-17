@@ -58,7 +58,6 @@ from .config import (
     STEERING_AXIS,
     STEERING_CENTER_SETTLE_DURATION_SEC,
     STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG,
-    STEERING_CENTER_SETTLE_LOW_OVERSHOOT_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
@@ -248,12 +247,11 @@ def start_manual_steering_center_settle(state, previous_servo_degrees: float) ->
     if abs(previous_delta) < float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
         state["steering_center_settle_until"] = 0.0
         return
-    if previous_delta > 0.0:
-        overshoot_direction = -1.0
-        overshoot_degrees = float(STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG)
-    else:
-        overshoot_direction = 1.0
-        overshoot_degrees = float(STEERING_CENTER_SETTLE_LOW_OVERSHOOT_DEG)
+    if previous_delta <= 0.0:
+        state["steering_center_settle_until"] = 0.0
+        return
+    overshoot_direction = -1.0
+    overshoot_degrees = float(STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG)
     state["steering_center_settle_deg"] = clamp_servo_degrees(
         center_degrees + (overshoot_direction * overshoot_degrees)
     )
