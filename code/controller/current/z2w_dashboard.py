@@ -36,7 +36,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 13
+DASHBOARD_PAGE_COUNT = 12
 
 DIGIT_BLUE: Color = (0, 0, 255)
 GEAR_RED_DIM: Color = (220, 0, 0)
@@ -48,11 +48,6 @@ TEXT_CYAN: Color = (0, 180, 255)
 TEXT_GREEN: Color = (0, 255, 0)
 TEXT_ORANGE: Color = (255, 120, 0)
 TEXT_WHITE: Color = (220, 220, 220)
-LIDAR_POINT_GREEN: Color = (0, 255, 70)
-LIDAR_POINT_YELLOW: Color = (255, 220, 0)
-LIDAR_POINT_RED: Color = (255, 0, 0)
-LIDAR_POINT_BLUE: Color = (0, 120, 255)
-LIDAR_CAR: Color = (255, 255, 255)
 RIGHT_TURN_SIGNAL_INDEX = 28
 LEFT_TURN_SIGNAL_INDEX = 29
 COLON_GLYPH_INDEX = 17
@@ -349,39 +344,6 @@ class DashboardRenderer:
         self._draw_text_row(2, ["F", "P", "S", ":", str(fps_int // 10), f"{fps_int % 10}.", str(fps_frac // 10), str(fps_frac % 10)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
-    def _draw_page_five(self, payload: Dict[str, object], y_offset_px: int = 0):
-        center_x = PANEL_WIDTH // 2
-        center_y = (PANEL_HEIGHT // 2) + y_offset_px
-        scale = 2.5
-        for row in range(0, PANEL_HEIGHT, 8):
-            self._set_pixel(center_x, row + y_offset_px, (0, 35, 35))
-        for col in range(0, PANEL_WIDTH, 8):
-            self._set_pixel(col, center_y, (0, 35, 35))
-        raw_points = payload.get("lidar_points", [])
-        if isinstance(raw_points, list):
-            for raw_point in raw_points:
-                if not isinstance(raw_point, list) or len(raw_point) < 2:
-                    continue
-                try:
-                    angle_deg = float(raw_point[0])
-                    distance_m = max(0.0, min(6.0, float(raw_point[1])))
-                except (TypeError, ValueError):
-                    continue
-                angle_rad = math.radians(angle_deg)
-                x = int(round(center_x + math.sin(angle_rad) * distance_m * scale))
-                y = int(round(center_y - math.cos(angle_rad) * distance_m * scale))
-                if distance_m < 0.6:
-                    color = LIDAR_POINT_RED
-                elif distance_m < 1.2:
-                    color = LIDAR_POINT_YELLOW
-                elif distance_m < 3.0:
-                    color = LIDAR_POINT_GREEN
-                else:
-                    color = LIDAR_POINT_BLUE
-                self._set_pixel(x, y, color)
-        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-            self._set_pixel(center_x + dx, center_y + dy, LIDAR_CAR)
-
     def _format_model_cells(self, model_choice: str) -> List[str]:
         model_choice = str(model_choice)
         match = re.search(r"(\d+)\.(\d+)", model_choice)
@@ -598,12 +560,9 @@ class DashboardRenderer:
             self._draw_route_time_page(payload, y_offset_px)
             return
         if page == 11:
-            self._draw_page_five(payload, y_offset_px)
-            return
-        if page == 12:
             self._draw_page_six(payload, y_offset_px)
             return
-        if page == 13:
+        if page == 12:
             self._draw_photo_run_stats_page(payload, y_offset_px)
             return
         self._draw_page_one(

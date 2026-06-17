@@ -228,28 +228,6 @@ def center_steering(state):
     state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
 
 
-def format_lidar_dashboard_points(lidar_scan, max_points: int = 180) -> list[list[float]]:
-    if not lidar_scan:
-        return []
-    valid_points = [
-        point
-        for point in lidar_scan
-        if getattr(point, "is_valid", False)
-        and getattr(point, "distance_mm", 0) > 0
-        and getattr(point, "confidence", 0) >= 150
-    ]
-    if not valid_points:
-        return []
-    stride = max(1, len(valid_points) // max_points)
-    return [
-        [
-            round(float(getattr(point, "angle_deg", 0.0)), 1),
-            round(float(getattr(point, "distance_mm", 0.0)) / 1000.0, 2),
-        ]
-        for point in valid_points[::stride][:max_points]
-    ]
-
-
 def get_dashboard_drive_mode(state) -> str:
     if state.get("lidar_override_active"):
         return "LDR"
@@ -342,8 +320,7 @@ DASHBOARD_PAGE_COORDS = {
     9: (5, 1),
     10: (5, 2),
     11: (6, 1),
-    12: (6, 2),
-    13: (2, 3),
+    12: (2, 3),
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
@@ -1616,11 +1593,8 @@ def run(model_choice=None):
                         cancel_autonomous_mode(state, metrics, "Navigation operator: human/manual segment.")
                     navigation_operator_last = nav_operator
             camera_pixels = []
-            if state["dashboard_page"] == 12 and webcam_vision is not None:
+            if state["dashboard_page"] == 11 and webcam_vision is not None:
                 camera_pixels = webcam_vision.get_dashboard_camera_pixels()
-            lidar_dashboard_points = []
-            if state["dashboard_page"] == 11:
-                lidar_dashboard_points = format_lidar_dashboard_points(latest_scan)
             if dashboard_sender is not None:
                 dashboard_sent = dashboard_sender.send(
                     metrics.smoothed_speed_mph,
@@ -1635,7 +1609,7 @@ def run(model_choice=None):
                     throttle_percent=state["dashboard_throttle_percent"],
                     brake_percent=state["dashboard_brake_percent"],
                     drive_mode=get_dashboard_drive_mode(state),
-                    lidar_points=lidar_dashboard_points,
+                    lidar_points=[],
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
