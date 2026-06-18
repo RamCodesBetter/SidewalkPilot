@@ -142,6 +142,7 @@ class Hub75DashboardSender:
         steering_trim_delta_deg: float = 0.0,
         steering_trim_total_deg: float = 90.0,
         steering_center_offset: float = 0.0,
+        dashboard_row1_text: str = "",
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -177,6 +178,7 @@ class Hub75DashboardSender:
             "steering_trim_delta_deg": round(max(-180.0, min(180.0, float(steering_trim_delta_deg))), 2),
             "steering_trim_total_deg": round(max(0.0, min(180.0, float(steering_trim_total_deg))), 2),
             "steering_center_offset": round(max(-1.0, min(1.0, float(steering_center_offset))), 4),
+            "dashboard_row1_text": str(dashboard_row1_text)[:10],
             "timestamp": time.time(),
         }
         notification_sent = False

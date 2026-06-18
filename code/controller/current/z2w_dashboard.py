@@ -65,6 +65,26 @@ PLUS_GLYPH_INDEX = 0
 MINUS_GLYPH_INDEX = 1
 MIN_VISIBLE_BRIGHTNESS_PERCENT = 5
 
+COMPACT_5X7_FONT: Dict[str, List[int]] = {
+    " ": [0b00000, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000],
+    ":": [0b00000, 0b01100, 0b01100, 0b00000, 0b01100, 0b01100, 0b00000],
+    "0": [0b01110, 0b10001, 0b10011, 0b10101, 0b11001, 0b10001, 0b01110],
+    "1": [0b00100, 0b01100, 0b00100, 0b00100, 0b00100, 0b00100, 0b01110],
+    "2": [0b01110, 0b10001, 0b00001, 0b00010, 0b00100, 0b01000, 0b11111],
+    "3": [0b11110, 0b00001, 0b00001, 0b01110, 0b00001, 0b00001, 0b11110],
+    "4": [0b00010, 0b00110, 0b01010, 0b10010, 0b11111, 0b00010, 0b00010],
+    "5": [0b11111, 0b10000, 0b10000, 0b11110, 0b00001, 0b00001, 0b11110],
+    "6": [0b01110, 0b10000, 0b10000, 0b11110, 0b10001, 0b10001, 0b01110],
+    "7": [0b11111, 0b00001, 0b00010, 0b00100, 0b01000, 0b01000, 0b01000],
+    "8": [0b01110, 0b10001, 0b10001, 0b01110, 0b10001, 0b10001, 0b01110],
+    "9": [0b01110, 0b10001, 0b10001, 0b01111, 0b00001, 0b00001, 0b01110],
+    "E": [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b11111],
+    "O": [0b01110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110],
+    "R": [0b11110, 0b10001, 0b10001, 0b11110, 0b10100, 0b10010, 0b10001],
+    "S": [0b01111, 0b10000, 0b10000, 0b01110, 0b00001, 0b00001, 0b11110],
+    "V": [0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01010, 0b00100],
+}
+
 
 def load_glyphs_from_header(path: Path) -> List[Glyph]:
     text = path.read_text(encoding="utf-8")
@@ -217,6 +237,21 @@ class DashboardRenderer:
                 continue
             self._draw_glyph_at(self.letter_map.get(cell, self.letter_map[" "]), row_index, col_index, color, y_offset_px)
 
+    def _draw_compact_text_row(self, row_index: int, text: str, color: Color, y_offset_px: int = 0):
+        normalized = str(text).upper()[:10]
+        char_width = 5
+        char_spacing = 1
+        text_width = (len(normalized) * (char_width + char_spacing)) - char_spacing if normalized else 0
+        x_origin = max(0, (PANEL_WIDTH - text_width) // 2)
+        y_origin = (row_index * CELL_SIZE) + y_offset_px
+        for char_index, char in enumerate(normalized):
+            glyph = COMPACT_5X7_FONT.get(char, COMPACT_5X7_FONT[" "])
+            x_base = x_origin + (char_index * (char_width + char_spacing))
+            for y, row_bits in enumerate(glyph):
+                for x in range(char_width):
+                    if row_bits & (1 << (char_width - 1 - x)):
+                        self._set_pixel(x_base + x, y_origin + y, color)
+
     def _speed_digits(self, speed_mph: float) -> str:
         clamped = max(0.0, min(9.99, speed_mph))
         hundredths = int(round(clamped * 100))
@@ -350,7 +385,11 @@ class DashboardRenderer:
             mode = " CC"
         if len(mode) < 3:
             mode = (mode + "   ")[:3]
-        self._draw_text_row(0, ["S", "R", "V", "O", ":", *servo_cells], TEXT_CYAN, y_offset_px)
+        row1_text = str(payload.get("dashboard_row1_text", "")).strip()
+        if row1_text:
+            self._draw_compact_text_row(0, row1_text, TEXT_CYAN, y_offset_px)
+        else:
+            self._draw_text_row(0, ["S", "R", "V", "O", ":", *servo_cells], TEXT_CYAN, y_offset_px)
         self._draw_text_row(1, ["T", "T", "L", "E", ":", *throttle_cells], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["B", "R", "K", "E", ":", *brake_cells], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["M", "O", "D", "E", ":", mode[0], mode[1], mode[2]], ARROW_YELLOW, y_offset_px)
@@ -884,6 +923,7 @@ def main():
     left_signal_visible = False
     right_signal_visible = False
     dashboard_alert = ""
+    dashboard_row1_text = ""
     brightness_percent = args.led_brightness
     dashboard_page = 1
     dashboard_page_transition = ""
@@ -942,6 +982,7 @@ def main():
                 "left_signal_visible": left_signal_visible,
                 "right_signal_visible": right_signal_visible,
                 "dashboard_alert": dashboard_alert,
+                "dashboard_row1_text": dashboard_row1_text,
                 "dashboard_page": dashboard_page,
                 "dashboard_page_transition": dashboard_page_transition,
                 "servo_deg": servo_deg,
@@ -989,6 +1030,7 @@ def main():
         nonlocal left_signal_visible
         nonlocal right_signal_visible
         nonlocal dashboard_alert
+        nonlocal dashboard_row1_text
         nonlocal brightness_percent
         nonlocal dashboard_page
         nonlocal dashboard_page_transition
@@ -1025,6 +1067,7 @@ def main():
         left_signal_visible = bool(payload.get("left_signal_visible", left_signal_visible))
         right_signal_visible = bool(payload.get("right_signal_visible", right_signal_visible))
         dashboard_alert = str(payload.get("dashboard_alert", dashboard_alert))[:4]
+        dashboard_row1_text = str(payload.get("dashboard_row1_text", ""))[:10].upper()
         brightness_percent = max(0, min(100, int(payload.get("brightness_percent", brightness_percent))))
         dashboard_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", dashboard_page))))
         dashboard_page_transition = str(payload.get("dashboard_page_transition", ""))[:8]
