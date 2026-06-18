@@ -66,7 +66,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--step", type=int, default=15, help="angle step")
     parser.add_argument("--start", type=int, default=0, help="starting servo angle")
     parser.add_argument("--wrap", action="store_true", help="wrap from max angle back to min angle on A")
-    parser.add_argument("--dashboard-page", type=int, default=2, help="dashboard page to force while running")
+    parser.add_argument("--dashboard-page", type=int, default=1, help=argparse.SUPPRESS)
     return parser.parse_args()
 
 
@@ -174,6 +174,7 @@ def main() -> int:
     print("  X: reset to first value")
     print("  Y: center near 90 degrees")
     print("  Share: quit")
+    print("  Dashboard row 1: SERVO:###")
 
     previous_buttons = {
         A_BUTTON: False,

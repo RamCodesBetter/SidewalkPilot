@@ -252,6 +252,24 @@ class DashboardRenderer:
                     if row_bits & (1 << (char_width - 1 - x)):
                         self._set_pixel(x_base + x, y_origin + y, color)
 
+    def _clear_row(self, row_index: int, y_offset_px: int = 0):
+        y_origin = (row_index * CELL_SIZE) + y_offset_px
+        for y in range(CELL_SIZE):
+            for x in range(PANEL_WIDTH):
+                self._set_pixel(x, y_origin + y, (0, 0, 0))
+
+    def _draw_row1_override(self, payload: Dict[str, object]):
+        row1_text = str(payload.get("dashboard_row1_text", "")).strip()
+        if not row1_text:
+            return
+        previous_x_offset = self.render_x_offset_px
+        self.render_x_offset_px = 0
+        try:
+            self._clear_row(0)
+            self._draw_compact_text_row(0, row1_text, TEXT_CYAN)
+        finally:
+            self.render_x_offset_px = previous_x_offset
+
     def _speed_digits(self, speed_mph: float) -> str:
         clamped = max(0.0, min(9.99, speed_mph))
         hundredths = int(round(clamped * 100))
@@ -765,6 +783,7 @@ class DashboardRenderer:
                 self._draw_page_with_offset(self.previous_page, payload, notification_rows, 0, previous_offset)
                 self._draw_page_with_offset(self.current_page, payload, notification_rows, 0, current_offset)
 
+        self._draw_row1_override(payload)
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
     def clear(self):
