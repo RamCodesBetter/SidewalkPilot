@@ -2,6 +2,12 @@
 
 TODO:
 
+- [ ] Implement measured steering calibration from the Desmos steering-fit graph:
+  [Fix Servo Trim Graph](https://www.desmos.com/calculator/sdwx6h3vpx).
+- [ ] Treat real servo `26.45558 deg` as the software left limit for logical steering `0 deg`, while keeping real servo `90 deg` as logical center and real servo `180 deg` as logical right.
+- [ ] Add a piecewise logical-to-real steering conversion so sidewalk driving and training labels use the symmetric logical range, but hardware still receives the measured real servo command.
+- [ ] Log both `steering_logical_deg` and `steering_servo_real_deg` in future photo labels and CSV telemetry so model training stays hardware-calibrated but debugging remains tied to the actual PCA9685 command.
+- [ ] Validate the calibration on a short route before counting new images toward the 5,000-image v3.0 dataset; pass condition is that release-to-center behavior and left/right curve shape are visibly more symmetric.
 - [ ] Add page-specific notes for `roadmap/next-steps.md` after inspecting the real project files.
 - [ ] Cross-link `Next Steps` to the most relevant code, data, testing, and safety pages.
 - [ ] State what is already proven before listing future work.
