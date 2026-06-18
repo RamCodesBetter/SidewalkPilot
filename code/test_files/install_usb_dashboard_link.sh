@@ -121,17 +121,34 @@ install_usb0_keeper() {
 #!/usr/bin/env bash
 set -euo pipefail
 
-ADDRESS="${1:?missing local address}"
-PEER="${2:?missing peer address}"
+ROLE="${1:?missing role}"
+ADDRESS="${2:?missing local address}"
+PEER="${3:?missing peer address}"
 FAILURES=0
+MISSING_COUNT=0
+CARRIER_DOWN_COUNT=0
+
+recover_z2w_gadget() {
+  if [[ "$ROLE" != "z2w" ]]; then
+    return 0
+  fi
+
+  logger -t sidewalkpilot-usb0-keeper "recovering Zero 2 W USB gadget"
+  modprobe -r g_ether >/dev/null 2>&1 || true
+  sleep 1
+  modprobe dwc2 >/dev/null 2>&1 || true
+  modprobe g_ether >/dev/null 2>&1 || true
+}
 
 while true; do
   if ip link show usb0 >/dev/null 2>&1; then
+    MISSING_COUNT=0
     ip link set usb0 up || true
     ip addr replace "$ADDRESS" dev usb0 || true
 
     CARRIER="$(cat /sys/class/net/usb0/carrier 2>/dev/null || echo 0)"
     if [[ "$CARRIER" == "1" ]]; then
+      CARRIER_DOWN_COUNT=0
       if ping -I usb0 -c 1 -W 1 "$PEER" >/dev/null 2>&1; then
         FAILURES=0
       else
@@ -146,6 +163,19 @@ while true; do
       fi
     else
       FAILURES=0
+      CARRIER_DOWN_COUNT=$((CARRIER_DOWN_COUNT + 1))
+      if [[ "$CARRIER_DOWN_COUNT" -ge 10 ]]; then
+        recover_z2w_gadget
+        CARRIER_DOWN_COUNT=0
+      fi
+    fi
+  else
+    FAILURES=0
+    CARRIER_DOWN_COUNT=0
+    MISSING_COUNT=$((MISSING_COUNT + 1))
+    if [[ "$MISSING_COUNT" -ge 5 ]]; then
+      recover_z2w_gadget
+      MISSING_COUNT=0
     fi
   fi
 
@@ -162,7 +192,7 @@ Wants=network-pre.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/sbin/sidewalkpilot-usb0-keeper ${address} ${peer}
+ExecStart=/usr/local/sbin/sidewalkpilot-usb0-keeper ${role} ${address} ${peer}
 Restart=always
 RestartSec=2
 
