@@ -130,19 +130,22 @@ while true; do
     ip link set usb0 up || true
     ip addr replace "$ADDRESS" dev usb0 || true
 
-    if ping -I usb0 -c 1 -W 1 "$PEER" >/dev/null 2>&1; then
-      FAILURES=0
-    else
-      FAILURES=$((FAILURES + 1))
-      ip neigh flush dev usb0 || true
-
-      if [[ "$FAILURES" -ge 3 ]]; then
-        ip link set usb0 down || true
-        sleep 1
-        ip link set usb0 up || true
-        ip addr replace "$ADDRESS" dev usb0 || true
+    CARRIER="$(cat /sys/class/net/usb0/carrier 2>/dev/null || echo 0)"
+    if [[ "$CARRIER" == "1" ]]; then
+      if ping -I usb0 -c 1 -W 1 "$PEER" >/dev/null 2>&1; then
         FAILURES=0
+      else
+        FAILURES=$((FAILURES + 1))
+        ip neigh flush dev usb0 || true
+
+        if [[ "$FAILURES" -ge 5 ]]; then
+          ip link set usb0 up || true
+          ip addr replace "$ADDRESS" dev usb0 || true
+          FAILURES=0
+        fi
       fi
+    else
+      FAILURES=0
     fi
   fi
 
