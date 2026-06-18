@@ -1,6 +1,6 @@
 # Steering Servo
 
-## Measured Steering Calibration
+## Measured Steering Calibration Note
 
 The steering linkage is not mechanically symmetric at the full servo endpoints.
 A measured fit in the Desmos graph
@@ -8,17 +8,17 @@ A measured fit in the Desmos graph
 found that the useful left-side endpoint is around real servo `26.4558 deg`,
 not real servo `0 deg`.
 
-Runtime, dashboard display, CSV telemetry, and photo labels use a logical
-steering range. The hardware adapter converts that logical value to the real
-PCA9685 servo command only at the final write:
+The active runtime currently sends the direct servo range `0..180`. The
+`26.4558 deg` result is preserved here as a calibration note while the right
+wheel curve is measured too.
+
+A future calibrated map may use a logical steering range where:
 
 - Logical steering `0 deg` maps to real servo `26.4558 deg`.
 - Logical steering `90 deg` maps to real servo `90 deg`.
 - Logical steering `180 deg` maps to real servo `180 deg`.
-- Public runtime state and labels remain logical `0..180`; the real command is
-  not duplicated in logs.
 
-The conversion is piecewise so center remains physically centered:
+That conversion would be piecewise so center remains physically centered:
 
 ```python
 LEFT_REAL_LIMIT_DEG = 26.4558
@@ -36,10 +36,9 @@ def logical_to_real_servo_deg(logical_deg: float) -> float:
     return logical
 ```
 
-This gives up unnecessary full-lock left steering, but sidewalks do not require
-tight turns. The goal is smoother, more symmetric steering labels for the v3.0
-training dataset while keeping hardware calibration hidden behind the steering
-adapter.
+This would give up unnecessary full-lock left steering, but sidewalks do not
+require tight turns. The goal would be smoother, more symmetric steering labels
+for the v3.0 training dataset.
 
 TODO:
 
