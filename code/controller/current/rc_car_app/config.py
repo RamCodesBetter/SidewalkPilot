@@ -105,17 +105,20 @@ RIGHT_MOTOR_PWM_SCALE = 1.0
 
 # --- HUB75 DASHBOARD TELEMETRY ---
 ENABLE_HUB75_DASHBOARD_TELEMETRY = True
-# Use the Pi 5 <-> Zero 2 W USB Ethernet gadget for low-latency dashboard
-# telemetry. Add ",zero2w.local" through RC_CAR_DASHBOARD_HOST only when you
-# intentionally want Wi-Fi fallback during debugging.
+# Use the Pi 5 <-> Zero 2 W USB Ethernet gadget as the fast dashboard path.
+# Keep zero2w.local as a slow fallback so the display still links when USB drops.
 HUB75_DASHBOARD_TRANSPORT = os.environ.get("RC_CAR_DASHBOARD_TRANSPORT", "udp").strip().lower()
-HUB75_DASHBOARD_HOST = os.environ.get("RC_CAR_DASHBOARD_HOST", "192.168.10.2").strip() or "192.168.10.2"
+HUB75_DASHBOARD_HOST = (
+    os.environ.get("RC_CAR_DASHBOARD_HOST", "192.168.10.2,zero2w.local").strip()
+    or "192.168.10.2,zero2w.local"
+)
 HUB75_DASHBOARD_UDP_PORT = int(os.environ.get("RC_CAR_DASHBOARD_UDP_PORT", "8765"))
 HUB75_DASHBOARD_SERIAL_PORT = os.environ.get("RC_CAR_DASHBOARD_SERIAL_PORT", "/dev/ttyACM0")
 HUB75_DASHBOARD_BAUD_RATE = 115200
 HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1
+HUB75_DASHBOARD_FALLBACK_INTERVAL_SEC = float(os.environ.get("RC_CAR_DASHBOARD_FALLBACK_INTERVAL_SEC", "1.0"))
 HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0
-HUB75_DASHBOARD_SHUTDOWN_ON_EXIT = os.environ.get("RC_CAR_DASHBOARD_SHUTDOWN_ON_EXIT", "0").strip().lower() in (
+HUB75_DASHBOARD_SHUTDOWN_ON_EXIT = os.environ.get("RC_CAR_DASHBOARD_SHUTDOWN_ON_EXIT", "1").strip().lower() in (
     "1",
     "true",
     "yes",
