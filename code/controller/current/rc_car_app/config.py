@@ -105,11 +105,11 @@ RIGHT_MOTOR_PWM_SCALE = 1.0
 
 # --- HUB75 DASHBOARD TELEMETRY ---
 ENABLE_HUB75_DASHBOARD_TELEMETRY = True
-# Use UDP over the Pi 5 <-> Zero 2 W USB Ethernet gadget first, with the
-# Zero 2 W hostname as a fallback so the dashboard keeps updating if usb0
-# comes up late or ARP gets wedged during a run.
+# Use the Pi 5 <-> Zero 2 W USB Ethernet gadget for low-latency dashboard
+# telemetry. Add ",zero2w.local" through RC_CAR_DASHBOARD_HOST only when you
+# intentionally want Wi-Fi fallback during debugging.
 HUB75_DASHBOARD_TRANSPORT = os.environ.get("RC_CAR_DASHBOARD_TRANSPORT", "udp").strip().lower()
-HUB75_DASHBOARD_HOST = os.environ.get("RC_CAR_DASHBOARD_HOST", "192.168.10.2,zero2w.local").strip() or "192.168.10.2"
+HUB75_DASHBOARD_HOST = os.environ.get("RC_CAR_DASHBOARD_HOST", "192.168.10.2").strip() or "192.168.10.2"
 HUB75_DASHBOARD_UDP_PORT = int(os.environ.get("RC_CAR_DASHBOARD_UDP_PORT", "8765"))
 HUB75_DASHBOARD_SERIAL_PORT = os.environ.get("RC_CAR_DASHBOARD_SERIAL_PORT", "/dev/ttyACM0")
 HUB75_DASHBOARD_BAUD_RATE = 115200
