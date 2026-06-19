@@ -78,14 +78,13 @@ STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG = float(
         os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_OVERSHOOT_DEG", "4.0"),
     )
 )
-_STEERING_CENTER_DEG = STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0
-STEERING_CENTER_SETTLE_DURATION_SEC = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "2.0"))
+STEERING_CENTER_SETTLE_DURATION_SEC = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "1.0"))
 STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG = float(
     os.environ.get(
         "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG",
         os.environ.get(
             "RC_CAR_STEERING_CENTER_SETTLE_LX_DEG",
-            "110.0",
+            "120.0",
         ),
     )
 )
@@ -94,25 +93,7 @@ STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC = float(
         "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC",
         os.environ.get(
             "RC_CAR_STEERING_CENTER_SETTLE_LS_SEC",
-            os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "2.0"),
-        ),
-    )
-)
-STEERING_CENTER_SETTLE_HIGH_RELEASE_TARGET_DEG = float(
-    os.environ.get(
-        "RC_CAR_STEERING_CENTER_SETTLE_HIGH_RELEASE_TARGET_DEG",
-        os.environ.get(
-            "RC_CAR_STEERING_CENTER_SETTLE_RY_DEG",
-            "70.0",
-        ),
-    )
-)
-STEERING_CENTER_SETTLE_HIGH_RELEASE_DURATION_SEC = float(
-    os.environ.get(
-        "RC_CAR_STEERING_CENTER_SETTLE_HIGH_RELEASE_DURATION_SEC",
-        os.environ.get(
-            "RC_CAR_STEERING_CENTER_SETTLE_RS_SEC",
-            os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "2.0"),
+            os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "1.0"),
         ),
     )
 )

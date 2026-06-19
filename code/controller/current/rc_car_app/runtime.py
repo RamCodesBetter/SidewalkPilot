@@ -56,8 +56,6 @@ from .config import (
     PULSES_PER_REVOLUTION,
     SPEED_SMOOTHING_ALPHA,
     STEERING_AXIS,
-    STEERING_CENTER_SETTLE_HIGH_RELEASE_DURATION_SEC,
-    STEERING_CENTER_SETTLE_HIGH_RELEASE_TARGET_DEG,
     STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC,
     STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
@@ -260,16 +258,15 @@ def center_steering(state):
 def start_manual_steering_center_settle(state, previous_servo_degrees: float) -> None:
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     previous_delta = float(previous_servo_degrees) - center_degrees
-    if abs(previous_delta) < float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
+    if previous_delta >= -float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
         return
-    if previous_delta < 0.0:
-        settle_target_degrees = float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG)
-        settle_duration_sec = float(STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC)
-    else:
-        settle_target_degrees = float(STEERING_CENTER_SETTLE_HIGH_RELEASE_TARGET_DEG)
-        settle_duration_sec = float(STEERING_CENTER_SETTLE_HIGH_RELEASE_DURATION_SEC)
+    settle_target_degrees = float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG)
+    settle_duration_sec = float(STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC)
+    if settle_duration_sec <= 0.0:
+        state["steering_center_settle_until"] = 0.0
+        return
     state["steering_center_settle_deg"] = clamp_servo_degrees(settle_target_degrees)
-    state["steering_center_settle_until"] = time.time() + max(0.0, settle_duration_sec)
+    state["steering_center_settle_until"] = time.time() + settle_duration_sec
 
 
 def get_dashboard_drive_mode(state) -> str:
