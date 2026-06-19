@@ -16,7 +16,6 @@ class Hub75DashboardSender:
         transport: str,
         baud_rate: int,
         send_interval_sec: float = 0.1,
-        fallback_send_interval_sec: float = 1.0,
         serial_port: str | None = None,
         udp_host: str | None = None,
         udp_port: int | None = None,
@@ -24,7 +23,6 @@ class Hub75DashboardSender:
         self.transport = str(transport).strip().lower()
         self.baud_rate = baud_rate
         self.send_interval_sec = send_interval_sec
-        self.fallback_send_interval_sec = max(0.1, float(fallback_send_interval_sec))
         self.serial_port = serial_port
         self.udp_host = udp_host
         self.udp_port = udp_port
@@ -33,7 +31,6 @@ class Hub75DashboardSender:
         self.udp_targets = []
         self.last_udp_target_log = ""
         self.last_udp_send_error_time = 0.0
-        self.last_fallback_send_time = 0.0
         self.last_send_time = 0.0
         self.last_payload_json = ""
         self.last_connect_attempt = 0.0
@@ -198,11 +195,7 @@ class Hub75DashboardSender:
             return
         for _ in range(5):
             try:
-                self._write_payload(
-                    {"shutdown": True, "timestamp": time.time()},
-                    time.monotonic(),
-                    force_all_targets=True,
-                )
+                self._write_payload({"shutdown": True, "timestamp": time.time()}, time.monotonic())
                 time.sleep(0.05)
             except Exception as exc:
                 print(f"Hub75 dashboard telemetry shutdown write failed: {exc}")
@@ -220,7 +213,7 @@ class Hub75DashboardSender:
             }
         )
 
-    def _write_payload(self, payload, send_time_monotonic: float, force_all_targets: bool = False) -> bool:
+    def _write_payload(self, payload, send_time_monotonic: float) -> bool:
         try:
             payload_json = json.dumps(payload, separators=(",", ":"), sort_keys=True)
             encoded = (payload_json + "\n").encode("utf-8")
@@ -233,27 +226,12 @@ class Hub75DashboardSender:
                     self.last_udp_target_log = target_summary
                 sent_any = False
                 last_error = None
-                targets_to_send = [self.udp_targets[0]]
-                should_send_fallback = (
-                    force_all_targets
-                    or send_time_monotonic - self.last_fallback_send_time >= self.fallback_send_interval_sec
-                )
-                if len(self.udp_targets) > 1 and should_send_fallback:
-                    targets_to_send = list(self.udp_targets)
-                    self.last_fallback_send_time = send_time_monotonic
-                for _, target in targets_to_send:
+                for _, target in self.udp_targets:
                     try:
                         self.socket_handle.sendto(encoded, target)
                         sent_any = True
                     except OSError as exc:
                         last_error = exc
-                if not sent_any and len(targets_to_send) == 1 and len(self.udp_targets) > 1:
-                    for _, target in self.udp_targets[1:]:
-                        try:
-                            self.socket_handle.sendto(encoded, target)
-                            sent_any = True
-                        except OSError as exc:
-                            last_error = exc
                 if not sent_any:
                     if send_time_monotonic - self.last_udp_send_error_time >= 2.0:
                         print(f"Hub75 dashboard telemetry UDP send failed for all targets: {last_error}")
