@@ -35,6 +35,8 @@ from .config import (
     STEERING_SERVO_MAX_PULSE_US,
     STEERING_SERVO_MIN_PULSE_US,
     STEERING_SERVO_PIN,
+    STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG,
+    STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG,
     USE_PCA9685_SERVO,
 )
 
@@ -79,8 +81,21 @@ class DummyServo:
         pass
 
 
+def logical_to_reference_steering_degrees(logical_angle_deg: float, actuation_range_deg: float) -> float:
+    actuation_range = max(1.0, float(actuation_range_deg))
+    center_angle = actuation_range / 2.0
+    logical = max(0.0, min(actuation_range, float(logical_angle_deg)))
+    left_limit = max(0.0, min(center_angle, float(STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG)))
+    right_limit = max(center_angle, min(actuation_range, float(STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG)))
+    if logical <= center_angle:
+        left_ratio = (center_angle - logical) / center_angle
+        return center_angle - (left_ratio * (center_angle - left_limit))
+    right_ratio = (logical - center_angle) / center_angle
+    return center_angle + (right_ratio * (right_limit - center_angle))
+
+
 def apply_steering_center_trim_degrees(
-    raw_angle_deg: float,
+    logical_angle_deg: float,
     actuation_range_deg: float,
     center_offset: float,
     center_preload: float,
@@ -88,9 +103,10 @@ def apply_steering_center_trim_degrees(
 ) -> float:
     actuation_range = max(1.0, float(actuation_range_deg))
     center_angle = actuation_range / 2.0
-    clamped = max(0.0, min(actuation_range, float(raw_angle_deg)))
-    centered = (clamped - center_angle) / center_angle
-    adjusted = clamped + (max(-1.0, min(1.0, center_offset)) * center_angle)
+    logical = max(0.0, min(actuation_range, float(logical_angle_deg)))
+    centered = (logical - center_angle) / center_angle
+    adjusted = logical_to_reference_steering_degrees(logical, actuation_range)
+    adjusted += max(-1.0, min(1.0, center_offset)) * center_angle
     preload_window = max(0.0, float(center_preload_window))
     if preload_window > 0.0 and abs(centered) < preload_window:
         preload_scale = 1.0 - (abs(centered) / preload_window)

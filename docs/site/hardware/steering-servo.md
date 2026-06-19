@@ -1,29 +1,39 @@
 # Steering Servo
 
-## Measured Steering Calibration Note
+## Measured Reference Steering Calibration
 
 The steering linkage is not mechanically symmetric at the full servo endpoints.
 A measured fit in the Desmos graph
 [Fix Servo Trim Graph](https://www.desmos.com/calculator/sdwx6h3vpx)
-found that the useful left-side endpoint is around real servo `26.4558 deg`,
-not real servo `0 deg`.
+found that the useful reference steering interval should be symmetric around
+the physical center:
 
-The active runtime currently sends the direct servo range `0..180`. The
-`26.4558 deg` result is preserved here as a calibration note while the right
-wheel curve is measured too.
+- Reference left limit: real servo `48.812 deg`.
+- Reference center: real servo `90 deg`.
+- Reference right limit: real servo `131.188 deg`.
 
-A future calibrated map may use a logical steering range where:
+The active runtime still reports, logs, and labels steering as logical
+`0..180`. The hardware adapter converts that logical command to the real
+PCA9685 servo command only at the final write:
 
-- Logical steering `0 deg` maps to real servo `26.4558 deg`.
+- Logical steering `0 deg` maps to real servo `48.812 deg`.
 - Logical steering `90 deg` maps to real servo `90 deg`.
-- Logical steering `180 deg` maps to real servo `180 deg`.
+- Logical steering `180 deg` maps to real servo `131.188 deg`.
 
-That conversion would be piecewise so center remains physically centered:
+The reference interval comes from the Desmos constraint:
+
+```text
+L_L.x <= x <= (180 - L_L.x)
+```
+
+With `L_L.x = 48.812`, the right endpoint is `180 - 48.812 = 131.188`.
+
+The conversion is piecewise so center remains physically centered:
 
 ```python
-LEFT_REAL_LIMIT_DEG = 26.4558
+LEFT_REAL_LIMIT_DEG = 48.812
 CENTER_SERVO_DEG = 90.0
-RIGHT_REAL_LIMIT_DEG = 180.0
+RIGHT_REAL_LIMIT_DEG = 131.188
 
 
 def logical_to_real_servo_deg(logical_deg: float) -> float:
@@ -33,12 +43,16 @@ def logical_to_real_servo_deg(logical_deg: float) -> float:
             ((CENTER_SERVO_DEG - logical) / CENTER_SERVO_DEG)
             * (CENTER_SERVO_DEG - LEFT_REAL_LIMIT_DEG)
         )
-    return logical
+    return CENTER_SERVO_DEG + (
+        ((logical - CENTER_SERVO_DEG) / CENTER_SERVO_DEG)
+        * (RIGHT_REAL_LIMIT_DEG - CENTER_SERVO_DEG)
+    )
 ```
 
-This would give up unnecessary full-lock left steering, but sidewalks do not
-require tight turns. The goal would be smoother, more symmetric steering labels
-for the v3.0 training dataset.
+This gives up unnecessary full-lock steering during normal driving, but
+sidewalks do not require tight turns. The goal is smoother, more symmetric
+steering labels for the v3.0 training dataset. Full absolute lock can still be
+added later as a separate low-speed maneuver path for U-turns or recovery.
 
 TODO:
 
