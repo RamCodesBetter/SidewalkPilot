@@ -56,9 +56,10 @@ from .config import (
     PULSES_PER_REVOLUTION,
     SPEED_SMOOTHING_ALPHA,
     STEERING_AXIS,
-    STEERING_CENTER_SETTLE_DURATION_SEC,
-    STEERING_CENTER_SETTLE_LEFT_OVERSHOOT_DEG,
-    STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG,
+    STEERING_CENTER_SETTLE_HIGH_RELEASE_DURATION_SEC,
+    STEERING_CENTER_SETTLE_HIGH_RELEASE_TARGET_DEG,
+    STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC,
+    STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
@@ -263,15 +264,13 @@ def start_manual_steering_center_settle(state, previous_servo_degrees: float) ->
         state["steering_center_settle_until"] = 0.0
         return
     if previous_delta < 0.0:
-        overshoot_direction = 1.0
-        overshoot_degrees = float(STEERING_CENTER_SETTLE_LEFT_OVERSHOOT_DEG)
+        settle_target_degrees = float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG)
+        settle_duration_sec = float(STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC)
     else:
-        overshoot_direction = -1.0
-        overshoot_degrees = float(STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG)
-    state["steering_center_settle_deg"] = clamp_servo_degrees(
-        center_degrees + (overshoot_direction * overshoot_degrees)
-    )
-    state["steering_center_settle_until"] = time.time() + max(0.0, float(STEERING_CENTER_SETTLE_DURATION_SEC))
+        settle_target_degrees = float(STEERING_CENTER_SETTLE_HIGH_RELEASE_TARGET_DEG)
+        settle_duration_sec = float(STEERING_CENTER_SETTLE_HIGH_RELEASE_DURATION_SEC)
+    state["steering_center_settle_deg"] = clamp_servo_degrees(settle_target_degrees)
+    state["steering_center_settle_until"] = time.time() + max(0.0, settle_duration_sec)
 
 
 def get_dashboard_drive_mode(state) -> str:
