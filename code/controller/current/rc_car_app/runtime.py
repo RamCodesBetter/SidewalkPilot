@@ -88,6 +88,7 @@ from .config import (
     SHARED_TRIGGER_AXIS,
     STEERING_DEADZONE,
     HUB75_DASHBOARD_IDLE_EXIT_SEC,
+    HUB75_DASHBOARD_SHUTDOWN_ON_EXIT,
 )
 from .hardware import Hardware
 from .lidar import (
@@ -1444,10 +1445,13 @@ def run(model_choice=None):
                 "Hub75 dashboard telemetry transport: serial "
                 f"({HUB75_DASHBOARD_SERIAL_PORT} @ {HUB75_DASHBOARD_BAUD_RATE})."
             )
-        print(
-            "Hub75 dashboard linked shutdown enabled "
-            f"(idle exit {HUB75_DASHBOARD_IDLE_EXIT_SEC:.1f}s)."
-        )
+        if HUB75_DASHBOARD_SHUTDOWN_ON_EXIT:
+            print(
+                "Hub75 dashboard linked shutdown enabled "
+                f"(idle exit {HUB75_DASHBOARD_IDLE_EXIT_SEC:.1f}s)."
+            )
+        else:
+            print("Hub75 dashboard linked shutdown disabled; receiver stays alive after controller exit.")
     clock = pygame.time.Clock()
     last_update_time = time.time()
     last_log_time = time.time()
@@ -1823,7 +1827,7 @@ def run(model_choice=None):
                 get_cpu_temp(),
             )
         dashboard_shutdown_sent = False
-        if dashboard_sender:
+        if dashboard_sender and HUB75_DASHBOARD_SHUTDOWN_ON_EXIT:
             dashboard_sender.send_shutdown()
             dashboard_shutdown_sent = True
         if lidar_parser:
@@ -1833,7 +1837,7 @@ def run(model_choice=None):
         if webcam_vision:
             webcam_vision.stop()
         if dashboard_sender:
-            if not dashboard_shutdown_sent:
+            if HUB75_DASHBOARD_SHUTDOWN_ON_EXIT and not dashboard_shutdown_sent:
                 dashboard_sender.send_shutdown()
             dashboard_sender.close()
         hardware.cleanup()

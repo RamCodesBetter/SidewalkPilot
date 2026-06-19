@@ -913,7 +913,7 @@ def parse_args():
     parser.add_argument("--max7219-device", type=int, default=0)
     parser.add_argument("--max7219-devices", type=int, default=4)
     parser.add_argument("--max7219-intensity", type=int, default=10)
-    parser.add_argument("--idle-exit-sec", type=float, default=2.0)
+    parser.add_argument("--idle-exit-sec", type=float, default=0.0)
     return parser.parse_args()
 
 
