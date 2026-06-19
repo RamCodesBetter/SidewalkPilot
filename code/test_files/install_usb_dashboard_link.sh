@@ -140,6 +140,19 @@ recover_z2w_gadget() {
   modprobe g_ether >/dev/null 2>&1 || true
 }
 
+recover_usb0_link() {
+  logger -t sidewalkpilot-usb0-keeper "recovering usb0 link for ${ROLE}"
+  ip neigh flush dev usb0 >/dev/null 2>&1 || true
+  ip link set usb0 down >/dev/null 2>&1 || true
+  sleep 0.2
+  ip link set usb0 up >/dev/null 2>&1 || true
+  sleep 0.2
+  ip addr replace "$ADDRESS" dev usb0 >/dev/null 2>&1 || true
+  recover_z2w_gadget
+  ip link set usb0 up >/dev/null 2>&1 || true
+  ip addr replace "$ADDRESS" dev usb0 >/dev/null 2>&1 || true
+}
+
 while true; do
   if ip link show usb0 >/dev/null 2>&1; then
     MISSING_COUNT=0
@@ -156,16 +169,15 @@ while true; do
         ip neigh flush dev usb0 || true
 
         if [[ "$FAILURES" -ge 5 ]]; then
-          ip link set usb0 up || true
-          ip addr replace "$ADDRESS" dev usb0 || true
+          recover_usb0_link
           FAILURES=0
         fi
       fi
     else
       FAILURES=0
       CARRIER_DOWN_COUNT=$((CARRIER_DOWN_COUNT + 1))
-      if [[ "$CARRIER_DOWN_COUNT" -ge 10 ]]; then
-        recover_z2w_gadget
+      if [[ "$CARRIER_DOWN_COUNT" -ge 5 ]]; then
+        recover_usb0_link
         CARRIER_DOWN_COUNT=0
       fi
     fi
