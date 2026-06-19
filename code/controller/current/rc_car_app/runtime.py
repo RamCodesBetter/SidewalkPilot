@@ -261,7 +261,6 @@ def start_manual_steering_center_settle(state, previous_servo_degrees: float) ->
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     previous_delta = float(previous_servo_degrees) - center_degrees
     if abs(previous_delta) < float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
-        state["steering_center_settle_until"] = 0.0
         return
     if previous_delta < 0.0:
         settle_target_degrees = float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG)
@@ -1292,6 +1291,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         servo_degrees = clamp_servo_degrees(state.get("steering_center_settle_deg", center_degrees))
     elif current_time >= float(state.get("steering_center_settle_until", 0.0)):
         state["steering_center_settle_until"] = 0.0
+    state["steering_effective_servo_deg"] = servo_degrees
     servo_write_ok = write_steering_servo_safely(state, metrics, hardware, servo_degrees)
 
     effective_brake = effective_brake_from_input
@@ -1497,12 +1497,25 @@ def run(model_choice=None):
                             )
                             scaled_steer_val = apply_steering_deadzone(raw_steer_val)
                             if scaled_steer_val == 0.0:
+                                was_steering = abs(float(state.get("steer", 0.0))) > 0.0
+                                settle_source_degrees = float(
+                                    state.get("steering_last_noncenter_servo_deg", previous_servo_degrees)
+                                )
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
-                                start_manual_steering_center_settle(state, previous_servo_degrees)
+                                if was_steering:
+                                    start_manual_steering_center_settle(state, settle_source_degrees)
                             else:
                                 state["steer"] = scaled_steer_val
                                 state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
+                                if (
+                                    abs(
+                                        state["steering_servo_deg"]
+                                        - (float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
+                                    )
+                                    >= float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG)
+                                ):
+                                    state["steering_last_noncenter_servo_deg"] = state["steering_servo_deg"]
                                 state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
                         state["throttle"], state["brake_force"] = split_shared_trigger_axis(event.value)
@@ -1755,7 +1768,7 @@ def run(model_choice=None):
                     state["dashboard_brightness_percent"],
                     dashboard_page=state["dashboard_page"],
                     dashboard_page_transition=metrics.dashboard_page_transition,
-                    servo_deg=state["steering_servo_deg"],
+                    servo_deg=state.get("steering_effective_servo_deg", state["steering_servo_deg"]),
                     throttle_percent=state["dashboard_throttle_percent"],
                     brake_percent=state["dashboard_brake_percent"],
                     drive_mode=get_dashboard_drive_mode(state),
