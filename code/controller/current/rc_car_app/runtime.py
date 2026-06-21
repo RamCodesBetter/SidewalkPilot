@@ -266,6 +266,10 @@ def start_manual_steering_center_settle(state, previous_servo_degrees: float) ->
     if settle_duration_sec <= 0.0:
         state["steering_center_settle_until"] = 0.0
         return
+    # Record the actual trigger peak only when a kick truly commits, so the
+    # logged source reflects what fired the settle and isn't clobbered by the
+    # resting-in-deadzone events that follow.
+    state["steering_settle_source_deg"] = float(previous_servo_degrees)
     state["steering_center_settle_deg"] = clamp_servo_degrees(settle_target_degrees)
     state["steering_center_settle_until"] = time.time() + settle_duration_sec
 
@@ -1507,10 +1511,6 @@ def run(model_choice=None):
                                 settle_source_degrees = float(
                                     state.get("steering_last_noncenter_servo_deg", previous_servo_degrees)
                                 )
-                                # Record the pre-reset trigger peak for logging so the CSV
-                                # shows the real source that drove the settle decision,
-                                # not the center value it gets reset to below.
-                                state["steering_settle_source_deg"] = settle_source_degrees
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
                                 if was_steering:
