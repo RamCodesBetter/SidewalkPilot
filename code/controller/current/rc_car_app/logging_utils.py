@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import csv
 import datetime
+import time
 
 
 def init_csv_logger(csv_filename, csv_headers):
@@ -70,6 +71,10 @@ def log_data_to_csv(csv_file, csv_writer, state, metrics, cpu_percent, memory_pe
         int(state["camera_right_edge_found"]),
         f"{state['camera_corridor_width_px']:.2f}",
         int(state["driveway_cut_suspected"]),
+        f"{state['steering_servo_deg']:.2f}",
+        int(state["steering_center_settle_until"] > time.time()),
+        f"{state['steering_last_noncenter_servo_deg']:.2f}",
+        f"{state['steering_center_settle_deg']:.2f}",
         state.get("dashboard_payload_json", ""),
     ]
     try:

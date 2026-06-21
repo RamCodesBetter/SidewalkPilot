@@ -197,6 +197,10 @@ CSV_HEADERS = [
     "Camera Right Edge Found",
     "Camera Corridor Width (px)",
     "Driveway Cut Suspected",
+    "Steering Servo Deg",
+    "Settle Active (0/1)",
+    "Settle Source Deg",
+    "Settle Target Deg",
     "Dashboard JSON Payload",
 ]
 
