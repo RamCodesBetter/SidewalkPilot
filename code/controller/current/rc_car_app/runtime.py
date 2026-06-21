@@ -1509,14 +1509,7 @@ def run(model_choice=None):
                             else:
                                 state["steer"] = scaled_steer_val
                                 state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
-                                if (
-                                    abs(
-                                        state["steering_servo_deg"]
-                                        - (float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
-                                    )
-                                    >= float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG)
-                                ):
-                                    state["steering_last_noncenter_servo_deg"] = state["steering_servo_deg"]
+                                state["steering_last_noncenter_servo_deg"] = state["steering_servo_deg"]
                                 state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
                         state["throttle"], state["brake_force"] = split_shared_trigger_axis(event.value)
