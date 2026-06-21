@@ -1507,6 +1507,10 @@ def run(model_choice=None):
                                 settle_source_degrees = float(
                                     state.get("steering_last_noncenter_servo_deg", previous_servo_degrees)
                                 )
+                                # Record the pre-reset trigger peak for logging so the CSV
+                                # shows the real source that drove the settle decision,
+                                # not the center value it gets reset to below.
+                                state["steering_settle_source_deg"] = settle_source_degrees
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
                                 if was_steering:

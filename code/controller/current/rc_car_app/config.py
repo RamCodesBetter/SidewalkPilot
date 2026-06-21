@@ -248,6 +248,7 @@ def create_state():
         "steering_center_settle_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "steering_effective_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "steering_last_noncenter_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
+        "steering_settle_source_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "throttle": 0.0,
         "brake": False,
         "brake_force": 0.0,

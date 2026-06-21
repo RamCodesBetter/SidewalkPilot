@@ -73,7 +73,7 @@ def log_data_to_csv(csv_file, csv_writer, state, metrics, cpu_percent, memory_pe
         int(state["driveway_cut_suspected"]),
         f"{state['steering_servo_deg']:.2f}",
         int(state["steering_center_settle_until"] > time.time()),
-        f"{state['steering_last_noncenter_servo_deg']:.2f}",
+        f"{state['steering_settle_source_deg']:.2f}",
         f"{state['steering_center_settle_deg']:.2f}",
         state.get("dashboard_payload_json", ""),
     ]
