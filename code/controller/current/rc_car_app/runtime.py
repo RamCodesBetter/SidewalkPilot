@@ -59,6 +59,7 @@ from .config import (
     STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC,
     STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
+    STEERING_CENTER_SNAP_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
     THROTTLE_AXIS,
@@ -1283,7 +1284,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
     )
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
-    if abs(servo_degrees - center_degrees) < (float(STEERING_SERVO_ACTUATION_RANGE_DEG) * 0.015):
+    if abs(servo_degrees - center_degrees) < float(STEERING_CENTER_SNAP_DEG):
         servo_degrees = center_degrees
     if (
         not state["autonomous_mode"]

@@ -98,6 +98,10 @@ STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC = float(
     )
 )
 STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_RELEASE_MIN_DEG", "12.0"))
+# Servo angles within this many degrees of center snap to exactly center.
+# Keep small so fine offsets (e.g. 88/89/91/92) are still commandable; the
+# input deadzone already handles stick jitter near center.
+STEERING_CENTER_SNAP_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SNAP_DEG", "0.5"))
 
 # Reduce the stronger side below 1.0 if the car pulls while steering is centered.
 LEFT_MOTOR_PWM_SCALE = 1.0
