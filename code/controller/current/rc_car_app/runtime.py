@@ -1497,19 +1497,37 @@ def run(model_choice=None):
                                 )
                             )
                             scaled_steer_val = apply_steering_deadzone(raw_steer_val)
+                            center_servo_deg = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
                             if scaled_steer_val == 0.0:
                                 was_steering = abs(float(state.get("steer", 0.0))) > 0.0
+                                # Use the most-extreme position reached on this side of
+                                # center (the excursion peak), not the last sample before
+                                # the deadzone, so a slow sweep back from full-left still
+                                # settles instead of only a fast flick.
                                 settle_source_degrees = float(
                                     state.get("steering_last_noncenter_servo_deg", previous_servo_degrees)
                                 )
                                 state["steer"] = 0.0
-                                state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+                                state["steering_servo_deg"] = center_servo_deg
                                 if was_steering:
                                     start_manual_steering_center_settle(state, settle_source_degrees)
+                                # Reached center: reset the excursion peak so a later tiny
+                                # nudge cannot re-fire settle from a stale far-side value.
+                                state["steering_last_noncenter_servo_deg"] = center_servo_deg
                             else:
                                 state["steer"] = scaled_steer_val
                                 state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
-                                state["steering_last_noncenter_servo_deg"] = state["steering_servo_deg"]
+                                current_servo_deg = state["steering_servo_deg"]
+                                peak_servo_deg = float(
+                                    state.get("steering_last_noncenter_servo_deg", center_servo_deg)
+                                )
+                                # Reset the peak when the stick crosses center (sign flip)
+                                # so each side's excursion is tracked independently.
+                                if (current_servo_deg - center_servo_deg) * (peak_servo_deg - center_servo_deg) < 0.0:
+                                    peak_servo_deg = center_servo_deg
+                                if abs(current_servo_deg - center_servo_deg) >= abs(peak_servo_deg - center_servo_deg):
+                                    peak_servo_deg = current_servo_deg
+                                state["steering_last_noncenter_servo_deg"] = peak_servo_deg
                                 state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
                         state["throttle"], state["brake_force"] = split_shared_trigger_axis(event.value)

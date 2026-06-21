@@ -93,7 +93,7 @@ STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC = float(
         "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC",
         os.environ.get(
             "RC_CAR_STEERING_CENTER_SETTLE_LS_SEC",
-            os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "1.0"),
+            "0.4",
         ),
     )
 )
