@@ -95,7 +95,7 @@ def helper_edge_allowed(kind: str, a_node: Dict[str, object], b_node: Dict[str, 
 def edge_allowed(edge: List[object], nodes: Dict[str, Dict[str, object]]) -> bool:
     if len(edge) < 3:
         return False
-    a, b = str(edge[0]), str(edge[1])
+    a, b = str(edge[0]).upper(), str(edge[1]).upper()
     if a not in nodes or b not in nodes:
         return False
     kind = str(edge[3]) if len(edge) > 3 else "way"
@@ -134,7 +134,7 @@ def build_graph(nodes: Dict[str, Dict[str, object]], edges: List[List[object]]) 
     for edge in edges:
         if not edge_allowed(edge, nodes):
             continue
-        a, b = str(edge[0]), str(edge[1])
+        a, b = str(edge[0]).upper(), str(edge[1]).upper()
         cost = edge_cost(edge, nodes)
         graph.setdefault(a, []).append((b, cost))
         graph.setdefault(b, []).append((a, cost))
