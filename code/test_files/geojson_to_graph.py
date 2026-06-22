@@ -664,6 +664,11 @@ def choose_sidewalk_stop(house, ways, overrides=None):
 
     if best_related and best_related_dist <= MAX_HOUSE_CONNECTOR_M:
         return (*best_related, "direct")
+    # Prefer the house's own-road sidewalk (even a bit farther, or on the
+    # opposite side of the road) over snapping to a DIFFERENT road's nearer
+    # sidewalk. A house can legitimately be across from its only sidewalk.
+    if best_related and best_related_dist <= ADDRESS_SIDEWALK_MAX_M:
+        return (*best_related, "same_road_extended")
     if best_any:
         mode = "nearest_sidewalk_fallback"
         if best_any_dist > unrelated_fallback_limit(road_dist):

@@ -61773,7 +61773,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": null,
       "connector_distance_m": 100.91711713926408,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house_stop",
       "crosswalk_endpoint": false
@@ -61790,7 +61790,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": "A27",
       "connector_distance_m": 100.91711713926408,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house",
       "crosswalk_endpoint": false
@@ -62079,7 +62079,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": null,
       "connector_distance_m": 89.94642901835785,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house_stop",
       "crosswalk_endpoint": false
@@ -62096,7 +62096,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": "B3P",
       "connector_distance_m": 89.94642901835785,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house",
       "crosswalk_endpoint": false
@@ -62317,7 +62317,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": null,
       "connector_distance_m": 89.23545259001682,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house_stop",
       "crosswalk_endpoint": false
@@ -62334,7 +62334,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": "B33",
       "connector_distance_m": 89.23545259001682,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house",
       "crosswalk_endpoint": false
@@ -62453,7 +62453,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": null,
       "connector_distance_m": 88.24943374208176,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house_stop",
       "crosswalk_endpoint": false
@@ -62470,7 +62470,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": "B4B",
       "connector_distance_m": 88.24943374208176,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house",
       "crosswalk_endpoint": false
@@ -62487,7 +62487,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": null,
       "connector_distance_m": 99.74410244961368,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house_stop",
       "crosswalk_endpoint": false
@@ -62504,7 +62504,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": "B4D",
       "connector_distance_m": 99.74410244961368,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house",
       "crosswalk_endpoint": false
@@ -62895,7 +62895,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": null,
       "connector_distance_m": 85.15603533002545,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house_stop",
       "crosswalk_endpoint": false
@@ -62912,7 +62912,7 @@
       "street": "Trossachs Boulevard Southeast",
       "stop_for_house": "B41",
       "connector_distance_m": 85.15603533002545,
-      "connector_status": "forced_sidewalk_fallback",
+      "connector_status": "same_road_extended",
       "connector_reason": "attached to sidewalk nearest the house's nearest road point",
       "way_role": "house",
       "crosswalk_endpoint": false
