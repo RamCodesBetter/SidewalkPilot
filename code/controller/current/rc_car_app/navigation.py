@@ -194,11 +194,12 @@ def astar(
     if start not in nodes or goal not in nodes:
         return [], float("inf")
     start_state = (None, start)
-    pq = [(0.0, 0.0, start_state)]
+    counter = 0
+    pq = [(0.0, 0.0, counter, start_state)]
     came_from: Dict[Tuple[Optional[str], str], Tuple[Optional[str], str]] = {}
     cost_so_far = {start_state: 0.0}
     while pq:
-        _, current_cost, state = heapq.heappop(pq)
+        _, current_cost, _, state = heapq.heappop(pq)
         prev_id, current = state
         if current == goal:
             path = reconstruct_path(came_from, start_state, state)
@@ -213,7 +214,8 @@ def astar(
             if new_cost < cost_so_far.get(new_state, float("inf")):
                 cost_so_far[new_state] = new_cost
                 priority = new_cost + haversine(nodes[nxt], nodes[goal])
-                heapq.heappush(pq, (priority, new_cost, new_state))
+                counter += 1
+                heapq.heappush(pq, (priority, new_cost, counter, new_state))
                 came_from[new_state] = state
     return [], float("inf")
 
