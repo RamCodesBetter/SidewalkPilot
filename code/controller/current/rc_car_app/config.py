@@ -84,7 +84,7 @@ STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG = float(
         "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG",
         os.environ.get(
             "RC_CAR_STEERING_CENTER_SETTLE_LX_DEG",
-            "120.0",
+            "125.0",
         ),
     )
 )
