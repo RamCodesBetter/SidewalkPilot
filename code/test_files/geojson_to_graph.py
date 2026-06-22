@@ -809,7 +809,7 @@ def build(ways, houses, overrides=None):
                 "house": house["num"],
                 "house_id": house["id"],
                 "street": house.get("street"),
-                "stop_for_house": house["num"],
+                "stop_for_house": None,
                 "connector_distance_m": stop_dist,
                 "connector_status": "connected" if connector_mode == "direct" else connector_mode,
                 "connector_reason": (
@@ -1009,70 +1009,6 @@ def add_inferred_crosswalk_transfers(
             connected_ids.update(component)
 
 
-def generate_synthetic_sidewalks(ways, houses):
-    """Create local sidewalk stubs only for roads that need fallback repair.
-
-    This is intentionally targeted. Enabling synthetic sidewalks for every road
-    with houses can move addresses that already had correct real-sidewalk stops.
-    Instead, first run the normal chooser, then synthesize only address roads
-    whose houses would otherwise use forced fallback or a long access-road stop.
-    """
-    roads_needing_sidewalk = set()
-    for house in houses:
-        choice = choose_sidewalk_stop(house, ways)
-        if not choice:
-            continue
-        connector_mode = choice[5]
-        connector_dist = choice[3]
-        needs_repair = connector_mode == "forced_sidewalk_fallback" or (
-            connector_mode == "address_road_access"
-            and connector_dist > LOCAL_HOUSE_SIDEWALK_MAX_M
-        )
-        if not needs_repair:
-            continue
-        road_id, _, _, road_dist, _ = nearest_address_road(house["point"], ways, house.get("street"))
-        if road_id and road_id in ways and road_dist <= ADDRESS_ROAD_MAX_DIST_M:
-            roads_needing_sidewalk.add(road_id)
-
-    # Generate a synthetic sidewalk for each road that actually needs repair.
-    OFFSET_M = 5.0  # metres offset from road centreline
-    synthetic_count = 0
-    for road_id in roads_needing_sidewalk:
-        road = ways[road_id]
-        nodes_pts = road["nodes"]
-        if len(nodes_pts) < 2:
-            continue
-
-        # Offset road nodes perpendicular to road direction
-        synthetic_nodes = []
-        for i, pt in enumerate(nodes_pts):
-            if i < len(nodes_pts) - 1:
-                dx = nodes_pts[i+1][0] - pt[0]
-                dy = nodes_pts[i+1][1] - pt[1]
-            else:
-                dx = pt[0] - nodes_pts[i-1][0]
-                dy = pt[1] - nodes_pts[i-1][1]
-            length = math.hypot(dx * 111320 * math.cos(math.radians(pt[1])), dy * 110540)
-            if length < 1e-9:
-                synthetic_nodes.append(pt)
-                continue
-            # Perpendicular offset (right side)
-            perp_lon = -dy / length * (OFFSET_M / 110540)
-            perp_lat =  dx / length * (OFFSET_M / (111320 * math.cos(math.radians(pt[1]))))
-            synthetic_nodes.append((pt[0] + perp_lon, pt[1] + perp_lat))
-
-        syn_id = f"synthetic/{road_id}"
-        ways[syn_id] = {
-            "id": syn_id,
-            "name": road["name"],
-            "nodes": synthetic_nodes,
-            "type": "footway",
-            "footway": "sidewalk",
-            "synthetic": True,
-        }
-        synthetic_count += 1
-
-    print(f"SYNTHETIC SIDEWALKS: {synthetic_count}")
 
 
 def parse_args():
@@ -1100,8 +1036,10 @@ def main():
     ways, houses = extract(geo)
     overrides = load_house_stop_overrides()
     nodes, edges = build(ways, houses, overrides)
-    home = [nid for nid, node in nodes.items() if node.get("type") == "house" and node.get("house") == "2019" and node.get("street") == "264th Place Southeast"]
-    dest = [nid for nid, node in nodes.items() if node.get("type") == "house" and node.get("house") == "2028" and node.get("street") == "263rd Place Southeast"]
+    home_key = normalize_address_key("2019 264th Place Southeast")
+    dest_key = normalize_address_key("2028 263rd Place Southeast")
+    home = [nid for nid, node in nodes.items() if node.get("type") == "house" and normalize_address_key(f"{node.get('house', '')} {node.get('street', '')}") == home_key]
+    dest = [nid for nid, node in nodes.items() if node.get("type") == "house" and normalize_address_key(f"{node.get('house', '')} {node.get('street', '')}") == dest_key]
     with open(OUTPUT_GRAPH, "w") as f:
         json.dump(
             {
