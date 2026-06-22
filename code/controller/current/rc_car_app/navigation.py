@@ -585,7 +585,12 @@ class NavigationManager:
         best_id = ""
         best_dist = float("inf")
         for node_id, node in self.nodes.items():
-            if not is_sidewalk_node(node) and node.get("type") != "house":
+            # Snap the car's live position only to real sidewalk/crosswalk
+            # network vertices — never to house buildings or the dense
+            # house_stop connectors (which would mislabel position/segment).
+            # Destination/house entry is unaffected: that goes through
+            # snap_endpoint_to_sidewalk (house -> its connector), not here.
+            if node.get("way_role") not in ("sidewalk", "crosswalk"):
                 continue
             dist = haversine(point, node)
             if dist < best_dist:
