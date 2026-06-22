@@ -35,7 +35,11 @@ WALK_EDGE_KINDS = {
     "osm_gap",
     "inferred_crosswalk",
 }
-SIDEWALK_SEGMENT_EDGE_KINDS = {"sidewalk", "sidewalk_split", "house_access", "house_access_fallback"}
+SIDEWALK_SEGMENT_EDGE_KINDS = {"sidewalk", "sidewalk_split"}
+# House<->sidewalk connectors are NOT drivable sidewalk. They only mark where to
+# stop on the sidewalk in front of a house's driveway; the car never drives the
+# connector/driveway. Labeled "driveway" and handled manually, never AUTO.
+DRIVEWAY_SEGMENT_EDGE_KINDS = {"house_access", "house_access_fallback"}
 CROSSWALK_SEGMENT_EDGE_KINDS = {
     "crosswalk",
     "intersection",
@@ -243,6 +247,8 @@ def edge_kind(a: str, b: str, edges_by_pair: Dict[Tuple[str, str], List[object]]
 def segment_type_for_edge(kind: str) -> str:
     if kind in SIDEWALK_SEGMENT_EDGE_KINDS:
         return "sidewalk"
+    if kind in DRIVEWAY_SEGMENT_EDGE_KINDS:
+        return "driveway"
     if kind in CROSSWALK_SEGMENT_EDGE_KINDS:
         return "crosswalk"
     return "crosswalk"

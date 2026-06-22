@@ -17,6 +17,7 @@ WALK_EDGE_KINDS = {
     "inferred_crosswalk",
 }
 SIDEWALK_SEGMENT_EDGE_KINDS = {"sidewalk", "sidewalk_split"}
+DRIVEWAY_SEGMENT_EDGE_KINDS = {"house_access", "house_access_fallback"}
 CROSSWALK_SEGMENT_EDGE_KINDS = {
     "crosswalk",
     "intersection",
@@ -334,10 +335,10 @@ def edge_kind(a, b, edges_by_pair):
 def segment_type_for_edge(kind):
     if kind in SIDEWALK_SEGMENT_EDGE_KINDS:
         return "sidewalk"
+    if kind in DRIVEWAY_SEGMENT_EDGE_KINDS:
+        return "driveway"
     if kind in CROSSWALK_SEGMENT_EDGE_KINDS:
         return "crosswalk"
-    if kind in {"house_access", "house_access_fallback"}:
-        return "sidewalk"
     return "crosswalk"
 
 
