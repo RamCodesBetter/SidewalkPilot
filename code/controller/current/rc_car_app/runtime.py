@@ -1067,6 +1067,14 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
     # rescheduling so the photo fires the moment the kick ends (~0.25s).
     if float(state.get("steering_center_settle_until", 0.0)) > now:
         return
+    # Don't capture while the car is stopped: stationary frames are near-
+    # duplicates that bias the dataset and waste the image budget without
+    # teaching steering. Require BOTH ~0 speed AND ~0 throttle so a flaky hall
+    # sensor (speed stuck at 0) can't silently kill capture while you're
+    # actually driving. Defer (no reschedule) -> resumes the moment you move.
+    if (float(getattr(metrics, "smoothed_speed_mph", 0.0)) < 0.1
+            and float(state.get("throttle", 0.0)) < 0.05):
+        return
     take_photo(webcam_vision, state)
     delay_sec = schedule_next_auto_photo(metrics, now)
     print(f"Next auto photo in {delay_sec}s.")
