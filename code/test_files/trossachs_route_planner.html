@@ -648,7 +648,9 @@
     }
 
     function makeAddressIndex() {
-      addressIndex = Object.entries(nodes).map(([id, node]) => {
+      addressIndex = Object.entries(nodes)
+        .filter(([, node]) => node.way_role !== "house_stop")
+        .map(([id, node]) => {
         const address = addressText(id, node);
         return { id, node, address, normalized: norm(`${id} ${address} ${node.house || ""} ${node.street || ""} ${node.road || ""}`) };
       });
@@ -739,10 +741,12 @@
         return top;
       }
       get size() { return this.items.length; }
+      _lt(a, b) { return a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]); }
+      _le(a, b) { return a[0] < b[0] || (a[0] === b[0] && a[1] <= b[1]); }
       bubble(i) {
         while (i > 0) {
           const p = Math.floor((i - 1) / 2);
-          if (this.items[p][0] <= this.items[i][0]) break;
+          if (this._le(this.items[p], this.items[i])) break;
           [this.items[p], this.items[i]] = [this.items[i], this.items[p]];
           i = p;
         }
@@ -751,8 +755,8 @@
         while (true) {
           const l = i * 2 + 1, r = l + 1;
           let s = i;
-          if (l < this.items.length && this.items[l][0] < this.items[s][0]) s = l;
-          if (r < this.items.length && this.items[r][0] < this.items[s][0]) s = r;
+          if (l < this.items.length && this._lt(this.items[l], this.items[s])) s = l;
+          if (r < this.items.length && this._lt(this.items[r], this.items[s])) s = r;
           if (s === i) break;
           [this.items[s], this.items[i]] = [this.items[i], this.items[s]];
           i = s;
@@ -762,13 +766,14 @@
 
     function astar(start, goal) {
       const frontier = new MinHeap();
+      let seq = 0;
       const startKey = stateKey(null, start);
-      frontier.push([0, 0, null, start]);
+      frontier.push([0, seq++, 0, null, start]);
       const came = new Map();
       const cost = new Map([[startKey, 0]]);
       let goalKey = null;
       while (frontier.size) {
-        const [, currentCost, prev, current] = frontier.pop();
+        const [, , currentCost, prev, current] = frontier.pop();
         const currentKey = stateKey(prev, current);
         if (currentCost > cost.get(currentKey)) continue;
         if (current === goal) {
@@ -781,7 +786,7 @@
           const nextCost = currentCost + edge.cost + turnPenalty(prev, current, edge.to);
           if (!cost.has(nextKey) || nextCost < cost.get(nextKey)) {
             cost.set(nextKey, nextCost);
-            frontier.push([nextCost + haversine(nodes[edge.to], nodes[goal]), nextCost, current, edge.to]);
+            frontier.push([nextCost + haversine(nodes[edge.to], nodes[goal]), seq++, nextCost, current, edge.to]);
             came.set(nextKey, currentKey);
           }
         }
@@ -1500,6 +1505,7 @@
     function showNode(id) {
       selectedNode = id;
       const node = nodes[id];
+      if (!node) return;
       const neighbors = adjacency.get(id) || [];
       const address = node.type === "house" && node.house ? `${node.house} ${node.street || node.road}` : node.road;
       nodePopup.style.display = "block";
