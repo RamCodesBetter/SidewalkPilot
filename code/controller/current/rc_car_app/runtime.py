@@ -1061,6 +1061,12 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
         return
     if now < metrics.auto_photo_next_time:
         return
+    # Don't capture a training frame during a steering-settle kick: the servo is
+    # physically mid-correction (toward 155) while the label is the logical
+    # center (90), so the image would be skewed vs its label. Defer without
+    # rescheduling so the photo fires the moment the kick ends (~0.25s).
+    if float(state.get("steering_center_settle_until", 0.0)) > now:
+        return
     take_photo(webcam_vision, state)
     delay_sec = schedule_next_auto_photo(metrics, now)
     print(f"Next auto photo in {delay_sec}s.")
