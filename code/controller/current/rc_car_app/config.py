@@ -84,7 +84,10 @@ STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG = float(
         "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG",
         os.environ.get(
             "RC_CAR_STEERING_CENTER_SETTLE_LX_DEG",
-            "155.0",
+            # Ram's rule: settle target = center + trim delta (L = 90 + D), so the
+            # left-release overshoot auto-follows the trim. At +13deg trim this
+            # is 103 (the well-tuned L103:0.25 +13D). Env vars still override.
+            str((STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0) * (1.0 + STEERING_SERVO_CENTER_OFFSET)),
         ),
     )
 )
