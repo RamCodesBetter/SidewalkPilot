@@ -106,6 +106,29 @@ STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(os.environ.get("RC_CAR_STEERING_C
 # input deadzone already handles stick jitter near center.
 STEERING_CENTER_SNAP_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SNAP_DEG", "0.5"))
 
+# --- Live-tunable steering overrides (written by the on-device tuning page) ---
+# steering_tune.json IS the persisted defaults: if present it overrides the four
+# values above, so an on-device SAVE survives restarts. Delete the file to
+# revert to the code defaults above.
+import json as _json
+STEERING_TUNE_PATH = os.path.join(os.path.dirname(__file__), "steering_tune.json")
+try:
+    with open(STEERING_TUNE_PATH) as _tune_f:
+        _tune = _json.load(_tune_f)
+    if isinstance(_tune, dict):
+        if "trim_delta_deg" in _tune:
+            STEERING_SERVO_CENTER_OFFSET = float(_tune["trim_delta_deg"]) / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
+        if "settle_target_deg" in _tune:
+            STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG = float(_tune["settle_target_deg"])
+        if "settle_duration_sec" in _tune:
+            STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC = float(_tune["settle_duration_sec"])
+        if "settle_trigger_deg" in _tune:
+            STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(_tune["settle_trigger_deg"])
+except FileNotFoundError:
+    pass
+except Exception as _tune_exc:
+    print(f"steering_tune.json ignored ({_tune_exc})")
+
 # Reduce the stronger side below 1.0 if the car pulls while steering is centered.
 LEFT_MOTOR_PWM_SCALE = 1.0
 RIGHT_MOTOR_PWM_SCALE = 1.0
