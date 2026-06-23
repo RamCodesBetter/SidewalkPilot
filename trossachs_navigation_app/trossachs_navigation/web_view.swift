@@ -108,19 +108,12 @@ final class WebBridge: NSObject, ObservableObject, WKScriptMessageHandler, CLLoc
     // MARK: - Swift → JS actions
 
     func planRoute(start: String, goal: String) {
+        // The page's planRoute() posts the structured routeResult itself when it
+        // finishes (no fixed-delay DOM scrape / race). Just set inputs + invoke.
         let js = """
         document.getElementById('start').value = \(jsStr(start));
         document.getElementById('goal').value = \(jsStr(goal));
         planRoute();
-        setTimeout(() => {
-            const steps = Array.from(document.querySelectorAll('#directions li')).map(li => li.textContent);
-            window.webkit.messageHandlers.routeResult.postMessage({
-                summary: document.getElementById('summary').textContent,
-                steps,
-                distance: document.getElementById('distanceMetric').textContent,
-                eta: document.getElementById('etaMetric').textContent
-            });
-        }, 500);
         """
         webView?.evaluateJavaScript(js)
     }
@@ -174,7 +167,7 @@ final class WebBridge: NSObject, ObservableObject, WKScriptMessageHandler, CLLoc
     func startPreview()   { webView?.evaluateJavaScript("startPreview();") }
     func pausePreview()   { webView?.evaluateJavaScript("stopPreview(false);") }
     func restartPreview() { webView?.evaluateJavaScript("restartPreview();") }
-    func setPreviewSpeed(_ s: Int) { webView?.evaluateJavaScript("document.getElementById('previewSpeed').value='\(s)'; ") }
+    func setPreviewSpeed(_ s: Int) { webView?.evaluateJavaScript("var ps=document.getElementById('previewSpeed'); ps.value='\(s)'; ps.dispatchEvent(new Event('change'));") }
     func setFollowPreview(_ on: Bool) { webView?.evaluateJavaScript("followCar = \(on ? "true" : "false");") }
     func setFollowLocation(_ on: Bool) { webView?.evaluateJavaScript("followLocation = \(on ? "true" : "false");") }
 
@@ -206,18 +199,9 @@ struct MapWebView: UIViewRepresentable {
             `;
             document.head.appendChild(s);
 
-            // Patch updatePreviewUi to post progress to Swift
-            var _orig = window.updatePreviewUi;
-            window.updatePreviewUi = function() {
-                if(_orig) _orig();
-                var total = routeDrawableLength();
-                var pct = total ? Math.max(0, Math.min(100, preview.distance / total * 100)) : 0;
-                window.webkit.messageHandlers.previewUpdate.postMessage({
-                    pct: pct,
-                    status: document.getElementById('previewStatus').textContent,
-                    playing: preview.playing
-                });
-            };
+            // Preview progress is posted by the page's own updatePreviewUi()
+            // (defined after this script runs, so an override here would be
+            // clobbered). No patch needed.
 
             (function poll(){
                 if(typeof indexReady !== 'undefined' && indexReady){

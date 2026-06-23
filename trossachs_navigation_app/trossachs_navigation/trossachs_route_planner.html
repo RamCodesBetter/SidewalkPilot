@@ -819,7 +819,9 @@
     }
 
     function makeAddressIndex() {
-      addressIndex = Object.entries(nodes).map(([id, node]) => {
+      addressIndex = Object.entries(nodes)
+        .filter(([, node]) => node.way_role !== "house_stop")
+        .map(([id, node]) => {
         const address = addressText(id, node);
         return { id, node, address, normalized: norm(`${id} ${address} ${node.house || ""} ${node.street || ""} ${node.road || ""}`) };
       });
@@ -844,7 +846,11 @@
       if (nodes[direct]) return { id: direct, matches: [entryFor(direct)] };
       const exact = addressIndex.filter(entry => norm(entry.address) === query);
       if (exact.length === 1) return { id: exact[0].id, matches: exact };
-      if (exact.length > 1) return { id: null, matches: exact };
+      if (exact.length > 1) {
+        const house = exact.find(entry => entry.node.type === "house");
+        if (house) return { id: house.id, matches: exact };
+        return { id: null, matches: exact };
+      }
       const pieces = query.split(" ").filter(Boolean);
       const fuzzy = addressIndex
         .filter(entry => pieces.every(piece => entry.normalized.includes(piece)))
@@ -910,10 +916,12 @@
         return top;
       }
       get size() { return this.items.length; }
+      _lt(a, b) { return a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]); }
+      _le(a, b) { return a[0] < b[0] || (a[0] === b[0] && a[1] <= b[1]); }
       bubble(i) {
         while (i > 0) {
           const p = Math.floor((i - 1) / 2);
-          if (this.items[p][0] <= this.items[i][0]) break;
+          if (this._le(this.items[p], this.items[i])) break;
           [this.items[p], this.items[i]] = [this.items[i], this.items[p]];
           i = p;
         }
@@ -922,8 +930,8 @@
         while (true) {
           const l = i * 2 + 1, r = l + 1;
           let s = i;
-          if (l < this.items.length && this.items[l][0] < this.items[s][0]) s = l;
-          if (r < this.items.length && this.items[r][0] < this.items[s][0]) s = r;
+          if (l < this.items.length && this._lt(this.items[l], this.items[s])) s = l;
+          if (r < this.items.length && this._lt(this.items[r], this.items[s])) s = r;
           if (s === i) break;
           [this.items[s], this.items[i]] = [this.items[i], this.items[s]];
           i = s;
@@ -933,13 +941,14 @@
 
     function astar(start, goal) {
       const frontier = new MinHeap();
+      let seq = 0;
       const startKey = stateKey(null, start);
-      frontier.push([0, 0, null, start]);
+      frontier.push([0, seq++, 0, null, start]);
       const came = new Map();
       const cost = new Map([[startKey, 0]]);
       let goalKey = null;
       while (frontier.size) {
-        const [, currentCost, prev, current] = frontier.pop();
+        const [, , currentCost, prev, current] = frontier.pop();
         const currentKey = stateKey(prev, current);
         if (currentCost > cost.get(currentKey)) continue;
         if (current === goal) {
@@ -952,7 +961,7 @@
           const nextCost = currentCost + edge.cost + turnPenalty(prev, current, edge.to);
           if (!cost.has(nextKey) || nextCost < cost.get(nextKey)) {
             cost.set(nextKey, nextCost);
-            frontier.push([nextCost + haversine(nodes[edge.to], nodes[goal]), nextCost, current, edge.to]);
+            frontier.push([nextCost + haversine(nodes[edge.to], nodes[goal]), seq++, nextCost, current, edge.to]);
             came.set(nextKey, currentKey);
           }
         }
@@ -1700,6 +1709,7 @@
     function showNode(id) {
       selectedNode = id;
       const node = nodes[id];
+      if (!node) return;
       const neighbors = adjacency.get(id) || [];
       const address = node.type === "house" && node.house ? `${node.house} ${node.street || node.road}` : node.road;
       nodePopup.style.display = "block";
@@ -1866,6 +1876,9 @@
       if (!currentRawPath.length) previewStatus.textContent = "Plan a route before previewing.";
       else if (preview.playing) previewStatus.textContent = `Driving preview at ${previewSpeed.value}x simulated speed.`;
       else previewStatus.textContent = pct >= 99.9 ? "Preview finished." : "Preview paused.";
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.previewUpdate) {
+        window.webkit.messageHandlers.previewUpdate.postMessage({ pct, status: previewStatus.textContent, playing: preview.playing });
+      }
     }
 
     function startPreview() {
@@ -2037,6 +2050,19 @@
       else centerOnWorldPoint(locationToWorld(currentLocation), 8);
     }
 
+    function postRouteResultToHost() {
+      if (!window.webkit || !window.webkit.messageHandlers || !window.webkit.messageHandlers.routeResult) return;
+      const steps = Array.from(document.querySelectorAll('#directions li')).map(li => li.textContent);
+      const distEl = document.getElementById('distanceMetric');
+      const etaEl = document.getElementById('etaMetric');
+      window.webkit.messageHandlers.routeResult.postMessage({
+        summary: (summary && summary.textContent) || "",
+        steps,
+        distance: distEl ? distEl.textContent : "",
+        eta: etaEl ? etaEl.textContent : ""
+      });
+    }
+
     function planRoute() {
       if (!indexReady) {
         summary.textContent = "Map is ready. Route index is still loading.";
@@ -2059,6 +2085,7 @@
         shellCommand.textContent = "python3 astar_nav.py START_NODE GOAL_NODE";
         updateMetrics();
         requestDraw();
+        postRouteResultToHost();
         return;
       }
       const routeStart = snapEndpointToSidewalk(startResolution.id);
@@ -2080,6 +2107,7 @@
         summary.textContent = "No route found between those two nodes.";
         directionsList.innerHTML = "";
         requestDraw();
+        postRouteResultToHost();
         return;
       }
       updateMetrics();
@@ -2092,6 +2120,7 @@
       saveRecentRoute(routeStart.id, routeGoal.id);
       zoomToRoute();
       requestDraw();
+      postRouteResultToHost();
     }
 
     function zoomToRoute() {
