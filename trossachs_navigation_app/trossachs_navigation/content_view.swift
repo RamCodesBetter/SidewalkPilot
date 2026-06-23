@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @StateObject private var bridge = WebBridge()
@@ -22,6 +23,10 @@ struct ContentView: View {
     // Preview state
     @State private var followPreview = true
     @State private var previewSpeed = 16
+
+    // GPX turn-by-turn (voice) navigation
+    @StateObject private var gpxNav = GPXNavigator()
+    @State private var showGPXImporter = false
 
     enum Field: Hashable { case start, goal }
     enum Tab: String, CaseIterable { case route = "Route", steps = "Steps", preview = "Preview" }
@@ -53,8 +58,13 @@ struct ContentView: View {
                 MapWebView(bridge: bridge)
                     .ignoresSafeArea()
                     .onTapGesture { dismissKeyboard() }
+                    .fileImporter(isPresented: $showGPXImporter,
+                                  allowedContentTypes: [UTType(filenameExtension: "gpx") ?? .xml, .xml, .item],
+                                  allowsMultipleSelection: false,
+                                  onCompletion: handleGPXImport)
 
                 topMapBadge(safeTop: safeTop)
+                gpxNavOverlay(safeTop: safeTop)
 
                 // ── LOADING OVERLAY ──────────────────────────────────────────
                 if !bridge.isReady {
@@ -670,6 +680,64 @@ struct ContentView: View {
 
     private func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    private func handleGPXImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            gpxNav.loadAndStart(url: url, name: url.deletingPathExtension().lastPathComponent)
+        case .failure(let error):
+            gpxNav.lastError = error.localizedDescription
+        }
+    }
+
+    @ViewBuilder
+    private func gpxNavOverlay(safeTop: CGFloat) -> some View {
+        VStack {
+            if gpxNav.isNavigating {
+                HStack(spacing: 10) {
+                    Image(systemName: "location.north.line.fill").foregroundColor(accent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(gpxNav.currentInstruction.isEmpty ? "Navigating GPX" : gpxNav.currentInstruction)
+                            .font(.headline).lineLimit(2)
+                        if gpxNav.distanceToNext > 0 {
+                            Text("in \(Int(gpxNav.distanceToNext.rounded())) m · \(Int(gpxNav.remainingDistance.rounded())) m left")
+                                .font(.caption).foregroundColor(.secondary)
+                        }
+                    }
+                    Spacer()
+                    Button { gpxNav.repeatInstruction() } label: {
+                        Image(systemName: "speaker.wave.2.fill").font(.title3)
+                    }
+                    Button { gpxNav.stop() } label: {
+                        Image(systemName: "xmark.circle.fill").font(.title3).foregroundColor(.secondary)
+                    }
+                }
+                .padding(12)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
+                .padding(.horizontal, 12)
+                .padding(.top, safeTop + 8)
+            } else {
+                HStack(spacing: 8) {
+                    Button { showGPXImporter = true } label: {
+                        Label("GPX", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 14).padding(.vertical, 9)
+                            .background(.ultraThinMaterial, in: Capsule())
+                    }
+                    if let err = gpxNav.lastError {
+                        Text(err).font(.caption2).foregroundColor(.red).lineLimit(2)
+                            .padding(.horizontal, 8)
+                            .background(.ultraThinMaterial, in: Capsule())
+                    }
+                    Spacer()
+                }
+                .padding(.leading, 12)
+                .padding(.top, safeTop + 8)
+            }
+            Spacer()
+        }
     }
 
     private func zoomButton(icon: String, action: @escaping () -> Void) -> some View {
