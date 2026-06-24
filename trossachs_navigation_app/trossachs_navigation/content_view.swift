@@ -729,14 +729,17 @@ struct ContentView: View {
             } else {
                 HStack(spacing: 8) {
                     Button { showGPXImporter = true } label: {
-                        Label("GPX", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
-                            .font(.subheadline.weight(.semibold))
-                            .padding(.horizontal, 14).padding(.vertical, 9)
-                            .background(.ultraThinMaterial, in: Capsule())
+                        Label("Start Navigation", systemImage: "location.north.line.fill")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 18).padding(.vertical, 12)
+                            .background(accent, in: Capsule())
+                            .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1))
+                            .shadow(color: .black.opacity(0.22), radius: 10, x: 0, y: 4)
                     }
                     if let err = gpxNav.lastError {
                         Text(err).font(.caption2).foregroundColor(.red).lineLimit(2)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, 8).padding(.vertical, 6)
                             .background(.ultraThinMaterial, in: Capsule())
                     }
                     Spacer()
