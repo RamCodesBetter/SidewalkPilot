@@ -574,18 +574,6 @@ class DashboardRenderer:
         selected = max(0, min(4, int(payload.get("tune_selected_row", 0))))
         saved = bool(payload.get("tune_saved", False))
 
-        # TEMP TUNE DEBUG: log what the Zero actually received, on change.
-        _rx = (
-            payload.get("steering_trim_delta_deg", "MISS"),
-            payload.get("settle_target_deg", "MISS"),
-            payload.get("settle_duration_sec", "MISS"),
-            payload.get("settle_trigger_deg", "MISS"),
-            payload.get("tune_selected_row", "MISS"),
-        )
-        if _rx != getattr(self, "_tune_rx_last", None):
-            self._tune_rx_last = _rx
-            print(f"[TUNE-RX] delta={_rx[0]} target={_rx[1]} dur={_rx[2]} trig={_rx[3]} row={_rx[4]}", flush=True)
-
         save_value = ["Y", "E", "S"] if saved else [" ", "N", "O"]
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
@@ -998,6 +986,11 @@ def main():
     steering_trim_delta_deg = 0.0
     steering_trim_total_deg = 90.0
     steering_center_offset = 0.0
+    settle_target_deg = 90.0
+    settle_duration_sec = 0.0
+    settle_trigger_deg = 0.0
+    tune_selected_row = 0
+    tune_saved = False
     receiver_start_time = time.monotonic()
     last_packet_time = time.monotonic()
     have_received_payload = False
@@ -1056,6 +1049,11 @@ def main():
                 "steering_trim_delta_deg": steering_trim_delta_deg,
                 "steering_trim_total_deg": steering_trim_total_deg,
                 "steering_center_offset": steering_center_offset,
+                "settle_target_deg": settle_target_deg,
+                "settle_duration_sec": settle_duration_sec,
+                "settle_trigger_deg": settle_trigger_deg,
+                "tune_selected_row": tune_selected_row,
+                "tune_saved": tune_saved,
             },
             notification_rows,
         )
@@ -1105,6 +1103,11 @@ def main():
         nonlocal steering_trim_delta_deg
         nonlocal steering_trim_total_deg
         nonlocal steering_center_offset
+        nonlocal settle_target_deg
+        nonlocal settle_duration_sec
+        nonlocal settle_trigger_deg
+        nonlocal tune_selected_row
+        nonlocal tune_saved
         nonlocal telemetry_stale_reported
 
         if payload.get("shutdown"):
@@ -1159,6 +1162,11 @@ def main():
             -1.0,
             min(1.0, float(payload.get("steering_center_offset", steering_center_offset))),
         )
+        settle_target_deg = max(0.0, min(180.0, float(payload.get("settle_target_deg", settle_target_deg))))
+        settle_duration_sec = max(0.0, min(9.99, float(payload.get("settle_duration_sec", settle_duration_sec))))
+        settle_trigger_deg = max(0.0, min(99.0, float(payload.get("settle_trigger_deg", settle_trigger_deg))))
+        tune_selected_row = max(0, min(4, int(payload.get("tune_selected_row", tune_selected_row))))
+        tune_saved = bool(payload.get("tune_saved", False))
         renderer.set_brightness(brightness_percent)
         max7219.set_brightness_percent(brightness_percent)
         notification = payload.get("dashboard_notification")
