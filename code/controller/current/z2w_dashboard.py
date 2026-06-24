@@ -574,6 +574,18 @@ class DashboardRenderer:
         selected = max(0, min(4, int(payload.get("tune_selected_row", 0))))
         saved = bool(payload.get("tune_saved", False))
 
+        # TEMP TUNE DEBUG: log what the Zero actually received, on change.
+        _rx = (
+            payload.get("steering_trim_delta_deg", "MISS"),
+            payload.get("settle_target_deg", "MISS"),
+            payload.get("settle_duration_sec", "MISS"),
+            payload.get("settle_trigger_deg", "MISS"),
+            payload.get("tune_selected_row", "MISS"),
+        )
+        if _rx != getattr(self, "_tune_rx_last", None):
+            self._tune_rx_last = _rx
+            print(f"[TUNE-RX] delta={_rx[0]} target={_rx[1]} dur={_rx[2]} trig={_rx[3]} row={_rx[4]}", flush=True)
+
         save_value = ["Y", "E", "S"] if saved else [" ", "N", "O"]
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),

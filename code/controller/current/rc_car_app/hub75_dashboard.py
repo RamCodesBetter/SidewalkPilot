@@ -198,6 +198,18 @@ class Hub75DashboardSender:
             notification_sent = "dashboard_notification" in payload
         if notification_sent:
             self.pending_notifications.pop(0)
+        # TEMP TUNE DEBUG: log what's actually in the page-13 packet, on change.
+        if payload.get("dashboard_page") == 13:
+            _tx = (
+                payload.get("steering_trim_delta_deg"),
+                payload.get("settle_target_deg"),
+                payload.get("settle_duration_sec"),
+                payload.get("settle_trigger_deg"),
+                payload.get("tune_selected_row"),
+            )
+            if _tx != getattr(self, "_tune_tx_last", None):
+                self._tune_tx_last = _tx
+                print(f"[TUNE-TX] page13 delta={_tx[0]} target={_tx[1]} dur={_tx[2]} trig={_tx[3]} row={_tx[4]}")
         return True
 
     def send_shutdown(self):
