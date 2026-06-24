@@ -260,10 +260,13 @@ def center_steering(state):
 def start_manual_steering_center_settle(state, previous_servo_degrees: float) -> None:
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     previous_delta = float(previous_servo_degrees) - center_degrees
-    if previous_delta >= -float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
+    # Live-tunable thresholds (tuning page); default to the config constants so
+    # behavior is identical until tuned on the display.
+    trigger_deg = float(state.get("settle_trigger_deg", STEERING_CENTER_SETTLE_RELEASE_MIN_DEG))
+    if previous_delta >= -trigger_deg:
         return
-    settle_target_degrees = float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG)
-    settle_duration_sec = float(STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC)
+    settle_target_degrees = float(state.get("settle_target_deg", STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG))
+    settle_duration_sec = float(state.get("settle_duration_sec", STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC))
     if settle_duration_sec <= 0.0:
         state["steering_center_settle_until"] = 0.0
         return
@@ -456,6 +459,56 @@ def adjust_steering_center_trim(state, hardware, direction: int) -> None:
         f"total {state['steering_trim_total_deg']:.1f} deg, "
         f"STEERING_SERVO_CENTER_OFFSET={state['steering_center_offset']:+.4f}"
     )
+
+
+# --- On-device steering tuning page (dashboard page 13 / v1h3) ---------------
+# Rows the d-pad up/down cycles through; left/right adjusts the selected one.
+TUNE_ROWS = ("DELT", "PHBK", "PBSC", "TRIG", "SAVE")
+STEERING_TUNE_PATH = os.path.join(os.path.dirname(__file__), "steering_tune.json")
+
+
+def cycle_tuning_row(state, hat_y: int) -> None:
+    # D-pad up (hat_y=+1) moves to the previous row; down moves to the next.
+    row = int(state.get("tune_selected_row", 0))
+    state["tune_selected_row"] = max(0, min(len(TUNE_ROWS) - 1, row - int(hat_y)))
+
+
+def save_steering_tune(state) -> None:
+    data = {
+        "trim_delta_deg": round(float(state.get("steering_trim_delta_deg", 0.0)), 2),
+        "settle_target_deg": round(float(state.get("settle_target_deg", 0.0)), 1),
+        "settle_duration_sec": round(float(state.get("settle_duration_sec", 0.25)), 2),
+        "settle_trigger_deg": round(float(state.get("settle_trigger_deg", 12.0)), 1),
+    }
+    try:
+        with open(STEERING_TUNE_PATH, "w") as handle:
+            json.dump(data, handle, indent=2)
+        state["tune_saved_flash_until"] = time.time() + 2.0
+        print(f"Saved steering tune -> {STEERING_TUNE_PATH}: {data}")
+    except Exception as exc:
+        print(f"Failed to save steering tune: {exc}")
+
+
+def adjust_tuning_value(state, hardware, direction: int) -> None:
+    row = int(state.get("tune_selected_row", 0))
+    step = int(direction)
+    if row == 0:  # DELT — center trim, applied to the servo immediately.
+        adjust_steering_center_trim(state, hardware, step)
+    elif row == 1:  # PHBK — settle overshoot target (logical deg).
+        state["settle_target_deg"] = max(90.0, min(180.0,
+            float(state.get("settle_target_deg", 103.0)) + step * 1.0))
+        print(f"Settle target -> {state['settle_target_deg']:.0f}")
+    elif row == 2:  # PBSC — settle hold duration (seconds).
+        state["settle_duration_sec"] = max(0.0, min(2.0,
+            round(float(state.get("settle_duration_sec", 0.25)) + step * 0.05, 2)))
+        print(f"Settle duration -> {state['settle_duration_sec']:.2f}s")
+    elif row == 3:  # TRIG — release angle that arms the settle (deg).
+        state["settle_trigger_deg"] = max(0.0, min(45.0,
+            float(state.get("settle_trigger_deg", 12.0)) + step * 1.0))
+        print(f"Settle trigger -> {state['settle_trigger_deg']:.0f} deg")
+    elif row == 4:  # SAVE — d-pad right commits to steering_tune.json.
+        if step > 0:
+            save_steering_tune(state)
 
 
 def dashboard_axis_direction(axis_value: float) -> int:
@@ -1668,18 +1721,22 @@ def run(model_choice=None):
                         shutdown_flag.set()
                 elif event.type == pygame.JOYHATMOTION:
                     hat_x, hat_y = event.value
+                    current_dashboard_page = int(state.get("dashboard_page", 1))
+                    on_tuning_page = current_dashboard_page == STEERING_TRIM_DASHBOARD_PAGE
                     if hat_x:
-                        current_dashboard_page = int(state.get("dashboard_page", 1))
-                        if current_dashboard_page == STEERING_TRIM_DASHBOARD_PAGE:
-                            adjust_steering_center_trim(state, hardware, int(hat_x))
+                        if on_tuning_page:
+                            adjust_tuning_value(state, hardware, int(hat_x))
                         elif current_dashboard_page == 5 and not navigation.active:
                             navigation.move_cursor(int(hat_x))
                         elif hat_x == -1:
                             toggle_turn_signal(state, metrics, "left")
                         elif hat_x == 1:
                             toggle_turn_signal(state, metrics, "right")
-                    state["dpad_y_value"] = int(hat_y)
-                    if hat_y:
+                    if on_tuning_page and hat_y:
+                        # Up/down selects the tuning row; no model cycling here.
+                        cycle_tuning_row(state, int(hat_y))
+                    state["dpad_y_value"] = 0 if on_tuning_page else int(hat_y)
+                    if hat_y and not on_tuning_page:
                         active_model_choice = handle_dpad_y_action(
                             int(hat_y),
                             state,
@@ -1818,6 +1875,11 @@ def run(model_choice=None):
                     steering_trim_delta_deg=state["steering_trim_delta_deg"],
                     steering_trim_total_deg=state["steering_trim_total_deg"],
                     steering_center_offset=state["steering_center_offset"],
+                    settle_target_deg=state.get("settle_target_deg", 90.0),
+                    settle_duration_sec=state.get("settle_duration_sec", 0.0),
+                    settle_trigger_deg=state.get("settle_trigger_deg", 0.0),
+                    tune_selected_row=state.get("tune_selected_row", 0),
+                    tune_saved=time.time() < float(state.get("tune_saved_flash_until", 0.0)),
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""

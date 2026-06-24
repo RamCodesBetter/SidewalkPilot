@@ -562,14 +562,34 @@ class DashboardRenderer:
         self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
 
-    def _draw_steering_trim_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        delta_cells = self._signed_two_digit_cells(float(payload.get("steering_trim_delta_deg", 0.0)))
-        total_cells = self._optional_three_digit_cells(float(payload.get("steering_trim_total_deg", 90.0)))
-        offset_cells = self._signed_offset_cells(float(payload.get("steering_center_offset", 0.0)))
-        self._draw_text_row(0, ["D", "E", "L", "T", ":", *delta_cells], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["T", "T", "L", "E", ":", *total_cells], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["V", "A", "R", "I", ":", "", "", ""], ARROW_YELLOW, y_offset_px)
-        self._draw_text_row(3, offset_cells, TEXT_ORANGE, y_offset_px)
+    def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        # On-device steering tuner. D-pad up/down picks the row (shown white),
+        # left/right adjusts it; SAVE (right) writes steering_tune.json.
+        # DELT = center trim, PHBK = settle target, PBSC = settle hold seconds
+        # (shown x100, so 025 = 0.25 s), TRIG = release angle that arms settle.
+        delta = float(payload.get("steering_trim_delta_deg", 0.0))
+        target = float(payload.get("settle_target_deg", 90.0))
+        duration = float(payload.get("settle_duration_sec", 0.0))
+        trigger = float(payload.get("settle_trigger_deg", 0.0))
+        selected = max(0, min(4, int(payload.get("tune_selected_row", 0))))
+        saved = bool(payload.get("tune_saved", False))
+
+        save_value = ["Y", "E", "S"] if saved else [" ", "N", "O"]
+        rows = [
+            (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
+            (["P", "H", "B", "K", ":", *self._optional_three_digit_cells(target)], TEXT_GREEN),
+            (["P", "B", "S", "C", ":", *self._digits(round(duration * 100), 3)], ARROW_YELLOW),
+            (["T", "R", "I", "G", ":", *self._optional_three_digit_cells(trigger)], TEXT_ORANGE),
+            (["S", "A", "V", "E", ":", *save_value], TEXT_GREEN if saved else ALERT_RED_DIM),
+        ]
+        # Four visible rows over five logical rows: only scroll to reveal SAVE.
+        window_start = 0 if selected < 4 else 1
+        for panel_row in range(4):
+            logical = window_start + panel_row
+            cells, color = rows[logical]
+            if logical == selected:
+                color = TEXT_WHITE
+            self._draw_text_row(panel_row, cells, color, y_offset_px)
 
     def _draw_nav_entry_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         nav = self._nav_payload(payload)
@@ -703,7 +723,7 @@ class DashboardRenderer:
             self._draw_photo_run_stats_page(payload, y_offset_px)
             return
         if page == 13:
-            self._draw_steering_trim_page(payload, y_offset_px)
+            self._draw_tuning_page(payload, y_offset_px)
             return
         if page == 14:
             self._draw_lidar_page(payload, y_offset_px)

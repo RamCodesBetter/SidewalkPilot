@@ -142,6 +142,11 @@ class Hub75DashboardSender:
         steering_trim_delta_deg: float = 0.0,
         steering_trim_total_deg: float = 90.0,
         steering_center_offset: float = 0.0,
+        settle_target_deg: float = 90.0,
+        settle_duration_sec: float = 0.0,
+        settle_trigger_deg: float = 0.0,
+        tune_selected_row: int = 0,
+        tune_saved: bool = False,
         dashboard_row1_text: str = "",
     ):
         now = time.monotonic()
@@ -178,6 +183,11 @@ class Hub75DashboardSender:
             "steering_trim_delta_deg": round(max(-180.0, min(180.0, float(steering_trim_delta_deg))), 2),
             "steering_trim_total_deg": round(max(0.0, min(180.0, float(steering_trim_total_deg))), 2),
             "steering_center_offset": round(max(-1.0, min(1.0, float(steering_center_offset))), 4),
+            "settle_target_deg": round(max(0.0, min(180.0, float(settle_target_deg))), 1),
+            "settle_duration_sec": round(max(0.0, min(9.99, float(settle_duration_sec))), 2),
+            "settle_trigger_deg": round(max(0.0, min(99.0, float(settle_trigger_deg))), 1),
+            "tune_selected_row": max(0, min(4, int(tune_selected_row))),
+            "tune_saved": bool(tune_saved),
             "dashboard_row1_text": str(dashboard_row1_text)[:10],
             "timestamp": time.time(),
         }

@@ -271,6 +271,14 @@ def create_state():
         "steer": 0.0,
         "steering_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "steering_trim_delta_deg": STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0),
+        # Live-tunable settle params (on-device tuning page). Init from config
+        # (which is steering_tune.json-overridden) so behavior is unchanged
+        # until you tune on the display.
+        "settle_target_deg": float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG),
+        "settle_duration_sec": float(STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC),
+        "settle_trigger_deg": float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG),
+        "tune_selected_row": 0,
+        "tune_saved_flash_until": 0.0,
         "steering_trim_total_deg": (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
         + (STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
         "steering_center_offset": STEERING_SERVO_CENTER_OFFSET,
