@@ -12,6 +12,7 @@
 		AA000003 /* content_view.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100003 /* content_view.swift */; };
 		AA000007 /* stable_text_field.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100007 /* stable_text_field.swift */; };
 		AA0000A1 /* gpx_navigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A1 /* gpx_navigator.swift */; };
+		AA0000A2 /* navigation_mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A2 /* navigation_mode.swift */; };
 		AA000004 /* trossachs_route_planner.html in Resources */ = {isa = PBXBuildFile; fileRef = AA100004 /* trossachs_route_planner.html */; };
 		AA000005 /* trossachs_nav_graph.json in Resources */ = {isa = PBXBuildFile; fileRef = AA100005 /* trossachs_nav_graph.json */; };
 		AA000009 /* trossachs_nav_graph_embed.js in Resources */ = {isa = PBXBuildFile; fileRef = AA100009 /* trossachs_nav_graph_embed.js */; };
@@ -36,6 +37,7 @@
 		AA100006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA100007 /* stable_text_field.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = stable_text_field.swift; sourceTree = "<group>"; };
 		AA1000A1 /* gpx_navigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gpx_navigator.swift; sourceTree = "<group>"; };
+		AA1000A2 /* navigation_mode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = navigation_mode.swift; sourceTree = "<group>"; };
 		AA100008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA200001 /* Trossachs Navigation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Trossachs Navigation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -75,6 +77,7 @@
 				AA100006 /* Info.plist */,
 				AA100007 /* stable_text_field.swift */,
 				AA1000A1 /* gpx_navigator.swift */,
+				AA1000A2 /* navigation_mode.swift */,
 				AA100008 /* Assets.xcassets */,
 			);
 			path = trossachs_navigation;
@@ -169,6 +172,7 @@
 				AA000003 /* content_view.swift in Sources */,
 				AA000007 /* stable_text_field.swift in Sources */,
 				AA0000A1 /* gpx_navigator.swift in Sources */,
+				AA0000A2 /* navigation_mode.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

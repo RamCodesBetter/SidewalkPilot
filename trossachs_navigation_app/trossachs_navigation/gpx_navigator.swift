@@ -57,6 +57,28 @@ final class GPXNavigator: NSObject, ObservableObject, CLLocationManagerDelegate 
     @Published var distanceToNext: CLLocationDistance = 0
     @Published var remainingDistance: CLLocationDistance = 0
     @Published var lastError: String?
+    // Geometry for the native nav map (kept independent of the HTML map).
+    @Published var routeCoordinates: [CLLocationCoordinate2D] = []
+    @Published var userLocation: CLLocationCoordinate2D?
+    @Published var userCourse: CLLocationDirection = -1
+
+    /// Coordinate of the maneuver we're currently heading toward (for the map pin).
+    var nextManeuverCoordinate: CLLocationCoordinate2D? {
+        guard nextIndex < maneuvers.count else { return nil }
+        return maneuvers[nextIndex].coordinate
+    }
+
+    /// Assumed travel speed for ETA (≈3 mph sidewalk pace).
+    private let assumedSpeedMps: CLLocationDistance = 1.4
+
+    /// Estimated time left to the destination, in seconds.
+    var remainingTime: TimeInterval { assumedSpeedMps > 0 ? remainingDistance / assumedSpeedMps : 0 }
+
+    static func formatDuration(_ seconds: TimeInterval) -> String {
+        let mins = Int((seconds / 60).rounded())
+        if mins < 60 { return "\(max(1, mins)) min" }
+        return "\(mins / 60) h \(mins % 60) min"
+    }
 
     private var maneuvers: [GPXManeuver] = []
     private var totalDistance: CLLocationDistance = 0
@@ -87,10 +109,17 @@ final class GPXNavigator: NSObject, ObservableObject, CLLocationManagerDelegate 
         guard let data = try? Data(contentsOf: url) else {
             lastError = "Could not read GPX file."; return
         }
-        let clean = Self.simplify(GPX.coordinates(from: data), minSegmentM: minSegmentM)
+        start(coordinates: GPX.coordinates(from: data), name: name)
+    }
+
+    /// Start turn-by-turn voice navigation for any coordinate list (GPX import,
+    /// a planned route, etc.). Independent of the HTML map.
+    func start(coordinates raw: [CLLocationCoordinate2D], name: String) {
+        let clean = Self.simplify(raw, minSegmentM: minSegmentM)
         guard clean.count >= 2 else {
-            lastError = "GPX has too few points to navigate."; return
+            lastError = "Route has too few points to navigate."; return
         }
+        routeCoordinates = clean
         maneuvers = Self.buildManeuvers(clean, turnThresholdDeg: turnThresholdDeg)
         totalDistance = maneuvers.last?.distanceFromStart ?? 0
         routeName = name
@@ -137,7 +166,10 @@ final class GPXNavigator: NSObject, ObservableObject, CLLocationManagerDelegate 
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard isNavigating, let here = locations.last, nextIndex < maneuvers.count else { return }
+        guard isNavigating, let here = locations.last else { return }
+        userLocation = here.coordinate
+        if here.course >= 0 { userCourse = here.course }
+        guard nextIndex < maneuvers.count else { return }
         let target = maneuvers[nextIndex]
         let targetLoc = CLLocation(latitude: target.coordinate.latitude, longitude: target.coordinate.longitude)
         let d = here.distance(from: targetLoc)

@@ -142,6 +142,14 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             withAnimation(.easeOut(duration: 0.25)) { keyboardHeight = 0 }
         }
+        // Full-screen native turn-by-turn (MapKit) whenever the navigator runs.
+        // Kept separate from the HTML planner map.
+        .fullScreenCover(isPresented: Binding(
+            get: { gpxNav.isNavigating },
+            set: { if !$0 { gpxNav.stop() } }
+        )) {
+            NavigationModeView(nav: gpxNav, onEnd: { gpxNav.stop() })
+        }
     }
 
     // MARK: - Bottom sheet
