@@ -180,7 +180,7 @@ struct ContentView: View {
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.55), lineWidth: 1))
         .shadow(color: .black.opacity(0.14), radius: 12, x: 0, y: 5)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.top, safeTop + 50)
+        .padding(.top, safeTop + 112)
         .padding(.leading, 14)
         .padding(.trailing, 14)
         .opacity(activeField == nil ? 1 : 0)
@@ -745,7 +745,7 @@ struct ContentView: View {
                     Spacer()
                 }
                 .padding(.leading, 12)
-                .padding(.top, safeTop + 8)
+                .padding(.top, safeTop + 58)
             }
             Spacer()
         }

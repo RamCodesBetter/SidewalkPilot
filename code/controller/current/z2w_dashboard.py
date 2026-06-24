@@ -373,10 +373,10 @@ class DashboardRenderer:
     ):
         speed_digits = self._speed_digits(speed_mph)
         for cell_index, char in enumerate(speed_digits):
-            self._draw_glyph(self.digit_map.get(char, self.letter_map[" "]), cell_index, DIGIT_BLUE, y_offset_px)
+            self._draw_glyph(self.digit_map.get(char, self.letter_map[" "]), cell_index, TEXT_CYAN, y_offset_px)
 
         # Decimal point in bottom-right of R1C1.
-        self._set_pixel(7, 7 + y_offset_px, DIGIT_BLUE)
+        self._set_pixel(7, 7 + y_offset_px, TEXT_CYAN)
 
         for offset, gear_char in enumerate("PRND", start=4):
             color = GEAR_GREEN_ACTIVE if gear == gear_char else GEAR_RED_DIM
@@ -582,8 +582,9 @@ class DashboardRenderer:
             (["T", "R", "I", "G", ":", *self._optional_three_digit_cells(trigger)], TEXT_ORANGE),
             (["S", "A", "V", "E", ":", *save_value], TEXT_GREEN if saved else ALERT_RED_DIM),
         ]
-        # Four visible rows over five logical rows: only scroll to reveal SAVE.
-        window_start = 0 if selected < 4 else 1
+        # Four visible rows over five logical rows. Reveal SAVE as soon as the
+        # selection reaches TRIG so it's never a hidden surprise at the bottom.
+        window_start = 0 if selected < 3 else 1
         for panel_row in range(4):
             logical = window_start + panel_row
             cells, color = rows[logical]
