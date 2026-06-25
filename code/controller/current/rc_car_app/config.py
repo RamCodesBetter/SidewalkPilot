@@ -106,6 +106,21 @@ STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(os.environ.get("RC_CAR_STEERING_C
 # input deadzone already handles stick jitter near center.
 STEERING_CENTER_SNAP_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SNAP_DEG", "0.5"))
 
+# --- Steering settle pushback curve (measured 2026-06-24 via pushback_curve_sim) ---
+# On a left release, the settle kicks the servo to poly(released_servo): released
+# value clamped to [0, center], output clamped to [center, range]. Quartic fit of
+# Ram's calibration (least average offset, ~0.28 deg). Coeffs ascending power:
+# c0 + c1*x + c2*x^2 + c3*x^3 + c4*x^4.
+STEERING_SETTLE_PUSHBACK_COEFFS = (
+    135.03247,
+    -0.97102,
+    0.0247475,
+    -0.000351665,
+    0.00000149645,
+)
+# Skip the settle if the curve asks for less than this much kick past center.
+STEERING_CENTER_SETTLE_MIN_KICK_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_MIN_KICK_DEG", "1.0"))
+
 # --- Live-tunable steering overrides (written by the on-device tuning page) ---
 # steering_tune.json IS the persisted defaults: if present it overrides the four
 # values above, so an on-device SAVE survives restarts. Delete the file to

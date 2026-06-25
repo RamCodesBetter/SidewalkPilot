@@ -59,6 +59,8 @@ from .config import (
     STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC,
     STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
+    STEERING_CENTER_SETTLE_MIN_KICK_DEG,
+    STEERING_SETTLE_PUSHBACK_COEFFS,
     STEERING_CENTER_SNAP_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
@@ -257,24 +259,35 @@ def center_steering(state):
     state["steering_center_settle_until"] = 0.0
 
 
+def settle_pushback_target(released_servo_degrees: float) -> float:
+    """Pushback servo target for a left release, from the measured quartic curve.
+    Released value clamped to [0, center]; output clamped to [center, range]."""
+    center = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+    x = max(0.0, min(center, float(released_servo_degrees)))
+    y = 0.0
+    for power, coeff in enumerate(STEERING_SETTLE_PUSHBACK_COEFFS):
+        y += float(coeff) * (x ** power)
+    return max(center, min(float(STEERING_SERVO_ACTUATION_RANGE_DEG), y))
+
+
 def start_manual_steering_center_settle(state, previous_servo_degrees: float) -> None:
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
-    previous_delta = float(previous_servo_degrees) - center_degrees
-    # Live-tunable thresholds (tuning page); default to the config constants so
-    # behavior is identical until tuned on the display.
-    trigger_deg = float(state.get("settle_trigger_deg", STEERING_CENTER_SETTLE_RELEASE_MIN_DEG))
-    if previous_delta >= -trigger_deg:
+    previous = float(previous_servo_degrees)
+    # Settle only counters left-return hysteresis -> only on left releases.
+    if previous >= center_degrees:
+        state["steering_center_settle_until"] = 0.0
         return
-    settle_target_degrees = float(state.get("settle_target_deg", STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG))
+    target_degrees = settle_pushback_target(previous)
+    if target_degrees - center_degrees < float(STEERING_CENTER_SETTLE_MIN_KICK_DEG):
+        # Near-center release: the curve asks for a negligible kick.
+        state["steering_center_settle_until"] = 0.0
+        return
     settle_duration_sec = float(state.get("settle_duration_sec", STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC))
     if settle_duration_sec <= 0.0:
         state["steering_center_settle_until"] = 0.0
         return
-    # Record the actual trigger peak only when a kick truly commits, so the
-    # logged source reflects what fired the settle and isn't clobbered by the
-    # resting-in-deadzone events that follow.
-    state["steering_settle_source_deg"] = float(previous_servo_degrees)
-    state["steering_center_settle_deg"] = clamp_servo_degrees(settle_target_degrees)
+    state["steering_settle_source_deg"] = previous
+    state["steering_center_settle_deg"] = clamp_servo_degrees(target_degrees)
     state["steering_center_settle_until"] = time.time() + settle_duration_sec
 
 
@@ -463,7 +476,7 @@ def adjust_steering_center_trim(state, hardware, direction: int) -> None:
 
 # --- On-device steering tuning page (dashboard page 13 / v1h3) ---------------
 # Rows the d-pad up/down cycles through; left/right adjusts the selected one.
-TUNE_ROWS = ("DELT", "PHBK", "PBSC", "TRIG", "SAVE")
+TUNE_ROWS = ("DELT", "PBSC", "SAVE")
 STEERING_TUNE_PATH = os.path.join(os.path.dirname(__file__), "steering_tune.json")
 
 
@@ -476,9 +489,7 @@ def cycle_tuning_row(state, hat_y: int) -> None:
 def save_steering_tune(state) -> None:
     data = {
         "trim_delta_deg": round(float(state.get("steering_trim_delta_deg", 0.0)), 2),
-        "settle_target_deg": round(float(state.get("settle_target_deg", 0.0)), 1),
         "settle_duration_sec": round(float(state.get("settle_duration_sec", 0.25)), 2),
-        "settle_trigger_deg": round(float(state.get("settle_trigger_deg", 12.0)), 1),
     }
     try:
         with open(STEERING_TUNE_PATH, "w") as handle:
@@ -494,19 +505,11 @@ def adjust_tuning_value(state, hardware, direction: int) -> None:
     step = int(direction)
     if row == 0:  # DELT — center trim, applied to the servo immediately.
         adjust_steering_center_trim(state, hardware, step)
-    elif row == 1:  # PHBK — settle overshoot target (logical deg).
-        state["settle_target_deg"] = max(90.0, min(180.0,
-            float(state.get("settle_target_deg", 103.0)) + step * 1.0))
-        print(f"Settle target -> {state['settle_target_deg']:.0f}")
-    elif row == 2:  # PBSC — settle hold duration (seconds).
+    elif row == 1:  # PBSC — settle hold duration (seconds).
         state["settle_duration_sec"] = max(0.0, min(2.0,
             round(float(state.get("settle_duration_sec", 0.25)) + step * 0.05, 2)))
         print(f"Settle duration -> {state['settle_duration_sec']:.2f}s")
-    elif row == 3:  # TRIG — release angle that arms the settle (deg).
-        state["settle_trigger_deg"] = max(0.0, min(45.0,
-            float(state.get("settle_trigger_deg", 12.0)) + step * 1.0))
-        print(f"Settle trigger -> {state['settle_trigger_deg']:.0f} deg")
-    elif row == 4:  # SAVE — d-pad right commits to steering_tune.json.
+    elif row == 2:  # SAVE — d-pad right commits to steering_tune.json.
         if step > 0:
             save_steering_tune(state)
 

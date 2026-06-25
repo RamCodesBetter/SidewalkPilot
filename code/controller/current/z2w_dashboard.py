@@ -512,31 +512,22 @@ class DashboardRenderer:
 
     def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         # On-device steering tuner. D-pad up/down picks the row (shown white),
-        # left/right adjusts it; SAVE (right) writes steering_tune.json.
-        # DELT = center trim, PHBK = settle target, PBSC = settle hold seconds
-        # (shown x100, so 025 = 0.25 s), TRIG = release angle that arms settle.
+        # left/right adjusts. DELT = center trim, PBSC = settle hold seconds
+        # (shown x100, so 025 = 0.25 s). SAVE writes steering_tune.json (right).
+        # The settle overshoot itself comes from the measured pushback curve.
         delta = float(payload.get("steering_trim_delta_deg", 0.0))
-        target = float(payload.get("settle_target_deg", 90.0))
         duration = float(payload.get("settle_duration_sec", 0.0))
-        trigger = float(payload.get("settle_trigger_deg", 0.0))
-        selected = max(0, min(4, int(payload.get("tune_selected_row", 0))))
+        selected = max(0, min(2, int(payload.get("tune_selected_row", 0))))
         saved = bool(payload.get("tune_saved", False))
 
         save_value = ["Y", "E", "S"] if saved else [" ", "N", "O"]
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
-            (["P", "H", "B", "K", ":", *self._optional_three_digit_cells(target)], TEXT_GREEN),
             (["P", "B", "S", "C", ":", *self._digits(round(duration * 100), 3)], ARROW_YELLOW),
-            (["T", "R", "I", "G", ":", *self._optional_three_digit_cells(trigger)], TEXT_ORANGE),
             (["S", "A", "V", "E", ":", *save_value], TEXT_GREEN if saved else ALERT_RED_DIM),
         ]
-        # Four visible rows over five logical rows. Reveal SAVE as soon as the
-        # selection reaches TRIG so it's never a hidden surprise at the bottom.
-        window_start = 0 if selected < 3 else 1
-        for panel_row in range(4):
-            logical = window_start + panel_row
-            cells, color = rows[logical]
-            if logical == selected:
+        for panel_row, (cells, color) in enumerate(rows):
+            if panel_row == selected:
                 color = TEXT_WHITE
             self._draw_text_row(panel_row, cells, color, y_offset_px)
 
