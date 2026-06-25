@@ -1,40 +1,29 @@
 #!/usr/bin/env python3
 """
-flick_detector_test.py  –  Steering flick pattern detector
+flick_detector_test.py  –  Guided steering "flick" speed calibrator
 
-Run on Pi 5 via SSH (no display needed) to calibrate the velocity threshold
-that distinguishes a genuine stick-release flick from a slow sweep through center.
+Run on the Pi 5 over SSH (no display needed). It walks you through N flicks:
+hold the steering stick FULL LEFT, it prints "FLICK NOW", you snap it back to
+center, and it measures how fast the stick sprang back. After N flicks it prints
+the average flick speed and a recommended threshold to use in the runtime.
+
+Why: when you release the stick it springs through 71,72,...,89 before center,
+so the settle can grab the wrong release angle. A flick (release) is FAST;
+deliberate steering is SLOW. This measures how fast a real flick is, so the
+runtime can tell them apart and snapshot the angle you were actually holding.
 
 Usage:
-    python3 code/test_files/flick_detector_test.py [--threshold 5.0] [--window 0.12]
+    python3 code/test_files/flick_detector_test.py            # 5 flicks
+    python3 code/test_files/flick_detector_test.py --flicks 8
 
-What it measures:
-    Each time the steering axis enters the deadzone from the left side it prints
-    whether the move was a FLICK (fast snap-back) or SMOOTH (slow pass-through),
-    along with the measured velocity so you can tune the threshold.
-
-Output example:
-    [FLICK ] vel=14.2/s  peak=-0.82  settle_deg=35.1  dt=58ms  → settle fires
-    [SMOOTH] vel=1.1/s   peak=-0.82  settle_deg=35.1  dt=750ms → settle skipped
-    [RIGHT ] vel=8.3/s   peak=+0.61  (from right – no settle)
-
-At the end (Ctrl-C) prints a summary: total events, flick count, smooth count,
-and the ratio. Adjust --threshold until the classification matches your feel.
-
-Settle threshold reference (same as runtime STEERING_CENTER_SETTLE_RELEASE_MIN_DEG):
-    12.0 logical degrees left of center = raw axis ~-0.22 before deadzone scaling.
-
-Axis conventions (same as runtime):
-    STEERING_AXIS  = 0
-    DEADZONE       = 0.1  (values |v| <= 0.1 treated as center)
+Controller does not move the servo here — it only reads the stick. Safe to run
+with the car service stopped or running.
 """
 
 import argparse
-import collections
 import os
-import sys
+import statistics
 import time
-from pathlib import Path
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
@@ -45,193 +34,113 @@ except ImportError as exc:
     print(f"pygame unavailable: {exc}")
     raise SystemExit(1)
 
-# ── runtime-matching constants ────────────────────────────────────────────────
+# ── runtime-matching constants ──────────────────────────────────────────────
 STEERING_AXIS = 0
-DEADZONE = 0.1
+DEADZONE = 0.1            # |axis| <= 0.1 counts as center (same as runtime)
+FULL_DEFLECT = 0.9       # |axis| >= 0.9 counts as "full left" to start a flick
 ACTUATION_RANGE_DEG = 180.0
-# settle fires when last non-center servo was >= 12 deg left of center (90 deg)
-SETTLE_MIN_LEFT_DEG = 12.0
-# raw axis value that corresponds to SETTLE_MIN_LEFT_DEG  (approximate)
-# servo_deg = ((scaled+1)/2)*180;  scaled = (|raw|-dz)/(1-dz) * sign
-# 90 - 12 = 78 servo → scaled = (78-90)/90 = -0.133
-# raw = -(0.133*(1-0.1) + 0.1) = -0.22
-SETTLE_AXIS_THRESHOLD = -0.22
+QUIT_BUTTON = 15
 
-# ── tunable defaults ──────────────────────────────────────────────────────────
-DEFAULT_FLICK_THRESHOLD = 5.0   # axis-units/second; adjust via --threshold
-DEFAULT_VELOCITY_WINDOW = 0.12  # seconds of history used for velocity calc
-
-# ── colours for terminal output ───────────────────────────────────────────────
-_RED   = "\033[91m"
-_GRN   = "\033[92m"
-_YEL   = "\033[93m"
-_CYN   = "\033[96m"
-_DIM   = "\033[2m"
-_RST   = "\033[0m"
+_GRN, _YEL, _CYN, _DIM, _RST = "\033[92m", "\033[93m", "\033[96m", "\033[2m", "\033[0m"
 
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--threshold", type=float, default=DEFAULT_FLICK_THRESHOLD,
-                   help=f"Velocity threshold (axis/s) that separates FLICK from SMOOTH (default {DEFAULT_FLICK_THRESHOLD})")
-    p.add_argument("--window", type=float, default=DEFAULT_VELOCITY_WINDOW,
-                   help=f"Seconds of history used to compute velocity (default {DEFAULT_VELOCITY_WINDOW})")
-    p.add_argument("--axis", type=int, default=STEERING_AXIS,
-                   help=f"Joystick axis index (default {STEERING_AXIS})")
+    p.add_argument("--flicks", type=int, default=5, help="how many flicks to measure (default 5)")
+    p.add_argument("--axis", type=int, default=STEERING_AXIS, help=f"joystick axis index (default {STEERING_AXIS})")
     return p.parse_args()
 
 
-def axis_to_servo_deg(raw: float) -> float:
-    mag = abs(raw)
-    if mag <= DEADZONE:
-        return ACTUATION_RANGE_DEG / 2.0
-    scaled = (mag - DEADZONE) / (1.0 - DEADZONE)
-    scaled = min(1.0, scaled)
-    if raw < 0:
-        scaled = -scaled
-    return ((scaled + 1.0) / 2.0) * ACTUATION_RANGE_DEG
+def read_axis(joy, axis):
+    pygame.event.pump()
+    return float(joy.get_axis(axis))
+
+
+def quit_pressed(joy):
+    return joy.get_numbuttons() > QUIT_BUTTON and bool(joy.get_button(QUIT_BUTTON))
 
 
 def main():
     args = parse_args()
-    flick_threshold = args.threshold
-    vel_window = args.window
-
     pygame.init()
     pygame.joystick.init()
-
     if pygame.joystick.get_count() == 0:
-        print("No joystick detected. Connect Xbox controller and retry.")
+        print("No joystick detected. Connect the Xbox controller and retry.")
         raise SystemExit(1)
-
     joy = pygame.joystick.Joystick(0)
     joy.init()
+
     print(f"Controller: {joy.get_name()}")
-    print(f"Flick threshold : {flick_threshold:.1f} axis/s  "
-          f"(edit with --threshold)")
-    print(f"Velocity window : {vel_window*1000:.0f} ms  "
-          f"(edit with --window)")
-    print(f"Settle fires for: left turns > {SETTLE_MIN_LEFT_DEG:.0f}° from center "
-          f"(axis <= {SETTLE_AXIS_THRESHOLD:.2f})")
-    print()
-    print(f"{'Event':8}  {'velocity':>10}  {'peak axis':>10}  {'settle deg':>11}  {'dt':>7}  result")
-    print("─" * 70)
+    print(f"Measuring {args.flicks} flicks on axis {args.axis}.  (Share button = quit early)\n")
+    print("For each one: hold the stick FULL LEFT, wait for 'FLICK NOW', then")
+    print("snap it back to center as you normally release.\n")
 
-    # rolling buffer of (timestamp, raw_axis_value)
-    history = collections.deque()
-    last_raw = 0.0
-    last_nonzero_time = None   # last time |raw| > DEADZONE
-    last_nonzero_val  = 0.0
-    peak_val          = 0.0    # most extreme raw value during current turn
-    in_deadzone       = True
-
-    stats = {"flick": 0, "smooth": 0, "right": 0, "total": 0}
+    peak_vels = []   # axis-units / second, peak instantaneous return speed
+    avg_vels = []    # axis-units / second, averaged over the whole return
 
     try:
-        while True:
-            pygame.event.pump()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+        for i in range(1, args.flicks + 1):
+            # 1) wait until the stick is held full left
+            print(f"Flick {i}/{args.flicks}: hold FULL LEFT ...", end="", flush=True)
+            while read_axis(joy, args.axis) > -FULL_DEFLECT:
+                if quit_pressed(joy):
                     raise KeyboardInterrupt
-                if event.type != pygame.JOYAXISMOTION:
-                    continue
-                if event.axis != args.axis:
-                    continue
+                time.sleep(0.005)
+            print(f"  {_CYN}>>> FLICK NOW! <<<{_RST}")
 
-                now = time.time()
-                raw = float(event.value)
+            # 2) measure the spring-back from full-left until it reaches center
+            samples = []
+            t0 = time.time()
+            prev_t, prev_v, peak = None, None, 0.0
+            while True:
+                v = read_axis(joy, args.axis)
+                t = time.time()
+                samples.append((t, v))
+                if prev_t is not None:
+                    dt = t - prev_t
+                    if dt > 0:
+                        peak = max(peak, abs(v - prev_v) / dt)
+                prev_t, prev_v = t, v
+                if abs(v) <= DEADZONE:        # reached center
+                    break
+                if t - t0 > 3.0:              # safety timeout
+                    break
+                if quit_pressed(joy):
+                    raise KeyboardInterrupt
+                time.sleep(0.002)
 
-                # maintain rolling velocity history
-                history.append((now, raw))
-                while history and now - history[0][0] > vel_window * 2:
-                    history.popleft()
-
-                currently_in_deadzone = abs(raw) <= DEADZONE
-
-                if not currently_in_deadzone:
-                    # track most extreme value during this turn segment
-                    if in_deadzone:
-                        # just left the deadzone – start a new segment
-                        peak_val = raw
-                    else:
-                        if abs(raw) > abs(peak_val):
-                            peak_val = raw
-                    last_nonzero_time = now
-                    last_nonzero_val  = raw
-                    in_deadzone = False
-                else:
-                    # entered (or staying in) deadzone
-                    if not in_deadzone and last_nonzero_time is not None:
-                        # transition: non-zero → deadzone
-                        dt = now - last_nonzero_time
-
-                        # compute velocity over the last vel_window seconds
-                        cutoff = now - vel_window
-                        window_pts = [(t, v) for t, v in history if t >= cutoff]
-                        if len(window_pts) >= 2:
-                            t0, v0 = window_pts[0]
-                            t1, v1 = window_pts[-1]
-                            span = t1 - t0
-                            vel = abs(v1 - v0) / span if span > 1e-6 else 0.0
-                        else:
-                            vel = abs(last_nonzero_val) / dt if dt > 1e-4 else 0.0
-
-                        settle_deg = abs(axis_to_servo_deg(peak_val) - ACTUATION_RANGE_DEG / 2.0)
-                        stats["total"] += 1
-
-                        if peak_val > SETTLE_AXIS_THRESHOLD:
-                            # came from right side – settle never fires
-                            stats["right"] += 1
-                            label = f"{_DIM}[RIGHT ]{_RST}"
-                            result = f"{_DIM}(from right – no settle){_RST}"
-                        elif settle_deg < SETTLE_MIN_LEFT_DEG:
-                            # too close to center – settle won't fire regardless of speed
-                            label = f"{_DIM}[SMALL ]{_RST}"
-                            result = f"{_DIM}(< {SETTLE_MIN_LEFT_DEG:.0f}° threshold – settle off){_RST}"
-                        elif vel >= flick_threshold:
-                            stats["flick"] += 1
-                            label = f"{_RED}[FLICK ]{_RST}"
-                            result = f"{_RED}→ settle fires{_RST}"
-                        else:
-                            stats["smooth"] += 1
-                            label = f"{_GRN}[SMOOTH]{_RST}"
-                            result = f"{_GRN}→ settle skipped{_RST}"
-
-                        print(
-                            f"{label}  "
-                            f"vel={_YEL}{vel:6.1f}/s{_RST}  "
-                            f"peak={peak_val:+.3f}  "
-                            f"settle_deg={settle_deg:5.1f}°  "
-                            f"dt={dt*1000:4.0f}ms  "
-                            f"{result}"
-                        )
-
-                    in_deadzone = True
-
-                last_raw = raw
-
-            time.sleep(0.002)
-
+            t_first, v_first = samples[0]
+            t_last, v_last = samples[-1]
+            span = max(1e-4, t_last - t_first)
+            avg = abs(v_first - v_last) / span
+            peak_vels.append(peak)
+            avg_vels.append(avg)
+            print(f"   → returned in {span * 1000:4.0f} ms   "
+                  f"avg {_YEL}{avg:5.1f}/s{_RST}   peak {_YEL}{peak:5.1f}/s{_RST}\n")
+            time.sleep(0.4)                   # small gap before the next one
     except KeyboardInterrupt:
-        pass
+        print("\n(stopped early)")
 
-    print()
-    print("─" * 70)
-    left_total = stats["flick"] + stats["smooth"]
-    print(f"Left releases : {left_total}   "
-          f"FLICK={_RED}{stats['flick']}{_RST}  "
-          f"SMOOTH={_GRN}{stats['smooth']}{_RST}  "
-          f"RIGHT={_DIM}{stats['right']}{_RST}")
-    if left_total > 0:
-        rate = stats["flick"] / left_total * 100
-        print(f"Flick detect rate: {rate:.0f}%  (threshold={flick_threshold:.1f}/s)")
-        if rate < 70:
-            print(f"  → threshold too high; try --threshold {max(1.0, flick_threshold - 1.0):.1f}")
-        elif rate > 95:
-            print(f"  → threshold may be too low; false positives possible; try --threshold {flick_threshold + 1.0:.1f}")
-        else:
-            print(f"  → threshold looks good.")
+    if not peak_vels:
+        print("No flicks recorded.")
+        pygame.quit()
+        return
+
+    mean_peak = statistics.mean(peak_vels)
+    mean_avg = statistics.mean(avg_vels)
+    slowest_peak = min(peak_vels)
+    print("=" * 56)
+    print(f"flicks measured     : {len(peak_vels)}")
+    print(f"avg return speed    : {mean_avg:.1f}/s")
+    print(f"avg peak speed      : {mean_peak:.1f}/s")
+    print(f"slowest flick peak  : {slowest_peak:.1f}/s")
+    # Threshold: comfortably below the slowest real flick, well above deliberate
+    # steering. Half the slowest flick peak is a safe separator.
+    recommend = max(1.0, round(slowest_peak * 0.5, 1))
+    print(f"\n{_GRN}Recommended flick threshold for the runtime: ~{recommend}/s{_RST}")
+    print("(real releases were faster than this; deliberate steering is slower)")
+    print("Tell me this number and I'll wire it into the settle so it snapshots")
+    print("the angle you were holding, not a spring-back value.")
     pygame.quit()
 
 
