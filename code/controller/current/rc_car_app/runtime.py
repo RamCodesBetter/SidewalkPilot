@@ -260,6 +260,20 @@ def center_steering(state):
     state["steering_center_settle_until"] = 0.0
 
 
+def model_is_series_3(model_choice) -> bool:
+    """A Series 3 model choice looks like '3.x'."""
+    return str(model_choice).strip().startswith("3")
+
+
+def steering_pushback_enabled(state, model_choice) -> bool:
+    """Pushback (the settle curve) runs in MANUAL always, and in AUTONOMOUS only
+    with a Series 3 model. Series 1/2 autonomous gets just the +12D trim and no
+    pushback (those models were trained/driven without it)."""
+    if not state.get("autonomous_mode", False):
+        return True
+    return model_is_series_3(model_choice)
+
+
 def settle_pushback_target(released_servo_degrees: float) -> float:
     """Pushback servo target for a left release, from the measured quartic curve.
     Released value clamped to [0, center]; output clamped to [center, range]."""
@@ -1586,7 +1600,7 @@ def run(model_choice=None):
                                 )
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
-                                if was_steering:
+                                if was_steering and steering_pushback_enabled(state, active_model_choice):
                                     start_manual_steering_center_settle(state, settle_source_degrees)
                                 # Reset for the next gesture.
                                 state["steering_release_candidate_deg"] = center_servo_deg
