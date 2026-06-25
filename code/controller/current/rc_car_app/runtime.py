@@ -1575,13 +1575,12 @@ def run(model_choice=None):
                             center_servo_deg = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
                             if scaled_steer_val == 0.0:
                                 was_steering = abs(float(state.get("steer", 0.0))) > 0.0
-                                # Use the most-extreme position reached on this side of
-                                # center (the excursion peak), not the last sample before
-                                # the deadzone, so a slow sweep back from full-left still
-                                # settles instead of only a fast flick.
-                                settle_source_degrees = float(
-                                    state.get("steering_last_noncenter_servo_deg", previous_servo_degrees)
-                                )
+                                # Use the actual position you released from (the last
+                                # servo value before re-centering), NOT the excursion peak,
+                                # so the pushback curve is read at the release angle: e.g.
+                                # 40 then ease to 70 and release -> 70's pushback. This
+                                # matches how the curve was calibrated (by release angle).
+                                settle_source_degrees = previous_servo_degrees
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
                                 if was_steering:
