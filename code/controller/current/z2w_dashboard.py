@@ -259,14 +259,21 @@ class DashboardRenderer:
                 self._set_pixel(x, y_origin + y, (0, 0, 0))
 
     def _draw_row1_override(self, payload: Dict[str, object]):
-        row1_text = str(payload.get("dashboard_row1_text", "")).strip()
+        row1_text = str(payload.get("dashboard_row1_text", "")).strip().upper()
         if not row1_text:
             return
         previous_x_offset = self.render_x_offset_px
         self.render_x_offset_px = 0
         try:
             self._clear_row(0)
-            self._draw_compact_text_row(0, row1_text, TEXT_CYAN)
+            # Render with the 8x8 glyph bitmaps (digit_map/letter_map), one per
+            # cell, left-aligned. Panel is 8 cells wide.
+            for cell_index, char in enumerate(row1_text[: PANEL_WIDTH // CELL_SIZE]):
+                if char.isdigit():
+                    glyph = self.digit_map.get(char, self.letter_map[" "])
+                else:
+                    glyph = self.letter_map.get(char, self.letter_map[" "])
+                self._draw_glyph_at(glyph, 0, cell_index, TEXT_CYAN, 0)
         finally:
             self.render_x_offset_px = previous_x_offset
 
