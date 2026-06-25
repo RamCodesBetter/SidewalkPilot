@@ -851,16 +851,18 @@ class Max7219TurnSignalDisplay:
 
     def show_glyphs(self, glyphs: Sequence[Sequence[int]]):
         """Render up to device_count 8x8 glyphs, left-aligned. The panel is
-        mounted upside-down, so rotate the whole image 180 deg (reverse module
-        order + flip each glyph rows/cols); the mount flips it back to upright."""
+        mounted upside-down, so each glyph is flipped 180 deg (rows + columns)
+        and the mount flips it back to upright. Module/chain order is left as-is
+        (the write path already handles it)."""
         if not self.spi:
             return
-        slots = [glyphs[d] if d < len(glyphs) else None for d in range(self.device_count)]
-        out = [None] * self.device_count
-        for m in range(self.device_count):
-            out[self.device_count - 1 - m] = self._rotate180(slots[m]) if slots[m] else None
+        rotated = [self._rotate180(g) if g else None
+                   for g in list(glyphs)[: self.device_count]]
         for row in range(8):
-            module_bytes = [(out[d][row] if out[d] else 0x00) for d in range(self.device_count)]
+            module_bytes = []
+            for dev in range(self.device_count):
+                g = rotated[dev] if dev < len(rotated) else None
+                module_bytes.append(g[row] if g else 0x00)
             self._write_row_bytes(row + 1, module_bytes)
 
     def clear(self):
