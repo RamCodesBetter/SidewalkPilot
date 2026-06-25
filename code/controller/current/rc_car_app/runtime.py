@@ -60,6 +60,7 @@ from .config import (
     STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG,
     STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
     STEERING_CENTER_SETTLE_MIN_KICK_DEG,
+    STEERING_RELEASE_FLICK_PER_SEC,
     STEERING_SETTLE_PUSHBACK_COEFFS,
     STEERING_CENTER_SNAP_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
@@ -1575,33 +1576,41 @@ def run(model_choice=None):
                             center_servo_deg = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
                             if scaled_steer_val == 0.0:
                                 was_steering = abs(float(state.get("steer", 0.0))) > 0.0
-                                # Use the actual position you released from (the last
-                                # servo value before re-centering), NOT the excursion peak,
-                                # so the pushback curve is read at the release angle: e.g.
-                                # 40 then ease to 70 and release -> 70's pushback. This
-                                # matches how the curve was calibrated (by release angle).
-                                settle_source_degrees = previous_servo_degrees
+                                # Release: the stick springs back to center fast. While you
+                                # steered we froze the angle you were HOLDING as the release
+                                # candidate, so the pushback curve reads that angle (held 70
+                                # then flick -> 70's pushback), not a spring-back value like
+                                # 89. Matches how the curve was calibrated (by release angle).
+                                settle_source_degrees = float(
+                                    state.get("steering_release_candidate_deg", previous_servo_degrees)
+                                )
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
                                 if was_steering:
                                     start_manual_steering_center_settle(state, settle_source_degrees)
-                                # Reached center: reset the excursion peak so a later tiny
-                                # nudge cannot re-fire settle from a stale far-side value.
-                                state["steering_last_noncenter_servo_deg"] = center_servo_deg
+                                # Reset for the next gesture.
+                                state["steering_release_candidate_deg"] = center_servo_deg
+                                state["steering_prev_steer"] = 0.0
                             else:
                                 state["steer"] = scaled_steer_val
                                 state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
                                 current_servo_deg = state["steering_servo_deg"]
-                                peak_servo_deg = float(
-                                    state.get("steering_last_noncenter_servo_deg", center_servo_deg)
+                                now_steer = time.time()
+                                prev_steer = float(state.get("steering_prev_steer", scaled_steer_val))
+                                prev_steer_time = float(state.get("steering_prev_steer_time", now_steer))
+                                dt_steer = now_steer - prev_steer_time
+                                return_speed = (
+                                    abs(scaled_steer_val - prev_steer) / dt_steer if dt_steer > 1e-4 else 0.0
                                 )
-                                # Reset the peak when the stick crosses center (sign flip)
-                                # so each side's excursion is tracked independently.
-                                if (current_servo_deg - center_servo_deg) * (peak_servo_deg - center_servo_deg) < 0.0:
-                                    peak_servo_deg = center_servo_deg
-                                if abs(current_servo_deg - center_servo_deg) >= abs(peak_servo_deg - center_servo_deg):
-                                    peak_servo_deg = current_servo_deg
-                                state["steering_last_noncenter_servo_deg"] = peak_servo_deg
+                                approaching_center = abs(scaled_steer_val) < abs(prev_steer)
+                                flicking_back = approaching_center and return_speed >= STEERING_RELEASE_FLICK_PER_SEC
+                                # Holding / steering deliberately: the release candidate tracks
+                                # where you are. During a fast spring-back (flick): freeze it,
+                                # so the settle reads the angle you were holding.
+                                if not flicking_back:
+                                    state["steering_release_candidate_deg"] = current_servo_deg
+                                state["steering_prev_steer"] = scaled_steer_val
+                                state["steering_prev_steer_time"] = now_steer
                                 state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
                         state["throttle"], state["brake_force"] = split_shared_trigger_axis(event.value)

@@ -120,6 +120,12 @@ STEERING_SETTLE_PUSHBACK_COEFFS = (
 )
 # Skip the settle if the curve asks for less than this much kick past center.
 STEERING_CENTER_SETTLE_MIN_KICK_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_MIN_KICK_DEG", "1.0"))
+# A release is a "flick": the stick springs back to center fast. If the return
+# speed (steer units/sec) is >= this, freeze the angle you were holding as the
+# settle's release angle instead of following the spring-back through 71..89.
+# Measured (flick_detector_test): real flicks ~12-24/s, deliberate steering
+# < ~2/s, so 5/s cleanly separates them.
+STEERING_RELEASE_FLICK_PER_SEC = float(os.environ.get("RC_CAR_STEERING_RELEASE_FLICK_PER_SEC", "5.0"))
 
 # --- Live-tunable steering overrides (written by the on-device tuning page) ---
 # steering_tune.json IS the persisted defaults: if present it overrides the four
