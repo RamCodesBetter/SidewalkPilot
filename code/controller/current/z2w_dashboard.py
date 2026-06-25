@@ -65,27 +65,6 @@ PLUS_GLYPH_INDEX = 0
 MINUS_GLYPH_INDEX = 1
 MIN_VISIBLE_BRIGHTNESS_PERCENT = 5
 
-COMPACT_5X7_FONT: Dict[str, List[int]] = {
-    " ": [0b00000, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000],
-    ":": [0b00000, 0b01100, 0b01100, 0b00000, 0b01100, 0b01100, 0b00000],
-    "0": [0b01110, 0b10001, 0b10011, 0b10101, 0b11001, 0b10001, 0b01110],
-    "1": [0b00100, 0b01100, 0b00100, 0b00100, 0b00100, 0b00100, 0b01110],
-    "2": [0b01110, 0b10001, 0b00001, 0b00010, 0b00100, 0b01000, 0b11111],
-    "3": [0b11110, 0b00001, 0b00001, 0b01110, 0b00001, 0b00001, 0b11110],
-    "4": [0b00010, 0b00110, 0b01010, 0b10010, 0b11111, 0b00010, 0b00010],
-    "5": [0b11111, 0b10000, 0b10000, 0b11110, 0b00001, 0b00001, 0b11110],
-    "6": [0b01110, 0b10000, 0b10000, 0b11110, 0b10001, 0b10001, 0b01110],
-    "7": [0b11111, 0b00001, 0b00010, 0b00100, 0b01000, 0b01000, 0b01000],
-    "8": [0b01110, 0b10001, 0b10001, 0b01110, 0b10001, 0b10001, 0b01110],
-    "9": [0b01110, 0b10001, 0b10001, 0b01111, 0b00001, 0b00001, 0b01110],
-    "E": [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b11111],
-    "O": [0b01110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110],
-    "R": [0b11110, 0b10001, 0b10001, 0b11110, 0b10100, 0b10010, 0b10001],
-    "S": [0b01111, 0b10000, 0b10000, 0b01110, 0b00001, 0b00001, 0b11110],
-    "V": [0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01010, 0b00100],
-}
-
-
 def load_glyphs_from_header(path: Path) -> List[Glyph]:
     text = path.read_text(encoding="utf-8")
     values = [int(match.group(1), 2) for match in re.finditer(r"0b([01]{8})", text)]
@@ -237,45 +216,11 @@ class DashboardRenderer:
                 continue
             self._draw_glyph_at(self.letter_map.get(cell, self.letter_map[" "]), row_index, col_index, color, y_offset_px)
 
-    def _draw_compact_text_row(self, row_index: int, text: str, color: Color, y_offset_px: int = 0):
-        normalized = str(text).upper()[:10]
-        char_width = 5
-        char_spacing = 1
-        text_width = (len(normalized) * (char_width + char_spacing)) - char_spacing if normalized else 0
-        x_origin = max(0, (PANEL_WIDTH - text_width) // 2)
-        y_origin = (row_index * CELL_SIZE) + y_offset_px
-        for char_index, char in enumerate(normalized):
-            glyph = COMPACT_5X7_FONT.get(char, COMPACT_5X7_FONT[" "])
-            x_base = x_origin + (char_index * (char_width + char_spacing))
-            for y, row_bits in enumerate(glyph):
-                for x in range(char_width):
-                    if row_bits & (1 << (char_width - 1 - x)):
-                        self._set_pixel(x_base + x, y_origin + y, color)
-
     def _clear_row(self, row_index: int, y_offset_px: int = 0):
         y_origin = (row_index * CELL_SIZE) + y_offset_px
         for y in range(CELL_SIZE):
             for x in range(PANEL_WIDTH):
                 self._set_pixel(x, y_origin + y, (0, 0, 0))
-
-    def _draw_row1_override(self, payload: Dict[str, object]):
-        row1_text = str(payload.get("dashboard_row1_text", "")).strip().upper()
-        if not row1_text:
-            return
-        previous_x_offset = self.render_x_offset_px
-        self.render_x_offset_px = 0
-        try:
-            self._clear_row(0)
-            # Render with the 8x8 glyph bitmaps (digit_map/letter_map), one per
-            # cell, left-aligned. Panel is 8 cells wide.
-            for cell_index, char in enumerate(row1_text[: PANEL_WIDTH // CELL_SIZE]):
-                if char.isdigit():
-                    glyph = self.digit_map.get(char, self.letter_map[" "])
-                else:
-                    glyph = self.letter_map.get(char, self.letter_map[" "])
-                self._draw_glyph_at(glyph, 0, cell_index, TEXT_CYAN, 0)
-        finally:
-            self.render_x_offset_px = previous_x_offset
 
     def _speed_digits(self, speed_mph: float) -> str:
         clamped = max(0.0, min(9.99, speed_mph))
@@ -410,11 +355,7 @@ class DashboardRenderer:
             mode = " CC"
         if len(mode) < 3:
             mode = (mode + "   ")[:3]
-        row1_text = str(payload.get("dashboard_row1_text", "")).strip()
-        if row1_text:
-            self._draw_compact_text_row(0, row1_text, TEXT_CYAN, y_offset_px)
-        else:
-            self._draw_text_row(0, ["S", "R", "V", "O", ":", *servo_cells], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(0, ["S", "R", "V", "O", ":", *servo_cells], TEXT_CYAN, y_offset_px)
         self._draw_text_row(1, ["T", "T", "L", "E", ":", *throttle_cells], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["B", "R", "K", "E", ":", *brake_cells], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["M", "O", "D", "E", ":", mode[0], mode[1], mode[2]], ARROW_YELLOW, y_offset_px)
@@ -811,7 +752,6 @@ class DashboardRenderer:
                 self._draw_page_with_offset(self.previous_page, payload, notification_rows, 0, previous_offset)
                 self._draw_page_with_offset(self.current_page, payload, notification_rows, 0, current_offset)
 
-        self._draw_row1_override(payload)
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
     def clear(self):
@@ -894,6 +834,17 @@ class Max7219TurnSignalDisplay:
                 module_bytes[self.device_count - 1] = self.left_turn_signal[row]
             if right_visible:
                 module_bytes[0] = self.right_turn_signal[row]
+            self._write_row_bytes(row + 1, module_bytes)
+
+    def show_glyphs(self, glyphs: Sequence[Sequence[int]]):
+        """Render up to device_count 8x8 glyphs (8 row-bytes each), left-aligned."""
+        if not self.spi:
+            return
+        for row in range(8):
+            module_bytes = []
+            for dev in range(self.device_count):
+                glyph = glyphs[dev] if dev < len(glyphs) else None
+                module_bytes.append(int(glyph[row]) if glyph else 0x00)
             self._write_row_bytes(row + 1, module_bytes)
 
     def clear(self):
@@ -1064,7 +1015,19 @@ def main():
             },
             notification_rows,
         )
-        max7219.render(left_signal_visible, right_signal_visible)
+        calib_label = str(dashboard_row1_text).strip().upper()
+        if calib_label:
+            # Show short text (e.g. calibration "L180") on the MAX7219 using the
+            # 8x8 glyph bitmaps, one glyph per module, left-aligned.
+            glyphs = []
+            for ch in calib_label[: max7219.device_count]:
+                if ch.isdigit():
+                    glyphs.append(renderer.digit_map.get(ch, renderer.letter_map[" "]))
+                else:
+                    glyphs.append(renderer.letter_map.get(ch, renderer.letter_map[" "]))
+            max7219.show_glyphs(glyphs)
+        else:
+            max7219.render(left_signal_visible, right_signal_visible)
 
     def handle_idle() -> int | None:
         nonlocal telemetry_stale_reported
