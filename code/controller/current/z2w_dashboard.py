@@ -836,15 +836,31 @@ class Max7219TurnSignalDisplay:
                 module_bytes[0] = self.right_turn_signal[row]
             self._write_row_bytes(row + 1, module_bytes)
 
+    @staticmethod
+    def _reverse_bits(value: int) -> int:
+        value = int(value) & 0xFF
+        result = 0
+        for _ in range(8):
+            result = (result << 1) | (value & 1)
+            value >>= 1
+        return result
+
+    def _rotate180(self, glyph: Sequence[int]) -> List[int]:
+        # 180 deg: reverse row order and mirror each row's columns.
+        return [self._reverse_bits(glyph[7 - r]) for r in range(8)]
+
     def show_glyphs(self, glyphs: Sequence[Sequence[int]]):
-        """Render up to device_count 8x8 glyphs (8 row-bytes each), left-aligned."""
+        """Render up to device_count 8x8 glyphs, left-aligned. The panel is
+        mounted upside-down, so rotate the whole image 180 deg (reverse module
+        order + flip each glyph rows/cols); the mount flips it back to upright."""
         if not self.spi:
             return
+        slots = [glyphs[d] if d < len(glyphs) else None for d in range(self.device_count)]
+        out = [None] * self.device_count
+        for m in range(self.device_count):
+            out[self.device_count - 1 - m] = self._rotate180(slots[m]) if slots[m] else None
         for row in range(8):
-            module_bytes = []
-            for dev in range(self.device_count):
-                glyph = glyphs[dev] if dev < len(glyphs) else None
-                module_bytes.append(int(glyph[row]) if glyph else 0x00)
+            module_bytes = [(out[d][row] if out[d] else 0x00) for d in range(self.device_count)]
             self._write_row_bytes(row + 1, module_bytes)
 
     def clear(self):
