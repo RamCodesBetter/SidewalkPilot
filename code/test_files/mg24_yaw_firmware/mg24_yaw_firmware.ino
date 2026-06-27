@@ -5,13 +5,18 @@
 //          CSV over USB serial so the Pi can (a) see which axis is YAW and
 //          (b) read the live yaw rate for steering correction.
 //
-// SETUP in Arduino IDE:
-//   1. Install the Seeed XIAO MG24 board package (Boards Manager).
-//   2. Install the IMU library that matches the on-board chip — on the Sense
-//      boards this is usually the LSM6DS3 ("Seeed Arduino LSM6DS3"). If your
-//      board reports a different IMU in Seeed's wiki example, swap the include
-//      + the three read calls below to that library; everything else stays.
-//   3. Select the XIAO MG24 board + its port, Upload.
+// SETUP in Arduino IDE (confirmed from Seeed's XIAO MG24 wiki):
+//   1. Settings -> "Additional boards manager URLs", add:
+//        https://siliconlabs.github.io/arduino/package_arduinosilabs_index.json
+//      then Tools -> Boards Manager -> search "Silicon Labs" -> Install.
+//   2. Tools -> Board -> select the "XIAO MG24" variant.
+//   3. IMU library: copy the exact #include + gyro-read calls from the Seeed
+//      wiki page "XIAO MG24 Sense built-in Sensor" and swap them in below
+//      (the placeholder LSM6DS3 lines). Everything else here stays.
+//   4. Select the port, Upload. Serial Monitor @ 115200 to verify.
+//
+// NOTE: the MG24 Sense POWER-GATES the IMU on pin PB1 — setup() drives PB1 HIGH
+// to turn the IMU on (the wiki's deep-sleep demo drives it LOW to power down).
 //
 // IMPORTANT: keep the board STILL for ~1 second after it powers on — that's the
 // gyro-bias calibration window.
@@ -29,6 +34,12 @@ void setup() {
   Serial.begin(115200);
   unsigned long t0 = millis();
   while (!Serial && millis() - t0 < 3000) { }   // wait up to 3s for USB
+
+  // The MG24 Sense power-gates the IMU on PB1 (wiki deep-sleep demo pulls it LOW
+  // to power down). Drive HIGH so the IMU is powered before we talk to it.
+  pinMode(PB1, OUTPUT);
+  digitalWrite(PB1, HIGH);
+  delay(50);
 
   if (imu.begin() != 0) {
     while (1) { Serial.println("ERR,imu_init_failed"); delay(500); }
