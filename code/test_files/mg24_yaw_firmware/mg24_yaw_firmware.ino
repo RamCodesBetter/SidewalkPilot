@@ -20,6 +20,12 @@
 // NOTE: the MG24 Sense POWER-GATES the IMU on pin PB1 — setup() drives PB1 HIGH
 // to turn the IMU on (the wiki's deep-sleep demo drives it LOW to power down).
 //
+// GPIO/UART wiring to the Pi (this sketch streams on Serial1 = D6 TX0 / D7 RX0,
+// and mirrors to USB Serial so the Arduino Serial Monitor still works):
+//   MG24 D6 (TX0) ─► Pi UART RX        MG24 D7 (RX0) ◄─ Pi UART TX
+//   MG24 GND ◄─► Pi GND                MG24 3V3/5V ◄─ Pi 3V3/5V
+//   Both 3.3V logic — wire directly, no level shifter.
+//
 // IMPORTANT: keep the board STILL for ~1 second after it powers on — that's the
 // gyro-bias calibration window.
 //
@@ -33,9 +39,10 @@ LSM6DS3 imu(I2C_MODE, 0x6A);    // MG24 Sense IMU = LSM6DS3TR-C at I2C 0x6A
 float bias_x = 0.0, bias_y = 0.0, bias_z = 0.0;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200);    // USB CDC — for the Arduino Serial Monitor while testing
+  Serial1.begin(115200);   // GPIO UART on D6 (TX0) / D7 (RX0) — this goes to the Pi
   unsigned long t0 = millis();
-  while (!Serial && millis() - t0 < 3000) { }   // wait up to 3s for USB
+  while (!Serial && millis() - t0 < 3000) { }   // wait up to 3s for USB (fine if no USB)
 
   // The MG24 Sense power-gates the IMU on PB1 (wiki deep-sleep demo pulls it LOW
   // to power down). Drive HIGH so the IMU is powered before we talk to it.
@@ -44,7 +51,7 @@ void setup() {
   delay(50);
 
   if (imu.begin() != 0) {
-    while (1) { Serial.println("ERR,imu_init_failed"); delay(500); }
+    while (1) { Serial.println("ERR,imu_init_failed"); Serial1.println("ERR,imu_init_failed"); delay(500); }
   }
 
   // --- gyro bias calibration: board MUST be still ---
@@ -56,7 +63,8 @@ void setup() {
     delay(3);
   }
   bias_x /= N; bias_y /= N; bias_z /= N;
-  Serial.println("READY");      // the Pi can wait for this line
+  Serial.println("READY");
+  Serial1.println("READY");     // the Pi can wait for this line
 }
 
 void loop() {
@@ -64,9 +72,9 @@ void loop() {
   float gy = imu.readFloatGyroY() - bias_y;
   float gz = imu.readFloatGyroZ() - bias_z;
 
-  Serial.print(gx, 2); Serial.print(',');
-  Serial.print(gy, 2); Serial.print(',');
-  Serial.println(gz, 2);
+  // stream to BOTH: USB (debug on the Mac) + GPIO UART (the Pi reads this one)
+  Serial.print(gx, 2);  Serial.print(',');  Serial.print(gy, 2);  Serial.print(',');  Serial.println(gz, 2);
+  Serial1.print(gx, 2); Serial1.print(','); Serial1.print(gy, 2); Serial1.print(','); Serial1.println(gz, 2);
 
   delay(10);                    // 100 Hz
 }
