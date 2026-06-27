@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 """
-imu_yaw_test.py  –  Read the MG24 IMU stream and find the yaw axis
+imu_yaw_test.py  –  Read the MG24 IMU stream, filter the yaw rate
 
-Run on the Pi after flashing mg24_yaw_firmware.ino to the XIAO MG24 Sense and
-plugging it in over USB. It reads the gyro CSV (gx,gy,gz in deg/s) and shows
-all three axes live, plus the biggest swing each has seen.
+Reads the gyro CSV (gx,gy,gz deg/s) from the MG24 and shows the raw 3 axes plus
+a FILTERED yaw value, so you can (a) confirm the yaw axis and (b) tune the noise
+filter that the steering PID will reuse.
 
-How to use it:
-    1. python3 code/test_files/imu_yaw_test.py        # auto-finds /dev/ttyACM*
-    2. Leave the car STILL  -> all three should sit near 0 (bias is zeroed).
-    3. TURN THE CAR LEFT/RIGHT by hand. The axis whose number swings the MOST
-       is YAW — that's the one the steering loop will use. (Should be Z if the
-       board is mounted flat, but we confirm, not assume.)
-    4. Tilt the car nose up/down and roll it side to side to see the OTHER two
-       axes move — that confirms which is which.
+Filter chain on the yaw axis (Z by default):
+  1. median-of-N   -> kills isolated spikes (a lone 20 among 0,1,2 -> ignored)
+  2. EMA low-pass  -> smooths the small jitter   ema = a*median + (1-a)*ema
+  3. deadband      -> |ema| < deadband reads exactly 0 (idle = dead still)
 
-Ctrl-C to quit; it prints which axis swung most.
+Usage:
+  python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3
+  # tune: --axis 2 (0=X,1=Y,2=Z) --median 5 --ema 0.3 --deadband 2.0
 """
 
 import argparse
+import collections
 import glob
-import sys
 import time
 
 try:
@@ -33,34 +31,44 @@ except ImportError:
 def find_port(explicit):
     if explicit:
         return explicit
-    candidates = sorted(glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*"))
-    if not candidates:
-        print("No /dev/ttyACM* or /dev/ttyUSB* found. Is the MG24 plugged in?")
+    cands = sorted(glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*"))
+    if not cands:
+        print("No port given and no /dev/ttyACM*/ttyUSB* found. "
+              "For the GPIO UART pass --port /dev/ttyAMA3")
         raise SystemExit(1)
-    return candidates[0]
+    return cands[0]
+
+
+def median(seq):
+    s = sorted(seq)
+    return s[len(s) // 2]
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--port", default=None, help="serial port (default: first /dev/ttyACM*)")
+    ap.add_argument("--port", default=None, help="serial port (e.g. /dev/ttyAMA3 for the GPIO UART)")
     ap.add_argument("--baud", type=int, default=115200)
+    ap.add_argument("--axis", type=int, default=2, help="yaw axis index 0=X 1=Y 2=Z (default 2=Z)")
+    ap.add_argument("--median", type=int, default=5, help="median window, odd, kills spikes (default 5)")
+    ap.add_argument("--ema", type=float, default=0.3, help="EMA alpha 0..1, lower = smoother/laggier (default 0.3)")
+    ap.add_argument("--deadband", type=float, default=2.0, help="|yaw| below this reads 0 deg/s (default 2.0)")
     args = ap.parse_args()
 
     port = find_port(args.port)
-    print(f"Opening {port} @ {args.baud} ...")
+    print(f"Opening {port} @ {args.baud}   yaw=axis{args.axis}  "
+          f"median={args.median} ema={args.ema} deadband={args.deadband}")
     ser = serial.Serial(port, args.baud, timeout=1.0)
     time.sleep(0.3)
     ser.reset_input_buffer()
 
-    peak = [0.0, 0.0, 0.0]   # biggest |value| seen per axis
-    labels = ("X", "Y", "Z")
-    print("Reading. Keep still first (≈0), then TURN the car left/right.")
-    print("(the axis that swings most = YAW)   Ctrl-C to stop.\n")
+    med_buf = collections.deque(maxlen=max(1, args.median))
+    ema = 0.0
+    print("Reading. Still = filtered yaw should sit at 0.  Ctrl-C to stop.\n")
 
     try:
         while True:
             raw = ser.readline().decode("utf-8", "ignore").strip()
-            if not raw or raw in ("READY",) or raw.startswith("ERR"):
+            if not raw or raw == "READY" or raw.startswith("ERR"):
                 if raw:
                     print(f"  [{raw}]")
                 continue
@@ -68,29 +76,25 @@ def main():
             if len(parts) != 3:
                 continue
             try:
-                gx, gy, gz = (float(p) for p in parts)
+                vals = [float(p) for p in parts]
             except ValueError:
                 continue
-            vals = (gx, gy, gz)
-            for i in range(3):
-                if abs(vals[i]) > peak[i]:
-                    peak[i] = abs(vals[i])
-            # biggest current mover, for a live hint
-            hot = labels[max(range(3), key=lambda i: abs(vals[i]))]
-            print(f"\rX={gx:+7.1f}  Y={gy:+7.1f}  Z={gz:+7.1f} deg/s   "
-                  f"moving:{hot}   peak X={peak[0]:.0f} Y={peak[1]:.0f} Z={peak[2]:.0f}   ",
+
+            yaw_raw = vals[args.axis]
+            med_buf.append(yaw_raw)
+            med = median(med_buf)                       # 1. spike kill
+            ema = args.ema * med + (1.0 - args.ema) * ema  # 2. smooth
+            yaw = 0.0 if abs(ema) < args.deadband else ema  # 3. deadband
+
+            print(f"\rraw X={vals[0]:+6.1f} Y={vals[1]:+6.1f} Z={vals[2]:+6.1f}   "
+                  f"yaw_raw={yaw_raw:+6.1f}  ->  FILTERED={yaw:+6.1f} deg/s     ",
                   end="", flush=True)
-            time.sleep(0.01)
+            time.sleep(0.005)
     except KeyboardInterrupt:
         pass
     finally:
         ser.close()
-
-    yaw_axis = labels[max(range(3), key=lambda i: peak[i])]
-    print(f"\n\nBiggest swing was on the {yaw_axis} axis "
-          f"(X={peak[0]:.0f} Y={peak[1]:.0f} Z={peak[2]:.0f}).")
-    print(f"If you were turning the car left/right, **{yaw_axis} is your YAW axis** "
-          f"— tell me and I'll point the steering loop at it.")
+    print("\ndone.")
 
 
 if __name__ == "__main__":
