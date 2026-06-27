@@ -10,9 +10,11 @@
 //        https://siliconlabs.github.io/arduino/package_arduinosilabs_index.json
 //      then Tools -> Boards Manager -> search "Silicon Labs" -> Install.
 //   2. Tools -> Board -> select the "XIAO MG24" variant.
-//   3. IMU library: copy the exact #include + gyro-read calls from the Seeed
-//      wiki page "XIAO MG24 Sense built-in Sensor" and swap them in below
-//      (the placeholder LSM6DS3 lines). Everything else here stays.
+//   3. Install the IMU library "Seeed_Arduino_LSM6DS3" — the MG24 Sense IMU is
+//      an LSM6DS3TR-C at I2C 0x6A. It's NOT in Library Manager by default: get
+//      the ZIP from github.com/Seeed-Studio/Seeed_Arduino_LSM6DS3 and add via
+//      Sketch -> Include Library -> Add .ZIP Library. (This sketch already uses
+//      its API: LSM6DS3 / readFloatGyroX/Y/Z.)
 //   4. Select the port, Upload. Serial Monitor @ 115200 to verify.
 //
 // NOTE: the MG24 Sense POWER-GATES the IMU on pin PB1 — setup() drives PB1 HIGH
@@ -24,9 +26,9 @@
 // Output line (100 Hz):   gx,gy,gz      (deg/s, bias-corrected)
 
 #include "Wire.h"
-#include "LSM6DS3.h"            // <-- swap if your Sense uses a different IMU
+#include <LSM6DS3.h>            // Seeed_Arduino_LSM6DS3 (install via .ZIP — see header)
 
-LSM6DS3 imu(I2C_MODE, 0x6A);    // on-board IMU I2C address (confirm in Seeed's example: 0x6A or 0x6B)
+LSM6DS3 imu(I2C_MODE, 0x6A);    // MG24 Sense IMU = LSM6DS3TR-C at I2C 0x6A
 
 float bias_x = 0.0, bias_y = 0.0, bias_z = 0.0;
 
