@@ -61,7 +61,9 @@ def parse_args():
     p.add_argument("--port", default="/dev/ttyAMA3", help="IMU UART port")
     p.add_argument("--baud", type=int, default=115200)
     p.add_argument("--axis", type=int, default=2, help="yaw axis 0=X 1=Y 2=Z (default 2)")
-    p.add_argument("--throttle", type=float, default=0.35, help="motor duty 0..1 (start low!)")
+    p.add_argument("--throttle", type=float, default=0.3, help="CRUISE duty once rolling (default 0.3)")
+    p.add_argument("--kick", type=float, default=0.5, help="KICKSTART duty to break stiction (default 0.5)")
+    p.add_argument("--kick-time", type=float, default=0.3, help="seconds at kick duty before dropping to cruise (default 0.3)")
     p.add_argument("--angles", default="60,75,85,90,95,105,120", help="logical servo angles to test")
     p.add_argument("--settle", type=float, default=0.8, help="s to reach steady turn before measuring")
     p.add_argument("--window", type=float, default=1.5, help="s to average yaw+speed per angle")
@@ -151,8 +153,10 @@ def main():
             motors_stop(); servo.value = CENTER; time.sleep(0.4)
             servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
             if not args.dry_run:
-                motors_forward(args.throttle)
-            time.sleep(args.settle)                       # reach steady turn
+                motors_forward(args.kick)                 # kickstart: break stiction (~0.5)
+                time.sleep(args.kick_time)
+                motors_forward(args.throttle)             # drop to cruise (~0.3) once rolling
+            time.sleep(args.settle)                       # reach steady turn at cruise speed
 
             yaw_sum, n = 0.0, 0
             p_start = pulse_count["n"]
