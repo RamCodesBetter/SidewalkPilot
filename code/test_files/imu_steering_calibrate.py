@@ -146,39 +146,54 @@ def main():
     else:
         print("DRY RUN: motors stay OFF; it just sweeps the servo through every angle.")
 
-    results = []
+    def measure(ang):
+        """One hop at servo `ang`: drive, measure yaw+speed, hard-brake.
+        Returns (ang, avg_yaw, speed, curvature) and prints the row."""
+        motors_stop(); servo.value = CENTER; time.sleep(0.4)
+        servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
+        if not args.dry_run:
+            motors_forward(args.throttle)             # full speed for the whole burst
+        time.sleep(args.settle)                       # reach steady turn
+        yaw_sum, n = 0.0, 0
+        p_start = pulse_count["n"]
+        t_end = time.time() + args.window
+        while time.time() < t_end:
+            y = read_yaw()
+            if y is not None:
+                yaw_sum += y; n += 1
+        pulses = pulse_count["n"] - p_start
+        if not args.dry_run:
+            motors_brake(); time.sleep(0.3)           # HARD BRAKE so it doesn't coast into a wall
+        motors_stop()                                 # release the brake
+        avg_yaw = (yaw_sum / n) if n else 0.0
+        speed = (pulses * DIST_PER_PULSE_M) / args.window      # m/s
+        curv = (avg_yaw / speed) if speed > 0.05 else float("nan")  # deg per metre
+        print(f"  servo {ang:5.1f}  yaw={avg_yaw:+6.1f} deg/s  speed={speed:4.2f} m/s  "
+              f"curvature={curv:+7.1f} deg/m")
+        time.sleep(0.3)                               # already braked; brief pause
+        return (ang, avg_yaw, speed, curv)
+
+    results = [None] * len(angles)
     try:
-        for ang in angles:
-            if not args.dry_run:
-                resp = input(f"\nReposition car + clear ahead. Type GO for servo {ang:.0f} "
-                             f"(anything else = finish): ").strip().lower()
-                if resp != "go":
-                    print("Finishing with the angles done so far."); break
-            motors_stop(); servo.value = CENTER; time.sleep(0.4)
-            servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
-            if not args.dry_run:
-                motors_forward(args.throttle)             # full speed for the whole burst
-            time.sleep(args.settle)                       # reach steady turn
-
-            yaw_sum, n = 0.0, 0
-            p_start = pulse_count["n"]
-            t_end = time.time() + args.window
-            while time.time() < t_end:
-                y = read_yaw()
-                if y is not None:
-                    yaw_sum += y; n += 1
-            pulses = pulse_count["n"] - p_start
-            if not args.dry_run:
-                motors_brake(); time.sleep(0.3)   # HARD BRAKE so it doesn't coast into a wall
-            motors_stop()                         # release the brake
-
-            avg_yaw = (yaw_sum / n) if n else 0.0
-            speed = (pulses * DIST_PER_PULSE_M) / args.window     # m/s
-            curv = (avg_yaw / speed) if speed > 0.05 else float("nan")  # deg per metre
-            results.append((ang, avg_yaw, speed, curv))
-            print(f"  servo {ang:5.1f}  yaw={avg_yaw:+6.1f} deg/s  speed={speed:4.2f} m/s  "
-                  f"curvature={curv:+7.1f} deg/m")
-            time.sleep(0.3)                               # already braked; brief pause
+        i = 0
+        while i < len(angles):
+            ang = angles[i]
+            if args.dry_run:
+                results[i] = measure(ang); i += 1; continue
+            prev = f"{angles[i-1]:.0f}" if i > 0 else "-"
+            resp = input(f"\nReposition car + clear ahead. Type GO for servo {ang:.0f}  "
+                         f"(REDO = redo prev servo {prev}, anything else = finish): ").strip().lower()
+            if resp == "go":
+                results[i] = measure(ang); i += 1
+            elif resp == "redo":
+                if i > 0:
+                    print(f"  redoing servo {angles[i-1]:.0f} ...")
+                    results[i - 1] = measure(angles[i - 1])
+                else:
+                    print("  nothing to redo yet.")
+                # stay at i — re-prompt for the same angle
+            else:
+                print("Finishing with the angles done so far."); break
     except KeyboardInterrupt:
         print("\nSTOPPED.")
     finally:
@@ -190,15 +205,16 @@ def main():
         try: servo.close()
         except Exception: pass
 
-    # write CSV + a quick center estimate
+    # write CSV + a quick center estimate (skip angles not yet measured)
+    done = [r for r in results if r is not None]
     with open(args.out, "w") as f:
         f.write("servo_logical_deg,avg_yaw_dps,speed_mps,curvature_deg_per_m\n")
-        for ang, yaw, sp, cv in results:
+        for ang, yaw, sp, cv in done:
             f.write(f"{ang:.1f},{yaw:.3f},{sp:.3f},{cv:.3f}\n")
     print(f"\nwrote {args.out}")
 
     # true center = where avg_yaw crosses 0 (linear interp between the two angles that straddle it)
-    pts = [(a, y) for a, y, _, _ in results]
+    pts = [(a, y) for a, y, _, _ in done]
     pts.sort()
     center_est = None
     for (a1, y1), (a2, y2) in zip(pts, pts[1:]):
