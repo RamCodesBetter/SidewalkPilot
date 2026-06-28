@@ -64,6 +64,19 @@ from .config import (
     STEERING_CENTER_SNAP_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
+    STEERING_YAW_PID_MODE,
+    STEERING_YAW_PID_PORT,
+    STEERING_YAW_PID_BAUD,
+    STEERING_YAW_PID_AXIS,
+    STEERING_YAW_PID_KP,
+    STEERING_YAW_PID_KI,
+    STEERING_YAW_PID_KD,
+    STEERING_YAW_PID_FF_SHIFT_DEG,
+    STEERING_YAW_PID_TURN_GAIN,
+    STEERING_YAW_PID_OUT_CLAMP_DEG,
+    STEERING_YAW_PID_INTEGRAL_CLAMP,
+    STEERING_YAW_PID_STRAIGHT_BAND_DEG,
+    STEERING_YAW_PID_MIN_SPEED_MPS,
     THROTTLE_AXIS,
     TURN_SIGNAL_BLINK_INTERVAL_SEC,
     ENABLE_HUB75_DASHBOARD_TELEMETRY,
@@ -106,6 +119,7 @@ from .lidar import (
 from .logging_utils import init_csv_logger, log_data_to_csv
 from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
+from .yaw_pid import ImuReader, YawController
 from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
 
 shutdown_flag = threading.Event()
@@ -1289,7 +1303,8 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     return AUTONOMOUS_CRUISE_PWM, False
 
 
-def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboard_sender=None):
+def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboard_sender=None,
+                yaw_controller=None, imu_reader=None):
     current_time = time.time()
     desired_pwm_from_input = 0.0
     effective_brake_from_input = state["brake"]
@@ -1378,6 +1393,26 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         servo_degrees = clamp_servo_degrees(state.get("steering_center_settle_deg", center_degrees))
     elif current_time >= float(state.get("steering_center_settle_until", 0.0)):
         state["steering_center_settle_until"] = 0.0
+
+    # --- IMU yaw-rate closed loop (mode "off" = no-op passthrough = baseline) ---
+    # When engaged it REPLACES the open-loop value above (incl. the settle kick),
+    # feeding the raw model/joystick command into the PID. Disengaged (off / not
+    # moving / lidar override) it leaves the open-loop servo_degrees untouched.
+    if yaw_controller is not None and yaw_controller.mode != "off":
+        raw_command = clamp_servo_degrees(
+            state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
+        )
+        measured_yaw = imu_reader.get_yaw() if (imu_reader is not None and imu_reader.is_fresh()) else 0.0
+        speed_mps = float(getattr(metrics, "smoothed_speed_mph", 0.0)) * 0.44704  # mph -> m/s
+        allow = not state.get("lidar_override_active", False)
+        pid_servo = yaw_controller.compute(raw_command, measured_yaw, speed_mps, dt, allow=allow)
+        if yaw_controller.engaged:
+            servo_degrees = clamp_servo_degrees(pid_servo)
+        state["yaw_rate_dps"] = measured_yaw
+        state["yaw_pid_engaged"] = yaw_controller.engaged
+        state["yaw_pid_target_yaw_dps"] = yaw_controller.last_target_yaw
+        state["yaw_pid_correction_deg"] = yaw_controller.last_correction
+
     state["steering_effective_servo_deg"] = servo_degrees
     servo_write_ok = write_steering_servo_safely(state, metrics, hardware, servo_degrees)
 
@@ -1503,6 +1538,32 @@ def run(model_choice=None):
 
     gps_reader = GpsReader()
     gps_reader.start()
+
+    # IMU yaw-rate closed-loop steering (MG24 on the GPIO UART). Only opens the
+    # serial port when armed; mode "off" leaves steering exactly open-loop.
+    yaw_controller = YawController(
+        mode=STEERING_YAW_PID_MODE,
+        kp=STEERING_YAW_PID_KP, ki=STEERING_YAW_PID_KI, kd=STEERING_YAW_PID_KD,
+        ff_shift_deg=STEERING_YAW_PID_FF_SHIFT_DEG,
+        turn_gain_curv_per_deg=STEERING_YAW_PID_TURN_GAIN,
+        out_clamp_deg=STEERING_YAW_PID_OUT_CLAMP_DEG,
+        integral_clamp=STEERING_YAW_PID_INTEGRAL_CLAMP,
+        straight_band_deg=STEERING_YAW_PID_STRAIGHT_BAND_DEG,
+        min_speed_mps=STEERING_YAW_PID_MIN_SPEED_MPS,
+        center_deg=float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0,
+        actuation_range_deg=float(STEERING_SERVO_ACTUATION_RANGE_DEG),
+    )
+    imu_reader = None
+    if STEERING_YAW_PID_MODE != "off":
+        imu_reader = ImuReader(STEERING_YAW_PID_PORT, STEERING_YAW_PID_BAUD, axis=STEERING_YAW_PID_AXIS)
+        if imu_reader.start():
+            print(f"Yaw-rate PID steering ENABLED (mode={STEERING_YAW_PID_MODE}) on {STEERING_YAW_PID_PORT}.")
+        else:
+            print("Yaw-rate PID: IMU failed to start; falling back to OPEN-LOOP steering.")
+            yaw_controller.mode = "off"
+            imu_reader = None
+    else:
+        print("Yaw-rate PID steering OFF (open-loop). Set STEERING_YAW_PID_MODE=straight|full to enable.")
 
     webcam_vision = WebcamVisionProcessor(model_choice=active_model_choice)
     if not webcam_vision.start():
@@ -1825,7 +1886,8 @@ def run(model_choice=None):
                 state["lidar_warn_threshold_m"] = OBSTACLE_WARN_THRESHOLD_M
                 state["num_lidar_points"] = 0
 
-            update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender)
+            update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender,
+                        yaw_controller=yaw_controller, imu_reader=imu_reader)
             update_turn_signal_blink(state, metrics)
             update_dashboard_page_selection(state, metrics)
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
@@ -1942,6 +2004,8 @@ def run(model_choice=None):
             lidar_parser.stop()
         if gps_reader:
             gps_reader.stop()
+        if imu_reader:
+            imu_reader.stop()
         if webcam_vision:
             webcam_vision.stop()
         if dashboard_sender:

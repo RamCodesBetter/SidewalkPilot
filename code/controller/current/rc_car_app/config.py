@@ -121,6 +121,30 @@ STEERING_SETTLE_PUSHBACK_COEFFS = (
 # Skip the settle if the curve asks for less than this much kick past center.
 STEERING_CENTER_SETTLE_MIN_KICK_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_MIN_KICK_DEG", "1.0"))
 
+# --- IMU yaw-rate closed-loop steering (MG24 on /dev/ttyAMA3) ---
+# THE TOGGLE / REVERT: "off" = exact current open-loop behavior (default, safe).
+#   "straight" = Option 1: hold yaw=0 only when commanding ~center; turns pass through.
+#   "full"     = Option 2: map (command-90) to a target yaw rate and track it everywhere.
+# Flip to "full" to try Option 2; "straight" to revert to Option 1; "off" to disable.
+STEERING_YAW_PID_MODE = os.environ.get("RC_CAR_STEERING_YAW_PID_MODE", "off")
+STEERING_YAW_PID_PORT = os.environ.get("RC_CAR_IMU_PORT", "/dev/ttyAMA3")
+STEERING_YAW_PID_BAUD = int(os.environ.get("RC_CAR_IMU_BAUD", "115200"))
+STEERING_YAW_PID_AXIS = int(os.environ.get("RC_CAR_IMU_YAW_AXIS", "2"))  # 0=X 1=Y 2=Z
+STEERING_YAW_PID_KP = float(os.environ.get("RC_CAR_STEERING_YAW_PID_KP", "0.30"))
+STEERING_YAW_PID_KI = float(os.environ.get("RC_CAR_STEERING_YAW_PID_KI", "0.05"))
+STEERING_YAW_PID_KD = float(os.environ.get("RC_CAR_STEERING_YAW_PID_KD", "0.02"))
+# Feed-forward: shift the command toward the MEASURED true center. Mid-center was
+# ~110 (R 100.8 / L 119.4 on 2026-06-28), i.e. +20 over the model's 90, so the loop
+# starts near straight and the PID only trims the residual + the 18.6-deg slop band.
+STEERING_YAW_PID_FF_SHIFT_DEG = float(os.environ.get("RC_CAR_STEERING_YAW_PID_FF_SHIFT_DEG", "20.0"))
+# Full-mode turn target: target_curvature[deg/m] = TURN_GAIN * (command - 90).
+# Negative because higher servo = right = negative yaw; ~-0.66 from the calib slope.
+STEERING_YAW_PID_TURN_GAIN = float(os.environ.get("RC_CAR_STEERING_YAW_PID_TURN_GAIN", "-0.66"))
+STEERING_YAW_PID_OUT_CLAMP_DEG = float(os.environ.get("RC_CAR_STEERING_YAW_PID_OUT_CLAMP_DEG", "25.0"))
+STEERING_YAW_PID_INTEGRAL_CLAMP = float(os.environ.get("RC_CAR_STEERING_YAW_PID_INTEGRAL_CLAMP", "200.0"))
+STEERING_YAW_PID_STRAIGHT_BAND_DEG = float(os.environ.get("RC_CAR_STEERING_YAW_PID_STRAIGHT_BAND_DEG", "20.0"))
+STEERING_YAW_PID_MIN_SPEED_MPS = float(os.environ.get("RC_CAR_STEERING_YAW_PID_MIN_SPEED_MPS", "0.2"))
+
 # --- Live-tunable steering overrides (written by the on-device tuning page) ---
 # steering_tune.json IS the persisted defaults: if present it overrides the four
 # values above, so an on-device SAVE survives restarts. Delete the file to
