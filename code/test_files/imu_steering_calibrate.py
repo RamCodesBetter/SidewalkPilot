@@ -149,11 +149,19 @@ def main():
     def measure(ang):
         """One hop at servo `ang`: drive, measure yaw+speed, hard-brake.
         Returns (ang, avg_yaw, speed, curvature) and prints the row."""
+        med.clear(); ema["v"] = 0.0                   # fresh filter for this hop
         motors_stop(); servo.value = CENTER; time.sleep(0.4)
         servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
         if not args.dry_run:
             motors_forward(args.throttle)             # full speed for the whole burst
-        time.sleep(args.settle)                       # reach steady turn
+        # SETTLE: keep READING the IMU (don't just sleep) so the serial buffer
+        # stays drained and the filter tracks the LIVE turn. Just sleeping let
+        # ~settle*100 stale lines pile up, so the window averaged old launch-phase
+        # data -> the +5 vs -1.5 garbage at the same angle.
+        t_settle = time.time() + args.settle
+        while time.time() < t_settle:
+            read_yaw()
+        ser.reset_input_buffer()                      # drop any leftover backlog -> measure fresh
         yaw_sum, n = 0.0, 0
         p_start = pulse_count["n"]
         t_end = time.time() + args.window
