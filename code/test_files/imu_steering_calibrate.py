@@ -160,10 +160,16 @@ def main():
         # the target. Without this, servo 90 read +11 coming from the left (servo 75)
         # but +2.3 coming from the right (servo 120) -- that's linkage slop, not gyro.
         motors_stop()
-        servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, args.approach))
-        time.sleep(0.4)                               # let it seat against the fixed side
-        servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
-        time.sleep(0.35)                              # let the servo physically REACH the target before launch
+        approach = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, args.approach))
+        servo.value = approach
+        time.sleep(0.5)                               # seat at the fixed side (worst case prev=180 -> 0 is a full swing)
+        target = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
+        servo.value = target
+        # Let the servo PHYSICALLY reach the target before the car launches. Scale the
+        # wait with travel distance: 0->15 is quick, but 0->180 is the full sweep and
+        # needs much longer -- a flat 0.35s would launch the car mid-turn on wide angles.
+        travel_frac = abs(target - approach) / STEERING_SERVO_ACTUATION_RANGE_DEG
+        time.sleep(0.30 + 0.55 * travel_frac)         # ~0.30s near the approach side, ~0.85s for a full 0->180 reach
         if not args.dry_run:
             motors_forward(args.throttle)             # full speed for the whole burst
         # SETTLE: keep READING the IMU (don't just sleep) so the serial buffer
