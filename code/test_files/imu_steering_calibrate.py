@@ -151,8 +151,8 @@ def main():
         for ang in angles:
             if not args.dry_run:
                 resp = input(f"\nReposition car + clear ahead. Type GO for servo {ang:.0f} "
-                             f"(anything else = finish): ").strip()
-                if resp != "GO":
+                             f"(anything else = finish): ").strip().lower()
+                if resp != "go":
                     print("Finishing with the angles done so far."); break
             motors_stop(); servo.value = CENTER; time.sleep(0.4)
             servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
