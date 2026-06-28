@@ -11,17 +11,14 @@ sensor), and logs curvature = yaw_rate / speed. From that you get:
   *** THE CAR DRIVES ITSELF in short full-speed bursts. Put it on the floor with
       a few metres of clear space, stay ready, and Ctrl-C stops everything. ***
 
-WHY a both-ways sweep (the important bit):
-  The steering linkage has BACKLASH (slop). If you reset to one side before every
-  hop you reverse direction each time, and the slop eats every small move -- servo
-  0 and servo 15 read the same ("0->0->15 isn't doing shii"). The fix is to move
-  MONOTONICALLY and never reverse mid-sweep:
-      UP-sweep   0 ->15->...->180   (always moving RIGHT -> slop seated right)
-      DOWN-sweep 180->...->15-> 0   (always moving LEFT  -> slop seated left)
-  Center read on the way up vs the way down differs by the slop; the gap between
-  the two zero-crossings IS the hysteresis band, and the two centers are the real
-  left-approach / right-approach centers. The servo HOLDS its position between
-  hops, so each hop is a small same-direction step from the previous angle.
+HOW each angle is measured ("refresh to the opposite extreme"):
+  The steering linkage has BACKLASH (slop). To seat every angle the SAME firm way,
+  each hop first snaps to the OPPOSITE extreme, then comes to the target, so the
+  final approach always travels a long way and fully takes up the slop:
+      Pass 1 — angles 0..90 : refresh to 180, then to the value (approach from RIGHT) -> 90(1)
+      Pass 2 — angles 90..180: refresh to 0,  then to the value (approach from LEFT)  -> 90(2)
+  Center (90) is measured in BOTH passes; the gap between 90(1) and 90(2) is the
+  hysteresis right at center. Each pass's yaw=0 crossing is that side's true center.
 
 Run on the Pi (car service stopped so it doesn't fight the servo/motors):
     sudo systemctl stop sidewalkpilot-rpi-car.service
@@ -65,7 +62,8 @@ from rc_car_app.config import (
 from rc_car_app.hardware import PCA9685SteeringServo
 
 DIST_PER_PULSE_M = (math.pi * (WHEEL_DIAMETER_CM / 100.0)) / PULSES_PER_REVOLUTION  # both-edge count
-CENTER = STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0
+RANGE = STEERING_SERVO_ACTUATION_RANGE_DEG
+CENTER = RANGE / 2.0
 
 
 def parse_args():
@@ -74,13 +72,11 @@ def parse_args():
     p.add_argument("--baud", type=int, default=115200)
     p.add_argument("--axis", type=int, default=2, help="yaw axis 0=X 1=Y 2=Z (default 2)")
     p.add_argument("--throttle", type=float, default=1.0, help="motor duty for the whole test (default 1.0 = FULL)")
-    p.add_argument("--angles", default="0,15,30,45,60,75,90,105,120,135,150,165,180", help="base servo angles (a sweep is built from these)")
-    p.add_argument("--sweep", choices=["both", "up", "down"], default="both",
-                   help="both = up 0->180 then down 180->0 (measures the hysteresis band, default); "
-                        "up = ascending only; down = descending only")
+    p.add_argument("--angles", default="0,15,30,45,60,75,90,105,120,135,150,165,180", help="base servo angles")
+    p.add_argument("--split", type=float, default=None, help="angle that splits pass1/pass2 (default = center)")
     p.add_argument("--settle", type=float, default=0.5, help="s to reach steady turn before measuring")
     p.add_argument("--window", type=float, default=1.0, help="s to average yaw+speed per angle")
-    p.add_argument("--seat", type=float, default=2.0, help="s to let the servo fully reach the target before launch")
+    p.add_argument("--seat", type=float, default=2.0, help="s to seat at the extreme AND to reach the target")
     p.add_argument("--median", type=int, default=5)
     p.add_argument("--ema", type=float, default=0.3)
     p.add_argument("--trim", type=float, default=12.0, help="+D center trim baked into the servo mapping")
@@ -90,19 +86,16 @@ def parse_args():
     return p.parse_args()
 
 
-def build_hops(base, sweep):
-    """Return an ordered list of (angle, pass) hops. pass is 'up' or 'dn'.
-    Both-ways sweeps up then back down so each angle is approached monotonically
-    from each side -> slop stays seated in the sweep direction."""
+def build_hops(base, split):
+    """Ordered hops as (target, refresh_extreme, pass).
+    Pass 1 = angles <= split, refreshed from the MAX extreme (approach from right).
+    Pass 2 = angles >= split, refreshed from the MIN extreme (approach from left).
+    The split angle (center) is measured in BOTH passes -> 90(1) vs 90(2)."""
     asc = sorted(set(base))
-    if sweep == "up":
-        return [(a, "up") for a in asc]
-    if sweep == "down":
-        return [(a, "dn") for a in reversed(asc)]
-    # both: up 0->180, then down 165->0 (skip the top angle, we just measured it)
-    ups = [(a, "up") for a in asc]
-    downs = [(a, "dn") for a in reversed(asc[:-1])]
-    return ups + downs
+    lo = [a for a in asc if a <= split]          # 0..90
+    hi = [a for a in asc if a >= split]          # 90..180  (split in both)
+    return ([(a, RANGE, "p1") for a in lo] +     # refresh to 180 (right), then come to value
+            [(a, 0.0, "p2") for a in hi])         # refresh to 0   (left),  then come to value
 
 
 def zero_cross(pts):
@@ -117,14 +110,15 @@ def zero_cross(pts):
 def main():
     args = parse_args()
     base = [float(a) for a in args.angles.split(",") if a.strip()]
-    hops = build_hops(base, args.sweep)
+    split = args.split if args.split is not None else CENTER
+    hops = build_hops(base, split)
 
     # --- hardware ---
-    center_offset = args.trim / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
+    center_offset = args.trim / (RANGE / 2.0)
     servo = PCA9685SteeringServo(
         channel=PCA9685_SERVO_CHANNEL, address=PCA9685_I2C_ADDRESS, frequency_hz=PCA9685_FREQUENCY_HZ,
         min_pulse_us=STEERING_SERVO_MIN_PULSE_US, max_pulse_us=STEERING_SERVO_MAX_PULSE_US,
-        actuation_range_deg=STEERING_SERVO_ACTUATION_RANGE_DEG,
+        actuation_range_deg=RANGE,
         center_offset=center_offset, center_preload=0.0, center_preload_window=0.0,
     )
     lf = PWMOutputDevice(MOTOR_LEFT_FWD_PIN);  lb = PWMOutputDevice(MOTOR_LEFT_BWD_PIN)
@@ -185,21 +179,21 @@ def main():
     if not args.dry_run:
         print("\n*** Per-hop GO (small-room friendly): position the car + clear ahead, type GO,"
               " it does ONE full-speed burst, stops, then waits for GO again. Ctrl-C stops anytime. ***")
-        print(f"Sweep: {args.sweep}  ({len(hops)} hops). The servo HOLDS between hops so each step is"
-              " a small same-direction move -- DON'T hand-twist the wheels between hops.")
+        print(f"{len(hops)} hops. Each hop REFRESHES to the opposite extreme, then comes to the value,"
+              " so the slop is always seated the same firm way.")
     else:
-        print("DRY RUN: motors stay OFF; it just sweeps the servo through every hop.")
+        print("DRY RUN: motors stay OFF; it just runs the refresh + move for every hop.")
 
-    def measure(ang, pass_tag):
-        """One hop at servo `ang`: move DIRECTLY from the previous angle (no reset),
-        drive, measure yaw+speed, hard-brake. Returns (ang, yaw, speed, curv, pass)."""
+    def measure(ang, refresh, pass_tag):
+        """One hop: snap to the opposite extreme (refresh), come to the target, drive,
+        measure yaw+speed, hard-brake. Returns (ang, yaw, speed, curv, pass)."""
         med.clear(); ema["v"] = 0.0                   # fresh filter for this hop
-        # MONOTONIC approach: move straight from wherever the servo is (the previous
-        # hop's angle) to the target. The sweep order keeps the move in one direction,
-        # so the backlash stays seated and small steps actually register. (Resetting to
-        # a fixed side every hop reversed direction and the slop ate the small moves.)
+        # REFRESH: snap to the opposite extreme first so the long final move into the
+        # target fully takes up the backlash the SAME way every time.
         motors_stop()
-        target = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
+        servo.value = max(0.0, min(RANGE, refresh))
+        time.sleep(args.seat)                         # seat hard against the opposite extreme
+        target = max(0.0, min(RANGE, ang))
         servo.value = target
         time.sleep(args.seat)                         # let the servo FULLY reach the target before launch
         if not args.dry_run:
@@ -225,8 +219,8 @@ def main():
         avg_yaw = (yaw_sum / n) if n else 0.0
         speed = (pulses * DIST_PER_PULSE_M) / args.window      # m/s
         curv = (avg_yaw / speed) if speed > 0.05 else float("nan")  # deg per metre
-        print(f"  [{pass_tag}] servo {ang:5.1f}  yaw={avg_yaw:+6.1f} deg/s  speed={speed:4.2f} m/s  "
-              f"curvature={curv:+7.1f} deg/m")
+        print(f"  [{pass_tag} from {refresh:.0f}] servo {ang:5.1f}  yaw={avg_yaw:+6.1f} deg/s  "
+              f"speed={speed:4.2f} m/s  curvature={curv:+7.1f} deg/m")
         time.sleep(0.3)                               # already braked; brief pause
         return (ang, avg_yaw, speed, curv, pass_tag)
 
@@ -244,7 +238,7 @@ def main():
             ps = cols[4].strip() if len(cols) > 4 else ""
             rows.append([sv, yw, sp, cv, ps, False])     # last = "used"
         loaded = 0
-        for idx, (a, pt) in enumerate(hops):
+        for idx, (a, _r, pt) in enumerate(hops):
             for r in rows:
                 if not r[5] and abs(a - r[0]) < 0.51 and (r[4] == "" or r[4] == pt):
                     results[idx] = (a, r[1], r[2], r[3], pt); r[5] = True; loaded += 1; break
@@ -252,37 +246,38 @@ def main():
     try:
         i = 0
         while i < len(hops):
-            ang, pt = hops[i]
+            ang, refresh, pt = hops[i]
             if results[i] is not None:                # already measured (resumed) -> skip
                 i += 1; continue
             if args.dry_run:
-                results[i] = measure(ang, pt); i += 1; continue
+                results[i] = measure(ang, refresh, pt); i += 1; continue
             prev = f"{hops[i-1][0]:.0f}" if i > 0 else "-"
-            resp = input(f"\nReposition car + clear ahead. GO for [{pt}] servo {ang:.0f}  "
+            resp = input(f"\nReposition car + clear ahead. GO for [{pt} refresh→{refresh:.0f}] servo {ang:.0f}  "
                          f"(hop {i+1}/{len(hops)}; REDO = redo prev servo {prev}, Q = finish): ").strip().lower()
             if resp == "go":
-                results[i] = measure(ang, pt); i += 1
+                results[i] = measure(ang, refresh, pt); i += 1
             elif resp == "redo" or resp.startswith("redo "):
                 parts = resp.split()
-                target = None
+                tgt = None
                 if len(parts) > 1:
                     try:
-                        target = float(parts[1])
+                        tgt = float(parts[1])
                     except ValueError:
-                        target = None
-                if target is not None:
-                    # redo a SPECIFIC angle: redo the most recent ALREADY-DONE hop at that angle
+                        tgt = None
+                if tgt is not None:
+                    # redo the most recent ALREADY-DONE hop at that angle
                     idx = next((j for j in range(i - 1, -1, -1)
-                                if results[j] is not None and abs(hops[j][0] - target) < 0.51), None)
+                                if results[j] is not None and abs(hops[j][0] - tgt) < 0.51), None)
                     if idx is None:
-                        print(f"  no measured hop at servo {target:.0f} to redo yet.")
+                        print(f"  no measured hop at servo {tgt:.0f} to redo yet.")
                     else:
-                        print(f"  redoing [{hops[idx][1]}] servo {hops[idx][0]:.0f} ...")
-                        results[idx] = measure(hops[idx][0], hops[idx][1])
+                        a2, r2, p2 = hops[idx]
+                        print(f"  redoing [{p2} from {r2:.0f}] servo {a2:.0f} ...")
+                        results[idx] = measure(a2, r2, p2)
                 elif i > 0:
-                    # bare "redo" -> redo the previous hop
-                    print(f"  redoing [{hops[i-1][1]}] servo {hops[i-1][0]:.0f} ...")
-                    results[i - 1] = measure(hops[i - 1][0], hops[i - 1][1])
+                    a2, r2, p2 = hops[i - 1]
+                    print(f"  redoing [{p2} from {r2:.0f}] servo {a2:.0f} ...")
+                    results[i - 1] = measure(a2, r2, p2)
                 else:
                     print("  nothing to redo yet.")
             elif resp in ("q", "quit", "done", "finish", "exit", "stop"):
@@ -300,7 +295,7 @@ def main():
         try: servo.close()
         except Exception: pass
 
-    # write CSV (in sweep order, with the up/dn pass tag)
+    # write CSV (in order, with the pass tag: p1 = approached from 180/right, p2 = from 0/left)
     done = [r for r in results if r is not None]
     with open(args.out, "w") as f:
         f.write("servo_logical_deg,avg_yaw_dps,speed_mps,curvature_deg_per_m,pass\n")
@@ -308,22 +303,24 @@ def main():
             f.write(f"{ang:.1f},{yaw:.3f},{sp:.3f},{cv:.3f},{pt}\n")
     print(f"\nwrote {args.out}")
 
-    # TRUE CENTER = where avg_yaw crosses 0, computed SEPARATELY for each sweep
-    # direction. The two differ by the steering backlash; the gap is the hysteresis.
-    up_pts = [(a, y) for a, y, _, _, pt in done if pt == "up"]
-    dn_pts = [(a, y) for a, y, _, _, pt in done if pt == "dn"]
-    c_up = zero_cross(up_pts)
-    c_dn = zero_cross(dn_pts)
-    if c_up is not None:
-        print(f"UP-sweep   center (yaw=0): servo ~= {c_up:.1f}   (delta {c_up - CENTER:+.1f} from commanded {CENTER:.0f})")
-    if c_dn is not None:
-        print(f"DOWN-sweep center (yaw=0): servo ~= {c_dn:.1f}   (delta {c_dn - CENTER:+.1f} from commanded {CENTER:.0f})")
-    if c_up is not None and c_dn is not None:
-        mid = (c_up + c_dn) / 2.0
-        print(f"HYSTERESIS band = {abs(c_up - c_dn):.1f} deg of servo slop.  Mid-center ~= {mid:.1f} "
-              f"-> good PID setpoint; the loop holds yaw=0 across the slop.")
-    elif c_up is None and c_dn is None:
-        print("No yaw zero-crossing found — widen --angles around center.")
+    # centers per pass + the hysteresis right at the split (90(1) from right vs 90(2) from left)
+    p1 = [(a, y) for a, y, _, _, pt in done if pt == "p1"]   # 0..90, approached from RIGHT (180)
+    p2 = [(a, y) for a, y, _, _, pt in done if pt == "p2"]   # 90..180, approached from LEFT (0)
+    c1, c2 = zero_cross(p1), zero_cross(p2)
+    if c1 is not None:
+        print(f"PASS1 (from right) center: servo ~= {c1:.1f}   (delta {c1 - CENTER:+.1f} from {CENTER:.0f})")
+    if c2 is not None:
+        print(f"PASS2 (from left)  center: servo ~= {c2:.1f}   (delta {c2 - CENTER:+.1f} from {CENTER:.0f})")
+    y1 = next((y for a, y in p1 if abs(a - split) < 0.51), None)
+    y2 = next((y for a, y in p2 if abs(a - split) < 0.51), None)
+    if y1 is not None and y2 is not None:
+        print(f"At servo {split:.0f}: 90(1) from right = {y1:+.1f} deg/s, 90(2) from left = {y2:+.1f} deg/s "
+              f"-> HYSTERESIS at center = {abs(y1 - y2):.1f} deg/s of yaw.")
+    if c1 is not None and c2 is not None:
+        print(f"Band between the two centers = {abs(c1 - c2):.1f} deg of servo slop. "
+              f"Mid-center ~= {(c1 + c2) / 2.0:.1f} -> PID setpoint; the loop holds yaw=0 across the slop.")
+    elif c1 is None and c2 is None:
+        print("No yaw zero-crossing found in either pass — widen --angles around center.")
 
 
 if __name__ == "__main__":
