@@ -9,7 +9,8 @@ filter that the steering PID will reuse.
 Filter chain on the yaw axis (Z by default):
   1. median-of-N   -> kills isolated spikes (a lone 20 among 0,1,2 -> ignored)
   2. EMA low-pass  -> smooths the small jitter   ema = a*median + (1-a)*ema
-  3. deadband      -> |ema| < deadband reads exactly 0 (idle = dead still)
+  3. soft deadband -> subtract the threshold: below it -> 0, just above -> near 0
+                      (3.5->0.0, 3.6->0.1). Continuous, so no 0<->3.5 edge chatter.
 
 Usage:
   python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3
@@ -19,6 +20,7 @@ Usage:
 import argparse
 import collections
 import glob
+import math
 import time
 
 try:
@@ -51,7 +53,7 @@ def main():
     ap.add_argument("--axis", type=int, default=2, help="yaw axis index 0=X 1=Y 2=Z (default 2=Z)")
     ap.add_argument("--median", type=int, default=5, help="median window, odd, kills spikes (default 5)")
     ap.add_argument("--ema", type=float, default=0.3, help="EMA alpha 0..1, lower = smoother/laggier (default 0.3)")
-    ap.add_argument("--deadband", type=float, default=2.0, help="|yaw| below this reads 0 deg/s (default 2.0)")
+    ap.add_argument("--deadband", type=float, default=3.5, help="soft deadband (deg/s): below it -> 0; above, the threshold is subtracted (default 3.5)")
     args = ap.parse_args()
 
     port = find_port(args.port)
@@ -84,7 +86,9 @@ def main():
             med_buf.append(yaw_raw)
             med = median(med_buf)                       # 1. spike kill
             ema = args.ema * med + (1.0 - args.ema) * ema  # 2. smooth
-            yaw = 0.0 if abs(ema) < args.deadband else ema  # 3. deadband
+            # 3. SOFT deadband: subtract the threshold so it's continuous
+            #    (3.5 -> 0.0, 3.6 -> 0.1) instead of jumping 0 -> 3.5 at the edge.
+            yaw = math.copysign(max(0.0, abs(ema) - args.deadband), ema)
 
             print(f"\rraw X={vals[0]:+6.1f} Y={vals[1]:+6.1f} Z={vals[2]:+6.1f}   "
                   f"yaw_raw={yaw_raw:+6.1f}  ->  FILTERED={yaw:+6.1f} deg/s     ",
