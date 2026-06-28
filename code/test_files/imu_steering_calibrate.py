@@ -14,11 +14,14 @@ sensor), and logs curvature = yaw_rate / speed. From that you get:
 HOW each angle is measured ("refresh to the opposite extreme"):
   The steering linkage has BACKLASH (slop). To seat every angle the SAME firm way,
   each hop first snaps to the OPPOSITE extreme, then comes to the target, so the
-  final approach always travels a long way and fully takes up the slop:
-      Pass 1 — angles 0..90 : refresh to 180, then to the value (approach from RIGHT) -> 90(1)
-      Pass 2 — angles 90..180: refresh to 0,  then to the value (approach from LEFT)  -> 90(2)
-  Center (90) is measured in BOTH passes; the gap between 90(1) and 90(2) is the
-  hysteresis right at center. Each pass's yaw=0 crossing is that side's true center.
+  final approach always travels a long way and fully takes up the slop.
+      Ascending phase  0->180: low angles refresh from 180 (approach RIGHT),
+                               high angles refresh from 0   (approach LEFT).
+      Descending phase 180->0: the OPPOSITE approach for each angle (default;
+                               --one-way skips it).
+  So every angle is measured approached-from-RIGHT and approached-from-LEFT. The
+  yaw=0 crossing of each approach is that side's true center; the gap between the
+  two centers is the steering hysteresis, and the mid-point is the PID setpoint.
 
 Run on the Pi (car service stopped so it doesn't fight the servo/motors):
     sudo systemctl stop sidewalkpilot-rpi-car.service
@@ -73,7 +76,10 @@ def parse_args():
     p.add_argument("--axis", type=int, default=2, help="yaw axis 0=X 1=Y 2=Z (default 2)")
     p.add_argument("--throttle", type=float, default=1.0, help="motor duty for the whole test (default 1.0 = FULL)")
     p.add_argument("--angles", default="0,15,30,45,60,75,90,105,120,135,150,165,180", help="base servo angles")
-    p.add_argument("--split", type=float, default=None, help="angle that splits pass1/pass2 (default = center)")
+    p.add_argument("--split", type=float, default=None, help="angle that splits the ascending phase's two halves (default = center)")
+    p.add_argument("--one-way", action="store_true",
+                   help="only the ascending 0->180 phase. Default ALSO runs the 180->0 phase so every "
+                        "angle is measured from BOTH approach directions.")
     p.add_argument("--settle", type=float, default=0.5, help="s to reach steady turn before measuring")
     p.add_argument("--window", type=float, default=1.0, help="s to average yaw+speed per angle")
     p.add_argument("--seat", type=float, default=2.0, help="s to seat at the extreme AND to reach the target")
@@ -86,16 +92,24 @@ def parse_args():
     return p.parse_args()
 
 
-def build_hops(base, split):
-    """Ordered hops as (target, refresh_extreme, pass).
-    Pass 1 = angles <= split, refreshed from the MAX extreme (approach from right).
-    Pass 2 = angles >= split, refreshed from the MIN extreme (approach from left).
-    The split angle (center) is measured in BOTH passes -> 90(1) vs 90(2)."""
+def build_hops(base, split, both_ways):
+    """Ordered hops as (target, refresh_extreme, approach).
+    approach 'R' = refreshed from the MAX extreme (snap to 180, come down -> approached from the RIGHT).
+    approach 'L' = refreshed from the MIN extreme (snap to 0,  come up   -> approached from the LEFT).
+    Ascending phase 0->180 gives every angle one approach; the descending phase
+    180->0 gives the OTHER approach, so each angle is measured from both sides."""
     asc = sorted(set(base))
     lo = [a for a in asc if a <= split]          # 0..90
     hi = [a for a in asc if a >= split]          # 90..180  (split in both)
-    return ([(a, RANGE, "p1") for a in lo] +     # refresh to 180 (right), then come to value
-            [(a, 0.0, "p2") for a in hi])         # refresh to 0   (left),  then come to value
+    # Phase A: targets climb 0 -> 180
+    hops = [(a, RANGE, "R") for a in lo]         # 0..90  from the right
+    hops += [(a, 0.0, "L") for a in hi]          # 90..180 from the left  (split measured both R+L here)
+    if both_ways:
+        # Phase B: targets descend 180 -> 0, the OPPOSITE approach for each angle
+        # (exclude the split so it isn't measured a 3rd/4th time)
+        hops += [(a, RANGE, "R") for a in reversed([x for x in hi if x > split])]   # 180..105 from the right
+        hops += [(a, 0.0, "L") for a in reversed([x for x in lo if x < split])]     # 75..0   from the left
+    return hops
 
 
 def zero_cross(pts):
@@ -111,7 +125,7 @@ def main():
     args = parse_args()
     base = [float(a) for a in args.angles.split(",") if a.strip()]
     split = args.split if args.split is not None else CENTER
-    hops = build_hops(base, split)
+    hops = build_hops(base, split, both_ways=not args.one_way)
 
     # --- hardware ---
     center_offset = args.trim / (RANGE / 2.0)
@@ -179,8 +193,9 @@ def main():
     if not args.dry_run:
         print("\n*** Per-hop GO (small-room friendly): position the car + clear ahead, type GO,"
               " it does ONE full-speed burst, stops, then waits for GO again. Ctrl-C stops anytime. ***")
-        print(f"{len(hops)} hops. Each hop REFRESHES to the opposite extreme, then comes to the value,"
-              " so the slop is always seated the same firm way.")
+        phase = "0->180 only (--one-way)" if args.one_way else "0->180 then 180->0 (both approaches)"
+        print(f"{len(hops)} hops, {phase}. Each hop REFRESHES to the opposite extreme, then comes to the"
+              " value, so the slop is always seated the same firm way.")
     else:
         print("DRY RUN: motors stay OFF; it just runs the refresh + move for every hop.")
 
@@ -303,24 +318,25 @@ def main():
             f.write(f"{ang:.1f},{yaw:.3f},{sp:.3f},{cv:.3f},{pt}\n")
     print(f"\nwrote {args.out}")
 
-    # centers per pass + the hysteresis right at the split (90(1) from right vs 90(2) from left)
-    p1 = [(a, y) for a, y, _, _, pt in done if pt == "p1"]   # 0..90, approached from RIGHT (180)
-    p2 = [(a, y) for a, y, _, _, pt in done if pt == "p2"]   # 90..180, approached from LEFT (0)
-    c1, c2 = zero_cross(p1), zero_cross(p2)
-    if c1 is not None:
-        print(f"PASS1 (from right) center: servo ~= {c1:.1f}   (delta {c1 - CENTER:+.1f} from {CENTER:.0f})")
-    if c2 is not None:
-        print(f"PASS2 (from left)  center: servo ~= {c2:.1f}   (delta {c2 - CENTER:+.1f} from {CENTER:.0f})")
-    y1 = next((y for a, y in p1 if abs(a - split) < 0.51), None)
-    y2 = next((y for a, y in p2 if abs(a - split) < 0.51), None)
-    if y1 is not None and y2 is not None:
-        print(f"At servo {split:.0f}: 90(1) from right = {y1:+.1f} deg/s, 90(2) from left = {y2:+.1f} deg/s "
-              f"-> HYSTERESIS at center = {abs(y1 - y2):.1f} deg/s of yaw.")
-    if c1 is not None and c2 is not None:
-        print(f"Band between the two centers = {abs(c1 - c2):.1f} deg of servo slop. "
-              f"Mid-center ~= {(c1 + c2) / 2.0:.1f} -> PID setpoint; the loop holds yaw=0 across the slop.")
-    elif c1 is None and c2 is None:
-        print("No yaw zero-crossing found in either pass — widen --angles around center.")
+    # centers per APPROACH direction (across the whole range when both-ways was run)
+    R = [(a, y) for a, y, _, _, pt in done if pt == "R"]   # approached from the RIGHT (refresh 180)
+    L = [(a, y) for a, y, _, _, pt in done if pt == "L"]   # approached from the LEFT  (refresh 0)
+    cR, cL = zero_cross(R), zero_cross(L)
+    if cR is not None:
+        print(f"RIGHT-approach center (yaw=0): servo ~= {cR:.1f}   (delta {cR - CENTER:+.1f} from {CENTER:.0f})")
+    if cL is not None:
+        print(f"LEFT-approach  center (yaw=0): servo ~= {cL:.1f}   (delta {cL - CENTER:+.1f} from {CENTER:.0f})")
+    # hysteresis at the split angle: yaw from each side at the same servo command
+    yR = next((y for a, y in R if abs(a - split) < 0.51), None)
+    yL = next((y for a, y in L if abs(a - split) < 0.51), None)
+    if yR is not None and yL is not None:
+        print(f"At servo {split:.0f}: from right = {yR:+.1f} deg/s, from left = {yL:+.1f} deg/s "
+              f"-> HYSTERESIS at center = {abs(yR - yL):.1f} deg/s of yaw.")
+    if cR is not None and cL is not None:
+        print(f"Band between the two centers = {abs(cR - cL):.1f} deg of servo slop. "
+              f"Mid-center ~= {(cR + cL) / 2.0:.1f} -> PID setpoint; the loop holds yaw=0 across the slop.")
+    elif cR is None and cL is None:
+        print("No yaw zero-crossing found — widen --angles around center.")
 
 
 if __name__ == "__main__":
