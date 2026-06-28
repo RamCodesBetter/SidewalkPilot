@@ -68,6 +68,10 @@ def parse_args():
     p.add_argument("--median", type=int, default=5)
     p.add_argument("--ema", type=float, default=0.3)
     p.add_argument("--trim", type=float, default=12.0, help="+D center trim baked into the servo mapping")
+    p.add_argument("--approach", type=float, default=0.0,
+                   help="pre-position servo to this fixed side before EACH hop so steering "
+                        "slop is taken up the same way every time (default 0 = full left). "
+                        "Kills the hysteresis where servo 90 read +11 from the left vs +2.3 from the right.")
     p.add_argument("--out", default="imu_calib.csv")
     p.add_argument("--resume", action="store_true", help="load --out CSV and only run angles not already in it")
     p.add_argument("--dry-run", action="store_true", help="NO motors — just sweep servo + read yaw")
@@ -151,8 +155,15 @@ def main():
         """One hop at servo `ang`: drive, measure yaw+speed, hard-brake.
         Returns (ang, avg_yaw, speed, curvature) and prints the row."""
         med.clear(); ema["v"] = 0.0                   # fresh filter for this hop
-        motors_stop(); servo.value = CENTER; time.sleep(0.4)
+        # HYSTERESIS FIX (Option A): always pre-position to the SAME side first, so
+        # the steering backlash is taken up in one consistent direction, THEN move to
+        # the target. Without this, servo 90 read +11 coming from the left (servo 75)
+        # but +2.3 coming from the right (servo 120) -- that's linkage slop, not gyro.
+        motors_stop()
+        servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, args.approach))
+        time.sleep(0.4)                               # let it seat against the fixed side
         servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
+        time.sleep(0.35)                              # let the servo physically REACH the target before launch
         if not args.dry_run:
             motors_forward(args.throttle)             # full speed for the whole burst
         # SETTLE: keep READING the IMU (don't just sleep) so the serial buffer
