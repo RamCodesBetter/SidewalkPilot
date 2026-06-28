@@ -69,6 +69,7 @@ def parse_args():
     p.add_argument("--ema", type=float, default=0.3)
     p.add_argument("--trim", type=float, default=12.0, help="+D center trim baked into the servo mapping")
     p.add_argument("--out", default="imu_calib.csv")
+    p.add_argument("--resume", action="store_true", help="load --out CSV and only run angles not already in it")
     p.add_argument("--dry-run", action="store_true", help="NO motors — just sweep servo + read yaw")
     return p.parse_args()
 
@@ -182,15 +183,31 @@ def main():
         return (ang, avg_yaw, speed, curv)
 
     results = [None] * len(angles)
+    if args.resume and Path(args.out).exists():
+        loaded = 0
+        for ln in Path(args.out).read_text().splitlines()[1:]:   # skip header
+            cols = ln.split(",")
+            if len(cols) < 4:
+                continue
+            try:
+                sv, yw, sp, cv = (float(c) for c in cols[:4])
+            except ValueError:
+                continue
+            for idx, a in enumerate(angles):
+                if abs(a - sv) < 0.51 and results[idx] is None:
+                    results[idx] = (a, yw, sp, cv); loaded += 1; break
+        print(f"Resumed {loaded} angle(s) from {args.out}; only the missing ones will run.")
     try:
         i = 0
         while i < len(angles):
             ang = angles[i]
+            if results[i] is not None:                # already measured (resumed) -> skip
+                i += 1; continue
             if args.dry_run:
                 results[i] = measure(ang); i += 1; continue
             prev = f"{angles[i-1]:.0f}" if i > 0 else "-"
-            resp = input(f"\nReposition car + clear ahead. Type GO for servo {ang:.0f}  "
-                         f"(REDO = redo prev servo {prev}, anything else = finish): ").strip().lower()
+            resp = input(f"\nReposition car + clear ahead. GO for servo {ang:.0f}  "
+                         f"(REDO = redo prev servo {prev}, Q = finish): ").strip().lower()
             if resp == "go":
                 results[i] = measure(ang); i += 1
             elif resp == "redo":
@@ -199,9 +216,10 @@ def main():
                     results[i - 1] = measure(angles[i - 1])
                 else:
                     print("  nothing to redo yet.")
-                # stay at i — re-prompt for the same angle
-            else:
+            elif resp in ("q", "quit", "done", "finish", "exit", "stop"):
                 print("Finishing with the angles done so far."); break
+            else:
+                print("  ? type 'go', 'redo', or 'q' — a typo won't quit/lose progress.")
     except KeyboardInterrupt:
         print("\nSTOPPED.")
     finally:
