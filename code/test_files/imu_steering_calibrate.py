@@ -96,10 +96,12 @@ def main():
     ser = serial.Serial(args.port, args.baud, timeout=0.2)
     time.sleep(0.3); ser.reset_input_buffer()
 
-    def motors_stop():
+    def motors_stop():                  # coast / release the brake (all inputs low)
         for d in (lf, lb, rf, rb): d.value = 0.0
-    def motors_forward(duty):
-        lb.value = 0.0; rb.value = 0.0; lf.value = duty; rf.value = duty
+    def motors_forward(duty):           # forward = right FWD + left BWD (left motor is mirror-mounted) — matches runtime
+        lf.value = 0.0; rb.value = 0.0; rf.value = duty; lb.value = duty
+    def motors_brake():                 # AT8236 hard brake: all four inputs HIGH clamps the motor outputs low
+        for d in (lf, lb, rf, rb): d.value = 1.0
 
     med = collections.deque(maxlen=max(1, args.median))
     ema = {"v": 0.0}
@@ -166,7 +168,9 @@ def main():
                 if y is not None:
                     yaw_sum += y; n += 1
             pulses = pulse_count["n"] - p_start
-            motors_stop()
+            if not args.dry_run:
+                motors_brake(); time.sleep(0.3)   # HARD BRAKE so it doesn't coast into a wall
+            motors_stop()                         # release the brake
 
             avg_yaw = (yaw_sum / n) if n else 0.0
             speed = (pulses * DIST_PER_PULSE_M) / args.window     # m/s
@@ -174,10 +178,14 @@ def main():
             results.append((ang, avg_yaw, speed, curv))
             print(f"  servo {ang:5.1f}  yaw={avg_yaw:+6.1f} deg/s  speed={speed:4.2f} m/s  "
                   f"curvature={curv:+7.1f} deg/m")
-            time.sleep(1.0)                               # let it coast/stop
+            time.sleep(0.3)                               # already braked; brief pause
     except KeyboardInterrupt:
         print("\nSTOPPED.")
     finally:
+        try:
+            motors_brake(); time.sleep(0.3)   # hard emergency brake on finish / Ctrl-C
+        except Exception:
+            pass
         motors_stop(); servo.value = CENTER
         try: servo.close()
         except Exception: pass
