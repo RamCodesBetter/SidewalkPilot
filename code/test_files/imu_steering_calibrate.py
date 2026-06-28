@@ -61,12 +61,10 @@ def parse_args():
     p.add_argument("--port", default="/dev/ttyAMA3", help="IMU UART port")
     p.add_argument("--baud", type=int, default=115200)
     p.add_argument("--axis", type=int, default=2, help="yaw axis 0=X 1=Y 2=Z (default 2)")
-    p.add_argument("--throttle", type=float, default=0.3, help="CRUISE duty once rolling (default 0.3)")
-    p.add_argument("--kick", type=float, default=0.5, help="KICKSTART duty to break stiction (default 0.5)")
-    p.add_argument("--kick-time", type=float, default=0.3, help="seconds at kick duty before dropping to cruise (default 0.3)")
+    p.add_argument("--throttle", type=float, default=1.0, help="motor duty for the whole test (default 1.0 = FULL)")
     p.add_argument("--angles", default="60,75,85,90,95,105,120", help="logical servo angles to test")
-    p.add_argument("--settle", type=float, default=0.8, help="s to reach steady turn before measuring")
-    p.add_argument("--window", type=float, default=1.5, help="s to average yaw+speed per angle")
+    p.add_argument("--settle", type=float, default=0.5, help="s to reach steady turn before measuring")
+    p.add_argument("--window", type=float, default=1.0, help="s to average yaw+speed per angle")
     p.add_argument("--median", type=int, default=5)
     p.add_argument("--ema", type=float, default=0.3)
     p.add_argument("--trim", type=float, default=12.0, help="+D center trim baked into the servo mapping")
@@ -141,7 +139,8 @@ def main():
     print("IMU OK.")
 
     if not args.dry_run:
-        print("\n*** CAR WILL DRIVE FORWARD in short bursts. Clear ~3 m, stay ready. ***")
+        print("\n*** CAR DRIVES AT FULL SPEED in short bursts — needs a LARGE clear area "
+              "(~5-6 m), expect fast sharp arcs. Stay ready, Ctrl-C stops it. ***")
         if input('Type GO to start (anything else aborts): ').strip() != "GO":
             print("Aborted."); motors_stop(); return
     else:
@@ -153,10 +152,8 @@ def main():
             motors_stop(); servo.value = CENTER; time.sleep(0.4)
             servo.value = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
             if not args.dry_run:
-                motors_forward(args.kick)                 # kickstart: break stiction (~0.5)
-                time.sleep(args.kick_time)
-                motors_forward(args.throttle)             # drop to cruise (~0.3) once rolling
-            time.sleep(args.settle)                       # reach steady turn at cruise speed
+                motors_forward(args.throttle)             # full speed for the whole burst
+            time.sleep(args.settle)                       # reach steady turn
 
             yaw_sum, n = 0.0, 0
             p_start = pulse_count["n"]
