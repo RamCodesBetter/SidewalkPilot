@@ -162,14 +162,10 @@ def main():
         motors_stop()
         approach = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, args.approach))
         servo.value = approach
-        time.sleep(0.5)                               # seat at the fixed side (worst case prev=180 -> 0 is a full swing)
+        time.sleep(2.0)                               # seat fully at the fixed side, even from a 180 -> 0 full swing
         target = max(0.0, min(STEERING_SERVO_ACTUATION_RANGE_DEG, ang))
         servo.value = target
-        # Let the servo PHYSICALLY reach the target before the car launches. Scale the
-        # wait with travel distance: 0->15 is quick, but 0->180 is the full sweep and
-        # needs much longer -- a flat 0.35s would launch the car mid-turn on wide angles.
-        travel_frac = abs(target - approach) / STEERING_SERVO_ACTUATION_RANGE_DEG
-        time.sleep(0.30 + 0.55 * travel_frac)         # ~0.30s near the approach side, ~0.85s for a full 0->180 reach
+        time.sleep(2.0)                               # let the servo FULLY reach the target before launch (incl. 0 -> 180)
         if not args.dry_run:
             motors_forward(args.throttle)             # full speed for the whole burst
         # SETTLE: keep READING the IMU (don't just sleep) so the serial buffer
