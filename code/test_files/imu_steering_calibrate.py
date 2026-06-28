@@ -210,8 +210,24 @@ def main():
                          f"(REDO = redo prev servo {prev}, Q = finish): ").strip().lower()
             if resp == "go":
                 results[i] = measure(ang); i += 1
-            elif resp == "redo":
-                if i > 0:
+            elif resp == "redo" or resp.startswith("redo "):
+                parts = resp.split()
+                target = None
+                if len(parts) > 1:
+                    try:
+                        target = float(parts[1])
+                    except ValueError:
+                        target = None
+                if target is not None:
+                    # redo a SPECIFIC angle: "redo 90" re-measures servo 90
+                    idx = next((j for j, a in enumerate(angles) if abs(a - target) < 0.51), None)
+                    if idx is None:
+                        print(f"  {target:.0f} is not in the angle list {angles}.")
+                    else:
+                        print(f"  redoing servo {angles[idx]:.0f} ...")
+                        results[idx] = measure(angles[idx])
+                elif i > 0:
+                    # bare "redo" -> redo the previous angle
                     print(f"  redoing servo {angles[i-1]:.0f} ...")
                     results[i - 1] = measure(angles[i - 1])
                 else:
