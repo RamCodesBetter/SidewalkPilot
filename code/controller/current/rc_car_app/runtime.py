@@ -56,11 +56,6 @@ from .config import (
     PULSES_PER_REVOLUTION,
     SPEED_SMOOTHING_ALPHA,
     STEERING_AXIS,
-    STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC,
-    STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG,
-    STEERING_CENTER_SETTLE_RELEASE_MIN_DEG,
-    STEERING_CENTER_SETTLE_MIN_KICK_DEG,
-    STEERING_SETTLE_PUSHBACK_COEFFS,
     STEERING_CENTER_SNAP_DEG,
     STEERING_SERVO_ACTUATION_RANGE_DEG,
     STEERING_SERVO_CENTER_OFFSET,
@@ -276,47 +271,6 @@ def center_steering(state):
 def model_is_series_3(model_choice) -> bool:
     """A Series 3 model choice looks like '3.x'."""
     return str(model_choice).strip().startswith("3")
-
-
-def steering_pushback_enabled(state, model_choice) -> bool:
-    """Pushback (the settle curve) runs in MANUAL always, and in AUTONOMOUS only
-    with a Series 3 model. Series 1/2 autonomous gets just the +12D trim and no
-    pushback (those models were trained/driven without it)."""
-    if not state.get("autonomous_mode", False):
-        return True
-    return model_is_series_3(model_choice)
-
-
-def settle_pushback_target(released_servo_degrees: float) -> float:
-    """Pushback servo target for a left release, from the measured quartic curve.
-    Released value clamped to [0, center]; output clamped to [center, range]."""
-    center = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
-    x = max(0.0, min(center, float(released_servo_degrees)))
-    y = 0.0
-    for power, coeff in enumerate(STEERING_SETTLE_PUSHBACK_COEFFS):
-        y += float(coeff) * (x ** power)
-    return max(center, min(float(STEERING_SERVO_ACTUATION_RANGE_DEG), y))
-
-
-def start_manual_steering_center_settle(state, previous_servo_degrees: float) -> None:
-    center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
-    previous = float(previous_servo_degrees)
-    # Settle only counters left-return hysteresis -> only on left releases.
-    if previous >= center_degrees:
-        state["steering_center_settle_until"] = 0.0
-        return
-    target_degrees = settle_pushback_target(previous)
-    if target_degrees - center_degrees < float(STEERING_CENTER_SETTLE_MIN_KICK_DEG):
-        # Near-center release: the curve asks for a negligible kick.
-        state["steering_center_settle_until"] = 0.0
-        return
-    settle_duration_sec = float(state.get("settle_duration_sec", STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC))
-    if settle_duration_sec <= 0.0:
-        state["steering_center_settle_until"] = 0.0
-        return
-    state["steering_settle_source_deg"] = previous
-    state["steering_center_settle_deg"] = clamp_servo_degrees(target_degrees)
-    state["steering_center_settle_until"] = time.time() + settle_duration_sec
 
 
 def get_dashboard_drive_mode(state) -> str:
@@ -1145,12 +1099,6 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
         return
     if now < metrics.auto_photo_next_time:
         return
-    # Don't capture a training frame during a steering-settle kick: the servo is
-    # physically mid-correction (toward 155) while the label is the logical
-    # center (90), so the image would be skewed vs its label. Defer without
-    # rescheduling so the photo fires the moment the kick ends (~0.25s).
-    if float(state.get("steering_center_settle_until", 0.0)) > now:
-        return
     # Don't capture while the car is stopped: stationary frames are near-
     # duplicates that bias the dataset and waste the image budget without
     # teaching steering. Require BOTH ~0 speed AND ~0 throttle so a flaky hall
@@ -1385,19 +1333,12 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     if abs(servo_degrees - center_degrees) < float(STEERING_CENTER_SNAP_DEG):
         servo_degrees = center_degrees
-    if (
-        not state["autonomous_mode"]
-        and servo_degrees == center_degrees
-        and current_time < float(state.get("steering_center_settle_until", 0.0))
-    ):
-        servo_degrees = clamp_servo_degrees(state.get("steering_center_settle_deg", center_degrees))
-    elif current_time >= float(state.get("steering_center_settle_until", 0.0)):
-        state["steering_center_settle_until"] = 0.0
 
     # --- IMU yaw-rate closed loop (mode "off" = no-op passthrough = baseline) ---
-    # When engaged it REPLACES the open-loop value above (incl. the settle kick),
-    # feeding the raw model/joystick command into the PID. Disengaged (off / not
-    # moving / lidar override) it leaves the open-loop servo_degrees untouched.
+    # The open-loop pushback/settle kick has been removed; the IMU loop now owns
+    # drift correction. When engaged it REPLACES the open-loop value above, feeding
+    # the raw model/joystick command into the PID. Disengaged (off / not moving /
+    # lidar override) it leaves the open-loop servo_degrees untouched.
     if yaw_controller is not None and yaw_controller.mode != "off":
         raw_command = clamp_servo_degrees(
             state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
@@ -1649,19 +1590,8 @@ def run(model_choice=None):
                             scaled_steer_val = apply_steering_deadzone(raw_steer_val)
                             center_servo_deg = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
                             if scaled_steer_val == 0.0:
-                                was_steering = abs(float(state.get("steer", 0.0))) > 0.0
-                                # Use the most-extreme deflection reached this turn (the
-                                # excursion peak) as the release angle, so the deepest part
-                                # of the turn sets the pushback.
-                                settle_source_degrees = float(
-                                    state.get("steering_last_noncenter_servo_deg", previous_servo_degrees)
-                                )
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
-                                if was_steering and steering_pushback_enabled(state, active_model_choice):
-                                    start_manual_steering_center_settle(state, settle_source_degrees)
-                                # Reset the peak so a later tiny nudge can't re-fire from a
-                                # stale far-side value.
                                 state["steering_last_noncenter_servo_deg"] = center_servo_deg
                             else:
                                 state["steer"] = scaled_steer_val
