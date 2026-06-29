@@ -512,15 +512,18 @@ class DashboardRenderer:
 
     def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         # On-device steering tuner. D-pad up/down picks the row (shown white),
-        # left/right adjusts. DELT = center trim. SAVE writes steering_tune.json (right).
+        # left/right dec/inc. DELT = center trim (signed deg). KP/KI/KD = yaw-PID
+        # gains shown x100 (050 = 0.50, 025 = 0.25, 005 = 0.05). No SAVE -- live.
         delta = float(payload.get("steering_trim_delta_deg", 0.0))
-        selected = max(0, min(1, int(payload.get("tune_selected_row", 0))))
-        saved = bool(payload.get("tune_saved", False))
-
-        save_value = ["Y", "E", "S"] if saved else [" ", "N", "O"]
+        kp = float(payload.get("yaw_kp", 0.0))
+        ki = float(payload.get("yaw_ki", 0.0))
+        kd = float(payload.get("yaw_kd", 0.0))
+        selected = max(0, min(3, int(payload.get("tune_selected_row", 0))))
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
-            (["S", "A", "V", "E", ":", *save_value], TEXT_GREEN if saved else ALERT_RED_DIM),
+            (["K", "P", ":", " ", *self._digits(round(kp * 100), 3)], ARROW_YELLOW),
+            (["K", "I", ":", " ", *self._digits(round(ki * 100), 3)], TEXT_GREEN),
+            (["K", "D", ":", " ", *self._digits(round(kd * 100), 3)], TEXT_ORANGE),
         ]
         for panel_row, (cells, color) in enumerate(rows):
             if panel_row == selected:
@@ -950,7 +953,9 @@ def main():
     steering_trim_total_deg = 90.0
     steering_center_offset = 0.0
     tune_selected_row = 0
-    tune_saved = False
+    yaw_kp = 0.0
+    yaw_ki = 0.0
+    yaw_kd = 0.0
     receiver_start_time = time.monotonic()
     last_packet_time = time.monotonic()
     have_received_payload = False
@@ -1010,7 +1015,9 @@ def main():
                 "steering_trim_total_deg": steering_trim_total_deg,
                 "steering_center_offset": steering_center_offset,
                 "tune_selected_row": tune_selected_row,
-                "tune_saved": tune_saved,
+                "yaw_kp": yaw_kp,
+                "yaw_ki": yaw_ki,
+                "yaw_kd": yaw_kd,
             },
             notification_rows,
         )
@@ -1073,7 +1080,9 @@ def main():
         nonlocal steering_trim_total_deg
         nonlocal steering_center_offset
         nonlocal tune_selected_row
-        nonlocal tune_saved
+        nonlocal yaw_kp
+        nonlocal yaw_ki
+        nonlocal yaw_kd
         nonlocal telemetry_stale_reported
 
         if payload.get("shutdown"):
@@ -1129,7 +1138,9 @@ def main():
             min(1.0, float(payload.get("steering_center_offset", steering_center_offset))),
         )
         tune_selected_row = max(0, min(4, int(payload.get("tune_selected_row", tune_selected_row))))
-        tune_saved = bool(payload.get("tune_saved", False))
+        yaw_kp = max(0.0, float(payload.get("yaw_kp", yaw_kp)))
+        yaw_ki = max(0.0, float(payload.get("yaw_ki", yaw_ki)))
+        yaw_kd = max(0.0, float(payload.get("yaw_kd", yaw_kd)))
         renderer.set_brightness(brightness_percent)
         max7219.set_brightness_percent(brightness_percent)
         notification = payload.get("dashboard_notification")

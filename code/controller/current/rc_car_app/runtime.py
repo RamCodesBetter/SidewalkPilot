@@ -67,8 +67,6 @@ from .config import (
     STEERING_YAW_PID_KI,
     STEERING_YAW_PID_KD,
     STEERING_YAW_PID_TURN_GAIN,
-    STEERING_YAW_PID_OUT_CLAMP_DEG,
-    STEERING_YAW_PID_INTEGRAL_CLAMP,
     STEERING_YAW_PID_STRAIGHT_BAND_DEG,
     STEERING_YAW_PID_MIN_SPEED_MPS,
     THROTTLE_AXIS,
@@ -456,8 +454,9 @@ def adjust_steering_center_trim(state, hardware, direction: int) -> None:
 
 # --- On-device steering tuning page (dashboard page 13 / v1h3) ---------------
 # Rows the d-pad up/down cycles through; left/right adjusts the selected one.
-TUNE_ROWS = ("DELT", "SAVE")
-STEERING_TUNE_PATH = os.path.join(os.path.dirname(__file__), "steering_tune.json")
+# TUNE page rows: trim + the live yaw-PID gains. D-pad up/down picks the row,
+# left/right dec/inc. No SAVE -- gains are tuned live in memory.
+TUNE_ROWS = ("DELT", "KP", "KI", "KD")
 
 
 def cycle_tuning_row(state, hat_y: int) -> None:
@@ -466,27 +465,23 @@ def cycle_tuning_row(state, hat_y: int) -> None:
     state["tune_selected_row"] = max(0, min(len(TUNE_ROWS) - 1, row - int(hat_y)))
 
 
-def save_steering_tune(state) -> None:
-    data = {
-        "trim_delta_deg": round(float(state.get("steering_trim_delta_deg", 0.0)), 2),
-    }
-    try:
-        with open(STEERING_TUNE_PATH, "w") as handle:
-            json.dump(data, handle, indent=2)
-        state["tune_saved_flash_until"] = time.time() + 2.0
-        print(f"Saved steering tune -> {STEERING_TUNE_PATH}: {data}")
-    except Exception as exc:
-        print(f"Failed to save steering tune: {exc}")
-
-
 def adjust_tuning_value(state, hardware, direction: int) -> None:
     row = int(state.get("tune_selected_row", 0))
     step = int(direction)
-    if row == 0:  # DELT — center trim, applied to the servo immediately.
+    if row == 0:    # DELT — center trim +/-1 deg, applied to the servo immediately.
         adjust_steering_center_trim(state, hardware, step)
-    elif row == 1:  # SAVE — d-pad right commits to steering_tune.json.
-        if step > 0:
-            save_steering_tune(state)
+    elif row == 1:  # KP +/-0.5
+        state["yaw_kp"] = max(0.0, round(float(state.get("yaw_kp", 0.0)) + step * 0.5, 3))
+        state["yaw_pid_reset"] = True
+        print(f"yaw Kp -> {state['yaw_kp']:.2f}")
+    elif row == 2:  # KI +/-0.25
+        state["yaw_ki"] = max(0.0, round(float(state.get("yaw_ki", 0.0)) + step * 0.25, 3))
+        state["yaw_pid_reset"] = True
+        print(f"yaw Ki -> {state['yaw_ki']:.2f}")
+    elif row == 3:  # KD +/-0.05
+        state["yaw_kd"] = max(0.0, round(float(state.get("yaw_kd", 0.0)) + step * 0.05, 3))
+        state["yaw_pid_reset"] = True
+        print(f"yaw Kd -> {state['yaw_kd']:.2f}")
 
 
 def dashboard_axis_direction(axis_value: float) -> int:
@@ -1333,6 +1328,13 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     # the raw model/joystick command into the PID. Disengaged (off / not moving /
     # lidar override) it leaves the open-loop servo_degrees untouched.
     if yaw_controller is not None and yaw_controller.mode != "off":
+        # apply the live-tuned gains (dashboard TUNE page) and reset on any change
+        yaw_controller.kp = float(state.get("yaw_kp", 0.0))
+        yaw_controller.ki = float(state.get("yaw_ki", 0.0))
+        yaw_controller.kd = float(state.get("yaw_kd", 0.0))
+        if state.get("yaw_pid_reset"):
+            yaw_controller.reset()
+            state["yaw_pid_reset"] = False
         raw_command = clamp_servo_degrees(
             state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
         )
@@ -1489,8 +1491,6 @@ def run(model_choice=None):
         mode=STEERING_YAW_PID_MODE,
         kp=STEERING_YAW_PID_KP, ki=STEERING_YAW_PID_KI, kd=STEERING_YAW_PID_KD,
         turn_gain_curv_per_deg=STEERING_YAW_PID_TURN_GAIN,
-        out_clamp_deg=STEERING_YAW_PID_OUT_CLAMP_DEG,
-        integral_clamp=STEERING_YAW_PID_INTEGRAL_CLAMP,
         straight_band_deg=STEERING_YAW_PID_STRAIGHT_BAND_DEG,
         min_speed_mps=STEERING_YAW_PID_MIN_SPEED_MPS,
         center_deg=float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0,
@@ -1873,7 +1873,9 @@ def run(model_choice=None):
                     steering_trim_total_deg=state["steering_trim_total_deg"],
                     steering_center_offset=state["steering_center_offset"],
                     tune_selected_row=state.get("tune_selected_row", 0),
-                    tune_saved=time.time() < float(state.get("tune_saved_flash_until", 0.0)),
+                    yaw_kp=state.get("yaw_kp", 0.0),
+                    yaw_ki=state.get("yaw_ki", 0.0),
+                    yaw_kd=state.get("yaw_kd", 0.0),
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""

@@ -127,9 +127,8 @@ class ImuReader:
 class YawController:
     """PID on yaw rate. compute() returns the logical servo angle to actually send."""
 
-    def __init__(self, mode="off", kp=0.50, ki=1.0, kd=0.05,
+    def __init__(self, mode="off", kp=0.0, ki=0.0, kd=0.0,
                  turn_gain_curv_per_deg=-0.66,
-                 out_clamp_deg=45.0, integral_clamp=40.0,
                  straight_band_deg=20.0, min_speed_mps=0.2,
                  center_deg=90.0, actuation_range_deg=180.0):
         self.mode = mode
@@ -137,8 +136,6 @@ class YawController:
         self.ki = ki
         self.kd = kd
         self.turn_gain = turn_gain_curv_per_deg
-        self.out_clamp = out_clamp_deg
-        self.i_clamp = integral_clamp
         self.straight_band = straight_band_deg
         self.min_speed = min_speed_mps
         self.center = center_deg
@@ -177,15 +174,14 @@ class YawController:
         # PURE PID (no feed-forward): the integral discovers the steady steering
         # offset needed to drive yaw to the target, so we don't hardcode a center.
         error = measured_yaw_dps - target_yaw          # + = too far left -> raise servo (steer right)
-        self._integral = _clamp(self._integral + error * dt, -self.i_clamp, self.i_clamp)
+        self._integral = self._integral + error * dt   # NO clamp -- infinite control
         if self._prev_error is None or dt <= 0.0:
             deriv = 0.0
         else:
             deriv = (error - self._prev_error) / dt
         self._prev_error = error
 
-        out = _clamp(self.kp * error + self.ki * self._integral + self.kd * deriv,
-                     -self.out_clamp, self.out_clamp)
+        out = self.kp * error + self.ki * self._integral + self.kd * deriv  # NO clamp
         self.engaged = True
         self.last_target_yaw = target_yaw
         self.last_correction = out

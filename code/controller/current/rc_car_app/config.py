@@ -80,14 +80,15 @@ STEERING_YAW_PID_MODE = "straight"
 STEERING_YAW_PID_PORT = "/dev/ttyAMA3"
 STEERING_YAW_PID_BAUD = 115200
 STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
-STEERING_YAW_PID_KP = 0.50
-STEERING_YAW_PID_KI = 1.0
-STEERING_YAW_PID_KD = 0.05
+# Gains START AT 0 — tune them LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows;
+# d-pad up/down picks the row, left/right dec/inc: DELT +/-1, KP +/-0.5, KI +/-0.25,
+# KD +/-0.05). No clamps anywhere: infinite control authority.
+STEERING_YAW_PID_KP = 0.0
+STEERING_YAW_PID_KI = 0.0
+STEERING_YAW_PID_KD = 0.0
 # Full-mode turn target: target_yaw[deg/s] = TURN_GAIN * (command - 90) * speed.
 # Negative because higher servo = right = negative yaw; ~-0.66 from the calib slope.
 STEERING_YAW_PID_TURN_GAIN = -0.66
-STEERING_YAW_PID_OUT_CLAMP_DEG = 45.0       # max +/- servo correction the loop can apply
-STEERING_YAW_PID_INTEGRAL_CLAMP = 40.0      # caps the integral so it can't wind up forever
 STEERING_YAW_PID_STRAIGHT_BAND_DEG = 20.0   # |cmd-90| within this -> "straight"; beyond -> passthrough
 STEERING_YAW_PID_MIN_SPEED_MPS = 0.2        # below this the loop disengages (yaw control meaningless)
 
@@ -252,6 +253,11 @@ def create_state():
         "steering_trim_total_deg": (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
         + (STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
         "steering_center_offset": STEERING_SERVO_CENTER_OFFSET,
+        # Live-tunable yaw PID gains (dashboard TUNE page). Start at config values (0).
+        "yaw_kp": float(STEERING_YAW_PID_KP),
+        "yaw_ki": float(STEERING_YAW_PID_KI),
+        "yaw_kd": float(STEERING_YAW_PID_KD),
+        "yaw_pid_reset": False,
         "steering_effective_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "throttle": 0.0,
         "brake": False,
