@@ -1337,8 +1337,10 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
             state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
         )
         imu_fresh = imu_reader is not None and imu_reader.is_fresh()
-        measured_yaw = imu_reader.get_yaw() if imu_fresh else 0.0
         speed_mps = float(getattr(metrics, "smoothed_speed_mph", 0.0)) * 0.44704  # mph -> m/s
+        if imu_reader is not None and speed_mps < 0.05:
+            imu_reader.note_stationary()   # stopped -> true yaw is 0, learn out the residual bias
+        measured_yaw = imu_reader.get_yaw() if imu_fresh else 0.0
         allow = not state.get("lidar_override_active", False)
         pid_servo = yaw_controller.compute(raw_command, measured_yaw, speed_mps, dt, allow=allow)
         if yaw_controller.engaged:

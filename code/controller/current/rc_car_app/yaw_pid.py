@@ -45,6 +45,7 @@ class ImuReader:
         self._med = collections.deque(maxlen=self._median_n)
         self._ema = 0.0
         self._yaw = 0.0
+        self._bias = 0.0          # residual gyro zero-offset, learned while stopped
         self._ok = False
         self._last_rx = 0.0
         self.lock = threading.Lock()
@@ -106,9 +107,17 @@ class ImuReader:
             pass
 
     def get_yaw(self):
-        """Latest filtered yaw rate (deg/s). 0.0 until the first sample."""
+        """Latest filtered yaw rate (deg/s), residual-bias corrected. + = LEFT."""
         with self.lock:
-            return self._yaw
+            return self._yaw - self._bias
+
+    def note_stationary(self):
+        """Call each loop while the car is KNOWN to be stopped: the true yaw is 0,
+        so slowly pull the bias toward the current reading. Cancels the residual
+        gyro zero-offset (e.g. the -2.2 dps the firmware bias-cal left behind) WITHOUT
+        a deadband, so small real turn rates still come through while driving."""
+        with self.lock:
+            self._bias = 0.98 * self._bias + 0.02 * self._yaw
 
     def is_fresh(self, max_age_sec=0.5):
         with self.lock:
