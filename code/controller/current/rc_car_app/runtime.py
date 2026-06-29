@@ -1337,7 +1337,8 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         raw_command = clamp_servo_degrees(
             state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
         )
-        measured_yaw = imu_reader.get_yaw() if (imu_reader is not None and imu_reader.is_fresh()) else 0.0
+        imu_fresh = imu_reader is not None and imu_reader.is_fresh()
+        measured_yaw = imu_reader.get_yaw() if imu_fresh else 0.0
         speed_mps = float(getattr(metrics, "smoothed_speed_mph", 0.0)) * 0.44704  # mph -> m/s
         allow = not state.get("lidar_override_active", False)
         pid_servo = yaw_controller.compute(raw_command, measured_yaw, speed_mps, dt, allow=allow)
@@ -1347,6 +1348,13 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         state["yaw_pid_engaged"] = yaw_controller.engaged
         state["yaw_pid_target_yaw_dps"] = yaw_controller.last_target_yaw
         state["yaw_pid_correction_deg"] = yaw_controller.last_correction
+        # Throttled diagnostics: RC_CAR_YAW_PID_DEBUG=1 prints why it is/ isn't correcting.
+        if os.environ.get("RC_CAR_YAW_PID_DEBUG") == "1" and current_time >= float(state.get("_yawdbg_next", 0.0)):
+            state["_yawdbg_next"] = current_time + 0.5
+            print(f"[yawpid] mode={yaw_controller.mode} imu_fresh={imu_fresh} "
+                  f"yaw={measured_yaw:+6.1f}dps speed={speed_mps:4.2f}m/s cmd={raw_command:5.1f} "
+                  f"-> out={servo_degrees:5.1f} engaged={yaw_controller.engaged} "
+                  f"target_yaw={yaw_controller.last_target_yaw:+6.1f} corr={yaw_controller.last_correction:+5.1f}")
 
     state["steering_effective_servo_deg"] = servo_degrees
     servo_write_ok = write_steering_servo_safely(state, metrics, hardware, servo_degrees)
