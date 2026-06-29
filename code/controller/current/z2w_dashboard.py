@@ -510,20 +510,40 @@ class DashboardRenderer:
         self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
 
+    def _gain_cells(self, formatted: str) -> List[str]:
+        """'000.5' -> ['0','0','0.','5'] : the decimal point rides on the digit cell
+        before it, so a 4-digit gain + dot fits in 4 cells (matches the TUNE layout)."""
+        cells: List[str] = []
+        i = 0
+        while i < len(formatted):
+            ch = formatted[i]
+            if ch == ".":
+                i += 1
+                continue
+            if i + 1 < len(formatted) and formatted[i + 1] == ".":
+                cells.append(ch + ".")
+                i += 2
+            else:
+                cells.append(ch)
+                i += 1
+        return cells
+
     def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # On-device steering tuner. D-pad up/down picks the row (shown white),
-        # left/right dec/inc. DELT = center trim (signed deg). KP/KI/KD = yaw-PID
-        # gains shown x100 (050 = 0.50, 025 = 0.25, 005 = 0.05). No SAVE -- live.
+        # TUNE page. D-pad up/down picks the row (white), left/right dec/inc.
+        #   DELT : +/- N N     center trim (deg)
+        #   kP   :  d d d. d   yaw Kp   (dot after 3rd digit)
+        #   kI   :  d d. d d   yaw Ki   (dot after 2nd digit)
+        #   kD   :  d. d d d   yaw Kd   (dot after 1st digit)
         delta = float(payload.get("steering_trim_delta_deg", 0.0))
-        kp = float(payload.get("yaw_kp", 0.0))
-        ki = float(payload.get("yaw_ki", 0.0))
-        kd = float(payload.get("yaw_kd", 0.0))
+        kp = min(999.9, max(0.0, float(payload.get("yaw_kp", 0.0))))
+        ki = min(99.99, max(0.0, float(payload.get("yaw_ki", 0.0))))
+        kd = min(9.999, max(0.0, float(payload.get("yaw_kd", 0.0))))
         selected = max(0, min(3, int(payload.get("tune_selected_row", 0))))
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
-            (["K", "P", ":", " ", *self._digits(round(kp * 100), 3)], ARROW_YELLOW),
-            (["K", "I", ":", " ", *self._digits(round(ki * 100), 3)], TEXT_GREEN),
-            (["K", "D", ":", " ", *self._digits(round(kd * 100), 3)], TEXT_ORANGE),
+            (["k", "P", ":", " ", *self._gain_cells(f"{kp:05.1f}")], ARROW_YELLOW),
+            (["k", "I", ":", " ", *self._gain_cells(f"{ki:05.2f}")], TEXT_GREEN),
+            (["k", "D", ":", " ", *self._gain_cells(f"{kd:05.3f}")], TEXT_ORANGE),
         ]
         for panel_row, (cells, color) in enumerate(rows):
             if panel_row == selected:
