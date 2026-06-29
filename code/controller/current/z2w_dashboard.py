@@ -36,7 +36,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 14
+DASHBOARD_PAGE_COUNT = 15
 TELEMETRY_STALE_DISPLAY_SEC = 4.0
 
 DIGIT_BLUE: Color = (0, 0, 255)
@@ -196,6 +196,18 @@ class DashboardRenderer:
         base_y = (row_index * CELL_SIZE) + y_offset_px
         self._set_pixel(base_x + 7, base_y + 4, color)
 
+    def _draw_vertical_bar_at(self, row_index: int, col_index: int, color: Color, y_offset_px: int = 0):
+        base_x = col_index * CELL_SIZE
+        base_y = (row_index * CELL_SIZE) + y_offset_px
+        for row in range(1, 7):
+            self._set_pixel(base_x + 3, base_y + row, color)
+
+    def _draw_slash_at(self, row_index: int, col_index: int, color: Color, y_offset_px: int = 0):
+        base_x = col_index * CELL_SIZE
+        base_y = (row_index * CELL_SIZE) + y_offset_px
+        for i in range(6):
+            self._set_pixel(base_x + 1 + i, base_y + 6 - i, color)
+
     def _draw_notification_row(self, row_index: int, cells: Sequence[str], color: Color, y_offset_px: int = 0):
         for col_index, raw_cell in enumerate(list(cells)[:8]):
             cell = str(raw_cell)
@@ -203,6 +215,12 @@ class DashboardRenderer:
                 continue
             if cell == ".":
                 self._draw_decimal_point_at(row_index, col_index, color, y_offset_px)
+                continue
+            if cell == "|":
+                self._draw_vertical_bar_at(row_index, col_index, color, y_offset_px)
+                continue
+            if cell == "/":
+                self._draw_slash_at(row_index, col_index, color, y_offset_px)
                 continue
             if cell == "10":
                 self._draw_glyph_at(self.digit_map.get("10", self.letter_map[" "]), row_index, col_index, color, y_offset_px)
@@ -528,6 +546,33 @@ class DashboardRenderer:
                 i += 1
         return cells
 
+    def _signed_dd_d(self, value: float) -> List[str]:
+        """Signed value -> 4 cells: sign, tens, ones(with dot), tenths  (e.g. +12.3)."""
+        sign = "-" if float(value) < 0 else "+"
+        s = f"{min(99.9, abs(float(value))):04.1f}"   # 'dd.d'
+        return [sign, s[0], s[1] + ".", s[3]]
+
+    def _d_dd(self, value: float) -> List[str]:
+        """Unsigned 0..9.99 -> 3 cells: ones(with dot), tenths, hundredths (e.g. 1.42)."""
+        s = f"{min(9.99, max(0.0, float(value))):.2f}"   # 'd.dd'
+        return [s[0] + ".", s[2], s[3]]
+
+    def _draw_yaw_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        # v1h4 yaw-PID telemetry.
+        #   YAW : +/- dd.d   current yaw rate (deg/s)
+        #   SPD :     d.dd   speed (m/s)
+        #   COR : +/- dd.d   PID correction (deg)
+        #   /III|OOO         input steer | output steer (servo deg)
+        yaw = float(payload.get("yaw_rate_dps", 0.0))
+        spd_ms = float(payload.get("speed_mph", 0.0)) * 0.44704      # telemetry is mph -> show m/s
+        cor = float(payload.get("yaw_pid_correction_deg", 0.0))
+        in_cells = self._format_three_digits(float(payload.get("steering_cmd_deg", 90.0)))
+        out_cells = self._format_three_digits(float(payload.get("servo_deg", 90.0)))
+        self._draw_text_row(0, ["Y", "A", "W", ":", *self._signed_dd_d(yaw)], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["S", "P", "D", ":", " ", *self._d_dd(spd_ms)], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["C", "O", "R", ":", *self._signed_dd_d(cor)], ARROW_YELLOW, y_offset_px)
+        self._draw_text_row(3, ["/", *in_cells, "|", *out_cells], TEXT_ORANGE, y_offset_px)
+
     def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         # TUNE page. D-pad up/down picks the row (white), left/right dec/inc.
         #   DELT : +/- N N     center trim (deg)
@@ -686,6 +731,9 @@ class DashboardRenderer:
             return
         if page == 14:
             self._draw_lidar_page(payload, y_offset_px)
+            return
+        if page == 15:
+            self._draw_yaw_page(payload, y_offset_px)
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),
@@ -954,6 +1002,9 @@ def main():
     dashboard_page = 1
     dashboard_page_transition = ""
     servo_deg = 90.0
+    yaw_rate_dps = 0.0
+    yaw_pid_correction_deg = 0.0
+    steering_cmd_deg = 90.0
     throttle_percent = 0
     brake_percent = 0
     drive_mode = "MAN"
@@ -1016,6 +1067,9 @@ def main():
                 "dashboard_page": dashboard_page,
                 "dashboard_page_transition": dashboard_page_transition,
                 "servo_deg": servo_deg,
+                "yaw_rate_dps": yaw_rate_dps,
+                "yaw_pid_correction_deg": yaw_pid_correction_deg,
+                "steering_cmd_deg": steering_cmd_deg,
                 "throttle_percent": throttle_percent,
                 "brake_percent": brake_percent,
                 "drive_mode": drive_mode,
@@ -1081,6 +1135,9 @@ def main():
         nonlocal dashboard_page
         nonlocal dashboard_page_transition
         nonlocal servo_deg
+        nonlocal yaw_rate_dps
+        nonlocal yaw_pid_correction_deg
+        nonlocal steering_cmd_deg
         nonlocal throttle_percent
         nonlocal brake_percent
         nonlocal drive_mode
@@ -1122,6 +1179,9 @@ def main():
         dashboard_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", dashboard_page))))
         dashboard_page_transition = str(payload.get("dashboard_page_transition", ""))[:8]
         servo_deg = max(0.0, min(180.0, float(payload.get("servo_deg", servo_deg))))
+        yaw_rate_dps = float(payload.get("yaw_rate_dps", yaw_rate_dps))
+        yaw_pid_correction_deg = float(payload.get("yaw_pid_correction_deg", yaw_pid_correction_deg))
+        steering_cmd_deg = max(0.0, min(180.0, float(payload.get("steering_cmd_deg", steering_cmd_deg))))
         throttle_percent = max(0, min(100, int(payload.get("throttle_percent", throttle_percent))))
         brake_percent = max(0, min(100, int(payload.get("brake_percent", brake_percent))))
         drive_mode = str(payload.get("drive_mode", drive_mode)).upper()[:3]
