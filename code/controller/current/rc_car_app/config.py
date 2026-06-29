@@ -89,7 +89,9 @@ STEERING_YAW_PID_KD = 0.0
 # Full-mode turn target: target_yaw[deg/s] = TURN_GAIN * (command - 90) * speed.
 # Negative because higher servo = right = negative yaw; ~-0.66 from the calib slope.
 STEERING_YAW_PID_TURN_GAIN = -0.66
-STEERING_YAW_PID_STRAIGHT_BAND_DEG = 20.0   # |cmd-90| within this -> "straight"; beyond -> passthrough
+STEERING_YAW_PID_STRAIGHT_BAND_DEG = 5.0    # |cmd-90| within this -> hold yaw=0; beyond -> passthrough
+                                            # (keep small: a wide band makes the loop fight your TURNS,
+                                            #  e.g. at servo 70 it tried to cancel the yaw you commanded -> wag)
 STEERING_YAW_PID_MIN_SPEED_MPS = 0.2        # below this the loop disengages (yaw control meaningless)
 
 # --- Live-tunable steering overrides (written by the on-device tuning page) ---
