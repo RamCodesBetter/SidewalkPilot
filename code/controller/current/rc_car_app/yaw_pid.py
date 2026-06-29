@@ -182,8 +182,8 @@ class YawController:
         measured_yaw_dps: filtered yaw rate (+ = left). speed_mps: forward speed.
         allow: external gate (autonomous-or-active-steering, no AEB/override/fault).
         Returns the logical angle to send to the servo."""
-        # Disengaged -> exact passthrough so "off" is a true revert.
-        if self.mode == "off" or not allow or speed_mps < self.min_speed:
+        # Off / reverse / lidar-override -> exact passthrough (no F at all).
+        if self.mode == "off" or not allow:
             self.reset()
             return commanded_deg
 
@@ -207,6 +207,14 @@ class YawController:
         else:  # "full" -- shift the stick into the calibrated frame, read target off curvature(x)
             ff_servo = _clamp(commanded_deg + (self.ff_center - self.center), 0.0, self.range)
             target_yaw = self._curvature(ff_servo) * speed_mps          # deg/s the car should rotate
+
+        # Below the engage speed: PRE-POSITION the wheels at F (so there's no left
+        # lurch on launch) but DON'T run the PID -- yaw is meaningless near-standstill,
+        # and the integral must not wind while stopped.
+        if speed_mps < self.min_speed:
+            self.reset()
+            self.last_target_yaw = target_yaw
+            return _clamp(ff_servo, 0.0, self.range)
 
         error = measured_yaw_dps - target_yaw          # + = too far left -> raise servo (steer right)
         self._integral = self._integral + error * dt   # NO clamp -- infinite control
