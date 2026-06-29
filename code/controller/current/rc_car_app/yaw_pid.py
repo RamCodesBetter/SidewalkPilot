@@ -118,16 +118,15 @@ class ImuReader:
 class YawController:
     """PID on yaw rate. compute() returns the logical servo angle to actually send."""
 
-    def __init__(self, mode="off", kp=0.30, ki=0.05, kd=0.02,
-                 ff_shift_deg=20.0, turn_gain_curv_per_deg=-0.66,
-                 out_clamp_deg=25.0, integral_clamp=200.0,
+    def __init__(self, mode="off", kp=0.50, ki=1.0, kd=0.05,
+                 turn_gain_curv_per_deg=-0.66,
+                 out_clamp_deg=45.0, integral_clamp=40.0,
                  straight_band_deg=20.0, min_speed_mps=0.2,
                  center_deg=90.0, actuation_range_deg=180.0):
         self.mode = mode
         self.kp = kp
         self.ki = ki
         self.kd = kd
-        self.ff_shift = ff_shift_deg
         self.turn_gain = turn_gain_curv_per_deg
         self.out_clamp = out_clamp_deg
         self.i_clamp = integral_clamp
@@ -163,12 +162,11 @@ class YawController:
                 self.reset()
                 return commanded_deg
             target_yaw = 0.0
-            ff = self.center + self.ff_shift
         else:  # "full"
-            target_curv = self.turn_gain * (commanded_deg - self.center)   # deg/m (sign in turn_gain)
-            target_yaw = target_curv * speed_mps                            # deg/s
-            ff = commanded_deg + self.ff_shift
+            target_yaw = self.turn_gain * (commanded_deg - self.center) * speed_mps  # deg/s
 
+        # PURE PID (no feed-forward): the integral discovers the steady steering
+        # offset needed to drive yaw to the target, so we don't hardcode a center.
         error = measured_yaw_dps - target_yaw          # + = too far left -> raise servo (steer right)
         self._integral = _clamp(self._integral + error * dt, -self.i_clamp, self.i_clamp)
         if self._prev_error is None or dt <= 0.0:
@@ -182,4 +180,4 @@ class YawController:
         self.engaged = True
         self.last_target_yaw = target_yaw
         self.last_correction = out
-        return _clamp(ff + out, 0.0, self.range)
+        return _clamp(commanded_deg + out, 0.0, self.range)

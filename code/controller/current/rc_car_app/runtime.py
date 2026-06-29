@@ -66,7 +66,6 @@ from .config import (
     STEERING_YAW_PID_KP,
     STEERING_YAW_PID_KI,
     STEERING_YAW_PID_KD,
-    STEERING_YAW_PID_FF_SHIFT_DEG,
     STEERING_YAW_PID_TURN_GAIN,
     STEERING_YAW_PID_OUT_CLAMP_DEG,
     STEERING_YAW_PID_INTEGRAL_CLAMP,
@@ -1487,7 +1486,6 @@ def run(model_choice=None):
     yaw_controller = YawController(
         mode=STEERING_YAW_PID_MODE,
         kp=STEERING_YAW_PID_KP, ki=STEERING_YAW_PID_KI, kd=STEERING_YAW_PID_KD,
-        ff_shift_deg=STEERING_YAW_PID_FF_SHIFT_DEG,
         turn_gain_curv_per_deg=STEERING_YAW_PID_TURN_GAIN,
         out_clamp_deg=STEERING_YAW_PID_OUT_CLAMP_DEG,
         integral_clamp=STEERING_YAW_PID_INTEGRAL_CLAMP,
