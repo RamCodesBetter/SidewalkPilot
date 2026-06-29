@@ -538,7 +538,7 @@ def dashboard_axis_turn_ready(
 # Hold-to-repeat for the TUNE page left/right adjust. Start matches the d-pad
 # default; interval is a touch slower so values step up gently while held.
 TUNE_ADJUST_REPEAT_START_SEC = 0.6
-TUNE_ADJUST_REPEAT_INTERVAL_SEC = 0.3
+TUNE_ADJUST_REPEAT_INTERVAL_SEC = 0.15
 
 
 def dpad_x_repeat_direction(state, metrics, repeat_start_sec: float, repeat_interval_sec: float) -> int:
