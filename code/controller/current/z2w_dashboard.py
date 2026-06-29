@@ -580,13 +580,13 @@ class DashboardRenderer:
         #   kI   :  d d. d d   yaw Ki   (dot after 2nd digit)
         #   kD   :  d. d d d   yaw Kd   (dot after 1st digit)
         delta = float(payload.get("steering_trim_delta_deg", 0.0))
-        kp = min(999.9, max(0.0, float(payload.get("yaw_kp", 0.0))))
+        kp = min(99.99, max(0.0, float(payload.get("yaw_kp", 0.0))))
         ki = min(99.99, max(0.0, float(payload.get("yaw_ki", 0.0))))
         kd = min(9.999, max(0.0, float(payload.get("yaw_kd", 0.0))))
         selected = max(0, min(3, int(payload.get("tune_selected_row", 0))))
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
-            (["k", "P", ":", " ", *self._gain_cells(f"{kp:05.1f}")], ARROW_YELLOW),
+            (["k", "P", ":", " ", *self._gain_cells(f"{kp:05.2f}")], ARROW_YELLOW),
             (["k", "I", ":", " ", *self._gain_cells(f"{ki:05.2f}")], TEXT_GREEN),
             (["k", "D", ":", " ", *self._gain_cells(f"{kd:05.3f}")], TEXT_ORANGE),
         ]

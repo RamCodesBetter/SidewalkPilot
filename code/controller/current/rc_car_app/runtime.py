@@ -472,8 +472,8 @@ def adjust_tuning_value(state, hardware, direction: int) -> None:
     step = int(direction)
     if row == 0:    # DELT — center trim +/-1 deg, applied to the servo immediately.
         adjust_steering_center_trim(state, hardware, step)
-    elif row == 1:  # KP +/-0.5
-        state["yaw_kp"] = max(0.0, round(float(state.get("yaw_kp", 0.0)) + step * 0.5, 3))
+    elif row == 1:  # KP +/-0.25
+        state["yaw_kp"] = max(0.0, round(float(state.get("yaw_kp", 0.0)) + step * 0.25, 3))
         state["yaw_pid_reset"] = True
         print(f"yaw Kp -> {state['yaw_kp']:.2f}")
     elif row == 2:  # KI +/-0.25
