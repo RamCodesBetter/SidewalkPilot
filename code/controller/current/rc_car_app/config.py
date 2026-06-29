@@ -93,7 +93,10 @@ STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5
 STEERING_YAW_PID_STRAIGHT_BAND_DEG = 5.0    # |cmd-90| within this -> hold yaw=0; beyond -> passthrough
                                             # (keep small: a wide band makes the loop fight your TURNS,
                                             #  e.g. at servo 70 it tried to cancel the yaw you commanded -> wag)
-STEERING_YAW_PID_MIN_SPEED_MPS = 0.2        # below this the loop disengages (yaw control meaningless)
+STEERING_YAW_PID_MIN_SPEED_MPS = 0.05       # below this the loop disengages. 0.05 = the clean handoff
+                                            # with the gyro bias auto-zero (which runs below 0.05 m/s);
+                                            # going lower would let the loop engage while bias is still
+                                            # being learned -> corrupts the zero. Top speed ~1.48 m/s.
 
 # --- Live-tunable steering overrides (written by the on-device tuning page) ---
 # steering_tune.json IS the persisted defaults: if present it overrides the four
