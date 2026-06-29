@@ -344,6 +344,9 @@ class Metrics:
     dpad_y_direction: int = 0
     dpad_y_hold_since: float = 0.0
     dpad_y_last_repeat_time: float = 0.0
+    dpad_x_direction: int = 0
+    dpad_x_hold_since: float = 0.0
+    dpad_x_last_repeat_time: float = 0.0
     dashboard_page_transition: str = ""
     dashboard_cpu_temp_c: float = 0.0
     dashboard_cpu_temp_last_sample_time: float = 0.0

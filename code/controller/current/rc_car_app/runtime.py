@@ -535,6 +535,36 @@ def dashboard_axis_turn_ready(
     return 0
 
 
+# Hold-to-repeat for the TUNE page left/right adjust. Start matches the d-pad
+# default; interval is a touch slower so values step up gently while held.
+TUNE_ADJUST_REPEAT_START_SEC = 0.6
+TUNE_ADJUST_REPEAT_INTERVAL_SEC = 0.3
+
+
+def dpad_x_repeat_direction(state, metrics, repeat_start_sec: float, repeat_interval_sec: float) -> int:
+    direction = int(state.get("dpad_x_value", 0))
+    if direction == 0:
+        metrics.dpad_x_direction = 0
+        metrics.dpad_x_hold_since = 0.0
+        metrics.dpad_x_last_repeat_time = 0.0
+        return 0
+
+    now = time.monotonic()
+    if direction != metrics.dpad_x_direction:
+        metrics.dpad_x_direction = direction
+        metrics.dpad_x_hold_since = now
+        metrics.dpad_x_last_repeat_time = now
+        return 0
+
+    if now - metrics.dpad_x_hold_since < repeat_start_sec:
+        return 0
+    if now - metrics.dpad_x_last_repeat_time < repeat_interval_sec:
+        return 0
+
+    metrics.dpad_x_last_repeat_time = now
+    return direction
+
+
 def dpad_y_repeat_direction(state, metrics, repeat_start_sec: float, repeat_interval_sec: float) -> int:
     direction = int(state.get("dpad_y_value", 0))
     if direction == 0:
@@ -1719,6 +1749,9 @@ def run(model_choice=None):
                     hat_x, hat_y = event.value
                     current_dashboard_page = int(state.get("dashboard_page", 1))
                     on_tuning_page = current_dashboard_page == STEERING_TRIM_DASHBOARD_PAGE
+                    # Track hat_x on the tuning page so hold-to-repeat can keep
+                    # adjusting the selected value; clear it elsewhere/on release.
+                    state["dpad_x_value"] = int(hat_x) if on_tuning_page else 0
                     if hat_x:
                         if on_tuning_page:
                             adjust_tuning_value(state, hardware, int(hat_x))
@@ -1743,6 +1776,16 @@ def run(model_choice=None):
                             dashboard_sender,
                             repeated=False,
                         )
+
+            # Hold d-pad left/right on the TUNE page -> keep adjusting the value.
+            if int(state.get("dashboard_page", 1)) == STEERING_TRIM_DASHBOARD_PAGE:
+                tune_x_repeat = dpad_x_repeat_direction(
+                    state, metrics, TUNE_ADJUST_REPEAT_START_SEC, TUNE_ADJUST_REPEAT_INTERVAL_SEC
+                )
+                if tune_x_repeat:
+                    adjust_tuning_value(state, hardware, tune_x_repeat)
+            else:
+                state["dpad_x_value"] = 0
 
             nav_letter_repeat = (
                 int(state.get("dashboard_page", 1)) == 5
