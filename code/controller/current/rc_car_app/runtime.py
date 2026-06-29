@@ -472,12 +472,12 @@ def adjust_tuning_value(state, hardware, direction: int) -> None:
     step = int(direction)
     if row == 0:    # DELT — center trim +/-1 deg, applied to the servo immediately.
         adjust_steering_center_trim(state, hardware, step)
-    elif row == 1:  # KP +/-0.25
-        state["yaw_kp"] = max(0.0, round(float(state.get("yaw_kp", 0.0)) + step * 0.25, 3))
+    elif row == 1:  # KP +/-0.05
+        state["yaw_kp"] = max(0.0, round(float(state.get("yaw_kp", 0.0)) + step * 0.05, 3))
         state["yaw_pid_reset"] = True
         print(f"yaw Kp -> {state['yaw_kp']:.2f}")
-    elif row == 2:  # KI +/-0.25
-        state["yaw_ki"] = max(0.0, round(float(state.get("yaw_ki", 0.0)) + step * 0.25, 3))
+    elif row == 2:  # KI +/-0.05
+        state["yaw_ki"] = max(0.0, round(float(state.get("yaw_ki", 0.0)) + step * 0.05, 3))
         state["yaw_pid_reset"] = True
         print(f"yaw Ki -> {state['yaw_ki']:.2f}")
     elif row == 3:  # KD +/-0.05
@@ -540,7 +540,7 @@ def dashboard_axis_turn_ready(
 # Hold-to-repeat for the TUNE page left/right adjust. Start matches the d-pad
 # default; interval is a touch slower so values step up gently while held.
 TUNE_ADJUST_REPEAT_START_SEC = 0.6
-TUNE_ADJUST_REPEAT_INTERVAL_SEC = 0.15
+TUNE_ADJUST_REPEAT_INTERVAL_SEC = 0.075
 
 
 def dpad_x_repeat_direction(state, metrics, repeat_start_sec: float, repeat_interval_sec: float) -> int:
