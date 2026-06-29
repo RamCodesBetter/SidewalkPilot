@@ -265,7 +265,6 @@ def joystick_steer_to_servo_degrees(normalized_value: float) -> float:
 def center_steering(state):
     state["steer"] = 0.0
     state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
-    state["steering_center_settle_until"] = 0.0
 
 
 def model_is_series_3(model_choice) -> bool:
@@ -458,7 +457,7 @@ def adjust_steering_center_trim(state, hardware, direction: int) -> None:
 
 # --- On-device steering tuning page (dashboard page 13 / v1h3) ---------------
 # Rows the d-pad up/down cycles through; left/right adjusts the selected one.
-TUNE_ROWS = ("DELT", "PBSC", "SAVE")
+TUNE_ROWS = ("DELT", "SAVE")
 STEERING_TUNE_PATH = os.path.join(os.path.dirname(__file__), "steering_tune.json")
 
 
@@ -471,7 +470,6 @@ def cycle_tuning_row(state, hat_y: int) -> None:
 def save_steering_tune(state) -> None:
     data = {
         "trim_delta_deg": round(float(state.get("steering_trim_delta_deg", 0.0)), 2),
-        "settle_duration_sec": round(float(state.get("settle_duration_sec", 0.25)), 2),
     }
     try:
         with open(STEERING_TUNE_PATH, "w") as handle:
@@ -487,11 +485,7 @@ def adjust_tuning_value(state, hardware, direction: int) -> None:
     step = int(direction)
     if row == 0:  # DELT — center trim, applied to the servo immediately.
         adjust_steering_center_trim(state, hardware, step)
-    elif row == 1:  # PBSC — settle hold duration (seconds).
-        state["settle_duration_sec"] = max(0.0, min(2.0,
-            round(float(state.get("settle_duration_sec", 0.25)) + step * 0.05, 2)))
-        print(f"Settle duration -> {state['settle_duration_sec']:.2f}s")
-    elif row == 2:  # SAVE — d-pad right commits to steering_tune.json.
+    elif row == 1:  # SAVE — d-pad right commits to steering_tune.json.
         if step > 0:
             save_steering_tune(state)
 
@@ -1592,22 +1586,9 @@ def run(model_choice=None):
                             if scaled_steer_val == 0.0:
                                 state["steer"] = 0.0
                                 state["steering_servo_deg"] = center_servo_deg
-                                state["steering_last_noncenter_servo_deg"] = center_servo_deg
                             else:
                                 state["steer"] = scaled_steer_val
                                 state["steering_servo_deg"] = joystick_steer_to_servo_degrees(state["steer"])
-                                current_servo_deg = state["steering_servo_deg"]
-                                peak_servo_deg = float(
-                                    state.get("steering_last_noncenter_servo_deg", center_servo_deg)
-                                )
-                                # Reset the peak when the stick crosses center (sign flip)
-                                # so each side's excursion is tracked independently.
-                                if (current_servo_deg - center_servo_deg) * (peak_servo_deg - center_servo_deg) < 0.0:
-                                    peak_servo_deg = center_servo_deg
-                                if abs(current_servo_deg - center_servo_deg) >= abs(peak_servo_deg - center_servo_deg):
-                                    peak_servo_deg = current_servo_deg
-                                state["steering_last_noncenter_servo_deg"] = peak_servo_deg
-                                state["steering_center_settle_until"] = 0.0
                     elif SHARED_TRIGGER_AXIS and event.axis == THROTTLE_AXIS:
                         state["throttle"], state["brake_force"] = split_shared_trigger_axis(event.value)
                         state["manual_brake_force"] = state["brake_force"]
@@ -1883,9 +1864,6 @@ def run(model_choice=None):
                     steering_trim_delta_deg=state["steering_trim_delta_deg"],
                     steering_trim_total_deg=state["steering_trim_total_deg"],
                     steering_center_offset=state["steering_center_offset"],
-                    settle_target_deg=state.get("settle_target_deg", 90.0),
-                    settle_duration_sec=state.get("settle_duration_sec", 0.0),
-                    settle_trigger_deg=state.get("settle_trigger_deg", 0.0),
                     tune_selected_row=state.get("tune_selected_row", 0),
                     tune_saved=time.time() < float(state.get("tune_saved_flash_until", 0.0)),
                 )

@@ -512,18 +512,14 @@ class DashboardRenderer:
 
     def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         # On-device steering tuner. D-pad up/down picks the row (shown white),
-        # left/right adjusts. DELT = center trim, PBSC = settle hold seconds
-        # (shown x100, so 025 = 0.25 s). SAVE writes steering_tune.json (right).
-        # The settle overshoot itself comes from the measured pushback curve.
+        # left/right adjusts. DELT = center trim. SAVE writes steering_tune.json (right).
         delta = float(payload.get("steering_trim_delta_deg", 0.0))
-        duration = float(payload.get("settle_duration_sec", 0.0))
-        selected = max(0, min(2, int(payload.get("tune_selected_row", 0))))
+        selected = max(0, min(1, int(payload.get("tune_selected_row", 0))))
         saved = bool(payload.get("tune_saved", False))
 
         save_value = ["Y", "E", "S"] if saved else [" ", "N", "O"]
         rows = [
             (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
-            (["P", "B", "S", "C", ":", *self._digits(round(duration * 100), 3)], ARROW_YELLOW),
             (["S", "A", "V", "E", ":", *save_value], TEXT_GREEN if saved else ALERT_RED_DIM),
         ]
         for panel_row, (cells, color) in enumerate(rows):
@@ -953,9 +949,6 @@ def main():
     steering_trim_delta_deg = 0.0
     steering_trim_total_deg = 90.0
     steering_center_offset = 0.0
-    settle_target_deg = 90.0
-    settle_duration_sec = 0.0
-    settle_trigger_deg = 0.0
     tune_selected_row = 0
     tune_saved = False
     receiver_start_time = time.monotonic()
@@ -1016,9 +1009,6 @@ def main():
                 "steering_trim_delta_deg": steering_trim_delta_deg,
                 "steering_trim_total_deg": steering_trim_total_deg,
                 "steering_center_offset": steering_center_offset,
-                "settle_target_deg": settle_target_deg,
-                "settle_duration_sec": settle_duration_sec,
-                "settle_trigger_deg": settle_trigger_deg,
                 "tune_selected_row": tune_selected_row,
                 "tune_saved": tune_saved,
             },
@@ -1082,9 +1072,6 @@ def main():
         nonlocal steering_trim_delta_deg
         nonlocal steering_trim_total_deg
         nonlocal steering_center_offset
-        nonlocal settle_target_deg
-        nonlocal settle_duration_sec
-        nonlocal settle_trigger_deg
         nonlocal tune_selected_row
         nonlocal tune_saved
         nonlocal telemetry_stale_reported
@@ -1141,9 +1128,6 @@ def main():
             -1.0,
             min(1.0, float(payload.get("steering_center_offset", steering_center_offset))),
         )
-        settle_target_deg = max(0.0, min(180.0, float(payload.get("settle_target_deg", settle_target_deg))))
-        settle_duration_sec = max(0.0, min(9.99, float(payload.get("settle_duration_sec", settle_duration_sec))))
-        settle_trigger_deg = max(0.0, min(99.0, float(payload.get("settle_trigger_deg", settle_trigger_deg))))
         tune_selected_row = max(0, min(4, int(payload.get("tune_selected_row", tune_selected_row))))
         tune_saved = bool(payload.get("tune_saved", False))
         renderer.set_brightness(brightness_percent)

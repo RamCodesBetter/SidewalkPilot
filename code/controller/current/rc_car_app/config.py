@@ -65,68 +65,16 @@ STEERING_SERVO_CENTER_OFFSET = float(
 )
 STEERING_SERVO_CENTER_PRELOAD = 0.0
 STEERING_SERVO_CENTER_PRELOAD_WINDOW = 0.0
-STEERING_CENTER_SETTLE_OVERSHOOT_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_OVERSHOOT_DEG", "4.0"))
-STEERING_CENTER_SETTLE_LEFT_OVERSHOOT_DEG = float(
-    os.environ.get(
-        "RC_CAR_STEERING_CENTER_SETTLE_LEFT_OVERSHOOT_DEG",
-        os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_OVERSHOOT_DEG", "4.0"),
-    )
-)
-STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG = float(
-    os.environ.get(
-        "RC_CAR_STEERING_CENTER_SETTLE_HIGH_OVERSHOOT_DEG",
-        os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_OVERSHOOT_DEG", "4.0"),
-    )
-)
-STEERING_CENTER_SETTLE_DURATION_SEC = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_DURATION_SEC", "1.0"))
-STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG = float(
-    os.environ.get(
-        "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG",
-        os.environ.get(
-            "RC_CAR_STEERING_CENTER_SETTLE_LX_DEG",
-            # Ram's rule: settle target = center + trim delta (L = 90 + D), so the
-            # left-release overshoot auto-follows the trim. At +13deg trim this
-            # is 103 (the well-tuned L103:0.25 +13D). Env vars still override.
-            str((STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0) * (1.0 + STEERING_SERVO_CENTER_OFFSET)),
-        ),
-    )
-)
-STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC = float(
-    os.environ.get(
-        "RC_CAR_STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC",
-        os.environ.get(
-            "RC_CAR_STEERING_CENTER_SETTLE_LS_SEC",
-            "0.25",
-        ),
-    )
-)
-STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_RELEASE_MIN_DEG", "12.0"))
 # Servo angles within this many degrees of center snap to exactly center.
 # Keep small so fine offsets (e.g. 88/89/91/92) are still commandable; the
 # input deadzone already handles stick jitter near center.
 STEERING_CENTER_SNAP_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SNAP_DEG", "0.5"))
 
-# --- Steering settle pushback curve (measured 2026-06-24 via pushback_curve_sim) ---
-# On a left release, the settle kicks the servo to poly(released_servo): released
-# value clamped to [0, center], output clamped to [center, range]. Quartic fit of
-# Ram's calibration (least average offset, ~0.28 deg). Coeffs ascending power:
-# c0 + c1*x + c2*x^2 + c3*x^3 + c4*x^4.
-STEERING_SETTLE_PUSHBACK_COEFFS = (
-    135.03247,
-    -0.97102,
-    0.0247475,
-    -0.000351665,
-    0.00000149645,
-)
-# Skip the settle if the curve asks for less than this much kick past center.
-STEERING_CENTER_SETTLE_MIN_KICK_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SETTLE_MIN_KICK_DEG", "1.0"))
-
 # --- IMU yaw-rate closed-loop steering (MG24 on /dev/ttyAMA3) ---
-# THE TOGGLE / REVERT: "off" = exact current open-loop behavior (default, safe).
-#   "straight" = Option 1: hold yaw=0 only when commanding ~center; turns pass through.
-#   "full"     = Option 2: map (command-90) to a target yaw rate and track it everywhere.
-# Flip to "full" to try Option 2; "straight" to revert to Option 1; "off" to disable.
-STEERING_YAW_PID_MODE = os.environ.get("RC_CAR_STEERING_YAW_PID_MODE", "off")
+# ON by default ("full" = Option 2: map (command-90) to a target yaw rate and track
+# it everywhere). Switch with this one value: "straight" = Option 1 (hold yaw=0 near
+# center, turns pass through); "off" = plain open-loop (no IMU).
+STEERING_YAW_PID_MODE = os.environ.get("RC_CAR_STEERING_YAW_PID_MODE", "full")
 STEERING_YAW_PID_PORT = os.environ.get("RC_CAR_IMU_PORT", "/dev/ttyAMA3")
 STEERING_YAW_PID_BAUD = int(os.environ.get("RC_CAR_IMU_BAUD", "115200"))
 STEERING_YAW_PID_AXIS = int(os.environ.get("RC_CAR_IMU_YAW_AXIS", "2"))  # 0=X 1=Y 2=Z
@@ -157,12 +105,6 @@ try:
     if isinstance(_tune, dict):
         if "trim_delta_deg" in _tune:
             STEERING_SERVO_CENTER_OFFSET = float(_tune["trim_delta_deg"]) / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
-        if "settle_target_deg" in _tune:
-            STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG = float(_tune["settle_target_deg"])
-        if "settle_duration_sec" in _tune:
-            STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC = float(_tune["settle_duration_sec"])
-        if "settle_trigger_deg" in _tune:
-            STEERING_CENTER_SETTLE_RELEASE_MIN_DEG = float(_tune["settle_trigger_deg"])
 except FileNotFoundError:
     pass
 except Exception as _tune_exc:
@@ -267,9 +209,6 @@ CSV_HEADERS = [
     "Camera Corridor Width (px)",
     "Driveway Cut Suspected",
     "Steering Servo Deg",
-    "Settle Active (0/1)",
-    "Settle Source Deg",
-    "Settle Target Deg",
     "Dashboard JSON Payload",
 ]
 
@@ -310,22 +249,12 @@ def create_state():
         "steer": 0.0,
         "steering_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "steering_trim_delta_deg": STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0),
-        # Live-tunable settle params (on-device tuning page). Init from config
-        # (which is steering_tune.json-overridden) so behavior is unchanged
-        # until you tune on the display.
-        "settle_target_deg": float(STEERING_CENTER_SETTLE_LOW_RELEASE_TARGET_DEG),
-        "settle_duration_sec": float(STEERING_CENTER_SETTLE_LOW_RELEASE_DURATION_SEC),
-        "settle_trigger_deg": float(STEERING_CENTER_SETTLE_RELEASE_MIN_DEG),
         "tune_selected_row": 0,
         "tune_saved_flash_until": 0.0,
         "steering_trim_total_deg": (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)
         + (STEERING_SERVO_CENTER_OFFSET * (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
         "steering_center_offset": STEERING_SERVO_CENTER_OFFSET,
-        "steering_center_settle_until": 0.0,
-        "steering_center_settle_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "steering_effective_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
-        "steering_last_noncenter_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
-        "steering_settle_source_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
         "throttle": 0.0,
         "brake": False,
         "brake_force": 0.0,
