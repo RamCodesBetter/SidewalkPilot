@@ -128,14 +128,14 @@ class YawController:
     """PID on yaw rate. compute() returns the logical servo angle to actually send."""
 
     def __init__(self, mode="off", kp=0.0, ki=0.0, kd=0.0,
-                 turn_gain_curv_per_deg=-0.66,
-                 straight_band_deg=20.0, min_speed_mps=0.2,
+                 curvature_coeffs=(0.0,),
+                 straight_band_deg=5.0, min_speed_mps=0.2,
                  center_deg=90.0, actuation_range_deg=180.0):
         self.mode = mode
         self.kp = kp
         self.ki = ki
         self.kd = kd
-        self.turn_gain = turn_gain_curv_per_deg
+        self.curv_coeffs = tuple(curvature_coeffs)   # curvature(x) quartic, ascending powers
         self.straight_band = straight_band_deg
         self.min_speed = min_speed_mps
         self.center = center_deg
@@ -145,6 +145,29 @@ class YawController:
         self.engaged = False          # for telemetry / dashboard
         self.last_target_yaw = 0.0
         self.last_correction = 0.0
+        # F = the open-loop straight angle = where curvature(x) crosses 0 (~109).
+        self.ff_center = self._solve_center()
+
+    def _curvature(self, x):
+        """Predicted curvature (deg/m) at servo angle x, from the calib quartic."""
+        y = 0.0
+        for i, c in enumerate(self.curv_coeffs):
+            y += c * (x ** i)
+        return y
+
+    def _solve_center(self):
+        """Root of curvature(x)=0 in [0, range] -> the feed-forward straight angle."""
+        step = 0.5
+        prev_x = 0.0
+        prev_y = self._curvature(prev_x)
+        x = step
+        while x <= self.range:
+            y = self._curvature(x)
+            if (prev_y <= 0.0 <= y) or (y <= 0.0 <= prev_y):
+                return prev_x if y == prev_y else prev_x + (0.0 - prev_y) * (x - prev_x) / (y - prev_y)
+            prev_x, prev_y = x, y
+            x += step
+        return self.center   # no root in range -> fall back to geometric center
 
     def reset(self):
         self._integral = 0.0
@@ -162,17 +185,18 @@ class YawController:
             self.reset()
             return commanded_deg
 
+        # FEED-FORWARD (F): start from the calibrated open-loop angle, PID only trims.
         if self.mode == "straight":
             # only hold near center; let real turns pass through untouched
             if abs(commanded_deg - self.center) > self.straight_band:
                 self.reset()
                 return commanded_deg
             target_yaw = 0.0
-        else:  # "full"
-            target_yaw = self.turn_gain * (commanded_deg - self.center) * speed_mps  # deg/s
+            ff_servo = self.ff_center                                   # ~109 = straight
+        else:  # "full" -- shift the stick into the calibrated frame, read target off curvature(x)
+            ff_servo = _clamp(commanded_deg + (self.ff_center - self.center), 0.0, self.range)
+            target_yaw = self._curvature(ff_servo) * speed_mps          # deg/s the car should rotate
 
-        # PURE PID (no feed-forward): the integral discovers the steady steering
-        # offset needed to drive yaw to the target, so we don't hardcode a center.
         error = measured_yaw_dps - target_yaw          # + = too far left -> raise servo (steer right)
         self._integral = self._integral + error * dt   # NO clamp -- infinite control
         if self._prev_error is None or dt <= 0.0:
@@ -181,8 +205,8 @@ class YawController:
             deriv = (error - self._prev_error) / dt
         self._prev_error = error
 
-        out = self.kp * error + self.ki * self._integral + self.kd * deriv  # NO clamp
+        out = self.kp * error + self.ki * self._integral + self.kd * deriv  # PID trim (no clamp)
         self.engaged = True
         self.last_target_yaw = target_yaw
         self.last_correction = out
-        return _clamp(commanded_deg + out, 0.0, self.range)
+        return _clamp(ff_servo + out, 0.0, self.range)

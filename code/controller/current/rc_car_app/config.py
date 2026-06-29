@@ -86,9 +86,10 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 STEERING_YAW_PID_KP = 0.0
 STEERING_YAW_PID_KI = 0.0
 STEERING_YAW_PID_KD = 0.0
-# Full-mode turn target: target_yaw[deg/s] = TURN_GAIN * (command - 90) * speed.
-# Negative because higher servo = right = negative yaw; ~-0.66 from the calib slope.
-STEERING_YAW_PID_TURN_GAIN = -0.66
+# Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
+# powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
+# feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
+STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
 STEERING_YAW_PID_STRAIGHT_BAND_DEG = 5.0    # |cmd-90| within this -> hold yaw=0; beyond -> passthrough
                                             # (keep small: a wide band makes the loop fight your TURNS,
                                             #  e.g. at servo 70 it tried to cancel the yaw you commanded -> wag)
