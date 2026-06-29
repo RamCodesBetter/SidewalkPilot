@@ -1375,7 +1375,9 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         if imu_reader is not None and speed_mps < 0.05:
             imu_reader.note_stationary()   # stopped -> true yaw is 0, learn out the residual bias
         measured_yaw = imu_reader.get_yaw() if imu_fresh else 0.0
-        allow = not state.get("lidar_override_active", False)
+        # No IMU correction in REVERSE -- yaw-rate feedback inverts driving backward,
+        # so just keep plain open-loop steering (+12D trim) there.
+        allow = not state.get("lidar_override_active", False) and state.get("gear_mode") != "R"
         pid_servo = yaw_controller.compute(raw_command, measured_yaw, speed_mps, dt, allow=allow)
         if yaw_controller.engaged:
             servo_degrees = clamp_servo_degrees(pid_servo)
