@@ -128,7 +128,7 @@ class YawController:
     """PID on yaw rate. compute() returns the logical servo angle to actually send."""
 
     def __init__(self, mode="off", kp=0.0, ki=0.0, kd=0.0,
-                 curvature_coeffs=(0.0,),
+                 curvature_coeffs=(0.0,), f_left_bump_deg=0.0,
                  straight_band_deg=5.0, min_speed_mps=0.2,
                  center_deg=90.0, actuation_range_deg=180.0):
         self.mode = mode
@@ -136,12 +136,14 @@ class YawController:
         self.ki = ki
         self.kd = kd
         self.curv_coeffs = tuple(curvature_coeffs)   # curvature(x) quartic, ascending powers
+        self.f_left_bump = f_left_bump_deg           # added to F when last steer was LEFT (hysteresis)
         self.straight_band = straight_band_deg
         self.min_speed = min_speed_mps
         self.center = center_deg
         self.range = actuation_range_deg
         self._integral = 0.0
         self._prev_error = None
+        self._last_side = 1           # +1 = last steered right, -1 = left (wheel seating)
         self.engaged = False          # for telemetry / dashboard
         self.last_target_yaw = 0.0
         self.last_correction = 0.0
@@ -185,6 +187,13 @@ class YawController:
             self.reset()
             return commanded_deg
 
+        # Remember which way we last steered (wheel seating) for the hysteresis F.
+        # Persists across the straight hold + brief stops; only a real turn changes it.
+        if commanded_deg > self.center + self.straight_band:
+            self._last_side = 1     # right
+        elif commanded_deg < self.center - self.straight_band:
+            self._last_side = -1    # left
+
         # FEED-FORWARD (F): start from the calibrated open-loop angle, PID only trims.
         if self.mode == "straight":
             # only hold near center; let real turns pass through untouched
@@ -192,7 +201,9 @@ class YawController:
                 self.reset()
                 return commanded_deg
             target_yaw = 0.0
-            ff_servo = self.ff_center                                   # ~109 = straight
+            # right keeps the curvature root (~109); left bumps up to the higher
+            # left-approach center (~119) to cancel the hysteresis.
+            ff_servo = self.ff_center + (self.f_left_bump if self._last_side < 0 else 0.0)
         else:  # "full" -- shift the stick into the calibrated frame, read target off curvature(x)
             ff_servo = _clamp(commanded_deg + (self.ff_center - self.center), 0.0, self.range)
             target_yaw = self._curvature(ff_servo) * speed_mps          # deg/s the car should rotate

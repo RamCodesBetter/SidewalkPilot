@@ -90,6 +90,10 @@ STEERING_YAW_PID_KD = 0.0
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
 # feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
 STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
+# Hysteresis: the LEFT-approach true center (~119) is higher than the right (~109).
+# Right keeps the curvature root (proven live); when the last steer was LEFT, bump F
+# up by this much. Start 10 (-> ~119); tune on the car if it isn't quite straight.
+STEERING_YAW_PID_F_LEFT_BUMP_DEG = 10.0
 STEERING_YAW_PID_STRAIGHT_BAND_DEG = 5.0    # |cmd-90| within this -> hold yaw=0; beyond -> passthrough
                                             # (keep small: a wide band makes the loop fight your TURNS,
                                             #  e.g. at servo 70 it tried to cancel the yaw you commanded -> wag)
