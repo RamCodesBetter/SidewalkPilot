@@ -1880,6 +1880,18 @@ def run(model_choice=None):
                     elif nav_operator == "MNUL":
                         cancel_autonomous_mode(state, metrics, "Navigation operator: human/manual segment.")
                     navigation_operator_last = nav_operator
+            # Motion-based page swap: tune on v1h3 while stopped, show v1h4 while
+            # driving. Only toggles between these two pages, so it never yanks you
+            # off any other page. v1h3 = STEERING_TRIM page (13), v1h4 = page 14.
+            speed_now_mph = float(getattr(metrics, "smoothed_speed_mph", 0.0))
+            current_page_now = int(state.get("dashboard_page", 1))
+            if speed_now_mph > 0.01 and current_page_now == STEERING_TRIM_DASHBOARD_PAGE:
+                state["dashboard_page"] = STEERING_TRIM_DASHBOARD_PAGE + 1   # v1h3 -> v1h4
+                metrics.dashboard_page_transition = "right"
+            elif speed_now_mph <= 0.0 and current_page_now == STEERING_TRIM_DASHBOARD_PAGE + 1:
+                state["dashboard_page"] = STEERING_TRIM_DASHBOARD_PAGE       # v1h4 -> v1h3
+                metrics.dashboard_page_transition = "left"
+
             camera_pixels = []
             if state["dashboard_page"] == 11 and webcam_vision is not None:
                 camera_pixels = webcam_vision.get_dashboard_camera_pixels()
