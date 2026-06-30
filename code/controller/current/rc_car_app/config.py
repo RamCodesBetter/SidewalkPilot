@@ -253,7 +253,7 @@ AUTO_PHOTO_MAX_INTERVAL_SEC = 4
 # fps (instead of the old 2-4s random) for dense training-data runs. Each frame is
 # labeled with the live logical steering + throttle (appended to a per-run CSV; the
 # JSON is built when the run ends).
-PHOTO_RUN_CAPTURE_FPS = 30.0
+PHOTO_RUN_CAPTURE_FPS = 10.0
 NAV_SELECT_BUTTON = 3
 QUIT_BUTTON = 15
 
