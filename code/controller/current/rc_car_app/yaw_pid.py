@@ -36,10 +36,11 @@ class ImuReader:
     """Background reader for the MG24 gyro stream `gx,gy,gz` (deg/s, bias-corrected
     by the firmware). Mirrors the LidarParser/GpsReader thread pattern."""
 
-    def __init__(self, port="/dev/ttyAMA3", baud=115200, axis=2, median=5, ema=0.3):
+    def __init__(self, port="/dev/ttyAMA3", baud=115200, axis=2, sign=1.0, median=5, ema=0.3):
         self.port = port
         self.baud = baud
         self.axis = axis
+        self.sign = float(sign)   # flips raw gyro so the controller sees + = LEFT
         self._median_n = max(1, int(median))
         self._ema_a = float(ema)
         self._med = collections.deque(maxlen=self._median_n)
@@ -88,7 +89,7 @@ class ImuReader:
                 if len(parts) != 3:
                     continue
                 try:
-                    raw = float(parts[self.axis])
+                    raw = float(parts[self.axis]) * self.sign
                 except (ValueError, IndexError):
                     continue
                 self._med.append(raw)

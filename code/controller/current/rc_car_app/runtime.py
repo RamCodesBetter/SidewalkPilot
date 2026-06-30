@@ -66,6 +66,7 @@ from .config import (
     STEERING_YAW_PID_PORT,
     STEERING_YAW_PID_BAUD,
     STEERING_YAW_PID_AXIS,
+    STEERING_YAW_PID_YAW_SIGN,
     STEERING_YAW_PID_KP,
     STEERING_YAW_PID_KI,
     STEERING_YAW_PID_KD,
@@ -1569,7 +1570,8 @@ def run(model_choice=None):
     )
     imu_reader = None
     if STEERING_YAW_PID_MODE != "off":
-        imu_reader = ImuReader(STEERING_YAW_PID_PORT, STEERING_YAW_PID_BAUD, axis=STEERING_YAW_PID_AXIS)
+        imu_reader = ImuReader(STEERING_YAW_PID_PORT, STEERING_YAW_PID_BAUD,
+                               axis=STEERING_YAW_PID_AXIS, sign=STEERING_YAW_PID_YAW_SIGN)
         if imu_reader.start():
             print(f"Yaw-rate PID steering ENABLED (mode={STEERING_YAW_PID_MODE}, F=curvature-center "
                   f"{yaw_controller.ff_center:.1f}deg) on {STEERING_YAW_PID_PORT}.")

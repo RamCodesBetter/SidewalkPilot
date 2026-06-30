@@ -80,6 +80,11 @@ STEERING_YAW_PID_MODE = "straight"
 STEERING_YAW_PID_PORT = "/dev/ttyAMA3"
 STEERING_YAW_PID_BAUD = 115200
 STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
+# IMU yaw sign so the controller's convention holds: + = LEFT. Measured on the car
+# (2026-06-30): driving straight while drifting LEFT read NEGATIVE yaw, i.e. the raw
+# gyro is inverted vs the controller's assumption -> flip it. If a future test shows
+# the correction still pushes INTO the drift, set this back to +1.0.
+STEERING_YAW_PID_YAW_SIGN = -1.0
 # Gains START AT 0 — tune them LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows;
 # d-pad up/down picks the row, left/right dec/inc: DELT +/-1, KP +/-0.5, KI +/-0.25,
 # KD +/-0.05). No clamps anywhere: infinite control authority.
