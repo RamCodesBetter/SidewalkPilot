@@ -46,15 +46,42 @@ _CODE_DIR = Path(__file__).resolve().parents[3]
 _DEFAULT_MODEL_DIRS = [_CODE_DIR / "ai_models", _CODE_DIR / "ai_models_datasets" / "series_3"]
 
 
+def _version_key(version):
+    """Sort key for a version string like '3.0b' -> (3.0, 1). 'b' alternates rank above
+    the plain version of the same number."""
+    v = str(version).strip().lower()
+    is_b = 1 if v.endswith("b") else 0
+    num = v[:-1] if is_b else v
+    try:
+        return (float(num), is_b)
+    except ValueError:
+        return (-1.0, is_b)
+
+
 def resolve_model_path(spec, extra_dir=None):
-    """Accept a path (.onnx/.pt/.pth) OR a version like '3.0b'/'2.4' that resolves to
-    SidewalkPilot-v<spec>.{onnx,pt,pth} (onnx preferred) in the model dirs."""
+    """Accept a path (.onnx/.pt/.pth), a version like '3.0b'/'2.4', or the keyword
+    'highest'/'latest' (greatest available version). Resolves to
+    SidewalkPilot-v<version>.{onnx,pt,pth} (onnx preferred) in the model dirs."""
+    dirs = ([Path(extra_dir).expanduser()] if extra_dir else []) + _DEFAULT_MODEL_DIRS
+
+    if str(spec).strip().lower() in ("highest", "latest", "newest", "max"):
+        found = {}  # version -> first matching path (onnx preferred via ext order)
+        for d in dirs:
+            for ext in (".onnx", ".pt", ".pth"):
+                for cand in sorted(d.glob(f"SidewalkPilot-v*{ext}")):
+                    ver = cand.stem[len("SidewalkPilot-v"):]
+                    found.setdefault(ver, str(cand))
+        if not found:
+            raise SystemExit(f"[jon] no SidewalkPilot-v* models in {[str(d) for d in dirs]}")
+        best = max(found, key=_version_key)
+        print(f"[jon] --model highest -> v{best}", flush=True)
+        return found[best]
+
     p = Path(spec).expanduser()
     if p.suffix.lower() in (".onnx", ".pt", ".pth"):
         if not p.exists():
             raise SystemExit(f"[jon] model file not found: {p}")
         return str(p)
-    dirs = ([Path(extra_dir).expanduser()] if extra_dir else []) + _DEFAULT_MODEL_DIRS
     for d in dirs:
         for ext in (".onnx", ".pt", ".pth"):
             cand = d / f"SidewalkPilot-v{spec}{ext}"
