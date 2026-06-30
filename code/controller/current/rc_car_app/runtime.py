@@ -1076,15 +1076,16 @@ def take_photo(webcam_vision=None, state=None, quiet=False):
     filename = str(photo_path)
     if webcam_vision:
         photo_status = "CTRE"
-        success, message = webcam_vision.save_current_frame(filename)
-        if success:
+        # async: fast frame-copy + enqueue; the slow JPEG write is off the loop.
+        queued = webcam_vision.queue_frame_save(filename)
+        if queued:
             servo_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
             if state is not None:
                 servo_degrees = float(state.get("steering_servo_deg", servo_degrees))
             append_photo_run_row(current_photo_run_dir, photo_name, servo_degrees, current_forward_throttle_label(state))
             photo_status = "SAVE"
             if not quiet:
-                print(f"Photo captured from live Pi camera stream: {message}")
+                print(f"Photo queued from live Pi camera stream: {photo_name}")
             return True
         photo_status = "ERR"
         print(f"Pi camera stream photo capture unavailable: {message}")

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+import queue
 import sys
 import threading
 import time
@@ -742,6 +743,11 @@ class WebcamVisionProcessor:
         self.model_path = resolve_steering_model_path(self.model_choice)
         self.steering_model = None
         self.torch_device = None
+        # async JPEG writer: keep the slow cv2.imwrite OFF the control loop so
+        # high-rate run capture doesn't stutter steering or the dashboard.
+        self._save_q: "queue.Queue" = queue.Queue(maxsize=240)
+        self._save_thread = None
+        self.frames_dropped = 0
 
     def _load_steering_model(self, model_choice):
         model_path = resolve_steering_model_path(model_choice)
@@ -801,8 +807,37 @@ class WebcamVisionProcessor:
         self.running = True
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
+        self._save_thread = threading.Thread(target=self._save_worker, daemon=True)
+        self._save_thread.start()
         print("Pi camera vision processor started.")
         return True
+
+    def queue_frame_save(self, output_path) -> bool:
+        """Snapshot the current frame (fast copy) and hand the slow JPEG write to
+        the background writer. Returns False if no frame yet or the queue is full."""
+        if cv2 is None:
+            return False
+        with self.lock:
+            frame = None if self.latest_frame is None else self.latest_frame.copy()
+        if frame is None:
+            return False
+        try:
+            self._save_q.put_nowait((str(output_path), frame))
+            return True
+        except queue.Full:
+            self.frames_dropped += 1
+            return False
+
+    def _save_worker(self):
+        while self.running or not self._save_q.empty():
+            try:
+                path, frame = self._save_q.get(timeout=0.2)
+            except queue.Empty:
+                continue
+            try:
+                cv2.imwrite(path, frame)
+            except Exception as exc:
+                print(f"Async frame write failed for {path}: {exc}")
 
     def set_model_choice(self, model_choice: str) -> bool:
         requested_choice = str(model_choice).strip()
@@ -832,6 +867,8 @@ class WebcamVisionProcessor:
         self.running = False
         if self.thread:
             self.thread.join(timeout=1.0)
+        if self._save_thread:
+            self._save_thread.join(timeout=3.0)   # let queued frames flush to disk
         if self.capture:
             self.capture.release()
             self.capture = None
