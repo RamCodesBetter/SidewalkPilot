@@ -1645,13 +1645,26 @@ def train(roots, args):
     print("Saved best:", best_path)
 
     export_checkpoint = best_path if args.export_checkpoint == "best" else final_path
-    onnx_path = None
-    if args.export_onnx or args.build_tensorrt:
-        if args.onnx_output:
-            onnx_path = Path(args.onnx_output).expanduser()
-        else:
-            onnx_path = export_checkpoint.with_suffix(".onnx")
-        export_onnx(export_checkpoint, onnx_path, args.width, args.height, args.onnx_opset)
+
+    # Export ONNX for BOTH checkpoints (final + best), then drop each .pth once its
+    # .onnx exists, so ai_models holds ONNX-only deployment artifacts. Pass --keep-pth
+    # to retain the torch checkpoints (e.g. for QAT or resuming training). If the
+    # 'onnx' package is missing we skip export and keep the .pth (never delete blind).
+    checkpoints = [final_path] if final_path == best_path else [final_path, best_path]
+    onnx_by_ckpt = {}
+    onnx_available = importlib.util.find_spec("onnx") is not None
+    if onnx_available:
+        for ckpt in checkpoints:
+            out = (Path(args.onnx_output).expanduser()
+                   if args.onnx_output and ckpt == export_checkpoint
+                   else ckpt.with_suffix(".onnx"))
+            export_onnx(ckpt, out, args.width, args.height, args.onnx_opset)
+            onnx_by_ckpt[ckpt] = out
+    else:
+        print("[export] WARNING: 'onnx' package not installed; skipping ONNX export "
+              "and KEEPING .pth files.", flush=True)
+
+    onnx_path = onnx_by_ckpt.get(export_checkpoint)
 
     if args.build_tensorrt:
         if onnx_path is None:
@@ -1669,6 +1682,13 @@ def train(roots, args):
             args.trt_workspace_mb,
             args.calibration_cache,
         )
+
+    # ONNX-only artifacts: remove each .pth now that its .onnx exists.
+    if onnx_available and not args.keep_pth:
+        for ckpt, out in onnx_by_ckpt.items():
+            if out.is_file() and ckpt.is_file():
+                ckpt.unlink()
+                print(f"[cleanup] removed {ckpt.name} (kept {out.name})", flush=True)
 
     print(f"[done] total_time={fmt_time(time.time() - start_time)} best_val={best_val:.6f}", flush=True)
 
@@ -1708,7 +1728,8 @@ def main():
     )
     parser.add_argument("--final-output", default=None, help="explicit final checkpoint path")
     parser.add_argument("--best-output", default=None, help="explicit best checkpoint path")
-    parser.add_argument("--export-onnx", action="store_true", help="export the selected checkpoint to ONNX after training")
+    parser.add_argument("--export-onnx", action="store_true", help="(kept for compatibility; ONNX for both checkpoints is now always exported)")
+    parser.add_argument("--keep-pth", action="store_true", help="keep .pth checkpoints instead of deleting them after ONNX export (e.g. for QAT/resume)")
     parser.add_argument("--export-checkpoint", choices=["best", "final"], default="best")
     parser.add_argument("--onnx-output", default=None, help="explicit ONNX output path")
     parser.add_argument("--onnx-opset", type=int, default=17)
