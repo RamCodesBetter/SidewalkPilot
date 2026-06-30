@@ -260,12 +260,12 @@ PHOTO_RUN_CAPTURE_FPS = 10.0
 # the active model choice to Jon and steers with the (steering, throttle) it gets
 # back. Empty host = current behavior (Pi runs its own Series-1/2 model locally).
 # If Jon is unreachable the car holds (safe stop), it does not free-run.
-# Jon = Jetson Orin Nano, over the wired Pi<->Jetson Ethernet link. The Pi runs
-# NetworkManager "shared" mode on eth0 (connection 'jetson-eth-share'): Pi is
-# 10.42.0.1 and hands the Jetson a 10.42.0.x lease (currently .233). This link is
-# separate from the 192.168.10.x Pi5<->Zero2W dashboard USB link.
-# NOTE: .233 is a DHCP lease — if it changes, give Jon a static IP and update this.
-JETSON_STEERING_HOST = "10.42.0.233"
+# Jon = Jetson Orin Nano, over the wired Pi<->Jetson Ethernet link. Pi eth0 is
+# 10.42.0.1 (NetworkManager "shared" mode, connection 'jetson-eth-share'); Jon's
+# eth is pinned STATIC to 10.42.0.2 (below the DHCP pool, so it survives reboots).
+# Jon keeps internet via gateway 10.42.0.1. Separate from the 192.168.10.x
+# Pi5<->Zero2W dashboard USB link.
+JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
 
 NAV_SELECT_BUTTON = 3
