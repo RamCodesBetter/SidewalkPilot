@@ -189,6 +189,7 @@ class SteeringModel:
         self.steer_scale = steer_scale
         self.force_size = force_size
         self.current_version = None
+        self.pinned = False          # True = ignore the Pi's per-frame model choice
         self.backend = None          # "onnx" or "torch"
         self.width = self.height = None
         self.load(spec)
@@ -292,7 +293,8 @@ def serve(model, host, port):
                     vbytes = _recv_exact(conn, vlen)
                     if vbytes is None:
                         break
-                    model.ensure_version(vbytes.decode("utf-8", "replace"))
+                    if not getattr(model, "pinned", False):
+                        model.ensure_version(vbytes.decode("utf-8", "replace"))
                 hdr = _recv_exact(conn, 4)
                 if not hdr:
                     break
@@ -319,7 +321,10 @@ def serve(model, host, port):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--model", required=True, help="version (3.0b, 2.4 ...) OR path to .onnx/.pt/.pth")
+    ap.add_argument("--model", default="highest",
+                    help="version (3.0b, 2.4 ...), a path to .onnx/.pt/.pth, or 'highest' "
+                         "(default). A concrete version PINS it (the Pi's per-frame model "
+                         "choice is ignored); 'highest' follows whatever the Pi requests.")
     ap.add_argument("--models-dir", default=None, help="extra dir to search for SidewalkPilot-v*.*")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8770)
@@ -333,6 +338,12 @@ def main():
     force = (args.width, args.height) if (args.width and args.height) else None
     model = SteeringModel(args.model, models_dir=args.models_dir, use_clahe=args.clahe,
                           steer_scale=args.steer_scale, force_size=force)
+
+    # An explicit concrete version (or path) PINS the model: ignore the Pi's per-frame
+    # choice. 'highest'/'latest' (the default) FOLLOWS whatever the Pi requests.
+    model.pinned = str(args.model).strip().lower() not in ("highest", "latest", "newest", "max")
+    print(f"[jon] model {'PINNED to v' + str(model.current_version) + ' (ignoring Pi choice)' if model.pinned else 'FOLLOWS the Pi per-frame choice'}.",
+          flush=True)
 
     if args.test_image:
         frame = cv2.imread(args.test_image)
