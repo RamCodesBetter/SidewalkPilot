@@ -380,7 +380,7 @@ class DashboardRenderer:
 
     def _draw_page_three(self, payload: Dict[str, object], y_offset_px: int = 0):
         # PRUN / PALL / FPS / STS
-        photos_run = max(0, min(999, int(payload.get("photos_run", 0))))
+        photos_run = max(0, min(99999, int(payload.get("photos_run", 0))))
         photos_all = max(0, min(99999, int(payload.get("photos_all", 0))))
         fps_val = max(0.0, min(99.99, float(payload.get("camera_fps", 0.0))))
         fps_int = int(fps_val)
@@ -395,8 +395,9 @@ class DashboardRenderer:
         }
         sts_color = sts_colors.get(sts, TEXT_GREEN)
         sts = (sts + "    ")[:4]
-        self._draw_text_row(0, ["P", "R", "U", "N", ":", str(photos_run // 100), str((photos_run // 10) % 10), str(photos_run % 10)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["P", "ALL", ":", str(photos_all // 10000), str((photos_all // 1000) % 10), str((photos_all // 100) % 10), str((photos_all // 10) % 10), str(photos_all % 10)], TEXT_GREEN, y_offset_px)
+        # short labels + 5-digit counts so thousands of photos display correctly
+        self._draw_text_row(0, ["P", "R", ":", *self._digits(photos_run, 5)], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["P", "A", ":", *self._digits(photos_all, 5)], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["F", "P", "S", ":", str(fps_int // 10), f"{fps_int % 10}.", str(fps_frac // 10), str(fps_frac % 10)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
