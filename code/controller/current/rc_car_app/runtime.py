@@ -23,6 +23,8 @@ from .config import (
     AUTO_PHOTO_MAX_INTERVAL_SEC,
     AUTO_PHOTO_MIN_INTERVAL_SEC,
     PHOTO_RUN_CAPTURE_FPS,
+    JETSON_STEERING_HOST,
+    JETSON_STEERING_PORT,
     BRAKE_RATE,
     CM_PER_SEC_TO_MPH,
     COASTING_RATE,
@@ -114,6 +116,7 @@ from .logging_utils import init_csv_logger, log_data_to_csv
 from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
 from .yaw_pid import ImuReader, YawController
+from .jetson_client import JetsonSteeringClient
 from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
 
 shutdown_flag = threading.Event()
@@ -1195,7 +1198,8 @@ def calculate_speed(state, metrics, dt):
     metrics.total_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
 
 
-def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan):
+def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan,
+                              jetson_client=None, active_model_choice=None):
     camera_analysis = {
         "heading_bias": 0.0,
         "confidence": 0.0,
@@ -1216,6 +1220,33 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             camera_analysis["right_edge_found"] = False
             camera_analysis["corridor_width_px"] = 0.0
             camera_analysis["method"] = "stale_model_frame"
+
+    # Jetson ("Jon") inference: the Pi sends the live frame + active model choice
+    # and steers with what comes back. Replaces the (camera-only / empty) local
+    # analysis. If Jon is unreachable, confidence stays 0 -> safe hard stop below.
+    if jetson_client is not None:
+        frame = webcam_vision.grab_latest_frame() if webcam_vision else None
+        jon_result = (
+            jetson_client.infer(frame, model_version=active_model_choice)
+            if frame is not None else None
+        )
+        if jon_result is not None:
+            jon_steer_deg, _jon_throttle = jon_result
+            camera_analysis = {
+                "heading_bias": max(-1.0, min(1.0, (jon_steer_deg - 90.0) / 90.0)),
+                "confidence": 1.0,
+                "left_edge_found": False,
+                "right_edge_found": False,
+                "corridor_width_px": 0.0,
+                "driveway_cut_hint": False,
+                "steering_angle_deg": jon_steer_deg,
+                "method": f"jetson:{active_model_choice}",
+            }
+            model_frame_is_stale = False
+        else:
+            model_frame_is_stale = True
+            camera_analysis["confidence"] = 0.0
+            camera_analysis["method"] = "jetson_unreachable"
 
     state["camera_steering_bias"] = camera_analysis["heading_bias"]
     state["camera_confidence"] = camera_analysis["confidence"]
@@ -1275,7 +1306,7 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
 
 
 def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboard_sender=None,
-                yaw_controller=None, imu_reader=None):
+                yaw_controller=None, imu_reader=None, jetson_client=None, active_model_choice=None):
     current_time = time.time()
     desired_pwm_from_input = 0.0
     effective_brake_from_input = state["brake"]
@@ -1283,7 +1314,8 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
 
     if state["autonomous_mode"]:
         desired_pwm_from_input, effective_brake_from_input = apply_autonomous_controls(
-            state, metrics, hardware, webcam_vision, lidar_scan
+            state, metrics, hardware, webcam_vision, lidar_scan,
+            jetson_client=jetson_client, active_model_choice=active_model_choice
         )
         desired_pwm_from_input = max(0.0, min(AUTONOMOUS_CRUISE_PWM, desired_pwm_from_input))
         state["throttle"] = desired_pwm_from_input
@@ -1488,6 +1520,7 @@ def run(model_choice=None):
     csv_file = None
     lidar_parser = None
     webcam_vision = None
+    jetson_client = None
     dashboard_sender = None
     gps_reader = None
     navigation = NavigationManager()
@@ -1547,7 +1580,16 @@ def run(model_choice=None):
     else:
         print("Yaw-rate PID steering OFF (open-loop). Set STEERING_YAW_PID_MODE=straight|full to enable.")
 
-    webcam_vision = WebcamVisionProcessor(model_choice=active_model_choice)
+    jetson_host = (JETSON_STEERING_HOST or "").strip()
+    jetson_client = None
+    if jetson_host:
+        jetson_client = JetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
+        print(f"Autonomy inference on Jetson (Jon) at {jetson_host}:{JETSON_STEERING_PORT}. "
+              f"Pi will NOT run a local steering model.")
+
+    webcam_vision = WebcamVisionProcessor(
+        model_choice=active_model_choice, camera_only=jetson_client is not None
+    )
     if not webcam_vision.start():
         webcam_vision = None
 
@@ -1858,7 +1900,8 @@ def run(model_choice=None):
                 state["num_lidar_points"] = 0
 
             update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender,
-                        yaw_controller=yaw_controller, imu_reader=imu_reader)
+                        yaw_controller=yaw_controller, imu_reader=imu_reader,
+                        jetson_client=jetson_client, active_model_choice=active_model_choice)
             update_turn_signal_blink(state, metrics)
             update_dashboard_page_selection(state, metrics)
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
@@ -1995,6 +2038,8 @@ def run(model_choice=None):
         finalize_photo_run(current_photo_run_dir)   # build <run>.json from the CSV on exit
         if webcam_vision:
             webcam_vision.stop()
+        if jetson_client:
+            jetson_client.close()
         if dashboard_sender:
             if HUB75_DASHBOARD_SHUTDOWN_ON_EXIT and not dashboard_shutdown_sent:
                 dashboard_sender.send_shutdown()

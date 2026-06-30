@@ -50,6 +50,10 @@ STEERING_MODEL_VERSIONS = (
     "2.3b",
     "2.4",
     "2.4b",
+    # Series 3 (heavy, 2-output): the Pi cannot run these locally — they are
+    # selectable so the model page can tell the Jetson ("Jon") to run them.
+    "3.0",
+    "3.0b",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", "1.0")
@@ -726,7 +730,10 @@ def annotate_sidewalk_edges(frame, analysis):
 class WebcamVisionProcessor:
     """Pi camera steering estimator backed by a SteeringAutonomyV2 checkpoint."""
 
-    def __init__(self, model_choice=None):
+    def __init__(self, model_choice=None, camera_only=False):
+        # camera_only: capture frames but do NOT load/run a local steering model.
+        # Used when the Jetson ("Jon") runs the model and the Pi only feeds it frames.
+        self.camera_only = bool(camera_only)
         self.capture = None
         self.lock = threading.Lock()
         self.model_lock = threading.Lock()
@@ -777,20 +784,26 @@ class WebcamVisionProcessor:
             print("Camera vision disabled or OpenCV unavailable.")
             return False
 
-        if torch is None or SteeringAutonomyV2 is None:
-            print("PyTorch unavailable; steering autonomy model cannot run.")
-            return False
-        if not self.model_path.exists():
-            print(f"Steering autonomy model not found: {self.model_path}")
-            return False
-        try:
-            self.torch_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            self.steering_model, self.model_path = self._load_steering_model(self.model_choice)
-            print(f"Loaded steering autonomy model {self.model_choice}: {self.model_path}")
-        except Exception as e:
+        if self.camera_only:
+            # Jon runs the model; the Pi just captures frames to send over.
+            print("Camera vision in CAMERA-ONLY mode (steering model runs on the Jetson).")
             self.steering_model = None
-            print(f"Failed to load steering autonomy model {self.model_path}: {e}")
-            return False
+            self.torch_device = None
+        else:
+            if torch is None or SteeringAutonomyV2 is None:
+                print("PyTorch unavailable; steering autonomy model cannot run.")
+                return False
+            if not self.model_path.exists():
+                print(f"Steering autonomy model not found: {self.model_path}")
+                return False
+            try:
+                self.torch_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                self.steering_model, self.model_path = self._load_steering_model(self.model_choice)
+                print(f"Loaded steering autonomy model {self.model_choice}: {self.model_path}")
+            except Exception as e:
+                self.steering_model = None
+                print(f"Failed to load steering autonomy model {self.model_path}: {e}")
+                return False
 
         try:
             self.capture = self._open_capture()
@@ -843,6 +856,16 @@ class WebcamVisionProcessor:
         requested_choice = str(model_choice).strip()
         if requested_choice == self.model_choice:
             return True
+        if self.camera_only:
+            # No local model to load — just record the choice. The runtime sends it
+            # to the Jetson each frame, which hot-swaps to the requested model.
+            with self.lock:
+                self.model_choice = requested_choice
+                self.analysis = _empty_analysis()
+                self.confidence = 0.0
+                self.frame_center_bias = 0.0
+            print(f"Model choice -> {requested_choice} (runs on the Jetson).")
+            return True
         if torch is None or SteeringAutonomyV2 is None or self.torch_device is None:
             print("Cannot switch steering model: PyTorch/model runtime is unavailable.")
             return False
@@ -876,6 +899,13 @@ class WebcamVisionProcessor:
     def get_steering_bias(self):
         with self.lock:
             return self.frame_center_bias, self.confidence, self.last_frame_time
+
+    def grab_latest_frame(self):
+        """Fast copy of the most recent BGR frame (for sending to the Jetson)."""
+        if cv2 is None:
+            return None
+        with self.lock:
+            return None if self.latest_frame is None else self.latest_frame.copy()
 
     def get_analysis(self):
         with self.lock:

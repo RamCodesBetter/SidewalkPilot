@@ -154,12 +154,29 @@ def decode_output(flat):
 
 
 class SteeringModel:
-    def __init__(self, model_path, use_clahe=False, steer_scale=86.0, force_size=None):
+    def __init__(self, spec, models_dir=None, use_clahe=False, steer_scale=86.0, force_size=None):
         if cv2 is None:
             raise RuntimeError("opencv-python is required.")
+        self.models_dir = models_dir
         self.use_clahe = use_clahe
+        self.steer_scale = steer_scale
+        self.force_size = force_size
+        self.current_version = None
         self.backend = None          # "onnx" or "torch"
         self.width = self.height = None
+        self.load(spec)
+
+    def ensure_version(self, spec):
+        """Hot-swap the model if the Pi requested a different version."""
+        if spec and str(spec) != str(self.current_version):
+            try:
+                self.load(spec)
+            except SystemExit as exc:
+                print(f"[jon] model switch to '{spec}' failed: {exc}", flush=True)
+
+    def load(self, spec):
+        model_path = resolve_model_path(spec, self.models_dir)
+        steer_scale = self.steer_scale
         low = model_path.lower()
 
         if low.endswith(".onnx"):
@@ -196,12 +213,13 @@ class SteeringModel:
             self.backend = "torch"
             providers_used = self.device
 
-        if force_size:
-            self.width, self.height = force_size
+        if self.force_size:
+            self.width, self.height = self.force_size
         if not self.width or not self.height:
             raise RuntimeError("Could not determine model input size; pass --width/--height.")
-        print(f"[jon] model={model_path} backend={self.backend} input={self.width}x{self.height} "
-              f"clahe={self.use_clahe} on={providers_used}", flush=True)
+        self.current_version = str(spec)
+        print(f"[jon] model={model_path} (v{self.current_version}) backend={self.backend} "
+              f"input={self.width}x{self.height} clahe={self.use_clahe} on={providers_used}", flush=True)
 
     def infer(self, frame_bgr):
         x = preprocess(frame_bgr, self.width, self.height, self.use_clahe)
@@ -236,6 +254,18 @@ def serve(model, host, port):
         frames, t0 = 0, time.time()
         try:
             while True:
+                # Frame: [1B version-len][version utf8][4B jpeg-len][jpeg bytes].
+                # version-len 0 means "keep current model". The Pi sends its active
+                # model choice every frame, so Jon hot-swaps when it changes.
+                vhdr = _recv_exact(conn, 1)
+                if not vhdr:
+                    break
+                vlen = vhdr[0]
+                if vlen:
+                    vbytes = _recv_exact(conn, vlen)
+                    if vbytes is None:
+                        break
+                    model.ensure_version(vbytes.decode("utf-8", "replace"))
                 hdr = _recv_exact(conn, 4)
                 if not hdr:
                     break
@@ -273,9 +303,9 @@ def main():
     ap.add_argument("--test-image", default=None, help="run inference on ONE local image and exit")
     args = ap.parse_args()
 
-    model_path = resolve_model_path(args.model, args.models_dir)
     force = (args.width, args.height) if (args.width and args.height) else None
-    model = SteeringModel(model_path, use_clahe=args.clahe, steer_scale=args.steer_scale, force_size=force)
+    model = SteeringModel(args.model, models_dir=args.models_dir, use_clahe=args.clahe,
+                          steer_scale=args.steer_scale, force_size=force)
 
     if args.test_image:
         frame = cv2.imread(args.test_image)

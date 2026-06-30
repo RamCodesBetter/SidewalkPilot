@@ -254,6 +254,15 @@ AUTO_PHOTO_MAX_INTERVAL_SEC = 4
 # labeled with the live logical steering + throttle (appended to a per-run CSV; the
 # JSON is built when the run ends).
 PHOTO_RUN_CAPTURE_FPS = 10.0
+
+# Jetson ("Jon") remote inference. When JETSON_STEERING_HOST is non-empty the Pi
+# does NOT run a steering model: in autonomous mode it sends the camera frame +
+# the active model choice to Jon and steers with the (steering, throttle) it gets
+# back. Empty host = current behavior (Pi runs its own Series-1/2 model locally).
+# If Jon is unreachable the car holds (safe stop), it does not free-run.
+JETSON_STEERING_HOST = ""
+JETSON_STEERING_PORT = 8770
+
 NAV_SELECT_BUTTON = 3
 QUIT_BUTTON = 15
 

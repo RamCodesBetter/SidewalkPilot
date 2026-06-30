@@ -6,12 +6,16 @@ None on any network hiccup (and lazily reconnects next call) so the control loop
 never wedged by the Jetson — the runtime can fall back to the local model.
 
 Protocol (TCP):
-    Pi  -> Jon : [4-byte big-endian length N][N bytes JPEG]
+    Pi  -> Jon : [1B version-len V][V bytes version utf8][4B big-endian len N][N bytes JPEG]
     Jon -> Pi  : 8 bytes = struct '>ff' (steering_deg 0..180, throttle 0..1)
+
+The version string is the Pi's active model choice (e.g. "3.0b"). Jon hot-swaps to
+that model when it changes — so picking a model on the Pi's dashboard model page
+switches the model Jon runs, with no separate control message.
 
 Usage in runtime:
     jon = JetsonSteeringClient("192.168.x.x")
-    result = jon.infer(frame_bgr)        # (steering, throttle) or None
+    result = jon.infer(frame_bgr, model_version="3.0b")   # (steering, throttle) or None
     if result: steering_deg, throttle = result
 
 Standalone test (from a machine with a test image):
@@ -65,8 +69,8 @@ class JetsonSteeringClient:
             buf += chunk
         return buf
 
-    def infer(self, frame_bgr):
-        """Send one BGR frame, return (steering_deg, throttle) or None on failure."""
+    def infer(self, frame_bgr, model_version=None):
+        """Send one BGR frame (+ desired model version), return (steering_deg, throttle) or None."""
         if cv2 is None:
             return None
         if self.sock is None and not self.connect():
@@ -75,8 +79,9 @@ class JetsonSteeringClient:
         if not ok:
             return None
         data = jpg.tobytes()
+        vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:255]
         try:
-            self.sock.sendall(struct.pack(">I", len(data)) + data)
+            self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
             reply = self._recv_exact(8)
             if reply is None:
                 raise OSError("short reply")
