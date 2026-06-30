@@ -37,8 +37,32 @@ import socket
 import struct
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
+
+# code/ai_models (released) + series_3 (fresh training output) — searched by version
+_CODE_DIR = Path(__file__).resolve().parents[3]
+_DEFAULT_MODEL_DIRS = [_CODE_DIR / "ai_models", _CODE_DIR / "ai_models_datasets" / "series_3"]
+
+
+def resolve_model_path(spec, extra_dir=None):
+    """Accept a path (.onnx/.pt/.pth) OR a version like '3.0b'/'2.4' that resolves to
+    SidewalkPilot-v<spec>.{onnx,pt,pth} (onnx preferred) in the model dirs."""
+    p = Path(spec).expanduser()
+    if p.suffix.lower() in (".onnx", ".pt", ".pth"):
+        if not p.exists():
+            raise SystemExit(f"[jon] model file not found: {p}")
+        return str(p)
+    dirs = ([Path(extra_dir).expanduser()] if extra_dir else []) + _DEFAULT_MODEL_DIRS
+    for d in dirs:
+        for ext in (".onnx", ".pt", ".pth"):
+            cand = d / f"SidewalkPilot-v{spec}{ext}"
+            if cand.exists():
+                return str(cand)
+    raise SystemExit(f"[jon] model '{spec}' not found: no such file, and no "
+                     f"SidewalkPilot-v{spec}.(onnx|pt|pth) in {[str(d) for d in dirs]}")
+
 
 try:
     import cv2
@@ -238,7 +262,8 @@ def serve(model, host, port):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--model", required=True, help=".onnx, .pt (TorchScript), or .pth (state-dict)")
+    ap.add_argument("--model", required=True, help="version (3.0b, 2.4 ...) OR path to .onnx/.pt/.pth")
+    ap.add_argument("--models-dir", default=None, help="extra dir to search for SidewalkPilot-v*.*")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8770)
     ap.add_argument("--clahe", action="store_true", help="apply CLAHE (only for CLAHE-trained models)")
@@ -248,8 +273,9 @@ def main():
     ap.add_argument("--test-image", default=None, help="run inference on ONE local image and exit")
     args = ap.parse_args()
 
+    model_path = resolve_model_path(args.model, args.models_dir)
     force = (args.width, args.height) if (args.width and args.height) else None
-    model = SteeringModel(args.model, use_clahe=args.clahe, steer_scale=args.steer_scale, force_size=force)
+    model = SteeringModel(model_path, use_clahe=args.clahe, steer_scale=args.steer_scale, force_size=force)
 
     if args.test_image:
         frame = cv2.imread(args.test_image)
