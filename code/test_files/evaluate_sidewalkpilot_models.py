@@ -33,9 +33,9 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[2]
+REPO_ROOT = SCRIPT_DIR.parents[1]            # code/test_files -> repo root
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
-CORRECTIONS_PATH = SCRIPT_DIR / "steering_corrections.json"
+CORRECTIONS_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_1_and_2" / "steering_corrections.json"
 DOCS_DIR = REPO_ROOT / "docs"
 DEFAULT_JSON_OUT = DOCS_DIR / "steering_eval_current_labels.json"
 DEFAULT_PDF_OUT = DOCS_DIR / "steering_model_report.pdf"
@@ -45,6 +45,15 @@ HEIGHT = 66
 SERIES_1_SCALE_DEG = 86.0
 SERIES_2_SCALE_DEG = 85.0
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+b?)\.pth$")
+
+# Series 3 (heavy 2-output SidewalkPilotV3, 320x180). Evaluated on its OWN dataset
+# (the new collected runs), not the Series 1/2 correction label set — so its rows
+# are folded into the same report with that caveat noted.
+S3_WIDTH = 320
+S3_HEIGHT = 180
+S3_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3" / "sidewalkpilot_dataset"
+S3_TRAINER_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3" / "sidewalkpilot_trainer.py"
+S3_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.pth$")
 
 BUCKETS = [
     ("HL 0-45", 0.0, 45.0),
@@ -117,19 +126,25 @@ def version_key(version):
 
 
 def discover_models(models_dir):
+    """Series 1/2 checkpoints only (SteeringAutonomyV2 arch). Series 3 is handled
+    separately by evaluate_series3()."""
     models = []
     for path in sorted(models_dir.glob("SidewalkPilot-v*.pth")):
         match = MODEL_RE.match(path.name)
-        if match:
+        if match and not match.group("version").startswith("3."):
             models.append((match.group("version"), path))
     return sorted(models, key=lambda item: version_key(item[0]))
 
 
 def series_for_version(version):
+    if version.startswith("3."):
+        return 3
     return 2 if version.startswith("2.") else 1
 
 
 def preprocessing_for_version(version):
+    if version.startswith("3."):
+        return "raw BGR 320x180"
     return "HSV/CLAHE -> BGR" if version in {"2.0", "2.0b"} else "raw BGR"
 
 
@@ -426,6 +441,110 @@ def evaluate_models(samples, raw_inputs, clahe_inputs, targets, models, batch_si
     return results
 
 
+def _short_s3_source(run_name):
+    """2026_05_10_run_1 -> S3:0510_r1 (compact subset-table column)."""
+    name = re.sub(r"^2026_", "", str(run_name)).replace("_run_", "_r").replace("_", "")
+    return f"S3:{name}"
+
+
+def _load_s3_arch():
+    """Load SidewalkPilotV3 from the series_3 trainer without a sys.path name clash
+    (both series have a sidewalkpilot_trainer.py)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("s3_trainer_for_eval", S3_TRAINER_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.SidewalkPilotV3
+
+
+def evaluate_series3(models_dir, device, batch_size):
+    """Evaluate Series 3 (SidewalkPilotV3) checkpoints on the S3 dataset and return
+    results entries shaped like the Series 1/2 ones (steering decoded to 0..180),
+    plus the per-image samples (source/dataset) for report context. Returns ({}, [])
+    if there are no S3 models or no S3 dataset yet."""
+    labels_path = S3_DATASET_DIR / "labels.json"
+    s3_paths = sorted(p for p in models_dir.glob("SidewalkPilot-v3*.pth") if S3_MODEL_RE.match(p.name))
+    if not s3_paths or not labels_path.is_file():
+        return {}, []
+
+    SidewalkPilotV3 = _load_s3_arch()
+    labels = json.loads(labels_path.read_text())
+
+    tensors, targets, samples = [], [], []
+    for name, label in labels.items():
+        frame = cv2.imread(str(S3_DATASET_DIR / name), cv2.IMREAD_COLOR)
+        if frame is None:
+            continue
+        steer = label.get("steering") if isinstance(label, dict) else label
+        if steer is None:
+            continue
+        img = cv2.resize(frame, (S3_WIDTH, S3_HEIGHT), interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
+        img = (img - 0.5) / 0.5
+        tensors.append(np.transpose(img, (2, 0, 1)))
+        targets.append(label_to_servo(steer))
+        run = str(name).split("__")[0]
+        samples.append({"source": run, "dataset": _short_s3_source(run)})
+
+    if not tensors:
+        return {}, []
+
+    inputs = torch.from_numpy(np.stack(tensors)).float()
+    targets = np.array(targets, dtype=np.float32)
+    datasets = [s["dataset"] for s in samples]
+    sources = [s["source"] for s in samples]
+    print(f"[eval.s3] dataset images={len(samples)}", flush=True)
+
+    results = {}
+    for path in s3_paths:
+        version = S3_MODEL_RE.match(path.name).group("version")
+        print(f"[eval] model={version} checkpoint={path.name}", flush=True)
+        model = SidewalkPilotV3().to(device)
+        checkpoint = torch.load(path, map_location=device)
+        state = checkpoint
+        if isinstance(checkpoint, dict):
+            for key in ("model_state_dict", "state_dict", "model"):
+                if key in checkpoint and isinstance(checkpoint[key], dict):
+                    state = checkpoint[key]
+                    break
+        state = {key.removeprefix("module."): value for key, value in state.items()}
+        model.load_state_dict(state, strict=True)
+        model.eval()
+
+        preds = []
+        with torch.no_grad():
+            for start in range(0, len(inputs), batch_size):
+                out = model(inputs[start:start + batch_size].to(device, non_blocking=True)).cpu().numpy()
+                u0 = np.clip(out[:, 0], -1.0, 1.0)            # decode steering control -> 0..180
+                preds.append(np.clip(90.0 + 90.0 * u0, 0.0, 180.0))
+        preds = np.concatenate(preds).astype(np.float32)
+
+        by_dataset = {}
+        for name in sorted(set(datasets)):
+            idx = [i for i, v in enumerate(datasets) if v == name]
+            by_dataset[name] = metric_block(preds[idx], targets[idx])
+        by_source = {}
+        for name in sorted(set(sources)):
+            idx = [i for i, v in enumerate(sources) if v == name]
+            by_source[name] = metric_block(preds[idx], targets[idx])
+
+        results[version] = {
+            "checkpoint": str(path.resolve()),
+            "series": 3,
+            "preprocessing": "raw BGR 320x180",
+            "output_scale_deg": None,           # 2-output unit controls, no fixed scale
+            "overall": metric_block(preds, targets),
+            "by_dataset": by_dataset,
+            "by_source": by_source,
+            **bucket_summary(preds, targets),
+        }
+        overall = results[version]["overall"]
+        print(f"[eval] done model={version} mae={overall['mae']:.3f} "
+              f"median={overall['median_ae']:.3f} within5={overall['within_5']}/{overall['count']}",
+              flush=True)
+
+    return results, samples
+
+
 def fmt_num(value, digits=2):
     if value is None:
         return "-"
@@ -525,7 +644,7 @@ def make_table(rows, col_widths=None, repeat_rows=1, header_color=colors.HexColo
     return table
 
 
-def build_pdf(results, samples, pdf_out):
+def build_pdf(results, samples, s3_samples, pdf_out):
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         "TitleCenter",
@@ -544,6 +663,7 @@ def build_pdf(results, samples, pdf_out):
     ranked = sorted(versions, key=lambda version: results[version]["overall"]["mae"])
     series1 = [version for version in versions if series_for_version(version) == 1]
     series2 = [version for version in versions if series_for_version(version) == 2]
+    series3 = [version for version in versions if series_for_version(version) == 3]
     best = ranked[0]
     second = ranked[1] if len(ranked) > 1 else None
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -582,16 +702,23 @@ def build_pdf(results, samples, pdf_out):
     story.append(
         paragraph(
             "Series 1 uses raw BGR and output scale 86. Series 2 uses output scale 85; v2.0/v2.0b use legacy HSV/CLAHE "
-            "preprocessing, while v2.1 and newer use raw BGR. These are offline same-dataset decision comparisons; field "
+            "preprocessing, while v2.1 and newer use raw BGR. Series 3 is the heavy 2-output (steering+throttle) "
+            "SidewalkPilotV3 at 320x180, evaluated on its OWN collected dataset "
+            f"({len(s3_samples):,} images) rather than the Series 1/2 correction set, so its steering MAE is comparable "
+            "in unit (servo degrees) but measured on a different set. These are offline decision comparisons; field "
             "reliability still has to be proven on the car.",
             normal,
         )
     )
 
     source_counts = Counter(sample["dataset"] for sample in samples)
+    source_counts.update(sample["dataset"] for sample in s3_samples)
     source_rows = [["Source", "Count", "Purpose"]]
     for source_name in sorted(source_counts):
-        source_rows.append([source_name, str(source_counts[source_name]), SOURCE_PURPOSES.get(source_name, "")])
+        purpose = SOURCE_PURPOSES.get(source_name, "")
+        if not purpose and source_name.startswith("S3:"):
+            purpose = "Series 3 collected run (own dataset)"
+        source_rows.append([source_name, str(source_counts[source_name]), purpose])
     story.append(Spacer(1, 0.08 * inch))
     story.append(paragraph("Active Correction Sources", h2))
     story.append(make_table(source_rows, col_widths=[1.0 * inch, 0.7 * inch, 7.2 * inch], header_color=colors.HexColor("#334155")))
@@ -634,7 +761,8 @@ def build_pdf(results, samples, pdf_out):
                 Path(results[version]["checkpoint"]).name,
                 str(results[version]["series"]),
                 results[version]["preprocessing"],
-                f"{results[version]['output_scale_deg']:.0f}",
+                (f"{results[version]['output_scale_deg']:.0f}"
+                 if results[version]["output_scale_deg"] is not None else "-"),
                 fmt_num(overall["mae"]),
                 fmt_num(overall["median_ae"]),
                 fmt_num(overall["signed_error"]),
@@ -654,15 +782,18 @@ def build_pdf(results, samples, pdf_out):
     story.append(growth_table)
 
     story.append(PageBreak())
-    dataset_names = sorted({sample["dataset"] for sample in samples})
+    # union of every model's subset keys: Series 1/2 datasets + Series 3 (S3:*) datasets.
+    dataset_names = sorted({name for version in versions for name in results[version]["by_dataset"]})
     subset_rows = [["Model"] + dataset_names]
     for version in ranked:
         row = [version]
         for dataset_name in dataset_names:
-            row.append(fmt_num(results[version]["by_dataset"][dataset_name]["mae"]))
+            block = results[version]["by_dataset"].get(dataset_name)
+            row.append(fmt_num(block["mae"]) if block else "-")
         subset_rows.append(row)
     story.append(paragraph("Field-Case / Subset MAE", h2))
-    story.append(paragraph("Lower is better. D0510 combines the three v2.3 field-failure runs added after v2.3 training.", small))
+    story.append(paragraph("Lower is better. '-' = model not evaluated on that subset (Series 1/2 vs Series 3 use "
+                           "different datasets). D0510 combines the three v2.3 field-failure runs; S3:* are Series 3 runs.", small))
     subset_col_widths = [0.48 * inch] + [0.7 * inch for _ in dataset_names]
     subset_table = make_table(subset_rows, col_widths=subset_col_widths, header_color=colors.HexColor("#7c2d12"))
     story.append(subset_table)
@@ -703,11 +834,16 @@ def build_pdf(results, samples, pdf_out):
 
     story.append(PageBreak())
     story.append(paragraph("Graphs", h2))
-    for title, chart_versions, chart_fn in [
+    graph_specs = [
         ("Graph 1: Series 1 all models", series1, build_line_chart),
         ("Graph 2: Series 2 all models", series2, build_line_chart),
-        ("Graph 3: Combined all models", versions, build_bar_chart),
-    ]:
+    ]
+    if series3:
+        graph_specs.append(("Graph 3: Series 3 all models", series3, build_bar_chart))
+    graph_specs.append((f"Graph {len(graph_specs) + 1}: Combined all models", versions, build_bar_chart))
+    for title, chart_versions, chart_fn in graph_specs:
+        if not chart_versions:
+            continue
         story.append(paragraph(title, h2))
         image_data = chart_fn(results, title, chart_versions)
         story.append(Image(image_data, width=9.1 * inch, height=3.1 * inch))
@@ -719,6 +855,11 @@ def build_pdf(results, samples, pdf_out):
         "The current active label set includes D0510 field-failure images, so these numbers are not directly comparable to older 1,464-label reports.",
         "Offline MAE does not prove real-world reliability. The car can still fail on lighting, turns, driveways, road-edge ambiguity, speed, and sensor conditions.",
         "v2.4 and v2.4b were trained with the D0510 correction data; low same-dataset error may include train/evaluation overlap and should be treated as a fit check, not final field proof.",
+        "Series 3 (v3.x) is evaluated on its own 320x180 collected dataset (sidewalkpilot_dataset), not the Series 1/2 "
+        "correction label set, so its MAE is same-unit but not measured on identical images — treat cross-series ranking "
+        "as indicative, not exact. Series 3 also predicts throttle, which was near-constant 1.0 in the collected runs.",
+        "Series 3 numbers include train/evaluation overlap (the models were trained on this dataset), so they are a fit "
+        "check, not held-out generalization.",
     ]
     for note in notes:
         story.append(paragraph(f"- {note}", normal))
@@ -761,10 +902,16 @@ def main():
     raw_inputs, clahe_inputs, targets = load_tensors(samples)
     results = evaluate_models(samples, raw_inputs, clahe_inputs, targets, models, args.batch_size, device)
 
+    # Series 3 (separate arch + own dataset), folded into the same report.
+    s3_results, s3_samples = evaluate_series3(args.models_dir, device, args.batch_size)
+    results.update(s3_results)
+    if s3_results:
+        print(f"[start] series3 models={len(s3_results)} s3_samples={len(s3_samples)}", flush=True)
+
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.pdf_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(json.dumps(results, indent=2) + "\n")
-    build_pdf(results, samples, args.pdf_out)
+    build_pdf(results, samples, s3_samples, args.pdf_out)
     print(f"[done] wrote {args.json_out}", flush=True)
     print(f"[done] wrote {args.pdf_out}", flush=True)
 

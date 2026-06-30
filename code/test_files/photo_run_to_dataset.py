@@ -109,6 +109,67 @@ def convert_run(run_dir, mode):
     return linked
 
 
+def aggregate_runs(runs, out_dir, mode, default_throttle):
+    """Merge several photo runs into ONE dataset folder + one combined labels.json
+    spanning multiple days. Old runs may store labels as a bare steering number and
+    may lack throttle; both are normalized (missing throttle -> default_throttle).
+    Filenames are prefixed with the run name to stay collision-proof across days."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_labels = {}
+    per_run = {}
+    total = missing = 0
+    for run_dir in runs:
+        label_path = find_label_json(run_dir)
+        if not label_path:
+            print(f"  [skip] {run_dir.name}: no label json")
+            continue
+        try:
+            labels = json.loads(label_path.read_text())
+        except Exception as exc:
+            print(f"  [skip] {run_dir.name}: unreadable label json ({exc})")
+            continue
+        if not isinstance(labels, dict) or not labels:
+            print(f"  [skip] {run_dir.name}: labels.json is not a non-empty image->label dict")
+            continue
+        run_count = 0
+        for image_name, label in labels.items():
+            src = run_dir / image_name
+            if not src.is_file():
+                missing += 1
+                continue
+            if isinstance(label, dict):
+                steer = label.get("steering", label.get("steer"))
+                throttle = label.get("throttle", default_throttle)
+            else:  # old format: bare steering number, no throttle
+                steer = label
+                throttle = default_throttle
+            if steer is None:
+                missing += 1
+                continue
+            # prefix with run name so same-named photos across days never collide
+            dst_name = f"{run_dir.name}__{image_name}"
+            dst = out_dir / dst_name
+            if dst.exists() or dst.is_symlink():
+                dst.unlink()
+            if mode == "copy":
+                shutil.copy2(src, dst)
+            else:
+                dst.symlink_to(os.path.relpath(src, out_dir))
+            out_labels[dst_name] = {
+                "steering": round(clamp_steer(steer), 2),
+                "throttle": round(clamp_throttle(throttle), 4),
+            }
+            run_count += 1
+        per_run[run_dir.name] = run_count
+        total += run_count
+        print(f"  {run_dir.name}: {run_count} images")
+
+    (out_dir / "labels.json").write_text(json.dumps(out_labels, indent=2) + "\n")
+    print(f"\nAggregated {total} images from {len(per_run)} run(s) "
+          f"({missing} missing/unlabeled) -> {out_dir.relative_to(REPO)}/labels.json")
+    return total
+
+
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -117,6 +178,14 @@ def main():
                         help="specific run dirs (default: every folder in media/photos that has a label json)")
     parser.add_argument("--mode", choices=["symlink", "copy"], default="symlink",
                         help="symlink (default; local, space-saving) or copy (portable across machines)")
+    parser.add_argument("--aggregate", nargs="?", const="sidewalkpilot_dataset", default=None,
+                        metavar="DIRNAME",
+                        help="merge all selected runs into ONE series_3 folder (default name "
+                             "'sidewalkpilot_dataset') with a single combined labels.json")
+    parser.add_argument("--exclude", nargs="*", default=[],
+                        help="run-name substrings to skip (e.g. 2026_06_15 left-drift batch)")
+    parser.add_argument("--default-throttle", type=float, default=1.0,
+                        help="throttle to assign when a run's labels lack it (default 1.0)")
     args = parser.parse_args()
 
     if args.runs:
@@ -126,17 +195,26 @@ def main():
     else:
         runs = []
 
+    runs = [r for r in runs if not any(x in r.name for x in args.exclude)]
+    runs = [r for r in runs if r.is_dir()]
     if not runs:
-        print("No photo runs found.")
+        print("No photo runs found (after exclusions).")
+        return
+
+    if args.aggregate:
+        out_dir = DATASET_DIR / args.aggregate
+        print(f"Aggregating Series 3 dataset (mode={args.mode}) -> {out_dir.relative_to(REPO)}:")
+        if args.exclude:
+            print(f"  excluding: {', '.join(args.exclude)}")
+        total = aggregate_runs(runs, out_dir, args.mode, args.default_throttle)
+        if args.mode == "symlink" and total:
+            print("Note: symlinks are local — use --mode copy before syncing to another machine.")
         return
 
     print(f"Assembling Series 3 datasets (mode={args.mode}):")
     total_images = 0
     runs_done = 0
     for run in runs:
-        if not run.is_dir():
-            print(f"  [skip] {run}: not a directory")
-            continue
         count = convert_run(run, args.mode)
         if count:
             total_images += count
