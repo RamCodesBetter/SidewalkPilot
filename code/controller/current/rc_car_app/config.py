@@ -260,10 +260,12 @@ PHOTO_RUN_CAPTURE_FPS = 10.0
 # the active model choice to Jon and steers with the (steering, throttle) it gets
 # back. Empty host = current behavior (Pi runs its own Series-1/2 model locally).
 # If Jon is unreachable the car holds (safe stop), it does not free-run.
-# Jon = Jetson Orin Nano, reached over the normal WiFi/LAN (NOT the 192.168.10.x
-# USB dashboard link, which is Pi5<->Zero2W only). If .local is flaky on the Pi,
-# replace with the resolved 192.168.0.x IP (check: getent hosts jetson-orin-nano.local).
-JETSON_STEERING_HOST = "jetson-orin-nano.local"
+# Jon = Jetson Orin Nano, on a dedicated wired Ethernet subnet so it stays off
+# WiFi/internet. Pi eth0 = 192.168.20.1, Jon eth = 192.168.20.2.
+# Subnets are kept separate on purpose:
+#   192.168.10.x = Pi5<->Zero2W dashboard USB link (NOT for Jon)
+#   192.168.20.x = Pi5<->Jetson Ethernet (this link)
+JETSON_STEERING_HOST = "192.168.20.2"
 JETSON_STEERING_PORT = 8770
 
 NAV_SELECT_BUTTON = 3
