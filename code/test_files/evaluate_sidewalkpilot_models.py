@@ -441,10 +441,34 @@ def evaluate_models(samples, raw_inputs, clahe_inputs, targets, models, batch_si
     return results
 
 
-def _short_s3_source(run_name):
-    """2026_05_10_run_1 -> S3:0510_r1 (compact subset-table column)."""
-    name = re.sub(r"^2026_", "", str(run_name)).replace("_run_", "_r").replace("_", "")
-    return f"S3:{name}"
+def _run_date_mmdd(run_name):
+    """2026_05_10_run_1 -> '0510'."""
+    m = re.search(r"\d{4}_(\d{2})_(\d{2})", str(run_name))
+    return f"{m.group(1)}{m.group(2)}" if m else str(run_name)
+
+
+def _image_hour(image_name):
+    """...photo_20260510_201230.jpg -> 20 (24h)."""
+    m = re.search(r"_(\d{8})_(\d{2})\d{4}", str(image_name))
+    return int(m.group(2)) if m else 0
+
+
+def _s3_source_labels(samples):
+    """Apply the original D-code convention to Series 3 runs: D{MMDD} for a single
+    run that day, D{MMDD}_{HH} (run start hour, 24h) when a day has multiple runs."""
+    from collections import defaultdict
+    run_hour = {}
+    run_date = {}
+    date_runs = defaultdict(set)
+    for s in samples:
+        run = s["run"]
+        run_date[run] = s["date"]
+        run_hour[run] = min(run_hour.get(run, 99), s["hour"])
+        date_runs[s["date"]].add(run)
+    labels = {}
+    for run, date in run_date.items():
+        labels[run] = f"D{date}_{run_hour[run]:02d}" if len(date_runs[date]) > 1 else f"D{date}"
+    return labels
 
 
 def _load_s3_arch():
@@ -483,10 +507,16 @@ def evaluate_series3(models_dir, device, batch_size):
         tensors.append(np.transpose(img, (2, 0, 1)))
         targets.append(label_to_servo(steer))
         run = str(name).split("__")[0]
-        samples.append({"source": run, "dataset": _short_s3_source(run)})
+        img_part = str(name).split("__", 1)[1] if "__" in str(name) else str(name)
+        samples.append({"run": run, "date": _run_date_mmdd(run), "hour": _image_hour(img_part)})
 
     if not tensors:
         return {}, []
+
+    # original D-code source naming: D{MMDD}, or D{MMDD}_{HH} for multi-run days
+    run_labels = _s3_source_labels(samples)
+    for s in samples:
+        s["dataset"] = s["source"] = run_labels[s["run"]]
 
     inputs = torch.from_numpy(np.stack(tensors)).float()
     targets = np.array(targets, dtype=np.float32)
@@ -715,10 +745,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     source_counts.update(sample["dataset"] for sample in s3_samples)
     source_rows = [["Source", "Count", "Purpose"]]
     for source_name in sorted(source_counts):
-        purpose = SOURCE_PURPOSES.get(source_name, "")
-        if not purpose and source_name.startswith("S3:"):
-            purpose = "Series 3 collected run (own dataset)"
-        source_rows.append([source_name, str(source_counts[source_name]), purpose])
+        source_rows.append([source_name, str(source_counts[source_name]), SOURCE_PURPOSES.get(source_name, "")])
     story.append(Spacer(1, 0.08 * inch))
     story.append(paragraph("Active Correction Sources", h2))
     story.append(make_table(source_rows, col_widths=[1.0 * inch, 0.7 * inch, 7.2 * inch], header_color=colors.HexColor("#334155")))
@@ -839,7 +866,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
         ("Graph 2: Series 2 all models", series2, build_line_chart),
     ]
     if series3:
-        graph_specs.append(("Graph 3: Series 3 all models", series3, build_bar_chart))
+        graph_specs.append(("Graph 3: Series 3 all models", series3, build_line_chart))
     graph_specs.append((f"Graph {len(graph_specs) + 1}: Combined all models", versions, build_bar_chart))
     for title, chart_versions, chart_fn in graph_specs:
         if not chart_versions:
