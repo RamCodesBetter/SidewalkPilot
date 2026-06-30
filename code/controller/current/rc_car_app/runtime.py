@@ -22,6 +22,7 @@ from .config import (
     AUTO_PHOTO_BUTTON,
     AUTO_PHOTO_MAX_INTERVAL_SEC,
     AUTO_PHOTO_MIN_INTERVAL_SEC,
+    PHOTO_RUN_CAPTURE_FPS,
     BRAKE_RATE,
     CM_PER_SEC_TO_MPH,
     COASTING_RATE,
@@ -118,6 +119,9 @@ from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, Webca
 shutdown_flag = threading.Event()
 current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
+# Live L/C/R + slow-throttle counts, incremented per capture (O(1)) so the dashboard
+# stats don't re-parse a growing label file at 30fps. Reset when a new run starts.
+photo_run_live_stats: dict[str, int] = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
 DASHBOARD_PHOTO_STATS_INTERVAL_SEC = 5.0
 
 
@@ -194,8 +198,8 @@ def print_controls():
     print(f"  Button {AUTONOMY_TOGGLE_BUTTON} (A): toggle autonomous driving")
     print(f"  Button {PHOTO_BUTTON} (B): take photo")
     print(
-        f"  Button {AUTO_PHOTO_BUTTON} (Menu): toggle auto photo "
-        f"({AUTO_PHOTO_MIN_INTERVAL_SEC}-{AUTO_PHOTO_MAX_INTERVAL_SEC}s random interval)"
+        f"  Button {AUTO_PHOTO_BUTTON} (Menu): toggle run capture "
+        f"(continuous {PHOTO_RUN_CAPTURE_FPS:.0f} fps; builds <run>.json on stop)"
     )
     print(f"  Button {NAV_SELECT_BUTTON} (X): navigation page/start/stop")
     print(f"  Buttons {CRUISE_TOGGLE_BUTTONS} (Y): cruise control toggle")
@@ -922,40 +926,8 @@ def count_photos_run() -> int:
 
 
 def photo_run_stats() -> dict[str, int]:
-    stats = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
-    if current_photo_run_dir is None or not current_photo_run_dir.exists():
-        return stats
-    label_path = current_photo_run_dir / f"{current_photo_run_dir.name}.json"
-    if not label_path.exists():
-        return stats
-    try:
-        labels = json.loads(label_path.read_text())
-    except Exception as exc:
-        print(f"Failed to read photo run stats {label_path}: {exc}")
-        return stats
-    if not isinstance(labels, dict):
-        return stats
-    for label in labels.values():
-        if not isinstance(label, dict):
-            continue
-        try:
-            steering = float(label.get("steering"))
-        except (TypeError, ValueError):
-            steering = None
-        if steering is not None:
-            if steering < 85.0:
-                stats["left"] += 1
-            elif steering > 95.0:
-                stats["right"] += 1
-            else:
-                stats["center"] += 1
-        try:
-            throttle = float(label.get("throttle"))
-        except (TypeError, ValueError):
-            throttle = None
-        if throttle is not None and throttle < 0.50:
-            stats["throttle_below_50"] += 1
-    return stats
+    # Live counters maintained per capture (no file re-parse at 30fps).
+    return dict(photo_run_live_stats)
 
 
 def count_photos_all() -> int:
@@ -996,6 +968,8 @@ def get_cpu_temp():
 
 
 def create_photo_run_dir() -> Path:
+    for k in photo_run_live_stats:
+        photo_run_live_stats[k] = 0   # fresh run -> reset live counters
     base_dir = Path(PHOTO_DIR)
     base_dir.mkdir(parents=True, exist_ok=True)
     day_prefix = datetime.datetime.now().strftime("%Y_%m_%d")
@@ -1036,29 +1010,62 @@ def current_forward_throttle_label(state) -> float:
     return max(0.0, min(1.0, motor_pwm))
 
 
-def save_photo_run_label(run_dir: Path, photo_name: str, servo_degrees: float, throttle: float) -> None:
-    label_path = run_dir / f"{run_dir.name}.json"
+def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, throttle: float) -> None:
+    """Append ONE line to the per-run label CSV (O(1), crash-safe) and bump the live
+    stats. The trainer's JSON is built from this CSV by finalize_photo_run()."""
+    steering = int(round(clamp_servo_degrees(servo_degrees)))
+    thr = round(max(0.0, min(1.0, float(throttle))), 4)
+    csv_path = run_dir / f"{run_dir.name}_labels.csv"
     try:
-        if label_path.exists():
-            labels = json.loads(label_path.read_text())
-            if not isinstance(labels, dict):
-                labels = {}
-        else:
-            labels = {}
-        labels[photo_name] = {
-            "steering": int(round(clamp_servo_degrees(servo_degrees))),
-            "throttle": round(max(0.0, min(1.0, float(throttle))), 4),
-        }
-        label_path.write_text(json.dumps(labels, indent=2) + "\n")
+        new = not csv_path.exists()
+        with open(csv_path, "a") as f:
+            if new:
+                f.write("photo,steering,throttle\n")
+            f.write(f"{photo_name},{steering},{thr}\n")
     except Exception as exc:
-        print(f"Failed to save photo steering/throttle label {label_path}: {exc}")
+        print(f"Failed to append photo label row {csv_path}: {exc}")
+        return
+    # live L/C/R + slow-throttle counters (match the dashboard buckets)
+    if steering < 85:
+        photo_run_live_stats["left"] += 1
+    elif steering > 95:
+        photo_run_live_stats["right"] += 1
+    else:
+        photo_run_live_stats["center"] += 1
+    if thr < 0.50:
+        photo_run_live_stats["throttle_below_50"] += 1
 
 
-def take_photo(webcam_vision=None, state=None):
+def finalize_photo_run(run_dir: Path | None) -> None:
+    """Build the trainer's <run>.json from the appended <run>_labels.csv. Called when
+    a capture run ends (toggle off / shutdown) so the heavy JSON write happens once."""
+    if run_dir is None:
+        return
+    csv_path = run_dir / f"{run_dir.name}_labels.csv"
+    if not csv_path.exists():
+        return
+    labels: dict[str, dict] = {}
+    try:
+        for line in csv_path.read_text().splitlines()[1:]:   # skip header
+            parts = line.split(",")
+            if len(parts) < 3:
+                continue
+            try:
+                labels[parts[0]] = {"steering": int(float(parts[1])), "throttle": float(parts[2])}
+            except ValueError:
+                continue
+        (run_dir / f"{run_dir.name}.json").write_text(json.dumps(labels, indent=2) + "\n")
+        print(f"Finalized photo run: {len(labels)} labels -> {run_dir.name}.json")
+    except Exception as exc:
+        print(f"Failed to finalize photo run {run_dir}: {exc}")
+
+
+def take_photo(webcam_vision=None, state=None, quiet=False):
     global current_photo_run_dir, photo_status
     if current_photo_run_dir is None:
         current_photo_run_dir = create_photo_run_dir()
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    # microsecond stamp -> unique + ordered + ms-precise at 30fps (no suffix churn)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     photo_name = f"photo_{timestamp}.jpg"
     photo_path = current_photo_run_dir / photo_name
     suffix = 1
@@ -1074,9 +1081,10 @@ def take_photo(webcam_vision=None, state=None):
             servo_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
             if state is not None:
                 servo_degrees = float(state.get("steering_servo_deg", servo_degrees))
-            save_photo_run_label(current_photo_run_dir, photo_name, servo_degrees, current_forward_throttle_label(state))
+            append_photo_run_row(current_photo_run_dir, photo_name, servo_degrees, current_forward_throttle_label(state))
             photo_status = "SAVE"
-            print(f"Photo captured from live Pi camera stream: {message}")
+            if not quiet:
+                print(f"Photo captured from live Pi camera stream: {message}")
             return True
         photo_status = "ERR"
         print(f"Pi camera stream photo capture unavailable: {message}")
@@ -1086,16 +1094,9 @@ def take_photo(webcam_vision=None, state=None):
     return False
 
 
-def random_auto_photo_delay_sec() -> int:
-    min_interval = int(AUTO_PHOTO_MIN_INTERVAL_SEC)
-    max_interval = int(AUTO_PHOTO_MAX_INTERVAL_SEC)
-    if max_interval < min_interval:
-        min_interval, max_interval = max_interval, min_interval
-    return random.randint(min_interval, max_interval)
-
-
-def schedule_next_auto_photo(metrics, now: float | None = None) -> int:
-    delay_sec = random_auto_photo_delay_sec()
+def schedule_next_auto_photo(metrics, now: float | None = None) -> float:
+    # Continuous high-rate capture: next frame one capture-period away.
+    delay_sec = 1.0 / max(1.0, float(PHOTO_RUN_CAPTURE_FPS))
     metrics.auto_photo_next_time = (time.time() if now is None else now) + delay_sec
     return delay_sec
 
@@ -1103,11 +1104,12 @@ def schedule_next_auto_photo(metrics, now: float | None = None) -> int:
 def toggle_auto_photo(state, metrics, dashboard_sender=None):
     state["auto_photo_enabled"] = not bool(state.get("auto_photo_enabled", False))
     if state["auto_photo_enabled"]:
-        delay_sec = schedule_next_auto_photo(metrics)
-        print(f"Auto photo ENABLED. First capture in {delay_sec}s.")
+        schedule_next_auto_photo(metrics)
+        print(f"Run capture ENABLED at {PHOTO_RUN_CAPTURE_FPS:.0f} fps (continuous).")
     else:
         metrics.auto_photo_next_time = 0.0
-        print("Auto photo DISABLED.")
+        finalize_photo_run(current_photo_run_dir)   # build the JSON from the CSV
+        print("Run capture DISABLED.")
     queue_auto_photo_notification(dashboard_sender, state["auto_photo_enabled"])
 
 
@@ -1128,9 +1130,8 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
     if (float(getattr(metrics, "smoothed_speed_mph", 0.0)) < 0.1
             and float(state.get("throttle", 0.0)) < 0.05):
         return
-    take_photo(webcam_vision, state)
-    delay_sec = schedule_next_auto_photo(metrics, now)
-    print(f"Next auto photo in {delay_sec}s.")
+    take_photo(webcam_vision, state, quiet=True)   # quiet: no per-frame spam at 30fps
+    schedule_next_auto_photo(metrics, now)
 
 
 def write_steering_servo_safely(state, metrics, hardware, servo_degrees: float) -> bool:
@@ -1990,6 +1991,7 @@ def run(model_choice=None):
             gps_reader.stop()
         if imu_reader:
             imu_reader.stop()
+        finalize_photo_run(current_photo_run_dir)   # build <run>.json from the CSV on exit
         if webcam_vision:
             webcam_vision.stop()
         if dashboard_sender:
