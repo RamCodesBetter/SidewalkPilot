@@ -56,7 +56,10 @@ STEERING_MODEL_VERSIONS = (
     "3.0b",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
-DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", "1.0")
+# Default to the HIGHEST version (last in the ascending list, currently 3.0b). The Pi
+# sends this to Jon each frame, so Jon runs the best model by default and z2w MODL
+# shows it. Cycle to others on the model page. (RC_CAR_STEERING_MODEL still overrides.)
+DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", STEERING_MODEL_VERSIONS[-1])
 YOLO_IMGSZ = 640
 YOLO_CONF = 0.20
 CAMERA_FRAME_WIDTH = 1280
