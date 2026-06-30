@@ -1,0 +1,68 @@
+{
+  "input_size": {
+    "width": 320,
+    "height": 180
+  },
+  "sample_count": 2757,
+  "source_counts": {
+    "real": 2757
+  },
+  "models": {
+    "3.0": {
+      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.0.pth",
+      "count": 2757,
+      "steering": {
+        "mae": 8.35156536102295,
+        "median_ae": 6.804931640625,
+        "max_ae": 87.39169311523438,
+        "signed_error": -0.37062034010887146,
+        "pred_min": 16.973304748535156,
+        "pred_max": 177.45452880859375,
+        "pred_mean": 103.12738037109375,
+        "target_min": 19.0,
+        "target_max": 180.0,
+        "target_mean": 103.49800872802734
+      },
+      "throttle": {
+        "mae": 0.0003866902843583375,
+        "median_ae": 0.00019478797912597656,
+        "max_ae": 0.02628767490386963,
+        "signed_error": -0.0003866902843583375,
+        "pred_min": 0.9737123250961304,
+        "pred_max": 0.9999952912330627,
+        "pred_mean": 0.9996134042739868,
+        "target_min": 1.0,
+        "target_max": 1.0,
+        "target_mean": 1.0
+      }
+    },
+    "3.0b": {
+      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.0b.pth",
+      "count": 2757,
+      "steering": {
+        "mae": 9.33851146697998,
+        "median_ae": 7.5265045166015625,
+        "max_ae": 75.75321960449219,
+        "signed_error": 0.7286078333854675,
+        "pred_min": 14.398719787597656,
+        "pred_max": 174.53274536132812,
+        "pred_mean": 104.22661590576172,
+        "target_min": 19.0,
+        "target_max": 180.0,
+        "target_mean": 103.49800872802734
+      },
+      "throttle": {
+        "mae": 0.0003166465030517429,
+        "median_ae": 0.000179290771484375,
+        "max_ae": 0.013518333435058594,
+        "signed_error": -0.0003166465030517429,
+        "pred_min": 0.9864816665649414,
+        "pred_max": 0.9999966621398926,
+        "pred_mean": 0.9996833205223083,
+        "target_min": 1.0,
+        "target_max": 1.0,
+        "target_mean": 1.0
+      }
+    }
+  }
+}

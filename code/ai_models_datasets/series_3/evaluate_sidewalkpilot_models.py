@@ -3,6 +3,7 @@ import argparse
 import json
 import re
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
 DEFAULT_JSON_OUT = REPO_ROOT / "docs" / "sidewalkpilot_v3_eval.json"
+DEFAULT_PDF_OUT = REPO_ROOT / "docs" / "steering_model_report.pdf"
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+[a-z]?)\.pth$")
 
 
@@ -115,6 +117,8 @@ def parse_args():
     parser.add_argument("--corrections", nargs="*", default=[str(SCRIPT_DIR / "steering_corrections.json")])
     parser.add_argument("--roots", nargs="*", default=[])
     parser.add_argument("--json-out", type=Path, default=DEFAULT_JSON_OUT)
+    parser.add_argument("--pdf-out", type=Path, default=DEFAULT_PDF_OUT)
+    parser.add_argument("--no-pdf", action="store_true", help="skip the PDF report")
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--width", type=int, default=320)
@@ -183,6 +187,112 @@ def main():
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(json.dumps(results, indent=2) + "\n")
     print(f"[done] wrote {args.json_out}", flush=True)
+
+    if not args.no_pdf:
+        build_pdf(results, args.pdf_out)
+        print(f"[done] wrote {args.pdf_out}", flush=True)
+
+
+def build_pdf(results, pdf_out):
+    """Render the Series 3 steering+throttle report PDF from the eval results dict."""
+    import io
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import landscape, letter
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import inch
+    from reportlab.platypus import (
+        Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle,
+    )
+
+    models = results.get("models", {})
+    # rank by steering MAE (lower is better)
+    ranked = sorted(models.items(), key=lambda kv: kv[1]["steering"]["mae"])
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle("T", parent=styles["Title"], fontSize=18,
+                                 textColor=colors.HexColor("#0f172a"))
+    h2 = ParagraphStyle("H2", parent=styles["Heading2"], textColor=colors.HexColor("#111827"),
+                        spaceBefore=8)
+    normal = ParagraphStyle("Body", parent=styles["BodyText"], fontSize=9, leading=12)
+    small = ParagraphStyle("Small", parent=styles["BodyText"], fontSize=7.5, leading=10,
+                           textColor=colors.HexColor("#475569"))
+
+    def P(text, style=normal):
+        return Paragraph(str(text), style)
+
+    story = []
+    story.append(P("SidewalkPilot Series 3 Steering + Throttle Model Report", title_style))
+    story.append(P(f"Offline evaluation &mdash; generated {datetime.now():%Y-%m-%d %I:%M %p}", small))
+    story.append(Spacer(1, 0.12 * inch))
+
+    src = ", ".join(f"{k}={v}" for k, v in results.get("source_counts", {}).items()) or "n/a"
+    isz = results.get("input_size", {})
+    story.append(P("Evaluation Setup", h2))
+    story.append(P(
+        f"<b>Samples:</b> {results.get('sample_count', 0):,} &nbsp; "
+        f"<b>Input:</b> {isz.get('width')}x{isz.get('height')} (BGR) &nbsp; "
+        f"<b>Sources:</b> {src} &nbsp; <b>Outputs:</b> steering 0..180 + throttle 0..1 "
+        f"(2-output unit controls). <b>Error unit:</b> servo degrees / throttle fraction."))
+    story.append(P(
+        "<b>Caveats:</b> evaluated on the collected run data (not a held-out split), so "
+        "this reflects fit quality. Throttle was a near-constant 1.0 across this run, so "
+        "throttle MAE is not a meaningful generalization signal yet.", small))
+    story.append(Spacer(1, 0.12 * inch))
+
+    if ranked:
+        best_v, best_m = ranked[0]
+        story.append(P(
+            f"<b>Best checkpoint:</b> v{best_v} &mdash; steering MAE "
+            f"{best_m['steering']['mae']:.3f}&deg; (median {best_m['steering']['median_ae']:.3f}&deg;)."))
+        story.append(Spacer(1, 0.1 * inch))
+
+    story.append(P("Model Ranking (lower steering MAE is better)", h2))
+    header = ["Version", "Steering MAE", "Median AE", "Max AE", "Signed err",
+              "Throttle MAE", "Pred mean", "Target mean"]
+    rows = [header]
+    for v, m in ranked:
+        s, t = m["steering"], m["throttle"]
+        rows.append([
+            f"v{v}", f"{s['mae']:.3f}", f"{s['median_ae']:.3f}", f"{s['max_ae']:.2f}",
+            f"{s['signed_error']:+.3f}", f"{t['mae']:.4f}",
+            f"{s['pred_mean']:.1f}", f"{s['target_mean']:.1f}",
+        ])
+    table = Table(rows, repeatRows=1)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e293b")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+        ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
+        ("BACKGROUND", (0, 1), (-1, 1), colors.HexColor("#dcfce7")),  # best row
+    ]))
+    story.append(table)
+    story.append(Spacer(1, 0.18 * inch))
+
+    # steering MAE bar chart
+    fig, ax = plt.subplots(figsize=(7.5, 2.6))
+    vers = [f"v{v}" for v, _ in ranked]
+    maes = [m["steering"]["mae"] for _, m in ranked]
+    bars = ax.bar(vers, maes, color="#2563eb")
+    ax.set_ylabel("Steering MAE (deg)")
+    ax.set_title("Steering MAE by checkpoint (lower is better)")
+    for b, mae in zip(bars, maes):
+        ax.text(b.get_x() + b.get_width() / 2, b.get_height(), f"{mae:.2f}",
+                ha="center", va="bottom", fontsize=8)
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    story.append(Image(buf, width=7.5 * inch, height=2.6 * inch))
+
+    pdf_out.parent.mkdir(parents=True, exist_ok=True)
+    SimpleDocTemplate(str(pdf_out), pagesize=landscape(letter),
+                      title="SidewalkPilot Series 3 Steering Model Report").build(story)
 
 
 if __name__ == "__main__":
