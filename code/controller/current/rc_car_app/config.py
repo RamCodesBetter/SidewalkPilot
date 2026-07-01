@@ -88,9 +88,9 @@ STEERING_YAW_PID_YAW_SIGN = -1.0
 # Gains START AT 0 — tune them LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows;
 # d-pad up/down picks the row, left/right dec/inc: DELT +/-1, KP +/-0.5, KI +/-0.25,
 # KD +/-0.05). No clamps anywhere: infinite control authority.
-STEERING_YAW_PID_KP = 0.70
-STEERING_YAW_PID_KI = 1.00
-STEERING_YAW_PID_KD = 0.05
+STEERING_YAW_PID_KP = 0.00
+STEERING_YAW_PID_KI = 0.00
+STEERING_YAW_PID_KD = 0.00
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
 # feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.

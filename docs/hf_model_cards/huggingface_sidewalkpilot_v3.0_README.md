@@ -76,14 +76,12 @@ SidewalkPilot-v3.0 is the first Series 3 checkpoint. Unlike the steering-only Se
 | Version | Main update category | Data/status | Result |
 |---|---|---|---|
 | `3.0` | First Series 3 steering+throttle model | tilted-camera Series 3 dataset (poor quality) | high MAE; not field-usable |
-| `3.0b` | Best checkpoint from the v3.0 training run | same v3.0 training run | similar; slightly worse MAE than 3.0 |
 
 ## Evaluation Summary
 
 | Model | Checkpoint | Full Score | MAE | Median AE | Max AE | Signed Error | Within 2 deg | Within 5 deg | Within 10 deg | Within 20 deg |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | `3.0` | `SidewalkPilot-v3.0.onnx` | `94.319%` | `10.225` | `7.802` | `87.389` | `+0.768` | `502 / 3517` | `1166 / 3517` | `2135 / 3517` | `3088 / 3517` |
-| `3.0b` | `SidewalkPilot-v3.0b.onnx` | `93.997%` | `10.805` | `8.478` | `75.904` | `+1.682` | `475 / 3517` | `1105 / 3517` | `2019 / 3517` | `3015 / 3517` |
 
 For reference, the best Series 2 model (v2.4b) scored `3.265` deg MAE on the Series 1/2 set — roughly 3x better than Series 3 here.
 
@@ -92,21 +90,18 @@ For reference, the best Series 2 model (v2.4b) scored `3.265` deg MAE on the Ser
 | Model | Pred Min | Pred Max | Pred Mean | Target Mean |
 |---|---:|---:|---:|---:|
 | `3.0` | `16.972` | `177.455` | `102.724` | `101.956` |
-| `3.0b` | `14.399` | `174.533` | `103.637` | `101.956` |
 
 ## Ranking
 
 | Rank In This Card | Model | Checkpoint | Score | MAE | Median AE | Max AE | Within 5 deg | Within 10 deg | Signed Error |
 |---:|---|---|---:|---:|---:|---:|---:|---:|---:|
 | `1` | `3.0` | `SidewalkPilot-v3.0.onnx` | `94.319%` | `10.225` | `7.802` | `87.389` | `1166 / 3517` | `2135 / 3517` | `+0.768` |
-| `2` | `3.0b` | `SidewalkPilot-v3.0b.onnx` | `93.997%` | `10.805` | `8.478` | `75.904` | `1105 / 3517` | `2019 / 3517` | `+1.682` |
 
 ## Field Case Comparison
 
 | Model | D0510_18 MAE | D0510_19 MAE | D0510_20 MAE | D0629_17 MAE |
 |---|---:|---:|---:|---:|
 | `3.0` | `15.94` | `12.72` | `17.39` | `8.35` |
-| `3.0b` | `16.06` | `12.31` | `16.19` | `9.34` |
 
 ## Current Version Snapshot
 
@@ -116,7 +111,7 @@ For reference, the best Series 2 model (v2.4b) scored `3.265` deg MAE on the Ser
 - **Full score:** `94.319%`
 - **MAE:** `10.225` servo degrees
 - **Median AE:** `7.802` servo degrees
-- **Rank in this card:** `1` of `2` listed checkpoints
+- **Rank in this card:** `1` of `1` listed checkpoints
 - **Verdict:** not field-usable — high MAE from tilted-camera training data.
 
 ## Intended Use
