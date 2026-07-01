@@ -338,6 +338,11 @@ def serve(model, host, port):
                 if not hdr:
                     break
                 n = struct.unpack(">I", hdr)[0]
+                if n == 0:
+                    # status ping (no frame): report temps + current ifps, run no inference
+                    jcpu, jgpu = _read_tegra_temps()
+                    conn.sendall(struct.pack(">fffff", 90.0, 0.0, jcpu, jgpu, ifps))
+                    continue
                 data = _recv_exact(conn, n)
                 if not data:
                     break

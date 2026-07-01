@@ -100,6 +100,26 @@ class JetsonSteeringClient:
             self.close()          # drop the socket; next infer() reconnects
             return None
 
+    def poll_status(self) -> bool:
+        """Ask Jon for temps + inference rate WITHOUT running inference (sends a
+        zero-length frame). Updates jon_cpu_temp_c/jon_gpu_temp_c/infer_fps. Returns
+        True on success. Lets the dashboard show Jon's temps even in manual mode."""
+        if self.sock is None and not self.connect():
+            return False
+        try:
+            self.sock.sendall(bytes([0]) + struct.pack(">I", 0))  # version-len 0, jpeg-len 0
+            reply = self._recv_exact(20)
+            if reply is None:
+                raise OSError("short reply")
+            _s, _t, jcpu, jgpu, ifps = struct.unpack(">fffff", reply)
+            self.jon_cpu_temp_c = float(jcpu)
+            self.jon_gpu_temp_c = float(jgpu)
+            self.infer_fps = float(ifps)
+            return True
+        except OSError:
+            self.close()
+            return False
+
 
 def _main():
     import argparse
