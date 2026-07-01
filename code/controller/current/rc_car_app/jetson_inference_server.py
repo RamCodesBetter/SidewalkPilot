@@ -214,7 +214,10 @@ class SteeringModel:
             # onnxruntime build is installed (on Jetson: the JetPack-matched
             # onnxruntime-gpu wheel; the plain PyPI 'onnxruntime' is CPU-only).
             available = ort.get_available_providers()
-            preferred = ("TensorrtExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider")
+            # CUDA first: fast, predictable GPU startup. (TensorRT EP is faster but
+            # rebuilds its engine every start without a cache -> save it for the
+            # explicit INT8/TensorRT step later.)
+            preferred = ("CUDAExecutionProvider", "TensorrtExecutionProvider", "CPUExecutionProvider")
             providers = [p for p in preferred if p in available] or ["CPUExecutionProvider"]
             if providers == ["CPUExecutionProvider"]:
                 print("[jon] WARNING: no GPU execution provider available -> running on CPU (slow). "
