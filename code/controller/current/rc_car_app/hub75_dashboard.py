@@ -181,7 +181,7 @@ class Hub75DashboardSender:
             "cpu_temp_c": round(max(0.0, min(99.0, float(cpu_temp_c))), 1),
             "jon_cpu_temp_c": round(max(0.0, min(99.0, float(jon_cpu_temp_c))), 1),
             "jon_gpu_temp_c": round(max(0.0, min(99.0, float(jon_gpu_temp_c))), 1),
-            "infer_fps": round(max(0.0, min(99.9, float(infer_fps))), 1),
+            "infer_fps": round(max(0.0, min(99.99, float(infer_fps))), 2),
             "camera_pixels": camera_pixels or [],
             "photos_run": max(0, int(photos_run)),
             "photos_all": max(0, int(photos_all)),
