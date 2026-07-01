@@ -210,8 +210,16 @@ class SteeringModel:
         if low.endswith(".onnx"):
             if ort is None:
                 raise RuntimeError("onnxruntime is required for .onnx models.")
-            providers = [p for p in ("CUDAExecutionProvider", "CPUExecutionProvider")
-                         if p in ort.get_available_providers()] or ["CPUExecutionProvider"]
+            # Prefer GPU: TensorRT > CUDA > CPU. These only appear if a GPU-capable
+            # onnxruntime build is installed (on Jetson: the JetPack-matched
+            # onnxruntime-gpu wheel; the plain PyPI 'onnxruntime' is CPU-only).
+            available = ort.get_available_providers()
+            preferred = ("TensorrtExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider")
+            providers = [p for p in preferred if p in available] or ["CPUExecutionProvider"]
+            if providers == ["CPUExecutionProvider"]:
+                print("[jon] WARNING: no GPU execution provider available -> running on CPU (slow). "
+                      "Install the JetPack-matched onnxruntime-gpu wheel to get CUDA/TensorRT. "
+                      f"(available: {available})", flush=True)
             self.session = ort.InferenceSession(model_path, providers=providers)
             self.input_name = self.session.get_inputs()[0].name
             shape = self.session.get_inputs()[0].shape   # [N,3,H,W]
