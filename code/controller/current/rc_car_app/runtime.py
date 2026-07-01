@@ -1917,10 +1917,13 @@ def run(model_choice=None):
                 # keep Jon's temps/IFPS fresh on the dashboard even in manual mode
                 # (in autonomy, apply_autonomous_controls already refreshes them each frame)
                 if jetson_client is not None and not state["autonomous_mode"]:
-                    if jetson_client.poll_status():
+                    _ok = jetson_client.poll_status()
+                    if _ok:
                         state["jon_cpu_temp_c"] = jetson_client.jon_cpu_temp_c
                         state["jon_gpu_temp_c"] = jetson_client.jon_gpu_temp_c
                         state["infer_fps"] = jetson_client.infer_fps
+                    print(f"[jontemp] poll_ok={_ok} cpu={jetson_client.jon_cpu_temp_c:.1f} "
+                          f"gpu={jetson_client.jon_gpu_temp_c:.1f} ips={jetson_client.infer_fps:.2f}", flush=True)
             update_dashboard_photo_stats(metrics, current_loop_time)
             gps_state = gps_reader.get_state() if gps_reader is not None else {"fix": False, "sats": 0}
             latest_nav = navigation.update(

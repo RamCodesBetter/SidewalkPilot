@@ -451,10 +451,10 @@ class DashboardRenderer:
         model_cells = self._format_model_cells(str(payload.get("model_choice", "0.0")))
         pred_cells = self._format_three_digits(float(payload.get("servo_deg", 90.0)))
         confidence_cells = self._format_percent_cells(float(payload.get("camera_confidence_percent", 0)))
-        ifps = max(0.0, min(99.9, float(payload.get("infer_fps", 0.0))))
-        ifps_i = int(ifps)
-        ifps_frac = int(round((ifps - ifps_i) * 10))
-        ifps_cells = [str(ifps_i // 10), f"{ifps_i % 10}.", str(ifps_frac)]
+        ips = max(0.0, min(99.99, float(payload.get("infer_fps", 0.0))))
+        ips_i = int(ips)
+        ips_frac = min(99, int(round((ips - ips_i) * 100)))
+        ips_cells = [str(ips_i // 10), f"{ips_i % 10}.", str(ips_frac // 10), str(ips_frac % 10)]
         if model_cells[2]:
             row_cells = ["M", "O", "D", "L", ":", "", model_cells[1], model_cells[2]]
             decimal_col = 5
@@ -466,7 +466,7 @@ class DashboardRenderer:
         self._draw_model_decimal_at(0, decimal_col, TEXT_CYAN, y_offset_px)
         self._draw_text_row(1, ["P", "R", "E", "D", ":", *pred_cells], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["C", "O", "N", "F", ":", *confidence_cells], ARROW_YELLOW, y_offset_px)
-        self._draw_text_row(3, ["I", "F", "P", "S", ":", *ifps_cells], TEXT_ORANGE, y_offset_px)
+        self._draw_text_row(3, ["I", "P", "S", ":", *ips_cells], TEXT_ORANGE, y_offset_px)
 
     def _read_zero_cpu_temp(self) -> float:
         """Zero's own CPU temp (°C), cached ~2s. 0.0 if unreadable."""
