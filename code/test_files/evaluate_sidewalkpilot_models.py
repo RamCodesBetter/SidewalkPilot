@@ -467,7 +467,7 @@ def _s3_source_labels(samples):
         date_runs[s["date"]].add(run)
     labels = {}
     for run, date in run_date.items():
-        labels[run] = f"D{date}_{run_hour[run]:02d}" if len(date_runs[date]) > 1 else f"D{date}"
+        labels[run] = f"D{date}_{run_hour[run]:02d}"   # always DMMDD_HH (run start hour, 24h)
     return labels
 
 
@@ -487,7 +487,19 @@ def evaluate_series3(models_dir, device, batch_size):
     plus the per-image samples (source/dataset) for report context. Returns ({}, [])
     if there are no S3 models or no S3 dataset yet."""
     labels_path = S3_DATASET_DIR / "labels.json"
-    s3_paths = sorted(p for p in models_dir.glob("SidewalkPilot-v3*.pth") if S3_MODEL_RE.match(p.name))
+    # accept .onnx (current artifact scheme) as well as .pt/.pth; one file per version,
+    # onnx preferred > pt > pth.
+    _any = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.(?P<ext>onnx|pt|pth)$")
+    by_ver = {}
+    for p in sorted(models_dir.glob("SidewalkPilot-v3*")):
+        m = _any.match(p.name)
+        if not m:
+            continue
+        rank = {"onnx": 0, "pt": 1, "pth": 2}[m.group("ext")]
+        v = m.group("version")
+        if v not in by_ver or rank < by_ver[v][0]:
+            by_ver[v] = (rank, p)
+    s3_paths = [by_ver[v][1] for v in sorted(by_ver)]
     if not s3_paths or not labels_path.is_file():
         return {}, []
 
@@ -513,12 +525,13 @@ def evaluate_series3(models_dir, device, batch_size):
     if not tensors:
         return {}, []
 
-    # original D-code source naming: D{MMDD}, or D{MMDD}_{HH} for multi-run days
+    # D-code source naming, D{MMDD}_{HH} (run start hour) per the original convention
     run_labels = _s3_source_labels(samples)
     for s in samples:
         s["dataset"] = s["source"] = run_labels[s["run"]]
 
-    inputs = torch.from_numpy(np.stack(tensors)).float()
+    inputs_np = np.stack(tensors).astype(np.float32)   # for onnxruntime
+    inputs = torch.from_numpy(inputs_np)               # for torch
     targets = np.array(targets, dtype=np.float32)
     datasets = [s["dataset"] for s in samples]
     sources = [s["source"] for s in samples]
@@ -526,26 +539,36 @@ def evaluate_series3(models_dir, device, batch_size):
 
     results = {}
     for path in s3_paths:
-        version = S3_MODEL_RE.match(path.name).group("version")
+        version = _any.match(path.name).group("version")
         print(f"[eval] model={version} checkpoint={path.name}", flush=True)
-        model = SidewalkPilotV3().to(device)
-        checkpoint = torch.load(path, map_location=device)
-        state = checkpoint
-        if isinstance(checkpoint, dict):
-            for key in ("model_state_dict", "state_dict", "model"):
-                if key in checkpoint and isinstance(checkpoint[key], dict):
-                    state = checkpoint[key]
-                    break
-        state = {key.removeprefix("module."): value for key, value in state.items()}
-        model.load_state_dict(state, strict=True)
-        model.eval()
-
         preds = []
-        with torch.no_grad():
-            for start in range(0, len(inputs), batch_size):
-                out = model(inputs[start:start + batch_size].to(device, non_blocking=True)).cpu().numpy()
+        if path.suffix.lower() == ".onnx":
+            import onnxruntime as ort
+            providers = [p for p in ("CUDAExecutionProvider", "CPUExecutionProvider")
+                         if p in ort.get_available_providers()] or ["CPUExecutionProvider"]
+            sess = ort.InferenceSession(str(path), providers=providers)
+            iname = sess.get_inputs()[0].name
+            for start in range(0, len(inputs_np), batch_size):
+                out = sess.run(None, {iname: inputs_np[start:start + batch_size]})[0]
                 u0 = np.clip(out[:, 0], -1.0, 1.0)            # decode steering control -> 0..180
                 preds.append(np.clip(90.0 + 90.0 * u0, 0.0, 180.0))
+        else:
+            model = SidewalkPilotV3().to(device)
+            checkpoint = torch.load(path, map_location=device)
+            state = checkpoint
+            if isinstance(checkpoint, dict):
+                for key in ("model_state_dict", "state_dict", "model"):
+                    if key in checkpoint and isinstance(checkpoint[key], dict):
+                        state = checkpoint[key]
+                        break
+            state = {key.removeprefix("module."): value for key, value in state.items()}
+            model.load_state_dict(state, strict=True)
+            model.eval()
+            with torch.no_grad():
+                for start in range(0, len(inputs), batch_size):
+                    out = model(inputs[start:start + batch_size].to(device, non_blocking=True)).cpu().numpy()
+                    u0 = np.clip(out[:, 0], -1.0, 1.0)        # decode steering control -> 0..180
+                    preds.append(np.clip(90.0 + 90.0 * u0, 0.0, 180.0))
         preds = np.concatenate(preds).astype(np.float32)
 
         by_dataset = {}
