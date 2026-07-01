@@ -1044,6 +1044,9 @@ def main():
     model_choice = ""
     camera_confidence_percent = 0
     cpu_temp_c = 0.0
+    jon_cpu_temp_c = 0.0
+    jon_gpu_temp_c = 0.0
+    infer_fps = 0.0
     camera_pixels: List[str] = []
     photos_run = 0
     photos_all = 0
@@ -1109,6 +1112,9 @@ def main():
                 "model_choice": model_choice,
                 "camera_confidence_percent": camera_confidence_percent,
                 "cpu_temp_c": cpu_temp_c,
+                "jon_cpu_temp_c": jon_cpu_temp_c,
+                "jon_gpu_temp_c": jon_gpu_temp_c,
+                "infer_fps": infer_fps,
                 "camera_pixels": camera_pixels,
                 "photos_run": photos_run,
                 "photos_all": photos_all,
@@ -1177,6 +1183,9 @@ def main():
         nonlocal model_choice
         nonlocal camera_confidence_percent
         nonlocal cpu_temp_c
+        nonlocal jon_cpu_temp_c
+        nonlocal jon_gpu_temp_c
+        nonlocal infer_fps
         nonlocal camera_pixels
         nonlocal photos_run
         nonlocal photos_all
@@ -1219,6 +1228,9 @@ def main():
         model_choice = str(payload.get("model_choice", model_choice))[:4]
         camera_confidence_percent = max(0, min(100, int(payload.get("camera_confidence_percent", camera_confidence_percent))))
         cpu_temp_c = max(0.0, min(99.0, float(payload.get("cpu_temp_c", cpu_temp_c))))
+        jon_cpu_temp_c = max(0.0, min(99.0, float(payload.get("jon_cpu_temp_c", jon_cpu_temp_c))))
+        jon_gpu_temp_c = max(0.0, min(99.0, float(payload.get("jon_gpu_temp_c", jon_gpu_temp_c))))
+        infer_fps = max(0.0, min(99.99, float(payload.get("infer_fps", infer_fps))))
         raw_lidar_points = payload.get("lidar_points", lidar_points)
         if isinstance(raw_lidar_points, list):
             lidar_points = raw_lidar_points[:180]
