@@ -280,6 +280,34 @@ def _recv_exact(conn, n):
     return buf
 
 
+_TEMP_CACHE = {"t": 0.0, "cpu": 0.0, "gpu": 0.0}
+
+
+def _read_tegra_temps():
+    """(cpu_c, gpu_c) from the Jetson thermal zones, cached ~2s. 0.0 if unreadable."""
+    import glob
+    now = time.time()
+    if now - _TEMP_CACHE["t"] < 2.0:
+        return _TEMP_CACHE["cpu"], _TEMP_CACHE["gpu"]
+    cpu = gpu = 0.0
+    try:
+        for zone in glob.glob("/sys/devices/virtual/thermal/thermal_zone*"):
+            try:
+                ztype = open(zone + "/type").read().strip().lower()
+                milli = float(open(zone + "/temp").read().strip())
+            except Exception:
+                continue
+            c = milli / 1000.0
+            if "cpu" in ztype:
+                cpu = max(cpu, c)
+            elif "gpu" in ztype:
+                gpu = max(gpu, c)
+    except Exception:
+        pass
+    _TEMP_CACHE.update({"t": now, "cpu": cpu, "gpu": gpu})
+    return cpu, gpu
+
+
 def serve(model, host, port):
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -290,7 +318,7 @@ def serve(model, host, port):
         conn, addr = srv.accept()
         conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         print(f"[jon] connected: {addr}", flush=True)
-        frames, t0 = 0, time.time()
+        frames, t0, ifps, last_frame_ts = 0, time.time(), 0.0, 0.0
         try:
             while True:
                 # Frame: [1B version-len][version utf8][4B jpeg-len][jpeg bytes].
@@ -313,16 +341,25 @@ def serve(model, host, port):
                 data = _recv_exact(conn, n)
                 if not data:
                     break
+                # inference rate (EMA) + Jetson temps, reported back to the Pi dashboard
+                now = time.time()
+                if last_frame_ts:
+                    dt_f = now - last_frame_ts
+                    if dt_f > 0.0:
+                        ifps = 0.3 * (1.0 / dt_f) + 0.7 * ifps
+                last_frame_ts = now
+                jcpu, jgpu = _read_tegra_temps()
                 frame = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)  # BGR
                 if frame is None:
-                    conn.sendall(struct.pack(">ff", 90.0, 0.0))
+                    conn.sendall(struct.pack(">fffff", 90.0, 0.0, jcpu, jgpu, ifps))
                     continue
                 steering, throttle = model.infer(frame)
-                conn.sendall(struct.pack(">ff", steering, throttle))
+                # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps
+                conn.sendall(struct.pack(">fffff", steering, throttle, jcpu, jgpu, ifps))
                 frames += 1
                 if frames % 100 == 0:
-                    print(f"[jon] {frames} frames, {frames/max(1e-6,time.time()-t0):.1f} infer/s, "
-                          f"last steer={steering:.1f}", flush=True)
+                    print(f"[jon] {frames} frames, {ifps:.1f} infer/s, "
+                          f"cpu={jcpu:.0f}C gpu={jgpu:.0f}C last steer={steering:.1f}", flush=True)
         except (ConnectionResetError, BrokenPipeError):
             pass
         finally:

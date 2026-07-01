@@ -36,7 +36,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 15
+DASHBOARD_PAGE_COUNT = 16
 TELEMETRY_STALE_DISPLAY_SEC = 4.0
 
 DIGIT_BLUE: Color = (0, 0, 255)
@@ -451,8 +451,10 @@ class DashboardRenderer:
         model_cells = self._format_model_cells(str(payload.get("model_choice", "0.0")))
         pred_cells = self._format_three_digits(float(payload.get("servo_deg", 90.0)))
         confidence_cells = self._format_percent_cells(float(payload.get("camera_confidence_percent", 0)))
-        cpu_temp = max(0, min(99, int(round(float(payload.get("cpu_temp_c", 0.0))))))
-        cpu_temp_cells = [str(cpu_temp // 10), str(cpu_temp % 10), "C"]
+        ifps = max(0.0, min(99.9, float(payload.get("infer_fps", 0.0))))
+        ifps_i = int(ifps)
+        ifps_frac = int(round((ifps - ifps_i) * 10))
+        ifps_cells = [str(ifps_i // 10), f"{ifps_i % 10}.", str(ifps_frac)]
         if model_cells[2]:
             row_cells = ["M", "O", "D", "L", ":", "", model_cells[1], model_cells[2]]
             decimal_col = 5
@@ -464,7 +466,32 @@ class DashboardRenderer:
         self._draw_model_decimal_at(0, decimal_col, TEXT_CYAN, y_offset_px)
         self._draw_text_row(1, ["P", "R", "E", "D", ":", *pred_cells], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["C", "O", "N", "F", ":", *confidence_cells], ARROW_YELLOW, y_offset_px)
-        self._draw_text_row(3, ["C", "T", "M", "P", ":", *cpu_temp_cells], TEXT_ORANGE, y_offset_px)
+        self._draw_text_row(3, ["I", "F", "P", "S", ":", *ifps_cells], TEXT_ORANGE, y_offset_px)
+
+    def _read_zero_cpu_temp(self) -> float:
+        """Zero's own CPU temp (°C), cached ~2s. 0.0 if unreadable."""
+        now = time.time()
+        if now - getattr(self, "_ztemp_t", 0.0) < 2.0:
+            return getattr(self, "_ztemp_c", 0.0)
+        c = 0.0
+        try:
+            with open("/sys/class/thermal/thermal_zone0/temp") as fh:
+                c = float(fh.read().strip()) / 1000.0
+        except Exception:
+            c = 0.0
+        self._ztemp_t = now
+        self._ztemp_c = c
+        return c
+
+    def _draw_temps_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        # v3h3 temps: RTMP=Pi CPU, JTMP=Jon CPU, GTMP=Jon GPU, ZTMP=Zero CPU
+        def tcells(v):
+            t = max(0, min(99, int(round(float(v)))))
+            return [str(t // 10), str(t % 10), "C"]
+        self._draw_text_row(0, ["R", "T", "M", "P", ":", *tcells(payload.get("cpu_temp_c", 0.0))], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["J", "T", "M", "P", ":", *tcells(payload.get("jon_cpu_temp_c", 0.0))], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["G", "T", "M", "P", ":", *tcells(payload.get("jon_gpu_temp_c", 0.0))], ARROW_YELLOW, y_offset_px)
+        self._draw_text_row(3, ["Z", "T", "M", "P", ":", *tcells(self._read_zero_cpu_temp())], TEXT_ORANGE, y_offset_px)
 
     def _draw_page_six(self, payload: Dict[str, object], y_offset_px: int = 0):
         rows = payload.get("camera_pixels", [])
@@ -735,6 +762,9 @@ class DashboardRenderer:
             return
         if page == 15:
             self._draw_yaw_page(payload, y_offset_px)
+            return
+        if page == 16:
+            self._draw_temps_page(payload, y_offset_px)
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),

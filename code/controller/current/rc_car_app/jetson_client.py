@@ -7,7 +7,8 @@ never wedged by the Jetson — the runtime can fall back to the local model.
 
 Protocol (TCP):
     Pi  -> Jon : [1B version-len V][V bytes version utf8][4B big-endian len N][N bytes JPEG]
-    Jon -> Pi  : 8 bytes = struct '>ff' (steering_deg 0..180, throttle 0..1)
+    Jon -> Pi  : 20 bytes = struct '>fffff' (steering_deg 0..180, throttle 0..1,
+                 jon_cpu_temp_c, jon_gpu_temp_c, infer_fps)
 
 The version string is the Pi's active model choice (e.g. "3.0b"). Jon hot-swaps to
 that model when it changes — so picking a model on the Pi's dashboard model page
@@ -38,6 +39,10 @@ class JetsonSteeringClient:
         self.jpeg_quality = int(jpeg_quality)
         self.timeout = float(timeout)
         self.sock = None
+        # latest telemetry Jon reports back with each inference (for the dashboard)
+        self.jon_cpu_temp_c = 0.0
+        self.jon_gpu_temp_c = 0.0
+        self.infer_fps = 0.0
 
     def connect(self):
         self.close()
@@ -82,10 +87,14 @@ class JetsonSteeringClient:
         vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:255]
         try:
             self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
-            reply = self._recv_exact(8)
+            # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps (5x f32)
+            reply = self._recv_exact(20)
             if reply is None:
                 raise OSError("short reply")
-            steering, throttle = struct.unpack(">ff", reply)
+            steering, throttle, jcpu, jgpu, ifps = struct.unpack(">fffff", reply)
+            self.jon_cpu_temp_c = float(jcpu)
+            self.jon_gpu_temp_c = float(jgpu)
+            self.infer_fps = float(ifps)
             return float(steering), float(throttle)
         except OSError:
             self.close()          # drop the socket; next infer() reconnects

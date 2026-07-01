@@ -396,6 +396,7 @@ DASHBOARD_PAGE_COORDS = {
     13: (1, 3),
     14: (6, 2),
     15: (1, 4),
+    16: (3, 3),
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
@@ -1233,6 +1234,10 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
         )
         if jon_result is not None:
             jon_steer_deg, _jon_throttle = jon_result
+            # Jon reports its CPU/GPU temps + inference rate back with each frame
+            state["jon_cpu_temp_c"] = float(getattr(jetson_client, "jon_cpu_temp_c", 0.0))
+            state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))
+            state["infer_fps"] = float(getattr(jetson_client, "infer_fps", 0.0))
             camera_analysis = {
                 "heading_bias": max(-1.0, min(1.0, (jon_steer_deg - 90.0) / 90.0)),
                 "confidence": 1.0,
@@ -1971,6 +1976,9 @@ def run(model_choice=None):
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
+                    jon_cpu_temp_c=state.get("jon_cpu_temp_c", 0.0),
+                    jon_gpu_temp_c=state.get("jon_gpu_temp_c", 0.0),
+                    infer_fps=state.get("infer_fps", 0.0),
                     camera_pixels=camera_pixels,
                     photos_run=metrics.dashboard_photos_run,
                     photos_all=metrics.dashboard_photos_all,
