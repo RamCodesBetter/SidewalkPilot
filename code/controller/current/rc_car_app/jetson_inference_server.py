@@ -26,7 +26,6 @@ Run on the Jetson:
     python3 jetson_inference_server.py --model SidewalkPilot-v3.0b.onnx
     python3 jetson_inference_server.py --model SidewalkPilot-v2.4b.pth          # S1/2 state-dict
     python3 jetson_inference_server.py --model model.pt                          # TorchScript
-    python3 jetson_inference_server.py --model X.onnx --test-image frame.jpg     # validate, no net
 
 Deps on the Jetson: numpy, opencv-python, and onnxruntime(-gpu) and/or torch
 (whichever your model format needs).
@@ -35,7 +34,6 @@ Deps on the Jetson: numpy, opencv-python, and onnxruntime(-gpu) and/or torch
 import argparse
 import socket
 import struct
-import sys
 import time
 from pathlib import Path
 
@@ -385,7 +383,6 @@ def main():
     ap.add_argument("--steer-scale", type=float, default=86.0, help="output_scale_deg for S1/2 .pth (S1=86)")
     ap.add_argument("--width", type=int, default=None)
     ap.add_argument("--height", type=int, default=None)
-    ap.add_argument("--test-image", default=None, help="run inference on ONE local image and exit")
     args = ap.parse_args()
 
     force = (args.width, args.height) if (args.width and args.height) else None
@@ -397,15 +394,6 @@ def main():
     model.pinned = str(args.model).strip().lower() not in ("highest", "latest", "newest", "max")
     print(f"[jon] model {'PINNED to v' + str(model.current_version) + ' (ignoring Pi choice)' if model.pinned else 'FOLLOWS the Pi per-frame choice'}.",
           flush=True)
-
-    if args.test_image:
-        frame = cv2.imread(args.test_image)
-        if frame is None:
-            print(f"[jon] could not read {args.test_image}", file=sys.stderr)
-            raise SystemExit(1)
-        steering, throttle = model.infer(frame)
-        print(f"[jon] {args.test_image} -> steering={steering:.2f} deg, throttle={throttle:.3f}")
-        return
 
     serve(model, args.host, args.port)
 
