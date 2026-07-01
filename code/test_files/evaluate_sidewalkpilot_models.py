@@ -65,18 +65,22 @@ BUCKETS = [
     ("HR 135-180", 135.0, 180.0),
 ]
 
+# Official source code = D{MMDD}_{HH} (run start hour, 24h).
 SOURCE_PURPOSES = {
-    "D0328": "First dataset relabel, March 28",
-    "D0329": "First dataset relabel, March 29",
-    "D0425": "Street test",
-    "D0426": "Curves and shadows",
-    "D0427": "Curved curb",
-    "D0429": "Driveway and shadow",
+    "D0328_17": "First dataset relabel, March 28",
+    "D0329_15": "First dataset relabel, March 29",
+    "D0425_14": "Street test",
+    "D0426_18": "Curves and shadows",
+    "D0427_18": "Curved curb",
+    "D0429_19": "Driveway and shadow",
     "D0502_12": "Shadow fix set",
     "D0502_19": "Hard turns, curb hugging, smoothness",
-    "D0503": "Harsh sidewalk",
-    "D0506": "8pm sidewalk failure set",
-    "D0510": "v2.3 field-failure runs: turns, road-right driving, driveways",
+    "D0503_17": "Harsh sidewalk",
+    "D0506_20": "8pm sidewalk failure set",
+    "D0510_18": "v2.3 field-failure run 1: turns, road-right driving, driveways",
+    "D0510_19": "v2.3 field-failure run 2 (short)",
+    "D0510_20": "v2.3 field-failure run 3: turns, road-right driving, driveways",
+    "D0629_17": "Series 3 collected run (camera tilted, poor image quality)",
 }
 
 
@@ -153,29 +157,35 @@ def scale_for_version(version):
 
 
 def dataset_key(source):
+    """Official source code = D{MMDD}_{HH} (run start hour, 24h). Hours derived from the
+    correction images' photo_YYYYMMDD_HHMMSS timestamps."""
     source = str(source or "").lower()
     if "0328" in source:
-        return "D0328"
+        return "D0328_17"
     if "0329" in source:
-        return "D0329"
-    if "20260425" in source or "0425" in source:
-        return "D0425"
-    if "20260426" in source or "0426" in source:
-        return "D0426"
-    if "20260427" in source or "0427" in source:
-        return "D0427"
-    if "20260429" in source or "0429" in source:
-        return "D0429"
-    if "20260502_19" in source or "0502_19" in source:
+        return "D0329_15"
+    if "0425" in source:
+        return "D0425_14"
+    if "0426" in source:
+        return "D0426_18"
+    if "0427" in source:
+        return "D0427_18"
+    if "0429" in source:
+        return "D0429_19"
+    if "0502_19" in source:
         return "D0502_19"
-    if "20260502" in source or "0502" in source:
+    if "0502" in source:
         return "D0502_12"
-    if "20260503" in source or "0503" in source:
-        return "D0503"
-    if "20260506" in source or "0506" in source:
-        return "D0506"
-    if "20260510" in source or "0510" in source:
-        return "D0510"
+    if "0503" in source:
+        return "D0503_17"
+    if "0506" in source:
+        return "D0506_20"
+    if "0510" in source and "run_2" in source:
+        return "D0510_19"
+    if "0510" in source and "run_3" in source:
+        return "D0510_20"
+    if "0510" in source:
+        return "D0510_18"
     return str(source or "unknown")
 
 
