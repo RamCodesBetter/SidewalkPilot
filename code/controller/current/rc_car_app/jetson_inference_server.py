@@ -291,7 +291,7 @@ def _read_tegra_temps():
         return _TEMP_CACHE["cpu"], _TEMP_CACHE["gpu"]
     cpu = gpu = 0.0
     try:
-        for zone in glob.glob("/sys/devices/virtual/thermal/thermal_zone*"):
+        for zone in glob.glob("/sys/class/thermal/thermal_zone*"):
             try:
                 ztype = open(zone + "/type").read().strip().lower()
                 milli = float(open(zone + "/temp").read().strip())
