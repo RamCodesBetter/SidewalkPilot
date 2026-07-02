@@ -22,7 +22,9 @@ SAFETY
     aborts the segment instantly. Ctrl-C aborts everything. Per-segment hard timeout.
   * On EVERY exit path the motors are cut and the wheels centered.
   * NO LiDAR/AEB here -- open area + finger on the controller is the safety net.
-    Throttle 0.85 by default (car won't move below ~0.55), so it rolls at a real pace.
+    Throttle 0.65 by default (just above the ~0.55 move floor) to keep the ground
+    covered per weave small; distance/cycle = speed x period, and the period is fixed
+    by the car, so speed is the only knob for shorter cycles.
 
 Run on the Pi INSTEAD of `car` (it owns the hardware):
     python3 ~/rc_car_code/code/test_files/pid_autotune.py
@@ -176,7 +178,7 @@ def main():
     ap = argparse.ArgumentParser(description="Relay auto-tune the yaw PID by driving the car (segmented)")
     ap.add_argument("--relay-deg", type=float, default=15.0, help="servo deg off center each way (d)")
     ap.add_argument("--hysteresis-dps", type=float, default=0.0, help="relay switch band (0 = auto from yaw noise)")
-    ap.add_argument("--throttle", type=float, default=0.85, help="motor pwm (0..1); car won't move below ~0.55")
+    ap.add_argument("--throttle", type=float, default=0.65, help="motor pwm (0..1); car won't move below ~0.55. Lower = less ground per weave")
     ap.add_argument("--settle-sec", type=float, default=1.5, help="straight roll before each weave (transient)")
     ap.add_argument("--seg-max-sec", type=float, default=15.0, help="per-segment hard timeout")
     ap.add_argument("--target-cycles", type=float, default=6.0, help="TOTAL oscillations to pool across segments")
