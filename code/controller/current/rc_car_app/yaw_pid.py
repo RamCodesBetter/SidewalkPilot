@@ -130,7 +130,7 @@ class YawController:
     """PID on yaw rate. compute() returns the logical servo angle to actually send."""
 
     def __init__(self, mode="off", kp=0.0, ki=0.0, kd=0.0,
-                 curvature_coeffs=(0.0,), f_left_bump_deg=0.0,
+                 curvature_coeffs=(0.0,), lff_deg=None, rff_deg=None,
                  straight_band_deg=5.0, min_speed_mps=0.2,
                  center_deg=90.0, actuation_range_deg=180.0,
                  side_dwell_sec=0.12,
@@ -140,7 +140,8 @@ class YawController:
         self.ki = ki
         self.kd = kd
         self.curv_coeffs = tuple(curvature_coeffs)   # curvature(x) quartic, ascending powers
-        self.f_left_bump = f_left_bump_deg           # added to F when last steer was LEFT (hysteresis)
+        self.lff = lff_deg                           # measured straight FF, last steer LEFT
+        self.rff = rff_deg                           # measured straight FF, last steer RIGHT
         self.side_dwell_sec = side_dwell_sec         # stick must dwell on a side this long to count (anti-flick)
         self.ref_speed = max(0.1, float(ref_speed_mps))            # speed the gains are tuned at
         self.max_correction = max(1.0, float(max_correction_deg))  # clamp on the PID correction (deg)
@@ -161,6 +162,10 @@ class YawController:
         self.last_correction = 0.0
         # F = the open-loop straight angle = where curvature(x) crosses 0 (~109).
         self.ff_center = self._solve_center()
+        if self.lff is None:                         # unmeasured -> fall back to the curvature root
+            self.lff = self.ff_center
+        if self.rff is None:
+            self.rff = self.ff_center
 
     def _curvature(self, x):
         """Predicted curvature (deg/m) at servo angle x, from the calib quartic."""
@@ -231,7 +236,7 @@ class YawController:
             target_yaw = 0.0
             # right keeps the curvature root (~109); left bumps up to the higher
             # left-approach center (~119) to cancel the hysteresis.
-            ff_servo = self.ff_center + (self.f_left_bump if self._last_side < 0 else 0.0)
+            ff_servo = self.lff if self._last_side < 0 else self.rff
         else:  # "full" -- shift the stick into the calibrated frame, read target off curvature(x)
             ff_servo = _clamp(commanded_deg + (self.ff_center - self.center), 0.0, self.range)
             target_yaw = self._curvature(ff_servo) * speed_mps          # deg/s the car should rotate

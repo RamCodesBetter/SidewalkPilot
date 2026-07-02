@@ -71,7 +71,8 @@ from .config import (
     STEERING_YAW_PID_KI,
     STEERING_YAW_PID_KD,
     STEERING_YAW_PID_CURVATURE_COEFFS,
-    STEERING_YAW_PID_F_LEFT_BUMP_DEG,
+    STEERING_YAW_PID_LFF_DEG,
+    STEERING_YAW_PID_RFF_DEG,
     STEERING_YAW_PID_SIDE_DWELL_SEC,
     STEERING_YAW_PID_REF_SPEED_MPS,
     STEERING_YAW_PID_MAX_CORRECTION_DEG,
@@ -1618,7 +1619,8 @@ def run(model_choice=None):
         mode=STEERING_YAW_PID_MODE,
         kp=STEERING_YAW_PID_KP, ki=STEERING_YAW_PID_KI, kd=STEERING_YAW_PID_KD,
         curvature_coeffs=STEERING_YAW_PID_CURVATURE_COEFFS,
-        f_left_bump_deg=STEERING_YAW_PID_F_LEFT_BUMP_DEG,
+        lff_deg=STEERING_YAW_PID_LFF_DEG,
+        rff_deg=STEERING_YAW_PID_RFF_DEG,
         side_dwell_sec=STEERING_YAW_PID_SIDE_DWELL_SEC,
         ref_speed_mps=STEERING_YAW_PID_REF_SPEED_MPS,
         max_correction_deg=STEERING_YAW_PID_MAX_CORRECTION_DEG,
@@ -1632,8 +1634,8 @@ def run(model_choice=None):
         imu_reader = ImuReader(STEERING_YAW_PID_PORT, STEERING_YAW_PID_BAUD,
                                axis=STEERING_YAW_PID_AXIS, sign=STEERING_YAW_PID_YAW_SIGN)
         if imu_reader.start():
-            print(f"Yaw-rate PID steering ENABLED (mode={STEERING_YAW_PID_MODE}, F=curvature-center "
-                  f"{yaw_controller.ff_center:.1f}deg) on {STEERING_YAW_PID_PORT}.")
+            print(f"Yaw-rate PID steering ENABLED (mode={STEERING_YAW_PID_MODE}, "
+                  f"LFF={yaw_controller.lff:.1f}/RFF={yaw_controller.rff:.1f}deg) on {STEERING_YAW_PID_PORT}.")
         else:
             print("Yaw-rate PID: IMU failed to start; falling back to OPEN-LOOP steering.")
             yaw_controller.mode = "off"

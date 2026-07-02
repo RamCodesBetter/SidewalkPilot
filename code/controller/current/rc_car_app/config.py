@@ -85,22 +85,22 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # gyro is inverted vs the controller's assumption -> flip it. If a future test shows
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
-# Moderate baseline gains (relay auto-tune said ~0.62/1.34/0.19 no-overshoot; kept
-# below that for safety). Tune LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows;
-# d-pad up/down picks the row, left/right dec/inc: DELT +/-1 deg, KP/KI/KD +/-0.01,
-# hold to repeat ~15/sec). Correction is clamped to STEERING_YAW_PID_MAX_CORRECTION_DEG
-# with integral anti-windup, so a hot gain can't run away.
-STEERING_YAW_PID_KP = 0.45
-STEERING_YAW_PID_KI = 0.20
-STEERING_YAW_PID_KD = 0.10
+# Very light gains -- the measured LFF/RFF feed-forwards now handle the steady drift
+# open-loop, so the PID only lightly polishes dynamic wobble. Tune LIVE on the TUNE
+# page (DELT/KP/KI/KD rows, +/-0.01, hold ~15/sec). Clamp + anti-windup guard it.
+STEERING_YAW_PID_KP = 0.15
+STEERING_YAW_PID_KI = 0.05
+STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
 # feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
 STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
-# Hysteresis: the LEFT-approach true center (~119) is higher than the right (~109).
-# Right keeps the curvature root (proven live); when the last steer was LEFT, bump F
-# up by this much. Start 10 (-> ~119); tune on the car if it isn't quite straight.
-STEERING_YAW_PID_F_LEFT_BUMP_DEG = 10.0
+# Direction-dependent straight-angle feed-forwards, MEASURED by ff_calibrate.py (the
+# steering has ~20 deg of hysteresis). LFF = straight servo angle when the last steer
+# was LEFT (wheels seated from the left); RFF = when last steer was RIGHT. The yaw
+# controller picks LFF/RFF by _last_side. Re-run ff_calibrate.py to remeasure.
+STEERING_YAW_PID_LFF_DEG = 111.4
+STEERING_YAW_PID_RFF_DEG = 92.0
 # A side only counts as "the last steer" once the stick DWELLS there this long.
 # Kills flick / spring-back overshoot: on a quick release the stick briefly crosses
 # center to the opposite side; without this dwell that transient flips the hysteresis
