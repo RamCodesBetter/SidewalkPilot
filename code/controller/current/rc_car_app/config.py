@@ -86,8 +86,8 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
 # Gains START AT 0 — tune them LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows;
-# d-pad up/down picks the row, left/right dec/inc: DELT +/-1, KP +/-0.5, KI +/-0.25,
-# KD +/-0.01). No clamps anywhere: infinite control authority.
+# d-pad up/down picks the row, left/right dec/inc: DELT +/-1 deg, KP/KI/KD +/-0.01
+# (hold to repeat ~15/sec). No clamps anywhere: infinite control authority.
 STEERING_YAW_PID_KP = 0.00
 STEERING_YAW_PID_KI = 0.00
 STEERING_YAW_PID_KD = 0.00
