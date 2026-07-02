@@ -143,7 +143,8 @@ def measure_point(hardware, imu, pulse, center, approach, angle, args):
 
 def main():
     ap = argparse.ArgumentParser(description="Measure LFF/RFF straight-angle feed-forwards from driving data")
-    ap.add_argument("--angles", default="104,108,112,116,120", help="near-center test angles to sweep")
+    ap.add_argument("--angles", default="88,96,104,112,120",
+                    help="test angles to sweep -- must BRACKET both straight angles (wide by default)")
     ap.add_argument("--throttle", type=float, default=0.65, help="motor pwm (0..1); won't move below ~0.55")
     ap.add_argument("--seat-sec", type=float, default=0.7, help="roll at the extreme to seat the wheels")
     ap.add_argument("--settle-sec", type=float, default=0.5, help="let yaw settle after moving to the test angle")
@@ -232,12 +233,15 @@ def main():
         print("  Not enough clean points on one side -- run more bursts (need >=2 per side).")
         return
 
-    def _sane(x):
-        return 60.0 <= x <= 160.0
-    print(f"  LFF (seated-from-left  straight angle) = {lff:.1f} deg"
-          + ("" if _sane(lff) else "   <-- looks off, re-check"))
-    print(f"  RFF (seated-from-right straight angle) = {rff:.1f} deg"
-          + ("" if _sane(rff) else "   <-- looks off, re-check"))
+    def _note(val, pts):
+        lo, hi = min(a for a, _ in pts), max(a for a, _ in pts)
+        if not (60.0 <= val <= 160.0):
+            return "   <-- looks off, re-check"
+        if val < lo or val > hi:
+            return f"   <-- EXTRAPOLATED past tested [{lo:.0f},{hi:.0f}]; re-run with angles around {val:.0f}"
+        return "   (bracketed - trustworthy)"
+    print(f"  LFF (seated-from-left  straight angle) = {lff:.1f} deg{_note(lff, left_pts)}")
+    print(f"  RFF (seated-from-right straight angle) = {rff:.1f} deg{_note(rff, right_pts)}")
 
     print(f"\n  >>> LFF = {lff:.1f}    RFF = {rff:.1f} <<<")
     print("  Paste these to me and I'll wire them into the runtime (and drop the +10 bump).")
