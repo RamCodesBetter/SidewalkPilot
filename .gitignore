@@ -29,3 +29,6 @@ media/photos/
 
 # Training dataset images (data, not source) — hosted on Hugging Face
 code/ai_models_datasets/**/*.jpg
+
+# runtime logs now live in ~/logs (outside the repo)
+logs/

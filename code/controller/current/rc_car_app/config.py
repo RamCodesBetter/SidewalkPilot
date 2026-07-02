@@ -177,7 +177,7 @@ KD = 0.005
 
 # --- LOGGING ---
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-LOG_DIR = os.environ.get("RC_CAR_LOG_DIR", os.path.join(PROJECT_ROOT, "logs"))
+LOG_DIR = os.environ.get("RC_CAR_LOG_DIR", os.path.expanduser("~/logs"))
 os.makedirs(LOG_DIR, exist_ok=True)
 PHOTO_DIR = os.environ.get("RC_CAR_PHOTO_DIR", os.path.join(PROJECT_ROOT, "media/photos"))
 os.makedirs(PHOTO_DIR, exist_ok=True)
