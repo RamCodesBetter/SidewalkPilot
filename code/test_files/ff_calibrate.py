@@ -25,7 +25,6 @@ Run on the Pi INSTEAD of `car`:
     python3 ~/rc_car_code/code/test_files/ff_calibrate.py --angles 106,112,118   # fewer bursts
 """
 import argparse
-import json
 import math
 import os
 import sys
@@ -240,31 +239,8 @@ def main():
     print(f"  RFF (seated-from-right straight angle) = {rff:.1f} deg"
           + ("" if _sane(rff) else "   <-- looks off, re-check"))
 
-    try:
-        ans = input("\nWrite lff_deg/rff_deg into steering_tune.json? [y/N] ").strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        ans = "n"
-    if ans == "y" and _sane(lff) and _sane(rff):
-        path = C.STEERING_TUNE_PATH
-        data = {}
-        try:
-            with open(path) as fh:
-                data = json.load(fh)
-            if not isinstance(data, dict):
-                data = {}
-        except FileNotFoundError:
-            pass
-        except Exception as exc:
-            print(f"  (existing {path} unreadable: {exc}; starting fresh)")
-            data = {}
-        data["lff_deg"] = round(lff, 1)
-        data["rff_deg"] = round(rff, 1)
-        with open(path, "w") as fh:
-            json.dump(data, fh, indent=2)
-        print(f"  wrote LFF={data['lff_deg']} / RFF={data['rff_deg']} to {path}")
-        print("  (runtime wiring to USE these + drop the +10 bump is the next step.)")
-    else:
-        print("  Not written. Re-run or hand-edit steering_tune.json when you're happy.")
+    print(f"\n  >>> LFF = {lff:.1f}    RFF = {rff:.1f} <<<")
+    print("  Paste these to me and I'll wire them into the runtime (and drop the +10 bump).")
 
 
 if __name__ == "__main__":
