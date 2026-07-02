@@ -5,7 +5,9 @@
 It rolls forward at a fixed throttle and runs a RELAY on the IMU yaw rate -- steer a
 fixed amount left/right depending on which way the car is rotating. That induces a
 steady weave (a limit cycle); from the weave's amplitude (a) and period (Tu) it
-computes the ultimate gain  Ku = 4d/(pi*a)  and prints Ziegler-Nichols PID gains.
+computes the ultimate gain  Ku = 4d/(pi*sqrt(a^2 - eps^2))  and prints Ziegler-Nichols
+gains. The relay uses a HYSTERESIS band eps (set from the yaw noise) so sensor jitter
+can't fake a tiny fast cycle -- the car must truly swing past +/-eps before it flips.
 
 Because the runtime loop is speed-normalized (correction scaled by REF_SPEED/speed),
 the gains are reported scaled to REF_SPEED so they drop straight into config/TUNE.
@@ -47,9 +49,10 @@ def pulses_to_mps(pulses, seconds):
     return rev_per_s * C.WHEEL_CIRCUMFERENCE_CM / 100.0        # cm -> m
 
 
-def analyze(samples, relay_deg, discard_cycles=2):
-    """samples: [(t, yaw_dps)]. Returns {a, Tu, Ku, cycles} from the limit cycle, or None.
-    Pure function -- unit-testable without hardware."""
+def analyze(samples, discard_cycles=2):
+    """samples: [(t, yaw_dps)]. Returns {a (peak amp), Tu, cycles} from the limit
+    cycle, or None. Ku is computed in main() with the hysteresis band. Pure function
+    -- unit-testable without hardware."""
     crossings, peaks, cur_peak, prev = [], [], 0.0, None
     for t, y in samples:
         if prev is not None and ((prev < 0.0) != (y < 0.0)):
@@ -69,8 +72,7 @@ def analyze(samples, relay_deg, discard_cycles=2):
     if a <= 0.0:
         return None
     Tu = 2.0 * (sum(half_periods) / len(half_periods))
-    Ku = 4.0 * relay_deg / (math.pi * a)
-    return {"a": a, "Tu": Tu, "Ku": Ku, "cycles": len(half_periods) / 2.0}
+    return {"a": a, "Tu": Tu, "cycles": len(half_periods) / 2.0}
 
 
 def _stop(hardware):
@@ -106,6 +108,7 @@ def _abort_requested():
 def main():
     ap = argparse.ArgumentParser(description="Relay auto-tune the yaw PID by driving the car")
     ap.add_argument("--relay-deg", type=float, default=15.0, help="servo deg off center each way (d)")
+    ap.add_argument("--hysteresis-dps", type=float, default=0.0, help="relay switch band (0 = auto from yaw noise)")
     ap.add_argument("--throttle", type=float, default=0.85, help="motor pwm for the test roll (0..1); car won't move below ~0.55")
     ap.add_argument("--settle-sec", type=float, default=3.0, help="spin-up/transient to discard")
     ap.add_argument("--max-sec", type=float, default=40.0, help="hard timeout")
@@ -160,6 +163,9 @@ def main():
         raise SystemExit("Not confirmed ('go' not typed) -- nothing moved.")
 
     samples = []
+    settle_yaws = []
+    eps = None
+    relay_state = 1
     aborted = None
     t0 = time.time()
     pulse_start = None
@@ -174,16 +180,36 @@ def main():
 
             _drive_forward(hardware, args.throttle)
             yaw = imu.get_yaw()                                  # + = right (runtime convention)
-            # corrective relay -> stable limit cycle: rotating right -> steer left, & vice-versa
-            hardware.steering_servo.value = (ff - args.relay_deg) if yaw > 0 else (ff + args.relay_deg)
 
-            if elapsed >= args.settle_sec:
-                if pulse_start is None:
-                    pulse_start = pulse["n"]; t_collect0 = now
-                samples.append((now, yaw))
-                res = analyze(samples, args.relay_deg)
-                if res and res["cycles"] >= args.target_cycles:
-                    break
+            if elapsed < args.settle_sec:
+                hardware.steering_servo.value = ff               # roll straight; sample the yaw NOISE
+                settle_yaws.append(yaw)
+                time.sleep(1.0 / 50.0)
+                continue
+
+            if eps is None:                                      # set the hysteresis band once
+                if args.hysteresis_dps > 0:
+                    eps = args.hysteresis_dps
+                else:
+                    m = sum(settle_yaws) / len(settle_yaws) if settle_yaws else 0.0
+                    sd = (math.sqrt(sum((y - m) ** 2 for y in settle_yaws) / len(settle_yaws))
+                          if settle_yaws else 0.0)
+                    eps = max(3.0, min(10.0, 4.0 * sd))
+                pulse_start = pulse["n"]; t_collect0 = now
+                print(f"Relay hysteresis eps = {eps:.1f} dps (from yaw noise). Weaving...", flush=True)
+
+            # RELAY WITH HYSTERESIS: only flip once the car truly swings past +/-eps, so
+            # yaw-sensor noise can't chatter the steering and fake a tiny fast cycle.
+            if yaw > eps:
+                relay_state = -1                                 # rotating right -> steer LEFT
+            elif yaw < -eps:
+                relay_state = 1                                  # rotating left  -> steer RIGHT
+            hardware.steering_servo.value = ff + relay_state * args.relay_deg
+
+            samples.append((now, yaw))
+            res = analyze(samples)
+            if res and res["cycles"] >= args.target_cycles:
+                break
             time.sleep(1.0 / 50.0)
     except KeyboardInterrupt:
         aborted = "ctrl-c"
@@ -205,12 +231,18 @@ def main():
         print(f"\nABORTED ({aborted}) -- motors cut, wheels centered. No gains computed.")
         return
 
-    res = analyze(samples, args.relay_deg)
+    res = analyze(samples)
     if not res:
         print("\nNo clean limit cycle found. Try a larger --relay-deg (e.g. 20-25) or more space.")
         return
 
-    Ku, Tu = res["Ku"], res["Tu"]
+    a, Tu = res["a"], res["Tu"]
+    if eps is None or a <= eps:
+        print(f"\nYaw swing (a={a:.1f} dps) didn't clearly exceed the hysteresis band (eps={eps}) "
+              f"-> the car barely rotated. Increase --relay-deg (e.g. 25-35). No reliable Ku.")
+        return
+    # relay-with-hysteresis describing function: Ku = 4d / (pi * sqrt(a^2 - eps^2))
+    Ku = 4.0 * args.relay_deg / (math.pi * math.sqrt(a * a - eps * eps))
     scale = (v_test / ref_speed) if (v_test > 0.05 and ref_speed > 0) else 1.0
 
     def zn(kp, ki, kd):
@@ -221,7 +253,7 @@ def main():
     pi_only = zn(0.45 * Ku, 0.54 * Ku / Tu, 0.0)
 
     print("\n=== relay auto-tune result ===")
-    print(f"  oscillation amplitude a = {res['a']:.1f} dps,  period Tu = {Tu:.2f} s,  cycles = {res['cycles']:.1f}")
+    print(f"  amplitude a = {a:.1f} dps (hysteresis eps = {eps:.1f}),  period Tu = {Tu:.2f} s,  cycles = {res['cycles']:.1f}")
     print(f"  ultimate gain Ku = {Ku:.3f}   (at measured test speed {v_test:.2f} m/s)")
     if abs(scale - 1.0) > 0.05:
         print(f"  gains scaled by v_test/REF = {scale:.2f} so they apply at REF_SPEED {ref_speed} m/s")
