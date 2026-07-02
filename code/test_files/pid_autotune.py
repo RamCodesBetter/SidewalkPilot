@@ -55,25 +55,6 @@ def pulses_to_mps(pulses, seconds):
     return rev_per_s * C.WHEEL_CIRCUMFERENCE_CM / 100.0        # cm -> m
 
 
-def extract(samples, discard_cycles=1):
-    """From one segment's [(t, yaw_dps)], return (peaks, half_periods) after dropping
-    the relay transient. main() POOLS these across segments. Pure -- unit-testable."""
-    crossings, peaks, cur_peak, prev = [], [], 0.0, None
-    for t, y in samples:
-        if prev is not None and ((prev < 0.0) != (y < 0.0)):
-            crossings.append(t)
-            peaks.append(cur_peak)
-            cur_peak = 0.0
-        cur_peak = max(cur_peak, abs(y))
-        prev = y
-    d0 = 2 * discard_cycles                                    # 2 crossings per cycle
-    if len(crossings) < d0 + 2:
-        return [], []
-    use_cross, use_peaks = crossings[d0:], peaks[d0:]
-    half_periods = [use_cross[i + 1] - use_cross[i] for i in range(len(use_cross) - 1)]
-    return use_peaks, half_periods
-
-
 def _stop(hardware):
     hardware.motor_left_fwd.value = 0
     hardware.motor_left_bwd.value = 0
@@ -105,10 +86,15 @@ def _abort_requested():
 
 
 def run_segment(hardware, imu, pulse, ff, center, args, eps, measure_noise, seg_num, need_cycles):
-    """Drive ONE short burst. Returns dict(peaks, half_periods, eps, aborted, v_test)."""
-    settle_yaws, samples = [], []
-    relay_state, last_osc = 1, 0
+    """Drive ONE short burst. Measures the limit cycle from the RELAY SWITCHES (which
+    only fire at +/-eps), so near-zero yaw noise can't dilute it. Returns
+    dict(peaks, half_periods, eps, aborted, v_test)."""
+    settle_yaws = []
+    relay_state = 1
+    half_periods, peaks = [], []             # one entry per relay half-cycle
+    since_peak, last_switch_t, last_osc = 0.0, None, 0
     aborted, pulse_start, t_collect0 = None, None, None
+    DISCARD_HALF = 2                          # drop the first full cycle (relay transient)
     per_seg_target = max(1, min(int(args.cycles_per_segment), int(math.ceil(need_cycles))))
     print(f">>> Segment {seg_num} driving (~{per_seg_target} osc). "
           f"Grab stick / any button / Ctrl-C aborts. <<<", flush=True)
@@ -142,23 +128,26 @@ def run_segment(hardware, imu, pulse, ff, center, args, eps, measure_noise, seg_
                     eps = max(3.0, min(10.0, 4.0 * sd))
                 print(f"  hysteresis eps = {eps:.1f} dps", flush=True)
             if pulse_start is None:
-                pulse_start = pulse["n"]; t_collect0 = now
+                pulse_start, t_collect0, last_switch_t = pulse["n"], now, now
 
             # RELAY WITH HYSTERESIS: flip only once the car truly swings past +/-eps.
+            since_peak = max(since_peak, abs(yaw))
+            new_state = relay_state
             if yaw > eps:
-                relay_state = -1                                 # rotating right -> steer LEFT
+                new_state = -1                                   # rotating right -> steer LEFT
             elif yaw < -eps:
-                relay_state = 1                                  # rotating left  -> steer RIGHT
+                new_state = 1                                    # rotating left  -> steer RIGHT
+            if new_state != relay_state:                         # a relay half-cycle just finished
+                half_periods.append(now - last_switch_t)
+                peaks.append(since_peak)
+                last_switch_t, since_peak, relay_state = now, 0.0, new_state
+                kept = max(0, len(half_periods) - DISCARD_HALF) / 2.0
+                if int(kept) > last_osc:
+                    last_osc = int(kept)
+                    print(f"    osc {last_osc}/{per_seg_target} (this segment)", flush=True)
+                if kept >= per_seg_target:
+                    break
             hardware.steering_servo.value = ff + relay_state * args.relay_deg
-
-            samples.append((now, yaw))
-            _, hps = extract(samples)
-            seg_cycles = len(hps) / 2.0
-            if int(seg_cycles) > last_osc:
-                last_osc = int(seg_cycles)
-                print(f"    osc {last_osc}/{per_seg_target} (this segment)", flush=True)
-            if seg_cycles >= per_seg_target:
-                break
             time.sleep(1.0 / 50.0)
     except KeyboardInterrupt:
         aborted = "ctrl-c"
@@ -168,15 +157,15 @@ def run_segment(hardware, imu, pulse, ff, center, args, eps, measure_noise, seg_
         time.sleep(0.2)
         _stop(hardware)
 
-    peaks, hps = extract(samples)
     v_test = pulses_to_mps(pulse["n"] - (pulse_start if pulse_start is not None else pulse["n"]),
                            (time.time() - t_collect0) if t_collect0 is not None else 0.0)
-    return {"peaks": peaks, "half_periods": hps, "eps": eps, "aborted": aborted, "v_test": v_test}
+    return {"peaks": peaks[DISCARD_HALF:], "half_periods": half_periods[DISCARD_HALF:],
+            "eps": eps, "aborted": aborted, "v_test": v_test}
 
 
 def main():
     ap = argparse.ArgumentParser(description="Relay auto-tune the yaw PID by driving the car (segmented)")
-    ap.add_argument("--relay-deg", type=float, default=15.0, help="servo deg off center each way (d)")
+    ap.add_argument("--relay-deg", type=float, default=25.0, help="servo deg off center each way (d); bigger = more yaw swing")
     ap.add_argument("--hysteresis-dps", type=float, default=0.0, help="relay switch band (0 = auto from yaw noise)")
     ap.add_argument("--throttle", type=float, default=0.65, help="motor pwm (0..1); car won't move below ~0.55. Lower = less ground per weave")
     ap.add_argument("--settle-sec", type=float, default=1.5, help="straight roll before each weave (transient)")
