@@ -111,14 +111,25 @@ def stats(samples):
 def main():
     ap = argparse.ArgumentParser(description="Analyze yaw-PID hold quality from run logs")
     ap.add_argument("--logs-dir", default="/nvme/logs")
+    ap.add_argument("--log", default=None,
+                    help="analyze ONE log (name or path, .csv optional); overrides the --logs-dir sweep")
     ap.add_argument("--output", default="/nvme/logs/pid_tune_report.json")
     ap.add_argument("--min-speed", type=float, default=0.3, help="m/s; ignore near-stationary samples")
     ap.add_argument("--straight-band", type=float, default=8.0, help="deg; |cmd-90| within this = straight-hold")
     args = ap.parse_args()
 
-    paths = sorted(glob.glob(os.path.join(os.path.expanduser(args.logs_dir), "*.csv")))
-    if not paths:
-        raise SystemExit(f"No CSV logs in {args.logs_dir}")
+    logs_dir = os.path.expanduser(args.logs_dir)
+    if args.log:
+        cand = os.path.expanduser(args.log)
+        tries = [cand, cand + ".csv", os.path.join(logs_dir, cand), os.path.join(logs_dir, cand + ".csv")]
+        match = next((p for p in tries if os.path.isfile(p)), None)
+        if not match:
+            raise SystemExit(f"Log not found: {args.log} (looked as-is and in {logs_dir})")
+        paths = [match]
+    else:
+        paths = sorted(glob.glob(os.path.join(logs_dir, "*.csv")))
+        if not paths:
+            raise SystemExit(f"No CSV logs in {args.logs_dir}")
 
     all_samples, per_file = [], []
     for p in paths:
