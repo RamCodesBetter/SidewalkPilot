@@ -85,12 +85,14 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # gyro is inverted vs the controller's assumption -> flip it. If a future test shows
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
-# The left drift is throttle-dependent (motor imbalance) so the constant FF can't kill
-# it -- the INTEGRAL has to. kI raised so it winds up and cancels the steady pull over
-# a few seconds of CONTINUOUS driving (won't show in 2s bursts). Clamp + anti-windup
-# guard it. If a slow sway appears, drop kI on the TUNE page.
-STEERING_YAW_PID_KP = 0.20
-STEERING_YAW_PID_KI = 0.35
+# Gentle P+D, NO integral. The left drift at speed is a MOTOR imbalance (thrust
+# differential that scales with throttle), which the steering servo can't cancel --
+# proven: +5deg of correction didn't dent the -10dps drift at max. So kI=0 (an
+# integral just winds up and lurches on decel without fixing anything). The real fix
+# is balancing LEFT/RIGHT_MOTOR_PWM_SCALE. For manual photo collection this is fine:
+# labels are the stick command; you keep the car on the path by eye.
+STEERING_YAW_PID_KP = 0.15
+STEERING_YAW_PID_KI = 0.00
 STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
