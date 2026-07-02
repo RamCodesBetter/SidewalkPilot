@@ -13,9 +13,10 @@ Modes (set STEERING_YAW_PID_MODE in config):
   "full"     -> always acts: maps (commanded-90) to a target yaw rate (via the measured
                 curvature slope x speed) and drives the servo to track it on straights AND turns.
 
-Sign convention (from imu_steering_calibrate.py data): low servo = LEFT = +yaw,
-high servo = RIGHT = -yaw. To correct a left drift (measured yaw too positive) we
-INCREASE the servo angle (steer right) -> error = measured - target, added to servo.
+Sign convention: with the runtime yaw sign, measured yaw + = RIGHT rotation, - = LEFT.
+Standard PID error = target - measured: a LEFT drift (measured negative) yields a
+POSITIVE error -> INCREASE the servo (steer right) to counter it; a RIGHT drift yields
+a negative error -> steer left. Negative feedback: the correction always OPPOSES the yaw.
 """
 
 import collections
@@ -184,7 +185,7 @@ class YawController:
 
     def compute(self, commanded_deg, measured_yaw_dps, speed_mps, dt, allow=True):
         """commanded_deg: model/joystick logical target (0..180).
-        measured_yaw_dps: filtered yaw rate (+ = left). speed_mps: forward speed.
+        measured_yaw_dps: filtered yaw rate (+ = right). speed_mps: forward speed.
         allow: external gate (autonomous-or-active-steering, no AEB/override/fault).
         Returns the logical angle to send to the servo."""
         # Off / reverse / lidar-override -> exact passthrough (no F at all).
@@ -237,7 +238,7 @@ class YawController:
             self.last_target_yaw = target_yaw
             return _clamp(ff_servo, 0.0, self.range)
 
-        error = measured_yaw_dps - target_yaw          # + = too far left -> raise servo (steer right)
+        error = target_yaw - measured_yaw_dps          # + = yawing left of target -> raise servo (steer right)
         self._integral = self._integral + error * dt   # NO clamp -- infinite control
         if self._prev_error is None or dt <= 0.0:
             deriv = 0.0
