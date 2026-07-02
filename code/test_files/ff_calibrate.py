@@ -145,10 +145,10 @@ def main():
     ap = argparse.ArgumentParser(description="Measure LFF/RFF straight-angle feed-forwards from driving data")
     ap.add_argument("--angles", default="88,96,104,112,120",
                     help="test angles to sweep -- must BRACKET both straight angles (wide by default)")
-    ap.add_argument("--throttle", type=float, default=0.65, help="motor pwm (0..1); won't move below ~0.55")
-    ap.add_argument("--seat-sec", type=float, default=0.7, help="roll at the extreme to seat the wheels")
-    ap.add_argument("--settle-sec", type=float, default=0.5, help="let yaw settle after moving to the test angle")
-    ap.add_argument("--hold-sec", type=float, default=1.0, help="measurement window at the test angle")
+    ap.add_argument("--throttle", type=float, default=0.95, help="motor pwm (0..1). Match how you DRIVE -- calibrate at max since that's your speed")
+    ap.add_argument("--seat-sec", type=float, default=0.6, help="roll at the extreme to seat the wheels")
+    ap.add_argument("--settle-sec", type=float, default=0.4, help="let yaw settle after moving to the test angle")
+    ap.add_argument("--hold-sec", type=float, default=0.7, help="measurement window at the test angle")
     ap.add_argument("--seg-max-sec", type=float, default=15.0, help="per-burst hard timeout")
     args = ap.parse_args()
 
