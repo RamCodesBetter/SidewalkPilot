@@ -104,6 +104,13 @@ STEERING_YAW_PID_F_LEFT_BUMP_DEG = 10.0
 # center to the opposite side; without this dwell that transient flips the hysteresis
 # F to the wrong value (109<->119 backwards). Real turns dwell well past this.
 STEERING_YAW_PID_SIDE_DWELL_SEC = 0.12
+# (A) Speed-normalize the correction: the servo->yaw plant gain grows with speed, so a
+# fixed kP is too hot fast / sluggish slow. The loop scales the correction by
+# REF_SPEED/speed (clamped) so ONE gain holds across speeds. REF = the speed you tune at.
+STEERING_YAW_PID_REF_SPEED_MPS = 1.0
+# (B) Hard cap on the PID correction (deg off the feed-forward center). Bounds rail-slam
+# and, with integral clamping, kills windup so behaviour is repeatable run to run.
+STEERING_YAW_PID_MAX_CORRECTION_DEG = 30.0
 STEERING_YAW_PID_STRAIGHT_BAND_DEG = 5.0    # |cmd-90| within this -> hold yaw=0; beyond -> passthrough
                                             # (keep small: a wide band makes the loop fight your TURNS,
                                             #  e.g. at servo 70 it tried to cancel the yaw you commanded -> wag)

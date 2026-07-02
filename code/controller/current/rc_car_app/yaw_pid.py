@@ -133,7 +133,8 @@ class YawController:
                  curvature_coeffs=(0.0,), f_left_bump_deg=0.0,
                  straight_band_deg=5.0, min_speed_mps=0.2,
                  center_deg=90.0, actuation_range_deg=180.0,
-                 side_dwell_sec=0.12):
+                 side_dwell_sec=0.12,
+                 ref_speed_mps=1.0, max_correction_deg=30.0):
         self.mode = mode
         self.kp = kp
         self.ki = ki
@@ -141,6 +142,11 @@ class YawController:
         self.curv_coeffs = tuple(curvature_coeffs)   # curvature(x) quartic, ascending powers
         self.f_left_bump = f_left_bump_deg           # added to F when last steer was LEFT (hysteresis)
         self.side_dwell_sec = side_dwell_sec         # stick must dwell on a side this long to count (anti-flick)
+        self.ref_speed = max(0.1, float(ref_speed_mps))            # speed the gains are tuned at
+        self.max_correction = max(1.0, float(max_correction_deg))  # clamp on the PID correction (deg)
+        self._speed_norm_floor = 0.3                 # don't divide by tiny speeds
+        self._speed_norm_min = 0.3                   # clamp the speed-scale factor
+        self._speed_norm_max = 2.0
         self.straight_band = straight_band_deg
         self.min_speed = min_speed_mps
         self.center = center_deg
@@ -239,14 +245,27 @@ class YawController:
             return _clamp(ff_servo, 0.0, self.range)
 
         error = target_yaw - measured_yaw_dps          # + = yawing left of target -> raise servo (steer right)
-        self._integral = self._integral + error * dt   # NO clamp -- infinite control
+
+        # (B) anti-windup: cap the integral so ki*integral alone can't exceed the
+        # correction clamp -- no unbounded windup, behaviour stays repeatable.
+        self._integral = self._integral + error * dt
+        if self.ki > 0.0:
+            i_limit = self.max_correction / self.ki
+            self._integral = _clamp(self._integral, -i_limit, i_limit)
+
         if self._prev_error is None or dt <= 0.0:
             deriv = 0.0
         else:
             deriv = (error - self._prev_error) / dt
         self._prev_error = error
 
-        out = self.kp * error + self.ki * self._integral + self.kd * deriv  # PID trim (no clamp)
+        # (A) speed-normalize: servo->yaw gain grows with speed, so scale the
+        # correction by ref_speed/speed (clamped) -> one gain holds across speeds.
+        speed_norm = _clamp(self.ref_speed / max(speed_mps, self._speed_norm_floor),
+                            self._speed_norm_min, self._speed_norm_max)
+
+        out = (self.kp * error + self.ki * self._integral + self.kd * deriv) * speed_norm
+        out = _clamp(out, -self.max_correction, self.max_correction)   # (B) correction clamp
         self.engaged = True
         self.last_target_yaw = target_yaw
         self.last_correction = out
