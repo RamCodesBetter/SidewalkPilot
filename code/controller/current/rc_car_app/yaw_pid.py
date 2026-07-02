@@ -131,13 +131,15 @@ class YawController:
     def __init__(self, mode="off", kp=0.0, ki=0.0, kd=0.0,
                  curvature_coeffs=(0.0,), f_left_bump_deg=0.0,
                  straight_band_deg=5.0, min_speed_mps=0.2,
-                 center_deg=90.0, actuation_range_deg=180.0):
+                 center_deg=90.0, actuation_range_deg=180.0,
+                 side_dwell_sec=0.12):
         self.mode = mode
         self.kp = kp
         self.ki = ki
         self.kd = kd
         self.curv_coeffs = tuple(curvature_coeffs)   # curvature(x) quartic, ascending powers
         self.f_left_bump = f_left_bump_deg           # added to F when last steer was LEFT (hysteresis)
+        self.side_dwell_sec = side_dwell_sec         # stick must dwell on a side this long to count (anti-flick)
         self.straight_band = straight_band_deg
         self.min_speed = min_speed_mps
         self.center = center_deg
@@ -145,6 +147,8 @@ class YawController:
         self._integral = 0.0
         self._prev_error = None
         self._last_side = 1           # +1 = last steered right, -1 = left (wheel seating)
+        self._cand_side = 0           # side currently being held, pending the dwell
+        self._cand_dwell = 0.0        # seconds the candidate side has persisted
         self.engaged = False          # for telemetry / dashboard
         self.last_target_yaw = 0.0
         self.last_correction = 0.0
@@ -190,10 +194,26 @@ class YawController:
 
         # Remember which way we last steered (wheel seating) for the hysteresis F.
         # Persists across the straight hold + brief stops; only a real turn changes it.
+        # A side must DWELL past side_dwell_sec before it counts, so a flick / spring-back
+        # that briefly overshoots center to the far side can't flip _last_side (which
+        # would apply the wrong F and read 109<->119 backwards on release).
         if commanded_deg > self.center + self.straight_band:
-            self._last_side = 1     # right
+            side = 1                # right
         elif commanded_deg < self.center - self.straight_band:
-            self._last_side = -1    # left
+            side = -1               # left
+        else:
+            side = 0                # near center: keep whatever we last committed
+        if side == 0:
+            self._cand_side = 0
+            self._cand_dwell = 0.0
+        else:
+            if side == self._cand_side:
+                self._cand_dwell += max(0.0, dt)
+            else:
+                self._cand_side = side
+                self._cand_dwell = 0.0
+            if self._cand_dwell >= self.side_dwell_sec:
+                self._last_side = side
 
         # FEED-FORWARD (F): start from the calibrated open-loop angle, PID only trims.
         if self.mode == "straight":

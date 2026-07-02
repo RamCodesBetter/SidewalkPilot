@@ -99,6 +99,11 @@ STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5
 # Right keeps the curvature root (proven live); when the last steer was LEFT, bump F
 # up by this much. Start 10 (-> ~119); tune on the car if it isn't quite straight.
 STEERING_YAW_PID_F_LEFT_BUMP_DEG = 10.0
+# A side only counts as "the last steer" once the stick DWELLS there this long.
+# Kills flick / spring-back overshoot: on a quick release the stick briefly crosses
+# center to the opposite side; without this dwell that transient flips the hysteresis
+# F to the wrong value (109<->119 backwards). Real turns dwell well past this.
+STEERING_YAW_PID_SIDE_DWELL_SEC = 0.12
 STEERING_YAW_PID_STRAIGHT_BAND_DEG = 5.0    # |cmd-90| within this -> hold yaw=0; beyond -> passthrough
                                             # (keep small: a wide band makes the loop fight your TURNS,
                                             #  e.g. at servo 70 it tried to cancel the yaw you commanded -> wag)
