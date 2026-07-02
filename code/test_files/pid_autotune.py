@@ -112,7 +112,7 @@ def main():
     ap.add_argument("--throttle", type=float, default=0.85, help="motor pwm for the test roll (0..1); car won't move below ~0.55")
     ap.add_argument("--settle-sec", type=float, default=3.0, help="spin-up/transient to discard")
     ap.add_argument("--max-sec", type=float, default=40.0, help="hard timeout")
-    ap.add_argument("--target-cycles", type=float, default=8.0, help="stop after this many oscillations")
+    ap.add_argument("--target-cycles", type=float, default=10.0, help="stop after this many oscillations")
     args = ap.parse_args()
 
     center = float(C.STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
@@ -166,6 +166,7 @@ def main():
     settle_yaws = []
     eps = None
     relay_state = 1
+    last_osc = 0
     aborted = None
     t0 = time.time()
     pulse_start = None
@@ -208,8 +209,13 @@ def main():
 
             samples.append((now, yaw))
             res = analyze(samples)
-            if res and res["cycles"] >= args.target_cycles:
-                break
+            if res:
+                n = int(res["cycles"])
+                if n > last_osc:
+                    last_osc = n
+                    print(f"  osc {n}/{int(args.target_cycles)}", flush=True)
+                if res["cycles"] >= args.target_cycles:
+                    break
             time.sleep(1.0 / 50.0)
     except KeyboardInterrupt:
         aborted = "ctrl-c"
