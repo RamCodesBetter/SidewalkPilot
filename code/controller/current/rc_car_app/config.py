@@ -85,12 +85,14 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # gyro is inverted vs the controller's assumption -> flip it. If a future test shows
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
-# Gains START AT 0 — tune them LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows;
-# d-pad up/down picks the row, left/right dec/inc: DELT +/-1 deg, KP/KI/KD +/-0.01
-# (hold to repeat ~15/sec). No clamps anywhere: infinite control authority.
-STEERING_YAW_PID_KP = 0.00
-STEERING_YAW_PID_KI = 0.00
-STEERING_YAW_PID_KD = 0.00
+# Light baseline gains (relay auto-tune said ~0.62/1.34/0.19 no-overshoot; kept gentle
+# and safe here). Tune LIVE on the dashboard TUNE page (DELT/KP/KI/KD rows; d-pad
+# up/down picks the row, left/right dec/inc: DELT +/-1 deg, KP/KI/KD +/-0.01, hold to
+# repeat ~15/sec). Correction is clamped to STEERING_YAW_PID_MAX_CORRECTION_DEG with
+# integral anti-windup, so a hot gain can't run away.
+STEERING_YAW_PID_KP = 0.30
+STEERING_YAW_PID_KI = 0.10
+STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
 # feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
