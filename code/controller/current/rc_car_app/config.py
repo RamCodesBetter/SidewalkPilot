@@ -103,8 +103,8 @@ STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5
 # harder at speed), so it's calibrated at the speed Ram drives. LFF = straight servo
 # angle when the last steer was LEFT; RFF = when last steer was RIGHT (picked by
 # _last_side). Re-run ff_calibrate.py --throttle 1.0 to remeasure at full speed.
-STEERING_YAW_PID_LFF_DEG = 119.5
-STEERING_YAW_PID_RFF_DEG = 107.8
+STEERING_YAW_PID_LFF_DEG = 117.9
+STEERING_YAW_PID_RFF_DEG = 99.3
 # A side only counts as "the last steer" once the stick DWELLS there this long.
 # Kills flick / spring-back overshoot: on a quick release the stick briefly crosses
 # center to the opposite side; without this dwell that transient flips the hysteresis
