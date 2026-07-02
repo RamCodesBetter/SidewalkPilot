@@ -113,6 +113,8 @@ def main():
     ap.add_argument("--logs-dir", default="/nvme/logs")
     ap.add_argument("--log", default=None,
                     help="analyze ONE log (name or path, .csv optional); overrides the --logs-dir sweep")
+    ap.add_argument("--latest-log", action="store_true",
+                    help="analyze only the most recently modified log in --logs-dir")
     ap.add_argument("--output", default="/nvme/logs/pid_tune_report.json")
     ap.add_argument("--min-speed", type=float, default=0.3, help="m/s; ignore near-stationary samples")
     ap.add_argument("--straight-band", type=float, default=8.0, help="deg; |cmd-90| within this = straight-hold")
@@ -126,6 +128,12 @@ def main():
         if not match:
             raise SystemExit(f"Log not found: {args.log} (looked as-is and in {logs_dir})")
         paths = [match]
+    elif args.latest_log:
+        csvs = glob.glob(os.path.join(logs_dir, "*.csv"))
+        if not csvs:
+            raise SystemExit(f"No CSV logs in {args.logs_dir}")
+        paths = [max(csvs, key=os.path.getmtime)]
+        print(f"Latest log: {os.path.basename(paths[0])}")
     else:
         paths = sorted(glob.glob(os.path.join(logs_dir, "*.csv")))
         if not paths:
