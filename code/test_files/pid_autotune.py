@@ -26,7 +26,7 @@ SAFETY
 
 Run on the Pi INSTEAD of `car` (it owns the hardware):
     python3 ~/rc_car_code/code/test_files/pid_autotune.py
-    python3 ~/rc_car_code/code/test_files/pid_autotune.py --cycles-per-segment 2   # tiny space
+    python3 ~/rc_car_code/code/test_files/pid_autotune.py --cycles-per-segment 1   # tiniest bursts
 """
 import argparse
 import math
@@ -177,10 +177,10 @@ def main():
     ap.add_argument("--relay-deg", type=float, default=15.0, help="servo deg off center each way (d)")
     ap.add_argument("--hysteresis-dps", type=float, default=0.0, help="relay switch band (0 = auto from yaw noise)")
     ap.add_argument("--throttle", type=float, default=0.85, help="motor pwm (0..1); car won't move below ~0.55")
-    ap.add_argument("--settle-sec", type=float, default=2.0, help="straight roll before each weave (transient)")
-    ap.add_argument("--seg-max-sec", type=float, default=20.0, help="per-segment hard timeout")
-    ap.add_argument("--target-cycles", type=float, default=10.0, help="TOTAL oscillations to pool across segments")
-    ap.add_argument("--cycles-per-segment", type=int, default=3, help="oscillations per short burst (smaller = less space)")
+    ap.add_argument("--settle-sec", type=float, default=1.5, help="straight roll before each weave (transient)")
+    ap.add_argument("--seg-max-sec", type=float, default=15.0, help="per-segment hard timeout")
+    ap.add_argument("--target-cycles", type=float, default=6.0, help="TOTAL oscillations to pool across segments")
+    ap.add_argument("--cycles-per-segment", type=int, default=2, help="oscillations per short burst (smaller = less space)")
     args = ap.parse_args()
 
     center = float(C.STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
