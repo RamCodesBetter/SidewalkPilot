@@ -182,7 +182,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 PHOTO_DIR = os.environ.get("RC_CAR_PHOTO_DIR", os.path.join(PROJECT_ROOT, "media/photos"))
 os.makedirs(PHOTO_DIR, exist_ok=True)
 CSV_FILENAME = os.path.join(LOG_DIR, f"log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
-LOG_INTERVAL_SEC = 1.0
+LOG_INTERVAL_SEC = 0.1          # log a CSV row every 100 ms
 
 CSV_HEADERS = [
     "Current Time",
@@ -228,6 +228,8 @@ CSV_HEADERS = [
     "Camera Corridor Width (px)",
     "Driveway Cut Suspected",
     "Steering Servo Deg",
+    "Intervention (Event)",
+    "Intervention Cause",
     "Dashboard JSON Payload",
 ]
 
@@ -314,6 +316,8 @@ def create_state():
         "event_quit_pressed": False,
         "event_cc_increase": False,
         "event_cc_decrease": False,
+        "event_intervention": False,
+        "intervention_cause": "",
         "lidar_front_dist": 12.0,
         "lidar_left_dist": 12.0,
         "lidar_right_dist": 12.0,

@@ -72,6 +72,8 @@ def log_data_to_csv(csv_file, csv_writer, state, metrics, cpu_percent, memory_pe
         f"{state['camera_corridor_width_px']:.2f}",
         int(state["driveway_cut_suspected"]),
         f"{state['steering_servo_deg']:.2f}",
+        int(state.get("event_intervention", False)),
+        state.get("intervention_cause", ""),
         state.get("dashboard_payload_json", ""),
     ]
     try:
@@ -84,3 +86,5 @@ def log_data_to_csv(csv_file, csv_writer, state, metrics, cpu_percent, memory_pe
     state["event_shift_down"] = False
     state["event_cc_increase"] = False
     state["event_cc_decrease"] = False
+    state["event_intervention"] = False
+    state["intervention_cause"] = ""

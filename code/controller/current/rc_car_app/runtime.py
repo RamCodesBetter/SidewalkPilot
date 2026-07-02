@@ -707,9 +707,29 @@ def apply_hard_stop_state(state, reason: str):
     state["stop_reason"] = reason
 
 
-def cancel_autonomous_mode(state, metrics, reason: str, center: bool = True):
+def _disengagement_cause(reason: str) -> str:
+    """Map a cancel reason string to a short cause word for the intervention log."""
+    r = (reason or "").lower()
+    if "steer" in r:
+        return "steer"
+    if "gas" in r or "throttle" in r:
+        return "throttle"
+    if "brake" in r:
+        return "brake"
+    if "arrived" in r or "destination" in r:
+        return "arrived"
+    if "nav" in r or "operator" in r or "segment" in r:
+        return "nav"
+    return "other"
+
+
+def cancel_autonomous_mode(state, metrics, reason: str, center: bool = True, cause: str = ""):
+    was_autonomous = state["autonomous_mode"]
     if reason:
         print(reason)
+    if was_autonomous:                       # only a real disengagement counts as an intervention
+        state["event_intervention"] = True
+        state["intervention_cause"] = (cause or _disengagement_cause(reason))[:12]
     state["autonomous_mode"] = False
     state["throttle"] = 0.0
     state["brake"] = False
@@ -1518,6 +1538,34 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     calculate_speed(state, metrics, dt)
 
 
+def _ship_logs_to_jon():
+    """On exit, rsync the run CSV logs to Jon (/nvme/logs) and delete the ones that
+    transferred (rsync --remove-source-files). Fails safe: keeps logs locally if Jon
+    is unreachable or there's no passwordless SSH key. Never raises -- shutdown must
+    not depend on it. Auto-runs on every quit; no flag."""
+    host = (JETSON_STEERING_HOST or "").strip()
+    if not host:
+        return
+    logs_dir = os.path.dirname(CSV_FILENAME)
+    try:
+        csvs = sorted(os.path.join(logs_dir, f) for f in os.listdir(logs_dir) if f.endswith(".csv"))
+    except OSError:
+        return
+    if not csvs:
+        return
+    try:
+        subprocess.run(
+            ["rsync", "-a", "--remove-source-files",
+             "-e", "ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new",
+             *csvs, f"ram@{host}:/nvme/logs/"],
+            timeout=30, check=True,
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        )
+        print(f"Shipped {len(csvs)} run log(s) to Jon:/nvme/logs and cleared them locally.")
+    except Exception as exc:
+        print(f"Log ship to Jon skipped (kept locally): {exc}")
+
+
 def run(model_choice=None):
     global photo_status
     print("RC Car Controller Starting...")
@@ -1767,6 +1815,8 @@ def run(model_choice=None):
                             metrics.driveway_cut_candidate_since = 0.0
                         else:
                             print("Autonomous Driving DISABLED.")
+                            state["event_intervention"] = True
+                            state["intervention_cause"] = "A"
                             state["throttle"] = 0.0
                             center_steering(state)
                             state["current_motor_pwm"] = 0.0
@@ -2066,5 +2116,6 @@ def run(model_choice=None):
         hardware.cleanup()
         if csv_file:
             csv_file.close()
+        _ship_logs_to_jon()          # rsync logs -> Jon:/nvme/logs, delete local on success
         cleanup_photo_run_dir()
         pygame.quit()
