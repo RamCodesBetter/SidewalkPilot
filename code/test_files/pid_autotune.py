@@ -16,7 +16,8 @@ SAFETY
     aborts instantly. Ctrl-C aborts. There is a hard timeout.
   * On EVERY exit path the motors are cut and the wheels centered.
   * There is NO LiDAR/AEB in this standalone tool -- open area + finger on the
-    controller is the safety net. Modest throttle by default.
+    controller is the safety net. Throttle 0.85 by default (car won't move below
+    ~0.55), so it rolls at a real pace -- keep well clear and ready to abort.
 
 Run on the Pi INSTEAD of `car` (it owns the hardware):
     python3 ~/rc_car_code/code/test_files/pid_autotune.py
@@ -105,7 +106,7 @@ def _abort_requested():
 def main():
     ap = argparse.ArgumentParser(description="Relay auto-tune the yaw PID by driving the car")
     ap.add_argument("--relay-deg", type=float, default=15.0, help="servo deg off center each way (d)")
-    ap.add_argument("--throttle", type=float, default=0.5, help="motor pwm for the test roll (0..1)")
+    ap.add_argument("--throttle", type=float, default=0.85, help="motor pwm for the test roll (0..1); car won't move below ~0.55")
     ap.add_argument("--settle-sec", type=float, default=3.0, help="spin-up/transient to discard")
     ap.add_argument("--max-sec", type=float, default=40.0, help="hard timeout")
     ap.add_argument("--target-cycles", type=float, default=8.0, help="stop after this many oscillations")
