@@ -7,20 +7,22 @@ Auth (NO env vars): run `huggingface-cli login` (or `hf auth login`) ONCE with a
 token from https://huggingface.co/settings/tokens. This script uses the cached token.
 Install the CLI if missing:  pip install -U 'huggingface_hub[cli]'
 
+The HF dataset repo MIRRORS the series folder (README + trainer + steering_corrections.json
++ sidewalkpilot_dataset/ holding the images), matching SidewalkPilot_v1_and_v2. So point
+--folder at the SERIES dir, NOT the image subfolder — images land under sidewalkpilot_dataset/
+and the labels.json paths resolve. __pycache__/artifacts are skipped by default.
+
 Examples (run from the repo root):
 
-  # Series 3 (the 2026-07-02 batch): 50,684 images + labels.json + dataset card
+  # Series 3 (the 2026-07-02 batch): mirror the whole series_3 folder
   python3 code/test_files/hf_upload_dataset.py \
     --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v3 \
-    --folder code/ai_models_datasets/series_3/sidewalkpilot_dataset \
-    --card   code/ai_models_datasets/series_3/README.md
+    --folder code/ai_models_datasets/series_3
 
-  # Series 1 & 2: dataset + its external steering_corrections.json + card
+  # Series 1 & 2 is already published; re-push only if the local folder changed:
   python3 code/test_files/hf_upload_dataset.py \
     --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v1_and_v2 \
-    --folder code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset \
-    --card   code/ai_models_datasets/series_1_and_2/README.md \
-    --extra  code/ai_models_datasets/series_1_and_2/steering_corrections.json
+    --folder code/ai_models_datasets/series_1_and_2
 """
 import argparse
 import sys
@@ -33,8 +35,12 @@ def main():
     ap.add_argument("--folder", required=True, help="local dataset folder (images + labels.json)")
     ap.add_argument("--card", help="local README.md to publish as the dataset card (repo root)")
     ap.add_argument("--extra", nargs="*", default=[], help="extra files to upload to the repo root")
+    ap.add_argument("--ignore", nargs="*", default=[], help="extra glob patterns to skip")
     ap.add_argument("--private", action="store_true", help="create the repo as private")
     args = ap.parse_args()
+
+    ignore = ["**/__pycache__/**", "*.pyc", "**/.DS_Store", ".DS_Store",
+              "*.pth", "*.onnx", "*.engine"] + list(args.ignore)
 
     try:
         from huggingface_hub import HfApi, whoami
@@ -54,8 +60,9 @@ def main():
     api = HfApi()
     api.create_repo(args.repo, repo_type="dataset", exist_ok=True, private=args.private)
 
-    print(f"uploading folder {folder} -> {args.repo}  (large; upload is resumable)...")
-    api.upload_large_folder(repo_id=args.repo, repo_type="dataset", folder_path=str(folder))
+    print(f"uploading folder {folder} -> {args.repo}  (large; resumable; ignoring {ignore})...")
+    api.upload_large_folder(repo_id=args.repo, repo_type="dataset", folder_path=str(folder),
+                            ignore_patterns=ignore)
 
     if args.card and Path(args.card).is_file():
         api.upload_file(path_or_fileobj=args.card, path_in_repo="README.md",
