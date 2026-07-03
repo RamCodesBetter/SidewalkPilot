@@ -1,7 +1,7 @@
 ---
 pretty_name: SidewalkPilot Series 3 Steering and Throttle Dataset
 size_categories:
-- n<1K
+- 10K<n<100K
 tags:
 - robotics
 - autonomous-driving
@@ -15,9 +15,9 @@ tags:
 
 # SidewalkPilot Series 3 Steering and Throttle Dataset
 
-SidewalkPilot Series 3 is the empty seed dataset for the Jetson-only heavy model series. Series 3.x changes the learning target from steering-only control to joint steering and throttle control.
+SidewalkPilot Series 3 is the dataset for the Jetson-only heavy model series. Series 3.x changes the learning target from steering-only control to joint steering and throttle control.
 
-The dataset is intentionally empty until new smooth human-driving captures and controlled CARLA samples are collected. Series 3 should not be seeded with autonomous/model-predicted labels from the old Series 2.x runs.
+First real batch (2026-07-02): 50,684 manually-driven sidewalk frames over two runs, decode-verified and curated (see the 2026-07-02 Batch section below). All labels are raw human stick commands (imitation learning), never autonomous/model-predicted — Series 3 must not be seeded with old Series 2.x model-predicted labels.
 
 Project code and documentation are maintained in the GitHub repo:
 
@@ -31,19 +31,39 @@ Project code and documentation are maintained in the GitHub repo:
 
 | File or folder | What it contains |
 |---|---|
-| `sidewalkpilot_dataset/` | Empty image folder reserved for Series 3 captures |
-| `steering_corrections.json` | Empty list-style correction file for merged Series 3 labels |
+| `sidewalkpilot_dataset/` | 50,684 human-driving JPGs (2026-07-02) plus `labels.json`. Images are hosted on Hugging Face and gitignored in the repo; the label file is committed. |
+| `sidewalkpilot_dataset/labels.json` | Dict-style `image -> {steering, throttle}` for all 50,684 frames. |
+| `steering_corrections.json` | Empty list-style correction/override file (optional; not required for training). |
 | `sidewalkpilot_trainer.py` | Series 3 training, ONNX export, and TensorRT build script |
 
 ## Current Size
 
 | Item | Count |
 |---|---:|
-| JPG images | 0 |
-| Steering/throttle label entries | 0 |
-| Label sources | 0 |
-| Steering range | 0 to 180 degrees |
+| JPG images | 50,684 |
+| Steering/throttle label entries | 50,684 |
+| Label sources | 2 human-driving runs (2026-07-02) |
+| Steering range | 0 to 180 degrees (logical; 90 = straight) |
 | Throttle range | 0.00 to 1.00 |
+
+## 2026-07-02 Batch
+
+The first real Series 3 batch: manual human driving on sidewalks / private test routes, captured continuously at ~8-10 fps across two runs, then quality-checked and curated.
+
+| Property | Value |
+|---|---|
+| Frames | 50,684 (run_1: 6,685 + run_2: 43,999) |
+| Capture | Manual human driving; continuous run-capture, ~8 fps effective |
+| Labels | Raw human stick command per frame (imitation learning) |
+| Steering balance | LEFT (<85) 8.4% · CENTER (85-95) 71% · RIGHT (>95) 20.5% |
+| Throttle | ~96.6% at 1.00; effectively constant (driven flat-out) |
+| QC | Full Pillow decode-verify; 154 empty crash-tail frames removed; 3,143 frames culled from selected time ranges |
+
+Known limitations to account for in training:
+
+- **Throttle is not learnable from this batch.** Throttle is ~constant (1.0), so the joint steering+throttle target has no throttle variance and the throttle head can only learn "full forward". Varied-throttle runs are needed before the throttle output is meaningful.
+- **Steering is center-heavy (71%) and skews right (~2.4:1 over left).** The car has a mechanical left-pull, so straight driving needed a slight right hold. Use horizontal-flip augmentation (mirror image + negate steering) to symmetrize left/right, plus class-balanced sampling and/or a left-heavy top-up run to counter center dominance.
+- Split train/val by **time segment, not randomly** — consecutive ~8 fps frames are near-duplicates, and a random split leaks them across train/val (inflated validation scores).
 
 ## Label Format
 
@@ -112,15 +132,14 @@ from pathlib import Path
 import json
 
 dataset_root = Path("sidewalkpilot_dataset")
-labels = json.loads(Path("steering_corrections.json").read_text())
+labels = json.loads((dataset_root / "labels.json").read_text())  # dict: image -> {steering, throttle}
 
-if labels:
-    first = labels[0]
-    image_path = dataset_root / Path(first["image"]).name
-    steering_degrees = float(first["steering"])
-    throttle = float(first["throttle"])
+first_image = next(iter(labels))
+image_path = dataset_root / first_image
+steering_degrees = float(labels[first_image]["steering"])
+throttle = float(labels[first_image]["throttle"])
 
-    print(image_path, steering_degrees, throttle)
+print(image_path, steering_degrees, throttle)
 ```
 
 ## Training Use
