@@ -1451,12 +1451,30 @@ def train(roots, args):
         stage_name="dataset.base",
     )
 
+    # Time/sequence-aware split (NOT random): consecutive frames at ~8-10 fps are
+    # near-duplicates, so random_split leaks nearly-identical frames into BOTH train
+    # and val -> a fake-low val loss that lies about generalization. Instead sort by
+    # image path (which embeds <run>__..._YYYYMMDD_HHMMSS_micro), chop into contiguous
+    # windows, and hold out WHOLE windows for val, strided across the timeline. Only
+    # the ~2 boundary frames per window can leak, vs ~100% with random_split.
     n = len(base_dataset)
-    val_size = max(1, int(args.val_split * n))
-    train_size = max(1, n - val_size)
-
-    gen = torch.Generator().manual_seed(args.seed)
-    train_base_subset, val_subset = random_split(base_dataset, [train_size, val_size], generator=gen)
+    val_frac = float(args.val_split)
+    order = sorted(range(n), key=lambda i: str(base_dataset.samples[i][0]))
+    window = 100  # ~10-12 s of video per window
+    num_windows = max(1, (n + window - 1) // window)
+    val_windows = max(1, round(num_windows * val_frac))
+    stride = max(1, num_windows // val_windows)
+    train_indices, val_indices = [], []
+    for w in range(num_windows):
+        block = order[w * window:(w + 1) * window]
+        (val_indices if w % stride == 0 else train_indices).extend(block)
+    if not val_indices or not train_indices:  # tiny-dataset fallback
+        cut = max(1, int(val_frac * n))
+        val_indices, train_indices = order[-cut:], order[:-cut]
+    train_base_subset = Subset(base_dataset, train_indices)
+    val_subset = Subset(base_dataset, val_indices)
+    print(f"[split] time-window split: {len(train_indices)} train / {len(val_indices)} val "
+          f"({num_windows} windows x{window}, every {stride}th -> val; anti-leakage)", flush=True)
 
     augmented_dataset = SteeringDataset(
         roots,
@@ -1520,6 +1538,8 @@ def train(roots, args):
     best_path.parent.mkdir(parents=True, exist_ok=True)
 
     best_val = float("inf")
+    best_epoch = 0
+    val_history = []
     loss_ema = None
     total_steps = max(1, args.epochs * len(train_loader))
     global_step = 0
@@ -1635,14 +1655,33 @@ def train(roots, args):
             print_bucket_distribution("validation prediction buckets", metrics["pred_values"])
             print_bucket_distribution("validation target buckets", metrics["target_values"])
 
+        val_history.append(float(metrics["loss"]))
         if metrics["loss"] < best_val:
             best_val = metrics["loss"]
+            best_epoch = epoch
             torch.save(model.state_dict(), best_path)
             print("Saved best:", best_path)
 
     torch.save(model.state_dict(), final_path)
     print("Saved:", final_path)
     print("Saved best:", best_path)
+
+    # --- retrain-epochs recommendation ---
+    # Best val loss occurred at best_epoch; beyond it val stopped improving (overfitting).
+    # If the best WAS the last epoch, val was still improving -> retrain longer.
+    if val_history:
+        if best_epoch >= args.epochs:
+            rec = args.epochs + max(5, args.epochs // 3)
+            print(f"[recommend] Val loss was STILL IMPROVING at the final epoch "
+                  f"({best_epoch}/{args.epochs}, best={best_val:.6f}). "
+                  f"Retrain LONGER: try --epochs {rec}.", flush=True)
+        else:
+            print(f"[recommend] Best val loss at epoch {best_epoch}/{args.epochs} "
+                  f"(best={best_val:.6f}); val flattened/worsened after that (overfitting). "
+                  f"Retrain with --epochs {best_epoch} for the same model faster; "
+                  f"add data/augmentation before going higher.", flush=True)
+        tail = val_history[-min(5, len(val_history)):]
+        print("[recommend] last val losses: " + ", ".join(f"{v:.6f}" for v in tail), flush=True)
 
     export_checkpoint = best_path if args.export_checkpoint == "best" else final_path
 
