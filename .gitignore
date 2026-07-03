@@ -30,5 +30,13 @@ media/photos/
 # Training dataset images (data, not source) — hosted on Hugging Face
 code/ai_models_datasets/**/*.jpg
 
+# Dataset folders themselves (images + labels.json) — data, hosted on Hugging Face,
+# not GitHub. Ignore the CONTENTS but keep the folder present via .gitkeep so the
+# trainer's --roots path exists in a fresh clone. Source (trainer, README,
+# steering_corrections.json) lives one level up and stays tracked.
+code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/*
+code/ai_models_datasets/series_3/sidewalkpilot_dataset/*
+!code/ai_models_datasets/series_3/sidewalkpilot_dataset/.gitkeep
+
 # runtime logs now live in ~/logs (outside the repo)
 logs/
