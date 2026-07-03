@@ -16,6 +16,8 @@ tags:
 
 SidewalkPilot Series 1 and 2 is the finalized camera-to-steering dataset for the baseline and failure/iteration model series. The dataset pairs real field images with steering servo labels in degrees, so a model can learn to map a camera frame to a steering command.
 
+**CARLA-assisted.** The Series 1/2 models were trained on a **blend of these real field images plus CARLA synthetic frames** (down-weighted vs real). This repository holds the real labeled images; the CARLA synthetic set is published separately as `SidewalkPilot_carla`.
+
 Project code and documentation are maintained in the GitHub repo:
 
 | Resource | Link |

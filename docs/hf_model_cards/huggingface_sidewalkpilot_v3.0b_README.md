@@ -164,6 +164,8 @@ LiDAR blocked/too close -> hard brake
 
 The Series 3 dataset was assembled from RC-car photo runs: the 05_10 v2.3 field-failure runs (`D0510_18/19/20`) plus a 06_29 run (`D0629_17`). Labels are logical steering `0..180` and throttle `0..1` (near-constant `1.0` in these runs). The 06_29 run was captured with a **tilted camera**, degrading image quality.
 
+**No CARLA / synthetic data.** The entire Series 3 line is trained on **real RC-car photos only** — no CARLA or simulator frames. (Series 1/2, by contrast, were CARLA-assisted: real + CARLA synthetic blended.)
+
 ## Preprocessing
 
 ```text

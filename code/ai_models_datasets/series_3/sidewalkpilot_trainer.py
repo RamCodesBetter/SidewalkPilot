@@ -222,7 +222,7 @@ def discover_roots(explicit_roots=None):
         "dataset_carla_steering_town03_clear",
         "dataset_carla_steering_town04_cloudy",
         "dataset_carla_steering_town05_wet",
-        "dataset_l2_realistic",
+        "carla_dataset",
         "dataset_l2_balanced",
         "dataset_realistic",
         "dataset_balanced",

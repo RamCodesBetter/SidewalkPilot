@@ -19,6 +19,8 @@ SidewalkPilot Series 3 is the dataset for the Jetson-only heavy model series. Se
 
 First batch (2026-07-02): 50,684 manually-driven sidewalk frames captured across two runs, decode-verified and curated. All labels are raw human stick commands (imitation learning), never autonomous/model-predicted — Series 3 must not be seeded with old Series 2.x model-predicted labels.
 
+**Not CARLA-assisted.** Series 3 models are trained on **real RC-car photos only** — no CARLA / simulator frames. (The CARLA synthetic dataset is published separately as `SidewalkPilot_carla`; it was only used to assist the earlier CARLA-assisted Series 1/2 models.)
+
 Project code and documentation are maintained in the GitHub repo:
 
 | Resource | Link |
