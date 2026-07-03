@@ -103,7 +103,7 @@ Reverse is not a Series 3 model output. Braking, stopping, and reverse behavior 
 | 105-135 right | 4,464 |
 | 135-180 hard right | 4,474 |
 
-The set is center-heavy (~71% straight) and skews right of center (~21% right vs ~8% left): the car has a mechanical left-pull, so straight driving needed a slight right hold. Use horizontal-flip augmentation (mirror image + negate steering) to symmetrize left/right, plus class-balanced sampling to counter center dominance.
+The set is center-heavy (about 71% straight) and skews right of center (about 21% right vs 8% left): the car has a mechanical left-pull, so straight driving needed a slight right hold. Use horizontal-flip augmentation (mirror image + negate steering) to symmetrize left/right, plus class-balanced sampling to counter center dominance.
 
 ## Throttle Distribution
 
@@ -115,7 +115,7 @@ The set is center-heavy (~71% straight) and skews right of center (~21% right vs
 | 0.01-0.50 | 118 |
 | 0.00 stop | 301 |
 
-Throttle is effectively constant (~97.6% at full) because this batch was driven flat-out. There is almost no throttle variance, so the throttle head cannot learn meaningful throttle control from this batch alone — treat it as a steering dataset until varied-throttle runs are added.
+Throttle is effectively constant (97.6% at full) because this batch was driven flat-out. There is almost no throttle variance, so the throttle head cannot learn meaningful throttle control from this batch alone — treat it as a steering dataset until varied-throttle runs are added.
 
 ## Source Breakdown
 
@@ -135,9 +135,9 @@ The training pipeline resizes images (Series 3 default input `320x180`) before t
 ## Data Quality and Known Limitations
 
 - Full Pillow decode-verify pass; 154 empty crash-tail frames removed, 3,143 frames culled from selected time ranges. No corrupt/truncated frames remain.
-- **Throttle is ~constant** (see Throttle Distribution) — not learnable from this batch; needs varied-throttle runs.
+- **Throttle is near-constant** (see Throttle Distribution) — not learnable from this batch; needs varied-throttle runs.
 - **Steering is center-heavy and right-skewed** (see Steering Distribution) — use horizontal-flip augmentation + class-balanced sampling.
-- Consecutive frames (~8-10 fps) are near-duplicates; split train/val **by time segment, not randomly**, to avoid leakage inflating validation scores.
+- Consecutive frames (8-10 fps) are near-duplicates; split train/val **by time segment, not randomly**, to avoid leakage inflating validation scores.
 
 ## Basic Loading Example
 

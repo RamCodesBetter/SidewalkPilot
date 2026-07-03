@@ -39,10 +39,9 @@ The per-frame telemetry (`speed`, `applied_steer`, `lateral_error`, `heading_err
 
 | File or folder | What it contains |
 |---|---|
-| `images/` | 50,000 rendered CARLA frames (PNG) |
-| `labels.json` | list of per-frame labels (`image`, `steering`, `throttle`, + sim telemetry) |
+| `sidewalkpilot_carla_dataset.tar` | the full dataset as one tar — the **50,000 PNG frames + `labels.json`** live inside (extract to reconstruct an `images/` folder). This is how the images are hosted (no loose `images/` folder on HF). |
+| `labels.json` | per-frame labels (`image`, `steering`, `throttle`, + sim telemetry) — a loose copy alongside the tar for quick inspection |
 | `telemetry.json` | extra per-frame simulator telemetry |
-| `sidewalkpilot_carla_dataset.tar` | the full set packed as one tar (HF-friendly; extract to reconstruct `images/` + `labels.json`) |
 
 ## Current Size
 
@@ -93,7 +92,7 @@ Early Series 1/2 real datasets were small (a few thousand hand-labeled field pho
 - **Sim2real via domain randomization:** CARLA frames get heavy augmentation (contrast, noise, blur, tree/edge shadows, texture — `--carla-domain-randomize-probability 0.70`) to bridge the render-vs-real gap so the model doesn't overfit the "clean sim look."
 - **Documented in the model cards:** v1.0 = "initial mixed sidewalk/CARLA set"; v2.1 = "CARLA + real + corrections"; v2.2 = stronger shadow and CARLA/domain-randomization settings. It gave the baseline models turn + shadow coverage *before* enough real field data existed.
 
-**Series 3 dropped it** — by then Ram had collected 50k+ real sidewalk photos, and Series 3 learns real-world steering+throttle directly (real-only).
+**Series 3 dropped it** — by then I had collected 50k+ real sidewalk photos, and Series 3 learns real-world steering+throttle directly (real-only).
 
 ## How It's Used In Training
 
