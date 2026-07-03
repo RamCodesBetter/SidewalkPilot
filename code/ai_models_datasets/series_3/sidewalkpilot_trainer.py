@@ -1522,18 +1522,20 @@ def train(roots, args):
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(1, args.epochs))
     loss_fn = nn.SmoothL1Loss(reduction="none")
 
+    # Checkpoints (+ their ONNX) land in code/ai_models/, not the CWD.
+    models_dir = SCRIPT_DIR.parent.parent / "ai_models"
     if args.final_output or args.best_output:
-        final_path = Path(args.final_output or "SidewalkPilot.pth").expanduser()
-        best_path = Path(args.best_output or "SidewalkPilot-best.pth").expanduser()
+        final_path = Path(args.final_output or (models_dir / "SidewalkPilot.pth")).expanduser()
+        best_path = Path(args.best_output or (models_dir / "SidewalkPilot-best.pth")).expanduser()
     elif args.model_version:
         safe_version = str(args.model_version).strip().replace("/", "_").replace("\\", "_")
         final_version = safe_version[:-1] if safe_version.endswith("b") else safe_version
         best_version = safe_version if safe_version.endswith("b") else f"{safe_version}b"
-        final_path = Path(f"SidewalkPilot-v{final_version}.pth")
-        best_path = Path(f"SidewalkPilot-v{best_version}.pth")
+        final_path = models_dir / f"SidewalkPilot-v{final_version}.pth"
+        best_path = models_dir / f"SidewalkPilot-v{best_version}.pth"
     else:
-        best_path = Path("SidewalkPilot-best.pth")
-        final_path = Path("SidewalkPilot.pth")
+        best_path = models_dir / "SidewalkPilot-best.pth"
+        final_path = models_dir / "SidewalkPilot.pth"
     final_path.parent.mkdir(parents=True, exist_ok=True)
     best_path.parent.mkdir(parents=True, exist_ok=True)
 
