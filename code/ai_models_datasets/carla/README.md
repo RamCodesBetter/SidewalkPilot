@@ -17,15 +17,23 @@ tags:
 
 # SidewalkPilot CARLA Synthetic Dataset
 
-CARLA-simulator-generated steering + throttle frames used to **assist** the SidewalkPilot **Series 1/2** models — blended with real RC-car photos and **down-weighted** vs real (0.6 vs 2.0). This is **synthetic** data rendered in the CARLA driving simulator, not real field capture.
+CARLA-simulator-generated steering + throttle frames used to **assist the SidewalkPilot Series 1/2 models** — blended with real RC-car photos and **down-weighted** vs real. This is **synthetic** data rendered in the CARLA driving simulator, not real field capture.
 
-**Series 3 does NOT use this dataset** — the Series 3 line is trained on **real RC-car photos only**. This CARLA set is kept/published for the CARLA-assisted Series 1/2 history and for optional future sim2real experiments.
+**Series 3 does NOT use this dataset** — the Series 3 line is trained on **real RC-car photos only**. This CARLA set is kept for the CARLA-assisted Series 1/2 history and for optional future sim2real experiments.
 
 | Resource | Link |
 |---|---|
 | GitHub repository | `https://github.com/RamCodesBetter/SidewalkPilot` |
 | Hugging Face dataset | `https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_carla` |
 | Real datasets | `SidewalkPilot_v1_and_v2` (real S1/2) · `SidewalkPilot_v3` (real S3) |
+
+## How this data was generated
+
+The frames were rendered in the **CARLA autonomous-driving simulator**. A vehicle was driven along road/lane routes by an **expert path-following controller** while a front-facing camera logged each frame together with the control the expert applied. Every frame therefore pairs a rendered image with a **clean expert steering + throttle label** plus the controller's tracking state — that's what makes it usable for imitation learning (image → control).
+
+The per-frame telemetry (`speed`, `applied_steer`, `lateral_error`, `heading_error`) is the fingerprint of that setup: a controller tracking a reference path, logging how much steering/throttle it applied and how far off the path it was (cross-track + heading error). Coverage spanned multiple CARLA **towns and weather presets** — the source folders were named `dataset_carla_steering_town03_clear`, `..._town04_cloudy`, `..._town05_wet`, etc. — giving varied roads, lighting, and surface conditions the small early real datasets lacked.
+
+> Project-specifics (CARLA version; exact town/weather split; capture resolution/fps; whether the expert was CARLA's built-in autopilot or a custom pure-pursuit/Stanley controller) belong to the SidewalkPilot generation setup. That generator is no longer in the repo (the old `generate_synthetic_sidewalks` helper was retired), so this set is preserved as the archived output.
 
 ## Dataset Contents
 
@@ -34,6 +42,7 @@ CARLA-simulator-generated steering + throttle frames used to **assist** the Side
 | `images/` | 50,000 rendered CARLA frames (PNG) |
 | `labels.json` | list of per-frame labels (`image`, `steering`, `throttle`, + sim telemetry) |
 | `telemetry.json` | extra per-frame simulator telemetry |
+| `sidewalkpilot_carla_dataset.tar` | the full set packed as one tar (HF-friendly; extract to reconstruct `images/` + `labels.json`) |
 
 ## Current Size
 
@@ -55,11 +64,11 @@ CARLA-simulator-generated steering + throttle frames used to **assist** the Side
 | `steering` | number | logical steering servo angle, 0–180 |
 | `throttle` | number | forward motor command, 0.00–1.00 |
 | `speed` | number | simulator speed (m/s) |
-| `applied_steer` | number | normalized steering actually applied in the sim |
-| `lateral_error` | number | cross-track error in the sim |
-| `heading_error` | number | heading error in the sim |
+| `applied_steer` | number | normalized steering actually applied by the expert controller |
+| `lateral_error` | number | cross-track error vs the reference path |
+| `heading_error` | number | heading error vs the reference path |
 
-The SidewalkPilot trainer only reads `image` / `steering` / `throttle`; the rest is sim telemetry kept for analysis.
+The SidewalkPilot trainer only reads `image` / `steering` / `throttle`; the rest is kept for analysis.
 
 Example entry:
 
@@ -75,12 +84,18 @@ Example entry:
 }
 ```
 
+## How it assisted the Series 1/2 models
+
+Early Series 1/2 real datasets were small (a few thousand hand-labeled field photos) and thin on turns, shadows, and route variety. CARLA filled those gaps:
+
+- **Volume + diversity:** 50k synthetic frames across towns/weather added far more steering angles and lighting conditions than the real set alone.
+- **Blended, not dominant:** the trainer tags any root whose name contains `carla`/`synthetic`/`sim`/`dataset_l2` as `source="carla"` and **down-weights it (`--carla-sample-weight 0.6`) vs real (`2.0`)** — real data stays the anchor, CARLA is a supplement.
+- **Sim2real via domain randomization:** CARLA frames get heavy augmentation (contrast, noise, blur, tree/edge shadows, texture — `--carla-domain-randomize-probability 0.70`) to bridge the render-vs-real gap so the model doesn't overfit the "clean sim look."
+- **Documented in the model cards:** v1.0 = "initial mixed sidewalk/CARLA set"; v2.1 = "CARLA + real + corrections"; v2.2 = stronger shadow and CARLA/domain-randomization settings. It gave the baseline models turn + shadow coverage *before* enough real field data existed.
+
+**Series 3 dropped it** — by then Ram had collected 50k+ real sidewalk photos, and Series 3 learns real-world steering+throttle directly (real-only).
+
 ## How It's Used In Training
-
-The SidewalkPilot trainers auto-tag any dataset root whose folder name contains `carla` / `synthetic` / `sim` / `dataset_l2` as `source="carla"`, then:
-
-- **down-weight** it (`--carla-sample-weight 0.6`) vs real data (`2.0`), and
-- apply **CARLA domain-randomization augmentation** (`--carla-domain-randomize-probability 0.70`).
 
 Blend it with a real dataset by listing it in `--roots`, e.g.:
 
@@ -88,7 +103,7 @@ Blend it with a real dataset by listing it in `--roots`, e.g.:
 python3 sidewalkpilot_trainer.py --roots <real_dataset> carla_dataset --model-version <ver>
 ```
 
-Series 1/2 models were trained this way (real + CARLA). **Series 3 omits it (real-only).**
+Series 1/2 models were trained this way (real + CARLA). Series 3 omits it.
 
 ## Intended Scope
 
