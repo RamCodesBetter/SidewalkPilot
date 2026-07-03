@@ -1207,6 +1207,7 @@ def make_weighted_sampler(
     real_weight=2.0,
     carla_weight=0.6,
     correction_weight=3.0,
+    balance_power=1.0,
 ):
     bucket_counts = [0 for _ in SERVO_BUCKETS]
     source_counts = Counter()
@@ -1222,7 +1223,10 @@ def make_weighted_sampler(
         steer = base_dataset.targets[index]
         bucket_index = servo_bucket_index(steer)
         bucket_count = max(1, bucket_counts[bucket_index])
-        bucket_weight = target_count / float(bucket_count)
+        # balance_power softens the inverse-frequency rebalancing: 1.0 = full (can make
+        # the model turn-happy by starving the dominant "straight" class), 0.5 = sqrt,
+        # 0.0 = no rebalance (natural distribution).
+        bucket_weight = (target_count / float(bucket_count)) ** balance_power
         sample_source_weight = source_weight(
             base_dataset.sources[index],
             real_weight,
@@ -1499,6 +1503,7 @@ def train(roots, args):
         args.real_sample_weight,
         args.carla_sample_weight,
         args.correction_sample_weight,
+        args.sampler_balance_power,
     )
 
     train_loader = build_loader(
@@ -1760,6 +1765,9 @@ def main():
     parser.add_argument("--real-sample-weight", type=float, default=2.0)
     parser.add_argument("--carla-sample-weight", type=float, default=0.6)
     parser.add_argument("--correction-sample-weight", type=float, default=3.0)
+    parser.add_argument("--sampler-balance-power", type=float, default=1.0,
+                        help="0..1: how hard to rebalance steering buckets. 1.0=full inverse-frequency "
+                             "(aggressive; can make the model turn-happy), 0.5=sqrt-softened, 0.0=natural distribution")
     parser.add_argument("--steering-loss-weight", type=float, default=1.0)
     parser.add_argument("--throttle-loss-weight", type=float, default=0.5)
     parser.add_argument(
