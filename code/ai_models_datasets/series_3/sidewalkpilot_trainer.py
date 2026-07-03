@@ -1266,15 +1266,15 @@ def build_loader(dataset, batch_size, num_workers, shuffle=False, sampler=None, 
     return DataLoader(dataset, **kwargs)
 
 
-def control_loss(raw, preds, targets, steering_loss_weight=1.0, throttle_loss_weight=0.5):
+def control_loss(raw, preds, targets, steering_loss_weight=1.0, throttle_loss_weight=0.5, magnitude_weight=2.0):
     target_turn = torch.abs(targets[:, 0])
-    steering_weights = (1.0 + 2.0 * target_turn) * float(steering_loss_weight)
+    steering_weights = (1.0 + float(magnitude_weight) * target_turn) * float(steering_loss_weight)
     throttle_weights = torch.full_like(steering_weights, float(throttle_loss_weight))
     weighted = torch.stack((raw[:, 0] * steering_weights, raw[:, 1] * throttle_weights), dim=1)
     return weighted.mean()
 
 
-def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_weight=0.5):
+def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_weight=0.5, magnitude_weight=2.0):
     model.eval()
     val_total = 0.0
     steering_mae_total = 0.0
@@ -1294,7 +1294,7 @@ def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_wei
             preds = torch.clamp(preds, -1.0, 1.0)
 
             raw = loss_fn(preds, targets)
-            vloss = control_loss(raw, preds, targets, steering_loss_weight, throttle_loss_weight)
+            vloss = control_loss(raw, preds, targets, steering_loss_weight, throttle_loss_weight, magnitude_weight)
             pred_steering, pred_throttle = decode_controls(preds)
             target_steering, target_throttle = decode_controls(targets)
 
@@ -1582,6 +1582,7 @@ def train(roots, args):
                 targets,
                 args.steering_loss_weight,
                 args.throttle_loss_weight,
+                args.steer_magnitude_weight,
             )
             oversteer_penalty = torch.mean(torch.relu(pred_turn - target_turn - 0.18) ** 2)
             saturation_penalty = torch.mean(torch.relu(pred_turn - 0.92) ** 2)
@@ -1638,6 +1639,7 @@ def train(roots, args):
             loss_fn,
             args.steering_loss_weight,
             args.throttle_loss_weight,
+            args.steer_magnitude_weight,
         )
         avg_train = train_total / max(1, len(train_loader))
         epoch_elapsed = time.time() - epoch_start
@@ -1770,6 +1772,10 @@ def main():
                              "(aggressive; can make the model turn-happy), 0.5=sqrt-softened, 0.0=natural distribution")
     parser.add_argument("--steering-loss-weight", type=float, default=1.0)
     parser.add_argument("--throttle-loss-weight", type=float, default=0.5)
+    parser.add_argument("--steer-magnitude-weight", type=float, default=2.0,
+                        help="extra weight on TURN errors in the steering loss: weight = 1 + w*|steer|. "
+                             "2.0 = old (hard-turn error counts 3x -> turn-happy); 0.0 = flat (all steering "
+                             "errors equal -> the model commits to holding straight)")
     parser.add_argument(
         "--model-version",
         default=None,
