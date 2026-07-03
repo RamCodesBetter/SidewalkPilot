@@ -32,8 +32,7 @@ Project code and documentation are maintained in the GitHub repo:
 | File or folder | What it contains |
 |---|---|
 | `sidewalkpilot_dataset/` | JPG field images plus `labels.json` (the labels the trainer loads) |
-| `sidewalkpilot_dataset/labels.json` | Dict-style `image -> {steering, throttle}` for every frame |
-| `steering_corrections.json` | Optional list-style label/override file (empty; not required for training) |
+| `sidewalkpilot_dataset/labels.json` | Dict-style `image -> {steering, throttle}` for every frame (the sole label file) |
 | `sidewalkpilot_trainer.py` | Series 3 training, ONNX export, and TensorRT build script |
 
 ## Current Size
@@ -67,7 +66,7 @@ Example entry:
 }
 ```
 
-`steering_corrections.json` is a separate, optional list-style override file (currently empty `[]`); it is not required to train.
+`labels.json` is the single source of labels for this dataset; there is no separate corrections/override file.
 
 ## Steering Label Meaning
 
@@ -172,7 +171,6 @@ Typical local training flow:
 ```bash
 python3 sidewalkpilot_trainer.py \
   --roots sidewalkpilot_dataset \
-  --corrections steering_corrections.json \
   --model-version 3.0 \
   --export-onnx
 ```
@@ -182,7 +180,6 @@ Jetson TensorRT INT8 build flow:
 ```bash
 python3 sidewalkpilot_trainer.py \
   --roots sidewalkpilot_dataset \
-  --corrections steering_corrections.json \
   --model-version 3.0 \
   --export-onnx \
   --build-tensorrt \
