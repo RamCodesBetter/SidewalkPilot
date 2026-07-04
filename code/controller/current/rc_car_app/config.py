@@ -23,9 +23,10 @@ CAMERA_TURN_BLEND = 0.35
 # on ambiguous frames: steer = ALPHA*new + (1-ALPHA)*prev.
 #   1.0  = off (raw, jittery)   ~0.5 = balanced   lower = smoother but laggier
 # Tune in the field: raise it if the car corners late, lower it if still twitchy.
-# 0.6 chosen from the 2026-07-03 field log (~8 deg/frame raw jitter, ~15 fps) for a
-# snappier response with less turn lag.
-STEERING_SMOOTH_ALPHA = 0.6
+# 0.45 chosen from the 2026-07-03 field log (~8 deg/frame raw jitter) re-tuned at the
+# real 30 fps loop rate: ~40% jitter cut, ~0.13 s turn lag -- a middle between max-smooth
+# (0.30) and snappy (0.60).
+STEERING_SMOOTH_ALPHA = 0.45
 MAX_AUTONOMOUS_SPEED_MPH = 3.2
 MAX_TARGET_HEADING_DEG = 60.0
 PASSABLE_WIDTH_MIN_M = 0.40
