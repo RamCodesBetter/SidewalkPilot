@@ -1458,13 +1458,6 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         state["yaw_pid_engaged"] = yaw_controller.engaged
         state["yaw_pid_target_yaw_dps"] = yaw_controller.last_target_yaw
         state["yaw_pid_correction_deg"] = yaw_controller.last_correction
-        # Throttled diagnostics (always on): shows why it is / isn't correcting.
-        if current_time >= float(state.get("_yawdbg_next", 0.0)):
-            state["_yawdbg_next"] = current_time + 0.5
-            print(f"[yawpid] mode={yaw_controller.mode} imu_fresh={imu_fresh} "
-                  f"yaw={measured_yaw:+6.1f}dps speed={speed_mps:4.2f}m/s cmd={raw_command:5.1f} "
-                  f"-> out={servo_degrees:5.1f} engaged={yaw_controller.engaged} "
-                  f"target_yaw={yaw_controller.last_target_yaw:+6.1f} corr={yaw_controller.last_correction:+5.1f}")
 
     state["steering_effective_servo_deg"] = servo_degrees
     servo_write_ok = write_steering_servo_safely(state, metrics, hardware, servo_degrees)

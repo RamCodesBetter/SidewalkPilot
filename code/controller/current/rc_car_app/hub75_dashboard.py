@@ -80,8 +80,6 @@ class Hub75DashboardSender:
                     return False
                 self.socket_handle = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 self.udp_targets = targets
-                target_names = ", ".join(f"{host}:{self.udp_port}" for host, _ in targets)
-                print(f"Hub75 dashboard telemetry sending UDP to {target_names}.")
                 return True
             except Exception as exc:
                 print(f"Hub75 dashboard telemetry UDP setup failed for {self.udp_host}:{self.udp_port}: {exc}")
@@ -240,10 +238,6 @@ class Hub75DashboardSender:
             if self.transport == "udp":
                 if self.socket_handle is None or not self.udp_targets:
                     return False
-                target_summary = self._udp_target_summary()
-                if target_summary != self.last_udp_target_log:
-                    print(f"Hub75 dashboard telemetry active UDP targets: {target_summary}.")
-                    self.last_udp_target_log = target_summary
                 sent_any = False
                 last_error = None
                 for _, target in self.udp_targets:
