@@ -79,16 +79,27 @@ def synthetic_trace(n=240, seed=7):
     return out
 
 
-def load_csv(path, col):
-    vals = []
+def load_csv(path, col, filter_col=None, filter_val=None):
+    """Read numeric `col` from a CSV. If filter_col/filter_val are given, keep only rows
+    where that column equals filter_val (e.g. Autonomous Mode == On) — so you tune on the
+    frames the MODEL was driving, not manual takeovers."""
+    vals, skipped = [], 0
+    want = None if filter_val is None else str(filter_val).strip().lower()
     with open(path) as f:
         for row in _csv.DictReader(f):
+            if filter_col:
+                if str(row.get(filter_col, "")).strip().lower() != want:
+                    skipped += 1
+                    continue
             try:
                 vals.append(float(row[col]))
             except (KeyError, ValueError, TypeError):
                 pass
     if not vals:
-        raise SystemExit(f"no numeric values in column '{col}' of {path}")
+        raise SystemExit(f"no numeric values in column '{col}' of {path}"
+                         + (f" with {filter_col}=={filter_val}" if filter_col else ""))
+    if filter_col:
+        print(f"[filter] kept {len(vals)} rows where {filter_col}=={filter_val}  (skipped {skipped})")
     return vals
 
 
@@ -96,6 +107,9 @@ def main():
     ap = argparse.ArgumentParser(description="Tune STEERING_SMOOTH_ALPHA for the steering EMA.")
     ap.add_argument("--csv", help="CSV run log to read a steering column from")
     ap.add_argument("--col", default="steering", help="steering column name in --csv")
+    ap.add_argument("--filter-col", help="only use rows where this column == --filter-val "
+                                         "(e.g. 'Autonomous Mode (On/Off)')")
+    ap.add_argument("--filter-val", help="value to match in --filter-col (e.g. On)")
     ap.add_argument("--values", help="comma-separated steering degrees to replay")
     ap.add_argument("--fps", type=float, default=15.0, help="control-loop frame rate (for lag in seconds)")
     ap.add_argument("--max-lag-s", type=float, default=0.25, help="max acceptable lag to reach 90%% of a turn")
@@ -107,8 +121,8 @@ def main():
         raw = [float(x) for x in a.values.replace(" ", "").split(",") if x]
         src = "--values"
     elif a.csv:
-        raw = load_csv(a.csv, a.col)
-        src = f"{a.csv} [{a.col}]"
+        raw = load_csv(a.csv, a.col, a.filter_col, a.filter_val)
+        src = f"{a.csv} [{a.col}]" + (f" where {a.filter_col}=={a.filter_val}" if a.filter_col else "")
     else:
         raw = synthetic_trace()
         src = "built-in synthetic blocky trace"

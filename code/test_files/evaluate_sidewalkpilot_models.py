@@ -703,7 +703,12 @@ def build_line_chart(results, title, versions):
 
 def build_bar_chart(results, title, versions):
     maes = [results[v]["overall"]["mae"] for v in versions]
-    colors_by_value = ["#22c55e" if value <= 5 else "#eab308" if value <= 10 else "#f97316" if value <= 20 else "#ef4444" for value in maes]
+    # Smooth red->green gradient by MAE: best (lowest MAE) = green, worst = red, with the
+    # full red-orange-yellow-green ramp in between (instead of 4 discrete tiers).
+    lo, hi = min(maes), max(maes)
+    rng = (hi - lo) or 1.0
+    cmap = plt.get_cmap("RdYlGn_r")   # _r so LOW value -> green, HIGH -> red
+    colors_by_value = [cmap((value - lo) / rng) for value in maes]
     fig, ax = plt.subplots(figsize=(9.2, 3.4), dpi=170)
     ax.bar(versions, maes, color=colors_by_value)
     ax.set_title(title)
