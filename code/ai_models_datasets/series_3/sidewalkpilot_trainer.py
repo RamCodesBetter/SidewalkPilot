@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset, Subset, WeightedRandomSampler, random_split
 
@@ -1105,7 +1106,9 @@ class SteeringDataset(Dataset):
             )
 
         img = image_to_tensor(img)
-        target = torch.tensor([servo_to_unit(steer), throttle_to_unit(throttle)], dtype=torch.float32)
+        # Hybrid head works in physical units: steering degrees (0..180) and throttle (0..1).
+        # The class index + within-bucket offset are derived from the degree in the loss.
+        target = torch.tensor([clamp_servo(steer), clamp_throttle(throttle)], dtype=torch.float32)
         return img, target
 
 
@@ -1146,8 +1149,10 @@ class SidewalkPilotV3(nn.Module):
             nn.Dropout(p=0.12),
             nn.Linear(256, 64),
             nn.ELU(inplace=True),
-            nn.Linear(64, 2),
-            nn.Tanh(),
+            # Hybrid steering head: NUM_STEER_CLASSES class logits + NUM_STEER_CLASSES
+            # within-bucket offsets + 1 throttle. Raw outputs (no Tanh) -- softmax/sigmoid
+            # are applied in the loss/decode, not here.
+            nn.Linear(64, 2 * NUM_STEER_CLASSES + 1),
         )
 
     def forward(self, x):
@@ -1167,6 +1172,78 @@ SERVO_BUCKETS = [
     ("right_105_135", 105.0, 135.0),
     ("hard_right_135_180", 135.0, 180.0),
 ]
+
+
+# --- Series 3.1 hybrid steering head: 9 coarse classes + within-bucket offset ---
+# Continuous regression collapses to the conditional mean (predicts a ~97 deg mid-band
+# mush with dead hard-turn tails). Instead the model CLASSIFIES a coarse steering bucket
+# (this holds the true distribution: lots of straight AND live hard-turn tails, because
+# cross-entropy picks the most likely class instead of averaging), and REGRESSES a 0..1
+# offset for the exact angle inside that bucket (precision, especially in the wide 45-deg
+# edge buckets). 9 bins: fine (10 deg) near center where precision + data are dense,
+# coarser at the edges where exact angle matters less and data is thin.
+STEER_CLASS_BINS = [
+    ("hard_left_0_45",      0.0,  45.0),
+    ("left_45_60",         45.0,  60.0),
+    ("left_60_75",         60.0,  75.0),
+    ("soft_left_75_85",    75.0,  85.0),
+    ("straight_85_95",     85.0,  95.0),
+    ("soft_right_95_105",  95.0, 105.0),
+    ("right_105_120",     105.0, 120.0),
+    ("right_120_135",     120.0, 135.0),
+    ("hard_right_135_180", 135.0, 180.0),
+]
+NUM_STEER_CLASSES = len(STEER_CLASS_BINS)
+_STEER_BIN_LO = [lo for _, lo, _ in STEER_CLASS_BINS]
+_STEER_BIN_HI = [hi for _, _, hi in STEER_CLASS_BINS]
+_STEER_BIN_EDGES = _STEER_BIN_HI[:-1]  # internal upper edges: [45,60,75,85,95,105,120,135]
+
+
+def steer_class_index(steer):
+    """Python-side class index for a steering degree (left-inclusive, right-exclusive)."""
+    steer = clamp_servo(steer)
+    for i, (_, lo, hi) in enumerate(STEER_CLASS_BINS):
+        if i == NUM_STEER_CLASSES - 1:
+            if lo <= steer <= hi:
+                return i
+        elif lo <= steer < hi:
+            return i
+    return NUM_STEER_CLASSES - 1
+
+
+def _steer_bins_on(device, dtype):
+    edges = torch.tensor(_STEER_BIN_EDGES, device=device, dtype=dtype)
+    lo = torch.tensor(_STEER_BIN_LO, device=device, dtype=dtype)
+    hi = torch.tensor(_STEER_BIN_HI, device=device, dtype=dtype)
+    return edges, lo, hi
+
+
+def steer_target_class_offset(steer_deg):
+    """steer_deg [N] (degrees) -> (class idx [N] long, offset [N] in 0..1 within its bucket)."""
+    steer_deg = steer_deg.contiguous()
+    edges, lo, hi = _steer_bins_on(steer_deg.device, steer_deg.dtype)
+    cls = torch.bucketize(steer_deg, edges, right=True).clamp_(0, NUM_STEER_CLASSES - 1)
+    bin_lo = lo[cls]
+    bin_hi = hi[cls]
+    offset = ((steer_deg - bin_lo) / (bin_hi - bin_lo)).clamp_(0.0, 1.0)
+    return cls, offset
+
+
+def split_hybrid_output(out):
+    """Slice the raw [N, 2*K+1] head output into (class_logits, offset_raw, throttle_raw)."""
+    k = NUM_STEER_CLASSES
+    return out[:, 0:k], out[:, k:2 * k], out[:, 2 * k:2 * k + 1]
+
+
+def decode_hybrid(out):
+    """Raw head output [N, 2*K+1] -> (steering_deg [N,1], throttle [N,1])."""
+    class_logits, offset_raw, throttle_raw = split_hybrid_output(out)
+    cls = torch.argmax(class_logits, dim=1)
+    offset = torch.sigmoid(offset_raw).gather(1, cls.view(-1, 1)).squeeze(1)
+    _, lo, hi = _steer_bins_on(out.device, out.dtype)
+    steering = lo[cls] + offset * (hi[cls] - lo[cls])
+    throttle = torch.sigmoid(throttle_raw).squeeze(1)
+    return steering.view(-1, 1), throttle.view(-1, 1)
 
 
 def servo_bucket_index(steer):
@@ -1233,7 +1310,10 @@ def make_weighted_sampler(
             carla_weight,
             correction_weight,
         )
-        weights.append(bucket_weight * steering_magnitude_weight(steer) * sample_source_weight)
+        # No per-sample magnitude weighting here: the hybrid head uses class-weighted
+        # focal CE for imbalance, so the sampler stays near the true prior (run with
+        # --sampler-balance-power 0.0 to keep ~71% straight in the predicted distribution).
+        weights.append(bucket_weight * sample_source_weight)
 
     print("[sampler] servo bucket counts:")
     for (name, _, _), count in zip(SERVO_BUCKETS, bucket_counts):
@@ -1266,19 +1346,43 @@ def build_loader(dataset, batch_size, num_workers, shuffle=False, sampler=None, 
     return DataLoader(dataset, **kwargs)
 
 
-def control_loss(raw, preds, targets, steering_loss_weight=1.0, throttle_loss_weight=0.5, magnitude_weight=2.0):
-    target_turn = torch.abs(targets[:, 0])
-    steering_weights = (1.0 + float(magnitude_weight) * target_turn) * float(steering_loss_weight)
-    throttle_weights = torch.full_like(steering_weights, float(throttle_loss_weight))
-    weighted = torch.stack((raw[:, 0] * steering_weights, raw[:, 1] * throttle_weights), dim=1)
-    return weighted.mean()
+def hybrid_loss(out, targets, class_weights=None, offset_loss_weight=1.0,
+                throttle_loss_weight=0.0, focal_gamma=1.5):
+    """Hybrid steering loss: focal class-weighted CE (which bucket) + SmoothL1 offset
+    (where inside it, true bucket only) + optional throttle SmoothL1. Returns
+    (total, class_loss, offset_loss, throttle_loss)."""
+    steer_deg = targets[:, 0]
+    throttle_t = targets[:, 1]
+    true_cls, true_off = steer_target_class_offset(steer_deg)
+    class_logits, offset_raw, throttle_raw = split_hybrid_output(out)
+
+    # Focal cross-entropy: class_weights lift the rare hard-turn tails; focal_gamma
+    # keeps the loss focused on hard/misclassified frames.
+    ce = F.cross_entropy(class_logits, true_cls, weight=class_weights, reduction="none")
+    pt = torch.exp(-ce)
+    class_loss = (((1.0 - pt) ** float(focal_gamma)) * ce).mean()
+
+    # Offset supervised only for the true bucket (sigmoid -> 0..1 fraction into the bin).
+    off_pred = torch.sigmoid(offset_raw).gather(1, true_cls.view(-1, 1)).squeeze(1)
+    offset_loss = F.smooth_l1_loss(off_pred, true_off)
+
+    thr_pred = torch.sigmoid(throttle_raw).squeeze(1)
+    throttle_loss = F.smooth_l1_loss(thr_pred, throttle_t)
+
+    total = (class_loss
+             + float(offset_loss_weight) * offset_loss
+             + float(throttle_loss_weight) * throttle_loss)
+    return total, class_loss, offset_loss, throttle_loss
 
 
-def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_weight=0.5, magnitude_weight=2.0):
+def evaluate(model, loader, class_weights=None, offset_loss_weight=1.0,
+             throttle_loss_weight=0.0, focal_gamma=1.5):
     model.eval()
     val_total = 0.0
     steering_mae_total = 0.0
     throttle_mae_total = 0.0
+    class_correct = 0
+    class_total = 0
     count = 0
     pred_steering_values = []
     target_steering_values = []
@@ -1290,13 +1394,17 @@ def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_wei
             imgs = imgs.to(DEVICE, non_blocking=True)
             targets = targets.to(DEVICE, non_blocking=True)
 
-            preds = model(imgs)
-            preds = torch.clamp(preds, -1.0, 1.0)
+            out = model(imgs)
+            vloss, _, _, _ = hybrid_loss(out, targets, class_weights,
+                                         offset_loss_weight, throttle_loss_weight, focal_gamma)
+            pred_steering, pred_throttle = decode_hybrid(out)
+            target_steering = targets[:, 0:1]
+            target_throttle = targets[:, 1:2]
 
-            raw = loss_fn(preds, targets)
-            vloss = control_loss(raw, preds, targets, steering_loss_weight, throttle_loss_weight, magnitude_weight)
-            pred_steering, pred_throttle = decode_controls(preds)
-            target_steering, target_throttle = decode_controls(targets)
+            class_logits, _, _ = split_hybrid_output(out)
+            true_cls, _ = steer_target_class_offset(targets[:, 0])
+            class_correct += int((torch.argmax(class_logits, dim=1) == true_cls).sum().item())
+            class_total += int(true_cls.numel())
 
             val_total += vloss.item()
             steering_mae_total += torch.mean(torch.abs(pred_steering - target_steering)).item()
@@ -1316,6 +1424,7 @@ def evaluate(model, loader, loss_fn, steering_loss_weight=1.0, throttle_loss_wei
         "loss": val_total / max(1, count),
         "steering_mae": steering_mae_total / max(1, count),
         "throttle_mae": throttle_mae_total / max(1, count),
+        "class_acc": class_correct / max(1, class_total),
         "pred_steering_min": float(pred_steering_values.min()),
         "pred_steering_max": float(pred_steering_values.max()),
         "pred_steering_mean": float(pred_steering_values.mean()),
@@ -1365,8 +1474,8 @@ def export_onnx(checkpoint_path, output_path, width=320, height=180, opset=17):
         opset_version=int(opset),
         do_constant_folding=True,
         input_names=["image"],
-        output_names=["control_norm"],
-        dynamic_axes={"image": {0: "batch"}, "control_norm": {0: "batch"}},
+        output_names=["control_raw"],
+        dynamic_axes={"image": {0: "batch"}, "control_raw": {0: "batch"}},
     )
     print(f"[export] ONNX saved: {output_path}", flush=True)
     return output_path
@@ -1525,7 +1634,25 @@ def train(roots, args):
     model = SidewalkPilotV3().to(DEVICE)
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(1, args.epochs))
-    loss_fn = nn.SmoothL1Loss(reduction="none")
+
+    # Class-weighted focal CE handles steering imbalance for the hybrid head (so the
+    # sampler can stay near-natural and keep the true ~71%-straight prior). Weights are
+    # built from TRAIN class counts: rarer classes get a larger CE weight.
+    train_class_counts = [0] * NUM_STEER_CLASSES
+    for i in train_indices:
+        train_class_counts[steer_class_index(base_dataset.targets[i])] += 1
+    _nonzero = [c for c in train_class_counts if c > 0]
+    _mean_count = float(np.mean(_nonzero)) if _nonzero else 1.0
+    class_weight_list = [(_mean_count / max(1, c)) ** float(args.class_weight_power)
+                         for c in train_class_counts]
+    class_weights = torch.tensor(class_weight_list, dtype=torch.float32, device=DEVICE)
+    print(f"[hybrid] {NUM_STEER_CLASSES}-class steering head | class-weight-power="
+          f"{args.class_weight_power:.2f} focal-gamma={args.focal_gamma:.2f} "
+          f"offset-loss-weight={args.offset_loss_weight:.2f} "
+          f"throttle-loss-weight={args.throttle_loss_weight:.2f}", flush=True)
+    print("[hybrid] train class counts / CE weights:", flush=True)
+    for (name, _, _), c, w in zip(STEER_CLASS_BINS, train_class_counts, class_weight_list):
+        print(f"  {name}: n={c} weight={w:.3f}", flush=True)
 
     # Checkpoints (+ their ONNX) land in code/ai_models/, not the CWD.
     models_dir = SCRIPT_DIR.parent.parent / "ai_models"
@@ -1570,26 +1697,14 @@ def train(roots, args):
             imgs = imgs.to(DEVICE, non_blocking=True)
             targets = targets.to(DEVICE, non_blocking=True)
 
-            preds = model(imgs)
-            preds = torch.clamp(preds, -1.0, 1.0)
-
-            raw = loss_fn(preds, targets)
-            target_turn = torch.abs(targets[:, 0])
-            pred_turn = torch.abs(preds[:, 0])
-            regression_loss = control_loss(
-                raw,
-                preds,
+            out = model(imgs)
+            loss, class_loss, offset_loss, throttle_loss = hybrid_loss(
+                out,
                 targets,
-                args.steering_loss_weight,
+                class_weights,
+                args.offset_loss_weight,
                 args.throttle_loss_weight,
-                args.steer_magnitude_weight,
-            )
-            oversteer_penalty = torch.mean(torch.relu(pred_turn - target_turn - 0.18) ** 2)
-            saturation_penalty = torch.mean(torch.relu(pred_turn - 0.92) ** 2)
-            loss = (
-                regression_loss
-                + 4.0 * oversteer_penalty
-                + 15.0 * saturation_penalty
+                args.focal_gamma,
             )
 
             optimizer.zero_grad(set_to_none=True)
@@ -1608,8 +1723,9 @@ def train(roots, args):
                 elapsed = time.time() - start_time
                 steps_per_sec = global_step / max(elapsed, 1e-6)
                 eta = (total_steps - global_step) / max(steps_per_sec, 1e-6)
-                pred_steering, pred_throttle = decode_controls(preds.detach())
-                target_steering, target_throttle = decode_controls(targets.detach())
+                pred_steering, pred_throttle = decode_hybrid(out.detach())
+                target_steering = targets.detach()[:, 0:1]
+                target_throttle = targets.detach()[:, 1:2]
                 pred_min = float(pred_steering.min().item())
                 pred_max = float(pred_steering.max().item())
                 pred_mean = float(pred_steering.mean().item())
@@ -1623,6 +1739,7 @@ def train(roots, args):
                 print(
                     f"[train] epoch={epoch}/{args.epochs} step={step + 1}/{len(train_loader)} "
                     f"global={global_step}/{total_steps} loss={val:.6f} ema={loss_ema:.6f} "
+                    f"cls={class_loss.item():.4f} off={offset_loss.item():.4f} "
                     f"lr={lr:.7f} grad={grad_norm:.4f} "
                     f"pred_deg=[{pred_min:.2f},{pred_max:.2f}] mean={pred_mean:.2f} "
                     f"target_deg=[{target_min:.2f},{target_max:.2f}] mean={target_mean:.2f} "
@@ -1636,10 +1753,10 @@ def train(roots, args):
         metrics = evaluate(
             model,
             val_loader,
-            loss_fn,
-            args.steering_loss_weight,
+            class_weights,
+            args.offset_loss_weight,
             args.throttle_loss_weight,
-            args.steer_magnitude_weight,
+            args.focal_gamma,
         )
         avg_train = train_total / max(1, len(train_loader))
         epoch_elapsed = time.time() - epoch_start
@@ -1654,6 +1771,7 @@ def train(roots, args):
             f"PredDegRange [{metrics['pred_steering_min']:.6f}, {metrics['pred_steering_max']:.6f}] | "
             f"PredDegMean {metrics['pred_steering_mean']:.6f} | "
             f"PredThrottleMean {metrics['pred_throttle_mean']:.6f} | "
+            f"ClassAcc {metrics['class_acc']:.3f} | "
             f"Pred straight 85..95 {metrics['pred_straight_85_95']} | "
             f"TargetDegRange [{metrics['target_steering_min']:.6f}, {metrics['target_steering_max']:.6f}] | "
             f"TargetThrottleMean {metrics['target_throttle_mean']:.6f} | "
@@ -1772,6 +1890,14 @@ def main():
                              "(aggressive; can make the model turn-happy), 0.5=sqrt-softened, 0.0=natural distribution")
     parser.add_argument("--steering-loss-weight", type=float, default=1.0)
     parser.add_argument("--throttle-loss-weight", type=float, default=0.5)
+    parser.add_argument("--class-weight-power", type=float, default=0.5,
+                        help="0..1: focal-CE class weighting for the hybrid steering head. "
+                             "0.0=natural prior (max straight predictions), 1.0=full "
+                             "inverse-frequency (revives rare hard-turn classes). 0.5=sqrt.")
+    parser.add_argument("--offset-loss-weight", type=float, default=1.0,
+                        help="weight for the within-bucket steering offset regression loss")
+    parser.add_argument("--focal-gamma", type=float, default=1.5,
+                        help="focal-loss gamma for the steering classifier (0.0 = plain CE)")
     parser.add_argument("--steer-magnitude-weight", type=float, default=2.0,
                         help="extra weight on TURN errors in the steering loss: weight = 1 + w*|steer|. "
                              "2.0 = old (hard-turn error counts 3x -> turn-happy); 0.0 = flat (all steering "
