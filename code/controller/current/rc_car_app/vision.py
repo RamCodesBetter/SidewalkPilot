@@ -50,10 +50,14 @@ STEERING_MODEL_VERSIONS = (
     "2.3b",
     "2.4",
     "2.4b",
-    # Series 3 (heavy, 2-output): the Pi cannot run these locally — they are
+    # Series 3 (heavy, Jetson-only): the Pi cannot run these locally — they are
     # selectable so the model page can tell the Jetson ("Jon") to run them.
+    # 3.0/3.0b = 2-output regression; 3.1+ = 19-output hybrid (9 class logits +
+    # 9 within-bucket offsets + 1 throttle), decoded on Jon by output length.
     "3.0",
     "3.0b",
+    "3.1",
+    "3.1b",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 # Default to the HIGHEST version (last in the ascending list, currently 3.0b). The Pi

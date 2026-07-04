@@ -7,10 +7,13 @@ over TCP. Accepts .onnx, .pt (TorchScript), or .pth (state-dict) — and is gene
 across Series 1/2/3:
 
   * Series 1/2 (SteeringAutonomyV2): 1 output, already in DEGREES (90 + scale*tanh).
-  * Series 3  (SidewalkPilotV3):     2 outputs in UNIT controls (steer,throttle in
+  * Series 3.0/3.0b (regression):    2 outputs in UNIT controls (steer,throttle in
                                      [-1,1]); decoded steer=90+90*u, throttle=(u+1)/2.
-  The output is auto-decoded by its length (1 -> degrees, 2 -> unit controls), so the
-  same code handles every model/format.
+  * Series 3.1+ (hybrid head):       19 outputs = 9 steering-class logits + 9 within-
+                                     bucket offsets + 1 throttle; decoded via argmax
+                                     bucket + sigmoid(offset) -> degrees.
+  The output is auto-decoded by its length (1 -> degrees, 2 -> unit controls,
+  19 -> hybrid), so the same code handles every model/format.
 
 Preprocessing MATCHES rc_car_app/vision.py exactly:
   BGR -> [optional CLAHE] -> resize(W,H, INTER_AREA) -> /255 -> (x-0.5)/0.5
@@ -168,14 +171,35 @@ def preprocess(frame_bgr, width, height, use_clahe):
     return img[np.newaxis, ...].astype(np.float32)  # NCHW
 
 
+# Series 3.1+ hybrid head buckets (must match series_3 trainer STEER_CLASS_BINS):
+# 9 classes, fine near center, coarse at the edges.
+_S3_HYBRID_LO = np.array([0, 45, 60, 75, 85, 95, 105, 120, 135], dtype=np.float32)
+_S3_HYBRID_HI = np.array([45, 60, 75, 85, 95, 105, 120, 135, 180], dtype=np.float32)
+
+
 def decode_output(flat):
-    """flat = 1-D output. 2 values -> S3 unit controls; 1 value -> S1/2 degrees."""
-    flat = np.asarray(flat).reshape(-1)
-    if flat.size >= 2:
+    """flat = 1-D model output -> (steering_deg 0..180, throttle 0..1), auto-detected
+    by length:
+      * 19 -> Series 3.1+ hybrid: 9 class logits + 9 within-bucket offsets + 1 throttle.
+              argmax the logits, sigmoid that bucket's offset, steer = lo + off*(hi-lo).
+      * 2  -> Series 3.0 unit controls (steer,throttle in [-1,1]).
+      * 1  -> Series 1/2, already in degrees."""
+    flat = np.asarray(flat, dtype=np.float32).reshape(-1)
+    n = flat.size
+    k = _S3_HYBRID_LO.size                                   # 9 steering classes
+    if n == 2 * k + 1:                                       # 19 -> hybrid head
+        logits = flat[0:k]
+        offset = 1.0 / (1.0 + np.exp(-flat[k:2 * k]))        # sigmoid -> 0..1 fraction
+        cls = int(np.argmax(logits))
+        lo = float(_S3_HYBRID_LO[cls]); hi = float(_S3_HYBRID_HI[cls])
+        steer = lo + float(offset[cls]) * (hi - lo)          # place inside the picked bucket
+        throttle = float(1.0 / (1.0 + np.exp(-flat[2 * k]))) # throttle head (off in training)
+        return float(np.clip(steer, 0.0, 180.0)), throttle
+    if n >= 2:                                               # 2 -> Series 3.0 unit controls
         u0 = float(np.clip(flat[0], -1.0, 1.0))
         u1 = float(np.clip(flat[1], -1.0, 1.0))
         return 90.0 + 90.0 * u0, (u1 + 1.0) * 0.5
-    return float(flat[0]), 0.0
+    return float(flat[0]), 0.0                               # 1 -> Series 1/2 degrees
 
 
 class SteeringModel:
