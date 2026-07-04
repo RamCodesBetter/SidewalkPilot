@@ -12,6 +12,10 @@ __pycache__/
 # temporary / cache files
 *.log
 *.tmp
+# HuggingFace upload-staging cache (huggingface_hub upload_large_folder writes one
+# .metadata per file into .cache/huggingface/upload/) - regenerable junk, and rsync
+# was fanning 50k of them out to every device.
+.cache/
 
 # IDEs
 .vscode/
