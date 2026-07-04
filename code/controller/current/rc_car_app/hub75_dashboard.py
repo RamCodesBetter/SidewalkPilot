@@ -146,6 +146,13 @@ class Hub75DashboardSender:
         steering_trim_total_deg: float = 90.0,
         steering_center_offset: float = 0.0,
         tune_selected_row: int = 0,
+        yaw_kp: float = 0.0,
+        yaw_ki: float = 0.0,
+        yaw_kd: float = 0.0,
+        yaw_rate_dps: float = 0.0,
+        yaw_pid_correction_deg: float = 0.0,
+        yaw_pid_engaged: bool = False,
+        steering_cmd_deg: float = 90.0,
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -185,6 +192,13 @@ class Hub75DashboardSender:
             "steering_trim_total_deg": round(max(0.0, min(180.0, float(steering_trim_total_deg))), 2),
             "steering_center_offset": round(max(-1.0, min(1.0, float(steering_center_offset))), 4),
             "tune_selected_row": max(0, min(4, int(tune_selected_row))),
+            "yaw_kp": round(max(0.0, float(yaw_kp)), 3),
+            "yaw_ki": round(max(0.0, float(yaw_ki)), 3),
+            "yaw_kd": round(max(0.0, float(yaw_kd)), 3),
+            "yaw_rate_dps": round(float(yaw_rate_dps), 1),
+            "yaw_pid_correction_deg": round(float(yaw_pid_correction_deg), 1),
+            "yaw_pid_engaged": bool(yaw_pid_engaged),
+            "steering_cmd_deg": round(max(0.0, min(180.0, float(steering_cmd_deg))), 1),
             "timestamp": time.time(),
         }
         notification_sent = False
