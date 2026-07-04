@@ -91,18 +91,48 @@ Nine logits (not one number) let the model represent "it's one of the extremes, 
 - **Score formula:** `max(0, 100 * (1 - absolute_error / 180))`
 - **Caveat:** fit-check (trained on this data), not held-out field proof.
 
+## Version Update Categories
+
+| Version | Main update category | Data/status | Result |
+|---|---|---|---|
+| `3.0` | First Series 3 steering+throttle **regression** | tilted-camera dataset (poor quality) | high MAE, dead turn tails; not field-usable |
+| `3.0b` | Best checkpoint of the v3.0 run | same v3.0 training run | same regression limits |
+| `3.1` | **Hybrid classify + within-bucket-offset head** on a clean real dataset | 50,684 photos (2026-07-02, 2 manual runs) | full steering distribution restored; final epoch — a little jittery |
+| `3.1b` | Best checkpoint of the v3.1 run | same v3.1 training run | **recommended** — drove the sidewalk at night; smoother + lower-error than v3.1 |
+
+The Series-3 leap is `3.0b -> 3.1`: swapping the single-number **regressor** (which averaged to center and killed the turn tails) for the **hybrid classifier + offset** (which commits to turns).
+
 ## Evaluation Summary
+
+All four Series-3 checkpoints on the **same** current `50,684`-image set (fit-check; note this differs from the older `3,517`-image set the v3.0 card reports):
 
 | Model | Checkpoint | Full Score | MAE | Median AE | Max AE | Signed Error | Within 2 deg | Within 5 deg | Within 10 deg | Within 20 deg |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `3.1b` | `SidewalkPilot-v3.1b.onnx` | `92.123%` | `14.179` | `2.540` | `178.915` | `+2.325` | `24387 / 50684` | `27244 / 50684` | `32557 / 50684` | `37360 / 50684` |
+| `3.0` | `SidewalkPilot-v3.0.onnx` | `90.284%` | `17.488` | `12.935` | `157.122` | `+0.605` | `4266 / 50684` | `10494 / 50684` | `20150 / 50684` | `34895 / 50684` |
+| `3.0b` | `SidewalkPilot-v3.0b.onnx` | `90.638%` | `16.852` | `12.233` | `153.385` | `-0.517` | `4461 / 50684` | `11002 / 50684` | `21249 / 50684` | `36161 / 50684` |
+| `3.1` | `SidewalkPilot-v3.1.onnx` | `91.112%` | `15.998` | `3.162` | `178.941` | `+4.859` | `23607 / 50684` | `26709 / 50684` | `31712 / 50684` | `36337 / 50684` |
+| `3.1b` **(this model)** | `SidewalkPilot-v3.1b.onnx` | `92.123%` | `14.179` | `2.540` | `178.915` | `+2.325` | `24387 / 50684` | `27244 / 50684` | `32557 / 50684` | `37360 / 50684` |
 
-**Steering-bucket agreement:** exact bucket `59.8%`, off-by-one bucket `77.1%`.
+**Steering-bucket agreement (the real growth metric):** `3.0` 24.2% → `3.0b` 25.0% → `3.1` 59.1% → `3.1b` **59.8%** exact bucket. Note the **median AE collapse** at 3.1 (`~13°` → `~3°`) — the hybrid nails the bulk of frames; the mean MAE stays ~14–16° because a minority of wrong-bucket picks are large.
+
+## Ranking
+
+| Rank | Model | Checkpoint | Score | MAE | Median AE | Exact bucket | Signed Error |
+|---:|---|---|---:|---:|---:|---:|---:|
+| `1` | `3.1b` | `SidewalkPilot-v3.1b.onnx` | `92.123%` | `14.179` | `2.540` | `59.8%` | `+2.325` |
+| `2` | `3.1` | `SidewalkPilot-v3.1.onnx` | `91.112%` | `15.998` | `3.162` | `59.1%` | `+4.859` |
+| `3` | `3.0b` | `SidewalkPilot-v3.0b.onnx` | `90.638%` | `16.852` | `12.233` | `25.0%` | `-0.517` |
+| `4` | `3.0` | `SidewalkPilot-v3.0.onnx` | `90.284%` | `17.488` | `12.935` | `24.2%` | `+0.605` |
 
 ## Prediction Distribution
 
+Watch `Pred Min` — the regression heads never dip below ~20° (they can't reach a real hard-left), while the hybrid heads reach ~1° (full range = live tails):
+
 | Model | Pred Min | Pred Max | Pred Mean | Pred Median | Target Mean |
 |---|---:|---:|---:|---:|---:|
+| `3.0` | `24.219` | `172.370` | `97.369` | `97.147` | `96.764` |
+| `3.0b` | `20.663` | `170.127` | `96.247` | `96.248` | `96.764` |
+| `3.1` | `1.059` | `179.246` | `101.623` | `89.994` | `96.764` |
 | `3.1b` | `1.085` | `179.063` | `99.089` | `90.110` | `96.764` |
 
 ## Field Verdict
