@@ -551,72 +551,13 @@ class DashboardRenderer:
         self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
 
-    def _gain_cells(self, formatted: str) -> List[str]:
-        """'000.5' -> ['0','0','0.','5'] : the decimal point rides on the digit cell
-        before it, so a 4-digit gain + dot fits in 4 cells (matches the TUNE layout)."""
-        cells: List[str] = []
-        i = 0
-        while i < len(formatted):
-            ch = formatted[i]
-            if ch == ".":
-                i += 1
-                continue
-            if i + 1 < len(formatted) and formatted[i + 1] == ".":
-                cells.append(ch + ".")
-                i += 2
-            else:
-                cells.append(ch)
-                i += 1
-        return cells
-
-    def _signed_dd_d(self, value: float) -> List[str]:
-        """Signed value -> 4 cells: sign, tens, ones(with dot), tenths  (e.g. +12.3)."""
-        sign = "-" if float(value) < 0 else "+"
-        s = f"{min(99.9, abs(float(value))):04.1f}"   # 'dd.d'
-        return [sign, s[0], s[1] + ".", s[3]]
-
-    def _d_dd(self, value: float) -> List[str]:
-        """Unsigned 0..9.99 -> 3 cells: ones(with dot), tenths, hundredths (e.g. 1.42)."""
-        s = f"{min(9.99, max(0.0, float(value))):.2f}"   # 'd.dd'
-        return [s[0] + ".", s[2], s[3]]
-
-    def _draw_yaw_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # v1h4 yaw-PID telemetry.
-        #   YAW : +/- dd.d   current yaw rate (deg/s)
-        #   SPD :     d.dd   speed (m/s)
-        #   COR : +/- dd.d   PID correction (deg)
-        #   /III|OOO         input steer | output steer (servo deg)
-        yaw = float(payload.get("yaw_rate_dps", 0.0))
-        spd_ms = float(payload.get("speed_mph", 0.0)) * 0.44704      # telemetry is mph -> show m/s
-        cor = float(payload.get("yaw_pid_correction_deg", 0.0))
-        in_cells = self._format_three_digits(float(payload.get("steering_cmd_deg", 90.0)))
-        out_cells = self._format_three_digits(float(payload.get("servo_deg", 90.0)))
-        self._draw_text_row(0, ["Y", "A", "W", ":", *self._signed_dd_d(yaw)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["S", "P", "D", ":", " ", *self._d_dd(spd_ms)], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["C", "O", "R", ":", *self._signed_dd_d(cor)], ARROW_YELLOW, y_offset_px)
-        self._draw_text_row(3, ["/", *in_cells, "|", *out_cells], TEXT_ORANGE, y_offset_px)
-
     def _draw_tuning_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # TUNE page. D-pad up/down picks the row (white), left/right dec/inc.
+        # TUNE page: steering center trim only. Left/right dec/inc the trim.
         #   DELT : +/- N N     center trim (deg)
-        #   kP   :  d d d. d   yaw Kp   (dot after 3rd digit)
-        #   kI   :  d d. d d   yaw Ki   (dot after 2nd digit)
-        #   kD   :  d. d d d   yaw Kd   (dot after 1st digit)
         delta = float(payload.get("steering_trim_delta_deg", 0.0))
-        kp = min(99.99, max(0.0, float(payload.get("yaw_kp", 0.0))))
-        ki = min(99.99, max(0.0, float(payload.get("yaw_ki", 0.0))))
-        kd = min(9.999, max(0.0, float(payload.get("yaw_kd", 0.0))))
-        selected = max(0, min(3, int(payload.get("tune_selected_row", 0))))
-        rows = [
-            (["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_CYAN),
-            (["k", "P", ":", " ", *self._gain_cells(f"{kp:05.2f}")], ARROW_YELLOW),
-            (["k", "I", ":", " ", *self._gain_cells(f"{ki:05.2f}")], TEXT_GREEN),
-            (["k", "D", ":", " ", *self._gain_cells(f"{kd:05.3f}")], TEXT_ORANGE),
-        ]
-        for panel_row, (cells, color) in enumerate(rows):
-            if panel_row == selected:
-                color = TEXT_WHITE
-            self._draw_text_row(panel_row, cells, color, y_offset_px)
+        self._draw_text_row(
+            0, ["D", "E", "L", "T", ":", *self._signed_two_digit_cells(delta)], TEXT_WHITE, y_offset_px
+        )
 
     def _draw_nav_entry_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         nav = self._nav_payload(payload)
@@ -755,9 +696,6 @@ class DashboardRenderer:
         if page == 14:
             self._draw_lidar_page(payload, y_offset_px)
             return
-        if page == 15:
-            self._draw_yaw_page(payload, y_offset_px)
-            return
         if page == 16:
             self._draw_temps_page(payload, y_offset_px)
             return
@@ -893,9 +831,6 @@ def main():
     dashboard_page = 1
     dashboard_page_transition = ""
     servo_deg = 90.0
-    yaw_rate_dps = 0.0
-    yaw_pid_correction_deg = 0.0
-    steering_cmd_deg = 90.0
     throttle_percent = 0
     brake_percent = 0
     drive_mode = "MAN"
@@ -918,9 +853,6 @@ def main():
     steering_trim_total_deg = 90.0
     steering_center_offset = 0.0
     tune_selected_row = 0
-    yaw_kp = 0.0
-    yaw_ki = 0.0
-    yaw_kd = 0.0
     receiver_start_time = time.monotonic()
     last_packet_time = time.monotonic()
     have_received_payload = False
@@ -960,9 +892,6 @@ def main():
                 "dashboard_page": dashboard_page,
                 "dashboard_page_transition": dashboard_page_transition,
                 "servo_deg": servo_deg,
-                "yaw_rate_dps": yaw_rate_dps,
-                "yaw_pid_correction_deg": yaw_pid_correction_deg,
-                "steering_cmd_deg": steering_cmd_deg,
                 "throttle_percent": throttle_percent,
                 "brake_percent": brake_percent,
                 "drive_mode": drive_mode,
@@ -985,9 +914,6 @@ def main():
                 "steering_trim_total_deg": steering_trim_total_deg,
                 "steering_center_offset": steering_center_offset,
                 "tune_selected_row": tune_selected_row,
-                "yaw_kp": yaw_kp,
-                "yaw_ki": yaw_ki,
-                "yaw_kd": yaw_kd,
             },
             notification_rows,
         )
@@ -1017,9 +943,6 @@ def main():
         nonlocal dashboard_page
         nonlocal dashboard_page_transition
         nonlocal servo_deg
-        nonlocal yaw_rate_dps
-        nonlocal yaw_pid_correction_deg
-        nonlocal steering_cmd_deg
         nonlocal throttle_percent
         nonlocal brake_percent
         nonlocal drive_mode
@@ -1042,9 +965,6 @@ def main():
         nonlocal steering_trim_total_deg
         nonlocal steering_center_offset
         nonlocal tune_selected_row
-        nonlocal yaw_kp
-        nonlocal yaw_ki
-        nonlocal yaw_kd
         nonlocal telemetry_stale_reported
 
         if payload.get("shutdown"):
@@ -1063,9 +983,6 @@ def main():
         dashboard_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", dashboard_page))))
         dashboard_page_transition = str(payload.get("dashboard_page_transition", ""))[:8]
         servo_deg = max(0.0, min(180.0, float(payload.get("servo_deg", servo_deg))))
-        yaw_rate_dps = float(payload.get("yaw_rate_dps", yaw_rate_dps))
-        yaw_pid_correction_deg = float(payload.get("yaw_pid_correction_deg", yaw_pid_correction_deg))
-        steering_cmd_deg = max(0.0, min(180.0, float(payload.get("steering_cmd_deg", steering_cmd_deg))))
         throttle_percent = max(0, min(100, int(payload.get("throttle_percent", throttle_percent))))
         brake_percent = max(0, min(100, int(payload.get("brake_percent", brake_percent))))
         drive_mode = str(payload.get("drive_mode", drive_mode)).upper()[:3]
@@ -1105,9 +1022,6 @@ def main():
             min(1.0, float(payload.get("steering_center_offset", steering_center_offset))),
         )
         tune_selected_row = max(0, min(4, int(payload.get("tune_selected_row", tune_selected_row))))
-        yaw_kp = max(0.0, float(payload.get("yaw_kp", yaw_kp)))
-        yaw_ki = max(0.0, float(payload.get("yaw_ki", yaw_ki)))
-        yaw_kd = max(0.0, float(payload.get("yaw_kd", yaw_kd)))
         renderer.set_brightness(brightness_percent)
         notification = payload.get("dashboard_notification")
         if isinstance(notification, dict):

@@ -400,14 +400,12 @@ DASHBOARD_PAGE_COORDS = {
     12: (2, 3),
     13: (1, 3),
     14: (6, 2),
-    15: (1, 4),
     16: (3, 3),
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
 STEERING_TRIM_DASHBOARD_PAGE = 13   # v1h3
 LIDAR_DASHBOARD_PAGE = 14           # v6h2
-YAW_DASHBOARD_PAGE = 15             # v1h4 — yaw-PID telemetry
 STEERING_TRIM_STEP_DEG = 1.0
 
 
@@ -471,9 +469,8 @@ def adjust_steering_center_trim(state, hardware, direction: int) -> None:
 
 # --- On-device steering tuning page (dashboard page 13 / v1h3) ---------------
 # Rows the d-pad up/down cycles through; left/right adjusts the selected one.
-# TUNE page rows: trim + the live yaw-PID gains. D-pad up/down picks the row,
-# left/right dec/inc. No SAVE -- gains are tuned live in memory.
-TUNE_ROWS = ("DELT", "KP", "KI", "KD")
+# TUNE page: steering center trim only. Left/right dec/inc the trim.
+TUNE_ROWS = ("DELT",)
 
 
 def cycle_tuning_row(state, hat_y: int) -> None:
@@ -487,18 +484,6 @@ def adjust_tuning_value(state, hardware, direction: int) -> None:
     step = int(direction)
     if row == 0:    # DELT — center trim +/-1 deg, applied to the servo immediately.
         adjust_steering_center_trim(state, hardware, step)
-    elif row == 1:  # KP +/-0.01
-        state["yaw_kp"] = max(0.0, round(float(state.get("yaw_kp", 0.0)) + step * 0.01, 3))
-        state["yaw_pid_reset"] = True
-        print(f"yaw Kp -> {state['yaw_kp']:.2f}")
-    elif row == 2:  # KI +/-0.01
-        state["yaw_ki"] = max(0.0, round(float(state.get("yaw_ki", 0.0)) + step * 0.01, 3))
-        state["yaw_pid_reset"] = True
-        print(f"yaw Ki -> {state['yaw_ki']:.2f}")
-    elif row == 3:  # KD +/-0.01
-        state["yaw_kd"] = max(0.0, round(float(state.get("yaw_kd", 0.0)) + step * 0.01, 3))
-        state["yaw_pid_reset"] = True
-        print(f"yaw Kd -> {state['yaw_kd']:.2f}")
 
 
 def dashboard_axis_direction(axis_value: float) -> int:
@@ -2012,18 +1997,6 @@ def run(model_choice=None):
                     elif nav_operator == "MNUL":
                         cancel_autonomous_mode(state, metrics, "Navigation operator: human/manual segment.")
                     navigation_operator_last = nav_operator
-            # Motion-based page swap: tune on v1h3 (TUNE) while stopped, show v1h4
-            # (YAW telemetry) while driving. Only toggles between these two pages,
-            # so it never yanks you off any other page.
-            speed_now_mph = float(getattr(metrics, "smoothed_speed_mph", 0.0))
-            current_page_now = int(state.get("dashboard_page", 1))
-            if speed_now_mph > 0.01 and current_page_now == STEERING_TRIM_DASHBOARD_PAGE:
-                set_dashboard_page(state, YAW_DASHBOARD_PAGE)               # v1h3 -> v1h4
-                metrics.dashboard_page_transition = "right"
-            elif speed_now_mph <= 0.0 and current_page_now == YAW_DASHBOARD_PAGE:
-                set_dashboard_page(state, STEERING_TRIM_DASHBOARD_PAGE)     # v1h4 -> v1h3
-                metrics.dashboard_page_transition = "left"
-
             camera_pixels = []
             if state["dashboard_page"] == 11 and webcam_vision is not None:
                 camera_pixels = webcam_vision.get_dashboard_camera_pixels()
@@ -2063,13 +2036,6 @@ def run(model_choice=None):
                     steering_trim_total_deg=state["steering_trim_total_deg"],
                     steering_center_offset=state["steering_center_offset"],
                     tune_selected_row=state.get("tune_selected_row", 0),
-                    yaw_kp=state.get("yaw_kp", 0.0),
-                    yaw_ki=state.get("yaw_ki", 0.0),
-                    yaw_kd=state.get("yaw_kd", 0.0),
-                    yaw_rate_dps=state.get("yaw_rate_dps", 0.0),
-                    yaw_pid_correction_deg=state.get("yaw_pid_correction_deg", 0.0),
-                    yaw_pid_engaged=state.get("yaw_pid_engaged", False),
-                    steering_cmd_deg=state.get("steering_servo_deg", 90.0),
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""
