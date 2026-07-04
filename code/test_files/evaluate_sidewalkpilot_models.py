@@ -481,14 +481,32 @@ def _s3_source_labels(samples):
     return labels
 
 
-def _load_s3_arch():
-    """Load SidewalkPilotV3 from the series_3 trainer without a sys.path name clash
-    (both series have a sidewalkpilot_trainer.py)."""
+def _load_s3_module():
+    """Load the Series 3 trainer module (arch + hybrid decode constants) without a
+    sys.path name clash (both series have a sidewalkpilot_trainer.py)."""
     import importlib.util
     spec = importlib.util.spec_from_file_location("s3_trainer_for_eval", S3_TRAINER_PATH)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.SidewalkPilotV3
+    return module
+
+
+def _decode_s3_steering(out, s3mod):
+    """Decode a Series 3 model output batch -> steering degrees [0..180]. Handles BOTH
+    the legacy 2-output unit-control head (v3.0/3.0b) and the v3.1+ hybrid head
+    (NUM_STEER_CLASSES class logits + within-bucket offsets + 1 throttle)."""
+    out = np.asarray(out, dtype=np.float32)
+    k = int(getattr(s3mod, "NUM_STEER_CLASSES", 0) or 0)
+    if k and out.ndim == 2 and out.shape[1] == 2 * k + 1:
+        logits = out[:, 0:k]
+        offset = 1.0 / (1.0 + np.exp(-out[:, k:2 * k]))          # sigmoid -> 0..1 fraction
+        cls = np.argmax(logits, axis=1)                          # which bucket
+        lo = np.asarray(s3mod._STEER_BIN_LO, dtype=np.float32)[cls]
+        hi = np.asarray(s3mod._STEER_BIN_HI, dtype=np.float32)[cls]
+        chosen = offset[np.arange(len(cls)), cls]               # offset for the picked bucket
+        return np.clip(lo + chosen * (hi - lo), 0.0, 180.0)
+    u0 = np.clip(out[:, 0], -1.0, 1.0)                          # legacy 2-output unit control
+    return np.clip(90.0 + 90.0 * u0, 0.0, 180.0)
 
 
 def evaluate_series3(models_dir, device, batch_size):
@@ -513,7 +531,8 @@ def evaluate_series3(models_dir, device, batch_size):
     if not s3_paths or not labels_path.is_file():
         return {}, []
 
-    SidewalkPilotV3 = _load_s3_arch()
+    s3mod = _load_s3_module()
+    SidewalkPilotV3 = s3mod.SidewalkPilotV3
     labels = json.loads(labels_path.read_text())
 
     tensors, targets, samples = [], [], []
@@ -560,8 +579,7 @@ def evaluate_series3(models_dir, device, batch_size):
             iname = sess.get_inputs()[0].name
             for start in range(0, len(inputs_np), batch_size):
                 out = sess.run(None, {iname: inputs_np[start:start + batch_size]})[0]
-                u0 = np.clip(out[:, 0], -1.0, 1.0)            # decode steering control -> 0..180
-                preds.append(np.clip(90.0 + 90.0 * u0, 0.0, 180.0))
+                preds.append(_decode_s3_steering(out, s3mod))
         else:
             model = SidewalkPilotV3().to(device)
             checkpoint = torch.load(path, map_location=device)
@@ -577,8 +595,7 @@ def evaluate_series3(models_dir, device, batch_size):
             with torch.no_grad():
                 for start in range(0, len(inputs), batch_size):
                     out = model(inputs[start:start + batch_size].to(device, non_blocking=True)).cpu().numpy()
-                    u0 = np.clip(out[:, 0], -1.0, 1.0)        # decode steering control -> 0..180
-                    preds.append(np.clip(90.0 + 90.0 * u0, 0.0, 180.0))
+                    preds.append(_decode_s3_steering(out, s3mod))
         preds = np.concatenate(preds).astype(np.float32)
 
         by_dataset = {}
