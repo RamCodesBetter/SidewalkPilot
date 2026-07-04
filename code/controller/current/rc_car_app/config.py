@@ -21,9 +21,11 @@ CAMERA_TURN_BLEND = 0.35
 # Temporal smoothing (EMA) for the model steering command. Damps the frame-to-frame
 # "blockiness" of the v3.1 hybrid head, whose argmax can flip between steering buckets
 # on ambiguous frames: steer = ALPHA*new + (1-ALPHA)*prev.
-#   1.0  = off (raw, jittery)   0.4 = balanced (recommended)   lower = smoother but laggier
+#   1.0  = off (raw, jittery)   ~0.5 = balanced   lower = smoother but laggier
 # Tune in the field: raise it if the car corners late, lower it if still twitchy.
-STEERING_SMOOTH_ALPHA = 0.4
+# 0.6 chosen from the 2026-07-03 field log (~8 deg/frame raw jitter, ~15 fps) for a
+# snappier response with less turn lag.
+STEERING_SMOOTH_ALPHA = 0.6
 MAX_AUTONOMOUS_SPEED_MPH = 3.2
 MAX_TARGET_HEADING_DEG = 60.0
 PASSABLE_WIDTH_MIN_M = 0.40
