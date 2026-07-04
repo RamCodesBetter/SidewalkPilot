@@ -334,33 +334,6 @@ def calibrate():
     js.init()
     print(f"Joystick: {js.get_name()}   (A=save & next, Share=quit)")
 
-    # Best-effort: mirror the current candidate to the Zero's MAX7219 panel.
-    _panel = None
-    try:
-        from rc_car_app.config import (
-            HUB75_DASHBOARD_TRANSPORT, HUB75_DASHBOARD_BAUD_RATE,
-            HUB75_DASHBOARD_HOST, HUB75_DASHBOARD_UDP_PORT, HUB75_DASHBOARD_SERIAL_PORT,
-        )
-        from rc_car_app.hub75_dashboard import Hub75DashboardSender
-        _panel = Hub75DashboardSender(
-            transport=HUB75_DASHBOARD_TRANSPORT, baud_rate=HUB75_DASHBOARD_BAUD_RATE,
-            send_interval_sec=0.0, serial_port=HUB75_DASHBOARD_SERIAL_PORT,
-            udp_host=HUB75_DASHBOARD_HOST, udp_port=HUB75_DASHBOARD_UDP_PORT,
-        )
-        print("Panel mirror on (needs `dash` running on the Zero).")
-    except Exception as exc:
-        print(f"(panel mirror off: {exc})")
-        _panel = None
-
-    def panel(text):
-        if _panel is None:
-            return
-        try:
-            _panel.send(0.0, "P", False, False, "", 70,
-                        dashboard_page=1, dashboard_row1_text=str(text)[:10])
-        except Exception:
-            pass
-
     def pressed(btn):
         return js.get_numbuttons() > btn and bool(js.get_button(btn))
 
@@ -389,7 +362,6 @@ def calibrate():
             cand = CANDIDATE_START
             while cand >= CANDIDATE_FLOOR - 1e-9:
                 print(f"  r={r:.0f}   L{cand:.0f}:{KICK_DURATION_SEC} +{TRIM_DELTA_DEG:.0f}D")
-                panel(f"L{cand:.0f}")
                 servo.value = CENTER; time.sleep(0.15)
                 servo.value = float(r); time.sleep(0.40)      # go to release position
                 servo.value = cand; time.sleep(KICK_DURATION_SEC)  # the pushback kick
@@ -399,7 +371,6 @@ def calibrate():
                     raise KeyboardInterrupt
                 if act == "save":
                     saved = cand
-                    panel(f"OK L{cand:.0f}")
                     break
                 cand -= CANDIDATE_STEP
             if saved is None:
@@ -410,17 +381,8 @@ def calibrate():
         print("\nstopped.")
     finally:
         try:
-            panel("DONE")
-        except Exception:
-            pass
-        try:
             servo.value = CENTER
             servo.close()
-        except Exception:
-            pass
-        try:
-            if _panel is not None:
-                _panel.close()
         except Exception:
             pass
         try:

@@ -2,14 +2,11 @@
 """
 Display panel tester for Raspberry Pi Zero 2 W.
 
-Supports:
-- 64x32 HUB75 RGB matrix using direct BCM GPIO bit-banging
-- 8x32 MAX7219 LED matrix using SPI0 / CE0
+Tests the 64x32 HUB75 RGB matrix using direct BCM GPIO bit-banging.
 
 Run examples:
-    python3 code/test_files/display_panel_test.py --panel both
-    python3 code/test_files/display_panel_test.py --panel hub75
-    python3 code/test_files/display_panel_test.py --panel max7219
+    python3 code/test_files/display_panel_test.py
+    python3 code/test_files/display_panel_test.py --glyph-set digits
 """
 
 from __future__ import annotations
@@ -31,11 +28,6 @@ try:
     import RPi.GPIO as RPI_GPIO
 except Exception:
     RPI_GPIO = None
-
-try:
-    import spidev
-except ImportError:
-    spidev = None
 
 try:
     from gpiozero.pins.lgpio import LGPIOFactory
@@ -310,161 +302,6 @@ class Hub75MatrixTest:
         self.blank()
 
 
-class Max7219PanelTest:
-    REG_NOOP = 0x00
-    REG_DIGIT0 = 0x01
-    REG_DECODEMODE = 0x09
-    REG_INTENSITY = 0x0A
-    REG_SCANLIMIT = 0x0B
-    REG_SHUTDOWN = 0x0C
-    REG_DISPLAYTEST = 0x0F
-
-    def __init__(self, device_count: int = 4, bus: int = 0, device: int = 0) -> None:
-        if spidev is None:
-            print("Missing dependency: spidev")
-            print("Install on the Pi with: sudo apt install python3-spidev")
-            raise SystemExit(1)
-
-        self.device_count = device_count
-        self.spi = spidev.SpiDev()
-        device_path = Path(f"/dev/spidev{bus}.{device}")
-        if device_path.exists() and hasattr(self.spi, "open_path"):
-            self.spi.open_path(str(device_path))
-        else:
-            self.spi.open(bus, device)
-        self.spi.max_speed_hz = 1_000_000
-        self.spi.mode = 0
-        self.initialize()
-
-    def cleanup(self) -> None:
-        try:
-            self.clear()
-            self.write_all(self.REG_SHUTDOWN, 0x00)
-        finally:
-            self.spi.close()
-
-    def write_all(self, register: int, data: int) -> None:
-        payload: List[int] = []
-        for _ in range(self.device_count):
-            payload.extend([register, data])
-        self.spi.xfer2(payload)
-
-    def write_row_bytes(self, row_register: int, module_bytes: Sequence[int]) -> None:
-        if len(module_bytes) != self.device_count:
-            raise ValueError("module_bytes length must match device_count")
-
-        payload: List[int] = []
-        for value in reversed(module_bytes):
-            payload.extend([row_register, value])
-        self.spi.xfer2(payload)
-
-    def initialize(self) -> None:
-        self.write_all(self.REG_DISPLAYTEST, 0x00)
-        self.write_all(self.REG_DECODEMODE, 0x00)
-        self.write_all(self.REG_SCANLIMIT, 0x07)
-        self.write_all(self.REG_INTENSITY, 0x03)
-        self.write_all(self.REG_SHUTDOWN, 0x01)
-        self.clear()
-
-    def clear(self) -> None:
-        for row in range(1, 9):
-            self.write_all(row, 0x00)
-
-    def set_intensity(self, intensity: int) -> None:
-        self.write_all(self.REG_INTENSITY, max(0, min(15, intensity)))
-
-    def display_test_mode(self, enabled: bool, seconds: float) -> None:
-        self.write_all(self.REG_DISPLAYTEST, 0x01 if enabled else 0x00)
-        time.sleep(seconds)
-        self.write_all(self.REG_DISPLAYTEST, 0x00)
-
-    def pattern_rows(self, rows: Sequence[Sequence[int]], seconds: float) -> None:
-        if len(rows) != 8:
-            raise ValueError("MAX7219 panel requires 8 row definitions")
-        end_time = time.monotonic() + seconds
-        while time.monotonic() < end_time:
-            for row_index, module_bytes in enumerate(rows, start=1):
-                self.write_row_bytes(row_index, module_bytes)
-            time.sleep(0.02)
-
-    def display_glyph_on_all_modules(self, glyph: Sequence[int], seconds: float) -> None:
-        rows = []
-        for row_value in glyph:
-            rows.append([row_value] * self.device_count)
-        self.pattern_rows(rows, seconds)
-
-    def display_glyph_set(self, set_name: str, seconds_per_glyph: float = 0.8) -> None:
-        path = GLYPH_FILES[set_name]
-        glyphs = load_glyphs_from_header(path)
-        labels = GLYPH_LABELS.get(set_name, [])
-
-        print(f"MAX7219: {set_name} from {path}")
-        for index, glyph in enumerate(glyphs):
-            label = labels[index] if index < len(labels) else f"{set_name}_{index}"
-            print(f"  {index:02d}: {label}")
-            self.display_glyph_on_all_modules(glyph, seconds_per_glyph)
-            self.clear()
-            time.sleep(0.12)
-
-    def sweep_columns(self, seconds_per_step: float = 0.08) -> None:
-        for x in range(self.device_count * 8):
-            rows = []
-            for _ in range(8):
-                row_modules = [0x00] * self.device_count
-                module_index = x // 8
-                bit_index = 7 - (x % 8)
-                row_modules[module_index] = 1 << bit_index
-                rows.append(row_modules)
-            self.pattern_rows(rows, seconds_per_step)
-
-    def sweep_rows(self, seconds_per_step: float = 0.12) -> None:
-        for y in range(8):
-            rows = []
-            for row_index in range(8):
-                rows.append([0xFF] * self.device_count if row_index == y else [0x00] * self.device_count)
-            self.pattern_rows(rows, seconds_per_step)
-
-    def run_demo(self, glyph_set: str) -> None:
-        print("MAX7219: display test")
-        self.display_test_mode(True, 1.0)
-
-        print("MAX7219: low brightness")
-        self.set_intensity(1)
-        self.pattern_rows([[0xFF] * self.device_count for _ in range(8)], 1.0)
-
-        print("MAX7219: high brightness")
-        self.set_intensity(10)
-        self.pattern_rows([[0xFF] * self.device_count for _ in range(8)], 1.0)
-
-        print("MAX7219: checker")
-        self.pattern_rows(
-            [
-                [0xAA] * self.device_count,
-                [0x55] * self.device_count,
-                [0xAA] * self.device_count,
-                [0x55] * self.device_count,
-                [0xAA] * self.device_count,
-                [0x55] * self.device_count,
-                [0xAA] * self.device_count,
-                [0x55] * self.device_count,
-            ],
-            1.5,
-        )
-
-        print("MAX7219: column sweep")
-        self.sweep_columns()
-
-        print("MAX7219: row sweep")
-        self.sweep_rows()
-
-        if glyph_set in ("digits", "letters", "signs", "all"):
-            sets = ["digits", "letters", "signs"] if glyph_set == "all" else [glyph_set]
-            for set_name in sets:
-                self.display_glyph_set(set_name)
-
-        self.clear()
-
-
 def install_signal_handlers(cleanups: Iterable) -> None:
     def handler(signum, frame) -> None:  # type: ignore[unused-argument]
         for cleanup in cleanups:
@@ -481,34 +318,10 @@ def install_signal_handlers(cleanups: Iterable) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="LED matrix panel tester for Raspberry Pi Zero 2 W")
     parser.add_argument(
-        "--panel",
-        choices=["hub75", "max7219", "both"],
-        default="both",
-        help="Select which panel to test",
-    )
-    parser.add_argument(
-        "--max7219-devices",
-        type=int,
-        default=4,
-        help="Number of cascaded 8x8 MAX7219 modules in the 8x32 panel",
-    )
-    parser.add_argument(
-        "--max7219-bus",
-        type=int,
-        default=0,
-        help="SPI bus number for the MAX7219 panel",
-    )
-    parser.add_argument(
-        "--max7219-device",
-        type=int,
-        default=0,
-        help="SPI chip-select/device number for the MAX7219 panel",
-    )
-    parser.add_argument(
         "--glyph-set",
         choices=["digits", "letters", "signs", "all", "none"],
         default="all",
-        help="Glyph set to load from code/controller/current for the MAX7219 test",
+        help="Glyph set to load from code/controller/current for the glyph test",
     )
     return parser.parse_args()
 
@@ -516,38 +329,19 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    hub75 = None
-    max7219 = None
     cleanups = []
 
     try:
-        if args.panel in ("hub75", "both"):
-            hub75 = Hub75MatrixTest()
-            cleanups.append(hub75.cleanup)
-
-        if args.panel in ("max7219", "both"):
-            max7219 = Max7219PanelTest(
-                device_count=args.max7219_devices,
-                bus=args.max7219_bus,
-                device=args.max7219_device,
-            )
-            cleanups.append(max7219.cleanup)
+        hub75 = Hub75MatrixTest()
+        cleanups.append(hub75.cleanup)
 
         install_signal_handlers(cleanups)
 
         print("Wiring summary")
         print("HUB75 RGB matrix: BCM 5,6,12,13,16,19,20,21,22,23,25,26,27")
-        print(
-            f"MAX7219 SPI: bus={args.max7219_bus} device={args.max7219_device} "
-            "MOSI=GPIO10 SCLK=GPIO11"
-        )
         print("Press Ctrl+C to stop.\n")
 
-        if max7219:
-            max7219.run_demo(args.glyph_set)
-
-        if hub75:
-            hub75.run_demo(args.glyph_set)
+        hub75.run_demo(args.glyph_set)
 
         return 0
     finally:

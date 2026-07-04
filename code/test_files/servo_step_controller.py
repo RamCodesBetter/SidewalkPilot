@@ -136,7 +136,6 @@ def send_dashboard(sender: Hub75DashboardSender, angle: int, dashboard_page: int
         brake_percent=0,
         drive_mode="CAL",
         system_status="CAL",
-        dashboard_row1_text=f"SERVO:{angle:03d}",
     )
 
 

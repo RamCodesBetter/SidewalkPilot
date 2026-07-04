@@ -19,11 +19,6 @@ except ImportError as exc:
     print("Install on the Pi with: python -m pip install pyserial")
     raise SystemExit(1) from exc
 
-try:
-    import spidev
-except ImportError:
-    spidev = None
-
 Color = Tuple[int, int, int]
 Glyph = List[int]
 
@@ -856,129 +851,6 @@ class DashboardRenderer:
         self.canvas.brightness = effective
 
 
-class Max7219TurnSignalDisplay:
-    REG_INTENSITY = 0x0A
-    REG_SCANLIMIT = 0x0B
-    REG_SHUTDOWN = 0x0C
-    REG_DISPLAYTEST = 0x0F
-    REG_DECODEMODE = 0x09
-
-    def __init__(self, device_count: int, bus: int, device: int, intensity: int):
-        self.available = spidev is not None
-        self.device_count = device_count
-        self.intensity = max(0, min(15, intensity))
-        self.spi = None
-        self.left_turn_signal, self.right_turn_signal = load_turn_signal_glyphs()
-        if not self.available:
-            print("MAX7219 on Zero 2 W disabled: missing dependency 'spidev'.")
-            return
-        try:
-            self.spi = spidev.SpiDev()
-            device_path = Path(f"/dev/spidev{bus}.{device}")
-            if device_path.exists() and hasattr(self.spi, "open_path"):
-                self.spi.open_path(str(device_path))
-            else:
-                self.spi.open(bus, device)
-            self.spi.max_speed_hz = 1_000_000
-            self.spi.mode = 0
-            self._initialize()
-            print(f"MAX7219 on Zero 2 W initialized on SPI{bus}.{device}.")
-        except Exception as exc:
-            print(f"MAX7219 on Zero 2 W init failed: {exc}")
-            self.available = False
-            self.spi = None
-
-    def _write_all(self, register: int, value: int):
-        if not self.spi:
-            return
-        payload: List[int] = []
-        for _ in range(self.device_count):
-            payload.extend([register, value])
-        self.spi.xfer2(payload)
-
-    def _write_row_bytes(self, row_register: int, module_bytes: Sequence[int]):
-        if not self.spi:
-            return
-        if len(module_bytes) != self.device_count:
-            raise ValueError("module_bytes length must match device_count")
-        payload: List[int] = []
-        for value in reversed(module_bytes):
-            payload.extend([row_register, value])
-        self.spi.xfer2(payload)
-
-    def _initialize(self):
-        self._write_all(self.REG_DISPLAYTEST, 0x00)
-        self._write_all(self.REG_DECODEMODE, 0x00)
-        self._write_all(self.REG_SCANLIMIT, 0x07)
-        self._write_all(self.REG_INTENSITY, self.intensity)
-        self._write_all(self.REG_SHUTDOWN, 0x01)
-        self.clear()
-
-    def render(self, left_visible: bool, right_visible: bool):
-        if not self.spi:
-            return
-        for row in range(8):
-            module_bytes = [0x00] * self.device_count
-            if left_visible:
-                module_bytes[self.device_count - 1] = self.left_turn_signal[row]
-            if right_visible:
-                module_bytes[0] = self.right_turn_signal[row]
-            self._write_row_bytes(row + 1, module_bytes)
-
-    @staticmethod
-    def _reverse_bits(value: int) -> int:
-        value = int(value) & 0xFF
-        result = 0
-        for _ in range(8):
-            result = (result << 1) | (value & 1)
-            value >>= 1
-        return result
-
-    def _rotate180(self, glyph: Sequence[int]) -> List[int]:
-        # 180 deg: reverse row order and mirror each row's columns.
-        return [self._reverse_bits(glyph[7 - r]) for r in range(8)]
-
-    def show_glyphs(self, glyphs: Sequence[Sequence[int]]):
-        """Render up to device_count 8x8 glyphs, left-aligned. The panel is
-        mounted upside-down, so each glyph is flipped 180 deg (rows + columns)
-        and the mount flips it back to upright. Module/chain order is left as-is
-        (the write path already handles it)."""
-        if not self.spi:
-            return
-        rotated = [self._rotate180(g) if g else None
-                   for g in list(glyphs)[: self.device_count]]
-        for row in range(8):
-            module_bytes = []
-            for dev in range(self.device_count):
-                g = rotated[dev] if dev < len(rotated) else None
-                module_bytes.append(g[row] if g else 0x00)
-            self._write_row_bytes(row + 1, module_bytes)
-
-    def clear(self):
-        if not self.spi:
-            return
-        for row in range(1, 9):
-            self._write_all(row, 0x00)
-
-    def set_brightness_percent(self, brightness_percent: int):
-        if not self.spi:
-            return
-        effective = effective_brightness_percent(brightness_percent)
-        intensity = max(0, min(15, round((effective / 100.0) * 15.0)))
-        if intensity == self.intensity:
-            return
-        self.intensity = intensity
-        self._write_all(self.REG_INTENSITY, self.intensity)
-
-    def cleanup(self):
-        try:
-            self.clear()
-            self._write_all(self.REG_SHUTDOWN, 0x00)
-        finally:
-            if self.spi:
-                self.spi.close()
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Zero 2 W dashboard receiver for HUB75 and MAX7219 displays")
     parser.add_argument("--transport", choices=("udp", "serial"), default="udp")
@@ -995,10 +867,6 @@ def parse_args():
     parser.add_argument("--led-limit-refresh", type=int, default=120)
     parser.add_argument("--led-rgb-sequence", default="RGB")
     parser.add_argument("--led-no-hardware-pulse", action="store_true")
-    parser.add_argument("--max7219-bus", type=int, default=0)
-    parser.add_argument("--max7219-device", type=int, default=0)
-    parser.add_argument("--max7219-devices", type=int, default=4)
-    parser.add_argument("--max7219-intensity", type=int, default=10)
     parser.add_argument("--idle-exit-sec", type=float, default=0.0)
     return parser.parse_args()
 
@@ -1016,19 +884,11 @@ def main():
         rgb_sequence=args.led_rgb_sequence,
         no_hardware_pulse=args.led_no_hardware_pulse,
     )
-    max7219 = Max7219TurnSignalDisplay(
-        device_count=args.max7219_devices,
-        bus=args.max7219_bus,
-        device=args.max7219_device,
-        intensity=args.max7219_intensity,
-    )
-
     latest_speed = 0.0
     latest_gear = "P"
     left_signal_visible = False
     right_signal_visible = False
     dashboard_alert = ""
-    dashboard_row1_text = ""
     brightness_percent = args.led_brightness
     dashboard_page = 1
     dashboard_page_transition = ""
@@ -1097,7 +957,6 @@ def main():
                 "left_signal_visible": left_signal_visible,
                 "right_signal_visible": right_signal_visible,
                 "dashboard_alert": dashboard_alert,
-                "dashboard_row1_text": dashboard_row1_text,
                 "dashboard_page": dashboard_page,
                 "dashboard_page_transition": dashboard_page_transition,
                 "servo_deg": servo_deg,
@@ -1132,19 +991,6 @@ def main():
             },
             notification_rows,
         )
-        calib_label = str(dashboard_row1_text).strip().upper()
-        if calib_label:
-            # Show short text (e.g. calibration "L180") on the MAX7219 using the
-            # 8x8 glyph bitmaps, one glyph per module, left-aligned.
-            glyphs = []
-            for ch in calib_label[: max7219.device_count]:
-                if ch.isdigit():
-                    glyphs.append(renderer.digit_map.get(ch, renderer.letter_map[" "]))
-                else:
-                    glyphs.append(renderer.letter_map.get(ch, renderer.letter_map[" "]))
-            max7219.show_glyphs(glyphs)
-        else:
-            max7219.render(left_signal_visible, right_signal_visible)
 
     def handle_idle() -> int | None:
         nonlocal telemetry_stale_reported
@@ -1167,7 +1013,6 @@ def main():
         nonlocal left_signal_visible
         nonlocal right_signal_visible
         nonlocal dashboard_alert
-        nonlocal dashboard_row1_text
         nonlocal brightness_percent
         nonlocal dashboard_page
         nonlocal dashboard_page_transition
@@ -1214,7 +1059,6 @@ def main():
         left_signal_visible = bool(payload.get("left_signal_visible", left_signal_visible))
         right_signal_visible = bool(payload.get("right_signal_visible", right_signal_visible))
         dashboard_alert = str(payload.get("dashboard_alert", dashboard_alert))[:4]
-        dashboard_row1_text = str(payload.get("dashboard_row1_text", ""))[:10].upper()
         brightness_percent = max(0, min(100, int(payload.get("brightness_percent", brightness_percent))))
         dashboard_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", dashboard_page))))
         dashboard_page_transition = str(payload.get("dashboard_page_transition", ""))[:8]
@@ -1265,7 +1109,6 @@ def main():
         yaw_ki = max(0.0, float(payload.get("yaw_ki", yaw_ki)))
         yaw_kd = max(0.0, float(payload.get("yaw_kd", yaw_kd)))
         renderer.set_brightness(brightness_percent)
-        max7219.set_brightness_percent(brightness_percent)
         notification = payload.get("dashboard_notification")
         if isinstance(notification, dict):
             raw_cells = notification.get("cells", [])
@@ -1353,7 +1196,6 @@ def main():
         return 0
     finally:
         renderer.clear()
-        max7219.cleanup()
 
 
 if __name__ == "__main__":
