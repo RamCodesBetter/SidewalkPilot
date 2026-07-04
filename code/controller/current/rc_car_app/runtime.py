@@ -25,6 +25,7 @@ from .config import (
     PHOTO_RUN_CAPTURE_FPS,
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
+    STEERING_SMOOTH_ALPHA,
     BRAKE_RATE,
     CM_PER_SEC_TO_MPH,
     COASTING_RATE,
@@ -1258,6 +1259,13 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
         )
         if jon_result is not None:
             jon_steer_deg, _jon_throttle = jon_result
+            # Temporal smoothing (EMA): the v3.1 hybrid head can flip steering buckets
+            # frame-to-frame (blocky output). Blend with the previous command to damp it.
+            _prev_steer = state.get("steer_smoothed_deg")
+            if _prev_steer is not None and 0.0 < STEERING_SMOOTH_ALPHA < 1.0:
+                jon_steer_deg = (STEERING_SMOOTH_ALPHA * jon_steer_deg
+                                 + (1.0 - STEERING_SMOOTH_ALPHA) * _prev_steer)
+            state["steer_smoothed_deg"] = jon_steer_deg
             # Jon reports its CPU/GPU temps + inference rate back with each frame
             state["jon_cpu_temp_c"] = float(getattr(jetson_client, "jon_cpu_temp_c", 0.0))
             state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))

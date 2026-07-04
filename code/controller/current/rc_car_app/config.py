@@ -18,6 +18,12 @@ AUTONOMOUS_WARN_PWM = 0.8
 AUTONOMOUS_LIDAR_OVERRIDE_PWM = 0.5
 CAMERA_STEER_GAIN = 0.75
 CAMERA_TURN_BLEND = 0.35
+# Temporal smoothing (EMA) for the model steering command. Damps the frame-to-frame
+# "blockiness" of the v3.1 hybrid head, whose argmax can flip between steering buckets
+# on ambiguous frames: steer = ALPHA*new + (1-ALPHA)*prev.
+#   1.0  = off (raw, jittery)   0.4 = balanced (recommended)   lower = smoother but laggier
+# Tune in the field: raise it if the car corners late, lower it if still twitchy.
+STEERING_SMOOTH_ALPHA = 0.4
 MAX_AUTONOMOUS_SPEED_MPH = 3.2
 MAX_TARGET_HEADING_DEG = 60.0
 PASSABLE_WIDTH_MIN_M = 0.40
