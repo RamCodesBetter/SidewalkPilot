@@ -334,6 +334,7 @@ class DashboardRenderer:
         right_signal_visible: bool,
         dashboard_alert: str,
         notification_rows: Sequence[Sequence[str]],
+        odometer_total_m: float = 0.0,
         y_offset_px: int = 0,
     ):
         speed_digits = self._speed_digits(speed_mph)
@@ -351,8 +352,15 @@ class DashboardRenderer:
             self._draw_glyph_at(self.left_turn_signal, 3, 0, ARROW_YELLOW, y_offset_px)
         if right_signal_visible:
             self._draw_glyph_at(self.right_turn_signal, 3, 7, ARROW_YELLOW, y_offset_px)
-        for offset, char in enumerate(str(dashboard_alert)[:4], start=2):
-            self._draw_glyph_at(self.letter_map.get(char, self.letter_map[" "]), 3, offset, ALERT_RED_DIM, y_offset_px)
+        alert_txt = str(dashboard_alert).strip()
+        if alert_txt:
+            for offset, char in enumerate(alert_txt[:4], start=2):
+                self._draw_glyph_at(self.letter_map.get(char, self.letter_map[" "]), 3, offset, ALERT_RED_DIM, y_offset_px)
+        else:
+            # no WARN/STOP active -> show total odometer (m) in the same row
+            odo = max(0, min(99999, int(float(odometer_total_m))))
+            for offset, char in enumerate(f"{odo:05d}", start=2):
+                self._draw_glyph_at(self.digit_map.get(char, self.letter_map[" "]), 3, offset, TEXT_WHITE, y_offset_px)
         for row_offset, cells in enumerate(list(notification_rows)[:2], start=1):
             self._draw_notification_row(row_offset, cells, NOTIFICATION_WHITE, y_offset_px)
 
@@ -372,6 +380,22 @@ class DashboardRenderer:
         self._draw_text_row(1, ["T", "T", "L", "E", ":", *throttle_cells], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["B", "R", "K", "E", ":", *brake_cells], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["M", "O", "D", "E", ":", mode[0], mode[1], mode[2]], ARROW_YELLOW, y_offset_px)
+
+    def _draw_autonomy_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        # V2H2 autonomy metrics: ICSE (cause code), ADT (dist m), IPKM (interv/km), AUT (avg uptime MM.SS).
+        code = (str(payload.get("autonomy_cause_code", "") or "---")[:3].upper() + "   ")[:3]
+        adt = max(0, min(9999, int(float(payload.get("autonomy_distance_m", 0)))))
+        ipkm_s = f"{max(0.0, min(9.9, float(payload.get('autonomy_interv_per_km', 0.0)))):.1f}"
+        aut = max(0, int(float(payload.get("autonomy_avg_uptime_s", 0))))
+        mm, ss = min(99, aut // 60), aut % 60
+        self._draw_text_row(0, ["I", "C", "S", "E", ":", code[0], code[1], code[2]], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["A", "D", "T", ":", *list(f"{adt:04d}")], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["I", "P", "K", "M", ":", ipkm_s[0], ipkm_s[2], " "], ARROW_YELLOW, y_offset_px)
+        self._draw_decimal_point_at(2, 5, ARROW_YELLOW, y_offset_px)          # dot after IPKM ones digit
+        m1, m2 = f"{mm:02d}"
+        s1, s2 = f"{ss:02d}"
+        self._draw_text_row(3, ["A", "U", "T", ":", m1, m2, s1, s2], TEXT_ORANGE, y_offset_px)
+        self._draw_decimal_point_at(3, 5, TEXT_ORANGE, y_offset_px)           # dot between MM and SS
 
     def _draw_page_three(self, payload: Dict[str, object], y_offset_px: int = 0):
         # PRUN / PALL / FPS / STS
@@ -723,7 +747,7 @@ class DashboardRenderer:
             self._draw_page_four(payload, y_offset_px)
             return
         if page == 4:
-            self._draw_page_three(payload, y_offset_px)
+            self._draw_autonomy_page(payload, y_offset_px)
             return
         if page == 5:
             self._draw_nav_entry_page(payload, y_offset_px)
@@ -768,6 +792,7 @@ class DashboardRenderer:
             bool(payload.get("right_signal_visible", False)),
             str(payload.get("dashboard_alert", ""))[:4],
             notification_rows,
+            float(payload.get("odometer_total_m", 0.0)),
             y_offset_px,
         )
 

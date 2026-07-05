@@ -727,6 +727,17 @@ def _disengagement_cause(reason: str) -> str:
     return "other"
 
 
+_CAUSE_CODES = {
+    "steer": "STR", "throttle": "TLE", "brake": "BRK", "a": "BTN",
+    "nav": "NAV", "arrived": "ARR", "lidar": "LDR", "emergency": "EMR", "holding": "HLD",
+}
+
+
+def _cause_code(cause_word: str) -> str:
+    """3-letter dashboard code (V2H2 ICSE) for an intervention cause word."""
+    return _CAUSE_CODES.get((cause_word or "").strip().lower(), "OTH")
+
+
 def cancel_autonomous_mode(state, metrics, reason: str, center: bool = True, cause: str = ""):
     was_autonomous = state["autonomous_mode"]
     if reason:
@@ -1223,6 +1234,18 @@ def calculate_speed(state, metrics, dt):
         metrics.max_speed_recall = metrics.smoothed_speed_mph
 
     metrics.total_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
+
+    # --- autonomy metrics (V2H2), edge-detected off autonomous_mode ---
+    engaged = bool(state["autonomous_mode"])
+    if engaged:
+        metrics.auto_time_s += dt
+        metrics.auto_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
+    if engaged and not metrics.auto_prev_engaged:          # engage -> new segment
+        metrics.auto_segments += 1
+    elif metrics.auto_prev_engaged and not engaged:        # disengage -> intervention
+        metrics.auto_intervention_count += 1
+        metrics.auto_last_cause_code = _cause_code(state.get("intervention_cause", ""))
+    metrics.auto_prev_engaged = engaged
 
 
 def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan,
@@ -2063,6 +2086,12 @@ def run(model_choice=None):
                     yaw_pid_correction_deg=state.get("yaw_pid_correction_deg", 0.0),
                     yaw_pid_engaged=state.get("yaw_pid_engaged", False),
                     steering_cmd_deg=state.get("steering_servo_deg", 90.0),
+                    autonomy_cause_code=metrics.auto_last_cause_code,
+                    autonomy_distance_m=metrics.auto_distance_cm / 100.0,
+                    autonomy_interv_per_km=(metrics.auto_intervention_count /
+                        max(0.001, metrics.auto_distance_cm / 100.0 / 1000.0)),
+                    autonomy_avg_uptime_s=metrics.auto_time_s / max(1, metrics.auto_segments),
+                    odometer_total_m=metrics.total_distance_cm / 100.0,
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""

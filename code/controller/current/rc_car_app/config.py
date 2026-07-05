@@ -386,6 +386,13 @@ class Metrics:
     smoothed_speed_mph: float = 0.0
     max_speed_recall: float = 0.0
     total_distance_cm: float = 0.0
+    # --- autonomy metrics (V2H2 dashboard page) ---
+    auto_distance_cm: float = 0.0      # ADT: distance driven while autonomous
+    auto_time_s: float = 0.0           # total autonomous time (for AUT)
+    auto_intervention_count: int = 0   # disengagements (for IPKM)
+    auto_segments: int = 0             # number of autonomous engagements (for AUT avg)
+    auto_prev_engaged: bool = False    # edge-detect autonomous_mode
+    auto_last_cause_code: str = ""     # ICSE: last disengagement cause code
     start_time: float = time.time()
     pid_integral_error: float = 0.0
     pid_previous_error: float = 0.0

@@ -151,6 +151,11 @@ class Hub75DashboardSender:
         yaw_pid_correction_deg: float = 0.0,
         yaw_pid_engaged: bool = False,
         steering_cmd_deg: float = 90.0,
+        autonomy_cause_code: str = "",
+        autonomy_distance_m: float = 0.0,
+        autonomy_interv_per_km: float = 0.0,
+        autonomy_avg_uptime_s: float = 0.0,
+        odometer_total_m: float = 0.0,
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -197,6 +202,11 @@ class Hub75DashboardSender:
             "yaw_pid_correction_deg": round(float(yaw_pid_correction_deg), 1),
             "yaw_pid_engaged": bool(yaw_pid_engaged),
             "steering_cmd_deg": round(max(0.0, min(180.0, float(steering_cmd_deg))), 1),
+            "autonomy_cause_code": str(autonomy_cause_code)[:3],
+            "autonomy_distance_m": round(max(0.0, float(autonomy_distance_m)), 1),
+            "autonomy_interv_per_km": round(max(0.0, float(autonomy_interv_per_km)), 2),
+            "autonomy_avg_uptime_s": round(max(0.0, float(autonomy_avg_uptime_s)), 1),
+            "odometer_total_m": round(max(0.0, float(odometer_total_m)), 1),
             "timestamp": time.time(),
         }
         notification_sent = False
