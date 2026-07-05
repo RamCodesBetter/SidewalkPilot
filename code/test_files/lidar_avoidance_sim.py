@@ -40,6 +40,7 @@ WARN_M = 1.2                 # lidar_warn_threshold_m: below this we react
 SIDE_CLEAR_M = 0.75          # LIDAR_OVERRIDE_SIDE_CLEARANCE_M: side must be this clear to swerve
 EMERGENCY_STOP_M = 0.35      # LIDAR_OVERRIDE_EMERGENCY_STOP_M: untouchable hard-stop line
 CRUISE_PWM = 1.0             # AUTONOMOUS_CRUISE_PWM
+MIN_MOVE_PWM = 0.55          # below this the car doesn't actually move -> "moving" throttle floors here
 
 # --- governor tuning (A) ----------------------------------------------------
 GOV_FULL_M = 2.5             # at/above this forward clearance -> full cruise throttle
@@ -77,8 +78,9 @@ def governor_target(front_clear_m):
         return 0.0
     if front_clear_m >= GOV_FULL_M:
         return CRUISE_PWM
+    # map clearance to [MIN_MOVE_PWM .. CRUISE_PWM] -- no dead 0<pwm<0.55 zone (car can't move there)
     frac = (front_clear_m - GOV_STOP_M) / (GOV_FULL_M - GOV_STOP_M)
-    return round(CRUISE_PWM * frac, 3)
+    return round(MIN_MOVE_PWM + frac * (CRUISE_PWM - MIN_MOVE_PWM), 3)
 
 
 def governed_throttle(front_clear_m, prev_throttle):
@@ -198,9 +200,9 @@ def decide(scan, left_dist_m, right_dist_m, prev_throttle):
         elif other_clear:
             new, thr = f"SWERVE {other}", governed_throttle(front_m, prev_throttle)
         else:
-            new, thr = "BRAKE + HOLD", governed_throttle(front_m, prev_throttle)
-    else:  # PERSON or WALL -> never swerve off the sidewalk
-        new, thr = "BRAKE + HOLD", governed_throttle(front_m, prev_throttle)
+            new, thr = "STOP + HOLD", 0.0     # boxed in, no swerve room -> full stop
+    else:  # PERSON or WALL -> full stop, never swerve off the sidewalk
+        new, thr = "STOP + HOLD", 0.0
     return label, detail, old, new, thr
 
 
