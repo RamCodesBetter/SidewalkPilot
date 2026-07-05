@@ -7,7 +7,7 @@ import time
 
 import serial
 
-DEFAULT_LIDAR_SERIAL_PORT = "/dev/ttyAMA2"
+DEFAULT_LIDAR_SERIAL_PORT = "/dev/ttyUSB0"   # USB 3.0 (CP2102); was GPIO UART /dev/ttyAMA2
 SERIAL_PORT = os.environ.get("RC_CAR_LIDAR_SERIAL_PORT", DEFAULT_LIDAR_SERIAL_PORT).strip() or DEFAULT_LIDAR_SERIAL_PORT
 BAUD_RATE = 230400
 PACKET_LENGTH = 47
@@ -78,7 +78,7 @@ class LidarParser:
             self.connected = False
             self.ser = None
             self.reconnect_interval = min(RECONNECT_INTERVAL_MAX_SEC, self.reconnect_interval * 1.5)
-            self.log_connect_status("LiDAR GPIO UART serial port not ready; waiting for /dev/ttyAMA2.")
+            self.log_connect_status(f"LiDAR USB serial port not ready; waiting for {DEFAULT_LIDAR_SERIAL_PORT}.")
             return False
         try:
             self.disconnect()

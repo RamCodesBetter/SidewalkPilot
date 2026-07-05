@@ -396,8 +396,8 @@ DASHBOARD_PAGE_COORDS = {
     3: (2, 1),    # V2H1 model MODL/PRED/CONF/IPS
     4: (2, 2),    # V2H2 autonomy ICSE/ADT/IPKM/AUT
     16: (2, 3),   # V2H3 temps RTMP/JTMP/GTMP/ZTMP
-    12: (3, 1),   # V3H1 photo stats PR/PA/FPS/STS
-    14: (3, 2),   # V3H2 lidar LP/CP/RP
+    14: (3, 1),   # V3H1 photo counters PR/PA/FPS/STS (_draw_page_three)
+    12: (3, 2),   # V3H2 photo L/C/R balance LP/CP/RP/<5 (_draw_photo_run_stats_page)
     5: (4, 1),    # V4H1 nav entry NAVIGATE
     7: (4, 2),    # V4H2 route nodes OPR/PNDE/CNDE/NNDE
     9: (4, 3),    # V4H3 route distance RDT/NDT/SDT/TDT

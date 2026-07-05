@@ -65,7 +65,7 @@ LIDAR_SWERVE_THROTTLE_DROP = 0.30    # sharper swerves shed this much throttle (
 # --- GPIO SETUP ---
 STEERING_SERVO_PIN = 12
 HALL_SENSOR_GPIO_PIN = 24
-LIDAR_MOTOR_ENABLE_GPIO_PIN = 18
+# LiDAR is on USB 3.0 now (CP2102, /dev/ttyUSB0) — no GPIO motor-enable pin needed.
 MOTOR_RIGHT_FWD_PIN = 19
 MOTOR_RIGHT_BWD_PIN = 20
 MOTOR_LEFT_FWD_PIN = 25

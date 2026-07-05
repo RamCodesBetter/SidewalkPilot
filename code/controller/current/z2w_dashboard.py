@@ -777,7 +777,7 @@ class DashboardRenderer:
             self._draw_tuning_page(payload, y_offset_px)
             return
         if page == 14:
-            self._draw_lidar_page(payload, y_offset_px)
+            self._draw_page_three(payload, y_offset_px)   # V3H1 photo counters (PR/PA/FPS/STS)
             return
         if page == 15:
             self._draw_yaw_page(payload, y_offset_px)

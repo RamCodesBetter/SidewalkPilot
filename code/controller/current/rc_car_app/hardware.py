@@ -20,7 +20,6 @@ except Exception:
 from .config import (
     ENABLE_HALL_SENSOR,
     HALL_SENSOR_GPIO_PIN,
-    LIDAR_MOTOR_ENABLE_GPIO_PIN,
     MOTOR_LEFT_BWD_PIN,
     MOTOR_LEFT_FWD_PIN,
     MOTOR_RIGHT_BWD_PIN,
@@ -219,7 +218,6 @@ class Hardware:
         self.motor_right_fwd = DummyPWM()
         self.motor_right_bwd = DummyPWM()
         self.hall_sensor = DummyDigitalInput()
-        self.lidar_motor_enable = DummyDigitalOutput()
         try:
             if USE_PCA9685_SERVO:
                 self.steering_servo = self._init_device(
@@ -270,13 +268,6 @@ class Hardware:
             self.motor_left_bwd = self._init_pwm("left motor backward", MOTOR_LEFT_BWD_PIN)
             self.motor_right_fwd = self._init_pwm("right motor forward", MOTOR_RIGHT_FWD_PIN)
             self.motor_right_bwd = self._init_pwm("right motor backward", MOTOR_RIGHT_BWD_PIN)
-            self.lidar_motor_enable = self._init_device(
-                "LiDAR motor enable",
-                f"GPIO {LIDAR_MOTOR_ENABLE_GPIO_PIN}",
-                lambda: DigitalOutputDevice(LIDAR_MOTOR_ENABLE_GPIO_PIN, active_high=True, initial_value=True),
-            )
-            self.lidar_motor_enable.on()
-            print(f"LiDAR motor enable set high on GPIO {LIDAR_MOTOR_ENABLE_GPIO_PIN}.")
 
             if ENABLE_HALL_SENSOR:
                 self.hall_sensor = self._init_device(
@@ -300,7 +291,6 @@ class Hardware:
             self.motor_right_fwd = DummyPWM()
             self.motor_right_bwd = DummyPWM()
             self.hall_sensor = DummyDigitalInput()
-            self.lidar_motor_enable = DummyDigitalOutput()
 
     def _init_device(self, label, pin, factory):
         last_exc = None
@@ -342,11 +332,6 @@ class Hardware:
                 device.close()
             except Exception:
                 pass
-        try:
-            self.lidar_motor_enable.off()
-            self.lidar_motor_enable.close()
-        except Exception:
-            pass
         try:
             self.steering_servo.value = STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0
             time.sleep(0.05)
