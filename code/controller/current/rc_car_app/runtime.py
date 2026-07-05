@@ -123,6 +123,7 @@ from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
 from .yaw_pid import ImuReader, YawController
 from .jetson_client import JetsonSteeringClient
+from . import lidar_avoidance
 from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
 
 shutdown_flag = threading.Event()
@@ -1326,25 +1327,24 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     state["lidar_heading_confidence"] = 0.0
     state["lidar_forward_clearance_m"] = state["lidar_front_dist"]
 
-    lidar_front_dist = float(state.get("lidar_front_dist", MAX_LIDAR_RANGE_M))
-    if state["direction_arrow"] == "BLOCKED" or lidar_front_dist < LIDAR_OVERRIDE_EMERGENCY_STOP_M:
-        apply_hard_stop_state(state, "blocked_path")
+    # LiDAR avoidance (forward-cone classify + governor). No LiDAR -> scan empty -> reads
+    # clear -> model-only driving (the intended fallback).
+    av = lidar_avoidance.evaluate(lidar_scan)
+    state["lidar_forward_clearance_m"] = av["front_m"]
+    state["lidar_action_code"] = av["code"]        # "" / LDR / HLD / EMR -> V2H2 ICSE
+    if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
+        apply_hard_stop_state(state, av["reason"])
         return 0.0, True
-
-    if state["direction_arrow"] in ("STOP_WARNING", "WARN_WARNING") or lidar_front_dist < state["lidar_warn_threshold_m"]:
-        override_side = pick_lidar_override_side(state, lidar_scan)
-        if override_side is None:
-            apply_hard_stop_state(state, "blocked_path")
-            return 0.0, True
-        steer_sign = 1.0 if override_side == "right" else -1.0
-        lidar_steer_deg = (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0) + (steer_sign * LIDAR_OVERRIDE_STEER_DEG)
-        state["steering_servo_deg"] = clamp_servo_degrees(lidar_steer_deg)
+    if av["code"] == "LDR":                          # swerve around a narrow obstacle (mailbox/post)
+        state["steering_servo_deg"] = clamp_servo_degrees(av["steer"])
         state["steer"] = steering_degrees_to_normalized(state["steering_servo_deg"])
         state["target_heading_deg"] = state["steer"] * MAX_TARGET_HEADING_DEG
         state["lidar_override_active"] = True
-        state["lidar_override_side"] = override_side
-        state["stop_reason"] = "lidar_override"
-        return AUTONOMOUS_LIDAR_OVERRIDE_PWM, False
+        state["lidar_override_side"] = "right" if av["steer"] > STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0 else "left"
+        state["stop_reason"] = av["reason"]
+        return av["throttle"], False
+    # CLEAR -> follow the model below; the governor still caps throttle by forward clearance.
+    lidar_governed_throttle = av["throttle"]
 
     camera_confidence = camera_analysis["confidence"]
     if webcam_vision is None or model_frame_is_stale or camera_confidence < LOW_CAMERA_CONFIDENCE:
@@ -1365,9 +1365,8 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     state["target_heading_deg"] = target_heading_deg
     state["steer"] = normalized_steer
 
-    if abs(target_heading_deg) > 15.0:
-        return AUTONOMOUS_TURN_PWM, False
-    return AUTONOMOUS_CRUISE_PWM, False
+    # Throttle is set by the LiDAR governor (forward clearance), not a fixed cruise/turn PWM.
+    return lidar_governed_throttle, False
 
 
 def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboard_sender=None,
@@ -1405,6 +1404,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         state["stop_reason"] = ""
         state["lidar_override_active"] = False
         state["lidar_override_side"] = ""
+        state["lidar_action_code"] = ""
 
         if state["gear_mode"] == "P":
             desired_pwm_from_input = 0.0
@@ -2090,7 +2090,7 @@ def run(model_choice=None):
                     yaw_pid_correction_deg=state.get("yaw_pid_correction_deg", 0.0),
                     yaw_pid_engaged=state.get("yaw_pid_engaged", False),
                     steering_cmd_deg=state.get("steering_servo_deg", 90.0),
-                    autonomy_cause_code=metrics.auto_last_cause_code,
+                    autonomy_cause_code=(state.get("lidar_action_code") or metrics.auto_last_cause_code),
                     autonomy_distance_m=metrics.auto_distance_cm / 100.0,
                     autonomy_interv_per_km=(metrics.auto_intervention_count /
                         max(0.001, metrics.auto_distance_cm / 100.0 / 1000.0)),

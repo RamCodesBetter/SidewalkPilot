@@ -43,6 +43,24 @@ LIDAR_OVERRIDE_EMERGENCY_STOP_M = 0.35
 LIDAR_OVERRIDE_SIDE_CLEARANCE_M = 0.75
 LIDAR_OVERRIDE_STEER_DEG = 38.0
 
+# --- LiDAR AVOIDANCE (validated in test_files/lidar_avoidance_sim.py) ---
+# Forward cone (+/-) that can BLOCK the path; wider = brakes for more off-center stuff.
+LIDAR_FORWARD_CONE_DEG = 25.0
+LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 25..75 wedges = swerve-clearance only
+LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
+LIDAR_WARN_M = 0.80                  # a forward point closer than this triggers classify/react
+LIDAR_GOV_FULL_M = 1.20              # governor: full throttle at/above this clearance
+LIDAR_GOV_STOP_M = 0.45              # governor: throttle 0 at/below this (above the 0.35 emergency)
+LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
+LIDAR_AVOID_SIDE_CLEAR_M = 0.50      # a side needs this much room to swerve into
+LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
+LIDAR_NARROW_MAX_DEG = 15.0          # narrower than this = post/mailbox (swervable)
+LIDAR_WIDE_MIN_DEG = 18.0            # wider than this = wall/person (full stop)
+LIDAR_LEG_GAP_MAX_DEG = 45.0         # two clusters within this apart = a person's two legs
+LIDAR_LEG_RANGE_TOL_M = 0.40         # ...and at matching range = same person
+LIDAR_SWERVE_MIN_DEG = 20.0          # gentle swerve when the mailbox is far (~WARN)
+LIDAR_SWERVE_MAX_DEG = 80.0          # hard swerve when it's close (~GOV_STOP); logical 90 -/+ this
+
 # --- GPIO SETUP ---
 STEERING_SERVO_PIN = 12
 HALL_SENSOR_GPIO_PIN = 24
@@ -351,6 +369,7 @@ def create_state():
         "lidar_forward_clearance_m": 12.0,
         "lidar_override_active": False,
         "lidar_override_side": "",
+        "lidar_action_code": "",          # live LiDAR-avoidance action for V2H2 ICSE: LDR/EMR/HLD or ""
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,
