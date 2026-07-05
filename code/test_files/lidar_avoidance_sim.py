@@ -44,7 +44,8 @@ CRUISE_PWM = 1.0             # AUTONOMOUS_CRUISE_PWM
 # --- governor tuning (A) ----------------------------------------------------
 GOV_FULL_M = 2.5             # at/above this forward clearance -> full cruise throttle
 GOV_STOP_M = 0.60            # at/below this -> throttle 0 (soft stop, above the 0.35 emergency)
-RESUME_RAMP_PER_FRAME = 0.05 # max throttle INCREASE per frame (ease back up); braking is instant
+ACCEL_RATE = 0.5             # mirror config.py: speed up FROM A BRAKE at the SAME slew as manual (per second)
+SIM_FPS = 30.0               # control-loop rate, to turn ACCEL_RATE (per sec) into a per-frame cap
 
 # --- classifier tuning (B) --------------------------------------------------
 NEAR_ANGLE_DEG = 75.0        # only points within +/- this arc count as "ahead"
@@ -79,10 +80,12 @@ def governor_target(front_clear_m):
 
 
 def governed_throttle(front_clear_m, prev_throttle):
-    """Apply the governor with an asymmetric rate limit: brake instantly, resume slowly."""
+    """Apply the governor with an asymmetric rate limit: brake instantly, resume at ACCEL_RATE.
+    Speeding up from a brake uses the SAME slew as manual/normal driving (config.ACCEL_RATE)."""
     target = governor_target(front_clear_m)
-    if target >= prev_throttle:                       # speeding up -> ease in
-        return round(min(target, prev_throttle + RESUME_RAMP_PER_FRAME), 3)
+    resume_step = ACCEL_RATE / SIM_FPS                # ACCEL_RATE per second -> per-frame cap
+    if target >= prev_throttle:                       # speeding up -> ramp at ACCEL_RATE
+        return round(min(target, prev_throttle + resume_step), 3)
     return target                                     # slowing down -> immediate
 
 
