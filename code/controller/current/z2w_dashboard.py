@@ -357,9 +357,9 @@ class DashboardRenderer:
             for offset, char in enumerate(alert_txt[:4], start=2):
                 self._draw_glyph_at(self.letter_map.get(char, self.letter_map[" "]), 3, offset, ALERT_RED_DIM, y_offset_px)
         else:
-            # no WARN/STOP active -> show total odometer (m) in the same row
-            odo = max(0, min(99999, int(float(odometer_total_m))))
-            for offset, char in enumerate(f"{odo:05d}", start=2):
+            # no WARN/STOP active -> show total odometer (m) in the same 4 cells as WARN/STOP
+            odo = max(0, min(9999, int(float(odometer_total_m))))
+            for offset, char in enumerate(f"{odo:04d}", start=2):
                 self._draw_glyph_at(self.digit_map.get(char, self.letter_map[" "]), 3, offset, TEXT_WHITE, y_offset_px)
         for row_offset, cells in enumerate(list(notification_rows)[:2], start=1):
             self._draw_notification_row(row_offset, cells, NOTIFICATION_WHITE, y_offset_px)
