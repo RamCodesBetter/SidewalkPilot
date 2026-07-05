@@ -58,6 +58,8 @@ WIDE_MIN_DEG = 18.0          # a single cluster wider than this is a wall/person
 LEG_GAP_MAX_DEG = 45.0       # two clusters whose centres are within this = a person's legs
 LEG_RANGE_TOL_M = 0.40       # ...and whose ranges match within this = same person
 MIN_CONFIDENCE = 150         # matches the runtime confidence gate
+SWERVE_MIN_DEG = 20.0        # gentle swerve when the mailbox is still far (~WARN_M)
+SWERVE_MAX_DEG = 80.0        # hard swerve when it's close (~GOV_STOP_M); logical steer = 90 -/+ this
 
 
 class Pt:
@@ -169,6 +171,15 @@ def classify(scan):
                        "width_deg": round(widest["width_deg"], 1)}
 
 
+def swerve_offset(front_m):
+    """Off-center swerve angle, scaled by proximity: gentle (SWERVE_MIN_DEG) when the
+    mailbox is far (~WARN_M), sharp (SWERVE_MAX_DEG) when it's close (~GOV_STOP_M).
+    Logical steering is then 90 - off (left) or 90 + off (right)."""
+    span = max(1e-6, WARN_M - GOV_STOP_M)
+    frac = max(0.0, min(1.0, (front_m - GOV_STOP_M) / span))   # 1 = far, 0 = close
+    return round(SWERVE_MIN_DEG + (1.0 - frac) * (SWERVE_MAX_DEG - SWERVE_MIN_DEG), 1)
+
+
 def decide(scan, left_dist_m, right_dist_m, prev_throttle):
     """Combine classifier + governor into an action, and contrast with today's logic."""
     label, detail = classify(scan)
@@ -195,10 +206,13 @@ def decide(scan, left_dist_m, right_dist_m, prev_throttle):
         away_clear = left_clear if away == "left" else right_clear
         other = "right" if away == "left" else "left"
         other_clear = right_clear if away == "left" else left_clear
+        off = swerve_offset(front_m)
         if away_clear:
-            new, thr = f"SWERVE {away}", governed_throttle(front_m, prev_throttle)
+            steer = 90 - off if away == "left" else 90 + off
+            new, thr = f"SWERVE {away} ->{steer:.0f}", governed_throttle(front_m, prev_throttle)
         elif other_clear:
-            new, thr = f"SWERVE {other}", governed_throttle(front_m, prev_throttle)
+            steer = 90 - off if other == "left" else 90 + off
+            new, thr = f"SWERVE {other} ->{steer:.0f}", governed_throttle(front_m, prev_throttle)
         else:
             new, thr = "STOP + HOLD", 0.0     # boxed in, no swerve room -> full stop
     else:  # PERSON or WALL -> full stop, never swerve off the sidewalk
@@ -233,12 +247,12 @@ def scenarios():
 
 def run_scenarios():
     print("Prototype LiDAR avoidance -- synthetic scenarios\n")
-    print(f"{'scenario':<44} {'class':<9} {'front':>6}  {'OLD':<12} -> {'NEW':<14} {'thr':>5}")
+    print(f"{'scenario':<44} {'class':<9} {'front':>6}  {'OLD':<12} -> {'NEW':<18} {'thr':>5}")
     print("-" * 100)
     prev = 1.0
     for name, scan, left, right in scenarios():
         label, detail, old, new, thr = decide(scan, left, right, prev)
-        print(f"{name:<44} {label:<9} {detail['front_m']:>5.2f}m  {old:<12} -> {new:<14} {thr:>5.2f}")
+        print(f"{name:<44} {label:<9} {detail['front_m']:>5.2f}m  {old:<12} -> {new:<18} {thr:>5.2f}")
     print("-" * 100)
     print("OLD swerves off the sidewalk for the person (a side is 'clear' = grass); "
           "NEW brakes and holds, then the governor ramps throttle back when they move.\n")

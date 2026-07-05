@@ -341,8 +341,10 @@ def serve(model, host, port):
         conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         print(f"[jon] connected: {addr}", flush=True)
         frames, t0, ifps, last_frame_ts = 0, time.time(), 0.0, 0.0
+        t_wait = t_dec = t_inf = 0.0    # per-100-frame timing: net-wait / jpeg-decode / inference
         try:
             while True:
+                loop_t0 = time.time()
                 # Frame: [1B version-len][version utf8][4B jpeg-len][jpeg bytes].
                 # version-len 0 means "keep current model". The Pi sends its active
                 # model choice every frame, so Jon hot-swaps when it changes.
@@ -368,8 +370,9 @@ def serve(model, host, port):
                 data = _recv_exact(conn, n)
                 if not data:
                     break
+                wait_done = time.time()   # blocked here = waiting on the Pi (network + Pi send cadence)
                 # inference rate (EMA) + Jetson temps, reported back to the Pi dashboard
-                now = time.time()
+                now = wait_done
                 if last_frame_ts:
                     dt_f = now - last_frame_ts
                     if dt_f > 0.0:
@@ -380,13 +383,22 @@ def serve(model, host, port):
                 if frame is None:
                     conn.sendall(struct.pack(">fffff", 90.0, 0.0, jcpu, jgpu, ifps))
                     continue
-                steering, throttle = model.infer(frame)
+                dec_done = time.time()
+                steering, throttle = model.infer(frame)   # preprocess + session.run
+                inf_done = time.time()
                 # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps
                 conn.sendall(struct.pack(">fffff", steering, throttle, jcpu, jgpu, ifps))
+                t_wait += wait_done - loop_t0
+                t_dec += dec_done - wait_done
+                t_inf += inf_done - dec_done
                 frames += 1
                 if frames % 100 == 0:
-                    print(f"[jon] {frames} frames, {ifps:.1f} infer/s, "
-                          f"cpu={jcpu:.0f}C gpu={jgpu:.0f}C last steer={steering:.1f}", flush=True)
+                    # avg ms/frame over the last 100: wait(net)=Pi/network bound, infer=model-compute bound.
+                    # If infer dominates -> FP16 helps a lot; if wait(net) dominates -> fix JPEG/TCP, not the model.
+                    print(f"[jon] {frames} frames, {ifps:.1f} infer/s, cpu={jcpu:.0f}C gpu={jgpu:.0f}C "
+                          f"steer={steering:.1f} | avg ms/frame: wait(net)={t_wait*10:.1f} "
+                          f"decode={t_dec*10:.1f} infer={t_inf*10:.1f}", flush=True)
+                    t_wait = t_dec = t_inf = 0.0
         except (ConnectionResetError, BrokenPipeError):
             pass
         finally:
