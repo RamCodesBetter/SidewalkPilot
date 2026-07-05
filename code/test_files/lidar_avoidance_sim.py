@@ -48,7 +48,9 @@ ACCEL_RATE = 0.5             # mirror config.py: speed up FROM A BRAKE at the SA
 SIM_FPS = 30.0               # control-loop rate, to turn ACCEL_RATE (per sec) into a per-frame cap
 
 # --- classifier tuning (B) --------------------------------------------------
-NEAR_ANGLE_DEG = 75.0        # only points within +/- this arc count as "ahead"
+NEAR_ANGLE_DEG = 75.0        # full forward fan we sense (+/-); side wedges used only for swerve room
+FORWARD_CONE_DEG = 25.0      # only obstacles within +/- this BLOCK the path (brake/stop). Beyond it
+                             # (the 25..75 side wedges) = hedges/fences alongside -> ignored for braking
 CLUSTER_GAP_DEG = 8.0        # angular gap that splits one cluster from the next (splits legs apart)
 NARROW_MAX_DEG = 15.0        # a cluster narrower than this is a post/mailbox (swervable)
 WIDE_MIN_DEG = 18.0          # a single cluster wider than this is a wall/person (brake)
@@ -132,10 +134,13 @@ def _cluster(pts):
 
 
 def classify(scan):
-    """Return (label, detail) where label in {CLEAR, MAILBOX, PERSON, WALL, EMERGENCY}."""
-    pts = _near_points(scan)
+    """Return (label, detail) where label in {CLEAR, MAILBOX, PERSON, WALL, EMERGENCY}.
+    Only the FORWARD cone (+/-FORWARD_CONE_DEG) can block the path -- points out in the
+    side wedges (hedges/fences running alongside) are ignored here; they only inform
+    swerve clearance (left_dist/right_dist), handled in decide()."""
+    pts = [(a, d) for (a, d) in _near_points(scan) if abs(a) <= FORWARD_CONE_DEG]
     if not pts:
-        return "CLEAR", {"front_m": GOV_FULL_M}   # nothing in the warn ring -> open path
+        return "CLEAR", {"front_m": GOV_FULL_M}   # forward path open (side objects don't count)
     front_m = min(d for _, d in pts)
     if front_m < EMERGENCY_STOP_M:
         return "EMERGENCY", {"front_m": front_m}
@@ -183,9 +188,15 @@ def decide(scan, left_dist_m, right_dist_m, prev_throttle):
     elif label == "CLEAR":
         new, thr = "FOLLOW MODEL", governed_throttle(front_m, prev_throttle)
     elif label == "MAILBOX":
-        side = "right" if right_clear else ("left" if left_clear else None)
-        if side:
-            new, thr = f"SWERVE {side}", governed_throttle(front_m, prev_throttle)
+        # swerve AWAY from the mailbox, toward the clear side
+        away = "left" if detail.get("centre_deg", 0.0) >= 0.0 else "right"
+        away_clear = left_clear if away == "left" else right_clear
+        other = "right" if away == "left" else "left"
+        other_clear = right_clear if away == "left" else left_clear
+        if away_clear:
+            new, thr = f"SWERVE {away}", governed_throttle(front_m, prev_throttle)
+        elif other_clear:
+            new, thr = f"SWERVE {other}", governed_throttle(front_m, prev_throttle)
         else:
             new, thr = "BRAKE + HOLD", governed_throttle(front_m, prev_throttle)
     else:  # PERSON or WALL -> never swerve off the sidewalk
@@ -208,10 +219,11 @@ def arc(centre_deg, half_width_deg, dist_m, step=3.0):
 def scenarios():
     return [
         ("clear path", [], 3.0, 3.0),
-        ("mailbox on right, left clear", arc(30, 4, 0.9), 2.0, 0.9),
-        ("person (two legs) ahead, grass on both sides",
+        ("mailbox in path (+15), left clear", arc(15, 4, 0.9), 2.0, 0.9),
+        ("hedge ALONGSIDE right (+60), path open", arc(60, 12, 0.7), 2.0, 0.7),
+        ("person (two legs) ahead, grass both sides",
          arc(-9, 3, 1.0) + arc(9, 3, 1.0), 0.85, 0.85),
-        ("hedge/wall broadside, sides open", arc(0, 22, 0.9), 0.8, 0.8),
+        ("wall broadside dead ahead, sides open", arc(0, 22, 0.9), 0.8, 0.8),
         ("person very close (emergency)", arc(-6, 3, 0.30) + arc(7, 3, 0.31), 0.9, 0.9),
         ("narrow post dead ahead, both sides clear", arc(0, 5, 1.0), 1.5, 1.5),
     ]
