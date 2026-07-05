@@ -1298,6 +1298,12 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             state["jon_cpu_temp_c"] = float(getattr(jetson_client, "jon_cpu_temp_c", 0.0))
             state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))
             state["infer_fps"] = float(getattr(jetson_client, "infer_fps", 0.0))
+            # perf on the Pi cmdline (Jon is headless): IPS (inference) vs FPS (camera), throttled ~2s
+            _perf_now = time.time()
+            if _perf_now >= state.get("_perf_next", 0.0):
+                state["_perf_next"] = _perf_now + 2.0
+                _cam_fps = webcam_vision.camera_fps if webcam_vision is not None else 0.0
+                print(f"[perf] IPS={state['infer_fps']:.1f}  FPS={_cam_fps:.1f}", flush=True)
             camera_analysis = {
                 "heading_bias": max(-1.0, min(1.0, (jon_steer_deg - 90.0) / 90.0)),
                 "confidence": 1.0,
