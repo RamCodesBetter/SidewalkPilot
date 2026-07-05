@@ -146,5 +146,7 @@ def evaluate(scan):
     else:
         return {"code": "HLD", "stop": True, "steer": None, "throttle": 0.0,
                 "front_m": front_m, "reason": "lidar_boxed"}        # no room -> full stop
-    return {"code": "LDR", "stop": False, "steer": steer, "throttle": governor_target(front_m),
+    # A mailbox/post is narrow -> clear it at FULL throttle with the swerve (matches the old
+    # basic-swerve behavior); the governor only slows for CLEAR-ahead and stops for people/walls.
+    return {"code": "LDR", "stop": False, "steer": steer, "throttle": C.AUTONOMOUS_CRUISE_PWM,
             "front_m": front_m, "reason": "lidar_override"}
