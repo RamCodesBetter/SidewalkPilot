@@ -2095,7 +2095,6 @@ def run(model_choice=None):
                     autonomy_interv_per_km=(metrics.auto_intervention_count /
                         max(0.001, metrics.auto_distance_cm / 100.0 / 1000.0)),
                     autonomy_avg_uptime_s=metrics.auto_time_s / max(1, metrics.auto_segments),
-                    odometer_total_m=metrics.total_distance_cm / 100.0,
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""

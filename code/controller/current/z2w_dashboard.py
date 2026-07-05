@@ -792,7 +792,7 @@ class DashboardRenderer:
             bool(payload.get("right_signal_visible", False)),
             str(payload.get("dashboard_alert", ""))[:4],
             notification_rows,
-            float(payload.get("odometer_total_m", 0.0)),
+            float(self._nav_payload(payload).get("odometer_m", 0.0)),  # same source as the V5 ODO
             y_offset_px,
         )
 

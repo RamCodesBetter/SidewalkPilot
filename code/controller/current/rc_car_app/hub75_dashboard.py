@@ -155,7 +155,6 @@ class Hub75DashboardSender:
         autonomy_distance_m: float = 0.0,
         autonomy_interv_per_km: float = 0.0,
         autonomy_avg_uptime_s: float = 0.0,
-        odometer_total_m: float = 0.0,
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -206,7 +205,6 @@ class Hub75DashboardSender:
             "autonomy_distance_m": round(max(0.0, float(autonomy_distance_m)), 1),
             "autonomy_interv_per_km": round(max(0.0, float(autonomy_interv_per_km)), 2),
             "autonomy_avg_uptime_s": round(max(0.0, float(autonomy_avg_uptime_s)), 1),
-            "odometer_total_m": round(max(0.0, float(odometer_total_m)), 1),
             "timestamp": time.time(),
         }
         notification_sent = False
