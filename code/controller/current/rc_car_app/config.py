@@ -45,14 +45,14 @@ LIDAR_OVERRIDE_STEER_DEG = 38.0
 
 # --- LiDAR AVOIDANCE (validated in test_files/lidar_avoidance_sim.py) ---
 # Forward cone (+/-) that can BLOCK the path; wider = brakes for more off-center stuff.
-LIDAR_FORWARD_CONE_DEG = 25.0
-LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 25..75 wedges = swerve-clearance only
+LIDAR_FORWARD_CONE_DEG = 30.0        # forward cone that BLOCKS the path (matches the V7H1 cone rays)
+LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 30..75 wedges = swerve-clearance only
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
-LIDAR_WARN_M = 1.05                  # +25cm (was 0.80): forward point closer than this triggers classify/react
-LIDAR_GOV_FULL_M = 1.45              # +25cm (was 1.20): governor full throttle at/above this clearance
-LIDAR_GOV_STOP_M = 0.70              # +25cm (was 0.45): governor throttle 0 at/below this (above the 0.60 emergency)
+LIDAR_WARN_M = 1.05                  # forward point closer than this triggers classify/react
+LIDAR_GOV_FULL_M = 1.50              # governor full throttle at/above this clearance
+LIDAR_GOV_STOP_M = 0.90              # governor throttle 0 at/below this (above the 0.60 emergency)
 LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
-LIDAR_AVOID_SIDE_CLEAR_M = 0.50      # a side needs this much room to swerve into
+LIDAR_AVOID_SIDE_CLEAR_M = 0.40      # a side needs this much room to swerve into
 LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
 LIDAR_NARROW_MAX_DEG = 15.0          # narrower than this = post/mailbox (swervable)
 LIDAR_WIDE_MIN_DEG = 18.0            # wider than this = wall/person (full stop)
