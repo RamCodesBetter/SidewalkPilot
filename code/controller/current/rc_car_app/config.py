@@ -39,7 +39,7 @@ DRIVEWAY_CUT_MIN_FORWARD_CLEARANCE_M = 1.2
 DRIVEWAY_CUT_DETECTION_SECONDS = 0.35
 FORWARD_OBSTACLE_STOP_DISTANCE_M = 0.5
 PARTIAL_BLOCKAGE_MIN_CLEARANCE_M = 0.8
-LIDAR_OVERRIDE_EMERGENCY_STOP_M = 0.35
+LIDAR_OVERRIDE_EMERGENCY_STOP_M = 0.60   # +25cm (was 0.35) — more stopping margin at speed
 LIDAR_OVERRIDE_SIDE_CLEARANCE_M = 0.75
 LIDAR_OVERRIDE_STEER_DEG = 38.0
 
@@ -48,9 +48,9 @@ LIDAR_OVERRIDE_STEER_DEG = 38.0
 LIDAR_FORWARD_CONE_DEG = 25.0
 LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 25..75 wedges = swerve-clearance only
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
-LIDAR_WARN_M = 0.80                  # a forward point closer than this triggers classify/react
-LIDAR_GOV_FULL_M = 1.20              # governor: full throttle at/above this clearance
-LIDAR_GOV_STOP_M = 0.45              # governor: throttle 0 at/below this (above the 0.35 emergency)
+LIDAR_WARN_M = 1.05                  # +25cm (was 0.80): forward point closer than this triggers classify/react
+LIDAR_GOV_FULL_M = 1.45              # +25cm (was 1.20): governor full throttle at/above this clearance
+LIDAR_GOV_STOP_M = 0.70              # +25cm (was 0.45): governor throttle 0 at/below this (above the 0.60 emergency)
 LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
 LIDAR_AVOID_SIDE_CLEAR_M = 0.50      # a side needs this much room to swerve into
 LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
