@@ -31,7 +31,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 16
+DASHBOARD_PAGE_COUNT = 17
 TELEMETRY_STALE_DISPLAY_SEC = 4.0
 
 DIGIT_BLUE: Color = (0, 0, 255)
@@ -420,19 +420,25 @@ class DashboardRenderer:
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
     def _draw_lidar_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        center_x = PANEL_WIDTH // 2
-        center_y = (PANEL_HEIGHT // 2) + y_offset_px
-        scale = 2.5
-        for row in range(0, PANEL_HEIGHT, 8):
-            self._set_pixel(center_x, row + y_offset_px, (0, 35, 35))
-        for col in range(0, PANEL_WIDTH, 8):
-            self._set_pixel(col, center_y, (0, 35, 35))
+        # Forward-facing view: car at bottom-centre, forward = up. Two guide rays mark the
+        # +/-30 deg forward cone; points colored by range (red near -> blue far).
+        car_x = PANEL_WIDTH // 2
+        car_y = (PANEL_HEIGHT - 1) + y_offset_px
+        scale = 9.0                       # px per metre (forward ~0..3.4 m fills the height)
+        for cone_deg in (-30.0, 30.0):    # forward +/-30 deg cone guide rays
+            cr = math.radians(cone_deg)
+            d = 0.2
+            while d <= 3.4:
+                gx = int(round(car_x + math.sin(cr) * d * scale))
+                gy = int(round(car_y - math.cos(cr) * d * scale))
+                self._set_pixel(gx, gy, (0, 45, 45))
+                d += 0.15
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))
         if not raw_points:
             self._draw_text_row(0, ["L", "D", "R", ":", "N", "O", "N", "E"], ALERT_RED_DIM, y_offset_px)
             count_cells = self._format_three_digits(point_count)
-            self._draw_text_row(3, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
+            self._draw_text_row(1, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
         if isinstance(raw_points, list):
             for raw_point in raw_points:
                 if not isinstance(raw_point, list) or len(raw_point) < 2:
@@ -443,8 +449,8 @@ class DashboardRenderer:
                 except (TypeError, ValueError):
                     continue
                 angle_rad = math.radians(angle_deg)
-                x = int(round(center_x + math.sin(angle_rad) * distance_m * scale))
-                y = int(round(center_y - math.cos(angle_rad) * distance_m * scale))
+                x = int(round(car_x + math.sin(angle_rad) * distance_m * scale))
+                y = int(round(car_y - math.cos(angle_rad) * distance_m * scale))
                 if distance_m < 0.6:
                     color = LIDAR_POINT_RED
                 elif distance_m < 1.2:
@@ -454,8 +460,8 @@ class DashboardRenderer:
                 else:
                     color = LIDAR_POINT_BLUE
                 self._set_pixel(x, y, color)
-        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-            self._set_pixel(center_x + dx, center_y + dy, LIDAR_CAR)
+        for dx, dy in ((-1, 0), (0, 0), (1, 0), (0, -1)):
+            self._set_pixel(car_x + dx, car_y + dy, LIDAR_CAR)
 
     def _format_model_cells(self, model_choice: str) -> List[str]:
         model_choice = str(model_choice)
@@ -783,6 +789,9 @@ class DashboardRenderer:
             return
         if page == 16:
             self._draw_temps_page(payload, y_offset_px)
+            return
+        if page == 17:
+            self._draw_lidar_page(payload, y_offset_px)   # V7H1 lidar scan (forward +/-30 cone)
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),
