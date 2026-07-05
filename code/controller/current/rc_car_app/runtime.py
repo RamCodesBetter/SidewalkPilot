@@ -385,28 +385,30 @@ def pick_lidar_override_side(state, lidar_scan) -> str | None:
     return "right" if float(state.get("lidar_right_dist", 0.0)) >= float(state.get("lidar_left_dist", 0.0)) else "left"
 
 
+# page number -> (vertical, horizontal) grid position. Page NUMBERS keep their draw
+# function + gates; only their grid position is set here to match the target layout.
 DASHBOARD_PAGE_COORDS = {
-    1: (1, 1),
-    2: (1, 2),
-    3: (2, 1),
-    4: (2, 2),
-    5: (3, 1),
-    6: (3, 2),
-    7: (4, 1),
-    8: (4, 2),
-    9: (5, 1),
-    10: (5, 2),
-    11: (6, 1),
-    12: (2, 3),
-    13: (1, 3),
-    14: (6, 2),
-    15: (1, 4),
-    16: (3, 3),
+    1: (1, 1),    # V1H1 main (speed/PRND/CC/AEB/dir)
+    2: (1, 2),    # V1H2 SRVO/TTLE/BRKE/MODE
+    13: (1, 3),   # V1H3 tune DELT/kP/kI/kD
+    15: (1, 4),   # V1H4 yaw
+    3: (2, 1),    # V2H1 model MODL/PRED/CONF/IPS
+    4: (2, 2),    # V2H2 autonomy ICSE/ADT/IPKM/AUT
+    16: (2, 3),   # V2H3 temps RTMP/JTMP/GTMP/ZTMP
+    12: (3, 1),   # V3H1 photo stats PR/PA/FPS/STS
+    14: (3, 2),   # V3H2 lidar LP/CP/RP
+    5: (4, 1),    # V4H1 nav entry NAVIGATE
+    7: (4, 2),    # V4H2 route nodes OPR/PNDE/CNDE/NNDE
+    9: (4, 3),    # V4H3 route distance RDT/NDT/SDT/TDT
+    10: (4, 4),   # V4H4 route time RTM/NTM
+    6: (5, 1),    # V5H1 gps FIX/SATS/ODO/SST
+    8: (5, 2),    # V5H2 latlon LAT/LON
+    11: (6, 1),   # V6H1 camera/lidar feed
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
 DASHBOARD_VERTICAL_PAGE_COUNT = 6
 STEERING_TRIM_DASHBOARD_PAGE = 13   # v1h3
-LIDAR_DASHBOARD_PAGE = 14           # v6h2
+LIDAR_DASHBOARD_PAGE = 14           # v3h2
 YAW_DASHBOARD_PAGE = 15             # v1h4 — yaw-PID telemetry
 STEERING_TRIM_STEP_DEG = 1.0
 
@@ -1242,9 +1244,11 @@ def calculate_speed(state, metrics, dt):
         metrics.auto_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
     if engaged and not metrics.auto_prev_engaged:          # engage -> new segment
         metrics.auto_segments += 1
-    elif metrics.auto_prev_engaged and not engaged:        # disengage -> intervention
-        metrics.auto_intervention_count += 1
-        metrics.auto_last_cause_code = _cause_code(state.get("intervention_cause", ""))
+    elif metrics.auto_prev_engaged and not engaged:        # disengage
+        code = _cause_code(state.get("intervention_cause", ""))
+        metrics.auto_last_cause_code = code
+        if code != "ARR":                                  # arrivals aren't interventions -> exclude from IPKM
+            metrics.auto_intervention_count += 1
     metrics.auto_prev_engaged = engaged
 
 
