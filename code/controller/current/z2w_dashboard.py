@@ -385,13 +385,12 @@ class DashboardRenderer:
         # V2H2 autonomy metrics: ICSE (cause code), ADT (dist m), IPKM (interv/km), AUT (avg uptime MM.SS).
         code = (str(payload.get("autonomy_cause_code", "") or "---")[:3].upper() + "   ")[:3]
         adt = max(0, min(9999, int(float(payload.get("autonomy_distance_m", 0)))))
-        ipkm_s = f"{max(0.0, min(9.9, float(payload.get('autonomy_interv_per_km', 0.0)))):.1f}"
+        ipkm = max(0, min(999, round(float(payload.get("autonomy_interv_per_km", 0.0)))))
         aut = max(0, int(float(payload.get("autonomy_avg_uptime_s", 0))))
         mm, ss = min(99, aut // 60), aut % 60
         self._draw_text_row(0, ["I", "C", "S", "E", ":", code[0], code[1], code[2]], TEXT_CYAN, y_offset_px)
         self._draw_text_row(1, ["A", "D", "T", ":", *list(f"{adt:04d}")], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["I", "P", "K", "M", ":", ipkm_s[0], ipkm_s[2], " "], ARROW_YELLOW, y_offset_px)
-        self._draw_decimal_point_at(2, 5, ARROW_YELLOW, y_offset_px)          # dot after IPKM ones digit
+        self._draw_text_row(2, ["I", "P", "K", "M", ":", *list(f"{ipkm:3d}")], ARROW_YELLOW, y_offset_px)
         m1, m2 = f"{mm:02d}"
         s1, s2 = f"{ss:02d}"
         self._draw_text_row(3, ["A", "U", "T", ":", m1, m2, s1, s2], TEXT_ORANGE, y_offset_px)
