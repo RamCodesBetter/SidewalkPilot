@@ -60,6 +60,7 @@ LIDAR_LEG_GAP_MAX_DEG = 45.0         # two clusters within this apart = a person
 LIDAR_LEG_RANGE_TOL_M = 0.40         # ...and at matching range = same person
 LIDAR_SWERVE_MIN_DEG = 20.0          # gentle swerve when the mailbox is far (~WARN)
 LIDAR_SWERVE_MAX_DEG = 80.0          # hard swerve when it's close (~GOV_STOP); logical 90 -/+ this
+LIDAR_SWERVE_THROTTLE_DROP = 0.30    # sharper swerves shed this much throttle (gentle=full, hardest=CRUISE-drop)
 
 # --- GPIO SETUP ---
 STEERING_SERVO_PIN = 12
@@ -369,7 +370,6 @@ def create_state():
         "lidar_forward_clearance_m": 12.0,
         "lidar_override_active": False,
         "lidar_override_side": "",
-        "lidar_action_code": "",          # live LiDAR-avoidance action for V2H2 ICSE: LDR/EMR/HLD or ""
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,

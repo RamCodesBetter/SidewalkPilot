@@ -146,7 +146,10 @@ def evaluate(scan):
     else:
         return {"code": "HLD", "stop": True, "steer": None, "throttle": 0.0,
                 "front_m": front_m, "reason": "lidar_boxed"}        # no room -> full stop
-    # A mailbox/post is narrow -> clear it at FULL throttle with the swerve (matches the old
-    # basic-swerve behavior); the governor only slows for CLEAR-ahead and stops for people/walls.
-    return {"code": "LDR", "stop": False, "steer": steer, "throttle": C.AUTONOMOUS_CRUISE_PWM,
+    # A mailbox/post is narrow -> clear it with the swerve. Gentle (far) swerve = full throttle
+    # (matches the old basic-swerve behavior); sharper (closer) swerves shed a little throttle.
+    off_frac = (off - C.LIDAR_SWERVE_MIN_DEG) / max(1e-6, C.LIDAR_SWERVE_MAX_DEG - C.LIDAR_SWERVE_MIN_DEG)
+    swerve_throttle = max(C.LIDAR_MIN_MOVE_PWM,
+                          C.AUTONOMOUS_CRUISE_PWM - off_frac * C.LIDAR_SWERVE_THROTTLE_DROP)
+    return {"code": "LDR", "stop": False, "steer": steer, "throttle": swerve_throttle,
             "front_m": front_m, "reason": "lidar_override"}

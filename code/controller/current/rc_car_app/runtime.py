@@ -1331,7 +1331,8 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     # clear -> model-only driving (the intended fallback).
     av = lidar_avoidance.evaluate(lidar_scan)
     state["lidar_forward_clearance_m"] = av["front_m"]
-    state["lidar_action_code"] = av["code"]        # "" / LDR / HLD / EMR -> V2H2 ICSE
+    if av["code"]:                                  # LDR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
+        metrics.auto_last_cause_code = av["code"]
     if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
         apply_hard_stop_state(state, av["reason"])
         return 0.0, True
@@ -1404,7 +1405,6 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         state["stop_reason"] = ""
         state["lidar_override_active"] = False
         state["lidar_override_side"] = ""
-        state["lidar_action_code"] = ""
 
         if state["gear_mode"] == "P":
             desired_pwm_from_input = 0.0
@@ -2090,7 +2090,7 @@ def run(model_choice=None):
                     yaw_pid_correction_deg=state.get("yaw_pid_correction_deg", 0.0),
                     yaw_pid_engaged=state.get("yaw_pid_engaged", False),
                     steering_cmd_deg=state.get("steering_servo_deg", 90.0),
-                    autonomy_cause_code=(state.get("lidar_action_code") or metrics.auto_last_cause_code),
+                    autonomy_cause_code=metrics.auto_last_cause_code,
                     autonomy_distance_m=metrics.auto_distance_cm / 100.0,
                     autonomy_interv_per_km=(metrics.auto_intervention_count /
                         max(0.001, metrics.auto_distance_cm / 100.0 / 1000.0)),
