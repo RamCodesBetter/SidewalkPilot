@@ -428,11 +428,11 @@ class DashboardRenderer:
         for cone_deg in (-30.0, 30.0):    # forward +/-30 deg cone guide rays
             cr = math.radians(cone_deg)
             d = 0.2
-            while d <= 3.4:
+            while d <= 6.0:                               # long rays (clip at the panel edge)
                 gx = int(round(car_x + math.sin(cr) * d * scale))
                 gy = int(round(car_y - math.cos(cr) * d * scale))
-                self._set_pixel(gx, gy, (0, 130, 200))   # brighter cone rays
-                d += 0.15
+                self._set_pixel(gx, gy, (60, 180, 255))   # bright blue cone rays
+                d += 0.12
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))
         if not raw_points:
@@ -452,13 +452,17 @@ class DashboardRenderer:
                 x = int(round(car_x + math.sin(angle_rad) * distance_m * scale))
                 y = int(round(car_y - math.cos(angle_rad) * distance_m * scale))
                 if distance_m < 0.6:
-                    color = LIDAR_POINT_RED
+                    color = (255, 0, 0)         # red    — danger
+                elif distance_m < 0.9:
+                    color = (255, 120, 0)       # orange
                 elif distance_m < 1.2:
-                    color = LIDAR_POINT_YELLOW
+                    color = (255, 220, 0)       # yellow
+                elif distance_m < 2.0:
+                    color = (0, 255, 70)        # green
                 elif distance_m < 3.0:
-                    color = LIDAR_POINT_GREEN
+                    color = (0, 220, 220)       # cyan
                 else:
-                    color = LIDAR_POINT_BLUE
+                    color = (0, 120, 255)       # blue   — far
                 self._set_pixel(x, y, color)
         for dx, dy in ((-1, 0), (0, 0), (1, 0), (0, -1)):
             self._set_pixel(car_x + dx, car_y + dy, LIDAR_CAR)
