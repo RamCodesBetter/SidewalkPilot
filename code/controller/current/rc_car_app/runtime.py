@@ -1252,6 +1252,12 @@ def calculate_speed(state, metrics, dt):
         if code != "ARR":                                  # arrivals aren't interventions -> exclude from IPKM
             metrics.auto_intervention_count += 1
     metrics.auto_prev_engaged = engaged
+    # TEMP debug: prove whether the accumulator sees autonomous_mode + is growing (remove once ICSE works)
+    if time.time() >= state.get("_autodbg_next", 0.0):
+        state["_autodbg_next"] = time.time() + 2.0
+        print(f"[autodbg] engaged={engaged} seg={metrics.auto_segments} "
+              f"adt={metrics.auto_distance_cm/100:.1f}m t={metrics.auto_time_s:.1f}s "
+              f"cnt={metrics.auto_intervention_count} ICSE={metrics.auto_last_cause_code or '-'}", flush=True)
 
 
 def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan,
