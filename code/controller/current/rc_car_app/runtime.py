@@ -286,7 +286,7 @@ def model_is_series_3(model_choice) -> bool:
 
 def get_dashboard_drive_mode(state) -> str:
     if state.get("lidar_override_active"):
-        return "LDR"
+        return "SWR"
     if state["autonomous_mode"]:
         return "ATO"
     if state["cc_active"]:
@@ -733,7 +733,7 @@ def _disengagement_cause(reason: str) -> str:
 
 _CAUSE_CODES = {
     "steer": "STR", "throttle": "TLE", "brake": "BRK", "a": "BTN",
-    "nav": "NAV", "arrived": "ARR", "lidar": "LDR", "emergency": "EMR", "holding": "HLD",
+    "nav": "NAV", "arrived": "ARR", "lidar": "SWR", "emergency": "EMR", "holding": "HLD",
 }
 
 
@@ -1340,12 +1340,12 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     # clear -> model-only driving (the intended fallback).
     av = lidar_avoidance.evaluate(lidar_scan)
     state["lidar_forward_clearance_m"] = av["front_m"]
-    if av["code"]:                                  # LDR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
+    if av["code"]:                                  # SWR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
         metrics.auto_last_cause_code = av["code"]
     if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
         apply_hard_stop_state(state, av["reason"])
         return 0.0, True
-    if av["code"] == "LDR":                          # swerve around a narrow obstacle (mailbox/post)
+    if av["code"] == "SWR":                          # swerve around a narrow obstacle (mailbox/post)
         state["steering_servo_deg"] = clamp_servo_degrees(av["steer"])
         state["steer"] = steering_degrees_to_normalized(state["steering_servo_deg"])
         state["target_heading_deg"] = state["steer"] * MAX_TARGET_HEADING_DEG

@@ -18,9 +18,9 @@ Two ideas:
   resume, so we just return the target here.
 
 evaluate(scan) -> dict the caller applies:
-  code   : "" (clear) | "LDR" (swerve) | "HLD" (person/wall/boxed stop) | "EMR" (emergency)
+  code   : "" (clear) | "SWR" (swerve) | "HLD" (person/wall/boxed stop) | "EMR" (emergency)
   stop   : True -> hard stop (throttle 0, brake)
-  steer  : logical servo degrees to command (only for LDR); else None
+  steer  : logical servo degrees to command (only for SWR); else None
   throttle: governor target (0..CRUISE)
   front_m: forward clearance used
   reason : stop_reason string for the log/dashboard
@@ -151,5 +151,5 @@ def evaluate(scan):
     off_frac = (off - C.LIDAR_SWERVE_MIN_DEG) / max(1e-6, C.LIDAR_SWERVE_MAX_DEG - C.LIDAR_SWERVE_MIN_DEG)
     swerve_throttle = max(C.LIDAR_MIN_MOVE_PWM,
                           C.AUTONOMOUS_CRUISE_PWM - off_frac * C.LIDAR_SWERVE_THROTTLE_DROP)
-    return {"code": "LDR", "stop": False, "steer": steer, "throttle": swerve_throttle,
+    return {"code": "SWR", "stop": False, "steer": steer, "throttle": swerve_throttle,
             "front_m": front_m, "reason": "lidar_override"}
