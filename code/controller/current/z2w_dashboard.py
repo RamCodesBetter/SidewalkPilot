@@ -431,7 +431,7 @@ class DashboardRenderer:
             while d <= 3.4:
                 gx = int(round(car_x + math.sin(cr) * d * scale))
                 gy = int(round(car_y - math.cos(cr) * d * scale))
-                self._set_pixel(gx, gy, (0, 45, 45))
+                self._set_pixel(gx, gy, (0, 130, 200))   # brighter cone rays
                 d += 0.15
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))

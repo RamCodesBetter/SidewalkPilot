@@ -405,12 +405,12 @@ DASHBOARD_PAGE_COORDS = {
     6: (5, 1),    # V5H1 gps FIX/SATS/ODO/SST
     8: (5, 2),    # V5H2 latlon LAT/LON
     11: (6, 1),   # V6H1 camera/lidar feed
-    17: (7, 1),   # V7H1 lidar scan view (forward +/-30 cone)
+    17: (6, 2),   # V6H2 lidar scan view (forward +/-30 cone)
 }
 DASHBOARD_COORD_PAGES = {coords: page for page, coords in DASHBOARD_PAGE_COORDS.items()}
-DASHBOARD_VERTICAL_PAGE_COUNT = 7
+DASHBOARD_VERTICAL_PAGE_COUNT = 6
 STEERING_TRIM_DASHBOARD_PAGE = 13   # v1h3
-LIDAR_DASHBOARD_PAGE = 17           # v7h1 lidar scan view
+LIDAR_DASHBOARD_PAGE = 17           # v6h2 lidar scan view
 YAW_DASHBOARD_PAGE = 15             # v1h4 — yaw-PID telemetry
 STEERING_TRIM_STEP_DEG = 1.0
 
