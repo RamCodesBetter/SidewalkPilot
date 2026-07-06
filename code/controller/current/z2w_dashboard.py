@@ -44,10 +44,13 @@ TEXT_CYAN: Color = (0, 180, 255)
 TEXT_GREEN: Color = (0, 255, 0)
 TEXT_ORANGE: Color = (255, 120, 0)
 TEXT_WHITE: Color = (220, 220, 220)
-LIDAR_POINT_GREEN: Color = (0, 255, 70)
-LIDAR_POINT_YELLOW: Color = (255, 220, 0)
-LIDAR_POINT_RED: Color = (255, 0, 0)
-LIDAR_POINT_BLUE: Color = (0, 120, 255)
+LIDAR_POINT_RED: Color = (255, 0, 0)        # < 0.6 m  (danger)
+LIDAR_POINT_ORANGE: Color = (255, 120, 0)    # < 0.9 m
+LIDAR_POINT_YELLOW: Color = (255, 220, 0)    # < 1.2 m
+LIDAR_POINT_GREEN: Color = (0, 255, 70)      # < 2.0 m
+LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
+LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
+LIDAR_CONE: Color = (60, 180, 255)           # forward +/-30 deg cone rays
 LIDAR_CAR: Color = (255, 255, 255)
 RIGHT_TURN_SIGNAL_INDEX = 28
 LEFT_TURN_SIGNAL_INDEX = 29
@@ -431,7 +434,7 @@ class DashboardRenderer:
             while d <= 6.0:                               # long rays (clip at the panel edge)
                 gx = int(round(car_x + math.sin(cr) * d * scale))
                 gy = int(round(car_y - math.cos(cr) * d * scale))
-                self._set_pixel(gx, gy, (60, 180, 255))   # bright blue cone rays
+                self._set_pixel(gx, gy, LIDAR_CONE)   # bright blue cone rays
                 d += 0.12
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))
@@ -452,17 +455,17 @@ class DashboardRenderer:
                 x = int(round(car_x + math.sin(angle_rad) * distance_m * scale))
                 y = int(round(car_y - math.cos(angle_rad) * distance_m * scale))
                 if distance_m < 0.6:
-                    color = (255, 0, 0)         # red    — danger
+                    color = LIDAR_POINT_RED
                 elif distance_m < 0.9:
-                    color = (255, 120, 0)       # orange
+                    color = LIDAR_POINT_ORANGE
                 elif distance_m < 1.2:
-                    color = (255, 220, 0)       # yellow
+                    color = LIDAR_POINT_YELLOW
                 elif distance_m < 2.0:
-                    color = (0, 255, 70)        # green
+                    color = LIDAR_POINT_GREEN
                 elif distance_m < 3.0:
-                    color = (0, 220, 220)       # cyan
+                    color = LIDAR_POINT_CYAN
                 else:
-                    color = (0, 120, 255)       # blue   — far
+                    color = LIDAR_POINT_BLUE
                 self._set_pixel(x, y, color)
         for dx, dy in ((-1, 0), (0, 0), (1, 0), (0, -1)):
             self._set_pixel(car_x + dx, car_y + dy, LIDAR_CAR)
