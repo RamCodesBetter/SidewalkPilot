@@ -958,6 +958,10 @@ def main():
     steering_trim_total_deg = 90.0
     steering_center_offset = 0.0
     tune_selected_row = 0
+    autonomy_cause_code = ""
+    autonomy_distance_m = 0.0
+    autonomy_interv_per_km = 0.0
+    autonomy_avg_uptime_s = 0.0
     yaw_kp = 0.0
     yaw_ki = 0.0
     yaw_kd = 0.0
@@ -1025,6 +1029,10 @@ def main():
                 "steering_trim_total_deg": steering_trim_total_deg,
                 "steering_center_offset": steering_center_offset,
                 "tune_selected_row": tune_selected_row,
+                "autonomy_cause_code": autonomy_cause_code,
+                "autonomy_distance_m": autonomy_distance_m,
+                "autonomy_interv_per_km": autonomy_interv_per_km,
+                "autonomy_avg_uptime_s": autonomy_avg_uptime_s,
                 "yaw_kp": yaw_kp,
                 "yaw_ki": yaw_ki,
                 "yaw_kd": yaw_kd,
@@ -1082,6 +1090,10 @@ def main():
         nonlocal steering_trim_total_deg
         nonlocal steering_center_offset
         nonlocal tune_selected_row
+        nonlocal autonomy_cause_code
+        nonlocal autonomy_distance_m
+        nonlocal autonomy_interv_per_km
+        nonlocal autonomy_avg_uptime_s
         nonlocal yaw_kp
         nonlocal yaw_ki
         nonlocal yaw_kd
@@ -1145,6 +1157,10 @@ def main():
             min(1.0, float(payload.get("steering_center_offset", steering_center_offset))),
         )
         tune_selected_row = max(0, min(4, int(payload.get("tune_selected_row", tune_selected_row))))
+        autonomy_cause_code = str(payload.get("autonomy_cause_code", autonomy_cause_code))[:3]
+        autonomy_distance_m = float(payload.get("autonomy_distance_m", autonomy_distance_m))
+        autonomy_interv_per_km = float(payload.get("autonomy_interv_per_km", autonomy_interv_per_km))
+        autonomy_avg_uptime_s = float(payload.get("autonomy_avg_uptime_s", autonomy_avg_uptime_s))
         yaw_kp = max(0.0, float(payload.get("yaw_kp", yaw_kp)))
         yaw_ki = max(0.0, float(payload.get("yaw_ki", yaw_ki)))
         yaw_kd = max(0.0, float(payload.get("yaw_kd", yaw_kd)))
