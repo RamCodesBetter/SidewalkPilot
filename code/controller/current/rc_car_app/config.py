@@ -39,7 +39,7 @@ DRIVEWAY_CUT_MIN_FORWARD_CLEARANCE_M = 1.2
 DRIVEWAY_CUT_DETECTION_SECONDS = 0.35
 FORWARD_OBSTACLE_STOP_DISTANCE_M = 0.5
 PARTIAL_BLOCKAGE_MIN_CLEARANCE_M = 0.8
-LIDAR_OVERRIDE_EMERGENCY_STOP_M = 0.60   # +25cm (was 0.35) — more stopping margin at speed
+LIDAR_OVERRIDE_EMERGENCY_STOP_M = 0.95   # hard-stop backstop (raised for earlier reaction)
 LIDAR_OVERRIDE_SIDE_CLEARANCE_M = 0.75
 LIDAR_OVERRIDE_STEER_DEG = 38.0
 
@@ -48,9 +48,9 @@ LIDAR_OVERRIDE_STEER_DEG = 38.0
 LIDAR_FORWARD_CONE_DEG = 30.0        # forward cone that BLOCKS the path (matches the V7H1 cone rays)
 LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 30..75 wedges = swerve-clearance only
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
-LIDAR_WARN_M = 1.05                  # forward point closer than this triggers classify/react
-LIDAR_GOV_FULL_M = 1.50              # governor full throttle at/above this clearance
-LIDAR_GOV_STOP_M = 0.90              # governor throttle 0 at/below this (above the 0.60 emergency)
+LIDAR_WARN_M = 1.30                  # forward point closer than this triggers classify/react
+LIDAR_GOV_FULL_M = 1.55              # governor full throttle at/above this clearance
+LIDAR_GOV_STOP_M = 1.15              # governor throttle 0 at/below this (above the 0.95 emergency)
 LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
 LIDAR_AVOID_SIDE_CLEAR_M = 0.40      # a side needs this much room to swerve into
 LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
