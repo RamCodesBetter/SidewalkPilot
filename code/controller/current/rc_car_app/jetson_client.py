@@ -7,8 +7,8 @@ never wedged by the Jetson — the runtime can fall back to the local model.
 
 Protocol (TCP):
     Pi  -> Jon : [1B version-len V][V bytes version utf8][4B big-endian len N][N bytes JPEG]
-    Jon -> Pi  : 20 bytes = struct '>fffff' (steering_deg 0..180, throttle 0..1,
-                 jon_cpu_temp_c, jon_gpu_temp_c, infer_fps)
+    Jon -> Pi  : 24 bytes = struct '>ffffff' (steering_deg 0..180, throttle 0..1,
+                 jon_cpu_temp_c, jon_gpu_temp_c, infer_fps, infer_ms)
 
 The version string is the Pi's active model choice (e.g. "3.0b"). Jon hot-swaps to
 that model when it changes — so picking a model on the Pi's dashboard model page
@@ -43,6 +43,7 @@ class JetsonSteeringClient:
         self.jon_cpu_temp_c = 0.0
         self.jon_gpu_temp_c = 0.0
         self.infer_fps = 0.0
+        self.infer_ms = 0.0
 
     def connect(self):
         self.close()
@@ -87,14 +88,15 @@ class JetsonSteeringClient:
         vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:255]
         try:
             self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
-            # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps (5x f32)
-            reply = self._recv_exact(20)
+            # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps, infer_ms (6x f32)
+            reply = self._recv_exact(24)
             if reply is None:
                 raise OSError("short reply")
-            steering, throttle, jcpu, jgpu, ifps = struct.unpack(">fffff", reply)
+            steering, throttle, jcpu, jgpu, ifps, ims = struct.unpack(">ffffff", reply)
             self.jon_cpu_temp_c = float(jcpu)
             self.jon_gpu_temp_c = float(jgpu)
             self.infer_fps = float(ifps)
+            self.infer_ms = float(ims)
             return float(steering), float(throttle)
         except OSError:
             self.close()          # drop the socket; next infer() reconnects
@@ -108,13 +110,14 @@ class JetsonSteeringClient:
             return False
         try:
             self.sock.sendall(bytes([0]) + struct.pack(">I", 0))  # version-len 0, jpeg-len 0
-            reply = self._recv_exact(20)
+            reply = self._recv_exact(24)
             if reply is None:
                 raise OSError("short reply")
-            _s, _t, jcpu, jgpu, ifps = struct.unpack(">fffff", reply)
+            _s, _t, jcpu, jgpu, ifps, ims = struct.unpack(">ffffff", reply)
             self.jon_cpu_temp_c = float(jcpu)
             self.jon_gpu_temp_c = float(jgpu)
             self.infer_fps = float(ifps)
+            self.infer_ms = float(ims)
             return True
         except OSError:
             self.close()

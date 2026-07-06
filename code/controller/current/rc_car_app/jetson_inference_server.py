@@ -363,7 +363,7 @@ def serve(model, host, port):
                 if n == 0:
                     # status ping (no frame): report temps + current ifps, run no inference
                     jcpu, jgpu = _read_tegra_temps()
-                    conn.sendall(struct.pack(">fffff", 90.0, 0.0, jcpu, jgpu, ifps))
+                    conn.sendall(struct.pack(">ffffff", 90.0, 0.0, jcpu, jgpu, ifps, 0.0))
                     continue
                 data = _recv_exact(conn, n)
                 if not data:
@@ -378,11 +378,13 @@ def serve(model, host, port):
                 jcpu, jgpu = _read_tegra_temps()
                 frame = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)  # BGR
                 if frame is None:
-                    conn.sendall(struct.pack(">fffff", 90.0, 0.0, jcpu, jgpu, ifps))
+                    conn.sendall(struct.pack(">ffffff", 90.0, 0.0, jcpu, jgpu, ifps, 0.0))
                     continue
+                t_inf = time.time()
                 steering, throttle = model.infer(frame)   # preprocess + session.run
-                # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps
-                conn.sendall(struct.pack(">fffff", steering, throttle, jcpu, jgpu, ifps))
+                infer_ms = (time.time() - t_inf) * 1000.0
+                # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps, infer_ms
+                conn.sendall(struct.pack(">ffffff", steering, throttle, jcpu, jgpu, ifps, infer_ms))
                 frames += 1
         except (ConnectionResetError, BrokenPipeError):
             pass
