@@ -84,7 +84,11 @@ def _forward_clusters(scan):
     for c in clusters:
         ang = [a for a, _ in c]
         dd = [d for _, d in c]
-        out.append({"width": max(ang) - min(ang), "centre": sum(ang) / len(ang), "min_d": min(dd)})
+        span_deg = max(ang) - min(ang)
+        min_d = min(dd)
+        out.append({"width": span_deg, "centre": sum(ang) / len(ang), "min_d": min_d,
+                    # physical width (chord) — distance-invariant so a close mailbox isn't a "wall"
+                    "width_m": 2.0 * min_d * math.sin(math.radians(span_deg) / 2.0)})
     return out
 
 
@@ -125,8 +129,8 @@ def evaluate(scan):
         person = (abs(a["centre"] - b["centre"]) <= C.LIDAR_LEG_GAP_MAX_DEG
                   and abs(a["min_d"] - b["min_d"]) <= C.LIDAR_LEG_RANGE_TOL_M
                   and a["width"] < C.LIDAR_NARROW_MAX_DEG and b["width"] < C.LIDAR_NARROW_MAX_DEG)
-    widest = max(clusters, key=lambda c: c["width"])
-    if person or widest["width"] >= C.LIDAR_WIDE_MIN_DEG:
+    widest = max(clusters, key=lambda c: c["width_m"])
+    if person or widest["width_m"] >= C.LIDAR_WALL_MIN_WIDTH_M:      # PHYSICAL width, not angular
         return {"code": "HLD", "stop": True, "steer": None, "throttle": 0.0,
                 "front_m": front_m, "reason": "lidar_hold"}         # person/wall -> full stop
 
