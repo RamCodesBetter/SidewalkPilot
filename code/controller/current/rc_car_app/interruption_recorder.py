@@ -106,8 +106,9 @@ class InterruptionClipRecorder:
         print(f"[clip] saved {path} ({len(frames)} frames @ {fps:.1f} fps)", flush=True)
 
     def ship_to_jon(self, host):
-        """On quit: drain the writer, then rsync every clip to Jon:/nvme/interruption_clips/.
-        Keeps local copies (no --remove-source-files). Never raises."""
+        """On quit: drain the writer, then rsync every clip to Jon:/nvme/interruption_clips/
+        and delete the local copies + folder AFTER a successful transfer (fail-safe: an
+        unreachable Jon leaves the clips on the Pi). Never raises."""
         if not self.enabled:
             return
         try:                                  # let the writer finish any pending clip
@@ -127,14 +128,20 @@ class InterruptionClipRecorder:
         if not clips:
             return
         try:
+            # --remove-source-files deletes each clip only AFTER it transfers, so an
+            # unreachable Jon leaves everything on the Pi (fail-safe).
             subprocess.run(
-                ["rsync", "-a",
+                ["rsync", "-a", "--remove-source-files",
                  "-e", "ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new",
                  *clips, f"ram@{host}:/nvme/interruption_clips/"],
                 timeout=60, check=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             )
-            print(f"Shipped {len(clips)} interruption clip(s) to Jon:/nvme/interruption_clips/.",
-                  flush=True)
+            try:                              # drop the now-empty local folder
+                os.rmdir(self.out_dir)
+            except OSError:
+                pass
+            print(f"Shipped {len(clips)} interruption clip(s) to Jon:/nvme/interruption_clips/ "
+                  f"and cleared them locally.", flush=True)
         except Exception as exc:
             print(f"Clip ship to Jon skipped (kept locally): {exc}", flush=True)
