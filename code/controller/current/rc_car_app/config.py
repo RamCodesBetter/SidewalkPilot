@@ -321,6 +321,16 @@ PHOTO_RUN_CAPTURE_FPS = 10.0
 JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
 
+# Interruption clip recorder (dad+son suggestion #1). While autonomous, keep a rolling
+# buffer of the exact JPEGs sent to Jon; the instant the driver takes over
+# (autonomous -> manual) a background thread saves the last INTERRUPTION_CLIP_SECONDS
+# to INTERRUPTION_CLIP_DIR as clip_<stamp>.mp4 -- the moments right before the takeover.
+# At quit every clip is rsync'd to Jon:/nvme/interruption_clips/ for clip_bucket_analyzer.py.
+# Records ONLY while autonomous, strictly the seconds BEFORE the takeover (no post-roll).
+INTERRUPTION_CLIP_ENABLED = True
+INTERRUPTION_CLIP_SECONDS = 2.0
+INTERRUPTION_CLIP_DIR = "~/interruption_clips"
+
 NAV_SELECT_BUTTON = 3
 QUIT_BUTTON = 15
 

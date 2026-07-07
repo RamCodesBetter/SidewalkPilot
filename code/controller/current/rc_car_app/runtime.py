@@ -25,6 +25,9 @@ from .config import (
     PHOTO_RUN_CAPTURE_FPS,
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
+    INTERRUPTION_CLIP_ENABLED,
+    INTERRUPTION_CLIP_SECONDS,
+    INTERRUPTION_CLIP_DIR,
     STEERING_SMOOTH_ALPHA,
     BRAKE_RATE,
     CM_PER_SEC_TO_MPH,
@@ -123,6 +126,7 @@ from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
 from .yaw_pid import ImuReader, YawController
 from .jetson_client import JetsonSteeringClient
+from .interruption_recorder import InterruptionClipRecorder
 from . import lidar_avoidance
 from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
 
@@ -1616,6 +1620,7 @@ def run(model_choice=None):
     lidar_parser = None
     webcam_vision = None
     jetson_client = None
+    clip_recorder = None
     dashboard_sender = None
     gps_reader = None
     navigation = NavigationManager()
@@ -1686,6 +1691,13 @@ def run(model_choice=None):
         jetson_client = JetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
         print(f"Autonomy inference on Jetson (Jon) at {jetson_host}:{JETSON_STEERING_PORT}. "
               f"Pi will NOT run a local steering model.")
+
+    # Interruption clip recorder: rolling buffer of the exact JPEGs sent to Jon; on every
+    # autonomous->manual takeover it saves the 2s-before as a clip (background thread), and
+    # ships them to Jon at quit. Only meaningful when Jon is the inference source.
+    clip_recorder = InterruptionClipRecorder(
+        clip_seconds=INTERRUPTION_CLIP_SECONDS, out_dir=INTERRUPTION_CLIP_DIR,
+        enabled=INTERRUPTION_CLIP_ENABLED and jetson_client is not None)
 
     webcam_vision = WebcamVisionProcessor(
         model_choice=active_model_choice, camera_only=jetson_client is not None
@@ -2004,6 +2016,10 @@ def run(model_choice=None):
             update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender,
                         yaw_controller=yaw_controller, imu_reader=imu_reader,
                         jetson_client=jetson_client, active_model_choice=active_model_choice)
+            # buffer the exact frame just sent to Jon; saves a clip on the takeover edge
+            if clip_recorder is not None:
+                clip_recorder.update(bool(state["autonomous_mode"]),
+                                     getattr(jetson_client, "last_jpeg", None))
             update_turn_signal_blink(state, metrics)
             update_dashboard_page_selection(state, metrics)
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
@@ -2165,5 +2181,7 @@ def run(model_choice=None):
         if csv_file:
             csv_file.close()
         _ship_logs_to_jon()          # rsync logs -> Jon:/nvme/logs, delete local on success
+        if clip_recorder is not None:
+            clip_recorder.ship_to_jon(jetson_host)   # rsync interruption clips -> Jon:/nvme/interruption_clips
         cleanup_photo_run_dir()
         pygame.quit()

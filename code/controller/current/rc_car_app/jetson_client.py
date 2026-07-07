@@ -44,6 +44,8 @@ class JetsonSteeringClient:
         self.jon_gpu_temp_c = 0.0
         self.infer_fps = 0.0
         self.infer_ms = 0.0
+        self.last_jpeg = None       # exact JPEG bytes of the frame last sent to Jon
+                                    # (interruption_recorder.py records these verbatim)
 
     def connect(self):
         self.close()
