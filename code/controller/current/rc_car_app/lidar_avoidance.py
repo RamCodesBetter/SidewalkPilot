@@ -25,6 +25,8 @@ evaluate(scan) -> dict the caller applies:
   front_m: forward clearance used
   reason : stop_reason string for the log/dashboard
 """
+import math
+
 from . import config as C
 
 _MAX_RANGE_M = 12.0
