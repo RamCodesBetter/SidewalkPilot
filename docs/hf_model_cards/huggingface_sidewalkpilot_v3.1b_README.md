@@ -24,7 +24,7 @@ SidewalkPilot-v3.1b is the **recommended Series 3 checkpoint** and the first Ser
 
 It replaces the Series 3 **regression** head (v3.0/3.0b), which collapsed toward the mean (~97°) and refused to commit to turns. v3.1b instead **commits to real turns** while staying precise on straights.
 
-**Field-validated at night (2026-07-03, ~9:00–9:45 pm)** and in **daylight (2026-07-04, 10:30 am–12:15 pm)**: drove the sidewalk cleanly. Known failures: **orange sodium-vapor lamppost light** falling on the sidewalk (a color/lighting case it never saw in training), and **strong shadows** — validated in shadow on July 4, where it **steers along the shadow's edge**, mistaking the shadow boundary for the road edge / sidewalk border and following it instead of the real sidewalk.
+**Field-validated at night (2026-07-03, ~9:00–9:45 pm)** and in **daylight (2026-07-04, 10:30 am–12:15 pm)**. It drives **very well in cloudy/overcast daylight**, but in **bright sunlight with hard, dark shadows it fails** — it **follows the shadows**: the sharp light↔dark color transitions confuse the model, so it locks onto one region and drives **either only on the bright sidewalk or only inside the dark shadow**, steering along the shadow's edge instead of the real sidewalk. Other known failure: **orange sodium-vapor lamppost light** on the sidewalk at night (a color/lighting case it never saw in training).
 
 ## Model Details
 
@@ -69,8 +69,8 @@ Nine logits (not one number) let the model represent "it's one of the extremes, 
 - **Raw steering is blocky/jittery** — the classifier flips between adjacent buckets frame-to-frame on ambiguous frames, causing whole-bucket jumps. Mitigated with **temporal smoothing (EMA)** in the runtime.
 - **Mean MAE (~14°) is dragged up by a minority of wrong-bucket picks** on ambiguous frames; the **median is 2.5°**, so most frames are tight.
 - **Throttle head not usable** — training throttle was near-constant full, so no signal.
-- **Follows shadow edges** — validated in strong shadows (2026-07-04, daytime) and it **steers along the angle of the shadow**, mistaking the shadow boundary for the road edge / sidewalk border and following it instead of the real sidewalk.
-- **Daytime now field-verified** (2026-07-04, 10:30 am–12:15 pm) — drove the sidewalk cleanly apart from the shadow-following case above.
+- **Cloudy/overcast daylight works very well** — daytime field-verified 2026-07-04, 10:30 am–12:15 pm.
+- **Fails in bright sunlight with hard shadows — follows the shadows.** The sharp light↔dark color transitions confuse the model; it locks onto one region and drives **either only on the bright sidewalk or only inside the dark shadow**, steering along the shadow's edge instead of the real sidewalk (tested 2026-07-04).
 - The evaluation below is a **fit-check** (run on the full training set, so it includes train/eval overlap), **not** held-out generalization. The honest held-out (time-split) steering MAE during training was ~14–16°.
 
 ## Output Meaning
@@ -99,7 +99,7 @@ Nine logits (not one number) let the model represent "it's one of the extremes, 
 | `3.0` | First Series 3 steering+throttle **regression** | tilted-camera dataset (poor quality) | high MAE, dead turn tails; not field-usable |
 | `3.0b` | Best checkpoint of the v3.0 run | same v3.0 training run | same regression limits |
 | `3.1` | **Hybrid classify + within-bucket-offset head** on a clean real dataset | 50,684 photos (2026-07-02, 2 manual runs) | full steering distribution restored; final epoch — a little jittery |
-| `3.1b` | Best checkpoint of the v3.1 run | same v3.1 training run | **recommended** — drove the sidewalk at night + daylight (follows shadow edges); smoother + lower-error than v3.1 |
+| `3.1b` | Best checkpoint of the v3.1 run | same v3.1 training run | **recommended** — drove at night + cloudy daylight; follows the shadows in bright sun; smoother + lower-error than v3.1 |
 
 The Series-3 leap is `3.0b -> 3.1`: swapping the single-number **regressor** (which averaged to center and killed the turn tails) for the **hybrid classifier + offset** (which commits to turns).
 
@@ -139,9 +139,9 @@ Watch `Pred Min` — the regression heads never dip below ~20° (they can't reac
 ## Field Verdict
 
 - **2026-07-03, ~9:00–9:45 pm (night):** drove the sidewalk **cleanly**.
-- **2026-07-04, 10:30 am–12:15 pm (daylight):** drove the sidewalk **cleanly**; daytime now field-verified.
+- **2026-07-04, 10:30 am–12:15 pm (daylight):** **cloudy/overcast conditions drive very well**; daytime field-verified.
 - **Failure mode (night):** orange sodium-vapor lamppost light on the sidewalk (color OOD).
-- **Failure mode (shadows, tested 2026-07-04):** **follows the angle of the shadow** — mistakes the shadow's edge for the road/sidewalk border and steers along it instead of the real sidewalk.
+- **Failure mode (bright sun + hard shadows, 2026-07-04):** **follows the shadows** — the light↔dark color transitions confuse the model, so it locks onto one region and drives **either only on the bright sidewalk or only inside the dark shadow** instead of the real sidewalk.
 - **Raw output was blocky** (argmax bucket flips) → temporal smoothing added in the runtime.
 
 ## Current Version Snapshot
@@ -149,7 +149,7 @@ Watch `Pred Min` — the regression heads never dip below ~20° (they can't reac
 - **Model:** `3.1b` (best-validation checkpoint, epoch 19)
 - **Checkpoint:** `SidewalkPilot-v3.1b.onnx`
 - **Full score:** `92.123%` · **MAE:** `14.179` deg · **Median AE:** `2.540` deg
-- **Verdict:** **recommended** Series 3 checkpoint. Field-drove at night (2026-07-03) and in daylight (2026-07-04); smoother and lower-error than the `v3.1` final checkpoint. Known failures: orange lamppost light and shadow-edge following.
+- **Verdict:** **recommended** Series 3 checkpoint. Field-drove at night (2026-07-03) and in daylight (2026-07-04) — very good in cloudy daylight; smoother and lower-error than the `v3.1` final checkpoint. Known failures: orange lamppost light, and following the shadows in bright sun (drives only the bright sidewalk or only the dark shadow).
 
 ## Intended Use
 
@@ -188,7 +188,7 @@ camera frame in OpenCV BGR
 
 ## Limitations
 
-Steering is precise on straights/gentle turns but its raw per-frame output is blocky (bucket flips) and needs temporal smoothing. It fails under orange lamppost lighting, and in strong shadows it follows the shadow's edge (mistaking it for the road/sidewalk border); daytime was field-verified on 2026-07-04. The throttle head has no usable signal. It does not predict braking, reverse, confidence, obstacle presence, or out-of-distribution frames.
+Steering is precise on straights/gentle turns but its raw per-frame output is blocky (bucket flips) and needs temporal smoothing. It fails under orange lamppost lighting, and in bright sunlight with hard shadows it follows the shadows — the light↔dark color transitions confuse it, so it tracks only the bright sidewalk or only the dark shadow; cloudy/overcast daylight works well (field-verified 2026-07-04). The throttle head has no usable signal. It does not predict braking, reverse, confidence, obstacle presence, or out-of-distribution frames.
 
 ## Safety Recommendation
 
