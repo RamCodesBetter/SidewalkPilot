@@ -90,6 +90,7 @@ class JetsonSteeringClient:
         vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:255]
         try:
             self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
+            self.last_jpeg = data           # exact bytes sent to Jon -> interruption recorder buffers these
             # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps, infer_ms (6x f32)
             reply = self._recv_exact(24)
             if reply is None:
