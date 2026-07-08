@@ -92,7 +92,7 @@ STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG = float(
 STEERING_SERVO_CENTER_OFFSET = float(
     os.environ.get(
         "RC_CAR_STEERING_SERVO_CENTER_OFFSET",
-        str(12.0 / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
+        str(9.0 / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),   # DELT center trim = +9deg (Ram, 2026-07-08)
     )
 )
 STEERING_SERVO_CENTER_PRELOAD = 0.0
@@ -132,12 +132,11 @@ STEERING_YAW_PID_KD = 0.05
 STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
 # Direction-dependent straight-angle feed-forwards. LFF = straight servo angle when
 # the last steer was LEFT; RFF = when last steer was RIGHT (picked by _last_side).
-# SOFTENED (hand-set) to a gentle +9deg / +8deg off logical center (90): the PID does
-# more of the work and the open-loop hand no longer slams the servo ~+20-30deg right.
-# Deltas are +9 (left-approach) / +8 (right-approach). ff_calibrate.py measured a much
-# harder push (119.5/107.8) at speed; re-run it if you want the measured values back.
-STEERING_YAW_PID_LFF_DEG = 99.0   # center 90 + 9
-STEERING_YAW_PID_RFF_DEG = 98.0   # center 90 + 8
+# REVERTED (2026-07-08, Ram) to the ff_calibrate.py MEASURED straight-angles: the
+# open-loop hand pushes to the calibrated angle and the PID corrects around it.
+# LFF = left-approach, RFF = right-approach (picked by _last_side).
+STEERING_YAW_PID_LFF_DEG = 119.5   # measured (left-approach)
+STEERING_YAW_PID_RFF_DEG = 107.8   # measured (right-approach)
 # A side only counts as "the last steer" once the stick DWELLS there this long.
 # Kills flick / spring-back overshoot: on a quick release the stick briefly crosses
 # center to the opposite side; without this dwell that transient flips the hysteresis
