@@ -51,7 +51,8 @@ LIDAR_POINT_GREEN: Color = (0, 255, 70)      # < 2.0 m
 LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
 LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
 LIDAR_CONE: Color = (60, 180, 255)           # forward corridor guide lines
-LIDAR_CORRIDOR_HALF_WIDTH_M = 0.56           # each guide line ~22in (20-23in) off the LiDAR centre
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762          # each guide line 2.5ft (30in) off centre => ~5ft sidewalk
+                                             # (car is only ~25.2cm wide, so it's a narrow car in a wide lane)
 # Horizontal rungs across the corridor at the LiDAR avoidance distances -- MIRROR config.py
 # (EMERGENCY 1.05 / GOV_STOP 1.25 / WARN 1.40 / GOV_FULL 1.65); update here if those change.
 LIDAR_RUNG_DISTANCES = [
