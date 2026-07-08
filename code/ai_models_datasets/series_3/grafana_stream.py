@@ -19,7 +19,10 @@ _CREDS_PATH = os.path.expanduser("~/.grafana_cloud.json")
 
 class GrafanaStreamer:
     def __init__(self, run_label):
-        self.run = str(run_label or "dev")
+        # Stamp each launch so a re-run starts a FRESH series (Prometheus can't delete old
+        # data) -- e.g. "3.2 @ 07-08 01:45". Old runs stay under their own label, so the
+        # dashboard's current run isn't polluted by the previous one ("erase at start").
+        self.run = f"{run_label or 'dev'} @ {time.strftime('%m-%d %H:%M')}"
         self.writer = None
         if not os.path.isfile(_CREDS_PATH):
             return                                   # streaming off (no creds) -> silent no-op
@@ -30,7 +33,7 @@ class GrafanaStreamer:
             self.writer = RemoteWriter(
                 url=c["url"],
                 auth={"username": str(c["user"]), "password": c["token"]},
-                retries=2, timeout=8.0,
+                retries=2, timeout=4.0,               # short timeout: a slow push must not stall training
                 auto_convert_seconds_to_ms=False,     # we pass ms directly (avoids per-metric warn spam)
             )
             print(f"[grafana] streaming training metrics to Grafana Cloud (run={self.run})", flush=True)

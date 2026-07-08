@@ -46,7 +46,8 @@
       "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         { "refId": "A", "expr": "sidewalkpilot_train_val_loss{run=~\"$run\"}", "legendFormat": "val {{run}}" },
-        { "refId": "B", "expr": "sidewalkpilot_train_train_loss{run=~\"$run\"}", "legendFormat": "train {{run}}" }
+        { "refId": "B", "expr": "sidewalkpilot_train_train_loss{run=~\"$run\"}", "legendFormat": "train/epoch {{run}}" },
+        { "refId": "C", "expr": "sidewalkpilot_train_train_loss_live{run=~\"$run\"}", "legendFormat": "train live {{run}}" }
       ]
     },
     {

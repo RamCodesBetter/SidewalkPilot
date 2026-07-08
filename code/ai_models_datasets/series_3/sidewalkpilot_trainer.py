@@ -1699,6 +1699,7 @@ def train(roots, args):
     except Exception as _exc:
         print(f"[grafana] streaming unavailable: {_exc}", flush=True)
         streamer = None
+    last_stream_push = 0.0            # throttle live step-metric pushes to Grafana (every ~5s)
 
     for epoch in range(1, args.epochs + 1):
         epoch_start = time.time()
@@ -1729,6 +1730,20 @@ def train(roots, args):
             val = loss.item()
             train_total += val
             loss_ema = val if loss_ema is None else 0.95 * loss_ema + 0.05 * val
+
+            # live push to Grafana every ~5s so the dashboard moves during an epoch (not
+            # just once at the end). Val metrics only exist per-epoch; these are the live
+            # training signals.
+            if streamer is not None and streamer.enabled and time.time() - last_stream_push >= 5.0:
+                last_stream_push = time.time()
+                streamer.push(epoch, {
+                    "train_loss_live": loss_ema,
+                    "lr": float(optimizer.param_groups[0]["lr"]),
+                    "grad_norm": grad_norm,
+                    "epoch": epoch,
+                    "global_step": global_step,
+                    "gpu_mem_gb": (torch.cuda.memory_reserved() / 1e9) if torch.cuda.is_available() else 0.0,
+                })
 
             if step % args.log_every == 0:
                 batch_sec = time.time() - batch_start
