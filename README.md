@@ -33,7 +33,7 @@ Three "manager" computers split the job. The **Raspberry Pi 5 (RPI5)** reads eve
 | Role | Component |
 |---|---|
 | **Major System Manager (RPI5)** | Raspberry Pi 5 (8 GB) — main controller: sensors, motors, steering, logging |
-| **AI Model Manager (JON)** | NVIDIA Jetson Orin Nano Super — runs the steering neural network (ONNX / TensorRT) |
+| **AI Model Manager (JON)** | NVIDIA Jetson Orin Nano — runs the steering neural network (ONNX / TensorRT) |
 | **Display System Manager (Z2W)** | Raspberry Pi Zero 2 W — LED dashboard over USB |
 | Vision | Raspberry Pi Camera Module 3 Wide |
 | Obstacles | Youyeetoo FHL-LD19 360° LiDAR — emergency braking + avoidance |
@@ -52,9 +52,21 @@ The brain is a convolutional neural network trained on tens of thousands of real
 
 - **Series 1 — the foundation.** A small (~2.7 M-parameter) network that predicts a steering angle directly from the image (200×66 input). It proved a car could follow a sidewalk from camera alone, and established the image → steering-label training pipeline.
 - **Series 2 — refinement.** Same direct-steering design, cleaner data, and tuned steering range. Added an HSV + CLAHE contrast option (models 2.0/2.0b) to fight harsh lighting — kept as a tool, not the default.
-- **Series 3 — the current generation.** A larger (~5.5 M-parameter) network with a **hybrid head**: it first classifies a coarse steering direction, then regresses the exact angle within it (plus throttle), on a 320×180 image with shadow/lighting augmentation. Series 3 was *originally targeted for quantization* (FP32 → FP16 → INT8 / TensorRT) to squeeze a heavy model onto the Jetson — but the focus **shifted toward accuracy and robustness**: the hybrid head and shadow-hardened training, running directly on the Jetson Orin Nano Super.
+- **Series 3 — the current generation.** A larger (~5.5 M-parameter) network with a **hybrid head**: it first classifies a coarse steering direction, then regresses the exact angle within it (plus throttle), on a 320×180 image with shadow/lighting augmentation. Series 3 was *originally targeted for quantization* (FP32 → FP16 → INT8 / TensorRT) to squeeze a heavy model onto the Jetson — but the focus **shifted toward accuracy and robustness**: the hybrid head and shadow-hardened training, running directly on the Jetson Orin Nano.
 
 Current best model **v3.2b** predicts steering to ~14° mean error on held-out validation — full per-model breakdown in [`docs/steering_model_report.pdf`](docs/steering_model_report.pdf).
+
+### Why the buckets matter — bright sidewalk vs. dark shadows
+
+The hardest real-world case is a bright sidewalk cut by sharp tree-shadows. A model that predicts a single raw steering number tends to **follow the shadow's diagonal edge**, mistaking it for the edge of the path. The hybrid head fixes this by outputting a **probability for each steering direction — left, right, or straight — instead of one number.** Reading those probabilities, the car can tell "I'm genuinely turning" apart from "I'm confidently straight, just crossing a shadow line," and commit to driving *straight through* the shadow instead of being pulled off course. That, together with shadow-hardened training data, is how Series 3 attacks the bright/dark problem.
+
+## Training & testing
+
+**Data.** Every field run logs camera frames paired with the human's steering, building a dataset of tens of thousands of real sidewalk images (published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat)).
+
+**Training.** Models train on an NVIDIA RTX 6000 Ada GPU. Each image is augmented on the fly — horizontal flips, brightness/HSV jitter, and **synthetic diagonal shadow bands** that mimic bright-sun-through-trees lighting — so the model practices on hard shadows it would otherwise rarely see. Data is split by **time window** (every 10th chunk held out), so near-identical neighboring frames can't leak between training and testing. Series 3 optimizes a **hybrid loss** — focal cross-entropy on the steering *bucket* + smooth-L1 on the exact *angle* within it + throttle — over ~30 epochs, keeping the checkpoint with the lowest validation steering error. The winner is exported to ONNX for the Jetson, and training metrics stream live to a Grafana dashboard.
+
+**Testing.** A held-out validation set scores steering error, bucket accuracy, and the predicted-vs-actual direction spread every epoch. A separate evaluator then runs *every* model over the full dataset and generates a per-model PDF report — mean/median error, "within N degrees," and a bucket confusion matrix ([`docs/steering_model_report.pdf`](docs/steering_model_report.pdf)). Finally the real car is **field-tested** on sidewalks across day, night, and shadow conditions — those runs are where failures like shadow-following get caught and fed back into the next dataset.
 
 ## Repo layout
 
