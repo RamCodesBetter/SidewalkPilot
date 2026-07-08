@@ -1925,7 +1925,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=256)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--lr", type=float, default=3e-4)
-    parser.add_argument("--weight-decay", type=float, default=1e-4)
+    parser.add_argument("--weight-decay", type=float, default=3e-4)   # up from 1e-4: less overfit past ~ep10, so the FINAL checkpoint stays near the best
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--val-split", type=float, default=0.10)
     parser.add_argument("--seed", type=int, default=42)
