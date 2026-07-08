@@ -471,19 +471,22 @@ def apply_diagonal_shadow_band(img):
     )
     axis = xx * math.cos(angle) + yy * math.sin(angle)
     center = random.uniform(float(axis.min()), float(axis.max()))
-    band_width = random.uniform(max(5.0, width * 0.08), max(8.0, width * 0.22))
+    band_width = random.uniform(max(5.0, width * 0.08), max(10.0, width * 0.30))
     distance = np.abs(axis - center)
     mask = np.clip(1.0 - distance / band_width, 0.0, 1.0)
-    mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=random.uniform(2.0, 5.0))
+    # HARD edge: a real bright-sun shadow has a small penumbra -> sharpen (was sigma 2.0-5.0)
+    mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=random.uniform(0.5, 2.5))
 
     img_f = img.astype(np.float32)
-    shadow_strength = random.uniform(0.38, 0.68)
+    # DARKER shadow = higher contrast, closer to a real noon cast shadow (was 0.38-0.68)
+    shadow_strength = random.uniform(0.20, 0.55)
     shadowed = img_f * shadow_strength
     out = img_f * (1.0 - mask[:, :, None]) + shadowed * mask[:, :, None]
 
-    if random.random() < 0.35:
+    # Sunlit side blown BRIGHT (the HDR the cloudy base never had): more often + stronger.
+    if random.random() < 0.6:
         bright_side = axis > center
-        out[bright_side] = out[bright_side] * random.uniform(1.04, 1.22) + random.uniform(2.0, 12.0)
+        out[bright_side] = out[bright_side] * random.uniform(1.10, 1.45) + random.uniform(4.0, 22.0)
 
     return np.clip(out, 0, 255).astype(np.uint8)
 
@@ -599,7 +602,8 @@ def apply_hsv_jitter(img):
     h, s, v = cv2.split(hsv)
     h = (h + random.uniform(-8.0, 8.0)) % 180.0
     s = np.clip(s * random.uniform(0.82, 1.18) + random.uniform(-8.0, 8.0), 0, 255)
-    v = np.clip(v * random.uniform(0.82, 1.18) + random.uniform(-12.0, 12.0), 0, 255)
+    # stronger VALUE (brightness) swing -> bright-sun highlight/shadow HDR (was 0.82-1.18 / +-12)
+    v = np.clip(v * random.uniform(0.68, 1.32) + random.uniform(-24.0, 24.0), 0, 255)
     hsv = cv2.merge((h, s, v)).astype(np.uint8)
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
@@ -1671,7 +1675,8 @@ def train(roots, args):
     final_path.parent.mkdir(parents=True, exist_ok=True)
     best_path.parent.mkdir(parents=True, exist_ok=True)
 
-    best_val = float("inf")
+    best_val = float("inf")     # tracked for the retrain-epochs recommendation
+    best_mae = float("inf")     # the checkpoint is saved on best STEERING MAE, not val loss
     best_epoch = 0
     val_history = []
     loss_ema = None
@@ -1817,10 +1822,14 @@ def train(roots, args):
 
         val_history.append(float(metrics["loss"]))
         if metrics["loss"] < best_val:
-            best_val = metrics["loss"]
+            best_val = metrics["loss"]                      # for the recommendation only
+        # Save "best" by STEERING MAE (what we drive on), not val loss -- they diverge:
+        # a lower-loss epoch can steer worse. This keeps the tightest-steering checkpoint.
+        if metrics["steering_mae"] < best_mae:
+            best_mae = metrics["steering_mae"]
             best_epoch = epoch
             torch.save(model.state_dict(), best_path)
-            print("Saved best:", best_path)
+            print(f"Saved best (SteerMAE {best_mae:.3f} deg):", best_path)
 
     torch.save(model.state_dict(), final_path)
     print("Saved:", final_path)
