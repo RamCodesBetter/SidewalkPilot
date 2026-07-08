@@ -58,6 +58,8 @@ STEERING_MODEL_VERSIONS = (
     "3.0b",
     "3.1",
     "3.1b",
+    "3.2",
+    "3.2b",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 # Default to the HIGHEST version (last in the ascending list, currently 3.0b). The Pi

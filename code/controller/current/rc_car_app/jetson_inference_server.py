@@ -92,6 +92,29 @@ def resolve_model_path(spec, extra_dir=None):
                      f"SidewalkPilot-v{spec}.(onnx|pt|pth) in {[str(d) for d in dirs]}")
 
 
+# Per-model preprocessing policy -- MIRRORS the Pi's vision.py (steering_uses_clahe /
+# steering_output_scale_deg). The Pi sends only a version string each frame, so Jon must
+# apply the SAME CLAHE + output-scale the model was trained with, not a fixed startup flag.
+_CLAHE_VERSIONS = {"2.0", "2.0b"}          # the only HSV-CLAHE-trained models (see vision.py)
+
+
+def _version_from_path(model_path):
+    """'.../SidewalkPilot-v2.0b.onnx' -> '2.0b'. None if the filename isn't a versioned model."""
+    stem = Path(model_path).stem
+    prefix = "SidewalkPilot-v"
+    return stem[len(prefix):] if stem.startswith(prefix) else None
+
+
+def _preproc_policy_for_version(version):
+    """version like '2.0b'/'3.2' -> (use_clahe, steer_scale_deg), mirroring the Pi.
+    CLAHE only for 2.0/2.0b; Series-2 output scale = 85, Series-1 = 86 (Series-3 ignores
+    scale -- it's decoded by output length)."""
+    v = str(version).strip().lower()
+    use_clahe = v in _CLAHE_VERSIONS
+    steer_scale = 85.0 if v.startswith("2.") else 86.0
+    return use_clahe, steer_scale
+
+
 try:
     import cv2
 except ImportError:
@@ -226,7 +249,14 @@ class SteeringModel:
 
     def load(self, spec):
         model_path = resolve_model_path(spec, self.models_dir)
-        steer_scale = self.steer_scale
+        # CLAHE + output-scale follow the VERSION (mirror the Pi's vision.py), because the
+        # Pi only sends a version string. e.g. 2.0/2.0b -> CLAHE on; every other model raw.
+        # A raw/unrecognized filename falls back to the startup --clahe/--steer-scale.
+        version = _version_from_path(model_path)
+        if version is not None:
+            self.use_clahe, steer_scale = _preproc_policy_for_version(version)
+        else:
+            steer_scale = self.steer_scale
         low = model_path.lower()
 
         if low.endswith(".onnx"):
@@ -402,8 +432,12 @@ def main():
     ap.add_argument("--models-dir", default=None, help="extra dir to search for SidewalkPilot-v*.*")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8770)
-    ap.add_argument("--clahe", action="store_true", help="apply CLAHE (only for CLAHE-trained models)")
-    ap.add_argument("--steer-scale", type=float, default=86.0, help="output_scale_deg for S1/2 .pth (S1=86)")
+    ap.add_argument("--clahe", action="store_true",
+                    help="FALLBACK CLAHE for unrecognized model filenames. Recognized "
+                         "SidewalkPilot-v* models auto-select (2.0/2.0b on, rest off).")
+    ap.add_argument("--steer-scale", type=float, default=86.0,
+                    help="FALLBACK output_scale_deg for unrecognized S1/2 filenames "
+                         "(recognized: S2=85, S1=86 auto).")
     ap.add_argument("--width", type=int, default=None)
     ap.add_argument("--height", type=int, default=None)
     args = ap.parse_args()
