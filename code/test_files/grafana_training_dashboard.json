@@ -76,14 +76,14 @@
     },
     {
       "id": 4,
-      "title": "Straight predictions (target ~4093)",
+      "title": "Learning rate",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
-      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "lineWidth": 2 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 7, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 8 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
       "targets": [
-        { "refId": "A", "expr": "sidewalkpilot_train_straight_preds{run=~\"$run\"}", "legendFormat": "straight {{run}}" }
+        { "refId": "A", "expr": "sidewalkpilot_train_lr{run=~\"$run\"}", "legendFormat": "lr {{run}}" }
       ]
     },
     {
