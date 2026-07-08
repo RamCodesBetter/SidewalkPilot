@@ -1885,20 +1885,23 @@ def main():
     parser.add_argument("--real-sample-weight", type=float, default=2.0)
     parser.add_argument("--carla-sample-weight", type=float, default=0.6)
     parser.add_argument("--correction-sample-weight", type=float, default=3.0)
-    parser.add_argument("--sampler-balance-power", type=float, default=1.0,
+    parser.add_argument("--sampler-balance-power", type=float, default=0.3,
                         help="0..1: how hard to rebalance steering buckets. 1.0=full inverse-frequency "
-                             "(aggressive; can make the model turn-happy), 0.5=sqrt-softened, 0.0=natural distribution")
+                             "(aggressive; flattens the 70%% straight majority to ~1/9 and starves the "
+                             "narrow straight bin -> 0 straight predictions), 0.5=sqrt-softened, "
+                             "0.3=gentle (default: keeps straight present while lifting rare turns), 0.0=natural")
     parser.add_argument("--steering-loss-weight", type=float, default=1.0)
     parser.add_argument("--throttle-loss-weight", type=float, default=0.5)
-    parser.add_argument("--class-weight-power", type=float, default=0.5,
+    parser.add_argument("--class-weight-power", type=float, default=0.3,
                         help="0..1: focal-CE class weighting for the hybrid steering head. "
                              "0.0=natural prior (max straight predictions), 1.0=full "
-                             "inverse-frequency (revives rare hard-turn classes). 0.5=sqrt.")
+                             "inverse-frequency (revives rare hard-turn classes but crushes straight). "
+                             "0.5=sqrt; 0.3=gentle (default: straight keeps a fair share of the loss).")
     parser.add_argument("--offset-loss-weight", type=float, default=1.0,
                         help="weight for the within-bucket steering offset regression loss")
     parser.add_argument("--focal-gamma", type=float, default=1.5,
                         help="focal-loss gamma for the steering classifier (0.0 = plain CE)")
-    parser.add_argument("--steer-magnitude-weight", type=float, default=2.0,
+    parser.add_argument("--steer-magnitude-weight", type=float, default=1.5,
                         help="extra weight on TURN errors in the steering loss: weight = 1 + w*|steer|. "
                              "2.0 = old (hard-turn error counts 3x -> turn-happy); 0.0 = flat (all steering "
                              "errors equal -> the model commits to holding straight)")
