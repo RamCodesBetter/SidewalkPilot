@@ -37,6 +37,7 @@ class InterruptionClipRecorder:
         self.enabled = bool(enabled) and cv2 is not None and np is not None
         self._buf = deque()                  # (monotonic_ts, jpeg_bytes) -- main thread only
         self._prev_auto = False
+        self._auto_start = None              # monotonic ts the current autonomous segment began
         self._last_jpeg = None               # identity guard against duplicate appends
         self._q = queue.Queue()              # main -> writer: (frames, fps)
         self._writer = None
@@ -51,10 +52,14 @@ class InterruptionClipRecorder:
 
     def update(self, is_autonomous, jpeg_bytes):
         """Call once per control-loop iteration. Appends the frame while autonomous; on
-        the autonomous->manual edge, queues the last clip_seconds for a background write."""
+        the autonomous->manual edge, queues the last clip_seconds for a background write --
+        but only if the autonomous segment lasted at least clip_seconds. A takeover after a
+        sub-window blip has no full window to save (mirrors the <6s AUT/IPKM rule, at 2s)."""
         if not self.enabled:
             return
         now = time.monotonic()
+        if is_autonomous and not self._prev_auto:      # rising edge -> segment starts
+            self._auto_start = now
         # Append only fresh autonomous frames (identity guard: infer() may not have run
         # this loop, leaving last_jpeg unchanged -- don't record the same frame twice).
         if is_autonomous and jpeg_bytes is not None and jpeg_bytes is not self._last_jpeg:
@@ -64,7 +69,12 @@ class InterruptionClipRecorder:
             while self._buf and self._buf[0][0] < cutoff:
                 self._buf.popleft()
         if self._prev_auto and not is_autonomous:      # falling edge -> takeover
-            self._snapshot(now)
+            seg = now - (self._auto_start if self._auto_start is not None else now)
+            if seg >= self.clip_seconds:
+                self._snapshot(now)
+            else:
+                print(f"[clip] takeover after {seg:.1f}s autonomous "
+                      f"(< {self.clip_seconds:.0f}s window) -- skipped", flush=True)
         self._prev_auto = is_autonomous
 
     def _snapshot(self, edge_ts):
