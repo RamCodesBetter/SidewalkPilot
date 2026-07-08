@@ -1687,6 +1687,14 @@ def train(roots, args):
     print(f"Final checkpoint: {final_path}")
     print(f"Best checkpoint: {best_path}")
 
+    # Optional live streaming to Grafana Cloud (no-op unless ~/.grafana_cloud.json exists).
+    try:
+        from grafana_stream import GrafanaStreamer
+        streamer = GrafanaStreamer(args.model_version)
+    except Exception as _exc:
+        print(f"[grafana] streaming unavailable: {_exc}", flush=True)
+        streamer = None
+
     for epoch in range(1, args.epochs + 1):
         epoch_start = time.time()
         model.train()
@@ -1781,6 +1789,31 @@ def train(roots, args):
         if epoch == 1 or epoch == args.epochs or epoch % args.bucket_every == 0:
             print_bucket_distribution("validation prediction buckets", metrics["pred_values"])
             print_bucket_distribution("validation target buckets", metrics["target_values"])
+
+        if streamer is not None and streamer.enabled:
+            pv = np.asarray(metrics["pred_values"], dtype=np.float64)
+            def _cnt(lo, hi):
+                return int(((pv >= lo) & (pv < hi)).sum())
+            streamer.push(epoch, {
+                "epoch": epoch,
+                "train_loss": avg_train,
+                "val_loss": metrics["loss"],
+                "steer_mae_deg": metrics["steering_mae"],
+                "throttle_mae": metrics["throttle_mae"],
+                "class_acc": metrics["class_acc"],
+                "straight_preds": metrics["pred_straight_85_95"],
+                "pred_deg_mean": metrics["pred_steering_mean"],
+                "lr": current_lr,
+                "epoch_time_s": epoch_elapsed,
+                "gpu_mem_gb": (torch.cuda.memory_reserved() / 1e9) if torch.cuda.is_available() else 0.0,
+                "bucket_hard_left": _cnt(0, 45),
+                "bucket_left": _cnt(45, 75),
+                "bucket_soft_left": _cnt(75, 85),
+                "bucket_straight": _cnt(85, 95),
+                "bucket_soft_right": _cnt(95, 105),
+                "bucket_right": _cnt(105, 135),
+                "bucket_hard_right": _cnt(135, 181),
+            })
 
         val_history.append(float(metrics["loss"]))
         if metrics["loss"] < best_val:
