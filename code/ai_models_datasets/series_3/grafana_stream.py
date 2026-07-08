@@ -19,10 +19,11 @@ _CREDS_PATH = os.path.expanduser("~/.grafana_cloud.json")
 
 class GrafanaStreamer:
     def __init__(self, run_label):
-        # Stamp each launch so a re-run starts a FRESH series (Prometheus can't delete old
-        # data) -- e.g. "3.2 @ 07-08 01:45". Old runs stay under their own label, so the
-        # dashboard's current run isn't polluted by the previous one ("erase at start").
-        self.run = f"{run_label or 'dev'} @ {time.strftime('%m-%d %H:%M')}"
+        # Stable run label (e.g. "3.2"). One dropdown entry, no clutter from restarts.
+        # To see only the CURRENT run, use the dashboard TIME RANGE (Last 15m) -- a previous
+        # run's points are in the past and scroll off-screen. (Prometheus can't delete, so a
+        # per-launch stamp just piles up dropdown entries -- not worth it.)
+        self.run = str(run_label or "dev")
         self.writer = None
         if not os.path.isfile(_CREDS_PATH):
             return                                   # streaming off (no creds) -> silent no-op
