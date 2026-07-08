@@ -50,7 +50,8 @@ LIDAR_POINT_YELLOW: Color = (255, 220, 0)    # < 1.2 m
 LIDAR_POINT_GREEN: Color = (0, 255, 70)      # < 2.0 m
 LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
 LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
-LIDAR_CONE: Color = (60, 180, 255)           # forward +/-30 deg cone rays
+LIDAR_CONE: Color = (60, 180, 255)           # forward corridor guide lines
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.56           # each guide line ~22in (20-23in) off the LiDAR centre
 LIDAR_CAR: Color = (255, 255, 255)
 RIGHT_TURN_SIGNAL_INDEX = 28
 LEFT_TURN_SIGNAL_INDEX = 29
@@ -423,19 +424,17 @@ class DashboardRenderer:
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
     def _draw_lidar_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # Forward-facing view: car at bottom-centre, forward = up. Two guide rays mark the
-        # +/-30 deg forward cone; points colored by range (red near -> blue far).
+        # Forward-facing view: car at bottom-centre, forward = up. Two PARALLEL guide lines
+        # (not a cone) mark the sidewalk corridor: each ~22in off the LiDAR centre, running
+        # straight forward. Points colored by range (red near -> blue far).
         car_x = PANEL_WIDTH // 2
         car_y = (PANEL_HEIGHT - 1) + y_offset_px
         scale = 9.0                       # px per metre (forward ~0..3.4 m fills the height)
-        for cone_deg in (-30.0, 30.0):    # forward +/-30 deg cone guide rays
-            cr = math.radians(cone_deg)
-            d = 0.2
-            while d <= 6.0:                               # long rays (clip at the panel edge)
-                gx = int(round(car_x + math.sin(cr) * d * scale))
-                gy = int(round(car_y - math.cos(cr) * d * scale))
-                self._set_pixel(gx, gy, LIDAR_CONE)   # bright blue cone rays
-                d += 0.12
+        half_w_px = int(round(LIDAR_CORRIDOR_HALF_WIDTH_M * scale))
+        for sign in (-1, 1):              # left + right corridor lines, parallel to forward
+            gx = car_x + sign * half_w_px
+            for gy in range(y_offset_px, car_y + 1):      # straight up the panel
+                self._set_pixel(gx, gy, LIDAR_CONE)
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))
         if not raw_points:

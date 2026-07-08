@@ -19,6 +19,7 @@ from .config import (
     AUTONOMOUS_CRUISE_PWM,
     AUTONOMOUS_LIDAR_OVERRIDE_PWM,
     AUTONOMOUS_TURN_PWM,
+    AUTONOMY_MIN_SEGMENT_S,
     AUTO_PHOTO_BUTTON,
     AUTO_PHOTO_MAX_INTERVAL_SEC,
     AUTO_PHOTO_MIN_INTERVAL_SEC,
@@ -1244,17 +1245,24 @@ def calculate_speed(state, metrics, dt):
     metrics.total_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
 
     # --- autonomy metrics (V2H2), edge-detected off autonomous_mode ---
+    # A stint under AUTONOMY_MIN_SEGMENT_S (6s) is a tap in/out, not a real segment:
+    # it's excluded from AUT (avg uptime) + IPKM (interventions), but still counts for
+    # ADT (distance, accumulated below) and ICSE (last cause code, set on every disengage).
     engaged = bool(state["autonomous_mode"])
-    if engaged:
-        metrics.auto_time_s += dt
-        metrics.auto_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
-    if engaged and not metrics.auto_prev_engaged:          # engage -> new segment
-        metrics.auto_segments += 1
+    if engaged and not metrics.auto_prev_engaged:          # engage -> start a segment timer
+        metrics.auto_segment_s = 0.0
     elif metrics.auto_prev_engaged and not engaged:        # disengage
         code = _cause_code(state.get("intervention_cause", ""))
-        metrics.auto_last_cause_code = code
-        if code != "ARR":                                  # arrivals aren't interventions -> exclude from IPKM
-            metrics.auto_intervention_count += 1
+        metrics.auto_last_cause_code = code                # ICSE: every disengage
+        if metrics.auto_segment_s >= AUTONOMY_MIN_SEGMENT_S:   # only real stints count for AUT/IPKM
+            metrics.auto_time_s += metrics.auto_segment_s
+            metrics.auto_segments += 1
+            if code != "ARR":                              # arrivals aren't interventions
+                metrics.auto_intervention_count += 1
+        metrics.auto_segment_s = 0.0
+    if engaged:
+        metrics.auto_segment_s += dt
+        metrics.auto_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt  # ADT: all segments
     metrics.auto_prev_engaged = engaged
 
 

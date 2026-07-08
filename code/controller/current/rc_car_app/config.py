@@ -14,6 +14,10 @@ PI_CAMERA_ROTATE_180 = True
 
 AUTONOMOUS_CRUISE_PWM = 1.0
 AUTONOMOUS_TURN_PWM = 1.0
+# Autonomous stints shorter than this don't count toward AUT (avg uptime) or IPKM
+# (interventions/km) -- a quick tap in/out isn't a real stint. They STILL count toward
+# ADT (distance) and ICSE (last cause code).
+AUTONOMY_MIN_SEGMENT_S = 6.0
 AUTONOMOUS_WARN_PWM = 0.8
 AUTONOMOUS_LIDAR_OVERRIDE_PWM = 0.5
 CAMERA_STEER_GAIN = 0.75
@@ -113,14 +117,14 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # gyro is inverted vs the controller's assumption -> flip it. If a future test shows
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
-# Gentle P+D, NO integral. The left drift at speed is a MOTOR imbalance (thrust
-# differential that scales with throttle), which the steering servo can't cancel --
-# proven: +5deg of correction didn't dent the -10dps drift at max. So kI=0 (an
-# integral just winds up and lurches on decel without fixing anything). The real fix
-# is balancing LEFT/RIGHT_MOTOR_PWM_SCALE. For manual photo collection this is fine:
-# labels are the stick command; you keep the car on the path by eye.
-STEERING_YAW_PID_KP = 0.15
-STEERING_YAW_PID_KI = 0.00
+# Ram-set gains (2026-07-07): stronger P + a small I to hold the line. NOTE: the left
+# drift at speed is partly a MOTOR imbalance (thrust differential that scales with
+# throttle) the steering servo can't fully cancel -- the real fix is balancing
+# LEFT/RIGHT_MOTOR_PWM_SCALE. The small kI is being trialled anyway; the anti-windup
+# clamp (STEERING_YAW_PID_MAX_CORRECTION_DEG) bounds its wind-up. Watch for a lurch on
+# decel; if it winds up and jerks, drop kI back toward 0.
+STEERING_YAW_PID_KP = 0.75
+STEERING_YAW_PID_KI = 0.1
 STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
@@ -417,12 +421,15 @@ class Metrics:
     max_speed_recall: float = 0.0
     total_distance_cm: float = 0.0
     # --- autonomy metrics (V2H2 dashboard page) ---
-    auto_distance_cm: float = 0.0      # ADT: distance driven while autonomous
-    auto_time_s: float = 0.0           # total autonomous time (for AUT)
-    auto_intervention_count: int = 0   # disengagements (for IPKM)
-    auto_segments: int = 0             # number of autonomous engagements (for AUT avg)
+    # Segments shorter than AUTONOMY_MIN_SEGMENT_S are ignored for AUT + IPKM (a quick
+    # tap-in/tap-out isn't a real autonomous stint) but STILL count for ADT + ICSE.
+    auto_distance_cm: float = 0.0      # ADT: distance driven while autonomous (ALL segments)
+    auto_time_s: float = 0.0           # AUT numerator: summed uptime of COUNTED (>=6s) segments
+    auto_intervention_count: int = 0   # IPKM: disengagements from COUNTED (>=6s) segments only
+    auto_segments: int = 0             # AUT denominator: number of COUNTED (>=6s) segments
+    auto_segment_s: float = 0.0        # duration of the CURRENT autonomous segment (in progress)
     auto_prev_engaged: bool = False    # edge-detect autonomous_mode
-    auto_last_cause_code: str = ""     # ICSE: last disengagement cause code
+    auto_last_cause_code: str = ""     # ICSE: last disengagement cause code (ALL segments)
     start_time: float = time.time()
     pid_integral_error: float = 0.0
     pid_previous_error: float = 0.0
