@@ -81,6 +81,8 @@ SOURCE_PURPOSES = {
     "D0510_19": "v2.3 field-failure run 2 (short)",
     "D0510_20": "v2.3 field-failure run 3: turns, road-right driving, driveways",
     "D0629_17": "Series 3 collected run (camera tilted, poor image quality)",
+    "D0702_16": "Series 3 base 50k clean set: cloudy/overcast daylight sidewalk driving",
+    "D0707_16": "Bright-sun HARD/diagonal shadows across the sidewalk (v3.2 shadow-robustness batch)",
 }
 
 
@@ -942,6 +944,12 @@ def build_pdf(results, samples, s3_samples, pdf_out):
         "as indicative, not exact. Series 3 also predicts throttle, which was near-constant 1.0 in the collected runs.",
         "Series 3 numbers include train/evaluation overlap (the models were trained on this dataset), so they are a fit "
         "check, not held-out generalization.",
+        "The Series 3 dataset is now 57,208 images: the D0702_16 50k base (cloudy/overcast daylight) plus the D0707_16 "
+        "bright-sun HARD-shadow batch, added to fix v3.1b's shadow-edge-following (the model steered along shadow edges "
+        "as if they were the sidewalk border).",
+        "v3.2 / v3.2b were trained on that combined set with horizontal-flip + HSV augmentation and softened bucket "
+        "rebalancing; on this fit-check v3.2b is the strongest Series 3 checkpoint (lowest median AE, most within-5deg). "
+        "Bright-sun/shadow behavior is still pending a field verdict.",
     ]
     for note in notes:
         story.append(paragraph(f"- {note}", normal))
