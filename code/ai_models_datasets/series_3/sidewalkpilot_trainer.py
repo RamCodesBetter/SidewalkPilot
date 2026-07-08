@@ -1826,13 +1826,16 @@ def train(roots, args):
                 "lr": current_lr,
                 "epoch_time_s": epoch_elapsed,
                 "gpu_mem_gb": (torch.cuda.memory_reserved() / 1e9) if torch.cuda.is_available() else 0.0,
-                "bucket_hard_left": _cnt(0, 45),
-                "bucket_left": _cnt(45, 75),
-                "bucket_soft_left": _cnt(75, 85),
-                "bucket_straight": _cnt(85, 95),
-                "bucket_soft_right": _cnt(95, 105),
-                "bucket_right": _cnt(105, 135),
-                "bucket_hard_right": _cnt(135, 181),
+                # the model's 9 hybrid classes (match STEER_CLASS_BINS)
+                "bucket_hard_left_0_45": _cnt(0, 45),
+                "bucket_left_45_60": _cnt(45, 60),
+                "bucket_left_60_75": _cnt(60, 75),
+                "bucket_soft_left_75_85": _cnt(75, 85),
+                "bucket_straight_85_95": _cnt(85, 95),
+                "bucket_soft_right_95_105": _cnt(95, 105),
+                "bucket_right_105_120": _cnt(105, 120),
+                "bucket_right_120_135": _cnt(120, 135),
+                "bucket_hard_right_135_180": _cnt(135, 181),
             })
 
         val_history.append(float(metrics["loss"]))
