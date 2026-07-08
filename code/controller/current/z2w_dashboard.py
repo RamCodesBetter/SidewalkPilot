@@ -52,6 +52,14 @@ LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
 LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
 LIDAR_CONE: Color = (60, 180, 255)           # forward corridor guide lines
 LIDAR_CORRIDOR_HALF_WIDTH_M = 0.56           # each guide line ~22in (20-23in) off the LiDAR centre
+# Horizontal rungs across the corridor at the LiDAR avoidance distances -- MIRROR config.py
+# (EMERGENCY 1.05 / GOV_STOP 1.25 / WARN 1.40 / GOV_FULL 1.65); update here if those change.
+LIDAR_RUNG_DISTANCES = [
+    (1.05, LIDAR_POINT_RED),      # emergency hard-stop
+    (1.25, LIDAR_POINT_ORANGE),   # governor stop
+    (1.40, LIDAR_POINT_YELLOW),   # warn / react
+    (1.65, LIDAR_POINT_GREEN),    # governor full-throttle above
+]
 LIDAR_CAR: Color = (255, 255, 255)
 RIGHT_TURN_SIGNAL_INDEX = 28
 LEFT_TURN_SIGNAL_INDEX = 29
@@ -435,6 +443,13 @@ class DashboardRenderer:
             gx = car_x + sign * half_w_px
             for gy in range(y_offset_px, car_y + 1):      # straight up the panel
                 self._set_pixel(gx, gy, LIDAR_CONE)
+        # horizontal rungs across the corridor at the LiDAR avoidance distances (colour = zone)
+        for dist_m, rung_color in LIDAR_RUNG_DISTANCES:
+            ry = car_y - int(round(dist_m * scale))
+            if ry < y_offset_px:
+                continue
+            for rx in range(car_x - half_w_px, car_x + half_w_px + 1):
+                self._set_pixel(rx, ry, rung_color)
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))
         if not raw_points:
