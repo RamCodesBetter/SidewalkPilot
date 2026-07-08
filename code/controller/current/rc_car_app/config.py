@@ -126,13 +126,14 @@ STEERING_YAW_PID_KD = 0.05
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
 # feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
 STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
-# Direction-dependent straight-angle feed-forwards, MEASURED by ff_calibrate.py at
-# ~max driving speed (~1.3 m/s) -- the straight angle is SPEED-dependent (pulls left
-# harder at speed), so it's calibrated at the speed Ram drives. LFF = straight servo
-# angle when the last steer was LEFT; RFF = when last steer was RIGHT (picked by
-# _last_side). Re-run ff_calibrate.py --throttle 1.0 to remeasure at full speed.
-STEERING_YAW_PID_LFF_DEG = 119.5
-STEERING_YAW_PID_RFF_DEG = 107.8
+# Direction-dependent straight-angle feed-forwards. LFF = straight servo angle when
+# the last steer was LEFT; RFF = when last steer was RIGHT (picked by _last_side).
+# SOFTENED (hand-set) to a gentle +9deg / +8deg off logical center (90): the PID does
+# more of the work and the open-loop hand no longer slams the servo ~+20-30deg right.
+# Deltas are +9 (left-approach) / +8 (right-approach). ff_calibrate.py measured a much
+# harder push (119.5/107.8) at speed; re-run it if you want the measured values back.
+STEERING_YAW_PID_LFF_DEG = 99.0   # center 90 + 9
+STEERING_YAW_PID_RFF_DEG = 98.0   # center 90 + 8
 # A side only counts as "the last steer" once the stick DWELLS there this long.
 # Kills flick / spring-back overshoot: on a quick release the stick briefly crosses
 # center to the opposite side; without this dwell that transient flips the hysteresis
