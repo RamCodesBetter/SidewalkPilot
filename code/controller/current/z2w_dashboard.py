@@ -346,7 +346,8 @@ class DashboardRenderer:
         left_signal_visible: bool,
         right_signal_visible: bool,
         dashboard_alert: str,
-        notification_rows: Sequence[Sequence[str]],
+        run_number: int,
+        clock_hms: str,
         odometer_total_m: float = 0.0,
         y_offset_px: int = 0,
     ):
@@ -374,8 +375,13 @@ class DashboardRenderer:
             odo = max(0, min(9999, int(float(odometer_total_m))))
             for offset, char in enumerate(f"{odo:04d}", start=2):
                 self._draw_glyph_at(self.digit_map.get(char, self.letter_map[" "]), 3, offset, TEXT_WHITE, y_offset_px)
-        for row_offset, cells in enumerate(list(notification_rows)[:2], start=1):
-            self._draw_notification_row(row_offset, cells, NOTIFICATION_WHITE, y_offset_px)
+        # Row 2 (idx 1): run number today "R###"  ·  Row 3 (idx 2): clock HH:MM:SS (24h).
+        # (Replaces the old transient notification rows.)
+        rn = f"R{max(0, int(run_number)) % 1000:03d}"
+        self._draw_text_row(1, list(rn) + ["", "", "", ""], NOTIFICATION_WHITE, y_offset_px)
+        hms = str(clock_hms).strip()
+        if len(hms) == 8:
+            self._draw_text_row(2, list(hms), TEXT_CYAN, y_offset_px)
 
     def _draw_page_two(self, payload: Dict[str, object], y_offset_px: int = 0):
         servo_cells = self._format_three_digits(float(payload.get("servo_deg", 90.0)))
@@ -821,7 +827,8 @@ class DashboardRenderer:
             bool(payload.get("left_signal_visible", False)),
             bool(payload.get("right_signal_visible", False)),
             str(payload.get("dashboard_alert", ""))[:4],
-            notification_rows,
+            int(payload.get("run_number", 0)),
+            str(payload.get("clock_hms", "")),
             float(self._nav_payload(payload).get("odometer_m", 0.0)),  # same source as the V5 ODO
             y_offset_px,
         )

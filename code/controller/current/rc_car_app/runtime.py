@@ -1267,6 +1267,26 @@ def calculate_speed(state, metrics, dt):
     metrics.auto_prev_engaged = engaged
 
 
+def _run_number_today():
+    """Nth car launch today (1,2,3...), persisted in ~/.sidewalkpilot_runcount.json.
+    Resets when the date rolls over. Shown on the z2w V1H1 page as R###."""
+    path = os.path.expanduser("~/.sidewalkpilot_runcount.json")
+    today = time.strftime("%Y%m%d")
+    data = {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        pass
+    n = int(data.get("count", 0)) + 1 if data.get("date") == today else 1
+    try:
+        with open(path, "w") as f:
+            json.dump({"date": today, "count": n}, f)
+    except Exception:
+        pass
+    return n
+
+
 def _tf(v):
     try:
         return float(v)
@@ -1772,6 +1792,7 @@ def run(model_choice=None):
     # Telemetry -> local InfluxDB (non-blocking; disabled if ~/.influxdb.json absent).
     # One run_id per car launch; browse at http://raspberrypi.local:8086.
     drive_run_id = time.strftime("%Y%m%d_%H%M%S")
+    dashboard_run_number = _run_number_today()   # R### shown on z2w V1H1
     influx = InfluxLogger(drive_run_id, base_tags={"model": str(active_model_choice), "device": "rpi5"})
 
     webcam_vision = WebcamVisionProcessor(
@@ -2198,6 +2219,7 @@ def run(model_choice=None):
                     autonomy_interv_per_km=(metrics.auto_intervention_count /
                         max(0.001, metrics.auto_distance_cm / 100.0 / 1000.0)),
                     autonomy_avg_uptime_s=metrics.auto_time_s / max(1, metrics.auto_segments),
+                    run_number=dashboard_run_number,
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""

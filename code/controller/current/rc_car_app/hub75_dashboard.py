@@ -155,6 +155,7 @@ class Hub75DashboardSender:
         autonomy_distance_m: float = 0.0,
         autonomy_interv_per_km: float = 0.0,
         autonomy_avg_uptime_s: float = 0.0,
+        run_number: int = 0,
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -168,6 +169,8 @@ class Hub75DashboardSender:
             "left_signal_visible": bool(left_signal_visible),
             "right_signal_visible": bool(right_signal_visible),
             "dashboard_alert": str(dashboard_alert)[:4],
+            "run_number": max(0, int(run_number)),
+            "clock_hms": time.strftime("%H:%M:%S"),
             "brightness_percent": max(0, min(100, int(brightness_percent))),
             "dashboard_page": max(1, min(17, int(dashboard_page))),
             "dashboard_page_transition": str(dashboard_page_transition)[:8],
