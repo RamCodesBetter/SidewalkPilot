@@ -127,6 +127,7 @@ from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
 from .yaw_pid import ImuReader, YawController
 from .jetson_client import JetsonSteeringClient
+from .influx_logger import InfluxLogger
 from .interruption_recorder import InterruptionClipRecorder
 from . import lidar_avoidance
 from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
@@ -1266,6 +1267,59 @@ def calculate_speed(state, metrics, dt):
     metrics.auto_prev_engaged = engaged
 
 
+def _tf(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _ti(v):
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _drive_telemetry(state, metrics, jetson_client):
+    """Flatten the driving state into (influx_fields, influx_tags). Defensive -- missing
+    keys drop out, never raises. The 9 bucket probs come from Jon's last reply."""
+    g = state.get
+    fields = {
+        "servo_deg": _tf(g("steering_servo_deg")),
+        "steer_norm": _tf(g("steer")),
+        "steer_smoothed_deg": _tf(g("steer_smoothed_deg")),
+        "target_heading_deg": _tf(g("target_heading_deg")),
+        "camera_bias": _tf(g("camera_steering_bias")),
+        "camera_confidence": _tf(g("camera_confidence")),
+        "motor_pwm": _tf(g("current_motor_pwm")),
+        "throttle": _tf(g("throttle")),
+        "brake_force": _tf(g("brake_force")),
+        "lidar_front_m": _tf(g("lidar_front_dist")),
+        "lidar_left_m": _tf(g("lidar_left_dist")),
+        "lidar_right_m": _tf(g("lidar_right_dist")),
+        "lidar_back_m": _tf(g("lidar_back_dist")),
+        "lidar_clearance_m": _tf(g("lidar_forward_clearance_m")),
+        "num_lidar_points": _ti(g("num_lidar_points")),
+        "override_active": bool(g("lidar_override_active", False)),
+        "autonomous": bool(g("autonomous_mode", False)),
+        "speed_mph": _tf(getattr(metrics, "smoothed_speed_mph", None)),
+        "jon_cpu_c": _tf(g("jon_cpu_temp_c")),
+        "jon_gpu_c": _tf(g("jon_gpu_temp_c")),
+        "infer_ms": _tf(g("infer_ms")),
+        "infer_ips": _tf(g("infer_fps")),
+    }
+    if g("stop_reason"):
+        fields["stop_reason"] = str(g("stop_reason"))
+    probs = getattr(jetson_client, "bucket_probs", None) if jetson_client is not None else None
+    if probs and len(probs) == 9:
+        for i, p in enumerate(probs):
+            fields[f"p{i}"] = float(p)
+    fields = {k: v for k, v in fields.items() if v is not None}
+    tags = {"gear": str(g("gear_mode", "?")), "mode": "auto" if g("autonomous_mode") else "manual"}
+    return fields, tags
+
+
 def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan,
                               jetson_client=None, active_model_choice=None):
     camera_analysis = {
@@ -1715,6 +1769,11 @@ def run(model_choice=None):
         clip_seconds=INTERRUPTION_CLIP_SECONDS, out_dir=INTERRUPTION_CLIP_DIR,
         enabled=INTERRUPTION_CLIP_ENABLED and jetson_client is not None)
 
+    # Telemetry -> local InfluxDB (non-blocking; disabled if ~/.influxdb.json absent).
+    # One run_id per car launch; browse at http://raspberrypi.local:8086.
+    drive_run_id = time.strftime("%Y%m%d_%H%M%S")
+    influx = InfluxLogger(drive_run_id, base_tags={"model": str(active_model_choice), "device": "rpi5"})
+
     webcam_vision = WebcamVisionProcessor(
         model_choice=active_model_choice, camera_only=jetson_client is not None
     )
@@ -2036,6 +2095,9 @@ def run(model_choice=None):
             if clip_recorder is not None:
                 clip_recorder.update(bool(state["autonomous_mode"]),
                                      getattr(jetson_client, "last_jpeg", None))
+            if influx.enabled:
+                _tel_fields, _tel_tags = _drive_telemetry(state, metrics, jetson_client)
+                influx.log(_tel_fields, tags=_tel_tags)
             update_turn_signal_blink(state, metrics)
             update_dashboard_page_selection(state, metrics)
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
@@ -2199,5 +2261,6 @@ def run(model_choice=None):
         _ship_logs_to_jon()          # rsync logs -> Jon:/nvme/logs, delete local on success
         if clip_recorder is not None:
             clip_recorder.ship_to_jon(jetson_host)   # rsync interruption clips -> Jon:/nvme/interruption_clips
+        influx.close()               # drain remaining telemetry to InfluxDB
         cleanup_photo_run_dir()
         pygame.quit()
