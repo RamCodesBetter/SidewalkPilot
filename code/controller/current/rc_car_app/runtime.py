@@ -1352,6 +1352,14 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     # clear -> model-only driving (the intended fallback).
     av = lidar_avoidance.evaluate(lidar_scan)
     state["lidar_forward_clearance_m"] = av["front_m"]
+    # debug (throttled ~1s, autonomous only): shows WHY the car does/doesn't roll --
+    # forward clearance, avoidance code/stop, governed throttle, model confidence + source.
+    _adbg_now = time.time()
+    if _adbg_now >= state.get("_autodbg_next", 0.0):
+        state["_autodbg_next"] = _adbg_now + 1.0
+        print(f"[auto-dbg] fwd={av['front_m']:.2f}m code={av['code'] or 'CLEAR'} "
+              f"stop={av['stop']} gov_thr={av['throttle']:.2f} "
+              f"conf={camera_analysis['confidence']:.2f} method={camera_analysis['method']}", flush=True)
     if av["code"]:                                  # SWR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
         metrics.auto_last_cause_code = av["code"]
     if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
