@@ -65,6 +65,22 @@ BUCKETS = [
     ("HR 135-180", 135.0, 180.0),
 ]
 
+# The 9 real model steering classes (STEER_CLASS_BINS in the Series-3 trainer) -- used for
+# the 9x9 confusion heatmap. Short labels keep the grid readable.
+BUCKETS9 = [
+    ("HL", 0.0, 45.0), ("L", 45.0, 60.0), ("L+", 60.0, 75.0),
+    ("SL", 75.0, 85.0), ("ST", 85.0, 95.0), ("SR", 95.0, 105.0),
+    ("R", 105.0, 120.0), ("R+", 120.0, 135.0), ("HR", 135.0, 180.0),
+]
+
+
+def bucket9_index(value):
+    for i, (_, lo, hi) in enumerate(BUCKETS9):
+        if lo <= value < hi:
+            return i
+    return len(BUCKETS9) - 1
+
+
 # Official source code = D{MMDD}_{HH} (run start hour, 24h).
 SOURCE_PURPOSES = {
     "D0328_17": "First dataset relabel, March 28",
@@ -344,6 +360,13 @@ def bucket_summary(preds, targets):
         for col_index, (col_name, _, _) in enumerate(BUCKETS):
             row[col_name] = int((pred_indices[mask] == col_index).sum())
         confusion[row_name] = row
+    # 9-class confusion (the real model buckets) for the PDF heatmap
+    confusion9 = {}
+    p9 = np.array([bucket9_index(v) for v in preds], dtype=np.int32)
+    t9 = np.array([bucket9_index(v) for v in targets], dtype=np.int32)
+    for ri, (rn, _, _) in enumerate(BUCKETS9):
+        m = t9 == ri
+        confusion9[rn] = {cn: int((p9[m] == ci).sum()) for ci, (cn, _, _) in enumerate(BUCKETS9)}
     count = max(1, len(targets))
     return {
         "prediction_bucket_counts": bucket_counts(preds),
@@ -355,6 +378,7 @@ def bucket_summary(preds, targets):
             "off_by_one_bucket_percent": off_by_one * 100.0 / count,
         },
         "bucket_confusion_ground_rows_pred_cols": confusion,
+        "bucket9_confusion_ground_rows_pred_cols": confusion9,
     }
 
 
@@ -931,6 +955,58 @@ def build_pdf(results, samples, s3_samples, pdf_out):
         story.append(paragraph(title, h2))
         image_data = chart_fn(results, title, chart_versions)
         story.append(Image(image_data, width=9.1 * inch, height=3.1 * inch))
+
+    # 9-class steering-bucket confusion heatmaps for the 4 LATEST models (always Series 3)
+    s3_latest = sorted(
+        (v for v in versions if results[v].get("series") == 3
+         and "bucket9_confusion_ground_rows_pred_cols" in results[v]),
+        key=version_key, reverse=True)[:4]
+    if s3_latest:
+        story.append(PageBreak())
+        story.append(paragraph("Steering-Bucket Confusion (9-class) — latest 4 models", h2))
+        story.append(paragraph(
+            "Rows = the TRUE steering bucket, columns = the model's PREDICTED bucket. "
+            "Green diagonal = correct; red off-diagonal = confusion. Shading = share of that true "
+            "bucket (each row sums to ~100%). Buckets: HL 0-45, L 45-60, L+ 60-75, SL 75-85, "
+            "ST 85-95, SR 95-105, R 105-120, R+ 120-135, HR 135-180.", small))
+        labels9 = [name for name, _, _ in BUCKETS9]
+        for version in s3_latest:
+            conf = results[version]["bucket9_confusion_ground_rows_pred_cols"]
+            grand = max(1, sum(sum(conf[r].values()) for r in labels9))
+            exact9 = sum(conf[labels9[i]][labels9[i]] for i in range(9))
+            near9 = sum(conf[labels9[i]][labels9[j]] for i in range(9) for j in range(9) if abs(i - j) <= 1)
+            data = [["T\\P"] + labels9]
+            tstyle = [
+                ("FONTSIZE", (0, 0), (-1, -1), 6.5),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f2937")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("BACKGROUND", (0, 1), (0, -1), colors.HexColor("#334155")),
+                ("TEXTCOLOR", (0, 1), (0, -1), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"),
+            ]
+            for ri, rname in enumerate(labels9):
+                vals = [conf[rname][cn] for cn in labels9]
+                total = max(1, sum(vals))
+                data.append([rname] + [str(v) if v else "·" for v in vals])
+                for ci, v in enumerate(vals):
+                    frac = v / total
+                    tr, tg, tb = (0.13, 0.60, 0.30) if ci == ri else (0.85, 0.20, 0.20)
+                    cell = (ci + 1, ri + 1)
+                    tstyle.append(("BACKGROUND", cell, cell,
+                                   colors.Color(1 + frac * (tr - 1), 1 + frac * (tg - 1), 1 + frac * (tb - 1))))
+                    if frac > 0.55:
+                        tstyle.append(("TEXTCOLOR", cell, cell, colors.white))
+            table = Table(data, colWidths=[0.8 * inch] + [0.66 * inch] * 9, repeatRows=1)
+            table.setStyle(TableStyle(tstyle))
+            story.append(Spacer(1, 0.08 * inch))
+            story.append(paragraph(
+                f"v{version} &nbsp;&middot;&nbsp; exact bucket {exact9 * 100.0 / grand:.0f}% "
+                f"&nbsp;&middot;&nbsp; within one bucket {near9 * 100.0 / grand:.0f}%", normal))
+            story.append(table)
 
     story.append(PageBreak())
     story.append(paragraph("Notes", h2))
