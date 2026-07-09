@@ -46,6 +46,7 @@ class JetsonSteeringClient:
         self.infer_ms = 0.0
         self.last_jpeg = None       # exact JPEG bytes of the frame last sent to Jon
                                     # (interruption_recorder.py records these verbatim)
+        self.bucket_probs = [0.0] * 9   # 9 steering-bucket softmax probs from Jon's last inference
 
     def connect(self):
         self.close()
@@ -91,15 +92,17 @@ class JetsonSteeringClient:
         try:
             self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
             self.last_jpeg = data           # exact bytes sent to Jon -> interruption recorder buffers these
-            # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps, infer_ms (6x f32)
-            reply = self._recv_exact(24)
+            # reply: steering, throttle, jcpu, jgpu, infer_fps, infer_ms + 9 bucket probs (15x f32)
+            reply = self._recv_exact(60)
             if reply is None:
                 raise OSError("short reply")
-            steering, throttle, jcpu, jgpu, ifps, ims = struct.unpack(">ffffff", reply)
+            v = struct.unpack(">15f", reply)
+            steering, throttle, jcpu, jgpu, ifps, ims = v[0:6]
             self.jon_cpu_temp_c = float(jcpu)
             self.jon_gpu_temp_c = float(jgpu)
             self.infer_fps = float(ifps)
             self.infer_ms = float(ims)
+            self.bucket_probs = [float(p) for p in v[6:15]]
             return float(steering), float(throttle)
         except OSError:
             self.close()          # drop the socket; next infer() reconnects
@@ -113,10 +116,10 @@ class JetsonSteeringClient:
             return False
         try:
             self.sock.sendall(bytes([0]) + struct.pack(">I", 0))  # version-len 0, jpeg-len 0
-            reply = self._recv_exact(24)
+            reply = self._recv_exact(60)
             if reply is None:
                 raise OSError("short reply")
-            _s, _t, jcpu, jgpu, ifps, ims = struct.unpack(">ffffff", reply)
+            _s, _t, jcpu, jgpu, ifps, ims = struct.unpack(">15f", reply)[0:6]
             self.jon_cpu_temp_c = float(jcpu)
             self.jon_gpu_temp_c = float(jgpu)
             self.infer_fps = float(ifps)

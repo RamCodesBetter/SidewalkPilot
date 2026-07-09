@@ -225,6 +225,17 @@ def decode_output(flat):
     return float(flat[0]), 0.0                               # 1 -> Series 1/2 degrees
 
 
+def decode_probs9(flat):
+    """9 softmax bucket probabilities for the hybrid head; zeros for non-hybrid outputs."""
+    flat = np.asarray(flat, dtype=np.float32).reshape(-1)
+    k = _S3_HYBRID_LO.size
+    if flat.size == 2 * k + 1:                               # hybrid: first k are class logits
+        z = flat[0:k] - np.max(flat[0:k])
+        e = np.exp(z)
+        return (e / float(np.sum(e))).astype(np.float32)
+    return np.zeros(k, dtype=np.float32)
+
+
 class SteeringModel:
     def __init__(self, spec, models_dir=None, use_clahe=False, steer_scale=86.0, force_size=None):
         if cv2 is None:
@@ -319,7 +330,8 @@ class SteeringModel:
         else:
             with torch.no_grad():
                 out = self.model(torch.from_numpy(x).to(self.device)).detach().cpu().numpy()
-        return decode_output(out)
+        steer, throttle = decode_output(out)
+        return steer, throttle, decode_probs9(out)
 
 
 def _recv_exact(conn, n):
@@ -393,7 +405,7 @@ def serve(model, host, port):
                 if n == 0:
                     # status ping (no frame): report temps + current ifps, run no inference
                     jcpu, jgpu = _read_tegra_temps()
-                    conn.sendall(struct.pack(">ffffff", 90.0, 0.0, jcpu, jgpu, ifps, 0.0))
+                    conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
                     continue
                 data = _recv_exact(conn, n)
                 if not data:
@@ -408,13 +420,14 @@ def serve(model, host, port):
                 jcpu, jgpu = _read_tegra_temps()
                 frame = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)  # BGR
                 if frame is None:
-                    conn.sendall(struct.pack(">ffffff", 90.0, 0.0, jcpu, jgpu, ifps, 0.0))
+                    conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
                     continue
                 t_inf = time.time()
-                steering, throttle = model.infer(frame)   # preprocess + session.run
+                steering, throttle, probs9 = model.infer(frame)   # preprocess + session.run
                 infer_ms = (time.time() - t_inf) * 1000.0
-                # reply: steering, throttle, jon_cpu_temp_c, jon_gpu_temp_c, infer_fps, infer_ms
-                conn.sendall(struct.pack(">ffffff", steering, throttle, jcpu, jgpu, ifps, infer_ms))
+                # reply: steering, throttle, jcpu, jgpu, infer_fps, infer_ms + 9 bucket probs (15x f32)
+                conn.sendall(struct.pack(">15f", steering, throttle, jcpu, jgpu, ifps, infer_ms,
+                                         *[float(p) for p in probs9]))
                 frames += 1
         except (ConnectionResetError, BrokenPipeError):
             pass
