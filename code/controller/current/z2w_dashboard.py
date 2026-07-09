@@ -378,7 +378,9 @@ class DashboardRenderer:
         # Row 2 (idx 1): run number today "R###"  ·  Row 3 (idx 2): clock HH:MM:SS (24h).
         # (Replaces the old transient notification rows.)
         rn = f"R{max(0, int(run_number)) % 1000:03d}"
-        self._draw_text_row(1, list(rn) + ["", "", "", ""], NOTIFICATION_WHITE, y_offset_px)
+        pad = (8 - len(rn)) // 2                       # center R### across the 8-cell row
+        self._draw_text_row(1, [""] * pad + list(rn) + [""] * (8 - pad - len(rn)),
+                            NOTIFICATION_WHITE, y_offset_px)
         hms = str(clock_hms).strip()
         if len(hms) == 8:
             self._draw_text_row(2, list(hms), TEXT_CYAN, y_offset_px)
