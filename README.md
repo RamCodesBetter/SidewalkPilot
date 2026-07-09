@@ -3,7 +3,7 @@
 SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural network steers a real, car-sized RC vehicle down residential sidewalks — with LiDAR emergency braking, GPS route-following, and a live LED dashboard. Built from scratch with a Raspberry Pi 5, Zero 2 W, and an NVIDIA Jetson Orin Nano.
 
 <div align="center">
-  <video src="https://raw.githubusercontent.com/RamCodesBetter/SidewalkPilot/lidar_aeb_v2/spmdif.mp4" controls muted width="720"></video>
+  <video src="https://raw.githubusercontent.com/RamCodesBetter/SidewalkPilot/lidar_aeb_v2/docs/media/sidewalkpilot-demo.mp4" autoplay loop muted playsinline controls width="720"></video>
 </div>
 
 🎥 [YouTube](https://www.youtube.com/@SidewalkPilot) · 📚 [Docs](https://ramcodesbetter.github.io/SidewalkPilot/) · 🤖 [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat) · 💻 [GitHub](https://github.com/RamCodesBetter/SidewalkPilot) · 💵 [Parts List](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
