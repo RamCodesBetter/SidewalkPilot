@@ -1,32 +1,18 @@
 # SidewalkPilot
 
-A self-driving RC car for **sidewalks**. A camera-fed neural network steers a real, car-sized RC vehicle down residential sidewalks — with LiDAR emergency braking, GPS route-following, and a live LED dashboard. Built from scratch on a Raspberry Pi 5 and an NVIDIA Jetson.
+SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural network steers a real, car-sized RC vehicle down residential sidewalks — with LiDAR emergency braking, GPS route-following, and a live LED dashboard. Built from scratch with a Raspberry Pi 5, Zero 2 W, and an NVIDIA Jetson Orin Nano.
 
-🎥 [YouTube](https://www.youtube.com/@SidewalkPilot) · 📚 [Docs](https://ramcodesbetter.github.io/SidewalkPilot/) · 🤖 [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat) · 💻 [GitHub](https://github.com/RamCodesBetter/SidewalkPilot)
+<div align="center">
+  <video src="https://raw.githubusercontent.com/RamCodesBetter/SidewalkPilot/lidar_aeb_v2/spmdif.mp4" controls muted width="720"></video>
+</div>
 
-> Independent research/learning project, run on private test routes. Not a road-legal or production autonomous vehicle.
+🎥 [YouTube](https://www.youtube.com/@SidewalkPilot) · 📚 [Docs](https://ramcodesbetter.github.io/SidewalkPilot/) · 🤖 [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat) · 💻 [GitHub](https://github.com/RamCodesBetter/SidewalkPilot) · 💵 [Parts List](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
+
+> Independent research/learning project, run on private test routes. This car is not a road-legal autonomous vehicle.
 
 ## How it works
 
-Three "manager" computers split the job. The **Raspberry Pi 5 (RPI5)** reads every sensor and drives the hardware. It streams camera frames to the **Jetson Orin Nano (JON)**, which runs the neural network and sends back a steering angle + throttle. The RPI5 then **fuses** that with LiDAR safety and GPS navigation before moving the wheels — and mirrors everything to a **Raspberry Pi Zero 2 W (Z2W)** LED dashboard.
-
-```
-   Camera 3 Wide ─┐
-   360° LiDAR ────┤                       frames ──▶ ┌────────────────────────┐
-   GPS + compass ─┼──▶  Raspberry Pi 5   ───────────▶│  Jetson Orin Nano (JON)│
-   Hall sensor ───┘     (RPI5)                        │  "AI Model Manager"    │
-   Xbox controller ─▶   "Major System   ◀────────────│  runs the steering CNN │
-                         Manager"     steer + throttle└────────────────────────┘
-                            │
-          fuse:  model steering  +  LiDAR braking  +  GPS route
-                            │
-             ┌──────────────┼────────────────┐
-             ▼              ▼                 ▼
-      Steering servo    Drive motors    Pi Zero 2 W (Z2W)
-       (PCA9685)         (AT8236)       LED dashboard
-```
-
-**Sense → Think → Act:** sensors feed the RPI5, the JON does the thinking, and the RPI5 acts on the wheels — with the human always able to grab the Xbox controller and take over or kill the run.
+Three *manager* computers control the entire RC car. The **Raspberry Pi 5 (RPI5)** reads every sensor and drives the hardware. It streams camera frames to the **Jetson Orin Nano (JON)**, which runs the neural network and sends back a steering angle + throttle. The RPI5 then **fuses** that with LiDAR safety and GPS navigation before moving the wheels — and mirrors everything to a **Raspberry Pi Zero 2 W (Z2W)** LED dashboard. All the sensors feed data to the RPI5, the JON does the thinking, and the RPI5 sends commands to the motors and steering, with me always able to take over or kill the run.
 
 ## Hardware
 
@@ -50,11 +36,11 @@ Three "manager" computers split the job. The **Raspberry Pi 5 (RPI5)** reads eve
 
 The brain is a convolutional neural network trained on tens of thousands of real sidewalk frames. It has grown through three generations:
 
-- **Series 1 — the foundation.** A small (~2.7 M-parameter) network that predicts a steering angle directly from the image (200×66 input). It proved a car could follow a sidewalk from camera alone, and established the image → steering-label training pipeline.
+- **Series 1 — the foundation.** A small (~2.7 M-parameter) network that predicts a steering angle directly from the image (200×66 input). It proved my car could follow a sidewalk from camera alone, and established the image → steering-label training pipeline.
 - **Series 2 — refinement.** Same direct-steering design, cleaner data, and tuned steering range. Added an HSV + CLAHE contrast option (models 2.0/2.0b) to fight harsh lighting — kept as a tool, not the default.
-- **Series 3 — the current generation.** A larger (~5.5 M-parameter) network with a **hybrid head**: it first classifies a coarse steering direction, then regresses the exact angle within it (plus throttle), on a 320×180 image with shadow/lighting augmentation. Series 3 was *originally targeted for quantization* (FP32 → FP16 → INT8 / TensorRT) to squeeze a heavy model onto the Jetson — but the focus **shifted toward accuracy and robustness**: the hybrid head and shadow-hardened training, running directly on the Jetson Orin Nano.
+- **Series 3 — the current generation.** A larger (~5.5 M-parameter) network with a **hybrid head**: it first classifies a coarse steering direction, then regresses the exact angle within it (plus throttle), on a 320×180 image with shadow/lighting augmentation. Series 3 was *originally targeted for quantization* (FP32 → FP16 → INT8 / TensorRT) to squeeze a heavy model onto the Jetson — but the focus **shifted toward accuracy and robustness**: the hybrid head and shadow-hardened training, running directly on the Jetson Orin Nano. The camera runs at 30 fps and the model runs at 30 ips (inferences per second) so there is no need to quantize the model.
 
-Current best model **v3.2b** predicts steering to ~14° mean error on held-out validation — full per-model breakdown in [`docs/steering_model_report.pdf`](docs/steering_model_report.pdf).
+Current best model **v3.2b** predicts steering to ~14° mean error on held-out validation. A full per-model breakdown is available in [`docs/steering_model_report.pdf`](docs/steering_model_report.pdf).
 
 ### Why the buckets matter — bright sidewalk vs. dark shadows
 
@@ -62,11 +48,11 @@ The hardest real-world case is a bright sidewalk cut by sharp tree-shadows. A mo
 
 ## Training & testing
 
-**Data.** Every field run logs camera frames paired with the human's steering, building a dataset of tens of thousands of real sidewalk images (published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat)).
+**Data:** Every field run logs camera frames paired with the human's steering and throttle, building a dataset of tens of thousands of real sidewalk images (published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat)).
 
-**Training.** Models train on an NVIDIA RTX 6000 Ada GPU. Each image is augmented on the fly — horizontal flips, brightness/HSV jitter, and **synthetic diagonal shadow bands** that mimic bright-sun-through-trees lighting — so the model practices on hard shadows it would otherwise rarely see. Data is split by **time window** (every 10th chunk held out), so near-identical neighboring frames can't leak between training and testing. Series 3 optimizes a **hybrid loss** — focal cross-entropy on the steering *bucket* + smooth-L1 on the exact *angle* within it + throttle — over ~30 epochs, keeping the checkpoint with the lowest validation steering error. The winner is exported to ONNX for the Jetson, and training metrics stream live to a Grafana dashboard.
+**Training:** All my models are trained on an NVIDIA RTX 6000 Ada-generation GPU. Each image is augmented on the fly — brightness/HSV jitter and **synthetic diagonal shadow bands** that mimic bright-sun-through-trees lighting — so the model practices on hard shadows it would otherwise rarely see. The photos come from real driving, so frames right next to each other look almost identical. If the model studied some frames and then got "tested" on their near-twins, it would pass validation just by memorizing. To stop that, the trainer splits the data by time: each drive is chopped into short chunks, and every 10th chunk is locked away as a test the model never trains on. Now its validation score is honest and it has to handle stretches of sidewalk it's genuinely never seen.
 
-**Testing.** A held-out validation set scores steering error, bucket accuracy, and the predicted-vs-actual direction spread every epoch. A separate evaluator then runs *every* model over the full dataset and generates a per-model PDF report — mean/median error, "within N degrees," and a bucket confusion matrix ([`docs/steering_model_report.pdf`](docs/steering_model_report.pdf)). Finally the real car is **field-tested** on sidewalks across day, night, and shadow conditions — those runs are where failures like shadow-following get caught and fed back into the next dataset.
+**Testing:** A held-out validation set scores steering error, bucket accuracy, and the predicted-vs-actual direction spread every epoch. A separate evaluator then runs *every* model over the full dataset and generates a per-model PDF report — mean/median error, "within N degrees," and a **bucket confusion matrix** — a grid of which steering directions the model mixes up ([full report](docs/steering_model_report.pdf)). Finally the real car is **field-tested** on sidewalks across day (2:00–6:30 pm), night (9:00–10:00 pm), and shadow conditions (11:00 am–1:00 pm); runs in these times are where failures like shadow-following get caught and fed back into the next dataset.
 
 ## Repo layout
 
