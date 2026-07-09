@@ -1692,14 +1692,22 @@ def train(roots, args):
     print(f"Final checkpoint: {final_path}")
     print(f"Best checkpoint: {best_path}")
 
-    # Optional live streaming to Grafana Cloud (no-op unless ~/.grafana_cloud.json exists).
+    # Training-metrics tracking via Weights & Biases (no-op unless `pip install wandb` +
+    # `wandb login`; fails safe). Replaces the old Grafana Cloud stream.
     try:
-        from grafana_stream import GrafanaStreamer
-        streamer = GrafanaStreamer(args.model_version)
+        from wandb_logger import WandbLogger
+        _wb_config = {k: getattr(args, k) for k in (
+            "epochs", "batch_size", "lr", "weight_decay", "workers", "samples_per_epoch",
+            "sampler_balance_power", "class_weight_power", "steer_magnitude_weight",
+            "focal_gamma", "flip_aug_probability", "hsv_aug_probability",
+        ) if hasattr(args, k)}
+        _wb_config.update({"architecture": "SidewalkPilotV3", "input": "320x180",
+                           "num_steer_classes": NUM_STEER_CLASSES})
+        streamer = WandbLogger(args.model_version, config=_wb_config)
     except Exception as _exc:
-        print(f"[grafana] streaming unavailable: {_exc}", flush=True)
+        print(f"[wandb] tracking unavailable: {_exc}", flush=True)
         streamer = None
-    last_stream_push = 0.0            # throttle live step-metric pushes to Grafana (every ~5s)
+    last_stream_push = 0.0            # throttle live step-metric pushes to W&B (every ~5s)
 
     for epoch in range(1, args.epochs + 1):
         epoch_start = time.time()
@@ -1869,6 +1877,9 @@ def train(roots, args):
                   f"add data/augmentation before going higher.", flush=True)
         tail = val_history[-min(5, len(val_history)):]
         print("[recommend] last val losses: " + ", ".join(f"{v:.6f}" for v in tail), flush=True)
+
+    if streamer is not None:
+        streamer.finish()
 
     export_checkpoint = best_path if args.export_checkpoint == "best" else final_path
 
