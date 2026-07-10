@@ -81,7 +81,7 @@ def _bucket_meta():
     return labels, ranges
 
 
-def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh):
+def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh, alpha):
     if cv2 is None:
         raise SystemExit("opencv-python is required (import cv2 failed).")
     cap = cv2.VideoCapture(str(clip_path))
@@ -99,18 +99,21 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh):
           + (f"  (~{total / src_fps:.1f}s)" if src_fps > 0 else ""))
     print(f"model  : v{model.current_version}  backend={model.backend}  "
           f"input={model.width}x{model.height}  clahe={use_clahe}")
-    print(f"every  : {every}   close-call threshold: top1-top2 < {close_thresh:.2f}\n")
+    print(f"every  : {every}   close-call threshold: top1-top2 < {close_thresh:.2f}   "
+          f"alpha(EMA smoothing): {alpha:.2f}\n")
 
     # header: two lines -- degree ranges, then L/C/R tags
     cols = "".join(f"{r:>8}" for r in ranges)
     tags = "".join(f"{t:>8}" for t in labels)
-    print(f"{'frame':>6}{'t(s)':>7}  {cols}   {'pick':>6}{'steer':>7}  flag")
+    print(f"{'frame':>6}{'t(s)':>7}  {cols}   {'pick':>6}{'steer':>7}  {'~pick':>6}{'~steer':>8}  flag")
     print(f"{'':>6}{'':>7}  {tags}")
-    print("-" * (13 + 8 * k + 22))
+    print("-" * (13 + 8 * k + 38))
 
     prob_sum = np.zeros(k, dtype=np.float64)
     pick_hist = np.zeros(k, dtype=np.int64)
     steers, top1s = [], []
+    ema = None                                # running EMA of the 9 probs (temporal smoothing)
+    s_steers, raw_picks, s_picks = [], [], []
     close_frames = []
     n = 0
     idx = -1
@@ -140,10 +143,22 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh):
         is_close = gap < close_thresh
         steer, _thr = jis.decode_output(flat)
 
+        # temporal smoothing: EMA the probability vector, then argmax + decode the
+        # smoothed-picked bucket using the current frame's within-bucket offset. This is
+        # what a per-frame prob-EMA in the runtime would do -- it kills argmax flips.
+        ema = probs.copy() if ema is None else (alpha * probs + (1.0 - alpha) * ema)
+        s_cls = int(np.argmax(ema))
+        s_off = 1.0 / (1.0 + np.exp(-float(flat[k + s_cls])))
+        s_steer = float(jis._S3_HYBRID_LO[s_cls]
+                        + s_off * (jis._S3_HYBRID_HI[s_cls] - jis._S3_HYBRID_LO[s_cls]))
+
         prob_sum += probs
         pick_hist[top] += 1
         steers.append(steer)
         top1s.append(float(probs[top]))
+        raw_picks.append(top)
+        s_picks.append(s_cls)
+        s_steers.append(s_steer)
         if is_close:
             close_frames.append((idx, labels[top], labels[second], probs[top], probs[second]))
 
@@ -152,7 +167,7 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh):
             for j, p in enumerate(probs))
         t = idx / src_fps if src_fps else 0.0
         print(f"{idx:>6}{t:>7.2f}  {cells}  {labels[top]:>5}{steer:>7.1f}  "
-              f"{'CLOSE' if is_close else ''}")
+              f"{labels[s_cls]:>5}{s_steer:>8.1f}  {'CLOSE' if is_close else ''}")
         n += 1
 
     cap.release()
@@ -174,8 +189,16 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh):
                 print(f"  {labels[i]:>4} [{ranges[i]:>7}] {pick_hist[i]:4d}  "
                       f"({100.0 * pick_hist[i] / n:4.1f}%)")
     sarr = np.asarray(steers, dtype=np.float64)
-    print(f"\nsteering : mean {sarr.mean():.1f} deg   min {sarr.min():.1f}   "
+    print(f"\nsteering (raw)      : mean {sarr.mean():.1f} deg   min {sarr.min():.1f}   "
           f"max {sarr.max():.1f}   std {sarr.std():.1f}")
+    if s_steers:
+        ss = np.asarray(s_steers, dtype=np.float64)
+        switches_raw = sum(1 for a, b in zip(raw_picks, raw_picks[1:]) if a != b)
+        switches_s = sum(1 for a, b in zip(s_picks, s_picks[1:]) if a != b)
+        print(f"steering (a={alpha:.2f})    : mean {ss.mean():.1f} deg   min {ss.min():.1f}   "
+              f"max {ss.max():.1f}   std {ss.std():.1f}")
+        print(f"bucket switches     : raw {switches_raw}  ->  smoothed {switches_s}   "
+              f"(fewer = calmer wheel)")
     if top1s:
         tarr = np.asarray(top1s, dtype=np.float64)
         conf = 100.0 * np.mean(tarr >= 0.70)
@@ -200,9 +223,12 @@ def main():
     ap.add_argument("--max-frames", type=int, default=0, help="stop after this many analyzed frames (0 = all)")
     ap.add_argument("--close", type=float, default=0.15,
                     help="close-call threshold: flag when top1-top2 probability < this (default 0.15)")
+    ap.add_argument("--alpha", type=float, default=0.45,
+                    help="EMA weight of the NEWEST frame's probs for the smoothed ~pick/~steer "
+                         "columns (0<alpha<=1; lower = smoother; default 0.45 ~ runtime)")
     args = ap.parse_args()
     analyze(Path(args.clip).expanduser(), args.model, args.clahe,
-            max(1, args.every), args.max_frames, args.close)
+            max(1, args.every), args.max_frames, args.close, args.alpha)
 
 
 if __name__ == "__main__":
