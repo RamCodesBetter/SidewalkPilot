@@ -42,6 +42,36 @@ try:
 except ImportError:
     cv2 = None
 
+# Physical servo mapping — mirrors hardware.logical_to_reference_steering_degrees +
+# apply_steering_center_trim_degrees, using config's measured constants. Reproduces the
+# DETERMINISTIC part of the runtime pipeline (ref-map + DELT center trim). It does NOT
+# include the yaw-PID/D closed-loop correction (needs live IMU yaw, absent from a clip;
+# also inactive whenever |cmd-90| > STRAIGHT_BAND ~5deg, i.e. all the turning frames),
+# nor the LFF/RFF straight-band feed-forward (only used within +/-5deg of center).
+try:
+    from rc_car_app import config as _cfg          # noqa: E402
+    _REF_L = float(_cfg.STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG)
+    _REF_R = float(_cfg.STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG)
+    _CTR_OFF = float(_cfg.STEERING_SERVO_CENTER_OFFSET)
+    _ACT_RANGE = float(_cfg.STEERING_SERVO_ACTUATION_RANGE_DEG)
+except Exception:                                  # fallback = measured defaults (2026-07-08)
+    _REF_L, _REF_R, _CTR_OFF, _ACT_RANGE = 48.812, 131.188, 9.0 / 90.0, 180.0
+
+
+def logical_to_physical_deg(logical):
+    """Logical steer (0=L,90=C,180=R) -> physical servo command deg (ref-map + DELT trim)."""
+    rng = max(1.0, _ACT_RANGE)
+    center = rng / 2.0
+    lg = max(0.0, min(rng, float(logical)))
+    ll = max(0.0, min(center, _REF_L))
+    rl = max(center, min(rng, _REF_R))
+    if lg <= center:
+        ref = center - ((center - lg) / center) * (center - ll)
+    else:
+        ref = center + ((lg - center) / center) * (rl - center)
+    ref += max(-1.0, min(1.0, _CTR_OFF)) * center
+    return max(0.0, min(rng, ref))
+
 
 def _softmax(z):
     z = np.asarray(z, dtype=np.float64)
@@ -105,8 +135,10 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh, a
     # header: two lines -- degree ranges, then L/C/R tags
     cols = "".join(f"{r:>8}" for r in ranges)
     tags = "".join(f"{t:>8}" for t in labels)
-    print(f"{'frame':>6}{'t(s)':>7}  {cols}   {'pick':>6}{'steer':>7}  {'~pick':>6}{'~steer':>8}  flag")
+    print(f"{'frame':>6}{'t(s)':>7}  {cols}   {'pick':>6}{'steer':>7}  {'~pick':>6}{'~phys':>8}  flag")
     print(f"{'':>6}{'':>7}  {tags}")
+    print(f"  steer = raw MODEL logical (0=L,90=C,180=R).  ~phys = alpha-smoothed -> servo deg via "
+          f"ref-map+DELT trim (phys straight ~= {logical_to_physical_deg(90.0):.1f}); excl. yaw-PID/D + LFF/RFF.")
     print("-" * (13 + 8 * k + 38))
 
     prob_sum = np.zeros(k, dtype=np.float64)
@@ -165,9 +197,10 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh, a
         cells = "".join(
             (f"{int(round(p * 100)):>6}* " if j == top else f"{int(round(p * 100)):>7} ")
             for j, p in enumerate(probs))
+        s_phys = logical_to_physical_deg(s_steer)
         t = idx / src_fps if src_fps else 0.0
         print(f"{idx:>6}{t:>7.2f}  {cells}  {labels[top]:>5}{steer:>7.1f}  "
-              f"{labels[s_cls]:>5}{s_steer:>8.1f}  {'CLOSE' if is_close else ''}")
+              f"{labels[s_cls]:>5}{s_phys:>8.1f}  {'CLOSE' if is_close else ''}")
         n += 1
 
     cap.release()
@@ -196,7 +229,10 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh, a
         switches_raw = sum(1 for a, b in zip(raw_picks, raw_picks[1:]) if a != b)
         switches_s = sum(1 for a, b in zip(s_picks, s_picks[1:]) if a != b)
         print(f"steering (a={alpha:.2f})    : mean {ss.mean():.1f} deg   min {ss.min():.1f}   "
-              f"max {ss.max():.1f}   std {ss.std():.1f}")
+              f"max {ss.max():.1f}   std {ss.std():.1f}   (logical)")
+        sp = np.asarray([logical_to_physical_deg(v) for v in s_steers], dtype=np.float64)
+        print(f"servo ~phys (a={alpha:.2f})  : mean {sp.mean():.1f} deg   min {sp.min():.1f}   "
+              f"max {sp.max():.1f}   std {sp.std():.1f}   (map+DELT, straight~{logical_to_physical_deg(90.0):.1f}, excl yaw-PID/D)")
         print(f"bucket switches     : raw {switches_raw}  ->  smoothed {switches_s}   "
               f"(fewer = calmer wheel)")
     if top1s:
