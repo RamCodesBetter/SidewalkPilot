@@ -956,6 +956,8 @@ def main():
     brightness_percent = args.led_brightness
     dashboard_page = 1
     dashboard_page_transition = ""
+    run_number = 0
+    clock_hms = ""
     servo_deg = 90.0
     yaw_rate_dps = 0.0
     yaw_pid_correction_deg = 0.0
@@ -1027,6 +1029,8 @@ def main():
                 "dashboard_alert": dashboard_alert,
                 "dashboard_page": dashboard_page,
                 "dashboard_page_transition": dashboard_page_transition,
+                "run_number": run_number,
+                "clock_hms": clock_hms,
                 "servo_deg": servo_deg,
                 "yaw_rate_dps": yaw_rate_dps,
                 "yaw_pid_correction_deg": yaw_pid_correction_deg,
@@ -1088,6 +1092,8 @@ def main():
         nonlocal brightness_percent
         nonlocal dashboard_page
         nonlocal dashboard_page_transition
+        nonlocal run_number
+        nonlocal clock_hms
         nonlocal servo_deg
         nonlocal yaw_rate_dps
         nonlocal yaw_pid_correction_deg
@@ -1138,6 +1144,8 @@ def main():
         brightness_percent = max(0, min(100, int(payload.get("brightness_percent", brightness_percent))))
         dashboard_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", dashboard_page))))
         dashboard_page_transition = str(payload.get("dashboard_page_transition", ""))[:8]
+        run_number = max(0, int(payload.get("run_number", run_number)))
+        clock_hms = str(payload.get("clock_hms", clock_hms))[:8]
         servo_deg = max(0.0, min(180.0, float(payload.get("servo_deg", servo_deg))))
         yaw_rate_dps = float(payload.get("yaw_rate_dps", yaw_rate_dps))
         yaw_pid_correction_deg = float(payload.get("yaw_pid_correction_deg", yaw_pid_correction_deg))
