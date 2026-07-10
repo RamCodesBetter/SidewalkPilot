@@ -502,20 +502,13 @@ def apply_tree_shadow_pattern(img):
     # 1) overall shade -- the whole frame is under the canopy
     out *= random.uniform(0.40, 0.70)
 
-    # 2) bright sun-fleck mask: many small-to-medium patches all over, + a few streaks
+    # 2) bright sun-fleck mask: a bunch of SMALL white dots scattered all over (no streaks)
     mask = np.zeros((height, width), dtype=np.float32)
     for _ in range(random.randint(16, 38)):
         cx = random.randint(0, width - 1)
         cy = random.randint(0, height - 1)
-        radius = random.randint(max(2, width // 90), max(4, width // 20))
+        radius = random.randint(max(2, width // 110), max(3, width // 30))
         cv2.circle(mask, (cx, cy), radius, random.uniform(0.45, 1.0), -1, cv2.LINE_AA)
-    for _ in range(random.randint(2, 6)):
-        x0 = random.randint(-width // 2, width)
-        y0 = random.randint(-height // 4, height)
-        x1 = x0 + random.randint(width // 5, width)
-        y1 = y0 + random.randint(height // 4, height)
-        thickness = random.randint(max(1, width // 90), max(2, width // 28))
-        cv2.line(mask, (x0, y0), (x1, y1), random.uniform(0.4, 0.9), thickness, cv2.LINE_AA)
 
     mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=random.uniform(0.8, 2.2))
     mask = np.clip(mask, 0.0, 1.0)
@@ -572,15 +565,16 @@ def apply_patchy_concrete_texture(img):
 
 
 def apply_shadow_stress_augmentation(img):
-    if random.random() < 0.65:
-        img = apply_mixed_lighting(img)
-    if random.random() < 0.65:
-        img = apply_diagonal_shadow_band(img)
+    # tree_shadow is the #1 real failure mode -> highest prob; others trimmed a bit (Ram, 2026-07-10)
     if random.random() < 0.55:
+        img = apply_mixed_lighting(img)
+    if random.random() < 0.55:
+        img = apply_diagonal_shadow_band(img)
+    if random.random() < 0.80:
         img = apply_tree_shadow_pattern(img)
-    if random.random() < 0.45:
-        img = apply_sidewalk_road_edge_shadow(img)
     if random.random() < 0.35:
+        img = apply_sidewalk_road_edge_shadow(img)
+    if random.random() < 0.25:
         img = apply_patchy_concrete_texture(img)
     return img
 
