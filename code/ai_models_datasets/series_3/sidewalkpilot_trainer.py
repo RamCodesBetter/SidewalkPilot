@@ -492,28 +492,38 @@ def apply_diagonal_shadow_band(img):
 
 
 def apply_tree_shadow_pattern(img):
+    """Tree canopy (Ram's observed pattern): DARKEN the whole frame (the sidewalk sits in
+    the tree's shade), then scatter BRIGHT WHITE sun-flecks all over it (sunlight poking
+    through gaps in the leaves). Dark base + white dappled patches = high-contrast dapple.
+    """
     height, width = img.shape[:2]
     out = img.astype(np.float32)
-    mask = np.zeros((height, width), dtype=np.float32)
 
-    for _ in range(random.randint(3, 8)):
+    # 1) overall shade -- the whole frame is under the canopy
+    out *= random.uniform(0.40, 0.70)
+
+    # 2) bright sun-fleck mask: many small-to-medium patches all over, + a few streaks
+    mask = np.zeros((height, width), dtype=np.float32)
+    for _ in range(random.randint(16, 38)):
+        cx = random.randint(0, width - 1)
+        cy = random.randint(0, height - 1)
+        radius = random.randint(max(2, width // 90), max(4, width // 20))
+        cv2.circle(mask, (cx, cy), radius, random.uniform(0.45, 1.0), -1, cv2.LINE_AA)
+    for _ in range(random.randint(2, 6)):
         x0 = random.randint(-width // 2, width)
         y0 = random.randint(-height // 4, height)
         x1 = x0 + random.randint(width // 5, width)
         y1 = y0 + random.randint(height // 4, height)
-        thickness = random.randint(max(1, width // 80), max(2, width // 22))
-        cv2.line(mask, (x0, y0), (x1, y1), random.uniform(0.35, 0.85), thickness, cv2.LINE_AA)
+        thickness = random.randint(max(1, width // 90), max(2, width // 28))
+        cv2.line(mask, (x0, y0), (x1, y1), random.uniform(0.4, 0.9), thickness, cv2.LINE_AA)
 
-    for _ in range(random.randint(10, 26)):
-        cx = random.randint(0, width - 1)
-        cy = random.randint(0, height - 1)
-        radius = random.randint(max(2, width // 80), max(4, width // 18))
-        cv2.circle(mask, (cx, cy), radius, random.uniform(0.18, 0.55), -1, cv2.LINE_AA)
+    mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=random.uniform(0.8, 2.2))
+    mask = np.clip(mask, 0.0, 1.0)
 
-    mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=random.uniform(1.0, 3.5))
-    mask = np.clip(mask, 0.0, 0.92)
-    shadow_strength = random.uniform(0.34, 0.72)
-    out *= 1.0 - (mask[:, :, None] * shadow_strength)
+    # 3) brighten toward white where the sun pokes through -> white patches on the dark base
+    bright = random.uniform(0.70, 1.0)
+    m = mask[:, :, None] * bright
+    out = out * (1.0 - m) + 255.0 * m
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
