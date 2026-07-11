@@ -45,32 +45,44 @@ def _norm_angle(p):
 
 
 def _forward_and_wedges(scan):
-    """(forward_cone_min_m, left_wedge_min_m, right_wedge_min_m). Empty scan -> all clear."""
+    """(forward_corridor_min_m, left_wedge_min_m, right_wedge_min_m). Empty scan -> all clear.
+
+    FORWARD blocking uses a LATERAL SIDEWALK CORRIDOR (the two dashboard blue lines), not an
+    angular cone: a point blocks only if it's AHEAD and within +/-CORRIDOR_HALF_WIDTH_M laterally,
+    scored by its FORWARD distance. Points past the sidewalk edge (alongside hedges/fences) are
+    ignored no matter how close in angle -> no more braking for edge hedges at distance."""
     fwd = left = right = _MAX_RANGE_M
+    hw = C.LIDAR_CORRIDOR_HALF_WIDTH_M
     for p in scan or []:
         if not _valid(p):
             continue
         a = _norm_angle(p)
         d = p.distance_mm / 1000.0
-        if abs(a) <= C.LIDAR_FORWARD_CONE_DEG:
-            fwd = min(fwd, d)
-        elif -C.LIDAR_NEAR_ANGLE_DEG <= a < -C.LIDAR_FORWARD_CONE_DEG:
-            left = min(left, d)
-        elif C.LIDAR_FORWARD_CONE_DEG < a <= C.LIDAR_NEAR_ANGLE_DEG:
-            right = min(right, d)
+        ar = math.radians(a)
+        x = d * math.sin(ar)                      # lateral offset (right +, left -)
+        f = d * math.cos(ar)                      # forward distance
+        if f > 0.0 and abs(x) <= hw:
+            fwd = min(fwd, f)                     # inside the sidewalk corridor ahead -> can block
+        elif abs(a) <= C.LIDAR_NEAR_ANGLE_DEG:    # outside corridor but within the fan -> swerve room
+            if a < 0.0:
+                left = min(left, d)
+            else:
+                right = min(right, d)
     return fwd, left, right
 
 
 def _forward_clusters(scan):
-    """Cluster the near (<= WARN) forward-cone points by angular gap."""
+    """Cluster the near (<= WARN) points that lie inside the forward SIDEWALK CORRIDOR."""
     pts = []
+    hw = C.LIDAR_CORRIDOR_HALF_WIDTH_M
     for p in scan or []:
         if not _valid(p):
             continue
         a = _norm_angle(p)
-        if abs(a) > C.LIDAR_FORWARD_CONE_DEG:
-            continue
         d = p.distance_mm / 1000.0
+        ar = math.radians(a)
+        if not (d * math.cos(ar) > 0.0 and abs(d * math.sin(ar)) <= hw):
+            continue                              # only points inside the sidewalk corridor ahead
         if d <= C.LIDAR_WARN_M:
             pts.append((a, d))
     pts.sort()

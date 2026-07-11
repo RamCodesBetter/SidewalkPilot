@@ -49,8 +49,12 @@ LIDAR_OVERRIDE_STEER_DEG = 38.0
 
 # --- LiDAR AVOIDANCE (validated in test_files/lidar_avoidance_sim.py) ---
 # Forward cone (+/-) that can BLOCK the path; wider = brakes for more off-center stuff.
-LIDAR_FORWARD_CONE_DEG = 30.0        # forward cone that BLOCKS the path (matches the V7H1 cone rays)
-LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 30..75 wedges = swerve-clearance only
+LIDAR_FORWARD_CONE_DEG = 30.0        # (legacy) old angular block cone; superseded by the corridor below
+# SIDEWALK CORRIDOR (the two dashboard blue lines): only obstacles WITHIN +/-this laterally, AHEAD,
+# can brake/stop. 76.2cm = half of a 5ft (152.4cm) sidewalk. A rectangle down the path instead of a
+# fan -> alongside hedges/fences past the sidewalk edge no longer trigger a brake at distance.
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762
+LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; outside-corridor points in the fan = swerve-clearance only
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
 LIDAR_WARN_M = 1.40                  # forward point closer than this triggers classify/react
 LIDAR_GOV_FULL_M = 1.65              # governor full throttle at/above this clearance
