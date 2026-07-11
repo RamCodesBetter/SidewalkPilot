@@ -137,7 +137,11 @@ current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
 # Live L/C/R + slow-throttle counts, incremented per capture (O(1)) so the dashboard
 # stats don't re-parse a growing label file at 30fps. Reset when a new run starts.
-photo_run_live_stats: dict[str, int] = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
+photo_run_live_stats: dict[str, int] = {
+    "left": 0, "center": 0, "right": 0, "throttle_below_50": 0,
+    # 9-way steering-bucket photo counters for the V3H1/2/3 dashboard pages
+    "hl": 0, "l": 0, "lp": 0, "sl": 0, "st": 0, "sr": 0, "r": 0, "rp": 0, "hr": 0,
+}
 DASHBOARD_PHOTO_STATS_INTERVAL_SEC = 5.0
 
 
@@ -402,8 +406,9 @@ DASHBOARD_PAGE_COORDS = {
     3: (2, 1),    # V2H1 model MODL/PRED/CONF/IPS
     4: (2, 2),    # V2H2 autonomy ICSE/ADT/IPKM/AUT
     16: (2, 3),   # V2H3 temps RTMP/JTMP/GTMP/ZTMP
-    14: (3, 1),   # V3H1 photo counters PR/PA/FPS/STS (_draw_page_three)
-    12: (3, 2),   # V3H2 photo L/C/R balance LP/CP/RP/<5 (_draw_photo_run_stats_page)
+    14: (3, 1),   # V3H1 photo counters PR/ST/FPS/STS (_draw_page_three)
+    12: (3, 2),   # V3H2 photo LEFT buckets HL/L/L+/SL (_draw_photo_run_stats_page)
+    18: (3, 3),   # V3H3 photo RIGHT buckets HR/R+/R/SR (_draw_bucket_right_page)
     5: (4, 1),    # V4H1 nav entry NAVIGATE
     7: (4, 2),    # V4H2 route nodes OPR/PNDE/CNDE/NNDE
     9: (4, 3),    # V4H3 route distance RDT/NDT/SDT/TDT
@@ -1085,6 +1090,25 @@ def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, t
         photo_run_live_stats["center"] += 1
     if thr < 0.50:
         photo_run_live_stats["throttle_below_50"] += 1
+    # 9-way steering-bucket tally (edges match STEER_CLASS_BINS) for V3H1/2/3 pages
+    if steering < 45:
+        photo_run_live_stats["hl"] += 1
+    elif steering < 60:
+        photo_run_live_stats["l"] += 1
+    elif steering < 75:
+        photo_run_live_stats["lp"] += 1
+    elif steering < 85:
+        photo_run_live_stats["sl"] += 1
+    elif steering < 95:
+        photo_run_live_stats["st"] += 1
+    elif steering < 105:
+        photo_run_live_stats["sr"] += 1
+    elif steering < 120:
+        photo_run_live_stats["r"] += 1
+    elif steering < 135:
+        photo_run_live_stats["rp"] += 1
+    else:
+        photo_run_live_stats["hr"] += 1
 
 
 def finalize_photo_run(run_dir: Path | None) -> None:

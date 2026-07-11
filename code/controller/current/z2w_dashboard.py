@@ -31,7 +31,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 17
+DASHBOARD_PAGE_COUNT = 18
 TELEMETRY_STALE_DISPLAY_SEC = 4.0
 
 DIGIT_BLUE: Color = (0, 0, 255)
@@ -418,9 +418,9 @@ class DashboardRenderer:
         self._draw_decimal_point_at(3, 5, TEXT_ORANGE, y_offset_px)           # dot between MM and SS
 
     def _draw_page_three(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # PRUN / PALL / FPS / STS
+        # PRUN / ST (straight-bucket photos this run) / FPS / STS
         photos_run = max(0, min(99999, int(payload.get("photos_run", 0))))
-        photos_all = max(0, min(99999, int(payload.get("photos_all", 0))))
+        st_count = self._photo_run_stats(payload)["st"]
         fps_val = max(0.0, min(99.99, float(payload.get("camera_fps", 0.0))))
         fps_int = int(fps_val)
         fps_frac = int(round((fps_val - fps_int) * 100))
@@ -436,7 +436,7 @@ class DashboardRenderer:
         sts = (sts + "    ")[:4]
         # short labels + 5-digit counts so thousands of photos display correctly
         self._draw_text_row(0, ["P", "R", ":", *self._digits(photos_run, 5)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["P", "A", ":", *self._digits(photos_all, 5)], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(1, ["S", "T", ":", *self._digits(st_count, 5)], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["F", "P", "S", ":", str(fps_int // 10), f"{fps_int % 10}.", str(fps_frac // 10), str(fps_frac % 10)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
@@ -596,7 +596,8 @@ class DashboardRenderer:
         if not isinstance(raw_stats, dict):
             raw_stats = {}
         stats = {}
-        for key in ("left", "center", "right", "throttle_below_50"):
+        for key in ("left", "center", "right", "throttle_below_50",
+                    "hl", "l", "lp", "sl", "st", "sr", "r", "rp", "hr"):
             try:
                 stats[key] = max(0, int(raw_stats.get(key, 0)))
             except (TypeError, ValueError):
@@ -604,11 +605,20 @@ class DashboardRenderer:
         return stats
 
     def _draw_photo_run_stats_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        # V3H2: LEFT steering-bucket photo counts this run (hardest -> softest).
         stats = self._photo_run_stats(payload)
-        self._draw_text_row(0, ["L", "P", ":", *self._digits(stats["left"], 5)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["C", "P", ":", *self._digits(stats["center"], 5)], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
-        self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
+        self._draw_text_row(0, ["H", "L", ":", *self._digits(stats["hl"], 5)], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["L", " ", ":", *self._digits(stats["l"], 5)], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["L", "+", ":", *self._digits(stats["lp"], 5)], TEXT_ORANGE, y_offset_px)
+        self._draw_text_row(3, ["S", "L", ":", *self._digits(stats["sl"], 5)], ARROW_YELLOW, y_offset_px)
+
+    def _draw_bucket_right_page(self, payload: Dict[str, object], y_offset_px: int = 0):
+        # V3H3: RIGHT steering-bucket photo counts this run (hardest -> softest).
+        stats = self._photo_run_stats(payload)
+        self._draw_text_row(0, ["H", "R", ":", *self._digits(stats["hr"], 5)], TEXT_CYAN, y_offset_px)
+        self._draw_text_row(1, ["R", "+", ":", *self._digits(stats["rp"], 5)], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(2, ["R", " ", ":", *self._digits(stats["r"], 5)], TEXT_ORANGE, y_offset_px)
+        self._draw_text_row(3, ["S", "R", ":", *self._digits(stats["sr"], 5)], ARROW_YELLOW, y_offset_px)
 
     def _gain_cells(self, formatted: str) -> List[str]:
         """'000.5' -> ['0','0','0.','5'] : the decimal point rides on the digit cell
@@ -822,6 +832,9 @@ class DashboardRenderer:
             return
         if page == 17:
             self._draw_lidar_page(payload, y_offset_px)   # V7H1 lidar scan (forward +/-30 cone)
+            return
+        if page == 18:
+            self._draw_bucket_right_page(payload, y_offset_px)   # V3H3 photo RIGHT buckets HR/R+/R/SR
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),
