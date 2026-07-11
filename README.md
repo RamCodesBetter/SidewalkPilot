@@ -14,6 +14,7 @@ SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural
 - [Twitter](https://x.com/SidewalkPilot)
 - [Grafana Labs](Adding Later...)
 - [Weights and Biases](Adding Later...)
+- [Email](mailto:ramsabavat2012@gmail.com)
 
 > Independent research/learning project, run on private test routes. This car is not a road-legal autonomous vehicle.
 
