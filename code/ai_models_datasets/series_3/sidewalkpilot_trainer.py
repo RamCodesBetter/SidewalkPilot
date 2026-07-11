@@ -565,12 +565,12 @@ def apply_patchy_concrete_texture(img):
 
 
 def apply_shadow_stress_augmentation(img):
-    # tree_shadow is the #1 real failure mode -> highest prob; others trimmed a bit (Ram, 2026-07-10)
+    # tree_shadow (darken + white dots) drove v3.3's bang-bang overfit -> softened 0.80->0.50 (Ram, 2026-07-11)
     if random.random() < 0.55:
         img = apply_mixed_lighting(img)
     if random.random() < 0.55:
         img = apply_diagonal_shadow_band(img)
-    if random.random() < 0.80:
+    if random.random() < 0.50:
         img = apply_tree_shadow_pattern(img)
     if random.random() < 0.35:
         img = apply_sidewalk_road_edge_shadow(img)
