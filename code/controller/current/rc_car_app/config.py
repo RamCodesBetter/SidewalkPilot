@@ -127,9 +127,9 @@ STEERING_YAW_PID_YAW_SIGN = -1.0
 # LEFT/RIGHT_MOTOR_PWM_SCALE. The small kI is being trialled anyway; the anti-windup
 # clamp (STEERING_YAW_PID_MAX_CORRECTION_DEG) bounds its wind-up. Watch for a lurch on
 # decel; if it winds up and jerks, drop kI back toward 0.
-STEERING_YAW_PID_KP = 1.3
+STEERING_YAW_PID_KP = 2.15
 STEERING_YAW_PID_KI = 0.20
-STEERING_YAW_PID_KD = 0.15
+STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
 # powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
 # feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
