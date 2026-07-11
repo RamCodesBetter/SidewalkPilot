@@ -1100,7 +1100,11 @@ class SteeringDataset(Dataset):
         img = resize_image_uint8(img, self.width, self.height, self.crop_top_ratio)
 
         if self.augment:
-            if random.random() < self.flip_aug_probability:
+            # Flip ONLY turn frames (skip the 85-95 straight bucket). Mirroring a left turn
+            # into a right (and vice versa) at p=0.5 balances L/R by construction -- each Lk
+            # bucket ends up equal to its Rk mirror -- while straight frames stay put so the
+            # flip isn't wasted on them (Ram, 2026-07-12).
+            if (steer < 85.0 or steer >= 95.0) and random.random() < self.flip_aug_probability:
                 img = cv2.flip(img, 1)
                 steer = 180.0 - steer
             img, steer = augment_image(
