@@ -13,7 +13,7 @@ SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural
 - [Parts List](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
 - [Twitter](https://x.com/SidewalkPilot)
 - [Grafana Labs](Adding Later...)
-- [Weights and Biases](Adding Later...)
+- [Weights and Biases](https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot)
 - [Email](mailto:ramsabavat2012@gmail.com)
 
 </td>
