@@ -6,7 +6,14 @@ SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural
   <img src="docs/media/sidewalkpilot-demo.gif" alt="SidewalkPilot autonomous sidewalk-driving demo" width="300">
 </p>
 
-🎥 [YouTube](https://www.youtube.com/@SidewalkPilot) · 📚 [Docs](https://ramcodesbetter.github.io/SidewalkPilot/) · 🤖 [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat) · 💻 [GitHub](https://github.com/RamCodesBetter/SidewalkPilot) · 💵 [Parts List](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
+- [YouTube](https://www.youtube.com/@SidewalkPilot)
+- [Docs](https://ramcodesbetter.github.io/SidewalkPilot/)
+- [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat)
+- [GitHub](https://github.com/RamCodesBetter/SidewalkPilot)
+- [Parts List](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
+- [Twitter](https://x.com/SidewalkPilot)
+- [Grafana Labs](Adding Later...)
+- [Weights and Biases](Adding Later...)
 
 > Independent research/learning project, run on private test routes. This car is not a road-legal autonomous vehicle.
 
