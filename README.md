@@ -12,7 +12,6 @@ SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural
 - [GitHub](https://github.com/RamCodesBetter/SidewalkPilot)
 - [Parts List](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
 - [Twitter](https://x.com/SidewalkPilot)
-- [Grafana Labs](Adding Later...)
 - [Weights and Biases](https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot)
 - [Email](mailto:ramsabavat2012@gmail.com)
 
@@ -55,7 +54,7 @@ The brain is a convolutional neural network trained on tens of thousands of real
 - **Series 2 — refinement.** Same direct-steering design, cleaner data, and tuned steering range. Added an HSV + CLAHE contrast option (models 2.0/2.0b) to fight harsh lighting — kept as a tool, not the default.
 - **Series 3 — the current generation.** A larger (~5.5 M-parameter) network with a **hybrid head**: it first classifies a coarse steering direction, then regresses the exact angle within it (plus throttle), on a 320×180 image with shadow/lighting augmentation. Series 3 was *originally targeted for quantization* (FP32 → FP16 → INT8 / TensorRT) to squeeze a heavy model onto the Jetson — but the focus **shifted toward accuracy and robustness**: the hybrid head and shadow-hardened training, running directly on the Jetson Orin Nano. The camera runs at 30 fps and the model runs at 30 ips (inferences per second) so there is no need to quantize the model.
 
-Current best model **v3.2b** predicts steering to ~14° mean error on held-out validation. A full per-model breakdown is available in [`docs/steering_model_report.pdf`](docs/steering_model_report.pdf).
+Current best model **v3.2b** predicts steering to ~12° mean error on held-out validation. A full per-model breakdown is available in [`docs/steering_model_report.pdf`](docs/steering_model_report.pdf).
 
 ### Why the buckets matter — bright sidewalk vs. dark shadows
 
