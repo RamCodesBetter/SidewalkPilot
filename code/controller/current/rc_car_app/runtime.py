@@ -439,9 +439,7 @@ def dashboard_coords_to_page(vertical_page: int, horizontal_page: int) -> int:
 
 
 def set_dashboard_page(state, page: int) -> None:
-    clamped = max(1, min(DASHBOARD_PAGE_COUNT, int(page)))
-    print(f"[navdbg] set_dashboard_page in={page} -> {clamped} (DASHBOARD_PAGE_COUNT={DASHBOARD_PAGE_COUNT})", flush=True)
-    page = clamped
+    page = max(1, min(DASHBOARD_PAGE_COUNT, int(page)))
     vertical_page, horizontal_page = dashboard_page_to_coords(page)
     state["dashboard_page"] = page
     state["dashboard_page_vertical"] = vertical_page
