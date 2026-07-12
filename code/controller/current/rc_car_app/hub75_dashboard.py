@@ -4,6 +4,8 @@ import socket
 import time
 from typing import Dict, List
 
+from .config import DASHBOARD_PAGE_COUNT   # single source of truth for the page clamp
+
 try:
     import serial
 except Exception:
@@ -172,7 +174,7 @@ class Hub75DashboardSender:
             "run_number": max(0, int(run_number)),
             "clock_hms": time.strftime("%H:%M:%S"),
             "brightness_percent": max(0, min(100, int(brightness_percent))),
-            "dashboard_page": max(1, min(17, int(dashboard_page))),
+            "dashboard_page": max(1, min(DASHBOARD_PAGE_COUNT, int(dashboard_page))),
             "dashboard_page_transition": str(dashboard_page_transition)[:8],
             "servo_deg": round(max(0.0, min(180.0, float(servo_deg))), 1),
             "throttle_percent": max(0, min(100, int(throttle_percent))),
