@@ -292,6 +292,14 @@ BRAKE_AXIS = 5
 SHARED_TRIGGER_AXIS = False
 DEBUG_CONTROLLER_INPUTS = False
 DASHBOARD_PAGE_COUNT = 18   # +1 for V3H3 photo RIGHT-bucket page
+
+# Photo-collection countdown: how many MORE photos each steering bucket needs to
+# reach 5,000 (deficit vs the current 57,208-image dataset). ST has no target. The
+# V3H1/2/3 dashboard pages count these DOWN to 0000 as photos are captured.
+PHOTO_BUCKET_COLLECTION_NEED = {
+    "hl": 4407, "l": 4138, "lp": 2835, "sl": 1806,
+    "sr": 3174, "r": 2550, "rp": 2515, "hr": 304,
+}
 DASHBOARD_PAGE_AXIS_THRESHOLD = 0.65
 DASHBOARD_PAGE_HOLD_SEC = 0.05
 DASHBOARD_SCROLL_REPEAT_START_SEC = 0.6

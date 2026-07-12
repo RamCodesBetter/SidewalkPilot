@@ -60,6 +60,7 @@ from .config import (
     LIDAR_OVERRIDE_STEER_DEG,
     MAX_TARGET_HEADING_DEG,
     PHOTO_BUTTON,
+    PHOTO_BUCKET_COLLECTION_NEED,
     PHOTO_DIR,
     PULSES_PER_REVOLUTION,
     SPEED_SMOOTHING_ALPHA,
@@ -137,11 +138,11 @@ current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
 # Live L/C/R + slow-throttle counts, incremented per capture (O(1)) so the dashboard
 # stats don't re-parse a growing label file at 30fps. Reset when a new run starts.
-photo_run_live_stats: dict[str, int] = {
-    "left": 0, "center": 0, "right": 0, "throttle_below_50": 0,
-    # 9-way steering-bucket photo counters for the V3H1/2/3 dashboard pages
-    "hl": 0, "l": 0, "lp": 0, "sl": 0, "st": 0, "sr": 0, "r": 0, "rp": 0, "hr": 0,
-}
+photo_run_live_stats: dict[str, int] = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
+# Cumulative per-bucket photos collected toward the 5k-per-bucket goal, PERSISTED across
+# runs/reboots. The V3 dashboard shows NEED - collected, counting DOWN to 0000 per bucket.
+photo_collection_collected: dict[str, int] = {bucket: 0 for bucket in PHOTO_BUCKET_COLLECTION_NEED}
+PHOTO_COLLECTION_PROGRESS_PATH = Path(PHOTO_DIR) / "collection_progress.json"
 DASHBOARD_PHOTO_STATS_INTERVAL_SEC = 5.0
 
 
@@ -981,9 +982,36 @@ def count_photos_run() -> int:
     return sum(1 for f in current_photo_run_dir.iterdir() if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
 
 
+def load_photo_collection_progress() -> None:
+    """Load cumulative per-bucket collection counts (persists across runs/reboots)."""
+    try:
+        with open(PHOTO_COLLECTION_PROGRESS_PATH) as f:
+            saved = json.load(f)
+        for bucket in photo_collection_collected:
+            photo_collection_collected[bucket] = max(0, int(saved.get(bucket, 0)))
+    except Exception:
+        pass  # missing/corrupt file -> keep zeros (fresh campaign)
+
+
+def save_photo_collection_progress() -> None:
+    try:
+        with open(PHOTO_COLLECTION_PROGRESS_PATH, "w") as f:
+            json.dump(photo_collection_collected, f)
+    except Exception as exc:
+        print(f"Failed to save collection progress: {exc}")
+
+
+load_photo_collection_progress()   # pick up prior sessions' progress on startup
+
+
 def photo_run_stats() -> dict[str, int]:
-    # Live counters maintained per capture (no file re-parse at 30fps).
-    return dict(photo_run_live_stats)
+    # Per-run L/C/R + slow-throttle counters, PLUS the collection COUNTDOWN: each of the
+    # 9 steering buckets shows NEED - collected (0 when done; ST has no target).
+    stats = dict(photo_run_live_stats)
+    for bucket, need in PHOTO_BUCKET_COLLECTION_NEED.items():
+        stats[bucket] = max(0, int(need) - photo_collection_collected.get(bucket, 0))
+    stats["st"] = 0
+    return stats
 
 
 def count_photos_all() -> int:
@@ -1090,25 +1118,28 @@ def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, t
         photo_run_live_stats["center"] += 1
     if thr < 0.50:
         photo_run_live_stats["throttle_below_50"] += 1
-    # 9-way steering-bucket tally (edges match STEER_CLASS_BINS) for V3H1/2/3 pages
+    # 9-way steering bucket (edges match STEER_CLASS_BINS); bump the collection countdown.
     if steering < 45:
-        photo_run_live_stats["hl"] += 1
+        bucket = "hl"
     elif steering < 60:
-        photo_run_live_stats["l"] += 1
+        bucket = "l"
     elif steering < 75:
-        photo_run_live_stats["lp"] += 1
+        bucket = "lp"
     elif steering < 85:
-        photo_run_live_stats["sl"] += 1
+        bucket = "sl"
     elif steering < 95:
-        photo_run_live_stats["st"] += 1
+        bucket = "st"
     elif steering < 105:
-        photo_run_live_stats["sr"] += 1
+        bucket = "sr"
     elif steering < 120:
-        photo_run_live_stats["r"] += 1
+        bucket = "r"
     elif steering < 135:
-        photo_run_live_stats["rp"] += 1
+        bucket = "rp"
     else:
-        photo_run_live_stats["hr"] += 1
+        bucket = "hr"
+    if bucket in photo_collection_collected:   # ST has no collection target
+        photo_collection_collected[bucket] += 1
+        save_photo_collection_progress()
 
 
 def finalize_photo_run(run_dir: Path | None) -> None:
