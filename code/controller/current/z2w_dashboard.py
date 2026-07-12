@@ -867,6 +867,7 @@ class DashboardRenderer:
         requested_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", self.current_page))))
         transition = str(payload.get("dashboard_page_transition", ""))
         if requested_page != self.current_page:
+            print(f"[z2wdbg] recv={payload.get('dashboard_page')} COUNT={DASHBOARD_PAGE_COUNT} -> render page {requested_page}", flush=True)
             self.previous_page = self.current_page
             self.current_page = requested_page
             if transition in ("right", "left"):
