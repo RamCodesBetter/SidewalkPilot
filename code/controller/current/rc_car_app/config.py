@@ -51,9 +51,9 @@ LIDAR_OVERRIDE_STEER_DEG = 38.0
 # Forward cone (+/-) that can BLOCK the path; wider = brakes for more off-center stuff.
 LIDAR_FORWARD_CONE_DEG = 30.0        # (legacy) old angular block cone; superseded by the corridor below
 # SIDEWALK CORRIDOR (the two dashboard blue lines): only obstacles WITHIN +/-this laterally, AHEAD,
-# can brake/stop. 76.2cm = half of a 5ft (152.4cm) sidewalk. A rectangle down the path instead of a
-# fan -> alongside hedges/fences past the sidewalk edge no longer trigger a brake at distance.
-LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762
+# can brake/stop. 50.8cm = half of 2/3 of a 5ft (152.4cm) sidewalk -> a 101.6cm-wide corridor. A
+# rectangle down the path instead of a fan -> hedges/fences past the corridor no longer brake at distance.
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.508   # 2/3 sidewalk (Ram, 2026-07-12)
 LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; outside-corridor points in the fan = swerve-clearance only
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
 LIDAR_WARN_M = 1.40                  # forward point closer than this triggers classify/react
