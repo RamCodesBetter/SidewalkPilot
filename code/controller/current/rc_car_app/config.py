@@ -69,15 +69,12 @@ LIDAR_LEG_RANGE_TOL_M = 0.40         # ...and at matching range = same person
 LIDAR_SWERVE_MIN_DEG = 20.0          # gentle swerve when the mailbox is far (~WARN)
 LIDAR_SWERVE_MAX_DEG = 80.0          # hard swerve when it's close (~GOV_STOP); logical 90 -/+ this
 LIDAR_SWERVE_THROTTLE_DROP = 0.30    # sharper swerves shed this much throttle (gentle=full, hardest=CRUISE-drop)
-# Blue-corridor SWERVE-THROUGH: an obstacle inside the emergency zone normally hard-stops. If it
-# is NOT a person/wall and a car-width(+margin) lateral gap is clear on one side of the corridor
-# WITH a drivable lane ahead, squeeze THROUGH instead of dead-stopping. Fail-safe: any doubt (no
-# gap, blocked lane, person/wall) -> hard stop. Toggle off here to restore pure hard-stop AEB.
-LIDAR_SWERVE_THROUGH_ENABLED = True
-LIDAR_CAR_WIDTH_M = 0.30             # working car width: real is 25.6cm, padded to 30cm (Ram)
-LIDAR_SWERVE_THROUGH_MARGIN_M = 0.12  # extra safety margin on top (LiDAR noise + steering slop); required gap = 0.42m
-LIDAR_SWERVE_THROUGH_BAND_M = 0.30   # depth behind the emergency rung to treat points as "the obstacle"
-LIDAR_SWERVE_THROUGH_AHEAD_M = 1.20  # escape lane must be clear at least this far ahead (drivable path, not a momentary gap)
+# Split the configured 5 ft corridor into equal left/center/right bands (each 5/3 ft).
+# Emergency actions are deterministic: L -> right, R -> left, LR -> creep straight,
+# and any center occupancy -> hard brake. The bands remain LiDAR/car-relative until a
+# separate sidewalk-edge estimate supplies a lateral corridor offset.
+LIDAR_LANE_COUNT = 3
+LIDAR_EMERGENCY_LANE_POLICY_ENABLED = True
 
 # --- GPIO SETUP ---
 STEERING_SERVO_PIN = 12
@@ -405,6 +402,9 @@ def create_state():
         "lidar_forward_clearance_m": 12.0,
         "lidar_override_active": False,
         "lidar_override_side": "",
+        "lidar_lane_occupancy": "",
+        "lidar_emergency_lane_occupancy": "",
+        "lidar_lane_action": "normal",
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,

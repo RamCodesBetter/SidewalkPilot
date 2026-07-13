@@ -51,6 +51,9 @@ LIDAR_POINT_GREEN: Color = (0, 255, 70)      # < 2.0 m
 LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
 LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
 LIDAR_CONE: Color = (60, 180, 255)           # forward corridor guide lines
+LIDAR_LANE_DIVIDER: Color = (20, 80, 120)    # equal L/C/R lane boundaries
+LIDAR_LANE_CLEAR: Color = (40, 130, 150)
+LIDAR_LANE_OCCUPIED: Color = (255, 210, 0)
 LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762          # each guide line 2.5ft (30in) off centre => ~5ft sidewalk
                                              # (car is only ~25.2cm wide, so it's a narrow car in a wide lane)
 # Horizontal rungs across the corridor at the LiDAR avoidance distances -- MIRROR config.py
@@ -441,9 +444,8 @@ class DashboardRenderer:
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
     def _draw_lidar_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # Forward-facing view: car at bottom-centre, forward = up. Two PARALLEL guide lines
-        # (not a cone) mark the sidewalk corridor: each ~22in off the LiDAR centre, running
-        # straight forward. Points colored by range (red near -> blue far).
+        # Forward-facing view: car at bottom-centre, forward = up. Parallel outer guides mark
+        # the 5 ft corridor; two inner guides split it into equal L/C/R lanes (5/3 ft each).
         car_x = PANEL_WIDTH // 2
         car_y = (PANEL_HEIGHT - 1) + y_offset_px
         scale = 9.0                       # px per metre (forward ~0..3.4 m fills the height)
@@ -452,6 +454,11 @@ class DashboardRenderer:
             gx = car_x + sign * half_w_px
             for gy in range(y_offset_px, car_y + 1):      # straight up the panel
                 self._set_pixel(gx, gy, LIDAR_CONE)
+        lane_boundary_px = half_w_px / 3.0
+        for sign in (-1, 1):
+            gx = int(round(car_x + sign * lane_boundary_px))
+            for gy in range(y_offset_px, car_y + 1):
+                self._set_pixel(gx, gy, LIDAR_LANE_DIVIDER)
         # horizontal rungs across the corridor at the LiDAR avoidance distances (colour = zone)
         for dist_m, rung_color in LIDAR_RUNG_DISTANCES:
             ry = car_y - int(round(dist_m * scale))
@@ -459,6 +466,28 @@ class DashboardRenderer:
                 continue
             for rx in range(car_x - half_w_px, car_x + half_w_px + 1):
                 self._set_pixel(rx, ry, rung_color)
+        occupied = str(payload.get("lidar_lane_occupancy", "")).upper()
+        emergency_occupied = str(payload.get("lidar_emergency_lane_occupancy", "")).upper()
+        tiny_labels = {
+            "L": ("100", "100", "100", "100", "111"),
+            "C": ("111", "100", "100", "100", "111"),
+            "R": ("110", "101", "110", "101", "101"),
+        }
+        lane_centers = {
+            "L": car_x - int(round(2.0 * half_w_px / 3.0)),
+            "C": car_x,
+            "R": car_x + int(round(2.0 * half_w_px / 3.0)),
+        }
+        for lane in "LCR":
+            color = LIDAR_LANE_CLEAR
+            if lane in occupied:
+                color = LIDAR_LANE_OCCUPIED
+            if lane in emergency_occupied:
+                color = LIDAR_POINT_RED
+            for dy, row in enumerate(tiny_labels[lane]):
+                for dx, bit in enumerate(row):
+                    if bit == "1":
+                        self._set_pixel(lane_centers[lane] - 1 + dx, y_offset_px + dy, color)
         raw_points = payload.get("lidar_points", [])
         point_count = max(0, int(payload.get("lidar_point_count", 0)))
         if not raw_points:
@@ -492,6 +521,18 @@ class DashboardRenderer:
                 self._set_pixel(x, y, color)
         for dx, dy in ((-1, 0), (0, 0), (1, 0), (0, -1)):
             self._set_pixel(car_x + dx, car_y + dy, LIDAR_CAR)
+        action = str(payload.get("lidar_lane_action", "normal")).lower()
+        if action == "brake":
+            for dx in range(-3, 4):
+                self._set_pixel(car_x + dx, car_y - 3, LIDAR_POINT_RED)
+        elif action in ("swerve_left", "swerve_right"):
+            direction = -1 if action == "swerve_left" else 1
+            for dx, dy in ((direction, -3), (2 * direction, -3), (2 * direction, -4),
+                           (2 * direction, -2)):
+                self._set_pixel(car_x + dx, car_y + dy, LIDAR_LANE_OCCUPIED)
+        elif action == "creep":
+            for dy in (-4, -3, -2):
+                self._set_pixel(car_x, car_y + dy, LIDAR_LANE_OCCUPIED)
 
     def _format_model_cells(self, model_choice: str) -> List[str]:
         model_choice = str(model_choice)
@@ -980,6 +1021,9 @@ def main():
     drive_mode = "MAN"
     lidar_points: List[List[float]] = []
     lidar_point_count = 0
+    lidar_lane_occupancy = ""
+    lidar_emergency_lane_occupancy = ""
+    lidar_lane_action = "normal"
     model_choice = ""
     camera_confidence_percent = 0
     cpu_temp_c = 0.0
@@ -1053,6 +1097,9 @@ def main():
                 "drive_mode": drive_mode,
                 "lidar_points": lidar_points,
                 "lidar_point_count": lidar_point_count,
+                "lidar_lane_occupancy": lidar_lane_occupancy,
+                "lidar_emergency_lane_occupancy": lidar_emergency_lane_occupancy,
+                "lidar_lane_action": lidar_lane_action,
                 "model_choice": model_choice,
                 "camera_confidence_percent": camera_confidence_percent,
                 "cpu_temp_c": cpu_temp_c,
@@ -1116,6 +1163,9 @@ def main():
         nonlocal drive_mode
         nonlocal lidar_points
         nonlocal lidar_point_count
+        nonlocal lidar_lane_occupancy
+        nonlocal lidar_emergency_lane_occupancy
+        nonlocal lidar_lane_action
         nonlocal model_choice
         nonlocal camera_confidence_percent
         nonlocal cpu_temp_c
@@ -1176,6 +1226,11 @@ def main():
         if isinstance(raw_lidar_points, list):
             lidar_points = raw_lidar_points[:180]
         lidar_point_count = max(0, int(payload.get("lidar_point_count", len(lidar_points))))
+        lidar_lane_occupancy = str(payload.get("lidar_lane_occupancy", lidar_lane_occupancy)).upper()[:3]
+        lidar_emergency_lane_occupancy = str(
+            payload.get("lidar_emergency_lane_occupancy", lidar_emergency_lane_occupancy)
+        ).upper()[:3]
+        lidar_lane_action = str(payload.get("lidar_lane_action", lidar_lane_action)).lower()[:16]
         raw_camera_pixels = payload.get("camera_pixels", camera_pixels)
         if isinstance(raw_camera_pixels, list):
             camera_pixels = [str(row)[: PANEL_WIDTH * 4] for row in raw_camera_pixels[:PANEL_HEIGHT]]

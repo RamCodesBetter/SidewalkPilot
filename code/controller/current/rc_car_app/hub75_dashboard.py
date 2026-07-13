@@ -129,6 +129,9 @@ class Hub75DashboardSender:
         drive_mode: str = "MAN",
         lidar_points: List[List[float]] | None = None,
         lidar_point_count: int = 0,
+        lidar_lane_occupancy: str = "",
+        lidar_emergency_lane_occupancy: str = "",
+        lidar_lane_action: str = "normal",
         model_choice: str = "",
         camera_confidence_percent: int = 0,
         cpu_temp_c: float = 0.0,
@@ -182,6 +185,13 @@ class Hub75DashboardSender:
             "drive_mode": str(drive_mode)[:3],
             "lidar_points": lidar_points or [],
             "lidar_point_count": max(0, int(lidar_point_count)),
+            "lidar_lane_occupancy": "".join(
+                lane for lane in "LCR" if lane in str(lidar_lane_occupancy).upper()
+            ),
+            "lidar_emergency_lane_occupancy": "".join(
+                lane for lane in "LCR" if lane in str(lidar_emergency_lane_occupancy).upper()
+            ),
+            "lidar_lane_action": str(lidar_lane_action).lower()[:16],
             "model_choice": str(model_choice)[:4],
             "camera_confidence_percent": max(0, min(100, int(camera_confidence_percent))),
             "cpu_temp_c": round(max(0.0, min(99.0, float(cpu_temp_c))), 1),

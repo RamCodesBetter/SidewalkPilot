@@ -55,6 +55,7 @@ from .config import (
     LEFT_MOTOR_PWM_SCALE,
     LOW_CAMERA_CONFIDENCE,
     LOG_INTERVAL_SEC,
+    LIDAR_WARN_M,
     LIDAR_OVERRIDE_EMERGENCY_STOP_M,
     LIDAR_OVERRIDE_SIDE_CLEARANCE_M,
     LIDAR_OVERRIDE_STEER_DEG,
@@ -1481,6 +1482,9 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     # clear -> model-only driving (the intended fallback).
     av = lidar_avoidance.evaluate(lidar_scan)
     state["lidar_forward_clearance_m"] = av["front_m"]
+    state["lidar_lane_occupancy"] = av["lane_occupancy"]
+    state["lidar_emergency_lane_occupancy"] = av["emergency_lane_occupancy"]
+    state["lidar_lane_action"] = av["lane_action"]
     # debug (throttled ~1s, autonomous only): shows WHY the car does/doesn't roll --
     # forward clearance, avoidance code/stop, governed throttle, model confidence + source.
     _adbg_now = time.time()
@@ -1488,18 +1492,22 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
         state["_autodbg_next"] = _adbg_now + 1.0
         print(f"[auto-dbg] fwd={av['front_m']:.2f}m code={av['code'] or 'CLEAR'} "
               f"stop={av['stop']} gov_thr={av['throttle']:.2f} "
+              f"lanes={av['emergency_lane_occupancy'] or '-'} action={av['lane_action']} "
               f"conf={camera_analysis['confidence']:.2f} method={camera_analysis['method']}", flush=True)
     if av["code"]:                                  # SWR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
         metrics.auto_last_cause_code = av["code"]
     if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
         apply_hard_stop_state(state, av["reason"])
         return 0.0, True
-    if av["code"] == "SWR":                          # swerve around a narrow obstacle (mailbox/post)
+    if av["code"] in ("SWR", "CRP"):                 # emergency lane override or ordinary swerve
         state["steering_servo_deg"] = clamp_servo_degrees(av["steer"])
         state["steer"] = steering_degrees_to_normalized(state["steering_servo_deg"])
         state["target_heading_deg"] = state["steer"] * MAX_TARGET_HEADING_DEG
         state["lidar_override_active"] = True
-        state["lidar_override_side"] = "right" if av["steer"] > STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0 else "left"
+        if av["code"] == "CRP":
+            state["lidar_override_side"] = ""
+        else:
+            state["lidar_override_side"] = "right" if av["steer"] > STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0 else "left"
         state["stop_reason"] = av["reason"]
         return av["throttle"], False
     # CLEAR -> follow the model below; the governor still caps throttle by forward clearance.
@@ -1534,6 +1542,12 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     desired_pwm_from_input = 0.0
     effective_brake_from_input = state["brake"]
     effective_brake_force = max(0.0, min(1.0, float(state.get("brake_force", 0.0))))
+    state["lidar_lane_occupancy"] = lidar_avoidance.lane_occupancy(lidar_scan, LIDAR_WARN_M)
+    state["lidar_emergency_lane_occupancy"] = lidar_avoidance.lane_occupancy(
+        lidar_scan, LIDAR_OVERRIDE_EMERGENCY_STOP_M
+    )
+    if not state["autonomous_mode"]:
+        state["lidar_lane_action"] = "normal"
 
     if state["autonomous_mode"]:
         desired_pwm_from_input, effective_brake_from_input = apply_autonomous_controls(
@@ -2245,6 +2259,9 @@ def run(model_choice=None):
                     drive_mode=get_dashboard_drive_mode(state),
                     lidar_points=lidar_dashboard_points,
                     lidar_point_count=state["num_lidar_points"],
+                    lidar_lane_occupancy=state.get("lidar_lane_occupancy", ""),
+                    lidar_emergency_lane_occupancy=state.get("lidar_emergency_lane_occupancy", ""),
+                    lidar_lane_action=state.get("lidar_lane_action", "normal"),
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
