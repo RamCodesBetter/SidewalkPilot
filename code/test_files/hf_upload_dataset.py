@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-"""hf_upload_dataset.py — push a SidewalkPilot dataset folder (+ card + extra label
-files) to a Hugging Face dataset repo. No upload tooling existed in the repo; this is
-the reusable one.
+"""hf_upload_dataset.py — push SidewalkPilot dataset artifacts to Hugging Face.
 
 Auth (NO env vars): run `huggingface-cli login` (or `hf auth login`) ONCE with a WRITE
 token from https://huggingface.co/settings/tokens. This script uses the cached token.
 Install the CLI if missing:  pip install -U 'huggingface_hub[cli]'
 
-The HF dataset repo MIRRORS the series folder (README + trainer + steering_corrections.json
-+ sidewalkpilot_dataset/ holding the images), matching SidewalkPilot_v1_and_v2. So point
---folder at the SERIES dir, NOT the image subfolder — images land under sidewalkpilot_dataset/
-and the labels.json paths resolve. __pycache__/artifacts are skipped by default.
+Tar archives and label manifests are published at the dataset repo root. Extracting the
+archive locally recreates the dataset folder expected by the trainer. __pycache__/artifacts
+are skipped by default.
 
 Examples (run from the repo root):
 
-  # Series 3 (the 2026-07-02 batch): mirror the whole series_3 folder
+    # Series 3 loose upload (small datasets only)
   python3 code/test_files/hf_upload_dataset.py \
     --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v3 \
     --folder code/ai_models_datasets/series_3
@@ -36,8 +33,8 @@ def main():
     ap.add_argument("--tar", help="PREFERRED for big image sets: upload ONE tarball (1 commit). HF free "
                                   "tier caps ~128 commits/hour, so loose uploads of 50k+ files get "
                                   "throttled/killed. Pack the images into a tar and push that instead.")
-    ap.add_argument("--tar-in-repo", help="repo path for --tar (default sidewalkpilot_dataset/<basename>)")
-    ap.add_argument("--labels", help="labels.json to publish at sidewalkpilot_dataset/labels.json")
+    ap.add_argument("--tar-in-repo", help="repo path for --tar (default: tar basename at repo root)")
+    ap.add_argument("--labels", help="labels.json to publish at repo root")
     ap.add_argument("--card", help="local README.md to publish as the dataset card (repo root)")
     ap.add_argument("--extra", nargs="*", default=[], help="extra files to upload to the repo root")
     ap.add_argument("--ignore", nargs="*", default=[], help="extra glob patterns to skip")
@@ -68,7 +65,7 @@ def main():
         tarp = Path(args.tar)
         if not tarp.is_file():
             sys.exit(f"no such tar: {tarp}")
-        dest = args.tar_in_repo or f"sidewalkpilot_dataset/{tarp.name}"
+        dest = args.tar_in_repo or tarp.name
         gb = tarp.stat().st_size / 1e9
         print(f"uploading tar {tarp} ({gb:.1f} GB) -> {dest}  (single commit)...")
         api.upload_file(path_or_fileobj=str(tarp), path_in_repo=dest,
@@ -76,9 +73,9 @@ def main():
         if args.labels:
             lp = Path(args.labels)
             if lp.is_file():
-                api.upload_file(path_or_fileobj=str(lp), path_in_repo="sidewalkpilot_dataset/labels.json",
+                api.upload_file(path_or_fileobj=str(lp), path_in_repo="labels.json",
                                 repo_id=args.repo, repo_type="dataset")
-                print("published labels.json -> sidewalkpilot_dataset/labels.json")
+                print("published labels.json -> labels.json")
             else:
                 print(f"[skip] labels not found: {lp}")
     else:

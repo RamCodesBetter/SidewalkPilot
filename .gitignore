@@ -31,6 +31,21 @@ code/ai_models_datasets/series_3/dataset_real_*/
 *.pth
 *.onnx
 
+# Hugging Face publishing artifacts stay local. Dataset/model cards and archives are
+# published to Hugging Face, not tracked on the GitHub branch.
+*.tar
+*.tar.gz
+*.tgz
+code/ai_models/README.md
+code/ai_models/**/README.md
+code/ai_models_datasets/**/README.md
+
+# Weights & Biases creates a new local recovery directory for every trainer launch,
+# including interrupted attempts. The canonical run history lives in the W&B project.
+wandb/
+code/ai_models_datasets/**/wandb/
+code/ai_models_datasets/**/wandb_runs_local/
+
 # Field data: photo runs (images + label manifests) — hosted on Hugging Face.
 # Ignore the contents but keep the folder present via .gitkeep.
 media/photos/*
