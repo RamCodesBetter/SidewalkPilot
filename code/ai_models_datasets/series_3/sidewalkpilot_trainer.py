@@ -1087,30 +1087,40 @@ class SteeringDataset(Dataset):
         for source_name, count in sorted(source_counts.items()):
             print(f"  {source_name}={count}")
 
-    def apply_balance_flip(self, indices):
-        """Even each L/R mirror bucket-pair within `indices` by flipping surplus images from
-        the abundant side to the scarce side (image mirror + steer -> 180-steer). Deterministic;
-        disables the random turn-flip. Sampler + class weights must read self.targets AFTER this."""
+    def apply_balance_flip(self, indices, max_passes=15):
+        """Even each L/R mirror bucket-pair within `indices` by flipping surplus images from the
+        abundant side to the scarce side (image mirror + steer -> 180-steer). ITERATED: one pass
+        leaves a small residual because values on a bin boundary (e.g. 135) mirror into the
+        neighbouring bin, so re-balance until every pair is off by <=1. Deterministic; disables
+        the random turn-flip. Sampler + class weights must read self.targets AFTER this."""
         from collections import defaultdict
-        by_bucket = defaultdict(list)
-        for i in indices:
-            by_bucket[steer_class_index(self.targets[i])].append(i)
-        moved = 0
-        for a, b in [(0, 8), (1, 7), (2, 6), (3, 5)]:   # class 4 (straight) self-mirrors -> untouched
-            A, B = by_bucket[a], by_bucket[b]
-            if len(A) == len(B):
-                continue
-            big = A if len(A) > len(B) else B
-            n = abs(len(A) - len(B)) // 2
-            for i in big[:n]:
-                path, steer, throttle = self.samples[i]
-                fs = 180.0 - float(steer)
-                self.samples[i] = (path, fs, throttle)
-                self.targets[i] = fs
-                self.forced_flip[i] = True
-            moved += n
+        moved_total = 0
+        passes = 0
+        while passes < max_passes:
+            passes += 1
+            by_bucket = defaultdict(list)
+            for i in indices:
+                by_bucket[steer_class_index(self.targets[i])].append(i)
+            moved = 0
+            for a, b in [(0, 8), (1, 7), (2, 6), (3, 5)]:   # class 4 (straight) self-mirrors
+                A, B = by_bucket[a], by_bucket[b]
+                diff = len(A) - len(B)
+                if abs(diff) <= 1:
+                    continue
+                big = A if diff > 0 else B
+                n = abs(diff) // 2
+                for i in big[:n]:
+                    path, steer, throttle = self.samples[i]
+                    fs = 180.0 - float(steer)
+                    self.samples[i] = (path, fs, throttle)
+                    self.targets[i] = fs
+                    self.forced_flip[i] = not self.forced_flip[i]
+                moved += n
+            moved_total += moved
+            if moved == 0:
+                break
         self.flip_aug_probability = 0.0   # deterministic balance replaces the random turn-flip
-        print(f"[{self.stage_name}] balance-flip: evened L/R pairs, moved {moved} images (random flip disabled)", flush=True)
+        print(f"[{self.stage_name}] balance-flip: {passes} passes, net {moved_total} flips -> L/R pairs even (off by <=1); random flip disabled", flush=True)
 
     def __len__(self):
         return len(self.samples)
