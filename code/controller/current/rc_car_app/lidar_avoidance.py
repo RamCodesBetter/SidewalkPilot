@@ -14,8 +14,12 @@ Two ideas:
       (boxed in: narrow but no clear side)           -> full stop, hold
       CLEAR      (nothing near)                      -> follow the model
   Throttle is governed by forward clearance: full at/above GOV_FULL, ramps down to MIN_MOVE,
-  then 0 at/below GOV_STOP. The runtime's existing ACCEL_RATE motor ramp handles the smooth
-  resume, so we just return the target here.
+  holds MIN_MOVE through the creep range, then reaches 0 at the emergency boundary. The
+  runtime's existing ACCEL_RATE motor ramp handles the smooth resume, so we just return the
+  target here.
+
+  Manual mode uses the same three lanes but only intervenes for simultaneous L/C/R
+  occupancy. Partial occupancy leaves the driver's command untouched.
 
 evaluate(scan) -> dict the caller applies:
   code   : "" (clear) | "SWR" (swerve) | "CRP" (center creep) | "HLD" (hold) | "EMR" (emergency)
@@ -109,8 +113,10 @@ def _forward_clusters(scan):
 
 def governor_target(front_m):
     """Steady-state throttle for a forward clearance; the runtime ramps toward it at ACCEL_RATE."""
-    if front_m <= C.LIDAR_GOV_STOP_M:
+    if front_m <= C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
         return 0.0
+    if front_m <= C.LIDAR_GOV_STOP_M:
+        return C.LIDAR_MIN_MOVE_PWM
     if front_m >= C.LIDAR_GOV_FULL_M:
         return C.AUTONOMOUS_CRUISE_PWM
     frac = (front_m - C.LIDAR_GOV_STOP_M) / (C.LIDAR_GOV_FULL_M - C.LIDAR_GOV_STOP_M)
@@ -139,11 +145,11 @@ def _person_or_wall(clusters):
     return person or widest["width_m"] >= C.LIDAR_WALL_MIN_WIDTH_M
 
 
-def lane_occupancy(scan, max_forward_m):
-    """Return the occupied equal-width corridor lanes in canonical L/C/R order."""
+def lane_forward_distances(scan):
+    """Nearest valid forward distance in each equal-width corridor lane."""
     hw = C.LIDAR_CORRIDOR_HALF_WIDTH_M
     lane_half = hw / C.LIDAR_LANE_COUNT
-    occupied = set()
+    distances = {lane: _MAX_RANGE_M for lane in "LCR"}
     for p in scan or []:
         if not _valid(p):
             continue
@@ -152,15 +158,48 @@ def lane_occupancy(scan, max_forward_m):
         ar = math.radians(a)
         x = d * math.sin(ar)                          # lateral offset (right +, left -)
         f = d * math.cos(ar)                          # forward distance
-        if f <= 0.0 or f > max_forward_m or abs(x) > hw:
+        if f <= 0.0 or abs(x) > hw:
             continue
         if x < -lane_half:
-            occupied.add("L")
+            lane = "L"
         elif x > lane_half:
-            occupied.add("R")
+            lane = "R"
         else:
-            occupied.add("C")
-    return "".join(lane for lane in "LCR" if lane in occupied)
+            lane = "C"
+        distances[lane] = min(distances[lane], f)
+    return distances
+
+
+def lane_occupancy(scan, max_forward_m):
+    """Return the occupied equal-width corridor lanes in canonical L/C/R order."""
+    distances = lane_forward_distances(scan)
+    return "".join(lane for lane in "LCR" if distances[lane] <= max_forward_m)
+
+
+def manual_lane_governor(scan):
+    """Manual mode only intervenes when all three corridor lanes are blocked.
+
+    Partial occupancy never modifies the driver's throttle. Once L/C/R are all blocked
+    inside GOV_FULL, the farthest of their nearest returns controls a physical 100% ->
+    55% cap. All three inside the emergency rung requests a hard stop.
+    """
+    distances = lane_forward_distances(scan)
+    blocking_forward_m = max(distances.values())
+    all_lanes_blocked = blocking_forward_m <= C.LIDAR_GOV_FULL_M
+    emergency_stop = blocking_forward_m <= C.LIDAR_OVERRIDE_EMERGENCY_STOP_M
+    if not all_lanes_blocked:
+        throttle_cap = C.AUTONOMOUS_CRUISE_PWM
+    elif emergency_stop:
+        throttle_cap = 0.0
+    else:
+        throttle_cap = governor_target(blocking_forward_m)
+    return {
+        "all_lanes_blocked": all_lanes_blocked,
+        "emergency_stop": emergency_stop,
+        "throttle_cap": throttle_cap,
+        "blocking_forward_m": blocking_forward_m,
+        "lane_forward_m": distances,
+    }
 
 
 def _result(code, stop, steer, throttle, front_m, reason, occupancy, action,
@@ -210,7 +249,7 @@ def evaluate(scan):
     occupancy = lane_occupancy(scan, C.LIDAR_WARN_M)
     emergency_occupancy = lane_occupancy(scan, C.LIDAR_OVERRIDE_EMERGENCY_STOP_M)
 
-    if fwd < C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
+    if fwd <= C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
         return _emergency_lane_decision(fwd, emergency_occupancy, occupancy)
 
     clusters = _forward_clusters(scan)

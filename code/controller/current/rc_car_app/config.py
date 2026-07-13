@@ -58,7 +58,7 @@ LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; outside-corridor points 
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
 LIDAR_WARN_M = 1.40                  # forward point closer than this triggers classify/react
 LIDAR_GOV_FULL_M = 1.65              # governor full throttle at/above this clearance
-LIDAR_GOV_STOP_M = 1.25              # governor throttle 0 at/below this (above the 1.05 emergency)
+LIDAR_GOV_STOP_M = 1.25              # governor reaches minimum moving throttle at/below this
 LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
 LIDAR_AVOID_SIDE_CLEAR_M = 0.40      # a side needs this much room to swerve into
 LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
@@ -70,11 +70,22 @@ LIDAR_SWERVE_MIN_DEG = 20.0          # gentle swerve when the mailbox is far (~W
 LIDAR_SWERVE_MAX_DEG = 80.0          # hard swerve when it's close (~GOV_STOP); logical 90 -/+ this
 LIDAR_SWERVE_THROTTLE_DROP = 0.30    # sharper swerves shed this much throttle (gentle=full, hardest=CRUISE-drop)
 # Split the configured 5 ft corridor into equal left/center/right bands (each 5/3 ft).
-# Emergency actions are deterministic: L -> right, R -> left, LR -> creep straight,
-# and any center occupancy -> hard brake. The bands remain LiDAR/car-relative until a
-# separate sidewalk-edge estimate supplies a lateral corridor offset.
+# Autonomous emergency actions are deterministic: L -> right, R -> left, LR -> creep
+# straight, and any center occupancy -> hard brake. Manual driving is less invasive:
+# only simultaneous L/C/R occupancy can cap throttle or trigger the emergency brake.
+# The bands remain LiDAR/car-relative until a separate sidewalk-edge estimate supplies
+# a lateral corridor offset.
 LIDAR_LANE_COUNT = 3
 LIDAR_EMERGENCY_LANE_POLICY_ENABLED = True
+
+
+def absolute_throttle_to_reference(absolute_pwm: float) -> float:
+    """Map physical motor PWM to the useful 0..1 range without changing saved labels."""
+    absolute = max(0.0, min(1.0, abs(float(absolute_pwm))))
+    if absolute <= LIDAR_MIN_MOVE_PWM:
+        return 0.0
+    usable_span = 1.0 - LIDAR_MIN_MOVE_PWM
+    return (absolute - LIDAR_MIN_MOVE_PWM) / usable_span
 
 # --- GPIO SETUP ---
 STEERING_SERVO_PIN = 12
@@ -405,6 +416,8 @@ def create_state():
         "lidar_lane_occupancy": "",
         "lidar_emergency_lane_occupancy": "",
         "lidar_lane_action": "normal",
+        "manual_lidar_throttle_cap": 1.0,
+        "manual_lidar_emergency_stop": False,
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,

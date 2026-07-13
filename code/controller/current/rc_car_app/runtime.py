@@ -56,6 +56,7 @@ from .config import (
     LOW_CAMERA_CONFIDENCE,
     LOG_INTERVAL_SEC,
     LIDAR_WARN_M,
+    LIDAR_MIN_MOVE_PWM,
     LIDAR_OVERRIDE_EMERGENCY_STOP_M,
     LIDAR_OVERRIDE_SIDE_CLEARANCE_M,
     LIDAR_OVERRIDE_STEER_DEG,
@@ -113,6 +114,7 @@ from .config import (
     STEERING_DEADZONE,
     HUB75_DASHBOARD_IDLE_EXIT_SEC,
     HUB75_DASHBOARD_SHUTDOWN_ON_EXIT,
+    absolute_throttle_to_reference,
 )
 from .hardware import Hardware
 from .lidar import (
@@ -1033,6 +1035,8 @@ def update_dashboard_photo_stats(metrics, now: float | None = None, force: bool 
 
 
 def is_stop_brake_condition(state) -> bool:
+    if not state.get("autonomous_mode"):
+        return bool(state.get("manual_lidar_emergency_stop", False))
     if state.get("lidar_override_active"):
         return False
     return (
@@ -1086,6 +1090,7 @@ def cleanup_photo_run_dir() -> None:
 
 
 def current_forward_throttle_label(state) -> float:
+    """Return absolute physical PWM for training labels (55% remains 0.55)."""
     if state is None:
         return 0.0
     try:
@@ -1546,8 +1551,16 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     state["lidar_emergency_lane_occupancy"] = lidar_avoidance.lane_occupancy(
         lidar_scan, LIDAR_OVERRIDE_EMERGENCY_STOP_M
     )
+    manual_lidar = lidar_avoidance.manual_lane_governor(lidar_scan)
+    state["manual_lidar_throttle_cap"] = manual_lidar["throttle_cap"]
+    state["manual_lidar_emergency_stop"] = manual_lidar["emergency_stop"]
     if not state["autonomous_mode"]:
-        state["lidar_lane_action"] = "normal"
+        if metrics.aeb_enabled and manual_lidar["emergency_stop"]:
+            state["lidar_lane_action"] = "brake"
+        elif metrics.aeb_enabled and manual_lidar["throttle_cap"] <= LIDAR_MIN_MOVE_PWM:
+            state["lidar_lane_action"] = "creep"
+        else:
+            state["lidar_lane_action"] = "normal"
 
     if state["autonomous_mode"]:
         desired_pwm_from_input, effective_brake_from_input = apply_autonomous_controls(
@@ -1618,6 +1631,11 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
                 metrics.pid_integral_error = 0.0
                 metrics.pid_previous_error = 0.0
                 metrics.pid_output = 0.0
+            if metrics.aeb_enabled:
+                desired_pwm_from_input = min(
+                    desired_pwm_from_input,
+                    float(manual_lidar["throttle_cap"]),
+                )
 
     servo_degrees = clamp_servo_degrees(
         state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
@@ -1735,7 +1753,10 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         hardware.motor_right_bwd.value = right_pwm
         hardware.motor_left_fwd.value = left_pwm
 
-    state["dashboard_throttle_percent"] = int(round(pwm_val * 100.0)) if not effective_brake else 0
+    state["dashboard_throttle_percent"] = (
+        int(round(absolute_throttle_to_reference(pwm_val) * 100.0))
+        if not effective_brake else 0
+    )
     state["dashboard_brake_percent"] = int(round(max(0.0, min(1.0, effective_brake_force)) * 100.0)) if effective_brake else 0
 
     calculate_speed(state, metrics, dt)

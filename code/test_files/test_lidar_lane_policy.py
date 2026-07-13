@@ -32,8 +32,11 @@ class LidarEmergencyLanePolicyTest(unittest.TestCase):
         self.lane_x = C.LIDAR_CORRIDOR_HALF_WIDTH_M * 2.0 / 3.0
 
     def scan(self, lanes):
+        return self.scan_at(lanes, self.forward_m)
+
+    def scan_at(self, lanes, forward_m):
         x_by_lane = {"L": -self.lane_x, "C": 0.0, "R": self.lane_x}
-        return [point(x_by_lane[lane], self.forward_m) for lane in lanes]
+        return [point(x_by_lane[lane], forward_m) for lane in lanes]
 
     def assert_hard_brake(self, lanes):
         result = lidar_avoidance.evaluate(self.scan(lanes))
@@ -90,6 +93,63 @@ class LidarEmergencyLanePolicyTest(unittest.TestCase):
         ])
         self.assertEqual(result["lane_occupancy"], "")
         self.assertEqual(result["lane_action"], "normal")
+
+    def test_manual_partial_lane_occupancy_never_intervenes(self):
+        for lanes in ("L", "C", "R", "LC", "LR", "CR"):
+            with self.subTest(lanes=lanes):
+                result = lidar_avoidance.manual_lane_governor(self.scan(lanes))
+                self.assertFalse(result["all_lanes_blocked"])
+                self.assertFalse(result["emergency_stop"])
+                self.assertEqual(result["throttle_cap"], C.AUTONOMOUS_CRUISE_PWM)
+
+    def test_manual_lcr_slows_from_full_to_minimum_then_stops(self):
+        full = lidar_avoidance.manual_lane_governor(
+            self.scan_at("LCR", C.LIDAR_GOV_FULL_M)
+        )
+        middle_forward_m = (C.LIDAR_GOV_FULL_M + C.LIDAR_GOV_STOP_M) / 2.0
+        middle = lidar_avoidance.manual_lane_governor(
+            self.scan_at("LCR", middle_forward_m)
+        )
+        minimum = lidar_avoidance.manual_lane_governor(
+            self.scan_at("LCR", C.LIDAR_GOV_STOP_M - 0.05)
+        )
+        emergency = lidar_avoidance.manual_lane_governor(
+            self.scan_at("LCR", C.LIDAR_OVERRIDE_EMERGENCY_STOP_M - 0.05)
+        )
+
+        self.assertAlmostEqual(full["throttle_cap"], 1.0, places=2)
+        self.assertGreater(middle["throttle_cap"], C.LIDAR_MIN_MOVE_PWM)
+        self.assertLess(middle["throttle_cap"], 1.0)
+        self.assertAlmostEqual(minimum["throttle_cap"], C.LIDAR_MIN_MOVE_PWM, places=2)
+        self.assertFalse(minimum["emergency_stop"])
+        self.assertEqual(emergency["throttle_cap"], 0.0)
+        self.assertTrue(emergency["emergency_stop"])
+
+    def test_governor_has_no_dead_pwm_region_above_emergency(self):
+        self.assertEqual(
+            lidar_avoidance.governor_target(C.LIDAR_OVERRIDE_EMERGENCY_STOP_M),
+            0.0,
+        )
+        self.assertEqual(
+            lidar_avoidance.governor_target(C.LIDAR_OVERRIDE_EMERGENCY_STOP_M + 0.01),
+            C.LIDAR_MIN_MOVE_PWM,
+        )
+        self.assertEqual(
+            lidar_avoidance.governor_target(C.LIDAR_GOV_STOP_M),
+            C.LIDAR_MIN_MOVE_PWM,
+        )
+        self.assertEqual(
+            lidar_avoidance.governor_target(C.LIDAR_GOV_FULL_M),
+            C.AUTONOMOUS_CRUISE_PWM,
+        )
+
+    def test_reference_throttle_hides_absolute_nonmoving_region(self):
+        self.assertEqual(C.absolute_throttle_to_reference(0.0), 0.0)
+        self.assertEqual(C.absolute_throttle_to_reference(0.30), 0.0)
+        self.assertEqual(C.absolute_throttle_to_reference(C.LIDAR_MIN_MOVE_PWM), 0.0)
+        midpoint = (C.LIDAR_MIN_MOVE_PWM + 1.0) / 2.0
+        self.assertAlmostEqual(C.absolute_throttle_to_reference(midpoint), 0.5)
+        self.assertEqual(C.absolute_throttle_to_reference(1.0), 1.0)
 
 
 if __name__ == "__main__":
