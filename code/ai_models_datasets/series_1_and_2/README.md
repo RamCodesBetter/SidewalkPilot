@@ -30,9 +30,17 @@ Project code and documentation are maintained in the GitHub repo:
 
 | File or folder | What it contains |
 |---|---|
-| `sidewalkpilot_dataset/` | JPG field images used for steering training and evaluation |
+| `sidewalkpilot_v1_and_v2_dataset.tar` | Clean archive containing the 2,224 JPG field images under `sidewalkpilot_dataset/` |
 | `steering_corrections.json` | Steering labels, source names, and repeat weights for each labeled image |
 | `sidewalkpilot_trainer.py` | Training script used with the labeled image dataset |
+
+Extract the image archive before training or evaluation:
+
+```bash
+tar -xf sidewalkpilot_v1_and_v2_dataset.tar
+```
+
+This creates `sidewalkpilot_dataset/` beside the metadata files. The archive excludes macOS metadata and upload-cache files.
 
 ## Current Size
 
