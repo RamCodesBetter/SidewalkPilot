@@ -123,10 +123,76 @@ def _swerve_offset(front_m):
     return C.LIDAR_SWERVE_MIN_DEG + (1.0 - frac) * (C.LIDAR_SWERVE_MAX_DEG - C.LIDAR_SWERVE_MIN_DEG)
 
 
+def _person_or_wall(clusters):
+    """True if the near clusters look like a PERSON (two matched narrow leg clusters) or a WALL
+    (one physically wide arc). These NEVER swerve -- always a full stop, in the emergency zone too."""
+    if not clusters:
+        return False
+    person = False
+    if len(clusters) == 2:
+        a, b = clusters
+        person = (abs(a["centre"] - b["centre"]) <= C.LIDAR_LEG_GAP_MAX_DEG
+                  and abs(a["min_d"] - b["min_d"]) <= C.LIDAR_LEG_RANGE_TOL_M
+                  and a["width"] < C.LIDAR_NARROW_MAX_DEG and b["width"] < C.LIDAR_NARROW_MAX_DEG)
+    widest = max(clusters, key=lambda c: c["width_m"])
+    return person or widest["width_m"] >= C.LIDAR_WALL_MIN_WIDTH_M
+
+
+def _emergency_swerve_through(scan, fwd):
+    """An obstacle sits inside the emergency zone. If a car-width(+margin) lateral gap is clear on
+    ONE side of the sidewalk corridor AND that escape lane is drivable ahead, return a swerve dict
+    to squeeze THROUGH; otherwise None so the caller hard-stops. Fail-safe: any doubt -> None.
+    The caller must have already ruled out person/wall."""
+    hw = C.LIDAR_CORRIDOR_HALF_WIDTH_M
+    need = C.LIDAR_CAR_WIDTH_M + C.LIDAR_SWERVE_THROUGH_MARGIN_M
+    danger = C.LIDAR_OVERRIDE_EMERGENCY_STOP_M + C.LIDAR_SWERVE_THROUGH_BAND_M
+    occ_x = []          # lateral positions of the emergency obstacle (points at/inside the danger band)
+    ahead = []          # (x, forward) of every in-corridor point ahead -> used to test the escape lane
+    for p in scan or []:
+        if not _valid(p):
+            continue
+        a = _norm_angle(p)
+        d = p.distance_mm / 1000.0
+        ar = math.radians(a)
+        x = d * math.sin(ar)                          # lateral offset (right +, left -)
+        f = d * math.cos(ar)                          # forward distance
+        if f <= 0.0 or abs(x) > hw:
+            continue                                  # only points inside the sidewalk corridor, ahead
+        ahead.append((x, f))
+        if f <= danger:
+            occ_x.append(x)
+    if not occ_x:
+        return None                                   # nothing concrete to squeeze past -> stop
+    x_lo, x_hi = min(occ_x), max(occ_x)
+    left_free = x_lo - (-hw)                           # clear lateral room LEFT of the obstacle
+    right_free = hw - x_hi                             # clear lateral room RIGHT of the obstacle
+    if left_free >= right_free:
+        side, gap = "left", left_free
+        lane_ahead = [f for x, f in ahead if x < x_lo]    # open strip LEFT of the obstacle (excl. its edge)
+    else:
+        side, gap = "right", right_free
+        lane_ahead = [f for x, f in ahead if x > x_hi]    # open strip RIGHT of the obstacle (excl. its edge)
+    if gap < need:
+        return None                                   # obstacle spans the corridor (no car-width gap) -> stop
+    if lane_ahead and min(lane_ahead) < C.LIDAR_SWERVE_THROUGH_AHEAD_M:
+        return None                                   # a SEPARATE obstacle blocks the escape lane -> stop
+    off = C.LIDAR_SWERVE_MAX_DEG                       # emergency = obstacle is close -> hardest swerve
+    steer = _CENTER_DEG - off if side == "left" else _CENTER_DEG + off
+    return {"code": "SWR", "stop": False, "steer": steer,        # reuse SWR: runtime already applies it
+            "throttle": C.LIDAR_MIN_MOVE_PWM, "front_m": fwd, "reason": "lidar_swerve_through"}
+
+
 def evaluate(scan):
     fwd, left_m, right_m = _forward_and_wedges(scan)
 
     if fwd < C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
+        # Blue-corridor swerve-through: squeeze past a NARROW obstacle in the emergency zone only if
+        # it is not a person/wall and a car-width(+margin) gap is clear with a drivable lane ahead.
+        # Any doubt falls through to the hard stop.
+        if C.LIDAR_SWERVE_THROUGH_ENABLED and not _person_or_wall(_forward_clusters(scan)):
+            through = _emergency_swerve_through(scan, fwd)
+            if through is not None:
+                return through
         return {"code": "EMR", "stop": True, "steer": None, "throttle": 0.0,
                 "front_m": fwd, "reason": "lidar_emergency"}
 
@@ -137,18 +203,12 @@ def evaluate(scan):
 
     front_m = min(c["min_d"] for c in clusters)
 
-    person = False
-    if len(clusters) == 2:
-        a, b = clusters
-        person = (abs(a["centre"] - b["centre"]) <= C.LIDAR_LEG_GAP_MAX_DEG
-                  and abs(a["min_d"] - b["min_d"]) <= C.LIDAR_LEG_RANGE_TOL_M
-                  and a["width"] < C.LIDAR_NARROW_MAX_DEG and b["width"] < C.LIDAR_NARROW_MAX_DEG)
-    widest = max(clusters, key=lambda c: c["width_m"])
-    if person or widest["width_m"] >= C.LIDAR_WALL_MIN_WIDTH_M:      # PHYSICAL width, not angular
+    if _person_or_wall(clusters):                                   # PHYSICAL width, not angular
         return {"code": "HLD", "stop": True, "steer": None, "throttle": 0.0,
                 "front_m": front_m, "reason": "lidar_hold"}         # person/wall -> full stop
 
     # MAILBOX: swerve AWAY from the object, toward a clear side
+    widest = max(clusters, key=lambda c: c["width_m"])
     left_clear = left_m >= C.LIDAR_AVOID_SIDE_CLEAR_M
     right_clear = right_m >= C.LIDAR_AVOID_SIDE_CLEAR_M
     away = "left" if widest["centre"] >= 0.0 else "right"
