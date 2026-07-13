@@ -50,12 +50,19 @@ LIDAR_POINT_YELLOW: Color = (255, 220, 0)    # < 1.2 m
 LIDAR_POINT_GREEN: Color = (0, 255, 70)      # < 2.0 m
 LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
 LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
-LIDAR_CONE: Color = (60, 180, 255)           # forward corridor guide lines
-LIDAR_LANE_DIVIDER: Color = (20, 80, 120)    # equal L/C/R lane boundaries
-LIDAR_LANE_CLEAR: Color = (40, 130, 150)
+LIDAR_OUTER_GUIDE: Color = (48, 144, 240)    # outer sidewalk corridor boundaries
+LIDAR_INNER_GUIDE: Color = (80, 112, 240)    # inner L/C/R boundaries; equal intensity, different blue
+LIDAR_LANE_CLEAR: Color = LIDAR_POINT_BLUE
 LIDAR_LANE_OCCUPIED: Color = (255, 210, 0)
 LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762          # each guide line 2.5ft (30in) off centre => ~5ft sidewalk
                                              # (car is only ~25.2cm wide, so it's a narrow car in a wide lane)
+LIDAR_PREVIEW_SIDE_PADDING_PX = 6
+LIDAR_PREVIEW_GUIDE_SPACING_PX = 17
+LIDAR_PREVIEW_GUIDE_X = tuple(
+    LIDAR_PREVIEW_SIDE_PADDING_PX + index * LIDAR_PREVIEW_GUIDE_SPACING_PX
+    for index in range(4)
+)
+LIDAR_FORWARD_SCALE_PX_PER_M = 11.0
 # Horizontal rungs across the corridor at the LiDAR avoidance distances -- MIRROR config.py
 # (EMERGENCY 1.05 / GOV_STOP 1.25 / WARN 1.40 / GOV_FULL 1.65); update here if those change.
 LIDAR_RUNG_DISTANCES = [
@@ -75,6 +82,24 @@ ALL_GLYPH_INDEX = 57
 PLUS_GLYPH_INDEX = 0
 MINUS_GLYPH_INDEX = 1
 MIN_VISIBLE_BRIGHTNESS_PERCENT = 5
+
+
+def lidar_lane_for_coordinates(lateral_m: float, forward_m: float) -> str | None:
+    if forward_m <= 0.0 or abs(lateral_m) > LIDAR_CORRIDOR_HALF_WIDTH_M:
+        return None
+    inner_boundary_m = LIDAR_CORRIDOR_HALF_WIDTH_M / 3.0
+    if lateral_m < -inner_boundary_m:
+        return "L"
+    if lateral_m > inner_boundary_m:
+        return "R"
+    return "C"
+
+
+def lidar_lane_zone_color(forward_m: float) -> Color:
+    for threshold_m, color in LIDAR_RUNG_DISTANCES:
+        if forward_m <= threshold_m:
+            return color
+    return LIDAR_LANE_CLEAR
 
 def load_glyphs_from_header(path: Path) -> List[Glyph]:
     text = path.read_text(encoding="utf-8")
@@ -193,6 +218,18 @@ class DashboardRenderer:
         base_y = (row_index * CELL_SIZE) + y_offset_px
         for row in range(8):
             row_bits = glyph[row]
+            for bit in range(8):
+                if row_bits & (1 << (7 - bit)):
+                    self._set_pixel(base_x + bit, base_y + row, color)
+
+    def _draw_glyph_pixels(
+        self,
+        glyph: Sequence[int],
+        base_x: int,
+        base_y: int,
+        color: Color,
+    ):
+        for row, row_bits in enumerate(glyph):
             for bit in range(8):
                 if row_bits & (1 << (7 - bit)):
                     self._set_pixel(base_x + bit, base_y + row, color)
@@ -446,54 +483,35 @@ class DashboardRenderer:
     def _draw_lidar_page(self, payload: Dict[str, object], y_offset_px: int = 0):
         # Forward-facing view: car at bottom-centre, forward = up. Parallel outer guides mark
         # the 5 ft corridor; two inner guides split it into equal L/C/R lanes (5/3 ft each).
-        car_x = PANEL_WIDTH // 2
+        outer_left_x, inner_left_x, inner_right_x, outer_right_x = LIDAR_PREVIEW_GUIDE_X
+        preview_center_x = (outer_left_x + outer_right_x) / 2.0
+        car_x = int(round(preview_center_x))
         car_y = (PANEL_HEIGHT - 1) + y_offset_px
-        scale = 9.0                       # px per metre (forward ~0..3.4 m fills the height)
-        half_w_px = int(round(LIDAR_CORRIDOR_HALF_WIDTH_M * scale))
-        for sign in (-1, 1):              # left + right corridor lines, parallel to forward
-            gx = car_x + sign * half_w_px
+        forward_scale = LIDAR_FORWARD_SCALE_PX_PER_M
+        lateral_scale = (
+            (outer_right_x - outer_left_x) / (2.0 * LIDAR_CORRIDOR_HALF_WIDTH_M)
+        )
+        guide_colors = (
+            LIDAR_OUTER_GUIDE,
+            LIDAR_INNER_GUIDE,
+            LIDAR_INNER_GUIDE,
+            LIDAR_OUTER_GUIDE,
+        )
+        for gx, guide_color in zip(LIDAR_PREVIEW_GUIDE_X, guide_colors):
             for gy in range(y_offset_px, car_y + 1):      # straight up the panel
-                self._set_pixel(gx, gy, LIDAR_CONE)
-        lane_boundary_px = half_w_px / 3.0
-        for sign in (-1, 1):
-            gx = int(round(car_x + sign * lane_boundary_px))
-            for gy in range(y_offset_px, car_y + 1):
-                self._set_pixel(gx, gy, LIDAR_LANE_DIVIDER)
+                self._set_pixel(gx, gy, guide_color)
         # horizontal rungs across the corridor at the LiDAR avoidance distances (colour = zone)
         for dist_m, rung_color in LIDAR_RUNG_DISTANCES:
-            ry = car_y - int(round(dist_m * scale))
+            ry = car_y - int(round(dist_m * forward_scale))
             if ry < y_offset_px:
                 continue
-            for rx in range(car_x - half_w_px, car_x + half_w_px + 1):
+            for rx in range(outer_left_x, outer_right_x + 1):
                 self._set_pixel(rx, ry, rung_color)
         occupied = str(payload.get("lidar_lane_occupancy", "")).upper()
         emergency_occupied = str(payload.get("lidar_emergency_lane_occupancy", "")).upper()
-        tiny_labels = {
-            "L": ("100", "100", "100", "100", "111"),
-            "C": ("111", "100", "100", "100", "111"),
-            "R": ("110", "101", "110", "101", "101"),
-        }
-        lane_centers = {
-            "L": car_x - int(round(2.0 * half_w_px / 3.0)),
-            "C": car_x,
-            "R": car_x + int(round(2.0 * half_w_px / 3.0)),
-        }
-        for lane in "LCR":
-            color = LIDAR_LANE_CLEAR
-            if lane in occupied:
-                color = LIDAR_LANE_OCCUPIED
-            if lane in emergency_occupied:
-                color = LIDAR_POINT_RED
-            for dy, row in enumerate(tiny_labels[lane]):
-                for dx, bit in enumerate(row):
-                    if bit == "1":
-                        self._set_pixel(lane_centers[lane] - 1 + dx, y_offset_px + dy, color)
         raw_points = payload.get("lidar_points", [])
-        point_count = max(0, int(payload.get("lidar_point_count", 0)))
-        if not raw_points:
-            self._draw_text_row(0, ["L", "D", "R", ":", "N", "O", "N", "E"], ALERT_RED_DIM, y_offset_px)
-            count_cells = self._format_three_digits(point_count)
-            self._draw_text_row(1, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
+        parsed_points = []
+        lane_forward_m = {lane: math.inf for lane in "LCR"}
         if isinstance(raw_points, list):
             for raw_point in raw_points:
                 if not isinstance(raw_point, list) or len(raw_point) < 2:
@@ -504,8 +522,26 @@ class DashboardRenderer:
                 except (TypeError, ValueError):
                     continue
                 angle_rad = math.radians(angle_deg)
-                x = int(round(car_x + math.sin(angle_rad) * distance_m * scale))
-                y = int(round(car_y - math.cos(angle_rad) * distance_m * scale))
+                lateral_m = math.sin(angle_rad) * distance_m
+                forward_m = math.cos(angle_rad) * distance_m
+                parsed_points.append((angle_rad, distance_m))
+                lane = lidar_lane_for_coordinates(lateral_m, forward_m)
+                if lane is not None:
+                    lane_forward_m[lane] = min(lane_forward_m[lane], forward_m)
+        lane_centers = {
+            "L": (outer_left_x + inner_left_x) / 2.0,
+            "C": (inner_left_x + inner_right_x) / 2.0,
+            "R": (inner_right_x + outer_right_x) / 2.0,
+        }
+        point_count = max(0, int(payload.get("lidar_point_count", 0)))
+        if not raw_points:
+            self._draw_text_row(0, ["L", "D", "R", ":", "N", "O", "N", "E"], ALERT_RED_DIM, y_offset_px)
+            count_cells = self._format_three_digits(point_count)
+            self._draw_text_row(1, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
+        else:
+            for angle_rad, distance_m in parsed_points:
+                x = int(round(preview_center_x + math.sin(angle_rad) * distance_m * lateral_scale))
+                y = int(round(car_y - math.cos(angle_rad) * distance_m * forward_scale))
                 if distance_m < 0.6:
                     color = LIDAR_POINT_RED
                 elif distance_m < 0.9:
@@ -519,6 +555,19 @@ class DashboardRenderer:
                 else:
                     color = LIDAR_POINT_BLUE
                 self._set_pixel(x, y, color)
+            for lane in "LCR":
+                color = lidar_lane_zone_color(lane_forward_m[lane])
+                if lane in occupied and color in (LIDAR_LANE_CLEAR, LIDAR_POINT_GREEN):
+                    color = LIDAR_POINT_YELLOW
+                if lane in emergency_occupied:
+                    color = LIDAR_POINT_RED
+                label_x = int(round(lane_centers[lane] - ((CELL_SIZE - 1) / 2.0)))
+                self._draw_glyph_pixels(
+                    self.letter_map.get(lane, self.letter_map[" "]),
+                    label_x,
+                    y_offset_px,
+                    color,
+                )
         for dx, dy in ((-1, 0), (0, 0), (1, 0), (0, -1)):
             self._set_pixel(car_x + dx, car_y + dy, LIDAR_CAR)
         action = str(payload.get("lidar_lane_action", "normal")).lower()
