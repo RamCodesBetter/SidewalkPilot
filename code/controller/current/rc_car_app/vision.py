@@ -62,9 +62,11 @@ STEERING_MODEL_VERSIONS = (
     "3.2b",
     "3.3",
     "3.3b",
+    "3.4",
+    "3.4b",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
-# Default to the HIGHEST version (last in the ascending list, currently 3.3b). The Pi
+# Default to the HIGHEST version (last in the ascending list, currently 3.4b). The Pi
 # sends this to Jon each frame, so Jon runs the best model by default and z2w MODL
 # shows it. Cycle to others on the model page. (RC_CAR_STEERING_MODEL still overrides.)
 DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", STEERING_MODEL_VERSIONS[-1])
