@@ -113,7 +113,7 @@ STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG = float(
 STEERING_SERVO_CENTER_OFFSET = float(
     os.environ.get(
         "RC_CAR_STEERING_SERVO_CENTER_OFFSET",
-        str(9.0 / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),   # DELT center trim = +9deg (Ram, 2026-07-08)
+        str(12.0 / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),  # DELT center trim = +12deg (Ram, 2026-07-13)
     )
 )
 STEERING_SERVO_CENTER_PRELOAD = 0.0
