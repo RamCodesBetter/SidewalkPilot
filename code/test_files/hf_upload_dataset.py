@@ -32,7 +32,12 @@ from pathlib import Path
 def main():
     ap = argparse.ArgumentParser(description="Upload a dataset folder to a Hugging Face dataset repo")
     ap.add_argument("--repo", required=True, help="dataset repo id, e.g. user/SidewalkPilot_v3")
-    ap.add_argument("--folder", required=True, help="local dataset folder (images + labels.json)")
+    ap.add_argument("--folder", help="local dataset folder for LOOSE upload (images + labels.json)")
+    ap.add_argument("--tar", help="PREFERRED for big image sets: upload ONE tarball (1 commit). HF free "
+                                  "tier caps ~128 commits/hour, so loose uploads of 50k+ files get "
+                                  "throttled/killed. Pack the images into a tar and push that instead.")
+    ap.add_argument("--tar-in-repo", help="repo path for --tar (default sidewalkpilot_dataset/<basename>)")
+    ap.add_argument("--labels", help="labels.json to publish at sidewalkpilot_dataset/labels.json")
     ap.add_argument("--card", help="local README.md to publish as the dataset card (repo root)")
     ap.add_argument("--extra", nargs="*", default=[], help="extra files to upload to the repo root")
     ap.add_argument("--ignore", nargs="*", default=[], help="extra glob patterns to skip")
@@ -53,16 +58,36 @@ def main():
         sys.exit("Not logged in. Run:  huggingface-cli login   (paste a WRITE token)")
     print(f"logged in as: {who.get('name', '?')}")
 
-    folder = Path(args.folder)
-    if not folder.is_dir():
-        sys.exit(f"no such folder: {folder}")
+    if not args.folder and not args.tar:
+        sys.exit("give either --tar (preferred for image sets) or --folder")
 
     api = HfApi()
     api.create_repo(args.repo, repo_type="dataset", exist_ok=True, private=args.private)
 
-    print(f"uploading folder {folder} -> {args.repo}  (large; resumable; ignoring {ignore})...")
-    api.upload_large_folder(repo_id=args.repo, repo_type="dataset", folder_path=str(folder),
-                            ignore_patterns=ignore)
+    if args.tar:
+        tarp = Path(args.tar)
+        if not tarp.is_file():
+            sys.exit(f"no such tar: {tarp}")
+        dest = args.tar_in_repo or f"sidewalkpilot_dataset/{tarp.name}"
+        gb = tarp.stat().st_size / 1e9
+        print(f"uploading tar {tarp} ({gb:.1f} GB) -> {dest}  (single commit)...")
+        api.upload_file(path_or_fileobj=str(tarp), path_in_repo=dest,
+                        repo_id=args.repo, repo_type="dataset")
+        if args.labels:
+            lp = Path(args.labels)
+            if lp.is_file():
+                api.upload_file(path_or_fileobj=str(lp), path_in_repo="sidewalkpilot_dataset/labels.json",
+                                repo_id=args.repo, repo_type="dataset")
+                print("published labels.json -> sidewalkpilot_dataset/labels.json")
+            else:
+                print(f"[skip] labels not found: {lp}")
+    else:
+        folder = Path(args.folder)
+        if not folder.is_dir():
+            sys.exit(f"no such folder: {folder}")
+        print(f"uploading folder {folder} -> {args.repo}  (large; resumable; ignoring {ignore})...")
+        api.upload_large_folder(repo_id=args.repo, repo_type="dataset", folder_path=str(folder),
+                                ignore_patterns=ignore)
 
     if args.card and Path(args.card).is_file():
         api.upload_file(path_or_fileobj=args.card, path_in_repo="README.md",
