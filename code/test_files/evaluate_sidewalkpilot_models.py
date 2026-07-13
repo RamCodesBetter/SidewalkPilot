@@ -46,9 +46,8 @@ SERIES_1_SCALE_DEG = 86.0
 SERIES_2_SCALE_DEG = 85.0
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+b?)\.pth$")
 
-# Series 3 (heavy 2-output SidewalkPilotV3, 320x180). Evaluated on its OWN dataset
-# (the new collected runs), not the Series 1/2 correction label set — so its rows
-# are folded into the same report with that caveat noted.
+# Series 3 (heavy SidewalkPilotV3, 320x180). Its collected field dataset is the
+# common evaluation set for every Series 1, 2, and 3 checkpoint in this report.
 S3_WIDTH = 320
 S3_HEIGHT = 180
 S3_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3" / "sidewalkpilot_dataset"
@@ -97,8 +96,10 @@ SOURCE_PURPOSES = {
     "D0510_19": "v2.3 field-failure run 2 (short)",
     "D0510_20": "v2.3 field-failure run 3: turns, road-right driving, driveways",
     "D0629_17": "Series 3 collected run (camera tilted, poor image quality)",
-    "D0702_16": "Series 3 base 50k clean set: cloudy/overcast daylight sidewalk driving",
+    "D0702_16": "Series 3 July 2 base set: two manual field runs, 50,684 images",
     "D0707_16": "Bright-sun HARD/diagonal shadows across the sidewalk (v3.2 shadow-robustness batch)",
+    "D0712_15": "Series 3 manual field collection, July 12 run 1",
+    "D0712_16": "Series 3 manual field collection, July 12 run 2 (103-frame bad segment removed)",
 }
 
 
@@ -368,6 +369,19 @@ def bucket_summary(preds, targets):
         m = t9 == ri
         confusion9[rn] = {cn: int((p9[m] == ci).sum()) for ci, (cn, _, _) in enumerate(BUCKETS9)}
     count = max(1, len(targets))
+    class_totals = np.bincount(t9, minlength=len(BUCKETS9))
+    class_exact = np.bincount(t9[t9 == p9], minlength=len(BUCKETS9))
+    nonempty = class_totals > 0
+    macro_exact = float(np.mean(class_exact[nonempty] / class_totals[nonempty])) if nonempty.any() else 0.0
+    straight_index = next(i for i, (name, _, _) in enumerate(BUCKETS9) if name == "ST")
+    turn_mask = t9 != straight_index
+    turn_count = max(1, int(turn_mask.sum()))
+    straight_mask = t9 == straight_index
+    straight_count = max(1, int(straight_mask.sum()))
+    turn_exact = int((p9[turn_mask] == t9[turn_mask]).sum())
+    turn_near = int((np.abs(p9[turn_mask] - t9[turn_mask]) <= 1).sum())
+    turn_detected = int((p9[turn_mask] != straight_index).sum())
+    straight_exact = int((p9[straight_mask] == straight_index).sum())
     return {
         "prediction_bucket_counts": bucket_counts(preds),
         "ground_bucket_counts": bucket_counts(targets),
@@ -379,6 +393,15 @@ def bucket_summary(preds, targets):
         },
         "bucket_confusion_ground_rows_pred_cols": confusion,
         "bucket9_confusion_ground_rows_pred_cols": confusion9,
+        "selection_metrics": {
+            "balanced_9_bucket_exact_percent": macro_exact * 100.0,
+            "turn_detection_recall_percent": turn_detected * 100.0 / turn_count,
+            "turn_exact_bucket_recall_percent": turn_exact * 100.0 / turn_count,
+            "turn_within_one_bucket_recall_percent": turn_near * 100.0 / turn_count,
+            "straight_exact_bucket_recall_percent": straight_exact * 100.0 / straight_count,
+            "turn_count": int(turn_mask.sum()),
+            "straight_count": int(straight_mask.sum()),
+        },
     }
 
 
@@ -554,24 +577,34 @@ def evaluate_series3(models_dir, device, batch_size):
         if v not in by_ver or rank < by_ver[v][0]:
             by_ver[v] = (rank, p)
     s3_paths = [by_ver[v][1] for v in sorted(by_ver)]
-    if not s3_paths or not labels_path.is_file():
+    s12_paths = discover_models(models_dir)   # Series 1/2 (SteeringAutonomyV2) -- run on the SAME S3 data
+    need_clahe = any(v in {"2.0", "2.0b"} for v, _ in s12_paths)
+    if (not s3_paths and not s12_paths) or not labels_path.is_file():
         return {}, []
 
     s3mod = _load_s3_module()
     SidewalkPilotV3 = s3mod.SidewalkPilotV3
     labels = json.loads(labels_path.read_text())
 
-    tensors, targets, samples = [], [], []
-    for name, label in labels.items():
+    # Evaluate on the FULL dataset. Frames are stored as uint8 (below) so all 81k fit (~14 GB)
+    # rather than the ~56 GB a float32 stack needs; each batch is normalized on the fly at inference.
+    items = sorted(labels.items())
+
+    tensors, tensors12, tensors12c, targets, samples = [], [], [], [], []
+    for name, label in items:
         frame = cv2.imread(str(S3_DATASET_DIR / name), cv2.IMREAD_COLOR)
         if frame is None:
             continue
         steer = label.get("steering") if isinstance(label, dict) else label
         if steer is None:
             continue
-        img = cv2.resize(frame, (S3_WIDTH, S3_HEIGHT), interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
-        img = (img - 0.5) / 0.5
-        tensors.append(np.transpose(img, (2, 0, 1)))
+        img = cv2.resize(frame, (S3_WIDTH, S3_HEIGHT), interpolation=cv2.INTER_AREA)  # S3 uint8 HWC BGR
+        tensors.append(np.transpose(img, (2, 0, 1)))                                  # S3 uint8 CHW (normalized per-batch)
+        img12 = cv2.resize(frame, (WIDTH, HEIGHT), interpolation=cv2.INTER_AREA)       # S1/2 uint8 200x66
+        tensors12.append(np.transpose(img12, (2, 0, 1)))
+        if need_clahe:                                                                 # only if a v2.0/2.0b model is present
+            imgc = cv2.resize(apply_clahe_to_bgr(frame), (WIDTH, HEIGHT), interpolation=cv2.INTER_AREA)
+            tensors12c.append(np.transpose(imgc, (2, 0, 1)))
         targets.append(label_to_servo(steer))
         run = str(name).split("__")[0]
         img_part = str(name).split("__", 1)[1] if "__" in str(name) else str(name)
@@ -585,12 +618,20 @@ def evaluate_series3(models_dir, device, batch_size):
     for s in samples:
         s["dataset"] = s["source"] = run_labels[s["run"]]
 
-    inputs_np = np.stack(tensors).astype(np.float32)   # for onnxruntime
-    inputs = torch.from_numpy(inputs_np)               # for torch
+    inputs_u8 = np.stack(tensors)                      # (N,3,180,320) uint8 (~14 GB for 81k) -- S3 models
+    del tensors
+    inputs12_u8 = np.stack(tensors12) if tensors12 else None    # (N,3,66,200) uint8 -- S1/2 models
+    del tensors12
+    inputs12c_u8 = np.stack(tensors12c) if tensors12c else None  # CLAHE variant (v2.0/2.0b)
+    del tensors12c
     targets = np.array(targets, dtype=np.float32)
     datasets = [s["dataset"] for s in samples]
     sources = [s["source"] for s in samples]
-    print(f"[eval.s3] dataset images={len(samples)}", flush=True)
+    print(f"[eval.s3] dataset images={len(samples)} (full, uint8) | s3 models={len(s3_paths)} s1/2 models={len(s12_paths)}", flush=True)
+
+    def _norm_batch(u8):                               # uint8 (n,3,H,W) -> normalized float32
+        x = u8.astype(np.float32) / 255.0
+        return (x - 0.5) / 0.5
 
     results = {}
     for path in s3_paths:
@@ -602,9 +643,11 @@ def evaluate_series3(models_dir, device, batch_size):
             providers = [p for p in ("CUDAExecutionProvider", "CPUExecutionProvider")
                          if p in ort.get_available_providers()] or ["CPUExecutionProvider"]
             sess = ort.InferenceSession(str(path), providers=providers)
+            print(f"[eval] model={version} ONNX providers={sess.get_providers()}", flush=True)
             iname = sess.get_inputs()[0].name
-            for start in range(0, len(inputs_np), batch_size):
-                out = sess.run(None, {iname: inputs_np[start:start + batch_size]})[0]
+            for start in range(0, len(inputs_u8), batch_size):
+                batch = _norm_batch(inputs_u8[start:start + batch_size])
+                out = sess.run(None, {iname: batch})[0]
                 preds.append(_decode_s3_steering(out, s3mod))
         else:
             model = SidewalkPilotV3().to(device)
@@ -619,8 +662,9 @@ def evaluate_series3(models_dir, device, batch_size):
             model.load_state_dict(state, strict=True)
             model.eval()
             with torch.no_grad():
-                for start in range(0, len(inputs), batch_size):
-                    out = model(inputs[start:start + batch_size].to(device, non_blocking=True)).cpu().numpy()
+                for start in range(0, len(inputs_u8), batch_size):
+                    batch = torch.from_numpy(_norm_batch(inputs_u8[start:start + batch_size]))
+                    out = model(batch.to(device, non_blocking=True)).cpu().numpy()
                     preds.append(_decode_s3_steering(out, s3mod))
         preds = np.concatenate(preds).astype(np.float32)
 
@@ -638,6 +682,41 @@ def evaluate_series3(models_dir, device, batch_size):
             "series": 3,
             "preprocessing": "raw BGR 320x180",
             "output_scale_deg": None,           # 2-output unit controls, no fixed scale
+            "overall": metric_block(preds, targets),
+            "by_dataset": by_dataset,
+            "by_source": by_source,
+            **bucket_summary(preds, targets),
+        }
+        overall = results[version]["overall"]
+        print(f"[eval] done model={version} mae={overall['mae']:.3f} "
+              f"median={overall['median_ae']:.3f} within5={overall['within_5']}/{overall['count']}",
+              flush=True)
+
+    # Series 1/2 (SteeringAutonomyV2, 200x66) scored on the SAME S3 images (torch/GPU).
+    for version, path in s12_paths:
+        print(f"[eval] model={version} checkpoint={path.name} (on S3 data)", flush=True)
+        model = load_model(path, version, device)
+        src_u8 = inputs12c_u8 if (version in {"2.0", "2.0b"} and inputs12c_u8 is not None) else inputs12_u8
+        preds = []
+        with torch.no_grad():
+            for start in range(0, len(src_u8), batch_size):
+                batch = torch.from_numpy(_norm_batch(src_u8[start:start + batch_size]))
+                out = torch.clamp(model(batch.to(device, non_blocking=True)), 0.0, 180.0)
+                preds.append(out.cpu().numpy().reshape(-1))
+        preds = np.concatenate(preds).astype(np.float32)
+        by_dataset = {}
+        for name in sorted(set(datasets)):
+            idx = [i for i, v in enumerate(datasets) if v == name]
+            by_dataset[name] = metric_block(preds[idx], targets[idx])
+        by_source = {}
+        for name in sorted(set(sources)):
+            idx = [i for i, v in enumerate(sources) if v == name]
+            by_source[name] = metric_block(preds[idx], targets[idx])
+        results[version] = {
+            "checkpoint": str(path.resolve()),
+            "series": series_for_version(version),
+            "preprocessing": preprocessing_for_version(version),
+            "output_scale_deg": scale_for_version(version),
             "overall": metric_block(preds, targets),
             "by_dataset": by_dataset,
             "by_source": by_source,
@@ -771,12 +850,21 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     small = ParagraphStyle("Small", parent=styles["BodyText"], fontSize=7, leading=9)
 
     versions = sorted(results, key=version_key)
-    ranked = sorted(versions, key=lambda version: results[version]["overall"]["mae"])
+    ranked_mae = sorted(versions, key=lambda version: results[version]["overall"]["mae"])
+    ranked = sorted(
+        versions,
+        key=lambda version: (
+            -results[version]["selection_metrics"]["balanced_9_bucket_exact_percent"],
+            -results[version]["selection_metrics"]["turn_within_one_bucket_recall_percent"],
+            results[version]["overall"]["mae"],
+        ),
+    )
     series1 = [version for version in versions if series_for_version(version) == 1]
     series2 = [version for version in versions if series_for_version(version) == 2]
     series3 = [version for version in versions if series_for_version(version) == 3]
     best = ranked[0]
     second = ranked[1] if len(ranked) > 1 else None
+    best_mae = ranked_mae[0]
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     doc = SimpleDocTemplate(
@@ -793,31 +881,37 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     story.append(paragraph("Combined current-label offline evaluation", h2))
     story.append(
         paragraph(
-            f"Generated {generated}. All available SidewalkPilot steering checkpoints are evaluated on the same active correction set: "
-            f"{len(samples):,} labeled images from steering_corrections.json. Active checkpoint naming is SidewalkPilot-vX.Y.pth "
-            "for final checkpoints and SidewalkPilot-vX.Yb.pth for best checkpoints.",
+            f"Generated {generated}. Every SidewalkPilot steering checkpoint (Series 1, 2, and 3) is evaluated on the "
+            f"SAME Series 3 dataset: {len(s3_samples):,} labeled field images. Series 1/2 (SteeringAutonomyV2, 200x66) and "
+            "Series 3 (SidewalkPilotV3, 320x180) each run with their own preprocessing but are scored against the same "
+            "steering labels, so the numbers are directly comparable. Checkpoint naming: SidewalkPilot-vX.Y.pth for final, "
+            "SidewalkPilot-vX.Yb.pth for best.",
             normal,
         )
     )
+    best_metrics = results[best]["selection_metrics"]
     best_text = (
-        f"Best offline checkpoint on this label set: {best} ({Path(results[best]['checkpoint']).name}) "
-        f"with MAE {results[best]['overall']['mae']:.3f}, median AE {results[best]['overall']['median_ae']:.3f}, "
-        f"score {results[best]['overall']['score']:.3f}%."
+        f"Best class-balanced offline checkpoint: {best} ({Path(results[best]['checkpoint']).name}) with "
+        f"balanced 9-bucket exact recall {best_metrics['balanced_9_bucket_exact_percent']:.1f}%, "
+        f"turn exact recall {best_metrics['turn_exact_bucket_recall_percent']:.1f}%, and "
+        f"turn within-one-bucket recall {best_metrics['turn_within_one_bucket_recall_percent']:.1f}%."
     )
     if second:
         best_text += (
-            f" Second: {second} ({Path(results[second]['checkpoint']).name}) "
-            f"with MAE {results[second]['overall']['mae']:.3f}."
+            f" Second by the same ranking: {second} ({Path(results[second]['checkpoint']).name})."
         )
+    best_text += (
+        f" Lowest MAE is {best_mae} at {results[best_mae]['overall']['mae']:.3f} deg; MAE remains secondary because "
+        "straight labels dominate this dataset."
+    )
     story.append(paragraph(best_text, normal))
     story.append(
         paragraph(
             "Series 1 uses raw BGR and output scale 86. Series 2 uses output scale 85; v2.0/v2.0b use legacy HSV/CLAHE "
-            "preprocessing, while v2.1 and newer use raw BGR. Series 3 is the heavy 2-output (steering+throttle) "
-            "SidewalkPilotV3 at 320x180, evaluated on its OWN collected dataset "
-            f"({len(s3_samples):,} images) rather than the Series 1/2 correction set, so its steering MAE is comparable "
-            "in unit (servo degrees) but measured on a different set. These are offline decision comparisons; field "
-            "reliability still has to be proven on the car.",
+            "preprocessing, while v2.1 and newer use raw BGR. Series 3 is the heavy hybrid SidewalkPilotV3 at 320x180. "
+            "All series are measured on the same Series 3 image set in servo degrees. Cross-series numbers are directly "
+            "comparable for this image set, but Series 1/2 were trained under older data and calibration regimes. These are "
+            "offline fit/transfer comparisons; field reliability still has to be proven on the car.",
             normal,
         )
     )
@@ -828,35 +922,39 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     for source_name in sorted(source_counts):
         source_rows.append([source_name, str(source_counts[source_name]), SOURCE_PURPOSES.get(source_name, "")])
     story.append(Spacer(1, 0.08 * inch))
-    story.append(paragraph("Active Correction Sources", h2))
+    story.append(paragraph("Series 3 Evaluation Sources", h2))
     story.append(make_table(source_rows, col_widths=[1.0 * inch, 0.7 * inch, 7.2 * inch], header_color=colors.HexColor("#334155")))
 
-    rank_rows = [["Rank", "Model", "Checkpoint filename", "Prep", "MAE", "Med", "Max", "Signed", "<=5", "<=10", "Score"]]
+    rank_rows = [["Rank", "Model", "Checkpoint filename", "Prep", "Bal9", "Turn exact", "Turn +/-1", "ST exact", "MAE", "Med", "Signed"]]
     for rank, version in enumerate(ranked, start=1):
         overall = results[version]["overall"]
+        selection = results[version]["selection_metrics"]
         rank_rows.append(
             [
                 str(rank),
                 version,
                 Path(results[version]["checkpoint"]).name,
                 results[version]["preprocessing"],
+                fmt_pct(selection["balanced_9_bucket_exact_percent"], 1),
+                fmt_pct(selection["turn_exact_bucket_recall_percent"], 1),
+                fmt_pct(selection["turn_within_one_bucket_recall_percent"], 1),
+                fmt_pct(selection["straight_exact_bucket_recall_percent"], 1),
                 fmt_num(overall["mae"]),
                 fmt_num(overall["median_ae"]),
-                fmt_num(overall["max_ae"]),
                 fmt_num(overall["signed_error"]),
-                f"{overall['within_5']}/{overall['count']}",
-                f"{overall['within_10']}/{overall['count']}",
-                fmt_pct(overall["score"]),
             ]
         )
     story.append(Spacer(1, 0.1 * inch))
-    story.append(paragraph("Combined Model Ranking", h2))
+    story.append(paragraph("Class-Balanced Model Ranking", h2))
+    story.append(paragraph(
+        "Ranked by macro-average exact recall across the 9 steering buckets, then turn within-one-bucket recall, then MAE. "
+        "This prevents the 66%-straight label majority from making a straight-collapsed model look best.", small))
     rank_table = make_table(
         rank_rows,
-        col_widths=[0.35 * inch, 0.45 * inch, 1.55 * inch, 1.05 * inch, 0.5 * inch, 0.5 * inch, 0.5 * inch, 0.55 * inch, 0.75 * inch, 0.75 * inch, 0.6 * inch],
+        col_widths=[0.34 * inch, 0.43 * inch, 1.45 * inch, 1.0 * inch, 0.48 * inch, 0.62 * inch, 0.62 * inch, 0.55 * inch, 0.47 * inch, 0.47 * inch, 0.5 * inch],
         header_color=colors.HexColor("#0f766e"),
     )
-    add_rank_coloring(rank_table, rank_rows, mae_col=4, score_col=10)
+    add_rank_coloring(rank_table, rank_rows, mae_col=8)
     story.append(rank_table)
 
     story.append(PageBreak())
@@ -890,7 +988,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     story.append(growth_table)
 
     story.append(PageBreak())
-    # union of every model's subset keys: Series 1/2 datasets + Series 3 (S3:*) datasets.
+    # Every model uses the same Series 3 run subsets.
     dataset_names = sorted({name for version in versions for name in results[version]["by_dataset"]})
     subset_rows = [["Model"] + dataset_names]
     for version in ranked:
@@ -900,8 +998,8 @@ def build_pdf(results, samples, s3_samples, pdf_out):
             row.append(fmt_num(block["mae"]) if block else "-")
         subset_rows.append(row)
     story.append(paragraph("Field-Case / Subset MAE", h2))
-    story.append(paragraph("Lower is better. '-' = model not evaluated on that subset (Series 1/2 vs Series 3 use "
-                           "different datasets). D0510 combines the three v2.3 field-failure runs; S3:* are Series 3 runs.", small))
+    story.append(paragraph(
+        "Lower is better. Every model is evaluated on every listed Series 3 run; '-' would indicate missing results.", small))
     subset_col_widths = [0.48 * inch] + [0.7 * inch for _ in dataset_names]
     subset_table = make_table(subset_rows, col_widths=subset_col_widths, header_color=colors.HexColor("#7c2d12"))
     story.append(subset_table)
@@ -1011,21 +1109,14 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     story.append(PageBreak())
     story.append(paragraph("Notes", h2))
     notes = [
-        "The combined table is useful for model-selection decisions, but Series 2 v2.0/v2.0b used different preprocessing from the raw-BGR models.",
-        "The current active label set includes D0510 field-failure images, so these numbers are not directly comparable to older 1,464-label reports.",
+        "Every checkpoint was evaluated on the same 81,237 Series 3 images. Series 2 v2.0/v2.0b used their required HSV/CLAHE preprocessing; the other Series 1/2 models used raw BGR.",
+        "The dataset is 66% straight, so MAE and within-degree counts can reward straight collapse. Use the class-balanced and turn-recall columns for selection, with MAE as supporting evidence.",
         "Offline MAE does not prove real-world reliability. The car can still fail on lighting, turns, driveways, road-edge ambiguity, speed, and sensor conditions.",
-        "v2.4 and v2.4b were trained with the D0510 correction data; low same-dataset error may include train/evaluation overlap and should be treated as a fit check, not final field proof.",
-        "Series 3 (v3.x) is evaluated on its own 320x180 collected dataset (sidewalkpilot_dataset), not the Series 1/2 "
-        "correction label set, so its MAE is same-unit but not measured on identical images — treat cross-series ranking "
-        "as indicative, not exact. Series 3 also predicts throttle, which was near-constant 1.0 in the collected runs.",
-        "Series 3 numbers include train/evaluation overlap (the models were trained on this dataset), so they are a fit "
-        "check, not held-out generalization.",
-        "The Series 3 dataset is now 57,208 images: the D0702_16 50k base (cloudy/overcast daylight) plus the D0707_16 "
-        "bright-sun HARD-shadow batch, added to fix v3.1b's shadow-edge-following (the model steered along shadow edges "
-        "as if they were the sidewalk border).",
-        "v3.2 / v3.2b were trained on that combined set with horizontal-flip + HSV augmentation and softened bucket "
-        "rebalancing; on this fit-check v3.2b is the strongest Series 3 checkpoint (lowest median AE, most within-5deg). "
-        "Bright-sun/shadow behavior is still pending a field verdict.",
+        "Series 1/2 were trained on older real-plus-CARLA datasets, so this is an out-of-era transfer test for them rather than their original validation benchmark.",
+        "Series 3 models were trained on overlapping images from this dataset, so their scores are fit checks, not held-out generalization estimates.",
+        f"The Series 3 evaluation set contains {len(s3_samples):,} curated real field frames across five manual-driving runs from July 2 through July 12, 2026.",
+        "Series 3 throttle labels are near-constant at full throttle, so this report evaluates steering only; throttle control remains disabled pending varied-throttle data.",
+        "v3.3, v3.3b, v3.4, and v3.4b still require field testing before any deployment winner is declared.",
     ]
     for note in notes:
         story.append(paragraph(f"- {note}", normal))
@@ -1054,25 +1145,17 @@ def main():
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    models = discover_models(args.models_dir)
+    print(f"[start] device={device}", flush=True)
+    # ALL models (Series 1, 2, and 3) are evaluated on the SAME Series 3 dataset.
+    results, s3_samples = evaluate_series3(args.models_dir, device, args.batch_size)
     if args.versions:
         wanted = set(args.versions)
-        models = [item for item in models if item[0] in wanted]
-    if not models:
-        raise FileNotFoundError(f"No SidewalkPilot model checkpoints found in {args.models_dir}")
+        results = {v: r for v, r in results.items() if v in wanted}
+    samples = []   # no separate correction set; every model is scored on s3_samples
+    print(f"[start] models={len(results)} s3_samples={len(s3_samples)}", flush=True)
 
-    print(f"[start] device={device}", flush=True)
-    print(f"[start] models={len(models)} corrections={args.corrections}", flush=True)
-    samples = load_samples(args.corrections)
-    print(f"[start] samples={len(samples)}", flush=True)
-    raw_inputs, clahe_inputs, targets = load_tensors(samples)
-    results = evaluate_models(samples, raw_inputs, clahe_inputs, targets, models, args.batch_size, device)
-
-    # Series 3 (separate arch + own dataset), folded into the same report.
-    s3_results, s3_samples = evaluate_series3(args.models_dir, device, args.batch_size)
-    results.update(s3_results)
-    if s3_results:
-        print(f"[start] series3 models={len(s3_results)} s3_samples={len(s3_samples)}", flush=True)
+    if not results:
+        raise FileNotFoundError(f"No SidewalkPilot checkpoints found in {args.models_dir}")
 
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.pdf_out.parent.mkdir(parents=True, exist_ok=True)
