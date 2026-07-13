@@ -922,6 +922,7 @@ class SteeringDataset(Dataset):
         self.scan_log_every = max(1, int(scan_log_every))
         self.stage_name = stage_name
         self.samples = []
+        self.forced_flip = []
         self.targets = []
         self.throttle_targets = []
         self.sources = []
@@ -1060,6 +1061,7 @@ class SteeringDataset(Dataset):
 
         if not self.samples:
             raise FileNotFoundError("No usable samples found.")
+        self.forced_flip = [False] * len(self.samples)
 
         t = np.array(self.targets, dtype=np.float32)
         th = np.array(self.throttle_targets, dtype=np.float32)
@@ -1085,6 +1087,31 @@ class SteeringDataset(Dataset):
         for source_name, count in sorted(source_counts.items()):
             print(f"  {source_name}={count}")
 
+    def apply_balance_flip(self, indices):
+        """Even each L/R mirror bucket-pair within `indices` by flipping surplus images from
+        the abundant side to the scarce side (image mirror + steer -> 180-steer). Deterministic;
+        disables the random turn-flip. Sampler + class weights must read self.targets AFTER this."""
+        from collections import defaultdict
+        by_bucket = defaultdict(list)
+        for i in indices:
+            by_bucket[steer_class_index(self.targets[i])].append(i)
+        moved = 0
+        for a, b in [(0, 8), (1, 7), (2, 6), (3, 5)]:   # class 4 (straight) self-mirrors -> untouched
+            A, B = by_bucket[a], by_bucket[b]
+            if len(A) == len(B):
+                continue
+            big = A if len(A) > len(B) else B
+            n = abs(len(A) - len(B)) // 2
+            for i in big[:n]:
+                path, steer, throttle = self.samples[i]
+                fs = 180.0 - float(steer)
+                self.samples[i] = (path, fs, throttle)
+                self.targets[i] = fs
+                self.forced_flip[i] = True
+            moved += n
+        self.flip_aug_probability = 0.0   # deterministic balance replaces the random turn-flip
+        print(f"[{self.stage_name}] balance-flip: evened L/R pairs, moved {moved} images (random flip disabled)", flush=True)
+
     def __len__(self):
         return len(self.samples)
 
@@ -1100,11 +1127,13 @@ class SteeringDataset(Dataset):
         img = resize_image_uint8(img, self.width, self.height, self.crop_top_ratio)
 
         if self.augment:
-            # Flip ONLY turn frames (skip the 85-95 straight bucket). Mirroring a left turn
-            # into a right (and vice versa) at p=0.5 balances L/R by construction -- each Lk
-            # bucket ends up equal to its Rk mirror -- while straight frames stay put so the
-            # flip isn't wasted on them (Ram, 2026-07-12).
-            if (steer < 85.0 or steer >= 95.0) and random.random() < self.flip_aug_probability:
+            # Flip ONLY turn frames (skip the 85-95 straight bucket). Mirroring a left turn into
+            # a right (and vice versa) balances L/R. --balance-flip pre-selects exactly which
+            # frames to mirror (forced_flip set + steer already mirrored in self.samples);
+            # otherwise it's random at flip_aug_probability (Ram, 2026-07-12).
+            if self.forced_flip[idx]:
+                img = cv2.flip(img, 1)
+            elif (steer < 85.0 or steer >= 95.0) and random.random() < self.flip_aug_probability:
                 img = cv2.flip(img, 1)
                 steer = 180.0 - steer
             img, steer = augment_image(
@@ -1617,8 +1646,10 @@ def train(roots, args):
         stage_name="dataset.augmented",
     )
     train_subset = Subset(augmented_dataset, train_base_subset.indices)
+    if args.balance_flip:
+        augmented_dataset.apply_balance_flip(train_base_subset.indices)
     train_sampler = make_weighted_sampler(
-        base_dataset,
+        augmented_dataset,
         train_base_subset,
         args.samples_per_epoch,
         args.real_sample_weight,
@@ -1652,7 +1683,7 @@ def train(roots, args):
     # built from TRAIN class counts: rarer classes get a larger CE weight.
     train_class_counts = [0] * NUM_STEER_CLASSES
     for i in train_indices:
-        train_class_counts[steer_class_index(base_dataset.targets[i])] += 1
+        train_class_counts[steer_class_index(augmented_dataset.targets[i])] += 1
     _nonzero = [c for c in train_class_counts if c > 0]
     _mean_count = float(np.mean(_nonzero)) if _nonzero else 1.0
     class_weight_list = [(_mean_count / max(1, c)) ** float(args.class_weight_power)
@@ -1665,6 +1696,9 @@ def train(roots, args):
     print("[hybrid] train class counts / CE weights:", flush=True)
     for (name, _, _), c, w in zip(STEER_CLASS_BINS, train_class_counts, class_weight_list):
         print(f"  {name}: n={c} weight={w:.3f}", flush=True)
+    if getattr(args, "dry_run", False):
+        print("[dry-run] datasets + balance-flip + sampler/class weights built; exiting before training.", flush=True)
+        return
 
     # Checkpoints (+ their ONNX) land in code/ai_models/, not the CWD.
     models_dir = SCRIPT_DIR.parent.parent / "ai_models"
@@ -1957,6 +1991,14 @@ def main():
     parser.add_argument("--samples-per-epoch", type=int, default=50000)
     parser.add_argument("--corrections", nargs="*", default=None)
     parser.add_argument("--flip-aug-probability", type=float, default=0.0)
+    parser.add_argument("--balance-flip", action="store_true",
+                        help="Deterministically flip surplus images from the abundant side of each L/R "
+                             "mirror pair (HL<->HR, L<->R+, L+<->R, SL<->SR) to the scarce side until each "
+                             "pair is even (off by <=1), on the TRAIN split only; sampler + class weights "
+                             "use the post-flip counts. Overrides random --flip-aug-probability.")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Build datasets + balance-flip + sampler/class weights, print the train class "
+                             "counts, then exit before training (verification).")
     parser.add_argument("--shadow-aug-probability", type=float, default=0.85)
     parser.add_argument("--carla-domain-randomize-probability", type=float, default=0.70)
     parser.add_argument("--hsv-aug-probability", type=float, default=0.0)
