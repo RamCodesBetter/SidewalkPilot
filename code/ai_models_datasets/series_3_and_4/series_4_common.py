@@ -748,7 +748,17 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                 "dataset_frames": len(frames),
                 "epochs": args.epochs,
                 "batch_size": args.batch_size,
+                "samples_per_epoch": args.samples_per_epoch,
                 "lr": args.lr,
+                "weight_decay": args.weight_decay,
+                "seed": args.seed,
+                "width": args.width,
+                "height": args.height,
+                "parameter_count": parameter_count,
+                "balance_flip": args.balance_flip,
+                "shadow_aug_probability": args.shadow_aug_probability,
+                "horizon_decay": args.horizon_decay,
+                "max_frame_gap_sec": args.max_frame_gap_sec,
             },
         )
     except Exception as exc:
@@ -756,6 +766,7 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
         tracker = None
 
     for epoch in range(1, args.epochs + 1):
+        epoch_start = time.time()
         model.train()
         train_loss = 0.0
         for step, (images, history, targets) in enumerate(train_loader, start=1):
@@ -802,17 +813,31 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
             torch.save(checkpoint_payload(model, experiment, contract, args), best_path)
             print(f"[save] best {best_version}: epoch={epoch} MAE={best_mae:.3f} -> {best_path}")
         if tracker is not None and tracker.enabled:
-            tracker.push(epoch, {
+            wandb_metrics = {
                 "train_loss": average_train,
                 "val_loss": metrics["loss"],
                 "steer_mae_deg": metrics["mae"],
+                "class_acc": metrics["class_accuracy"],
                 "median_ae_deg": metrics["median_ae"],
                 "signed_error_deg": metrics["signed_error"],
                 "balanced_9": metrics["balanced_9"],
                 "turn_exact": metrics["turn_exact"],
                 "turn_pm1": metrics["turn_pm1"],
                 "straight_exact": metrics["straight_exact"],
-            })
+                "lr": float(optimizer.param_groups[0]["lr"]),
+                "epoch_time_s": time.time() - epoch_start,
+                "gpu_mem_gb": (
+                    torch.cuda.memory_reserved() / 1e9
+                    if torch.cuda.is_available()
+                    else 0.0
+                ),
+            }
+            for horizon, horizon_mae in enumerate(metrics["horizon_mae"]):
+                name = "current" if horizon == 0 else f"future_{horizon}"
+                wandb_metrics[f"horizon_{name}_mae_deg"] = horizon_mae
+            if "hold_last_mae" in metrics:
+                wandb_metrics["hold_last_mae_deg"] = metrics["hold_last_mae"]
+            tracker.push(epoch, wandb_metrics)
 
     torch.save(checkpoint_payload(model, experiment, contract, args), final_path)
     print(f"[save] final {final_version}: {final_path}")
