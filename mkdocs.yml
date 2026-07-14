@@ -51,7 +51,7 @@ nav:
       - Packet Parsing: autonomy-stack/lidar-safety/packet-parsing.md
       - Distance Regions: autonomy-stack/lidar-safety/distance-regions.md
       - AEB: autonomy-stack/lidar-safety/aeb.md
-      - Why LiDAR Does Not Steer: autonomy-stack/lidar-safety/override-steering.md
+      - Override Steering: autonomy-stack/lidar-safety/override-steering.md
       - Reconnect Behavior: autonomy-stack/lidar-safety/reconnect-behavior.md
     - Navigation:
       - Overview: autonomy-stack/navigation/overview.md
@@ -171,7 +171,6 @@ nav:
       - Tanh Output: ai-and-models/architecture/tanh-output.md
     - Model Zoo:
       - Overview: ai-and-models/model-zoo/overview.md
-      - Series 3: ai-and-models/model-zoo/series-3.md
       - v1.0: ai-and-models/model-zoo/v1-0.md
       - v1.0b: ai-and-models/model-zoo/v1-0b.md
       - v1.1: ai-and-models/model-zoo/v1-1.md

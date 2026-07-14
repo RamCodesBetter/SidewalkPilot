@@ -1,37 +1,19 @@
-# LiDAR Distance Regions
+# Distance Regions
 
-The LiDAR policy evaluates only points in the car-relative center corridor: `forward > 0` and `abs(lateral) <= 0.254 m`. The nearest qualifying forward point selects one longitudinal action.
+TODO:
 
-| Nearest center point | Action | Maximum forward command |
-|---:|---|---:|
-| No point or `>= 1.65 m` | Normal | 100% reference |
-| `1.65 m` down to `1.25 m` | Slow | Linear 100% to 60% reference |
-| `1.25 m` down to `1.05 m` | Creep/hold | 60% reference |
-| `<= 1.05 m` | Emergency brake | Zero throttle + hard brake |
-
-## Reference and Physical Throttle
-
-The car begins moving near 55% physical PWM. Runtime reference throttle maps `0..100%` onto physical `55..100%` while preserving physical zero as stopped. Therefore:
-
-```text
-physical = 0.55 + reference * (1.00 - 0.55)
-```
-
-At 60% reference, physical PWM is `0.82`. Dashboard control values use the reference scale; photo/training labels retain the absolute physical command, so the same moment is labeled `0.82`.
-
-## AEB Toggle
-
-With AEB OFF, `evaluate(..., enabled=False)` reports telemetry but returns full throttle permission and no stop. With AEB ON, the same policy governs manual and autonomous forward driving. Reverse is not governed by the forward corridor.
-
-## Display Rungs
-
-The LiDAR page draws four colored horizontal rungs across the active center corridor plus two blue vertical guides. Side points remain visible for context but cannot change control or the `C` lane state.
-
-## Verification
-
-```bash
-python3 code/test_files/test_lidar_center_aeb.py -v
-python3 code/test_files/test_z2w_lidar_layout.py -v
-```
-
-An empty or stale scan cannot prove a clear corridor; sensor health must be checked independently before driving. See [AEB](aeb.md) and [Why LiDAR Does Not Steer](override-steering.md).
+- [ ] Add page-specific notes for `autonomy-stack/lidar-safety/distance-regions.md` after inspecting the real project files.
+- [ ] Cross-link `Distance Regions` to the most relevant code, data, testing, and safety pages.
+- [ ] Document the exact input entering this subsystem.
+- [ ] Document the exact output leaving this subsystem.
+- [ ] Map the subsystem to the owning runtime file or module.
+- [ ] Describe the control priority when this subsystem disagrees with another subsystem.
+- [ ] List the settings, constants, and flags that change this behavior.
+- [ ] Add a failure-mode checklist for field testing.
+- [ ] Add how to verify the subsystem on the bench before a driving test.
+- [ ] Add how to verify the subsystem during a real outdoor run.
+- [ ] Document serial port, packet format, reconnect behavior, and stale-scan handling.
+- [ ] Add bench test steps with the LiDAR disconnected and reconnected.
+- [ ] Document the safety priority order and manual override behavior.
+- [ ] Add what must be true before any autonomous outdoor run.
+- [ ] Add the exact source path, artifact path, or hardware component name.

@@ -1,32 +1,19 @@
-# Dashboard Sender
+# Sender
 
-`code/controller/current/rc_car_app/hub75_dashboard.py` serializes dashboard state. Production wraps it with `AsyncDashboardSender` in `runtime.py`, keeping DNS, JSON encoding, socket writes, and shutdown retries outside the 60 Hz control loop.
+TODO:
 
-## Production Configuration
-
-| Setting | Default |
-|---|---|
-| Transport | UDP |
-| Target | `192.168.10.2` |
-| Port | `8765` |
-| Send interval | `0.1 s` |
-| Linked shutdown | enabled |
-
-Environment overrides are `RC_CAR_DASHBOARD_TRANSPORT`, `RC_CAR_DASHBOARD_HOST`, `RC_CAR_DASHBOARD_UDP_PORT`, and `RC_CAR_DASHBOARD_SHUTDOWN_ON_EXIT`.
-
-## Latest-Payload Behavior
-
-The main loop calls `AsyncDashboardSender.send()` with current state. That method replaces the pending argument snapshot and returns immediately. The worker sends at the configured rate. If several 60 Hz updates occur between 10 Hz transmissions, only the newest survives; stale dashboard packets never form a backlog.
-
-Transient notification rows use a small FIFO because notifications, unlike state, must not disappear merely because another state update arrived.
-
-## Failure Behavior
-
-UDP is intentionally connectionless. A successful `sendto()` proves only that the local kernel accepted the datagram, not that the Zero rendered it. Link health is verified with `ping`, receiver service status, and the display's `NO LINK`/`STALE` states.
-
-```bash
-ping -c 3 192.168.10.2
-journalctl -u sidewalkpilot-rpi-car.service -n 80 -l --no-pager
-```
-
-The USB link is the only production dashboard route. Wi-Fi is not a telemetry fallback.
+- [ ] Add page-specific notes for `runtime-code/dashboard/sender.md` after inspecting the real project files.
+- [ ] Cross-link `Sender` to the most relevant code, data, testing, and safety pages.
+- [ ] Name the exact source file that owns this runtime behavior.
+- [ ] List the important classes, functions, constants, and module-level variables.
+- [ ] Document the command or script used to run this behavior on the car.
+- [ ] Document required hardware connections and environment assumptions.
+- [ ] List expected logs, dashboard fields, or console output.
+- [ ] Add common exceptions and what they usually mean.
+- [ ] Add a bench-test procedure that does not require driving outdoors.
+- [ ] Add a field-test procedure and pass/fail criteria.
+- [ ] Trace one loop iteration from sensor input to actuator command.
+- [ ] List timing expectations and what can block the loop.
+- [ ] Add the exact source path, artifact path, or hardware component name.
+- [ ] Add the command or procedure needed to reproduce the result.
+- [ ] Add expected inputs and outputs.

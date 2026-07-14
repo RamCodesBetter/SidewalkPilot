@@ -1,6 +1,6 @@
 # SidewalkPilot
 
-SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural network steers a real, car-sized RC vehicle down residential sidewalks, with independent LiDAR slowdown/emergency braking, GPS route-following, and a live LED dashboard. Built from scratch with a Raspberry Pi 5, Zero 2 W, and an NVIDIA Jetson Orin Nano.
+SidewalkPilot is a self-driving RC car for **sidewalks**. A convolutional neural network steers a real, car-sized RC vehicle down residential sidewalks — with LiDAR emergency braking, GPS route-following, and a live LED dashboard. Built from scratch with a Raspberry Pi 5, Zero 2 W, and an NVIDIA Jetson Orin Nano.
 
 <table width="100%">
 <tr>
@@ -36,14 +36,14 @@ Three *manager* computers control the entire RC car. The **Raspberry Pi 5 (RPI5)
 | **AI Model Manager (JON)** | NVIDIA Jetson Orin Nano — runs the steering neural network (ONNX / TensorRT) |
 | **Display System Manager (Z2W)** | Raspberry Pi Zero 2 W — LED dashboard over USB |
 | Vision | Raspberry Pi Camera Module 3 Wide |
-| Obstacles | Youyeetoo FHL-LD19 360° LiDAR — center-corridor slowdown + emergency braking |
+| Obstacles | Youyeetoo FHL-LD19 360° LiDAR — emergency braking + avoidance |
 | Navigation | BN880 GPS + HMC5883L compass |
 | Speed | Hall-effect sensor |
 | Chassis | Yahboom Ackermann 520M — real car-style steering |
 | Steering | PCA9685 PWM driver → steering servo |
 | Drive | Yahboom AT8236 motor controller → DC motors |
 | Manual control | Xbox Wireless Controller — drive + safety kill switch |
-| Dashboard | Waveshare 64×32 RGB LED matrix (HUB75), driven by the Zero 2 W |
+| Dashboard | Waveshare 64×32 RGB LED matrix (HUB75) + MAX7219 8×32 |
 | Power | INIU power banks (140 W for JON, 45 W for RPI5/Z2W); OVONIC 3S LiPo (motors) + 2S LiPo (display); buck converters + fuses |
 
 ## The model

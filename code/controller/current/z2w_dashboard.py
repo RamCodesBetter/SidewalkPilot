@@ -607,7 +607,7 @@ class DashboardRenderer:
         return c
 
     def _draw_temps_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # V2H3 temps: RTMP=Pi CPU, JTMP=Jon CPU, GTMP=Jon GPU, ZTMP=Zero CPU
+        # v3h3 temps: RTMP=Pi CPU, JTMP=Jon CPU, GTMP=Jon GPU, ZTMP=Zero CPU
         def tcells(v):
             t = max(0, min(99, int(round(float(v)))))
             return [str(t // 10), str(t % 10), "C"]
@@ -963,7 +963,7 @@ class DashboardRenderer:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Zero 2 W dashboard receiver for the 64x32 HUB75 display")
+    parser = argparse.ArgumentParser(description="Zero 2 W dashboard receiver for HUB75 and MAX7219 displays")
     parser.add_argument("--transport", choices=("udp", "serial"), default="udp")
     parser.add_argument("--serial-port", default="/dev/ttyGS0")
     parser.add_argument("--baud-rate", type=int, default=115200)
