@@ -26,6 +26,8 @@ from .config import (
     PHOTO_RUN_CAPTURE_FPS,
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
+    JETSON_RESULT_MAX_AGE_SEC,
+    CONTROL_LOOP_STALL_WARN_SEC,
     INTERRUPTION_CLIP_ENABLED,
     INTERRUPTION_CLIP_SECONDS,
     INTERRUPTION_CLIP_DIR,
@@ -57,7 +59,6 @@ from .config import (
     LOG_INTERVAL_SEC,
     MAX_TARGET_HEADING_DEG,
     PHOTO_BUTTON,
-    PHOTO_BUCKET_COLLECTION_NEED,
     PHOTO_DIR,
     PULSES_PER_REVOLUTION,
     SPEED_SMOOTHING_ALPHA,
@@ -125,7 +126,7 @@ from .logging_utils import init_csv_logger, log_data_to_csv
 from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
 from .yaw_pid import ImuReader, YawController
-from .jetson_client import JetsonSteeringClient
+from .jetson_client import AsyncJetsonSteeringClient
 from .influx_logger import InfluxLogger
 from .interruption_recorder import InterruptionClipRecorder
 from . import lidar_avoidance
@@ -134,16 +135,6 @@ from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, Webca
 shutdown_flag = threading.Event()
 current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
-# Live L/C/R + slow-throttle counts, incremented per capture (O(1)) so the dashboard
-# stats don't re-parse a growing label file at 30fps. Reset when a new run starts.
-photo_run_live_stats: dict[str, int] = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
-# Cumulative per-bucket photos collected toward the 5k-per-bucket goal, PERSISTED across
-# runs/reboots. The V3 dashboard shows NEED - collected, counting DOWN to 0000 per bucket.
-photo_collection_collected: dict[str, int] = {bucket: 0 for bucket in PHOTO_BUCKET_COLLECTION_NEED}
-PHOTO_COLLECTION_PROGRESS_PATH = Path(PHOTO_DIR) / "collection_progress.json"
-DASHBOARD_PHOTO_STATS_INTERVAL_SEC = 5.0
-
-
 class AsyncDashboardSender:
     def __init__(self, sender: Hub75DashboardSender):
         self.sender = sender
@@ -359,9 +350,7 @@ DASHBOARD_PAGE_COORDS = {
     3: (2, 1),    # V2H1 model MODL/PRED/CONF/IPS
     4: (2, 2),    # V2H2 autonomy ICSE/ADT/IPKM/AUT
     16: (2, 3),   # V2H3 temps RTMP/JTMP/GTMP/ZTMP
-    14: (3, 1),   # V3H1 photo counters PR/ST/FPS/STS (_draw_page_three)
-    12: (3, 2),   # V3H2 photo LEFT buckets HL/L/L+/SL (_draw_photo_run_stats_page)
-    18: (3, 3),   # V3H3 photo RIGHT buckets HR/R+/R/SR (_draw_bucket_right_page)
+    14: (3, 1),   # V3H1 photo counters PR/PA/FPS/STS (_draw_page_three)
     5: (4, 1),    # V4H1 nav entry NAVIGATE
     7: (4, 2),    # V4H2 route nodes OPR/PNDE/CNDE/NNDE
     9: (4, 3),    # V4H3 route distance RDT/NDT/SDT/TDT
@@ -928,44 +917,6 @@ def get_system_status(state, model_frame_is_stale: bool = False) -> str:
     return photo_status
 
 
-def count_photos_run() -> int:
-    if current_photo_run_dir is None or not current_photo_run_dir.exists():
-        return 0
-    return sum(1 for f in current_photo_run_dir.iterdir() if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
-
-
-def load_photo_collection_progress() -> None:
-    """Load cumulative per-bucket collection counts (persists across runs/reboots)."""
-    try:
-        with open(PHOTO_COLLECTION_PROGRESS_PATH) as f:
-            saved = json.load(f)
-        for bucket in photo_collection_collected:
-            photo_collection_collected[bucket] = max(0, int(saved.get(bucket, 0)))
-    except Exception:
-        pass  # missing/corrupt file -> keep zeros (fresh campaign)
-
-
-def save_photo_collection_progress() -> None:
-    try:
-        with open(PHOTO_COLLECTION_PROGRESS_PATH, "w") as f:
-            json.dump(photo_collection_collected, f)
-    except Exception as exc:
-        print(f"Failed to save collection progress: {exc}")
-
-
-load_photo_collection_progress()   # pick up prior sessions' progress on startup
-
-
-def photo_run_stats() -> dict[str, int]:
-    # Per-run L/C/R + slow-throttle counters, PLUS the collection COUNTDOWN: each of the
-    # 9 steering buckets shows NEED - collected (0 when done; ST has no target).
-    stats = dict(photo_run_live_stats)
-    for bucket, need in PHOTO_BUCKET_COLLECTION_NEED.items():
-        stats[bucket] = max(0, int(need) - photo_collection_collected.get(bucket, 0))
-    stats["st"] = 0
-    return stats
-
-
 def count_photos_all() -> int:
     base = Path(PHOTO_DIR)
     if not base.exists():
@@ -973,32 +924,21 @@ def count_photos_all() -> int:
     return sum(1 for f in base.rglob("*") if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
 
 
-def update_dashboard_photo_stats(metrics, now: float | None = None, force: bool = False) -> None:
-    current_time = time.time() if now is None else now
-    if not force and current_time - metrics.dashboard_photo_stats_last_sample_time < DASHBOARD_PHOTO_STATS_INTERVAL_SEC:
-        return
-    metrics.dashboard_photos_run = count_photos_run()
-    metrics.dashboard_photos_all = count_photos_all()
-    metrics.dashboard_photo_run_stats = photo_run_stats()
-    metrics.dashboard_photo_stats_last_sample_time = current_time
-
-
 def is_stop_brake_condition(state) -> bool:
     return bool(state.get("lidar_emergency_stop", False))
 
 
 def get_cpu_temp():
+    """Read the kernel thermal sensor directly; never fork from the control loop."""
     try:
-        result = subprocess.run(["vcgencmd", "measure_temp"], capture_output=True, text=True, check=True)
-        temp_str = result.stdout.strip()
-        return float(temp_str.split("=")[1].split("'")[0])
-    except Exception:
+        raw = Path("/sys/class/thermal/thermal_zone0/temp").read_text().strip()
+        value = float(raw)
+        return value / 1000.0 if value > 1000.0 else value
+    except (OSError, ValueError):
         return 0.0
 
 
 def create_photo_run_dir() -> Path:
-    for k in photo_run_live_stats:
-        photo_run_live_stats[k] = 0   # fresh run -> reset live counters
     base_dir = Path(PHOTO_DIR)
     base_dir.mkdir(parents=True, exist_ok=True)
     day_prefix = datetime.datetime.now().strftime("%Y_%m_%d")
@@ -1055,39 +995,6 @@ def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, t
     except Exception as exc:
         print(f"Failed to append photo label row {csv_path}: {exc}")
         return
-    # live L/C/R + slow-throttle counters (match the dashboard buckets)
-    if steering < 85:
-        photo_run_live_stats["left"] += 1
-    elif steering > 95:
-        photo_run_live_stats["right"] += 1
-    else:
-        photo_run_live_stats["center"] += 1
-    if thr < 0.50:
-        photo_run_live_stats["throttle_below_50"] += 1
-    # 9-way steering bucket (edges match STEER_CLASS_BINS); bump the collection countdown.
-    if steering < 45:
-        bucket = "hl"
-    elif steering < 60:
-        bucket = "l"
-    elif steering < 75:
-        bucket = "lp"
-    elif steering < 85:
-        bucket = "sl"
-    elif steering < 95:
-        bucket = "st"
-    elif steering < 105:
-        bucket = "sr"
-    elif steering < 120:
-        bucket = "r"
-    elif steering < 135:
-        bucket = "rp"
-    else:
-        bucket = "hr"
-    if bucket in photo_collection_collected:   # ST has no collection target
-        photo_collection_collected[bucket] += 1
-        save_photo_collection_progress()
-
-
 def finalize_photo_run(run_dir: Path | None) -> None:
     """Build the trainer's <run>.json from the appended <run>_labels.csv. Called when
     a capture run ends (toggle off / shutdown) so the heavy JSON write happens once."""
@@ -1112,7 +1019,7 @@ def finalize_photo_run(run_dir: Path | None) -> None:
         print(f"Failed to finalize photo run {run_dir}: {exc}")
 
 
-def take_photo(webcam_vision=None, state=None, quiet=False):
+def take_photo(webcam_vision=None, state=None, metrics=None, quiet=False):
     global current_photo_run_dir, photo_status
     if current_photo_run_dir is None:
         current_photo_run_dir = create_photo_run_dir()
@@ -1135,6 +1042,9 @@ def take_photo(webcam_vision=None, state=None, quiet=False):
             if state is not None:
                 servo_degrees = float(state.get("steering_servo_deg", servo_degrees))
             append_photo_run_row(current_photo_run_dir, photo_name, servo_degrees, current_forward_throttle_label(state))
+            if metrics is not None:
+                metrics.dashboard_photos_run += 1
+                metrics.dashboard_photos_all += 1
             photo_status = "SAVE"
             if not quiet:
                 print(f"Photo queued from live Pi camera stream: {photo_name}")
@@ -1183,7 +1093,7 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
     if (float(getattr(metrics, "smoothed_speed_mph", 0.0)) < 0.1
             and float(state.get("throttle", 0.0)) < 0.05):
         return
-    take_photo(webcam_vision, state, quiet=True)   # quiet: no per-frame spam at 30fps
+    take_photo(webcam_vision, state, metrics, quiet=True)   # quiet: no per-frame spam at 30fps
     schedule_next_auto_photo(metrics, now)
 
 
@@ -1379,23 +1289,33 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             camera_analysis["method"] = "stale_model_frame"
 
     # Jetson ("Jon") inference: the Pi sends the live frame + active model choice
-    # and steers with what comes back. Replaces the (camera-only / empty) local
-    # analysis. If Jon is unreachable, confidence stays 0 -> safe hard stop below.
+    # through a latest-frame worker and consumes only cached results here. Network,
+    # JPEG, and model latency therefore never block controller events or GPIO writes.
+    # If Jon is unreachable or stale, confidence stays 0 -> safe hard stop below.
     if jetson_client is not None:
         frame = webcam_vision.grab_latest_frame() if webcam_vision else None
-        jon_result = (
-            jetson_client.infer(frame, model_version=active_model_choice)
-            if frame is not None else None
+        if frame is not None:
+            jetson_client.submit(frame, model_version=active_model_choice)
+        jon_sample = jetson_client.get_latest_sample(
+            model_version=active_model_choice,
+            max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
         )
-        if jon_result is not None:
+        if jon_sample is not None:
+            jon_result = jon_sample["result"]
             jon_steer_deg, _jon_throttle = jon_result
             # Temporal smoothing (EMA): the v3.1 hybrid head can flip steering buckets
             # frame-to-frame (blocky output). Blend with the previous command to damp it.
-            _prev_steer = state.get("steer_smoothed_deg")
-            if _prev_steer is not None and 0.0 < STEERING_SMOOTH_ALPHA < 1.0:
-                jon_steer_deg = (STEERING_SMOOTH_ALPHA * jon_steer_deg
-                                 + (1.0 - STEERING_SMOOTH_ALPHA) * _prev_steer)
-            state["steer_smoothed_deg"] = jon_steer_deg
+            # Apply the EMA once per completed inference, not once per 60 Hz control tick.
+            jon_sequence = int(jon_sample["sequence"])
+            if jon_sequence != int(state.get("_jon_result_sequence", 0)):
+                _prev_steer = state.get("steer_smoothed_deg")
+                if _prev_steer is not None and 0.0 < STEERING_SMOOTH_ALPHA < 1.0:
+                    jon_steer_deg = (STEERING_SMOOTH_ALPHA * jon_steer_deg
+                                     + (1.0 - STEERING_SMOOTH_ALPHA) * _prev_steer)
+                state["steer_smoothed_deg"] = jon_steer_deg
+                state["_jon_result_sequence"] = jon_sequence
+            else:
+                jon_steer_deg = float(state.get("steer_smoothed_deg", jon_steer_deg))
             # Jon reports its CPU/GPU temps + inference rate back with each frame
             state["jon_cpu_temp_c"] = float(getattr(jetson_client, "jon_cpu_temp_c", 0.0))
             state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))
@@ -1793,7 +1713,7 @@ def run(model_choice=None):
     jetson_host = (JETSON_STEERING_HOST or "").strip()
     jetson_client = None
     if jetson_host:
-        jetson_client = JetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
+        jetson_client = AsyncJetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
         print(f"Autonomy inference on Jetson (Jon) at {jetson_host}:{JETSON_STEERING_PORT}. "
               f"Pi will NOT run a local steering model.")
 
@@ -1817,6 +1737,9 @@ def run(model_choice=None):
         webcam_vision = None
 
     csv_file, csv_writer = init_csv_logger(CSV_FILENAME, CSV_HEADERS)
+    # The all-time photo count can be expensive with a large dataset. Scan once before
+    # entering the real-time loop; successful captures increment this cached value.
+    metrics.dashboard_photos_all = count_photos_all()
     if ENABLE_HUB75_DASHBOARD_TELEMETRY:
         dashboard_sender = AsyncDashboardSender(Hub75DashboardSender(
             transport=HUB75_DASHBOARD_TRANSPORT,
@@ -1858,6 +1781,16 @@ def run(model_choice=None):
             current_loop_time = time.time()
             dt = current_loop_time - last_update_time
             last_update_time = current_loop_time
+            if (
+                dt >= CONTROL_LOOP_STALL_WARN_SEC
+                and current_loop_time >= state.get("_loop_stall_next_log", 0.0)
+            ):
+                state["_loop_stall_next_log"] = current_loop_time + 1.0
+                print(
+                    f"[loop-stall] control loop paused {dt * 1000.0:.0f}ms "
+                    f"(auto={int(bool(state['autonomous_mode']))})",
+                    flush=True,
+                )
 
             for event in pygame.event.get():
                 if DEBUG_CONTROLLER_INPUTS and event.type in (
@@ -1994,7 +1927,7 @@ def run(model_choice=None):
                         print(f"Automatic Emergency Braking (AEB): {'ENABLED' if metrics.aeb_enabled else 'DISABLED'}")
                         queue_aeb_toggle_notification(dashboard_sender, metrics.aeb_enabled)
                     elif event.button == PHOTO_BUTTON:
-                        take_photo(webcam_vision, state)
+                        take_photo(webcam_vision, state, metrics)
                     elif event.button == AUTO_PHOTO_BUTTON:
                         toggle_auto_photo(state, metrics, dashboard_sender)
                     elif event.button == NAV_SELECT_BUTTON:
@@ -2139,14 +2072,12 @@ def run(model_choice=None):
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
                 metrics.dashboard_cpu_temp_c = get_cpu_temp()
                 metrics.dashboard_cpu_temp_last_sample_time = current_loop_time
-                # keep Jon's temps/IFPS fresh on the dashboard even in manual mode
-                # (in autonomy, apply_autonomous_controls already refreshes them each frame)
+                # The asynchronous client refreshes these fields in its worker. Reading
+                # cached values here cannot wait on a powered-off or unreachable Jon.
                 if jetson_client is not None and not state["autonomous_mode"]:
-                    if jetson_client.poll_status():
-                        state["jon_cpu_temp_c"] = jetson_client.jon_cpu_temp_c
-                        state["jon_gpu_temp_c"] = jetson_client.jon_gpu_temp_c
-                        state["infer_fps"] = jetson_client.infer_fps
-            update_dashboard_photo_stats(metrics, current_loop_time)
+                    state["jon_cpu_temp_c"] = jetson_client.jon_cpu_temp_c
+                    state["jon_gpu_temp_c"] = jetson_client.jon_gpu_temp_c
+                    state["infer_fps"] = jetson_client.infer_fps
             gps_state = gps_reader.get_state() if gps_reader is not None else {"fix": False, "sats": 0}
             latest_nav = navigation.update(
                 gps_state,
@@ -2217,7 +2148,6 @@ def run(model_choice=None):
                     camera_pixels=camera_pixels,
                     photos_run=metrics.dashboard_photos_run,
                     photos_all=metrics.dashboard_photos_all,
-                    photo_run_stats=metrics.dashboard_photo_run_stats,
                     camera_fps=webcam_vision.camera_fps if webcam_vision is not None else 0.0,
                     system_status=get_system_status(state),
                     nav_status=latest_nav,

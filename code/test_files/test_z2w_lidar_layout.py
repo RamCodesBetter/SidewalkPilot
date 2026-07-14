@@ -50,6 +50,11 @@ def renderer():
 
 
 class LidarDashboardLayoutTest(unittest.TestCase):
+    def test_removed_photo_countdown_pages_are_outside_page_range(self):
+        self.assertEqual(D.DASHBOARD_PAGE_COUNT, 17)
+        self.assertFalse(hasattr(D.DashboardRenderer, "_draw_photo_run_stats_page"))
+        self.assertFalse(hasattr(D.DashboardRenderer, "_draw_bucket_right_page"))
+
     def test_preview_keeps_side_padding_but_only_two_center_guides(self):
         self.assertEqual(D.LIDAR_PREVIEW_X, (6, 57))
         self.assertEqual(D.LIDAR_CENTER_GUIDE_X, (23, 40))

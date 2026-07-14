@@ -167,6 +167,71 @@ class LidarCenterAebTest(unittest.TestCase):
         self.assertEqual(state["steering_servo_deg"], 117.0)
         self.assertFalse(state["lidar_override_active"])
 
+    def test_autonomous_control_consumes_cached_jetson_result(self):
+        class FreshCamera:
+            camera_fps = 30.0
+
+            def get_analysis(self):
+                return ({
+                    "heading_bias": 0.0,
+                    "confidence": 0.0,
+                    "left_edge_found": False,
+                    "right_edge_found": False,
+                    "corridor_width_px": 0.0,
+                    "driveway_cut_hint": False,
+                    "method": "camera_only",
+                }, time.time())
+
+            def grab_latest_frame(self):
+                return "latest-frame"
+
+        class CachedJetson:
+            jon_cpu_temp_c = 48.0
+            jon_gpu_temp_c = 52.0
+            infer_fps = 30.0
+            infer_ms = 10.0
+
+            def __init__(self):
+                self.submissions = []
+
+            def submit(self, frame, model_version=None):
+                self.submissions.append((frame, model_version))
+                return 8
+
+            def get_latest_sample(self, model_version=None, max_age_sec=None):
+                return {
+                    "sequence": 7,
+                    "model_version": model_version,
+                    "result": (121.0, 0.0),
+                    "age_sec": 0.01,
+                }
+
+        state = C.create_state()
+        state["autonomous_mode"] = True
+        state["_perf_next"] = time.time() + 60.0
+        state["_autodbg_next"] = time.time() + 60.0
+        metrics = C.Metrics()
+        jetson = CachedJetson()
+        policy = lidar_avoidance.evaluate([], enabled=True)
+
+        started = time.perf_counter()
+        throttle, brake = runtime.apply_autonomous_controls(
+            state,
+            metrics,
+            hardware=None,
+            webcam_vision=FreshCamera(),
+            lidar_scan=[],
+            jetson_client=jetson,
+            active_model_choice="3.4",
+            lidar_policy=policy,
+        )
+
+        self.assertLess(time.perf_counter() - started, 0.05)
+        self.assertEqual(jetson.submissions, [("latest-frame", "3.4")])
+        self.assertEqual(state["steering_servo_deg"], 121.0)
+        self.assertEqual(throttle, C.AUTONOMOUS_CRUISE_PWM)
+        self.assertFalse(brake)
+
     def test_policy_never_outputs_a_steering_command(self):
         distances = (
             C.LIDAR_OVERRIDE_EMERGENCY_STOP_M - 0.10,

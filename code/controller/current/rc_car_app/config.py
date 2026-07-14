@@ -3,7 +3,7 @@ import datetime
 import math
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # --- SELF-DRIVING BUILD FLAGS ---
 ENABLE_HALL_SENSOR = True
@@ -293,15 +293,7 @@ THROTTLE_AXIS = 4
 BRAKE_AXIS = 5
 SHARED_TRIGGER_AXIS = False
 DEBUG_CONTROLLER_INPUTS = False
-DASHBOARD_PAGE_COUNT = 18   # +1 for V3H3 photo RIGHT-bucket page
-
-# Photo-collection countdown: how many MORE photos each steering bucket needs to
-# reach 5,000 (deficit vs the current 57,208-image dataset). ST has no target. The
-# V3H1/2/3 dashboard pages count these DOWN to 0000 as photos are captured.
-PHOTO_BUCKET_COLLECTION_NEED = {
-    "hl": 4407, "l": 4138, "lp": 2835, "sl": 1806,
-    "sr": 3174, "r": 2550, "rp": 2515, "hr": 304,
-}
+DASHBOARD_PAGE_COUNT = 17
 DASHBOARD_PAGE_AXIS_THRESHOLD = 0.65
 DASHBOARD_PAGE_HOLD_SEC = 0.05
 DASHBOARD_SCROLL_REPEAT_START_SEC = 0.6
@@ -338,6 +330,8 @@ PHOTO_RUN_CAPTURE_FPS = 10.0
 # Pi5<->Zero2W dashboard USB link.
 JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
+JETSON_RESULT_MAX_AGE_SEC = 0.25
+CONTROL_LOOP_STALL_WARN_SEC = 0.10
 
 # Interruption clip recorder (dad+son suggestion #1). While autonomous, keep a rolling
 # buffer of the exact JPEGs sent to Jon; the instant the driver takes over
@@ -479,10 +473,6 @@ class Metrics:
     dashboard_cpu_temp_last_sample_time: float = 0.0
     dashboard_photos_run: int = 0
     dashboard_photos_all: int = 0
-    dashboard_photo_run_stats: dict = field(
-        default_factory=lambda: {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
-    )
-    dashboard_photo_stats_last_sample_time: float = 0.0
     auto_photo_next_time: float = 0.0
     servo_error_count: int = 0
     servo_error_last_log_time: float = 0.0

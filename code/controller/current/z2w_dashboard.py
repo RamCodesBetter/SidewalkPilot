@@ -31,7 +31,7 @@ SIGNS_PATH = BITMAPS_DIR / "signs.h"
 CELL_SIZE = 8
 PANEL_WIDTH = 64
 PANEL_HEIGHT = 32
-DASHBOARD_PAGE_COUNT = 18
+DASHBOARD_PAGE_COUNT = 17
 TELEMETRY_STALE_DISPLAY_SEC = 4.0
 
 DIGIT_BLUE: Color = (0, 0, 255)
@@ -448,9 +448,9 @@ class DashboardRenderer:
         self._draw_decimal_point_at(3, 5, TEXT_ORANGE, y_offset_px)           # dot between MM and SS
 
     def _draw_page_three(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # PRUN / ST (straight-bucket photos this run) / FPS / STS
+        # V3H1: photos this run / photos all / camera FPS / system status.
         photos_run = max(0, min(99999, int(payload.get("photos_run", 0))))
-        st_count = self._photo_run_stats(payload)["st"]
+        photos_all = max(0, min(99999, int(payload.get("photos_all", 0))))
         fps_val = max(0.0, min(99.99, float(payload.get("camera_fps", 0.0))))
         fps_int = int(fps_val)
         fps_frac = int(round((fps_val - fps_int) * 100))
@@ -466,7 +466,7 @@ class DashboardRenderer:
         sts = (sts + "    ")[:4]
         # short labels + 5-digit counts so thousands of photos display correctly
         self._draw_text_row(0, ["P", "R", ":", *self._digits(photos_run, 5)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["S", "T", ":", *self._digits(st_count, 5)], TEXT_GREEN, y_offset_px)
+        self._draw_text_row(1, ["P", "A", ":", *self._digits(photos_all, 5)], TEXT_GREEN, y_offset_px)
         self._draw_text_row(2, ["F", "P", "S", ":", str(fps_int // 10), f"{fps_int % 10}.", str(fps_frac // 10), str(fps_frac % 10)], TEXT_ORANGE, y_offset_px)
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
@@ -659,35 +659,6 @@ class DashboardRenderer:
         self._draw_text_row(1, ["S", "A", "T", "S", ":", *sats_cells], TEXT_CYAN, y_offset_px)
         self._draw_text_row(2, ["O", "D", "O", ":", *odo_cells], ARROW_YELLOW, y_offset_px)
         self._draw_text_row(3, ["S", "S", "T", ":", *sts_cells], sts_color, y_offset_px)
-
-    def _photo_run_stats(self, payload: Dict[str, object]) -> Dict[str, int]:
-        raw_stats = payload.get("photo_run_stats", {})
-        if not isinstance(raw_stats, dict):
-            raw_stats = {}
-        stats = {}
-        for key in ("left", "center", "right", "throttle_below_50",
-                    "hl", "l", "lp", "sl", "st", "sr", "r", "rp", "hr"):
-            try:
-                stats[key] = max(0, int(raw_stats.get(key, 0)))
-            except (TypeError, ValueError):
-                stats[key] = 0
-        return stats
-
-    def _draw_photo_run_stats_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # V3H2: LEFT steering-bucket photo counts this run (hardest -> softest).
-        stats = self._photo_run_stats(payload)
-        self._draw_text_row(0, ["H", "L", ":", *self._digits(stats["hl"], 5)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["L", " ", ":", *self._digits(stats["l"], 5)], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["L", "+", ":", *self._digits(stats["lp"], 5)], TEXT_ORANGE, y_offset_px)
-        self._draw_text_row(3, ["S", "L", ":", *self._digits(stats["sl"], 5)], ARROW_YELLOW, y_offset_px)
-
-    def _draw_bucket_right_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # V3H3: RIGHT steering-bucket photo counts this run (hardest -> softest).
-        stats = self._photo_run_stats(payload)
-        self._draw_text_row(0, ["H", "R", ":", *self._digits(stats["hr"], 5)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["R", "+", ":", *self._digits(stats["rp"], 5)], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["R", " ", ":", *self._digits(stats["r"], 5)], TEXT_ORANGE, y_offset_px)
-        self._draw_text_row(3, ["S", "R", ":", *self._digits(stats["sr"], 5)], ARROW_YELLOW, y_offset_px)
 
     def _gain_cells(self, formatted: str) -> List[str]:
         """'000.5' -> ['0','0','0.','5'] : the decimal point rides on the digit cell
@@ -884,9 +855,6 @@ class DashboardRenderer:
         if page == 11:
             self._draw_page_six(payload, y_offset_px)
             return
-        if page == 12:
-            self._draw_photo_run_stats_page(payload, y_offset_px)
-            return
         if page == 13:
             self._draw_tuning_page(payload, y_offset_px)
             return
@@ -901,9 +869,6 @@ class DashboardRenderer:
             return
         if page == 17:
             self._draw_lidar_page(payload, y_offset_px)   # V7H1 lidar scan (forward +/-30 cone)
-            return
-        if page == 18:
-            self._draw_bucket_right_page(payload, y_offset_px)   # V3H3 photo RIGHT buckets HR/R+/R/SR
             return
         self._draw_page_one(
             float(payload.get("speed_mph", 0.0)),
@@ -1061,7 +1026,6 @@ def main():
     camera_pixels: List[str] = []
     photos_run = 0
     photos_all = 0
-    photo_run_stats: Dict[str, int] = {}
     camera_fps = 0.0
     system_status = "GOOD"
     nav_status: Dict[str, object] = {}
@@ -1137,7 +1101,6 @@ def main():
                 "camera_pixels": camera_pixels,
                 "photos_run": photos_run,
                 "photos_all": photos_all,
-                "photo_run_stats": photo_run_stats,
                 "camera_fps": camera_fps,
                 "system_status": status_override or system_status,
                 "nav_status": nav_status,
@@ -1203,7 +1166,6 @@ def main():
         nonlocal camera_pixels
         nonlocal photos_run
         nonlocal photos_all
-        nonlocal photo_run_stats
         nonlocal camera_fps
         nonlocal system_status
         nonlocal nav_status
@@ -1264,9 +1226,6 @@ def main():
             camera_pixels = [str(row)[: PANEL_WIDTH * 4] for row in raw_camera_pixels[:PANEL_HEIGHT]]
         photos_run = max(0, int(payload.get("photos_run", photos_run)))
         photos_all = max(0, int(payload.get("photos_all", photos_all)))
-        raw_photo_run_stats = payload.get("photo_run_stats", photo_run_stats)
-        if isinstance(raw_photo_run_stats, dict):
-            photo_run_stats = dict(raw_photo_run_stats)
         camera_fps = max(0.0, float(payload.get("camera_fps", camera_fps)))
         system_status = str(payload.get("system_status", system_status))[:4].upper() or "GOOD"
         raw_nav_status = payload.get("nav_status", nav_status)
