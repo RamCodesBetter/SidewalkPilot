@@ -65,7 +65,7 @@ def absolute_throttle_to_reference(absolute_pwm: float) -> float:
 
 
 def reference_throttle_to_absolute(reference_throttle: float) -> float:
-    """Map useful-range throttle to physical motor PWM."""
+    """Map useful-range throttle to physical PWM without changing saved labels."""
     reference = max(0.0, min(1.0, abs(float(reference_throttle))))
     return LIDAR_MIN_MOVE_PWM + reference * (1.0 - LIDAR_MIN_MOVE_PWM)
 

@@ -1030,15 +1030,14 @@ def cleanup_photo_run_dir() -> None:
 
 
 def current_forward_throttle_label(state) -> float:
-    """Return useful-range throttle for labels (physical 55..100% -> 0..100%)."""
+    """Return absolute physical PWM for training labels (55% remains 0.55)."""
     if state is None:
         return 0.0
     try:
         motor_pwm = float(state.get("current_motor_pwm", state.get("throttle", 0.0)))
     except (TypeError, ValueError):
         motor_pwm = 0.0
-    forward_pwm = max(0.0, min(1.0, motor_pwm))
-    return absolute_throttle_to_reference(forward_pwm)
+    return max(0.0, min(1.0, motor_pwm))
 
 
 def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, throttle: float) -> None:
