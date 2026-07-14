@@ -51,8 +51,8 @@ MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+b?)\.pth$")
 # corrected real-image evaluation set; Series 3 uses its own collected dataset.
 S3_WIDTH = 320
 S3_HEIGHT = 180
-S3_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3" / "sidewalkpilot_dataset"
-S3_TRAINER_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3" / "sidewalkpilot_trainer.py"
+S3_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "sidewalkpilot_dataset"
+S3_TRAINER_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "series_3_sidewalkpilot_trainer.py"
 S3_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.pth$")
 
 BUCKETS = [
@@ -534,8 +534,7 @@ def _s3_source_labels(samples):
 
 
 def _load_s3_module():
-    """Load the Series 3 trainer module (arch + hybrid decode constants) without a
-    sys.path name clash (both series have a sidewalkpilot_trainer.py)."""
+    """Load the Series 3 trainer module and its hybrid decode constants."""
     import importlib.util
     spec = importlib.util.spec_from_file_location("s3_trainer_for_eval", S3_TRAINER_PATH)
     module = importlib.util.module_from_spec(spec)

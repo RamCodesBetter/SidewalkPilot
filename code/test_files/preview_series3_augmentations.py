@@ -10,10 +10,15 @@ import numpy as np
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SERIES3_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3"
+SERIES3_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4"
 sys.path.insert(0, str(SERIES3_DIR))
 
-from sidewalkpilot_trainer import augment_image, clamp_servo, clamp_throttle, resize_image_uint8  # noqa: E402
+from series_3_sidewalkpilot_trainer import (  # noqa: E402
+    augment_image,
+    clamp_servo,
+    clamp_throttle,
+    resize_image_uint8,
+)
 
 
 def draw_label(img, text):

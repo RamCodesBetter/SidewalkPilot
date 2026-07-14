@@ -32,9 +32,9 @@ import torch
 import torch.nn as nn
 
 REPO = Path(__file__).resolve().parents[2]                      # code/test_files -> repo root
-S3 = REPO / "code" / "ai_models_datasets" / "series_3"
+S3 = REPO / "code" / "ai_models_datasets" / "series_3_and_4"
 DEFAULT_DATASET = S3 / "sidewalkpilot_dataset"
-TRAINER = S3 / "sidewalkpilot_trainer.py"
+TRAINER = S3 / "series_3_sidewalkpilot_trainer.py"
 MODELS_DIR = REPO / "code" / "ai_models"
 W, H = 320, 180                                                 # SidewalkPilotV3 input
 

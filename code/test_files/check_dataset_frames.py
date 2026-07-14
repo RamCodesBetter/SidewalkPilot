@@ -14,7 +14,7 @@ Also cross-checks the image set against labels.json (orphan images / orphan labe
 
 Usage:
   python3 code/test_files/check_dataset_frames.py \
-      code/ai_models_datasets/series_3/sidewalkpilot_dataset
+      code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset
 """
 import argparse
 import json

@@ -42,9 +42,9 @@ from pathlib import Path
 
 import numpy as np
 
-# code/ai_models (released) + series_3 (fresh training output) — searched by version
+# code/ai_models (released) + series_3_and_4 (fresh training output) — searched by version
 _CODE_DIR = Path(__file__).resolve().parents[3]
-_DEFAULT_MODEL_DIRS = [_CODE_DIR / "ai_models", _CODE_DIR / "ai_models_datasets" / "series_3"]
+_DEFAULT_MODEL_DIRS = [_CODE_DIR / "ai_models", _CODE_DIR / "ai_models_datasets" / "series_3_and_4"]
 
 
 def _version_key(version):
@@ -194,7 +194,7 @@ def preprocess(frame_bgr, width, height, use_clahe):
     return img[np.newaxis, ...].astype(np.float32)  # NCHW
 
 
-# Series 3.1+ hybrid head buckets (must match series_3 trainer STEER_CLASS_BINS):
+# Series 3.1+ hybrid head buckets (must match the shared Series 3/4 trainer bins):
 # 9 classes, fine near center, coarse at the edges.
 _S3_HYBRID_LO = np.array([0, 45, 60, 75, 85, 95, 105, 120, 135], dtype=np.float32)
 _S3_HYBRID_HI = np.array([45, 60, 75, 85, 95, 105, 120, 135, 180], dtype=np.float32)

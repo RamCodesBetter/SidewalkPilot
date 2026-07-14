@@ -25,7 +25,7 @@ __pycache__/
 .claude/
 
 # Generated training datasets (assembled from media/photos by photo_run_to_dataset.py)
-code/ai_models_datasets/series_3/dataset_real_*/
+code/ai_models_datasets/series_3_and_4/dataset_real_*/
 
 # Model checkpoints / exports — kept local / hosted on Hugging Face, never pushed to GitHub
 *.pth
@@ -56,12 +56,12 @@ code/ai_models_datasets/**/*.jpg
 
 # Dataset folders themselves (images + labels.json) — data, hosted on Hugging Face,
 # not GitHub. Ignore the CONTENTS but keep the folder present via .gitkeep so the
-# trainer's --roots path exists in a fresh clone. Source (trainer, README,
-# steering_corrections.json) lives one level up and stays tracked.
+# trainer's --roots path exists in a fresh clone. Trainer source and tests live
+# one level up and stay tracked; dataset cards remain Hub-only by policy above.
 code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/*
-code/ai_models_datasets/series_3/sidewalkpilot_dataset/*
+code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/*
 !code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/.gitkeep
-!code/ai_models_datasets/series_3/sidewalkpilot_dataset/.gitkeep
+!code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/.gitkeep
 
 # runtime logs now live in ~/logs (outside the repo)
 logs/

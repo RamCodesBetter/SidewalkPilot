@@ -29,11 +29,11 @@ import cv2
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SERIES3_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3"
+SERIES3_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4"
 DEFAULT_DATASET = SERIES3_DIR / "sidewalkpilot_dataset"
 sys.path.insert(0, str(SERIES3_DIR))
 
-from sidewalkpilot_trainer import (  # noqa: E402
+from series_3_sidewalkpilot_trainer import (  # noqa: E402
     resize_image_uint8,
     apply_mixed_lighting,
     apply_diagonal_shadow_band,

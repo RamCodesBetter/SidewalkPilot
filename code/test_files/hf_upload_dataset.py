@@ -13,8 +13,8 @@ Examples (run from the repo root):
 
     # Series 3 loose upload (small datasets only)
   python3 code/test_files/hf_upload_dataset.py \
-    --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v3 \
-    --folder code/ai_models_datasets/series_3
+    --repo   ram-shreyas-naik-sabavat/SidewalkPilot_series_3_and_4 \
+    --folder code/ai_models_datasets/series_3_and_4
 
   # Series 1 & 2 is already published; re-push only if the local folder changed:
   python3 code/test_files/hf_upload_dataset.py \
@@ -28,7 +28,7 @@ from pathlib import Path
 
 def main():
     ap = argparse.ArgumentParser(description="Upload a dataset folder to a Hugging Face dataset repo")
-    ap.add_argument("--repo", required=True, help="dataset repo id, e.g. user/SidewalkPilot_v3")
+    ap.add_argument("--repo", required=True, help="dataset repo id, e.g. user/SidewalkPilot_series_3_and_4")
     ap.add_argument("--folder", help="local dataset folder for LOOSE upload (images + labels.json)")
     ap.add_argument("--tar", help="PREFERRED for big image sets: upload ONE tarball (1 commit). HF free "
                                   "tier caps ~128 commits/hour, so loose uploads of 50k+ files get "
