@@ -216,7 +216,7 @@ class LidarCenterAebTest(unittest.TestCase):
             C.AUTONOMOUS_CRUISE_PWM,
         )
 
-    def test_reference_throttle_does_not_change_absolute_training_labels(self):
+    def test_photo_labels_use_the_full_reference_throttle_range(self):
         self.assertEqual(C.absolute_throttle_to_reference(0.30), 0.0)
         self.assertEqual(
             C.absolute_throttle_to_reference(C.LIDAR_MIN_MOVE_PWM), 0.0
@@ -225,6 +225,22 @@ class LidarCenterAebTest(unittest.TestCase):
         self.assertAlmostEqual(C.absolute_throttle_to_reference(midpoint), 0.5)
         self.assertEqual(C.absolute_throttle_to_reference(1.0), 1.0)
         self.assertAlmostEqual(C.reference_throttle_to_absolute(0.60), 0.82)
+        self.assertEqual(
+            runtime.current_forward_throttle_label({"current_motor_pwm": 0.55}),
+            0.0,
+        )
+        self.assertAlmostEqual(
+            runtime.current_forward_throttle_label({"current_motor_pwm": 0.82}),
+            0.60,
+        )
+        self.assertEqual(
+            runtime.current_forward_throttle_label({"current_motor_pwm": 1.0}),
+            1.0,
+        )
+        self.assertEqual(
+            runtime.current_forward_throttle_label({"current_motor_pwm": -0.82}),
+            0.0,
+        )
 
 
 if __name__ == "__main__":

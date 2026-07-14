@@ -10,7 +10,7 @@ No Series 4 checkpoint exists yet. No `4.x` option is present in the live contro
 
 The first experiment must state one architectural hypothesis before code is copied or training begins. Dataset, split, evaluation, and deployment changes must not be mixed into the same experiment unless they are the hypothesis being tested.
 
-The compatibility baseline is `320x180` BGR input, absolute steering/throttle labels, time-segment validation, ONNX deployment on Jetson, and a fixed v3.4 replay. The current 19-output hybrid head can be retained or replaced, but trainer, loss, evaluator, export, and Jetson decoding must agree on the contract.
+The compatibility baseline is `320x180` BGR input, absolute steering labels, useful-range throttle labels (`0..1` maps physical `55..100%`), time-segment validation, ONNX deployment on Jetson, and a fixed v3.4 replay. The current 19-output hybrid head can be retained or replaced, but trainer, loss, evaluator, export, and Jetson decoding must agree on the contract.
 
 ## Promotion Evidence
 
