@@ -55,11 +55,6 @@ from .config import (
     LEFT_MOTOR_PWM_SCALE,
     LOW_CAMERA_CONFIDENCE,
     LOG_INTERVAL_SEC,
-    LIDAR_WARN_M,
-    LIDAR_MIN_MOVE_PWM,
-    LIDAR_OVERRIDE_EMERGENCY_STOP_M,
-    LIDAR_OVERRIDE_SIDE_CLEARANCE_M,
-    LIDAR_OVERRIDE_STEER_DEG,
     MAX_TARGET_HEADING_DEG,
     PHOTO_BUTTON,
     PHOTO_BUCKET_COLLECTION_NEED,
@@ -299,8 +294,6 @@ def model_is_series_3(model_choice) -> bool:
 
 
 def get_dashboard_drive_mode(state) -> str:
-    if state.get("lidar_override_active"):
-        return "SWR"
     if state["autonomous_mode"]:
         return "ATO"
     if state["cc_active"]:
@@ -354,50 +347,6 @@ def cycle_steering_model(webcam_vision, current_choice: str, direction: int) -> 
     if webcam_vision.set_model_choice(next_choice):
         return next_choice
     return current_choice
-
-
-def pick_lidar_override_side(state, lidar_scan) -> str | None:
-    left_clear = float(state.get("lidar_left_dist", 0.0)) >= LIDAR_OVERRIDE_SIDE_CLEARANCE_M
-    right_clear = float(state.get("lidar_right_dist", 0.0)) >= LIDAR_OVERRIDE_SIDE_CLEARANCE_M
-    if not left_clear and not right_clear:
-        return None
-
-    warn_distance = float(state.get("lidar_warn_threshold_m", OBSTACLE_WARN_THRESHOLD_M))
-    left_obstacle_score = 0.0
-    right_obstacle_score = 0.0
-    for point in lidar_scan or []:
-        if (
-            not getattr(point, "is_valid", False)
-            or getattr(point, "distance_mm", 0) <= 0
-            or getattr(point, "confidence", 0) < 150
-        ):
-            continue
-        angle = float(getattr(point, "angle_deg", 0.0))
-        if angle > 180.0:
-            angle -= 360.0
-        if angle < -75.0 or angle > 75.0:
-            continue
-        distance_m = float(getattr(point, "distance_mm", 0.0)) / 1000.0
-        if distance_m > warn_distance:
-            continue
-        score = max(0.0, warn_distance - distance_m) + 0.05
-        if angle < -5.0:
-            left_obstacle_score += score
-        elif angle > 5.0:
-            right_obstacle_score += score
-        else:
-            left_obstacle_score += score * 0.5
-            right_obstacle_score += score * 0.5
-
-    if left_obstacle_score > right_obstacle_score * 1.15:
-        return "right" if right_clear else None
-    if right_obstacle_score > left_obstacle_score * 1.15:
-        return "left" if left_clear else None
-    if right_clear and not left_clear:
-        return "right"
-    if left_clear and not right_clear:
-        return "left"
-    return "right" if float(state.get("lidar_right_dist", 0.0)) >= float(state.get("lidar_left_dist", 0.0)) else "left"
 
 
 # page number -> (vertical, horizontal) grid position. Page NUMBERS keep their draw
@@ -748,7 +697,7 @@ def _disengagement_cause(reason: str) -> str:
 
 _CAUSE_CODES = {
     "steer": "STR", "throttle": "TLE", "brake": "BRK", "a": "BTN",
-    "nav": "NAV", "arrived": "ARR", "lidar": "SWR", "emergency": "EMR", "holding": "HLD",
+    "nav": "NAV", "arrived": "ARR", "lidar": "EMR", "emergency": "EMR", "holding": "HLD",
 }
 
 
@@ -1035,16 +984,7 @@ def update_dashboard_photo_stats(metrics, now: float | None = None, force: bool 
 
 
 def is_stop_brake_condition(state) -> bool:
-    if not state.get("autonomous_mode"):
-        return bool(state.get("manual_lidar_emergency_stop", False))
-    if state.get("lidar_override_active"):
-        return False
-    return (
-        state["direction_arrow"] in ("STOP_WARNING", "BLOCKED")
-        or float(state.get("lidar_front_dist", MAX_LIDAR_RANGE_M))
-        < float(state.get("lidar_stop_threshold_m", FORWARD_OBSTACLE_STOP_DISTANCE_M))
-        or state.get("stop_reason") in ("blocked_path", "aeb_stop")
-    )
+    return bool(state.get("lidar_emergency_stop", False))
 
 
 def get_cpu_temp():
@@ -1402,7 +1342,21 @@ def _drive_telemetry(state, metrics, jetson_client):
 
 
 def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan,
-                              jetson_client=None, active_model_choice=None):
+                              jetson_client=None, active_model_choice=None,
+                              lidar_policy=None):
+    # Apply an already-computed emergency decision before waiting on camera/Jetson work.
+    # The same policy object is reused below so one control loop cannot interpret two scans.
+    av = lidar_policy or lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+    state["lidar_forward_clearance_m"] = av["front_m"]
+    state["lidar_lane_occupancy"] = av["lane_occupancy"]
+    state["lidar_emergency_lane_occupancy"] = av["emergency_lane_occupancy"]
+    state["lidar_lane_action"] = av["lane_action"]
+    if av["code"]:
+        metrics.auto_last_cause_code = av["code"]
+    if av["stop"]:
+        apply_hard_stop_state(state, av["reason"])
+        return 0.0, True
+
     camera_analysis = {
         "heading_bias": 0.0,
         "confidence": 0.0,
@@ -1483,13 +1437,8 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     state["lidar_heading_confidence"] = 0.0
     state["lidar_forward_clearance_m"] = state["lidar_front_dist"]
 
-    # LiDAR avoidance (forward-cone classify + governor). No LiDAR -> scan empty -> reads
-    # clear -> model-only driving (the intended fallback).
-    av = lidar_avoidance.evaluate(lidar_scan)
-    state["lidar_forward_clearance_m"] = av["front_m"]
-    state["lidar_lane_occupancy"] = av["lane_occupancy"]
-    state["lidar_emergency_lane_occupancy"] = av["emergency_lane_occupancy"]
-    state["lidar_lane_action"] = av["lane_action"]
+    # LiDAR never commands steering. It can only cap throttle or request an emergency
+    # stop in the center corridor, and the complete policy follows the AEB toggle.
     # debug (throttled ~1s, autonomous only): shows WHY the car does/doesn't roll --
     # forward clearance, avoidance code/stop, governed throttle, model confidence + source.
     _adbg_now = time.time()
@@ -1499,23 +1448,6 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
               f"stop={av['stop']} gov_thr={av['throttle']:.2f} "
               f"lanes={av['emergency_lane_occupancy'] or '-'} action={av['lane_action']} "
               f"conf={camera_analysis['confidence']:.2f} method={camera_analysis['method']}", flush=True)
-    if av["code"]:                                  # SWR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
-        metrics.auto_last_cause_code = av["code"]
-    if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
-        apply_hard_stop_state(state, av["reason"])
-        return 0.0, True
-    if av["code"] in ("SWR", "CRP"):                 # emergency lane override or ordinary swerve
-        state["steering_servo_deg"] = clamp_servo_degrees(av["steer"])
-        state["steer"] = steering_degrees_to_normalized(state["steering_servo_deg"])
-        state["target_heading_deg"] = state["steer"] * MAX_TARGET_HEADING_DEG
-        state["lidar_override_active"] = True
-        if av["code"] == "CRP":
-            state["lidar_override_side"] = ""
-        else:
-            state["lidar_override_side"] = "right" if av["steer"] > STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0 else "left"
-        state["stop_reason"] = av["reason"]
-        return av["throttle"], False
-    # CLEAR -> follow the model below; the governor still caps throttle by forward clearance.
     lidar_governed_throttle = av["throttle"]
 
     camera_confidence = camera_analysis["confidence"]
@@ -1547,25 +1479,18 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     desired_pwm_from_input = 0.0
     effective_brake_from_input = state["brake"]
     effective_brake_force = max(0.0, min(1.0, float(state.get("brake_force", 0.0))))
-    state["lidar_lane_occupancy"] = lidar_avoidance.lane_occupancy(lidar_scan, LIDAR_WARN_M)
-    state["lidar_emergency_lane_occupancy"] = lidar_avoidance.lane_occupancy(
-        lidar_scan, LIDAR_OVERRIDE_EMERGENCY_STOP_M
-    )
-    manual_lidar = lidar_avoidance.manual_lane_governor(lidar_scan)
-    state["manual_lidar_throttle_cap"] = manual_lidar["throttle_cap"]
-    state["manual_lidar_emergency_stop"] = manual_lidar["emergency_stop"]
-    if not state["autonomous_mode"]:
-        if metrics.aeb_enabled and manual_lidar["emergency_stop"]:
-            state["lidar_lane_action"] = "brake"
-        elif metrics.aeb_enabled and manual_lidar["throttle_cap"] <= LIDAR_MIN_MOVE_PWM:
-            state["lidar_lane_action"] = "creep"
-        else:
-            state["lidar_lane_action"] = "normal"
+    lidar_policy = lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+    state["lidar_lane_occupancy"] = lidar_policy["lane_occupancy"]
+    state["lidar_emergency_lane_occupancy"] = lidar_policy["emergency_lane_occupancy"]
+    state["lidar_lane_action"] = lidar_policy["lane_action"]
+    state["lidar_throttle_cap"] = lidar_policy["throttle"]
+    state["lidar_emergency_stop"] = lidar_policy["stop"]
 
     if state["autonomous_mode"]:
         desired_pwm_from_input, effective_brake_from_input = apply_autonomous_controls(
             state, metrics, hardware, webcam_vision, lidar_scan,
-            jetson_client=jetson_client, active_model_choice=active_model_choice
+            jetson_client=jetson_client, active_model_choice=active_model_choice,
+            lidar_policy=lidar_policy,
         )
         desired_pwm_from_input = max(0.0, min(AUTONOMOUS_CRUISE_PWM, desired_pwm_from_input))
         state["throttle"] = desired_pwm_from_input
@@ -1634,7 +1559,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
             if metrics.aeb_enabled:
                 desired_pwm_from_input = min(
                     desired_pwm_from_input,
-                    float(manual_lidar["throttle_cap"]),
+                    float(lidar_policy["throttle"]),
                 )
 
     servo_degrees = clamp_servo_degrees(

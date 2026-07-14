@@ -42,41 +42,16 @@ HIGH_CAMERA_CONFIDENCE = 0.60
 DRIVEWAY_CUT_MIN_FORWARD_CLEARANCE_M = 1.2
 DRIVEWAY_CUT_DETECTION_SECONDS = 0.35
 FORWARD_OBSTACLE_STOP_DISTANCE_M = 0.5
-PARTIAL_BLOCKAGE_MIN_CLEARANCE_M = 0.8
 LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05   # hard-stop backstop (raised for earlier reaction)
-LIDAR_OVERRIDE_SIDE_CLEARANCE_M = 0.75
-LIDAR_OVERRIDE_STEER_DEG = 38.0
 
-# --- LiDAR AVOIDANCE (validated in test_files/lidar_avoidance_sim.py) ---
-# Forward cone (+/-) that can BLOCK the path; wider = brakes for more off-center stuff.
-LIDAR_FORWARD_CONE_DEG = 30.0        # (legacy) old angular block cone; superseded by the corridor below
-# SIDEWALK CORRIDOR (the two dashboard blue lines): only obstacles WITHIN +/-this laterally, AHEAD,
-# can brake/stop. 76.2cm = half of a 5ft (152.4cm) sidewalk. A rectangle down the path instead of a
-# fan -> alongside hedges/fences past the sidewalk edge no longer trigger a brake at distance.
-LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762
-LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; outside-corridor points in the fan = swerve-clearance only
+# --- LiDAR CENTER-CORRIDOR AEB ---
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762  # dashboard preview: half of a 5ft sidewalk
+LIDAR_CENTER_HALF_WIDTH_M = LIDAR_CORRIDOR_HALF_WIDTH_M / 3.0
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
-LIDAR_WARN_M = 1.40                  # forward point closer than this triggers classify/react
+LIDAR_WARN_M = 1.40                  # warning rung inside the governed center corridor
 LIDAR_GOV_FULL_M = 1.65              # governor full throttle at/above this clearance
 LIDAR_GOV_STOP_M = 1.25              # governor reaches minimum moving throttle at/below this
 LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
-LIDAR_AVOID_SIDE_CLEAR_M = 0.40      # a side needs this much room to swerve into
-LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
-LIDAR_NARROW_MAX_DEG = 15.0          # per-cluster angular cap for a "leg" (person detection)
-LIDAR_WALL_MIN_WIDTH_M = 0.65        # PHYSICAL width to count as a wall (mailbox ~0.5m stays swervable)
-LIDAR_LEG_GAP_MAX_DEG = 45.0         # two clusters within this apart = a person's two legs
-LIDAR_LEG_RANGE_TOL_M = 0.40         # ...and at matching range = same person
-LIDAR_SWERVE_MIN_DEG = 20.0          # gentle swerve when the mailbox is far (~WARN)
-LIDAR_SWERVE_MAX_DEG = 80.0          # hard swerve when it's close (~GOV_STOP); logical 90 -/+ this
-LIDAR_SWERVE_THROTTLE_DROP = 0.30    # sharper swerves shed this much throttle (gentle=full, hardest=CRUISE-drop)
-# Split the configured 5 ft corridor into equal left/center/right bands (each 5/3 ft).
-# Autonomous emergency actions are deterministic: L -> right, R -> left, LR -> creep
-# straight, and any center occupancy -> hard brake. Manual driving is less invasive:
-# only simultaneous L/C/R occupancy can cap throttle or trigger the emergency brake.
-# The bands remain LiDAR/car-relative until a separate sidewalk-edge estimate supplies
-# a lateral corridor offset.
-LIDAR_LANE_COUNT = 3
-LIDAR_EMERGENCY_LANE_POLICY_ENABLED = True
 
 
 def absolute_throttle_to_reference(absolute_pwm: float) -> float:
@@ -416,8 +391,8 @@ def create_state():
         "lidar_lane_occupancy": "",
         "lidar_emergency_lane_occupancy": "",
         "lidar_lane_action": "normal",
-        "manual_lidar_throttle_cap": 1.0,
-        "manual_lidar_emergency_stop": False,
+        "lidar_throttle_cap": 1.0,
+        "lidar_emergency_stop": False,
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pixel-level checks for the Zero 2 W LiDAR dashboard layout."""
+"""Pixel-level checks for the Zero 2 W center-corridor LiDAR page."""
 
 from __future__ import annotations
 
@@ -50,20 +50,17 @@ def renderer():
 
 
 class LidarDashboardLayoutTest(unittest.TestCase):
-    def test_guides_are_equally_spaced_with_side_padding(self):
-        self.assertEqual(D.LIDAR_PREVIEW_GUIDE_X, (6, 23, 40, 57))
-        gaps = [right - left for left, right in zip(
-            D.LIDAR_PREVIEW_GUIDE_X,
-            D.LIDAR_PREVIEW_GUIDE_X[1:],
-        )]
-        self.assertEqual(gaps, [17, 17, 17])
-        self.assertGreater(D.LIDAR_PREVIEW_GUIDE_X[0], 0)
-        self.assertLess(D.LIDAR_PREVIEW_GUIDE_X[-1], D.PANEL_WIDTH - 1)
+    def test_preview_keeps_side_padding_but_only_two_center_guides(self):
+        self.assertEqual(D.LIDAR_PREVIEW_X, (6, 57))
+        self.assertEqual(D.LIDAR_CENTER_GUIDE_X, (23, 40))
 
-    def test_outer_and_inner_guides_have_equal_intensity(self):
-        self.assertEqual(sum(D.LIDAR_OUTER_GUIDE), sum(D.LIDAR_INNER_GUIDE))
-        self.assertEqual(max(D.LIDAR_OUTER_GUIDE), max(D.LIDAR_INNER_GUIDE))
-        self.assertNotEqual(D.LIDAR_OUTER_GUIDE, D.LIDAR_INNER_GUIDE)
+        value = renderer()
+        value._draw_lidar_page({"lidar_points": [[0.0, 2.0]], "lidar_point_count": 1})
+        for guide_x in D.LIDAR_CENTER_GUIDE_X:
+            self.assertEqual(value.canvas.pixels[(guide_x, 8)], D.LIDAR_CENTER_GUIDE)
+            self.assertEqual(value.canvas.pixels[(guide_x, 30)], D.LIDAR_CENTER_GUIDE)
+        self.assertNotEqual(value.canvas.pixels.get((6, 30)), D.LIDAR_CENTER_GUIDE)
+        self.assertNotEqual(value.canvas.pixels.get((57, 30)), D.LIDAR_CENTER_GUIDE)
 
     def test_lane_zone_colors_follow_the_four_rungs(self):
         self.assertEqual(D.lidar_lane_zone_color(2.0), D.LIDAR_POINT_BLUE)
@@ -72,69 +69,71 @@ class LidarDashboardLayoutTest(unittest.TestCase):
         self.assertEqual(D.lidar_lane_zone_color(1.20), D.LIDAR_POINT_ORANGE)
         self.assertEqual(D.lidar_lane_zone_color(1.00), D.LIDAR_POINT_RED)
 
-    def test_lane_classification_matches_equal_corridor_thirds(self):
-        self.assertEqual(D.lidar_lane_for_coordinates(-0.50, 1.0), "L")
-        self.assertEqual(D.lidar_lane_for_coordinates(0.00, 1.0), "C")
-        self.assertEqual(D.lidar_lane_for_coordinates(0.50, 1.0), "R")
-        self.assertIsNone(D.lidar_lane_for_coordinates(0.80, 1.0))
+    def test_only_center_coordinates_belong_to_the_safety_corridor(self):
+        self.assertEqual(D.lidar_lane_for_coordinates(0.0, 1.0), "C")
+        self.assertEqual(D.lidar_lane_for_coordinates(0.20, 1.0), "C")
+        self.assertIsNone(D.lidar_lane_for_coordinates(-0.30, 1.0))
+        self.assertIsNone(D.lidar_lane_for_coordinates(0.30, 1.0))
+        self.assertIsNone(D.lidar_lane_for_coordinates(0.0, -1.0))
 
-    def test_lidar_page_uses_full_letter_bitmaps(self):
+    def test_lidar_page_draws_one_full_center_glyph(self):
         value = renderer()
         value._draw_lidar_page({"lidar_points": [[0.0, 2.0]], "lidar_point_count": 1})
 
-        label_bases = {"L": 11, "C": 28, "R": 45}
-        for lane, base_x in label_bases.items():
-            expected = {
-                (base_x + bit, row)
-                for row, row_bits in enumerate(value.letter_map[lane])
-                for bit in range(8)
-                if row_bits & (1 << (7 - bit))
-            }
-            actual = {
-                point for point in expected
-                if value.canvas.pixels.get(point) == D.LIDAR_LANE_CLEAR
-            }
-            self.assertEqual(actual, expected, lane)
-
-    def test_each_lane_label_uses_its_nearest_rung_color(self):
-        value = renderer()
-
-        def point(lateral_m, forward_m):
-            angle_deg = math.degrees(math.atan2(lateral_m, forward_m))
-            return [angle_deg, math.hypot(lateral_m, forward_m)]
-
-        value._draw_lidar_page({
-            "lidar_points": [
-                point(-0.50, 1.55),
-                point(0.00, 1.35),
-                point(0.50, 1.20),
-            ],
-            "lidar_point_count": 3,
-        })
-
-        expected_colors = {
-            "L": D.LIDAR_POINT_GREEN,
-            "C": D.LIDAR_POINT_YELLOW,
-            "R": D.LIDAR_POINT_ORANGE,
+        base_x = 28
+        expected = {
+            (base_x + bit, row)
+            for row, row_bits in enumerate(value.letter_map["C"])
+            for bit in range(8)
+            if row_bits & (1 << (7 - bit))
         }
-        label_bases = {"L": 11, "C": 28, "R": 45}
-        for lane, base_x in label_bases.items():
-            glyph_pixel = next(
-                (base_x + bit, row)
-                for row, row_bits in enumerate(value.letter_map[lane])
-                for bit in range(8)
-                if row_bits & (1 << (7 - bit))
-            )
-            self.assertEqual(value.canvas.pixels[glyph_pixel], expected_colors[lane])
+        actual = {
+            point for point in expected
+            if value.canvas.pixels.get(point) == D.LIDAR_LANE_CLEAR
+        }
+        self.assertEqual(actual, expected)
 
-    def test_all_four_guides_span_the_panel(self):
+    def test_center_label_uses_nearest_rung_color(self):
+        value = renderer()
+        value._draw_lidar_page({
+            "lidar_points": [[0.0, 1.20]],
+            "lidar_point_count": 1,
+        })
+        base_x = 28
+        glyph_pixel = next(
+            (base_x + bit, row)
+            for row, row_bits in enumerate(value.letter_map["C"])
+            for bit in range(8)
+            if row_bits & (1 << (7 - bit))
+        )
+        self.assertEqual(value.canvas.pixels[glyph_pixel], D.LIDAR_POINT_ORANGE)
+
+    def test_side_point_does_not_change_center_label(self):
+        value = renderer()
+        lateral_m, forward_m = 0.50, 1.0
+        value._draw_lidar_page({
+            "lidar_points": [[
+                math.degrees(math.atan2(lateral_m, forward_m)),
+                math.hypot(lateral_m, forward_m),
+            ]],
+            "lidar_point_count": 1,
+        })
+        base_x = 28
+        glyph_pixel = next(
+            (base_x + bit, row)
+            for row, row_bits in enumerate(value.letter_map["C"])
+            for bit in range(8)
+            if row_bits & (1 << (7 - bit))
+        )
+        self.assertEqual(value.canvas.pixels[glyph_pixel], D.LIDAR_LANE_CLEAR)
+
+    def test_rungs_span_center_corridor_only(self):
         value = renderer()
         value._draw_lidar_page({"lidar_points": [[0.0, 2.0]], "lidar_point_count": 1})
-
-        for index, guide_x in enumerate(D.LIDAR_PREVIEW_GUIDE_X):
-            color = D.LIDAR_OUTER_GUIDE if index in (0, 3) else D.LIDAR_INNER_GUIDE
-            self.assertEqual(value.canvas.pixels[(guide_x, 8)], color)
-            self.assertEqual(value.canvas.pixels[(guide_x, 30)], color)
+        rung_y = (D.PANEL_HEIGHT - 1) - int(round(1.40 * D.LIDAR_FORWARD_SCALE_PX_PER_M))
+        self.assertEqual(value.canvas.pixels[(30, rung_y)], D.LIDAR_POINT_YELLOW)
+        self.assertNotEqual(value.canvas.pixels.get((10, rung_y)), D.LIDAR_POINT_YELLOW)
+        self.assertNotEqual(value.canvas.pixels.get((50, rung_y)), D.LIDAR_POINT_YELLOW)
 
 
 if __name__ == "__main__":

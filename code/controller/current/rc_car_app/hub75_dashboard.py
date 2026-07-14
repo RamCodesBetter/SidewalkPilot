@@ -186,10 +186,10 @@ class Hub75DashboardSender:
             "lidar_points": lidar_points or [],
             "lidar_point_count": max(0, int(lidar_point_count)),
             "lidar_lane_occupancy": "".join(
-                lane for lane in "LCR" if lane in str(lidar_lane_occupancy).upper()
+                lane for lane in "C" if lane in str(lidar_lane_occupancy).upper()
             ),
             "lidar_emergency_lane_occupancy": "".join(
-                lane for lane in "LCR" if lane in str(lidar_emergency_lane_occupancy).upper()
+                lane for lane in "C" if lane in str(lidar_emergency_lane_occupancy).upper()
             ),
             "lidar_lane_action": str(lidar_lane_action).lower()[:16],
             "model_choice": str(model_choice)[:4],
