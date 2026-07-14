@@ -1,19 +1,46 @@
-# AEB
+# Automatic Emergency Braking
 
-TODO:
+The RSB controller button toggles LiDAR AEB. The toggle has the same meaning in manual and autonomous driving:
 
-- [ ] Add page-specific notes for `autonomy-stack/lidar-safety/aeb.md` after inspecting the real project files.
-- [ ] Cross-link `AEB` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact input entering this subsystem.
-- [ ] Document the exact output leaving this subsystem.
-- [ ] Map the subsystem to the owning runtime file or module.
-- [ ] Describe the control priority when this subsystem disagrees with another subsystem.
-- [ ] List the settings, constants, and flags that change this behavior.
-- [ ] Add a failure-mode checklist for field testing.
-- [ ] Add how to verify the subsystem on the bench before a driving test.
-- [ ] Add how to verify the subsystem during a real outdoor run.
-- [ ] Document serial port, packet format, reconnect behavior, and stale-scan handling.
-- [ ] Add bench test steps with the LiDAR disconnected and reconnected.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
+| AEB state | Center slowdown | Center emergency stop | LiDAR steering |
+|---|---|---|---|
+| ON | Enabled | Enabled | Never |
+| OFF | Disabled | Disabled | Never |
+
+This fixes the previous split behavior where the final brake respected the toggle but an earlier autonomous `SWR/CRP` path could still alter control.
+
+## Runtime Path
+
+`update_gpio()` calls:
+
+```python
+lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+```
+
+once per control loop. The resulting throttle cap and stop flag are shared by manual and autonomous paths. The same result populates dashboard occupancy/action fields, preventing control and display logic from using different interpretations of the scan.
+
+In Drive gear:
+
+- manual throttle or cruise control is capped by the policy throttle;
+- autonomous throttle is capped before motor output;
+- an emergency result activates the existing AT8236 hard-brake output; and
+- Reverse is not subject to forward AEB.
+
+## Bench Test
+
+Keep the wheels lifted or mechanically unable to move during the first test.
+
+1. Start the controller and open the LiDAR dashboard page.
+2. Confirm only two blue center guides and one `C` glyph are shown.
+3. Switch AEB OFF. Move an object through every rung in the center. Confirm no control intervention.
+4. Switch AEB ON. Put the object outside either center guide. Confirm no intervention.
+5. Move it between the center guides from beyond 1.65 m toward 1.25 m. Confirm throttle decreases smoothly.
+6. Hold it between 1.25 m and 1.05 m. Confirm the physical target is 55%.
+7. Move it to 1.05 m or closer. Confirm hard brake and `C`/brake indication.
+8. Repeat with autonomous mode enabled and verify model steering remains unchanged by LiDAR.
+
+Abort on any side-object brake, any LiDAR steering change, failure to stop at the emergency boundary, stale scan, or unexpected motor direction.
+
+## Automated Regression
+
+`code/test_files/test_lidar_center_aeb.py` proves the threshold behavior, side-point exclusion, AEB-disabled behavior, and the invariant that every result has `steer=None`.

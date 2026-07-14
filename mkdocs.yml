@@ -162,6 +162,7 @@ nav:
       - Metrics: ai-and-models/training-pipeline/metrics.md
     - Architecture:
       - CNN: ai-and-models/architecture/cnn.md
+      - Series 4 Plan: ai-and-models/architecture/series-4-plan.md
       - Tensor Shape: ai-and-models/architecture/tensor-shape.md
       - Conv Layers: ai-and-models/architecture/conv-layers.md
       - BatchNorm: ai-and-models/architecture/batchnorm.md
