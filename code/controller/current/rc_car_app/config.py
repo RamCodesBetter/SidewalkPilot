@@ -50,8 +50,9 @@ LIDAR_CENTER_HALF_WIDTH_M = LIDAR_CORRIDOR_HALF_WIDTH_M / 3.0
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
 LIDAR_WARN_M = 1.40                  # warning rung inside the governed center corridor
 LIDAR_GOV_FULL_M = 1.65              # governor full throttle at/above this clearance
-LIDAR_GOV_STOP_M = 1.25              # governor reaches minimum moving throttle at/below this
-LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
+LIDAR_GOV_STOP_M = 1.25              # governor reaches its hold throttle at/below this
+LIDAR_MIN_MOVE_PWM = 0.55            # physical motor dead-zone boundary (reference 0%)
+LIDAR_GOV_MIN_REFERENCE = 0.60       # closest non-EMR governor target on the useful scale
 
 
 def absolute_throttle_to_reference(absolute_pwm: float) -> float:
@@ -61,6 +62,15 @@ def absolute_throttle_to_reference(absolute_pwm: float) -> float:
         return 0.0
     usable_span = 1.0 - LIDAR_MIN_MOVE_PWM
     return (absolute - LIDAR_MIN_MOVE_PWM) / usable_span
+
+
+def reference_throttle_to_absolute(reference_throttle: float) -> float:
+    """Map useful-range throttle to physical PWM without changing saved labels."""
+    reference = max(0.0, min(1.0, abs(float(reference_throttle))))
+    return LIDAR_MIN_MOVE_PWM + reference * (1.0 - LIDAR_MIN_MOVE_PWM)
+
+
+LIDAR_GOV_MIN_PWM = reference_throttle_to_absolute(LIDAR_GOV_MIN_REFERENCE)
 
 # --- GPIO SETUP ---
 STEERING_SERVO_PIN = 12

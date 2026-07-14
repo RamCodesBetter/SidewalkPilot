@@ -25,11 +25,11 @@ A point contributes only when `forward > 0` and `abs(lateral) <= 0.254 m`. The n
 | Center clearance | Physical command with AEB ON |
 |---:|---|
 | `>= 1.65 m` | Full requested throttle allowed |
-| `1.65..1.25 m` | Proportional cap from 100% down to 55% |
-| `1.25..1.05 m` | Hold 55%, the measured minimum-moving command |
+| `1.65..1.25 m` | Proportional cap from 100% down to 60% reference |
+| `1.25..1.05 m` | Hold 60% reference (82% physical PWM) |
 | `<= 1.05 m` | Hard brake / zero throttle |
 
-The dashboard maps physical `55..100%` to reference `0..100%`, but training/photo labels remain absolute physical commands. A 55% capture is labeled `0.55`.
+The dashboard maps physical `55..100%` to reference `0..100%`. Therefore, the 60% reference hold target is 82% physical PWM. Training/photo labels remain absolute physical commands, so a frame captured at that target is labeled `0.82`, not `0.60`.
 
 ## Control Priority
 

@@ -62,7 +62,7 @@ class LidarCenterAebTest(unittest.TestCase):
                 self.assertEqual(result["lane_occupancy"], "")
                 self.assertIsNone(result["steer"])
 
-    def test_center_obstacle_scales_from_full_to_minimum_moving_throttle(self):
+    def test_center_obstacle_scales_from_full_to_60_percent_reference(self):
         at_full = lidar_avoidance.evaluate([point(0.0, C.LIDAR_GOV_FULL_M)])
         midpoint_m = (C.LIDAR_GOV_FULL_M + C.LIDAR_GOV_STOP_M) / 2.0
         midpoint = lidar_avoidance.evaluate([point(0.0, midpoint_m)])
@@ -72,10 +72,13 @@ class LidarCenterAebTest(unittest.TestCase):
 
         self.assertEqual(at_full["throttle"], C.AUTONOMOUS_CRUISE_PWM)
         self.assertEqual(at_full["lane_occupancy"], "C")
-        self.assertGreater(midpoint["throttle"], C.LIDAR_MIN_MOVE_PWM)
+        self.assertGreater(midpoint["throttle"], C.LIDAR_GOV_MIN_PWM)
         self.assertLess(midpoint["throttle"], C.AUTONOMOUS_CRUISE_PWM)
         self.assertEqual(midpoint["lane_action"], "slow")
-        self.assertEqual(creep["throttle"], C.LIDAR_MIN_MOVE_PWM)
+        self.assertEqual(creep["throttle"], C.LIDAR_GOV_MIN_PWM)
+        self.assertAlmostEqual(
+            C.absolute_throttle_to_reference(creep["throttle"]), 0.60
+        )
         self.assertEqual(creep["lane_action"], "creep")
 
     def test_center_obstacle_at_emergency_boundary_hard_stops(self):
@@ -191,19 +194,23 @@ class LidarCenterAebTest(unittest.TestCase):
         self.assertFalse(result["stop"])
         self.assertEqual(result["lane_occupancy"], "")
 
-    def test_governor_skips_the_nonmoving_pwm_region(self):
+    def test_governor_holds_at_60_percent_reference_before_emr(self):
         self.assertEqual(
             lidar_avoidance.governor_target(C.LIDAR_OVERRIDE_EMERGENCY_STOP_M),
             0.0,
         )
         self.assertEqual(
             lidar_avoidance.governor_target(C.LIDAR_OVERRIDE_EMERGENCY_STOP_M + 0.01),
-            C.LIDAR_MIN_MOVE_PWM,
+            C.LIDAR_GOV_MIN_PWM,
         )
         self.assertEqual(
             lidar_avoidance.governor_target(C.LIDAR_GOV_STOP_M),
-            C.LIDAR_MIN_MOVE_PWM,
+            C.LIDAR_GOV_MIN_PWM,
         )
+        self.assertAlmostEqual(
+            C.absolute_throttle_to_reference(C.LIDAR_GOV_MIN_PWM), 0.60
+        )
+        self.assertAlmostEqual(C.LIDAR_GOV_MIN_PWM, 0.82)
         self.assertEqual(
             lidar_avoidance.governor_target(C.LIDAR_GOV_FULL_M),
             C.AUTONOMOUS_CRUISE_PWM,
@@ -217,6 +224,7 @@ class LidarCenterAebTest(unittest.TestCase):
         midpoint = (C.LIDAR_MIN_MOVE_PWM + 1.0) / 2.0
         self.assertAlmostEqual(C.absolute_throttle_to_reference(midpoint), 0.5)
         self.assertEqual(C.absolute_throttle_to_reference(1.0), 1.0)
+        self.assertAlmostEqual(C.reference_throttle_to_absolute(0.60), 0.82)
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@ Keep the wheels lifted or mechanically unable to move during the first test.
 3. Switch AEB OFF. Move an object through every rung in the center. Confirm no control intervention.
 4. Switch AEB ON. Put the object outside either center guide. Confirm no intervention.
 5. Move it between the center guides from beyond 1.65 m toward 1.25 m. Confirm throttle decreases smoothly.
-6. Hold it between 1.25 m and 1.05 m. Confirm the physical target is 55%.
+6. Hold it between 1.25 m and 1.05 m. Confirm the dashboard target is 60% reference (82% physical PWM).
 7. Move it to 1.05 m or closer. Confirm hard brake and `C`/brake indication.
 8. Repeat with autonomous mode enabled and verify model steering remains unchanged by LiDAR.
 

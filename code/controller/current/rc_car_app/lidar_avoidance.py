@@ -2,8 +2,9 @@
 
 The camera model owns every steering command. LiDAR points outside the center safety
 corridor are telemetry only and never cause a swerve. A valid point directly ahead can
-reduce the physical throttle target from 100% to the 55% minimum-moving command and can
-request a hard stop at the emergency boundary.
+reduce the reference throttle target from 100% to 60% and can request a hard stop at
+the emergency boundary. The 60% reference target is 82% physical PWM because the
+physical 0..55% motor dead zone maps to reference 0%.
 
 The caller passes the operator's AEB toggle into :func:`evaluate`. When disabled, this
 module reports occupancy for the dashboard but returns full throttle and no stop.
@@ -57,18 +58,18 @@ def lane_occupancy(scan, max_forward_m: float) -> str:
 
 
 def governor_target(front_m: float) -> float:
-    """Map center clearance to physical PWM without commanding the dead 0..55% region."""
+    """Map center clearance to physical PWM, flooring the governor at 60% reference."""
     if front_m <= C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
         return 0.0
     if front_m <= C.LIDAR_GOV_STOP_M:
-        return C.LIDAR_MIN_MOVE_PWM
+        return C.LIDAR_GOV_MIN_PWM
     if front_m >= C.LIDAR_GOV_FULL_M:
         return C.AUTONOMOUS_CRUISE_PWM
     fraction = (front_m - C.LIDAR_GOV_STOP_M) / (
         C.LIDAR_GOV_FULL_M - C.LIDAR_GOV_STOP_M
     )
-    return C.LIDAR_MIN_MOVE_PWM + fraction * (
-        C.AUTONOMOUS_CRUISE_PWM - C.LIDAR_MIN_MOVE_PWM
+    return C.LIDAR_GOV_MIN_PWM + fraction * (
+        C.AUTONOMOUS_CRUISE_PWM - C.LIDAR_GOV_MIN_PWM
     )
 
 
@@ -107,7 +108,7 @@ def evaluate(scan, enabled: bool = True) -> dict:
         }
 
     throttle = governor_target(front_m)
-    if throttle <= C.LIDAR_MIN_MOVE_PWM and occupancy:
+    if throttle <= C.LIDAR_GOV_MIN_PWM and occupancy:
         action = "creep"
     elif throttle < C.AUTONOMOUS_CRUISE_PWM:
         action = "slow"
