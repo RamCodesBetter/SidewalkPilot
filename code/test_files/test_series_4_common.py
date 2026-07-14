@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
+import sys
 import unittest
 from pathlib import Path
 
 import numpy as np
 import torch
 
-import series_4_common as s4
+SERIES4_DIR = (
+    Path(__file__).resolve().parents[1]
+    / "ai_models_datasets"
+    / "series_3_and_4"
+)
+sys.path.insert(0, str(SERIES4_DIR))
+
+import series_4_common as s4  # noqa: E402
 
 
 def frame(index, run, timestamp, steering):

@@ -5,21 +5,25 @@ Auth (NO env vars): run `huggingface-cli login` (or `hf auth login`) ONCE with a
 token from https://huggingface.co/settings/tokens. This script uses the cached token.
 Install the CLI if missing:  pip install -U 'huggingface_hub[cli]'
 
-Tar archives and label manifests are published at the dataset repo root. Extracting the
-archive locally recreates the dataset folder expected by the trainer. __pycache__/artifacts
-are skipped by default.
+Tar archives, label manifests, and an explicitly selected card are published at the dataset
+repo root. Extracting the archive locally recreates the dataset folder expected by the
+trainer. Executable code, caches, W&B state, and model artifacts are skipped by default;
+training code stays canonical in GitHub.
 
 Examples (run from the repo root):
 
-    # Series 3 loose upload (small datasets only)
+    # Preferred Series 3/4 release: one archive + labels + explicit dataset card
   python3 code/test_files/hf_upload_dataset.py \
-    --repo   ram-shreyas-naik-sabavat/SidewalkPilot_series_3_and_4 \
-    --folder code/ai_models_datasets/series_3_and_4
+    --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v3_and_v4 \
+    --tar    sidewalkpilot_v3_and_v4_dataset.tar \
+    --labels code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/labels.json \
+    --card   code/ai_models_datasets/series_3_and_4/README.md
 
-  # Series 1 & 2 is already published; re-push only if the local folder changed:
+  # Loose upload is for a data-only folder, not the trainer directory:
   python3 code/test_files/hf_upload_dataset.py \
     --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v1_and_v2 \
-    --folder code/ai_models_datasets/series_1_and_2
+    --folder code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset \
+    --card   code/ai_models_datasets/series_1_and_2/README.md
 """
 import argparse
 import sys
@@ -28,7 +32,7 @@ from pathlib import Path
 
 def main():
     ap = argparse.ArgumentParser(description="Upload a dataset folder to a Hugging Face dataset repo")
-    ap.add_argument("--repo", required=True, help="dataset repo id, e.g. user/SidewalkPilot_series_3_and_4")
+    ap.add_argument("--repo", required=True, help="dataset repo id, e.g. user/SidewalkPilot_v3_and_v4")
     ap.add_argument("--folder", help="local dataset folder for LOOSE upload (images + labels.json)")
     ap.add_argument("--tar", help="PREFERRED for big image sets: upload ONE tarball (1 commit). HF free "
                                   "tier caps ~128 commits/hour, so loose uploads of 50k+ files get "
@@ -41,8 +45,22 @@ def main():
     ap.add_argument("--private", action="store_true", help="create the repo as private")
     args = ap.parse_args()
 
-    ignore = ["**/__pycache__/**", "*.pyc", "**/.DS_Store", ".DS_Store",
-              "*.pth", "*.onnx", "*.engine"] + list(args.ignore)
+    ignore = [
+        "**/__pycache__/**",
+        "**/.cache/**",
+        "**/wandb/**",
+        "**/wandb_runs_local/**",
+        "*.py",
+        "**/*.py",
+        "*.pyc",
+        "README.md",
+        "**/README.md",
+        "**/.DS_Store",
+        ".DS_Store",
+        "*.pth",
+        "*.onnx",
+        "*.engine",
+    ] + list(args.ignore)
 
     try:
         from huggingface_hub import HfApi, whoami
