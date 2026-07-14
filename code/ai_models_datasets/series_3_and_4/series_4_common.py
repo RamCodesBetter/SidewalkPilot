@@ -489,7 +489,7 @@ def evaluate(
     loader: DataLoader,
     class_weights: torch.Tensor,
     args,
-) -> dict[str, float | list[float]]:
+) -> dict[str, float | list[float] | list[int]]:
     model.eval()
     loss_total = 0.0
     batches = 0
@@ -524,24 +524,39 @@ def evaluate(
     errors = current_predicted - current_actual
     predicted_classes = np.asarray([S3.steer_class_index(value) for value in current_predicted])
     actual_classes = np.asarray([S3.steer_class_index(value) for value in current_actual])
-    recalls = []
-    for class_index in range(NUM_STEER_CLASSES):
+    predicted_bucket_counts = np.bincount(
+        predicted_classes, minlength=NUM_STEER_CLASSES
+    ).astype(np.int64)
+    target_bucket_counts = np.bincount(
+        actual_classes, minlength=NUM_STEER_CLASSES
+    ).astype(np.int64)
+    bucket_recalls = np.zeros(NUM_STEER_CLASSES, dtype=np.float64)
+    populated_buckets = target_bucket_counts > 0
+    for class_index in np.flatnonzero(populated_buckets):
         mask = actual_classes == class_index
-        if mask.any():
-            recalls.append(float((predicted_classes[mask] == class_index).mean()))
+        bucket_recalls[class_index] = float(
+            (predicted_classes[mask] == class_index).mean()
+        )
     turn_mask = actual_classes != 4
     straight_mask = actual_classes == 4
-    metrics: dict[str, float | list[float]] = {
+    metrics: dict[str, float | list[float] | list[int]] = {
         "loss": loss_total / max(1, batches),
         "mae": float(np.mean(np.abs(errors))),
         "median_ae": float(np.median(np.abs(errors))),
         "signed_error": float(np.mean(errors)),
         "class_accuracy": float(np.mean(predicted_classes == actual_classes)),
-        "balanced_9": float(np.mean(recalls)) if recalls else 0.0,
+        "balanced_9": (
+            float(np.mean(bucket_recalls[populated_buckets]))
+            if populated_buckets.any()
+            else 0.0
+        ),
         "turn_exact": float(np.mean(predicted_classes[turn_mask] == actual_classes[turn_mask])) if turn_mask.any() else 0.0,
         "turn_pm1": float(np.mean(np.abs(predicted_classes[turn_mask] - actual_classes[turn_mask]) <= 1)) if turn_mask.any() else 0.0,
         "straight_exact": float(np.mean(predicted_classes[straight_mask] == 4)) if straight_mask.any() else 0.0,
         "horizon_mae": [float(np.mean(np.abs(predicted[:, h] - actual[:, h]))) for h in range(predicted.shape[1])],
+        "predicted_bucket_counts": predicted_bucket_counts.tolist(),
+        "target_bucket_counts": target_bucket_counts.tolist(),
+        "bucket_recalls": bucket_recalls.tolist(),
     }
     if histories:
         history_values = np.concatenate(histories, axis=0)
@@ -562,6 +577,22 @@ def checkpoint_payload(model: SidewalkPilotV4, experiment: str, contract: str, a
             "height": int(args.height),
         },
     }
+
+
+def add_wandb_bucket_metrics(
+    payload: dict[str, float],
+    metrics: dict[str, float | list[float] | list[int]],
+) -> None:
+    for class_index, (bucket_name, _, _) in enumerate(S3.STEER_CLASS_BINS):
+        # Keep the Series 3 names for direct cross-run W&B charts. Target
+        # counts distinguish an absent validation class from prediction collapse.
+        payload[f"bucket_{bucket_name}"] = metrics[
+            "predicted_bucket_counts"
+        ][class_index]
+        payload[f"target_bucket_{bucket_name}"] = metrics[
+            "target_bucket_counts"
+        ][class_index]
+        payload[f"recall_{bucket_name}"] = metrics["bucket_recalls"][class_index]
 
 
 def load_checkpoint(path: Path, device: str = DEVICE) -> tuple[SidewalkPilotV4, dict]:
@@ -837,6 +868,7 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                 wandb_metrics[f"horizon_{name}_mae_deg"] = horizon_mae
             if "hold_last_mae" in metrics:
                 wandb_metrics["hold_last_mae_deg"] = metrics["hold_last_mae"]
+            add_wandb_bucket_metrics(wandb_metrics, metrics)
             tracker.push(epoch, wandb_metrics)
 
     torch.save(checkpoint_payload(model, experiment, contract, args), final_path)

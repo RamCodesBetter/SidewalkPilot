@@ -96,6 +96,50 @@ class Series4TemporalTests(unittest.TestCase):
         self.assertGreater(details["class_loss"], 0.0)
         self.assertEqual(tuple(s4.decode_hybrid(output.detach()).shape), (4, 4))
 
+    def test_evaluation_bucket_metrics_include_all_nine_classes(self):
+        class FixedModel(torch.nn.Module):
+            def forward(self, images, history):
+                batch_size = images.shape[0]
+                output = torch.full(
+                    (batch_size, 1, 18), -20.0, device=images.device
+                )
+                classes = images[:, 0, 0, 0].to(torch.long)
+                output[
+                    torch.arange(batch_size, device=images.device), 0, classes
+                ] = 20.0
+                return output
+
+        classes = torch.arange(s4.NUM_STEER_CLASSES, dtype=torch.float32)
+        images = torch.zeros(s4.NUM_STEER_CLASSES, 3, 8, 8)
+        images[:, 0, 0, 0] = classes
+        history = torch.empty(s4.NUM_STEER_CLASSES, 0)
+        targets = torch.tensor(
+            [[(low + high) / 2.0] for _, low, high in s4.S3.STEER_CLASS_BINS],
+            dtype=torch.float32,
+        )
+        loader = [(images, history, targets)]
+        args = type(
+            "Args",
+            (),
+            {"offset_loss_weight": 1.0, "focal_gamma": 1.5, "horizon_decay": 0.7},
+        )()
+
+        metrics = s4.evaluate(
+            FixedModel(), loader, torch.ones(9, device=s4.DEVICE), args
+        )
+
+        self.assertEqual(metrics["predicted_bucket_counts"], [1] * 9)
+        self.assertEqual(metrics["target_bucket_counts"], [1] * 9)
+        self.assertEqual(metrics["bucket_recalls"], [1.0] * 9)
+        self.assertAlmostEqual(metrics["balanced_9"], 1.0)
+
+        payload = {}
+        s4.add_wandb_bucket_metrics(payload, metrics)
+        for bucket_name, _, _ in s4.S3.STEER_CLASS_BINS:
+            self.assertEqual(payload[f"bucket_{bucket_name}"], 1)
+            self.assertEqual(payload[f"target_bucket_{bucket_name}"], 1)
+            self.assertEqual(payload[f"recall_{bucket_name}"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()
