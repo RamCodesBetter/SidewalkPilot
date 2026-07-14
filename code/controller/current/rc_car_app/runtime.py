@@ -981,8 +981,7 @@ def current_forward_throttle_label(state) -> float:
 
 
 def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, throttle: float) -> None:
-    """Append ONE line to the per-run label CSV (O(1), crash-safe) and bump the live
-    stats. The trainer's JSON is built from this CSV by finalize_photo_run()."""
+    """Append one crash-safe row; finalize_photo_run() builds the trainer JSON."""
     steering = int(round(clamp_servo_degrees(servo_degrees)))
     thr = round(max(0.0, min(1.0, float(throttle))), 4)
     csv_path = run_dir / f"{run_dir.name}_labels.csv"
