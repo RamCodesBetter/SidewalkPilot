@@ -762,6 +762,9 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
     best_mae = float("inf")
     best_epoch = 0
     start = time.time()
+    global_step = 0
+    last_stream_push = 0.0
+    loss_ema = None
 
     try:
         from wandb_logger import WandbLogger
@@ -817,7 +820,35 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
             loss.backward()
             gradient_norm = float(torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip).item())
             optimizer.step()
-            train_loss += float(loss.item())
+            loss_value = float(loss.item())
+            train_loss += loss_value
+            global_step += 1
+            loss_ema = (
+                loss_value
+                if loss_ema is None
+                else 0.95 * loss_ema + 0.05 * loss_value
+            )
+            if (
+                tracker is not None
+                and tracker.enabled
+                and time.time() - last_stream_push >= 5.0
+            ):
+                last_stream_push = time.time()
+                tracker.push(
+                    epoch,
+                    {
+                        "train_loss_live": loss_ema,
+                        "lr": float(optimizer.param_groups[0]["lr"]),
+                        "grad_norm": gradient_norm,
+                        "epoch": epoch,
+                        "global_step": global_step,
+                        "gpu_mem_gb": (
+                            torch.cuda.memory_reserved() / 1e9
+                            if torch.cuda.is_available()
+                            else 0.0
+                        ),
+                    },
+                )
             if step == 1 or step % args.log_every == 0:
                 decoded = decode_hybrid(output.detach())[:, 0]
                 print(
