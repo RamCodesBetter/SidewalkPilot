@@ -54,14 +54,14 @@ LiDAR --------------------------------------+         |
 GPS, IMU, hall sensor ----------------------+         +--> logs + dashboard
 ```
 
-Camera inference uses a background latest-frame client. Connection and inference waits occur in that worker rather than in the controller loop. One powered-off Jetson Orin Nano hardware retest no longer showed the earlier periodic steering pauses, but that observation is not a formal worst-case latency bound. The current LiDAR policy does not steer: it can progressively slow, hold, or emergency-brake inside a center corridor.
+Camera inference uses a background thread. Connection and inference waits occur in that worker rather than in the controller loop. One powered-off Jetson Orin Nano hardware test no longer showed the earlier periodic steering pauses, but that observation is not a formal worst-case latency bound. The current LiDAR policy does not steer: it can progressively slow, hold, or emergency-brake inside a center corridor.
 
 ## Model Journey
 
 SidewalkPilot has 46 trained steering checkpoints across four series:
 
 - **Series 1:** compact 200x66 direct steering regression established the end-to-end image-to-servo loop.
-- **Series 2:** retained the approximately 0.67M-parameter regressor while testing data cleanup, steering range, and HSV/CLAHE preprocessing.
+- **Series 2:** retained the approximately 0.67M-parameter model while testing data cleanup, steering range, and HSV/CLAHE preprocessing.
 - **Series 3:** moved to 320x180 images and an approximately 5.53M-parameter network. v3.1+ uses nine steering-class logits, nine class-local offsets, and one throttle output.
 - **Series 4:** keeps the Series 3 visual backbone, removes throttle learning, and compares causal steering history and multi-horizon supervision. PC, CF, and PCF contain approximately 5.54M to 5.57M parameters.
 
@@ -79,13 +79,13 @@ Training runs on an NVIDIA RTX 6000 Ada GPU. The Series 3/4 trainers support lig
 |---|---|
 | AI inference computer | Jetson Orin Nano |
 | Hardware controller | Raspberry Pi 5 |
-| Dashboard computer | Zero 2 W |
+| Dashboard controller | Zero 2 W |
 | Chassis | Yahboom Ackermann 520M |
 | Vision | Raspberry Pi Camera Module 3 Wide |
-| Obstacle distance | Youyeetoo FHL-LD19 360-degree LiDAR through CP2102 USB |
-| Steering | PCA9685 PWM driver and high-torque steering servo |
+| Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through CP2102 USB |
+| Steering | PCA9685 PWM driver and 25KG steering servo |
 | Drive | Yahboom AT8236 motor controller and DC motors |
-| Navigation | BN880 GPS; onboard HMC5883L-compatible compass is currently bench-only |
+| Navigation | BN880 GPS; onboard HMC5883L compass is bench-only (not used during runtime) |
 | Motion feedback | Hall-effect wheel-speed sensor and external IMU |
 | Manual control | Xbox Wireless Controller |
 | Dashboard | Waveshare 64x32 HUB75 RGB LED matrix |
