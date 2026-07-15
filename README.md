@@ -54,7 +54,7 @@ LiDAR --------------------------------------+         |
 GPS, IMU, hall sensor ----------------------+         +--> logs + dashboard
 ```
 
-Camera inference uses a background thread. Connection and inference waits occur in that worker rather than in the controller loop. One powered-off Jetson Orin Nano hardware test no longer showed the earlier periodic steering pauses, but that observation is not a formal worst-case latency bound. The current LiDAR policy does not steer: it can progressively slow, hold, or emergency-brake inside a center corridor.
+The Jetson Orin Nano analyzes camera images in the background so the Raspberry Pi 5 can continue reading the controller and operating the car. In one test with the Jetson Orin Nano powered off, manual steering remained smooth; more testing is still needed. LiDAR works as a separate braking system: it can slow or stop the car when an obstacle is directly ahead, but it does not steer around the obstacle.
 
 ## Model Journey
 
