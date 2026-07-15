@@ -1208,9 +1208,12 @@ def build_pdf(results, samples, s34_samples, pdf_out):
         ]))
 
     story.append(Spacer(1, 0.16 * inch))
-    for label, group in (("Series 1/2", ranked12), ("Series 3/4", ranked34)):
+    ranking_groups = (("Series 1/2", ranked12), ("Series 3/4", ranked34))
+    for group_index, (label, group) in enumerate(ranking_groups):
         if not group:
             continue
+        if group_index:
+            story.append(PageBreak())
         rank_rows = ranking_rows(results, group)
         story.append(paragraph(f"{label} Class-Balanced Model Ranking", h2))
         story.append(paragraph(
@@ -1378,11 +1381,13 @@ def build_pdf(results, samples, s34_samples, pdf_out):
                         tstyle.append(("TEXTCOLOR", cell, cell, colors.white))
             table = Table(data, colWidths=[0.8 * inch] + [0.66 * inch] * 9, repeatRows=1)
             table.setStyle(TableStyle(tstyle))
-            story.append(Spacer(1, 0.08 * inch))
-            story.append(paragraph(
-                f"v{version} &nbsp;&middot;&nbsp; exact bucket {exact9 * 100.0 / grand:.0f}% "
-                f"&nbsp;&middot;&nbsp; within one bucket {near9 * 100.0 / grand:.0f}%", normal))
-            story.append(table)
+            story.append(KeepTogether([
+                Spacer(1, 0.08 * inch),
+                paragraph(
+                    f"v{version} &nbsp;&middot;&nbsp; exact bucket {exact9 * 100.0 / grand:.0f}% "
+                    f"&nbsp;&middot;&nbsp; within one bucket {near9 * 100.0 / grand:.0f}%", normal),
+                table,
+            ]))
 
     story.append(PageBreak())
     story.append(paragraph("Notes", h2))
