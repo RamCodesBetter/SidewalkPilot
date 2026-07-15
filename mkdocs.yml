@@ -1,5 +1,8 @@
 site_name: SidewalkPilot RC Car
 docs_dir: docs/site
+exclude_docs: |
+  .DS_Store
+  **/.DS_Store
 theme:
   name: readthedocs
 
