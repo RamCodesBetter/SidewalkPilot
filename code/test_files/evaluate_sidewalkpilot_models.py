@@ -38,6 +38,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[1]            # code/test_files -> repo root
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
 CORRECTIONS_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_1_and_2" / "steering_corrections.json"
+S12_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_1_and_2" / "sidewalkpilot_dataset"
 DOCS_DIR = REPO_ROOT / "docs"
 DEFAULT_JSON_OUT = DOCS_DIR / "steering_eval_current_labels.json"
 DEFAULT_PDF_OUT = DOCS_DIR / "steering_model_report.pdf"
@@ -233,7 +234,7 @@ def label_to_servo(value):
     return clamp_servo((max(-1.0, min(1.0, value)) + 1.0) * 90.0)
 
 
-def resolve_image_path(corrections_path, item):
+def resolve_image_path(corrections_path, item, dataset_dir):
     raw = item.get("image") or item.get("image_path") or item.get("path") or item.get("file")
     if not raw:
         return None
@@ -242,6 +243,8 @@ def resolve_image_path(corrections_path, item):
         return path
     candidates = [
         corrections_path.parent / path,
+        dataset_dir / path,
+        dataset_dir / path.name,
         REPO_ROOT / path,
         REPO_ROOT / "code" / "ai_models_datasets" / "series_1_and_2" / path,
     ]
@@ -251,7 +254,7 @@ def resolve_image_path(corrections_path, item):
     return None
 
 
-def load_samples(corrections_path):
+def load_samples(corrections_path, dataset_dir):
     items = json.loads(corrections_path.read_text())
     if not isinstance(items, list):
         raise ValueError(f"{corrections_path} must contain a list")
@@ -259,7 +262,7 @@ def load_samples(corrections_path):
     samples = []
     missing = []
     for index, item in enumerate(items):
-        img_path = resolve_image_path(corrections_path, item)
+        img_path = resolve_image_path(corrections_path, item, dataset_dir)
         if img_path is None:
             missing.append((index, item.get("image")))
             continue
@@ -1405,6 +1408,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Evaluate SidewalkPilot steering checkpoints and regenerate the PDF report.")
     parser.add_argument("--models-dir", type=Path, default=MODELS_DIR)
     parser.add_argument("--corrections", type=Path, default=CORRECTIONS_PATH)
+    parser.add_argument("--s12-dataset-dir", type=Path, default=S12_DATASET_DIR)
     parser.add_argument("--json-out", type=Path, default=DEFAULT_JSON_OUT)
     parser.add_argument("--pdf-out", type=Path, default=DEFAULT_PDF_OUT)
     parser.add_argument("--batch-size", type=int, default=256)
@@ -1431,7 +1435,7 @@ def main():
     results = {}
     samples = []
     if models:
-        samples = load_samples(args.corrections)
+        samples = load_samples(args.corrections, args.s12_dataset_dir)
         raw_inputs, clahe_inputs, targets = load_tensors(samples)
         results.update(evaluate_models(
             samples, raw_inputs, clahe_inputs, targets, models, args.batch_size, device))
