@@ -1050,7 +1050,10 @@ def take_photo(webcam_vision=None, state=None, metrics=None, quiet=False):
                 print(f"Photo queued from live Pi camera stream: {photo_name}")
             return True
         photo_status = "ERR"
-        print(f"Pi camera stream photo capture unavailable: {message}")
+        print(
+            "Pi camera stream photo capture unavailable: "
+            "no frame was available or the save queue was full."
+        )
     else:
         photo_status = "ERR"
         print("Pi camera stream photo capture unavailable: no active camera stream")
@@ -1093,7 +1096,7 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
     if (float(getattr(metrics, "smoothed_speed_mph", 0.0)) < 0.1
             and float(state.get("throttle", 0.0)) < 0.05):
         return
-    take_photo(webcam_vision, state, metrics, quiet=True)   # quiet: no per-frame spam at 30fps
+    take_photo(webcam_vision, state, metrics, quiet=True)   # quiet: no per-frame spam at 10 fps
     schedule_next_auto_photo(metrics, now)
 
 
