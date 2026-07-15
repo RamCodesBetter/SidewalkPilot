@@ -27,7 +27,8 @@ solve scene similarity across the split.
 
 ## Audit Evidence
 
-The tracked `dataset_cosine_similarity.py`, `dataset_clusters.py`, and related
+The tracked `code/test_files/data/dataset_cosine_similarity.py`,
+`code/test_files/data/dataset_clusters.py`, and related
 analysis scripts can support a nearest-neighbor audit. Generated embedding and
 HTML outputs under a local `code/test_files/data/` directory are working files,
 not published artifacts in this branch. There is no checked-in command that

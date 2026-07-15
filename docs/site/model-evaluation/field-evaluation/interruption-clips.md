@@ -18,7 +18,7 @@ frames are buffered, the video writer fails, or capture is disabled. Therefore,
 
 ## Analyzer
 
-`code/test_files/clip_bucket_analyzer.py` can replay a chosen Series 3 checkpoint
+`code/test_files/models/clip_bucket_analyzer.py` can replay a chosen Series 3 checkpoint
 over a clip and report class probabilities, decoded logical steering, and an
 optional EMA trace. A raw clip has no target steering label, live IMU correction,
 or measured physical wheel angle, so the tool cannot prove that a prediction was

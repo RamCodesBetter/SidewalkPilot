@@ -14,8 +14,8 @@ Per run + aggregate:
   - per-speed-bin breakdown: jitter should be ~flat across speed after speed-norm (A)
 
 Usage (on Jon):
-  python3 pid_tune_analyze.py
-  python3 pid_tune_analyze.py --logs-dir /nvme/logs --output /nvme/logs/pid_tune_report.json
+  python3 code/test_files/steering/pid_tune_analyze.py
+  python3 code/test_files/steering/pid_tune_analyze.py --logs-dir /nvme/logs --output /nvme/logs/pid_tune_report.json
 """
 import argparse
 import csv

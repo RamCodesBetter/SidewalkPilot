@@ -1,6 +1,6 @@
 # IMU Verifier
 
-The IMU verifier is the bench check for the Seeed XIAO MG24 6-axis IMU used by the live yaw-control path. It confirms which gyro axis is yaw, checks its sign, and exposes filter behavior before the runtime is allowed to use that signal. It runs the checked-in `code/test_files/imu_yaw_test.py`.
+The IMU verifier is the bench check for the Seeed XIAO MG24 6-axis IMU used by the live yaw-control path. It confirms which gyro axis is yaw, checks its sign, and exposes filter behavior before the runtime is allowed to use that signal. It runs the checked-in `code/test_files/sensors/imu_yaw_test.py`.
 
 ## How it works
 
@@ -16,9 +16,9 @@ The IMU verifier is the bench check for the Seeed XIAO MG24 6-axis IMU used by t
 Run on the Pi 5 (IMU is on the GPIO UART `/dev/ttyAMA3`, Pi GPIO8/9):
 
 ```bash
-python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3
+python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3
 # tune: pick the yaw axis and filter
-python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3 --axis 2 --median 5 --ema 0.3 --deadband 2.0
+python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3 --axis 2 --median 5 --ema 0.3 --deadband 2.0
 ```
 
 ## Pass / warn / fail

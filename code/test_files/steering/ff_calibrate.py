@@ -21,8 +21,8 @@ aborts the burst; Ctrl-C aborts all); per-burst timeout; motors cut + wheels cen
 on EVERY exit. Open, flat area -- the seating turns the car hard each burst.
 
 Run on the Pi INSTEAD of `car`:
-    python3 ~/rc_car_code/code/test_files/ff_calibrate.py
-    python3 ~/rc_car_code/code/test_files/ff_calibrate.py --angles 106,112,118   # fewer bursts
+    python3 ~/rc_car_code/code/test_files/steering/ff_calibrate.py
+    python3 ~/rc_car_code/code/test_files/steering/ff_calibrate.py --angles 106,112,118   # fewer bursts
 """
 import argparse
 import math
@@ -30,7 +30,7 @@ import os
 import sys
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "controller", "current"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "controller", "current"))
 
 from rc_car_app.hardware import Hardware                       # noqa: E402
 from rc_car_app.yaw_pid import ImuReader                       # noqa: E402

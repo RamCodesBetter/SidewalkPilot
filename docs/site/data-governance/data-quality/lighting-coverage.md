@@ -17,7 +17,7 @@ The synthetic layer lives in the trainer (`code/ai_models_datasets/series_3_and_
 
 These run at `shadow_aug_probability` (0.85 by default) on real frames. CARLA/synthetic roots additionally get `apply_carla_domain_randomization()` (brightness/contrast jitter). Augmentation broadens the training distribution, but its effect must be established by controlled evaluation. It is not evidence that the model handles every real shadow or that real lighting coverage is unnecessary.
 
-For measuring what lighting the real dataset already contains, the tracked starting point is `code/test_files/dataset_scene_tags.py`, with `dataset_clusters.py` and `dataset_cosine_similarity.py` available for related analysis. These tools can generate local HTML and embedding outputs under `code/test_files/data/`, but those outputs are untracked working files in this branch. They are therefore not cited as published evidence.
+For measuring what lighting the real dataset already contains, the tracked starting point is `code/test_files/data/dataset_scene_tags.py`, with `dataset_clusters.py` and `dataset_cosine_similarity.py` available for related analysis. These tools can generate local HTML and embedding outputs under `code/test_files/data/`, but those outputs are untracked working files in this branch. They are therefore not cited as published evidence.
 
 ## Why it matters
 

@@ -13,7 +13,7 @@ Filter chain on the yaw axis (Z by default):
                       (3.5->0.0, 3.6->0.1). Continuous, so no 0<->3.5 edge chatter.
 
 Usage:
-  python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3
+  python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3
   # tune: --axis 2 (0=X,1=Y,2=Z) --median 5 --ema 0.3 --deadband 2.0
 """
 

@@ -17,10 +17,10 @@ alpha: JITTER (mean frame-to-frame change of the output -> lower = smoother) and
 smoothest alpha that still keeps lag within your budget.
 
 Usage:
-  python3 alpha_smoothing_tuner.py                          # built-in synthetic blocky trace
-  python3 alpha_smoothing_tuner.py --csv run.csv --col steering   # a real logged run
-  python3 alpha_smoothing_tuner.py --values 80,120,80,120,150,158,108
-  python3 alpha_smoothing_tuner.py --fps 15 --max-lag-s 0.25 --plot /tmp/alpha.png
+  python3 code/test_files/steering/alpha_smoothing_tuner.py
+  python3 code/test_files/steering/alpha_smoothing_tuner.py --csv run.csv --col steering
+  python3 code/test_files/steering/alpha_smoothing_tuner.py --values 80,120,80,120,150,158,108
+  python3 code/test_files/steering/alpha_smoothing_tuner.py --fps 15 --max-lag-s 0.25 --plot /tmp/alpha.png
 """
 import argparse
 import csv as _csv

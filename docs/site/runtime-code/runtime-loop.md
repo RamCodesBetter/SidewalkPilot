@@ -61,8 +61,8 @@ journalctl -u sidewalkpilot-rpi-car.service -f
 Regression coverage:
 
 ```bash
-python3 code/test_files/test_async_jetson_client.py
-python3 code/test_files/test_lidar_center_aeb.py
+python3 code/test_files/controller/test_async_jetson_client.py
+python3 code/test_files/lidar/test_lidar_center_aeb.py
 ```
 
 See [Model Inference](../autonomy-stack/camera-steering/model-inference.md) and [Dashboard Sender](dashboard/sender.md).

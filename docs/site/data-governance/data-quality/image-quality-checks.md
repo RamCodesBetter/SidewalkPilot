@@ -19,7 +19,7 @@ The runtime queues `photo_<timestamp>.jpg` into a dated run folder and appends t
 
 ## Image scan
 
-`code/test_files/check_dataset_frames.py` is read-only. It:
+`code/test_files/data/check_dataset_frames.py` is read-only. It:
 
 - Verifies each JPEG header and full decode;
 - Flags truncation, unexpected dimensions, near-black/near-white frames, and files smaller than 1 KiB; and
@@ -28,7 +28,7 @@ The runtime queues `photo_<timestamp>.jpg` into a dated run folder and appends t
 Run it against the frozen dataset folder:
 
 ```bash
-python3 code/test_files/check_dataset_frames.py \
+python3 code/test_files/data/check_dataset_frames.py \
   code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset
 ```
 

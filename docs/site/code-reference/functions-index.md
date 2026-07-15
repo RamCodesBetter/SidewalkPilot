@@ -34,6 +34,6 @@ Line numbers are omitted because they become stale after normal refactors. Searc
 | `decode_hybrid` | `series_3_and_4/series_4_common.py` | Class-plus-offset steering decode |
 | `temporal_hybrid_loss` | `series_3_and_4/series_4_common.py` | Current/future steering objective |
 | `run_training` | `series_3_and_4/series_4_common.py` | Shared Series 4 run implementation |
-| evaluator entrypoint | `code/test_files/evaluate_sidewalkpilot_models.py` | 46-model JSON/PDF generation |
+| evaluator entrypoint | `code/test_files/models/evaluate_sidewalkpilot_models.py` | 46-model JSON/PDF generation |
 
 Use `rg '^(def|class) '` in the relevant source directory for a complete generated symbol list.

@@ -25,9 +25,9 @@ HOW each angle is measured ("refresh to the opposite extreme"):
 
 Run on the Pi (car service stopped so it doesn't fight the servo/motors):
     sudo systemctl stop sidewalkpilot-rpi-car.service
-    python3 code/test_files/imu_steering_calibrate.py --port /dev/ttyAMA3
+    python3 code/test_files/steering/imu_steering_calibrate.py --port /dev/ttyAMA3
     # safe first pass with NO motors (just servo + yaw plumbing):
-    python3 code/test_files/imu_steering_calibrate.py --port /dev/ttyAMA3 --dry-run
+    python3 code/test_files/steering/imu_steering_calibrate.py --port /dev/ttyAMA3 --dry-run
 
 Note: finding TRUE CENTER (curvature = 0) does NOT depend on the speed scale, so
 even if the hall calibration is a bit off, the zero-crossing is still correct.
@@ -55,7 +55,7 @@ try:
 except ImportError:
     print("gpiozero missing"); raise SystemExit(1)
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "controller" / "current"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "controller" / "current"))
 from rc_car_app.config import (
     MOTOR_LEFT_FWD_PIN, MOTOR_LEFT_BWD_PIN, MOTOR_RIGHT_FWD_PIN, MOTOR_RIGHT_BWD_PIN,
     HALL_SENSOR_GPIO_PIN, WHEEL_DIAMETER_CM, PULSES_PER_REVOLUTION,

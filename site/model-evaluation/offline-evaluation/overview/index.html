@@ -969,7 +969,7 @@
 </ul>
 <p>Series 1/2 frames are resized to 200x66 and decoded as direct steering regression. Series 3/4 frames are 320x180 and use their matching regression or hybrid decoder. This compares behavior on the same images and labels even though the architectures differ.</p>
 <h2 id="evaluator-outputs">Evaluator Outputs</h2>
-<p><code>code/test_files/evaluate_sidewalkpilot_models.py</code> discovers all supported checkpoints and writes:</p>
+<p><code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> discovers all supported checkpoints and writes:</p>
 <ul>
 <li><code>docs/steering_eval_current_labels.json</code>, containing overall, source, bucket, confusion, and selection metrics;</li>
 <li><code>docs/steering_model_report.pdf</code>, a 22-page report with the class-balanced ranking, all-series MAE bars, per-model sections, and confusion matrices.</li>
@@ -1022,7 +1022,7 @@
 <p>On the evaluation workstation with ONNX Runtime GPU installed:</p>
 <pre><code class="language-bash">cd ~/rc_car_code
 /home/rsabavat/.gpu-env/bin/python -u \
-  code/test_files/evaluate_sidewalkpilot_models.py \
+  code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 </code></pre>
 <p>See <a href="../bal9/">Bal9</a>, <a href="../confusion-matrix/">Confusion Matrix</a>, and <a href="../../comparisons/offline-vs-field/">Offline vs Field</a>.</p>

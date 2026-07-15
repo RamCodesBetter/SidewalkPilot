@@ -114,7 +114,7 @@ Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specifie
 
 ## Evaluation and Promotion
 
-The evaluator at `code/test_files/evaluate_sidewalkpilot_models.py` produces the cross-model report. Current ranking considers:
+The evaluator at `code/test_files/models/evaluate_sidewalkpilot_models.py` produces the cross-model report. Current ranking considers:
 
 - Balanced nine-class accuracy;
 - Turn exact and turn within one class;

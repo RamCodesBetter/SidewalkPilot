@@ -14,8 +14,8 @@ folder (shadow_embeds_<folder>.npz) so re-running with new prompts is instant.
 
 Output: printed counts + a self-contained, cloud-styled HTML gallery (samples per bucket).
 
-    python3 sort_shadows_by_type.py --dataset /home/rsabavat/rc_car_code/media/photos/2026_07_07_run_1
-    python3 sort_shadows_by_type.py --samples 30 --out /home/rsabavat/D0707_shadows.html
+    python3 code/test_files/data/sort_shadows_by_type.py --dataset /home/rsabavat/rc_car_code/media/photos/2026_07_07_run_1
+    python3 code/test_files/data/sort_shadows_by_type.py --samples 30 --out /home/rsabavat/D0707_shadows.html
 """
 import argparse
 import base64

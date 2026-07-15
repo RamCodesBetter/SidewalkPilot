@@ -34,7 +34,7 @@ difference; that conclusion needs the associated images and run notes.
 
 ## Source
 
-`code/test_files/evaluate_sidewalkpilot_models.py` assigns D-codes from run/image timestamps
+`code/test_files/models/evaluate_sidewalkpilot_models.py` assigns D-codes from run/image timestamps
 and writes the full breakdown to `docs/steering_eval_current_labels.json`.
 
 ## Related Pages

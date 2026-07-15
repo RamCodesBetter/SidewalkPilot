@@ -11,18 +11,18 @@ The Zero receives UDP telemetry on port `8765` and drives the 64×32 HUB75 panel
 
 ## Install Permanent Recovery
 
-Run the role matching each machine from `code/test_files`:
+Run the role matching each machine from the repository root:
 
 ```bash
 # Pi 5
-sudo ./install_usb_dashboard_link.sh rpi
-./install_usb_dashboard_link.sh verify-rpi
+sudo code/test_files/setup/install_usb_dashboard_link.sh rpi
+code/test_files/setup/install_usb_dashboard_link.sh verify-rpi
 ```
 
 ```bash
 # Zero 2 W
-sudo ./install_usb_dashboard_link.sh z2w
-./install_usb_dashboard_link.sh verify-z2w
+sudo code/test_files/setup/install_usb_dashboard_link.sh z2w
+code/test_files/setup/install_usb_dashboard_link.sh verify-z2w
 ```
 
 The installer creates static addressing and `sidewalkpilot-usb0-keeper.service`. The keeper restores addresses, flushes failed neighbor entries, cycles the interface after repeated failures, and reloads `dwc2/g_ether` on the Zero when its gadget interface disappears.

@@ -54,7 +54,7 @@ main control loop. Missing scans remain fail-open with respect to AEB.
   leaves throttle untouched. Keep the car restrained during bench checks.
 - The stop reason, center clearance, occupancy, and lane-action telemetry record
   which branch fired.
-- Bench tools: `code/test_files/lidar_uart_test.py` and `code/test_files/lidar/lidar_viewer.py`.
+- Bench tools: `code/test_files/lidar/lidar_uart_test.py` and `code/test_files/lidar/lidar_viewer.py`.
 
 ## Related pages
 

@@ -1030,8 +1030,9 @@
 <pre><code class="language-bash"># Pi 5 — I2C steering device present
 i2cdetect -y 1                    # expect 0x40
 
-# Pi 5 — motor GPIO and hall input bench checks live in code/test_files:
-#   servo_step_controller.py, hall_sensor_test.py
+# Pi 5 — motor GPIO and hall input bench checks:
+#   code/test_files/steering/servo_step_controller.py
+#   code/test_files/sensors/hall_sensor_test.py
 </code></pre>
 <p>Failure symptoms narrow the search but do not prove one cause. For example, <code>0x40</code> with no servo motion leaves servo power, PWM calibration, linkage, and the servo itself to check; a motor with correct GPIO activity still leaves the driver, rail, wiring, and motor; a zero hall count leaves the sensor, pull-up, gap, wiring, and software configuration. Trace each signal end to end before assigning a cause.</p>
 <h2 id="related-pages">Related pages</h2>

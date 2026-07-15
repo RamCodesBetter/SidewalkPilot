@@ -31,8 +31,9 @@ Signal wiring is where a mistake is most likely to look like a software bug: a m
 # Pi 5 — I2C steering device present
 i2cdetect -y 1                    # expect 0x40
 
-# Pi 5 — motor GPIO and hall input bench checks live in code/test_files:
-#   servo_step_controller.py, hall_sensor_test.py
+# Pi 5 — motor GPIO and hall input bench checks:
+#   code/test_files/steering/servo_step_controller.py
+#   code/test_files/sensors/hall_sensor_test.py
 ```
 
 Failure symptoms narrow the search but do not prove one cause. For example, `0x40` with no servo motion leaves servo power, PWM calibration, linkage, and the servo itself to check; a motor with correct GPIO activity still leaves the driver, rail, wiring, and motor; a zero hall count leaves the sensor, pull-up, gap, wiring, and software configuration. Trace each signal end to end before assigning a cause.

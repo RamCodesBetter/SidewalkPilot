@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         default=None,
-        help="optional JSON output path; default writes into code/test_files",
+        help="optional JSON output path; default writes into code/test_files/camera",
     )
     parser.add_argument(
         "--no-open",

@@ -16,7 +16,7 @@ from pathlib import Path
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[2]
 CURRENT_DIR = BASE_DIR / "controller" / "current"
 sys.path.insert(0, str(CURRENT_DIR))
 

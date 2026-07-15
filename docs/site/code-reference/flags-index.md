@@ -30,6 +30,6 @@ Do not copy an old command without recording:
 
 ## Evaluator Flags
 
-`code/test_files/evaluate_sidewalkpilot_models.py --help` is the source of truth. The current report run uses CUDA and a batch size selected for the evaluation GPU. It writes both JSON and PDF artifacts.
+`code/test_files/models/evaluate_sidewalkpilot_models.py --help` is the source of truth. The current report run uses CUDA and a batch size selected for the evaluation GPU. It writes both JSON and PDF artifacts.
 
 See [Training Command Setup](../runbooks/training-day/command-setup.md) and [Model Selection](../runbooks/field-test-day/model-selection.md).

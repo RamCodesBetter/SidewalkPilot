@@ -28,5 +28,5 @@ The removed V3H2 and V3H3 collection-count pages are not part of the current gri
 
 - Pi sender: `code/controller/current/rc_car_app/hub75_dashboard.py`
 - Zero renderer: `code/controller/current/z2w_dashboard.py`
-- Link setup: `code/test_files/install_usb_dashboard_link.sh`
-- Pixel/layout tests: `code/test_files/test_z2w_lidar_layout.py`
+- Link setup: `code/test_files/setup/install_usb_dashboard_link.sh`
+- Pixel/layout tests: `code/test_files/display/test_z2w_lidar_layout.py`

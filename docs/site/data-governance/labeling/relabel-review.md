@@ -40,7 +40,7 @@ python3 -c "import json; d=json.load(open('steering_corrections.json')); print('
 Then re-run the evaluator and read the bucket confusion / turn coverage, not just the headline MAE:
 
 ```bash
-python3 code/test_files/evaluate_sidewalkpilot_models.py --device cuda
+python3 code/test_files/models/evaluate_sidewalkpilot_models.py --device cuda
 ```
 
 ## Recovery

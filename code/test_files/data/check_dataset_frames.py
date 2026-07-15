@@ -13,7 +13,7 @@ Per-frame flags:
 Also cross-checks the image set against labels.json (orphan images / orphan labels).
 
 Usage:
-  python3 code/test_files/check_dataset_frames.py \
+  python3 code/test_files/data/check_dataset_frames.py \
       code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset
 """
 import argparse

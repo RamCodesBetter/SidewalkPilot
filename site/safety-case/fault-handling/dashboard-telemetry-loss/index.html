@@ -983,7 +983,7 @@ failure. The architecture keeps this observability path outside routine actuator
 <h2 id="response">Response</h2>
 <p>No dashboard payload is used to calculate steering, braking, or AEB. Packet loss therefore
 does not intentionally change a motion command. Recovery is by the USB keeper/reset helpers
-(<code>install_usb_dashboard_link.sh</code>), not by anything in the driving loop.</p>
+(<code>code/test_files/setup/install_usb_dashboard_link.sh</code>), not by anything in the driving loop.</p>
 <p>Linked shutdown is preserved: when the controller quits, it calls
 <code>dashboard_sender.send_shutdown()</code> so the Zero receiver is told to stop; the sender
 also advertises an idle-exit window (<code>HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0</code>).</p>
@@ -997,7 +997,7 @@ or process-isolation guarantee.</p>
   <code>close</code>.</li>
 <li>Config: <code>config.py</code> — <code>HUB75_DASHBOARD_HOST/UDP_PORT/SEND_INTERVAL_SEC/IDLE_EXIT_SEC</code>,
   USB-only transport default.</li>
-<li>Ops: <code>code/test_files/install_usb_dashboard_link.sh</code> (keeper + hard-reset recovery).</li>
+<li>Ops: <code>code/test_files/setup/install_usb_dashboard_link.sh</code> (keeper + hard-reset recovery).</li>
 <li>Field observation: <code>NO LINK</code> rendering has been observed. A controlled loop-latency test
   during link failure is not preserved here.</li>
 </ul>

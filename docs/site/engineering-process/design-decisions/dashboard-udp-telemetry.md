@@ -57,7 +57,7 @@ fallback was deliberately removed and must not be re-added unless Ram explicitly
 - On the Zero, `ss -lunp | grep 8765` shows the receiver listening.
 - `NO LINK` on the display means the receiver is alive but no packets arrived
   recently — check `usb0` carrier, ARP, and ping both ways.
-- `code/test_files/install_usb_dashboard_link.sh` installs the static IPs
+- `code/test_files/setup/install_usb_dashboard_link.sh` installs the static IPs
   plus the keeper service used for the project's ARP/USB recovery procedure.
 
 ## Related pages

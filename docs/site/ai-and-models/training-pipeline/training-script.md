@@ -27,6 +27,6 @@ Training runs on the NVIDIA workstation. ONNX inference runs on Jon. The checked
 ## Evidence
 
 - The four trainers above;
-- `code/test_files/test_series_4_common.py` for Series 4 data/contract checks;
-- `code/test_files/evaluate_sidewalkpilot_models.py` for the shared report; and
+- `code/test_files/models/test_series_4_common.py` for Series 4 data/contract checks;
+- `code/test_files/models/evaluate_sidewalkpilot_models.py` for the shared report; and
 - The named Weights & Biases runs and ONNX artifacts.

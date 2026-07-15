@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 
 
-CURRENT_DIR = Path(__file__).resolve().parents[1] / "controller" / "current"
+CURRENT_DIR = Path(__file__).resolve().parents[2] / "controller" / "current"
 MODULE_PATH = CURRENT_DIR / "z2w_dashboard.py"
 
 

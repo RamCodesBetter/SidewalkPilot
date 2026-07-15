@@ -13,9 +13,9 @@ see exactly what each one does on its own. Saves a single grid image:
 N rows (one per photo) x 6 columns (original + 5 augs) -> e.g. 3 photos = 18 tiles.
 
 Run on the training PC (where the dataset + trainer live):
-    python3 preview_shadow_augmentations.py
-    python3 preview_shadow_augmentations.py --count 3 --output /tmp/shadow_augs.jpg
-    python3 preview_shadow_augmentations.py --seed 7        # reproducible pick + augs
+    python3 code/test_files/camera/preview_shadow_augmentations.py
+    python3 code/test_files/camera/preview_shadow_augmentations.py --count 3 --output /tmp/shadow_augs.jpg
+    python3 code/test_files/camera/preview_shadow_augmentations.py --seed 7
 
 These are the SAME functions used during training, imported from the trainer, so the
 preview can never drift from what the model actually sees.
@@ -28,7 +28,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SERIES3_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4"
 DEFAULT_DATASET = SERIES3_DIR / "sidewalkpilot_dataset"
 sys.path.insert(0, str(SERIES3_DIR))

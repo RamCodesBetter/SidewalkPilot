@@ -299,7 +299,7 @@ def calibrate():
     except Exception as exc:
         print(f"pygame unavailable (Pi only): {exc}")
         return []
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "controller" / "current"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "controller" / "current"))
     try:
         from rc_car_app.config import (
             PCA9685_FREQUENCY_HZ, PCA9685_I2C_ADDRESS, PCA9685_SERVO_CHANNEL,

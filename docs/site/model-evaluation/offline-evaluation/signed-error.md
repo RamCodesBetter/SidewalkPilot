@@ -21,7 +21,7 @@ same measurement. Motor imbalance, steering linkage, payload, surface, and trim 
 physical car even when model signed error is near zero. Use the offline metric to inspect
 the model and controlled hardware tests to inspect the chassis.
 
-`code/test_files/evaluate_sidewalkpilot_models.py` reports signed steering error overall and
+`code/test_files/models/evaluate_sidewalkpilot_models.py` reports signed steering error overall and
 by source for all checkpoints. The current report evaluates steering only.
 
 ## Related Pages

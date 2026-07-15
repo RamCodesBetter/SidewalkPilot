@@ -61,7 +61,7 @@ Do not treat an enabled AEB indicator as proof that LiDAR data is fresh. An empt
 - `code/controller/current/rc_car_app/runtime.py`: controller loop, AEB gating, arbitration, and motor application.
 - `code/controller/current/rc_car_app/vision.py`: all 46 selectable checkpoint names and the v3.4 default.
 - `code/ai_models_datasets/series_3_and_4/series_4_common.py`: shared PC/CF/PCF architecture and training engine.
-- `code/test_files/evaluate_sidewalkpilot_models.py`: common-dataset evaluator.
+- `code/test_files/models/evaluate_sidewalkpilot_models.py`: common-dataset evaluator.
 - `docs/steering_model_report.pdf`: 22-page all-series comparison report.
 - `docs/steering_eval_current_labels.json`: machine-readable results and historical S1/2 blocks.
 

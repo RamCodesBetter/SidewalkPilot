@@ -4,10 +4,10 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  sudo ./install_usb_dashboard_link.sh rpi
-  sudo ./install_usb_dashboard_link.sh z2w
-  ./install_usb_dashboard_link.sh verify-rpi
-  ./install_usb_dashboard_link.sh verify-z2w
+  sudo code/test_files/setup/install_usb_dashboard_link.sh rpi
+  sudo code/test_files/setup/install_usb_dashboard_link.sh z2w
+  code/test_files/setup/install_usb_dashboard_link.sh verify-rpi
+  code/test_files/setup/install_usb_dashboard_link.sh verify-z2w
 
 Permanent USB dashboard link:
   rpi usb0  -> 192.168.10.1/24

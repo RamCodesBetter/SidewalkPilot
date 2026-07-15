@@ -12,7 +12,7 @@ $$
 \operatorname{MedianAE} = \operatorname{median}\left(\lvert \hat{y}_i-y_i\rvert\right)
 $$
 
-`code/test_files/evaluate_sidewalkpilot_models.py` calculates this in servo
+`code/test_files/models/evaluate_sidewalkpilot_models.py` calculates this in servo
 degrees and reports it as `Med` for every compatible checkpoint.
 
 ## Interpretation

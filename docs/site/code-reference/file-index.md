@@ -12,7 +12,7 @@ This index maps current repository areas to their responsibilities. Generated da
 | `code/ai_models/` | Local/Hugging Face PTH/ONNX artifacts | Binary artifacts are ignored by Git; preserve version names |
 | `code/ai_models_datasets/series_1_and_2/` | Early direct-regression trainer and metadata | 200x66 family |
 | `code/ai_models_datasets/series_3_and_4/` | Series 3 trainer, three Series 4 trainers, shared temporal code | 320x180 families |
-| `code/test_files/evaluate_sidewalkpilot_models.py` | Common 46-model evaluator | Produces JSON/PDF report |
+| `code/test_files/models/evaluate_sidewalkpilot_models.py` | Common 46-model evaluator | Produces JSON/PDF report |
 | `code/test_files/` | Bench, calibration, setup, and regression utilities | Not the live control loop |
 | `docs/site/` | MkDocs source | Edit this tree, not generated `site/` |
 | `docs/steering_model_report.pdf` | Generated comparison report | 46 checkpoints |

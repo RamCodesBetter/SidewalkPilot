@@ -7,7 +7,7 @@ error: how much of the set is genuinely precise versus merely "close enough."
 
 ## How it works
 
-In `code/test_files/evaluate_sidewalkpilot_models.py`, `metric_block()` computes the
+In `code/test_files/models/evaluate_sidewalkpilot_models.py`, `metric_block()` computes the
 absolute error `ae = abs(preds - targets)` per
 frame and then counts:
 

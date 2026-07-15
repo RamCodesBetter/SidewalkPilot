@@ -43,5 +43,5 @@ Internal IDs are intentionally sparse because existing render functions retained
 Pixel-level LiDAR/page checks run with:
 
 ```bash
-python3 code/test_files/test_z2w_lidar_layout.py
+python3 code/test_files/display/test_z2w_lidar_layout.py
 ```

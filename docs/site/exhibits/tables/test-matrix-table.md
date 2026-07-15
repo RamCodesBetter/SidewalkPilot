@@ -12,19 +12,19 @@ All paths below are relative to `code/test_files/` and include their subsystem f
 | Steering | `steering/calibrate_servo.py` | Center/endpoint calibration | Servo |
 | Steering | `steering/model_steering_test.py` | Model-to-steering bench response | Camera, model, optionally servo |
 | LiDAR | `lidar/lidar_viewer.py` | Live scan visualization and point stream | FHL-LD19 LiDAR |
-| LiDAR policy | `test_lidar_center_aeb.py` | Center-corridor slowdown/stop policy | none in unit-test mode |
+| LiDAR policy | `lidar/test_lidar_center_aeb.py` | Center-corridor slowdown/stop policy | none in unit-test mode |
 | Camera | `camera/test_camera_preview.py` | Picamera2 capture/preview | RPi Camera Module 3 Wide |
 | Camera | `camera/test_camera_flip.py` | Mounted orientation | Camera |
 | Display | `display/hub75_rgbmatrix_test.py` | HUB75 panel bring-up | Waveshare LED matrix |
-| Display policy | `test_z2w_lidar_layout.py` | Dashboard LiDAR layout rendering | none in layout-test mode |
+| Display policy | `display/test_z2w_lidar_layout.py` | Dashboard LiDAR layout rendering | none in layout-test mode |
 | Sensors | `sensors/bn880_test.py` | BN880 GPS and compass reads | GPS/compass |
 | Sensors | `sensors/hall_sensor_test.py` | Hall speed pulses | Hall sensor |
-| IMU | `imu_yaw_test.py` | Yaw axis/sign/filter output | XIAO MG24 Sense |
+| IMU | `sensors/imu_yaw_test.py` | Yaw axis/sign/filter output | XIAO MG24 Sense |
 | Controller | `controller/xbox_test.py` | Xbox axes/buttons through pygame | Xbox controller |
 | Navigation | `navigation/geojson_to_graph.py` | Build a route graph from GeoJSON | none |
 | Navigation | `navigation/astar_nav.py` | A* pathfinding over a graph | none |
-| Models | `evaluate_sidewalkpilot_models.py` | Common 46-checkpoint JSON/PDF evaluation | evaluation GPU |
-| Series 4 | `test_series_4_common.py`, `test_jetson_series4_runtime.py` | Temporal contracts and runtime decoding | CPU/CUDA depending on invocation |
+| Models | `models/evaluate_sidewalkpilot_models.py` | Common 46-checkpoint JSON/PDF evaluation | evaluation GPU |
+| Series 4 | `models/test_series_4_common.py`, `models/test_jetson_series4_runtime.py` | Temporal contracts and runtime decoding | CPU/CUDA depending on invocation |
 | Setup | `setup/setup_and_verify.sh` | Environment checks | depends on selected checks |
 
 ## Verification Standard

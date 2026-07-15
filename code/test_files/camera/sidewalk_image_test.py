@@ -6,7 +6,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent.parent
-CURRENT_CONTROLLER_DIR = PROJECT_ROOT / "CODE" / "CONTROLLER" / "CURRENT"
+CURRENT_CONTROLLER_DIR = PROJECT_ROOT / "code" / "controller" / "current"
 if str(CURRENT_CONTROLLER_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_CONTROLLER_DIR))
 

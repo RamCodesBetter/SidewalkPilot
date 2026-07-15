@@ -23,9 +23,9 @@ Notes:
 - Generated datasets are DATA, not source — they're gitignored, not committed.
 
 Usage:
-  python3 code/test_files/photo_run_to_dataset.py                 # all runs that have a label json
-  python3 code/test_files/photo_run_to_dataset.py --runs media/photos/2026_06_20_run_1
-  python3 code/test_files/photo_run_to_dataset.py --mode copy     # copy images (portable) instead of symlink
+  python3 code/test_files/data/photo_run_to_dataset.py                 # all runs that have a label json
+  python3 code/test_files/data/photo_run_to_dataset.py --runs media/photos/2026_06_20_run_1
+  python3 code/test_files/data/photo_run_to_dataset.py --mode copy     # copy images (portable) instead of symlink
 """
 import argparse
 import json
@@ -34,7 +34,7 @@ import shutil
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 PHOTOS_DIR = REPO / "media" / "photos"
 DATASET_DIR = REPO / "code" / "ai_models_datasets" / "series_3_and_4"
 

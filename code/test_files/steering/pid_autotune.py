@@ -27,8 +27,8 @@ SAFETY
     by the car, so speed is the only knob for shorter cycles.
 
 Run on the Pi INSTEAD of `car` (it owns the hardware):
-    python3 ~/rc_car_code/code/test_files/pid_autotune.py
-    python3 ~/rc_car_code/code/test_files/pid_autotune.py --cycles-per-segment 3   # more per burst, fewer stops
+    python3 ~/rc_car_code/code/test_files/steering/pid_autotune.py
+    python3 ~/rc_car_code/code/test_files/steering/pid_autotune.py --cycles-per-segment 3   # more per burst, fewer stops
 """
 import argparse
 import math
@@ -36,7 +36,7 @@ import os
 import sys
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "controller", "current"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "controller", "current"))
 
 from rc_car_app.hardware import Hardware                       # noqa: E402
 from rc_car_app.yaw_pid import ImuReader, YawController        # noqa: E402

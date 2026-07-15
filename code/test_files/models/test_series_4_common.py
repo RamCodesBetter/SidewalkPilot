@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 SERIES4_DIR = (
-    Path(__file__).resolve().parents[1]
+    Path(__file__).resolve().parents[2]
     / "ai_models_datasets"
     / "series_3_and_4"
 )

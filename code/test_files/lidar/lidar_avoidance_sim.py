@@ -29,8 +29,8 @@ Two behaviours are prototyped here, matching the two field problems:
 Thresholds mirror rc_car_app/config.py so the numbers transfer to the runtime later.
 
 Usage:
-  python3 lidar_avoidance_sim.py                 # run all synthetic scenarios
-  python3 lidar_avoidance_sim.py --csv run.csv --col "LiDAR Front Distance (m)"   # governor on a real front-distance trace
+  python3 code/test_files/lidar/lidar_avoidance_sim.py
+  python3 code/test_files/lidar/lidar_avoidance_sim.py --csv run.csv --col "LiDAR Front Distance (m)"
 """
 import argparse
 import csv as _csv

@@ -5,8 +5,8 @@ Display panel tester for Raspberry Pi Zero 2 W.
 Tests the 64x32 HUB75 RGB matrix using direct BCM GPIO bit-banging.
 
 Run examples:
-    python3 code/test_files/display_panel_test.py
-    python3 code/test_files/display_panel_test.py --glyph-set digits
+    python3 code/test_files/display/display_panel_test.py
+    python3 code/test_files/display/display_panel_test.py --glyph-set digits
 """
 
 from __future__ import annotations

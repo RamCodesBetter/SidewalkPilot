@@ -11,7 +11,7 @@ known shadow cases. Preserve the model hash, route, time, weather, starting pose
 continuous video or interruption clips, and every manual takeover. Score a case as pass,
 warning, or failure using a rule chosen before comparing the next model.
 
-The interruption recorder and `clip_bucket_analyzer.py` can help inspect the commands before
+The interruption recorder and `code/test_files/models/clip_bucket_analyzer.py` can help inspect the commands before
 a takeover. A clip does not contain steering ground truth or a measured wheel angle, so it
 supports diagnosis but cannot prove a single root cause.
 

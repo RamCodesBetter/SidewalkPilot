@@ -39,14 +39,14 @@ remains the field-selected model based on the July 13 comparison.
 The evaluator is:
 
 ```text
-code/test_files/evaluate_sidewalkpilot_models.py
+code/test_files/models/evaluate_sidewalkpilot_models.py
 ```
 
 Run it from the repository root:
 
 ```bash
 /home/rsabavat/.gpu-env/bin/python -u \
-  code/test_files/evaluate_sidewalkpilot_models.py \
+  code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 ```
 

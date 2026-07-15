@@ -8,7 +8,7 @@ worst frame, how wrong was this model?"
 ## How it works
 
 The current evaluator computes it in `metric_block()` as `max(abs(preds - targets))` in
-servo degrees (`code/test_files/evaluate_sidewalkpilot_models.py`). Because steering is clamped to
+servo degrees (`code/test_files/models/evaluate_sidewalkpilot_models.py`). Because steering is clamped to
 `0..180`, the theoretical ceiling is 180° (predicting hard-right on a hard-left
 frame), but a realistic worst case is a full turn class in the wrong direction.
 

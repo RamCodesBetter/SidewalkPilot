@@ -18,8 +18,8 @@ off" on its own -- it flags AMBIGUOUS frames (CLOSE) and shows you the decoded a
 so you (or I) can eyeball which frames were confidently wrong vs genuinely torn.
 
 Usage on Jon (repo at ~/rc_car_code or /nvme/rc_car_code):
-    python3 clip_bucket_analyzer.py --clip ~/interruption_clips/clip_1720300000.mp4
-    python3 clip_bucket_analyzer.py --clip clip.mov --model 3.1b --every 1
+    python3 code/test_files/models/clip_bucket_analyzer.py --clip ~/interruption_clips/clip_1720300000.mp4
+    python3 code/test_files/models/clip_bucket_analyzer.py --clip clip.mov --model 3.1b --every 1
 
 Defaults to the highest available model (3.1b here) to match the field run.
 Deps (already on Jon): numpy, opencv-python, and onnxruntime(-gpu) and/or torch.
@@ -32,8 +32,8 @@ import numpy as np
 
 # Reuse the live Jon service's model loader + preprocess + decode so this analyzer
 # can never drift from what actually ran on the car.
-_HERE = Path(__file__).resolve().parent                       # .../code/test_files
-_CTRL = _HERE.parent / "controller" / "current"               # .../code/controller/current
+_HERE = Path(__file__).resolve().parent                       # .../code/test_files/models
+_CTRL = _HERE.parents[1] / "controller" / "current"          # .../code/controller/current
 sys.path.insert(0, str(_CTRL))
 from rc_car_app import jetson_inference_server as jis          # noqa: E402
 

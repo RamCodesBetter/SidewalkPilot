@@ -12,7 +12,7 @@ After Training is the runbook that turns a finished run into a judged, recorded 
 
 1. Run the common evaluator from the repository root. It discovers supported Series 1-4 checkpoints, evaluates the selected versions on the frozen common Series 3/4 subset, and updates the JSON and PDF:
    ```bash
-   python3 code/test_files/evaluate_sidewalkpilot_models.py \
+   python3 code/test_files/models/evaluate_sidewalkpilot_models.py \
      --device cuda \
      --versions 3.x 3.xb
    ```

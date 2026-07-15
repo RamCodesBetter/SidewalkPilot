@@ -974,7 +974,7 @@ evidence associated with a commit rather than relying on a manually copied metri
 <tr>
 <td>Steering Model Report</td>
 <td><code>docs/steering_model_report.pdf</code></td>
-<td><code>code/test_files/evaluate_sidewalkpilot_models.py</code></td>
+<td><code>code/test_files/models/evaluate_sidewalkpilot_models.py</code></td>
 <td>46 checkpoints from v1.0 through v4.0c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table</td>
 </tr>
 <tr>
@@ -1011,7 +1011,7 @@ Series 4 completes physical testing.</p>
 ONNX Runtime GPU installed:</p>
 <pre><code class="language-bash">cd ~/rc_car_code
 /home/rsabavat/.gpu-env/bin/python -u \
-  code/test_files/evaluate_sidewalkpilot_models.py \
+  code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 </code></pre>
 <p>The default outputs are:</p>

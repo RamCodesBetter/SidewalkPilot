@@ -982,14 +982,14 @@
 </table>
 <p>The Zero receives UDP telemetry on port <code>8765</code> and drives the 64×32 HUB75 panel. Wi-Fi can remain available for SSH, but the controller does not send dashboard packets to a Wi-Fi hostname.</p>
 <h2 id="install-permanent-recovery">Install Permanent Recovery</h2>
-<p>Run the role matching each machine from <code>code/test_files</code>:</p>
+<p>Run the role matching each machine from the repository root:</p>
 <pre><code class="language-bash"># Pi 5
-sudo ./install_usb_dashboard_link.sh rpi
-./install_usb_dashboard_link.sh verify-rpi
+sudo code/test_files/setup/install_usb_dashboard_link.sh rpi
+code/test_files/setup/install_usb_dashboard_link.sh verify-rpi
 </code></pre>
 <pre><code class="language-bash"># Zero 2 W
-sudo ./install_usb_dashboard_link.sh z2w
-./install_usb_dashboard_link.sh verify-z2w
+sudo code/test_files/setup/install_usb_dashboard_link.sh z2w
+code/test_files/setup/install_usb_dashboard_link.sh verify-z2w
 </code></pre>
 <p>The installer creates static addressing and <code>sidewalkpilot-usb0-keeper.service</code>. The keeper restores addresses, flushes failed neighbor entries, cycles the interface after repeated failures, and reloads <code>dwc2/g_ether</code> on the Zero when its gadget interface disappears.</p>
 <h2 id="start-and-verify">Start and Verify</h2>

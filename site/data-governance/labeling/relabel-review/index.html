@@ -990,7 +990,7 @@
 python3 -c &quot;import json; d=json.load(open('steering_corrections.json')); print('correction_rows',len(d))&quot;
 </code></pre>
 <p>Then re-run the evaluator and read the bucket confusion / turn coverage, not just the headline MAE:</p>
-<pre><code class="language-bash">python3 code/test_files/evaluate_sidewalkpilot_models.py --device cuda
+<pre><code class="language-bash">python3 code/test_files/models/evaluate_sidewalkpilot_models.py --device cuda
 </code></pre>
 <h2 id="recovery">Recovery</h2>
 <p>If a relabel made things worse, restore the prior label snapshot or remove the optional correction row, then re-evaluate. If a whole batch is suspect, quarantine it and report the counts before deleting anything.</p>

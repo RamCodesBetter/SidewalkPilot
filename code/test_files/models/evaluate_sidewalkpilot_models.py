@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[1]            # code/test_files -> repo root
+REPO_ROOT = SCRIPT_DIR.parents[2]            # code/test_files/models -> repo root
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
 CORRECTIONS_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_1_and_2" / "steering_corrections.json"
 S12_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_1_and_2" / "sidewalkpilot_dataset"

@@ -10,8 +10,8 @@ CLIP image embeddings are cached (dataset_clip_embeddings.npz) so you can edit T
 re-run in seconds. Output: printed table + dataset_scene_tags.html (self-contained).
 
 Usage:
-    python3 dataset_scene_tags.py                 # all images
-    python3 dataset_scene_tags.py --limit 3000    # quick pass
+    python3 code/test_files/data/dataset_scene_tags.py                 # all images
+    python3 code/test_files/data/dataset_scene_tags.py --limit 3000    # quick pass
 """
 import argparse
 import base64

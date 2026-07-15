@@ -7,7 +7,7 @@ evidence associated with a commit rather than relying on a manually copied metri
 
 | Artifact | File | Source | Scope |
 |---|---|---|---|
-| Steering Model Report | `docs/steering_model_report.pdf` | `code/test_files/evaluate_sidewalkpilot_models.py` | 46 checkpoints from v1.0 through v4.0c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table |
+| Steering Model Report | `docs/steering_model_report.pdf` | `code/test_files/models/evaluate_sidewalkpilot_models.py` | 46 checkpoints from v1.0 through v4.0c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table |
 | Machine-readable steering results | `docs/steering_eval_current_labels.json` | same evaluator | complete metrics, source breakdowns, confusion matrices, checkpoint metadata, and historical Series 1/2 blocks |
 | CNN Parameter Visual Guide | `docs/cnn_parameter_visual_guide.pdf` | hand-authored visual guide | layer and parameter-count explanation for the major architecture families |
 
@@ -39,7 +39,7 @@ ONNX Runtime GPU installed:
 ```bash
 cd ~/rc_car_code
 /home/rsabavat/.gpu-env/bin/python -u \
-  code/test_files/evaluate_sidewalkpilot_models.py \
+  code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 ```
 

@@ -13,8 +13,8 @@ deliberate steering is SLOW. This measures how fast a real flick is, so the
 runtime can tell them apart and snapshot the angle you were actually holding.
 
 Usage:
-    python3 code/test_files/flick_detector_test.py            # 5 flicks
-    python3 code/test_files/flick_detector_test.py --flicks 8
+    python3 code/test_files/controller/flick_detector_test.py            # 5 flicks
+    python3 code/test_files/controller/flick_detector_test.py --flicks 8
 
 Controller does not move the servo here — it only reads the stick. Safe to run
 with the car service stopped or running.

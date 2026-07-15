@@ -15,9 +15,9 @@ The best S3 model (v3.2b) is onnx-only, so the backbone is loaded from the newes
 SidewalkPilotV3 .pth (default 3.1b -- same architecture, representative feature space).
 
 Usage:
-    python3 dataset_cosine_similarity.py                      # all 57k, writes html next to this file
-    python3 dataset_cosine_similarity.py --limit 2000         # quick smoke test
-    python3 dataset_cosine_similarity.py --model 3.1 --topk 8 --dup-threshold 0.98
+    python3 code/test_files/data/dataset_cosine_similarity.py
+    python3 code/test_files/data/dataset_cosine_similarity.py --limit 2000
+    python3 code/test_files/data/dataset_cosine_similarity.py --model 3.1 --topk 8 --dup-threshold 0.98
 """
 import argparse
 import base64
@@ -31,7 +31,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-REPO = Path(__file__).resolve().parents[2]                      # code/test_files -> repo root
+REPO = Path(__file__).resolve().parents[3]                 # code/test_files/data -> repo root
 S3 = REPO / "code" / "ai_models_datasets" / "series_3_and_4"
 DEFAULT_DATASET = S3 / "sidewalkpilot_dataset"
 TRAINER = S3 / "series_3_sidewalkpilot_trainer.py"

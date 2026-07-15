@@ -13,14 +13,14 @@ training code stays canonical in GitHub.
 Examples (run from the repo root):
 
     # Preferred Series 3/4 release: one archive + labels + explicit dataset card
-  python3 code/test_files/hf_upload_dataset.py \
+  python3 code/test_files/data/hf_upload_dataset.py \
     --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v3_and_v4 \
     --tar    sidewalkpilot_v3_and_v4_dataset.tar \
     --labels code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/labels.json \
     --card   code/ai_models_datasets/series_3_and_4/README.md
 
   # Loose upload is for a data-only folder, not the trainer directory:
-  python3 code/test_files/hf_upload_dataset.py \
+  python3 code/test_files/data/hf_upload_dataset.py \
     --repo   ram-shreyas-naik-sabavat/SidewalkPilot_v1_and_v2 \
     --folder code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset \
     --card   code/ai_models_datasets/series_1_and_2/README.md

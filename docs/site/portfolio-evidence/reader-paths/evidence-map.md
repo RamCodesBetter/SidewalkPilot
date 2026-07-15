@@ -29,7 +29,7 @@ This page maps important SidewalkPilot claims to the strongest available proof a
 | Series 4 PC trainer | `code/ai_models_datasets/series_3_and_4/series_4_0pr_sidewalkpilot_trainer.py` |
 | Series 4 CF trainer | `code/ai_models_datasets/series_3_and_4/series_4_0fg_sidewalkpilot_trainer.py` |
 | Series 4 PCF trainer | `code/ai_models_datasets/series_3_and_4/series_4_0ac_sidewalkpilot_trainer.py` |
-| Cross-model evaluator | `code/test_files/evaluate_sidewalkpilot_models.py` |
+| Cross-model evaluator | `code/test_files/models/evaluate_sidewalkpilot_models.py` |
 | Evaluation JSON | `docs/steering_eval_current_labels.json` |
 | Evaluation PDF | `docs/steering_model_report.pdf` |
 | Public artifacts | [Hugging Face profile](https://huggingface.co/ram-shreyas-naik-sabavat) |

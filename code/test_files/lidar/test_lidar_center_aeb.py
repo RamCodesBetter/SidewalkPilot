@@ -10,7 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 
-CONTROLLER_DIR = Path(__file__).resolve().parents[1] / "controller" / "current"
+CONTROLLER_DIR = Path(__file__).resolve().parents[2] / "controller" / "current"
 if str(CONTROLLER_DIR) not in sys.path:
     sys.path.insert(0, str(CONTROLLER_DIR))
 

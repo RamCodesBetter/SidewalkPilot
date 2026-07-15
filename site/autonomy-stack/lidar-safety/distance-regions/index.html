@@ -999,8 +999,8 @@
 <h2 id="display-rungs">Display Rungs</h2>
 <p>The LiDAR page draws four colored horizontal rungs across the active center corridor plus two blue vertical guides. Side points remain visible for context but cannot change control or the <code>C</code> lane state.</p>
 <h2 id="verification">Verification</h2>
-<pre><code class="language-bash">python3 code/test_files/test_lidar_center_aeb.py -v
-python3 code/test_files/test_z2w_lidar_layout.py -v
+<pre><code class="language-bash">python3 code/test_files/lidar/test_lidar_center_aeb.py -v
+python3 code/test_files/display/test_z2w_lidar_layout.py -v
 </code></pre>
 <p>An empty or stale scan cannot prove a clear corridor; sensor health must be checked independently before driving. See <a href="../aeb/">AEB</a> and <a href="../override-steering/">Why LiDAR Does Not Steer</a>.</p>
               

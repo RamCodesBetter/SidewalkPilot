@@ -8,8 +8,8 @@ Use it to feel out the speed difference between a slow deliberate move and a
 quick release/flick.
 
 Run on the Pi over SSH (no display needed); reads the stick only, no servo:
-    python3 code/test_files/joystick_velocity_test.py            # axis 0
-    python3 code/test_files/joystick_velocity_test.py --axis 0
+    python3 code/test_files/controller/joystick_velocity_test.py            # axis 0
+    python3 code/test_files/controller/joystick_velocity_test.py --axis 0
 
 Share button (15) or Ctrl-C to quit.
 """

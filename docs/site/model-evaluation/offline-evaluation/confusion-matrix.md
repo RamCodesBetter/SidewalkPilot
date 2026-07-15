@@ -8,7 +8,7 @@ grade, the confusion matrix is the report card that shows *which* classes passed
 
 ## How it works
 
-The common evaluator (`code/test_files/evaluate_sidewalkpilot_models.py`) builds a
+The common evaluator (`code/test_files/models/evaluate_sidewalkpilot_models.py`) builds a
 **9x9** matrix over these servo-angle classes (target on rows, prediction on
 columns):
 

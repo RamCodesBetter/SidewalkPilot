@@ -35,7 +35,7 @@ ping -c 3 192.168.10.2               # from Pi 5
 ss -lunp | grep 8765
 ```
 
-Failure symptoms: a missing `/dev/ttyUSB0` means the expected adapter did not appear at that name; check the stable by-id path, `lsusb`, cable, host port, power, and adapter. Descriptor error `-110` records a USB timeout but does not identify which component caused it. On the dashboard link, carrier `1` with failed ping means the interface reports a physical link but IP/ARP traffic is not completing; the keeper service and `code/test_files/install_usb_dashboard_link.sh` provide the project recovery path. `NO LINK` on the display means the receiver is alive but has not seen a recent packet.
+Failure symptoms: a missing `/dev/ttyUSB0` means the expected adapter did not appear at that name; check the stable by-id path, `lsusb`, cable, host port, power, and adapter. Descriptor error `-110` records a USB timeout but does not identify which component caused it. On the dashboard link, carrier `1` with failed ping means the interface reports a physical link but IP/ARP traffic is not completing; the keeper service and `code/test_files/setup/install_usb_dashboard_link.sh` provide the project recovery path. `NO LINK` on the display means the receiver is alive but has not seen a recent packet.
 
 ## Related pages
 

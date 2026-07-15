@@ -6,7 +6,7 @@ When a model version or config change counts as "verified": what has to be re-ru
 
 The policy is a two-gate rule. A change is not "done" until it passes both an offline gate and a field gate, in that order.
 
-**Offline gate.** Run `code/test_files/evaluate_sidewalkpilot_models.py` and read Bal9, turn exact, turn +/-1, straight exact, error magnitude, signed bias, and the confusion matrix. The offline gate catches gross regressions cheaply before hardware time. Passing it means "worth field-testing," not "good."
+**Offline gate.** Run `code/test_files/models/evaluate_sidewalkpilot_models.py` and read Bal9, turn exact, turn +/-1, straight exact, error magnitude, signed bias, and the confusion matrix. The offline gate catches gross regressions cheaply before hardware time. Passing it means "worth field-testing," not "good."
 
 **Field gate.** Drive the car on the real situation the change was meant to fix. A compatible ONNX must exist on Jon and the version must exist in `STEERING_MODEL_VERSIONS`. Series 4 also requires the correct runtime contract: image-only CF or causal history for PC/PCF. Then re-drive the specific failing scenario, such as the shadow band that caused shadow-chasing or the mid-right turn that was missed, and confirm the behavior actually changed on the car.
 

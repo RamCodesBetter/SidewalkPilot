@@ -14,7 +14,7 @@ Series 1/2 frames are resized to 200x66 and decoded as direct steering regressio
 
 ## Evaluator Outputs
 
-`code/test_files/evaluate_sidewalkpilot_models.py` discovers all supported checkpoints and writes:
+`code/test_files/models/evaluate_sidewalkpilot_models.py` discovers all supported checkpoints and writes:
 
 - `docs/steering_eval_current_labels.json`, containing overall, source, bucket, confusion, and selection metrics;
 - `docs/steering_model_report.pdf`, a 22-page report with the class-balanced ranking, all-series MAE bars, per-model sections, and confusion matrices.
@@ -48,7 +48,7 @@ On the evaluation workstation with ONNX Runtime GPU installed:
 ```bash
 cd ~/rc_car_code
 /home/rsabavat/.gpu-env/bin/python -u \
-  code/test_files/evaluate_sidewalkpilot_models.py \
+  code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 ```
 

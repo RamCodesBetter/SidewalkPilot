@@ -11,8 +11,8 @@ Training code is split between the early direct-regression family and the shared
 | `series_3_and_4/series_4_0fg_sidewalkpilot_trainer.py` | CF run: v4.0f final and v4.0g best-validation |
 | `series_3_and_4/series_4_0ac_sidewalkpilot_trainer.py` | PCF run: v4.0a final and v4.0c best-validation |
 | `series_3_and_4/wandb_logger.py` | W&B metric definitions and logging helper |
-| `code/test_files/evaluate_sidewalkpilot_models.py` | Architecture-aware evaluator for all 46 checkpoints |
-| `code/test_files/test_series_4_common.py` | Temporal-window and S4 contract regression tests |
+| `code/test_files/models/evaluate_sidewalkpilot_models.py` | Architecture-aware evaluator for all 46 checkpoints |
+| `code/test_files/models/test_series_4_common.py` | Temporal-window and S4 contract regression tests |
 
 ## Contracts
 
@@ -39,7 +39,7 @@ TensorRT/INT8 builder files described by older documentation are not present in 
 python3 -m py_compile \
   code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py \
   code/ai_models_datasets/series_3_and_4/series_4_common.py \
-  code/test_files/evaluate_sidewalkpilot_models.py
+  code/test_files/models/evaluate_sidewalkpilot_models.py
 ```
 
 See [Training Pipeline](../ai-and-models/training-pipeline/overview.md) and [Series 4 Temporal Experiments](../ai-and-models/architecture/series-4-plan.md).

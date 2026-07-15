@@ -12,8 +12,8 @@ K; it also flags diffuse points as noise). For every cluster it prints + renders
 Writes dataset_clusters.html (self-contained). Cluster count depends on --min-cluster-size.
 
 Usage:
-    python3 dataset_clusters.py                       # all images, min-cluster-size 50
-    python3 dataset_clusters.py --min-cluster-size 30 --limit 5000
+    python3 code/test_files/data/dataset_clusters.py                       # all images, min-cluster-size 50
+    python3 code/test_files/data/dataset_clusters.py --min-cluster-size 30 --limit 5000
 """
 import argparse
 import base64

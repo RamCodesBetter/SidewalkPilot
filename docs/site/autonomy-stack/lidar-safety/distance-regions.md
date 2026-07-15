@@ -30,8 +30,8 @@ The LiDAR page draws four colored horizontal rungs across the active center corr
 ## Verification
 
 ```bash
-python3 code/test_files/test_lidar_center_aeb.py -v
-python3 code/test_files/test_z2w_lidar_layout.py -v
+python3 code/test_files/lidar/test_lidar_center_aeb.py -v
+python3 code/test_files/display/test_z2w_lidar_layout.py -v
 ```
 
 An empty or stale scan cannot prove a clear corridor; sensor health must be checked independently before driving. See [AEB](aeb.md) and [Why LiDAR Does Not Steer](override-steering.md).

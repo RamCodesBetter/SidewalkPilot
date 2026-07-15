@@ -1,6 +1,6 @@
 # Steering Trim Tuner
 
-The steering trim tuner is the windowless, SSH-friendly utility I use to measure and set the steering center without launching the whole runtime. It drives only the steering servo — never the motors — so I can jog the wheels to true straight over an SSH session and read off the trim angle, then decide whether a constant needs to change. It lives at `code/test_files/steering_trim_tuner.py`.
+The steering trim tuner is the windowless, SSH-friendly utility I use to measure and set the steering center without launching the whole runtime. It drives only the steering servo — never the motors — so I can jog the wheels to true straight over an SSH session and read off the trim angle, then decide whether a constant needs to change. It lives at `code/test_files/steering/steering_trim_tuner.py`.
 
 ## How it works
 
@@ -14,9 +14,9 @@ The steering trim tuner is the windowless, SSH-friendly utility I use to measure
 Run on the Pi 5 over SSH, Xbox controller connected, wheels off the ground:
 
 ```bash
-python3 code/test_files/steering_trim_tuner.py
+python3 code/test_files/steering/steering_trim_tuner.py
 # custom start and finer step:
-python3 code/test_files/steering_trim_tuner.py --start 90 --step 0.5
+python3 code/test_files/steering/steering_trim_tuner.py --start 90 --step 0.5
 ```
 
 D-pad to jog the wheels straight, button `0` to print the trim, button `1` to reset, button `15` to quit.
