@@ -1,3 +1,0 @@
-#!/bin/bash
-
-gh issue list --limit 1000 --state open  --json number -q '.[].number'

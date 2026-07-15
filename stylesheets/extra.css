@@ -1,0 +1,18 @@
+/* Read the Docs defaults table cells to one unbroken line. Project tables
+   contain full descriptions, so wrap them before requiring horizontal scroll. */
+.wy-table-responsive table {
+  width: 100%;
+}
+
+.wy-table-responsive table th,
+.wy-table-responsive table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.wy-table-responsive table td code,
+.wy-table-responsive table th code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
