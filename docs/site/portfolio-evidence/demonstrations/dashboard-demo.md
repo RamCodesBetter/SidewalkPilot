@@ -1,13 +1,13 @@
 # Dashboard Demo
 
-The dashboard demonstration shows live vehicle telemetry on a physical 64x32 HUB75 panel driven by a Raspberry Pi Zero 2 W.
+The dashboard demonstration shows live vehicle telemetry on a physical 64x32 HUB75 panel driven by a Zero 2 W.
 
 ## What It Demonstrates
 
-- The Pi queues latest-value UDP telemetry to an asynchronous sender targeting `192.168.10.2:8765` over the dedicated USB-Ethernet link.
-- The Zero renders gear, speed, control values, model state, autonomy metrics, temperatures, photos, navigation, GPS, camera preview, and LiDAR state.
+- The Raspberry Pi 5 queues latest-value UDP telemetry to an asynchronous sender targeting `192.168.10.2:8765` over the dedicated USB-Ethernet link.
+- The Zero 2 W renders gear, speed, control values, model state, autonomy metrics, temperatures, photos, navigation, GPS, camera preview, and LiDAR state.
 - `NO LINK` and `STALE` make transport failure visible instead of leaving apparently current values frozen on screen.
-- The dashboard does not control the car; final control remains on the Pi.
+- The dashboard does not control the car; final control remains on the Raspberry Pi 5.
 
 ## Current Page Grid
 
@@ -26,7 +26,7 @@ The removed V3H2 and V3H3 collection-count pages are not part of the current gri
 
 ## Evidence
 
-- Pi sender: `code/controller/current/rc_car_app/hub75_dashboard.py`
-- Zero renderer: `code/controller/current/z2w_dashboard.py`
+- Raspberry Pi 5 sender: `code/controller/current/rc_car_app/hub75_dashboard.py`
+- Zero 2 W renderer: `code/controller/current/z2w_dashboard.py`
 - Link setup: `code/test_files/setup/install_usb_dashboard_link.sh`
 - Pixel/layout tests: `code/test_files/display/test_z2w_lidar_layout.py`

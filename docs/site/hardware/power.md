@@ -1,7 +1,7 @@
 # Power
 
 The car carries its own power. The drive motors are fed from a 3S LiPo through the
-AT8236, while the compute boards (Pi 5, Jetson, Zero 2 W) run from high-output USB power
+AT8236, while the compute boards (Jetson Orin Nano, Raspberry Pi 5, Zero 2 W) run from high-output USB power
 banks. Separating the noisy motor rail from the clean logic rail is the main goal of the
 power design.
 
@@ -22,7 +22,7 @@ power design.
   large 10000 uF electrolytic capacitors buffer the motor rail against current spikes, and
   ATC/ATO fuses protect against shorts.
 - **Logic rail:** the compute boards run from USB power banks (a 27000 mAh 140W bank and a
-  10000 mAh 45W bank), keeping the Pi/Jetson/Zero off the noisy motor supply.
+  10000 mAh 45W bank), keeping the Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W off the noisy motor supply.
 - **Support gear:** a dual LiPo charger/discharger and a 2S LiPo are part of the battery kit
   for charging and bench work.
 

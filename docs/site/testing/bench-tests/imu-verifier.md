@@ -13,7 +13,7 @@ The IMU verifier is the bench check for the Seeed XIAO MG24 6-axis IMU used by t
 
 ## Command
 
-Run on the Pi 5 (IMU is on the GPIO UART `/dev/ttyAMA3`, Pi GPIO8/9):
+Run on the Raspberry Pi 5 (IMU is on the GPIO UART `/dev/ttyAMA3`, Raspberry Pi 5 GPIO8/9):
 
 ```bash
 python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3

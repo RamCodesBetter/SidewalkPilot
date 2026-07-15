@@ -1,6 +1,6 @@
 # Cleanup
 
-`Hardware.cleanup()` in `code/controller/current/rc_car_app/hardware.py` is the normal shutdown path for physical devices on the Pi 5 controller. It is called when GPIO initialization fails and during the runtime's normal exit sequence. It attempts to stop motor outputs and release the servo, but it cannot run after every possible power, process, or hardware failure.
+`Hardware.cleanup()` in `code/controller/current/rc_car_app/hardware.py` is the normal shutdown path for physical devices on the Raspberry Pi 5 controller. It is called when GPIO initialization fails and during the runtime's normal exit sequence. It attempts to stop motor outputs and release the servo, but it cannot run after every possible power, process, or hardware failure.
 
 ## How it works
 
@@ -30,7 +30,7 @@ Every step is wrapped in its own `try/except` that swallows errors. That is inte
 
 ## Failure symptom
 
-If `cleanup()` is skipped (e.g. the process is `kill -9`'d rather than exiting through the loop), the last-written motor PWM and the servo pulse can persist — the car may keep creeping or the wheels stay turned until power is cut. The correct shutdown is to quit the controller through its normal exit (or Ctrl-C), which runs this path. The linked shutdown decision also has quitting the Pi controller tell the Zero dashboard receiver to stop.
+If `cleanup()` is skipped (e.g. the process is `kill -9`'d rather than exiting through the loop), the last-written motor PWM and the servo pulse can persist — the car may keep creeping or the wheels stay turned until power is cut. The correct shutdown is to quit the controller through its normal exit (or Ctrl-C), which runs this path. The linked shutdown decision also has quitting the Raspberry Pi 5 controller tell the Zero 2 W dashboard receiver to stop.
 
 ## Related pages
 

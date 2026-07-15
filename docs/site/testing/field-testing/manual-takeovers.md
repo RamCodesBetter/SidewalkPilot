@@ -13,7 +13,7 @@ Override is built into `runtime.py`. While `autonomous_mode` is true, these qual
 
 `cancel_autonomous_mode()` zeroes requested throttle, clears brake force, resets PID state, and (for gas/brake) re-centers steering rather than intentionally retaining the model's command. If the run was on a GPS `AUTO` navigation segment, the same inputs also cancel the navigation route. Physical response still depends on loop timing, actuator health, traction, and power.
 
-The preflight checklist tests this path on a stand: qualifying input enters the Pi event loop and autonomy cancels on a following control iteration. A timed latency record is still needed before quoting an override time.
+The preflight checklist tests this path on a stand: qualifying input enters the Raspberry Pi 5 event loop and autonomy cancels on a following control iteration. A timed latency record is still needed before quoting an override time.
 
 ## How a takeover is counted
 
@@ -33,7 +33,7 @@ The direction I'm chasing is distance-per-takeover going up across model version
 
 ## Field note
 
-Takeover counts are only meaningful against a fixed route and defined intervention criteria — otherwise "I grabbed it a couple times" isn't a measurement. The per-run takeover summary (count + trigger breakdown per route) is **planned** as an automated CSV rollup on Jon; today it's read by hand from the `Autonomous Mode` column of each run log.
+Takeover counts are only meaningful against a fixed route and defined intervention criteria — otherwise "I grabbed it a couple times" isn't a measurement. The per-run takeover summary (count + trigger breakdown per route) is **planned** as an automated CSV rollup on Jetson Orin Nano; today it's read by hand from the `Autonomous Mode` column of each run log.
 
 ## Related pages
 

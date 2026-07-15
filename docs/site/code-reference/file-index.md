@@ -4,10 +4,10 @@ This index maps current repository areas to their responsibilities. Generated da
 
 | Path | Responsibility | Notes |
 |---|---|---|
-| `code/controller/current/` | Live Pi, Jon, and Zero 2 W software | Field runtime |
-| `code/controller/current/rc_car.py` | Minimal Pi controller entrypoint | Model selection is on-device; no runtime `--model` flag |
-| `code/controller/current/rc_car_app/` | Control loop, hardware, vision client, LiDAR, GPS, logging, dashboard sender | Pi-owned package |
-| `code/controller/current/rc_car_app/jetson_inference_server.py` | ONNX Runtime inference server | Runs on Jon |
+| `code/controller/current/` | Live Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W software | Field runtime |
+| `code/controller/current/rc_car.py` | Minimal Raspberry Pi 5 controller entrypoint | Model selection is on-device; no runtime `--model` flag |
+| `code/controller/current/rc_car_app/` | Control loop, hardware, vision client, LiDAR, GPS, logging, dashboard sender | Raspberry Pi 5-owned package |
+| `code/controller/current/rc_car_app/jetson_inference_server.py` | ONNX Runtime inference server | Runs on Jetson Orin Nano |
 | `code/controller/current/z2w_dashboard.py` | HUB75 dashboard receiver/renderer | Runs on Zero 2 W |
 | `code/ai_models/` | Local/Hugging Face PTH/ONNX artifacts | Binary artifacts are ignored by Git; preserve version names |
 | `code/ai_models_datasets/series_1_and_2/` | Early direct-regression trainer and metadata | 200x66 family |
@@ -27,7 +27,7 @@ Large image datasets, generated archives, model cards, and dataset cards are not
 | Control ownership and arbitration | `rc_car_app/runtime.py` |
 | Pins, thresholds, calibration | `rc_car_app/config.py` |
 | GPIO/PWM/PCA9685 writes | `rc_car_app/hardware.py` |
-| Model registry and Pi inference client | `rc_car_app/vision.py` |
+| Model registry and Raspberry Pi 5 inference client | `rc_car_app/vision.py` |
 | ONNX loading/decoding | `rc_car_app/jetson_inference_server.py` |
 | LiDAR packet parsing | `rc_car_app/lidar.py` |
 | LiDAR slowdown/brake policy | `rc_car_app/lidar_avoidance.py` |

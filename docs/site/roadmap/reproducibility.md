@@ -11,7 +11,7 @@ SidewalkPilot publishes code, model artifacts, dataset releases, and evaluation 
 | Training | Trainer commands, fixed seeds, hyperparameters, and Weights & Biases runs record the main experiment settings. |
 | Models | Named ONNX artifacts identify each deployed or evaluated checkpoint. |
 | Evaluation | `code/test_files/models/evaluate_sidewalkpilot_models.py` evaluates every checkpoint on a frozen shared subset and writes JSON plus the PDF report. |
-| Deployment | The Pi selects a version and Jon resolves the matching ONNX model for ONNX Runtime inference. |
+| Deployment | The Raspberry Pi 5 selects a version and Jetson Orin Nano resolves the matching ONNX model for ONNX Runtime inference. |
 
 ## What Must Be Recorded Per Model
 

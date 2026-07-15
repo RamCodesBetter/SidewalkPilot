@@ -7,11 +7,11 @@ during a drive, not just a claim in a table.
 
 ## What the dashboard is
 
-The Pi 5 controller streams telemetry over USB Ethernet to a Raspberry Pi Zero 2 W,
+The Raspberry Pi 5 controller streams telemetry over USB Ethernet to a Zero 2 W,
 which renders it on a small RGB LED dashboard. The transport is UDP-only by design:
-Pi 5 `usb0` is `192.168.10.1`, the Zero is `192.168.10.2`, and packets go to
+Raspberry Pi 5 `usb0` is `192.168.10.1`, the Zero 2 W is `192.168.10.2`, and packets go to
 `192.168.10.2:8765` about every 100 ms (`HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1`).
-The Pi side serializes the payload in `hub75_dashboard.py`; the Zero renders it in
+The Raspberry Pi 5 side serializes the payload in `hub75_dashboard.py`; the Zero 2 W renders it in
 `z2w_dashboard.py`. Because the display rows are tiny, every label is a short fixed
 token.
 
@@ -38,7 +38,7 @@ so the full instrument cluster is documented.
 These are real, code-backed states — good screenshot targets because they show the
 system telling the truth about itself:
 
-- **`NO LINK`** — the Zero display is alive but has not received a packet recently.
+- **`NO LINK`** — the Zero 2 W display is alive but has not received a packet recently.
   This is the exact failure signature that made USB link reliability a whole
   workstream, so a still of it is genuine evidence, not a bug to hide.
 - **Photo-capture status field** — the alert region cycles `GOOD` -> `CTRE`

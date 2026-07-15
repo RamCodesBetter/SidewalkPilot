@@ -8,20 +8,20 @@ The registry in `code/controller/current/rc_car_app/vision.py` contains all 46 e
 
 | Family | Versions | Inference computer |
 |---|---|---|
-| Series 1 | `1.0/1.0b` through `1.9/1.9b` | Pi when local inference is used, or Jon through ONNX |
-| Series 2 | `2.0/2.0b` through `2.4/2.4b` | Pi when local inference is used, or Jon through ONNX |
-| Series 3 | `3.0/3.0b` through `3.4/3.4b` | Jon |
-| Series 4 PC | `4.0p`, `4.0r` | Jon, image plus causal history |
-| Series 4 CF | `4.0f`, `4.0g` | Jon, image only |
-| Series 4 PCF | `4.0a`, `4.0c` | Jon, image plus causal history |
+| Series 1 | `1.0/1.0b` through `1.9/1.9b` | Raspberry Pi 5 when local inference is used, or Jetson Orin Nano through ONNX |
+| Series 2 | `2.0/2.0b` through `2.4/2.4b` | Raspberry Pi 5 when local inference is used, or Jetson Orin Nano through ONNX |
+| Series 3 | `3.0/3.0b` through `3.4/3.4b` | Jetson Orin Nano |
+| Series 4 PC | `4.0p`, `4.0r` | Jetson Orin Nano, image plus causal history |
+| Series 4 CF | `4.0f`, `4.0g` | Jetson Orin Nano, image only |
+| Series 4 PCF | `4.0a`, `4.0c` | Jetson Orin Nano, image plus causal history |
 
 The startup default is v3.4. `RC_CAR_STEERING_MODEL` can override it before launch. The current `rc_car.py` has no `--model` option; field switching happens on the dashboard model page.
 
 ## Preconditions
 
-1. Copy the intended `SidewalkPilot-v<version>.onnx` to Jon's `code/ai_models/` directory.
-2. Confirm the runtime revision containing that model name is synchronized to the Pi and Jon.
-3. Start the Jon inference server and the Pi controller.
+1. Copy the intended `SidewalkPilot-v<version>.onnx` to Jetson Orin Nano's `code/ai_models/` directory.
+2. Confirm the runtime revision containing that model name is synchronized to the Raspberry Pi 5 and Jetson Orin Nano.
+3. Start the Jetson Orin Nano inference server and the Raspberry Pi 5 controller.
 4. Keep AEB state, steering trim, tire pressure, battery state, and route constant across comparisons.
 5. Prepare a run record with date/time, lighting, route segment, model hash, clips/logs, and takeover fields.
 
@@ -29,11 +29,11 @@ The startup default is v3.4. `RC_CAR_STEERING_MODEL` can override it before laun
 
 1. Open the dashboard model page.
 2. Use the D-pad control to cycle to the intended version.
-3. Watch the Pi and Jon logs for the successful model switch/load message.
+3. Watch the Raspberry Pi 5 and Jetson Orin Nano logs for the successful model switch/load message.
 4. Confirm the dashboard displays the intended full model suffix, including `p/r/f/g/a/c` for Series 4.
 5. With the wheels safely unloaded or the car restrained, confirm fresh steering responses before placing it on the route.
 
-Jon inspects the ONNX signature. CF uses only the image. PC and PCF use a three-value target history that starts at `[90,90,90]`, updates from each completed model prediction, and resets after a model switch, reconnect, or manual/status period.
+Jetson Orin Nano inspects the ONNX signature. CF uses only the image. PC and PCF use a three-value target history that starts at `[90,90,90]`, updates from each completed model prediction, and resets after a model switch, reconnect, or manual/status period.
 
 ## Comparison Order
 
@@ -56,7 +56,7 @@ This order prioritizes Bal9 and turn capability while retaining lower-MAE and im
 Do not arm autonomy when:
 
 - The intended artifact fails to load;
-- Jon is unreachable or results are stale;
+- Jetson Orin Nano is unreachable or results are stale;
 - The displayed version does not match the planned run;
 - Manual takeover, brake, steering, or AEB checks fail;
 - A PC/PCF model shows unstable autoregressive behavior;

@@ -10,7 +10,7 @@ The GeoJSON-to-graph test is the offline build step that turns exported OpenStre
 
 ## Command
 
-Run on the workstation or Pi 5 from the navigation folder (it reads/writes files by relative name):
+Run on the workstation or Raspberry Pi 5 from the navigation folder (it reads/writes files by relative name):
 
 ```bash
 cd code/test_files/navigation

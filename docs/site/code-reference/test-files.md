@@ -14,7 +14,7 @@ exercise; the directory root contains folders rather than a second unsorted tool
 | Data and logs | `data/photo_run_to_dataset.py`, `data/check_dataset_frames.py`, `data/dataset_cosine_similarity.py`, `data/dataset_clusters.py`, `data/dataset_scene_tags.py`, `data/takeover_log_report.py` | Dataset assembly/audit, scene analysis, and CSV takeover reporting |
 | Display | `display/hub75_rgbmatrix_test.py`, `display/display_panel_test.py`, `display/test_z2w_lidar_layout.py` | HUB75 bring-up and dashboard layout checks |
 | Sensors | `sensors/bn880_test.py`, `sensors/hall_sensor_test.py`, `sensors/imu_yaw_test.py` | GPS/compass, wheel speed, and IMU stream checks |
-| Controller | `controller/xbox_test.py`, `controller/joystick_velocity_test.py`, `controller/flick_detector_test.py`, `controller/test_async_jetson_client.py` | Input-device behavior and non-blocking Jetson-client checks |
+| Controller | `controller/xbox_test.py`, `controller/joystick_velocity_test.py`, `controller/flick_detector_test.py`, `controller/test_async_jetson_client.py` | Input-device behavior and non-blocking Jetson Orin Nano client checks |
 | Navigation | `navigation/geojson_to_graph.py`, `navigation/astar_nav.py`, `navigation/generate_printable_map.py` | Route-graph generation, A* testing, and map output |
 | Models | `models/evaluate_sidewalkpilot_models.py`, `models/test_series_4_common.py`, `models/test_jetson_series4_runtime.py`, `models/clip_bucket_analyzer.py` | Cross-model report, Series 4 contracts/runtime, and clip diagnosis |
 | Setup | `setup/setup_and_verify.sh`, `setup/install_usb_dashboard_link.sh` | Environment checks and USB dashboard link installation |

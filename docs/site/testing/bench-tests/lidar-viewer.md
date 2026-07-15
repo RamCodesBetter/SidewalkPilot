@@ -10,7 +10,7 @@ The LiDAR viewer checks whether the FHL-LD19 is streaming plausible distances be
 
 ## Command
 
-Stop the car service first so two readers don't fight over the port, then run on the Pi 5:
+Stop the car service first so two readers don't fight over the port, then run on the Raspberry Pi 5:
 
 ```bash
 sudo systemctl stop sidewalkpilot-rpi-car.service

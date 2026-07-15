@@ -11,7 +11,7 @@ edge heuristics. Its masks and edge fits can be disrupted by dark seams or stron
 interior lines. That explains the fallback's mechanism, but it does not explain a
 neural model failure.
 
-Series 3/4 uses the learned ONNX model on Jon. Its response depends on training
+Series 3/4 uses the learned ONNX model on Jetson Orin Nano. Its response depends on training
 coverage and learned features, and it does not expose a calibrated confidence for
 surface familiarity. A fresh neural result is normally reported with confidence
 `1.0`; the runtime will not necessarily stop merely because the pavement is

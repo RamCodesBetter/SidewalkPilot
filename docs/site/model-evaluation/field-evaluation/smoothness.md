@@ -15,7 +15,7 @@ For a time-aligned clip and CSV interval, record:
 - Vehicle speed and manual takeover; and
 - The same statistics with and without an explicitly stated smoothing rule.
 
-The Series 3/4 runtime applies an exponential moving average to completed Jon steering
+The Series 3/4 runtime applies an exponential moving average to completed Jetson Orin Nano steering
 results with `STEERING_SMOOTH_ALPHA = 0.45`. The clip analyzer can replay a Series 3 clip
 with a matching alpha, but it does not reproduce IMU correction, actuator mechanics, or the
 full closed-loop trajectory.

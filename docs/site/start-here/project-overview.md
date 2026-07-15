@@ -6,11 +6,11 @@ The project is deliberately split into three computers so each has a clear respo
 
 | Manager | Hardware | Responsibility |
 |---|---|---|
+| AI Model Manager | Jetson Orin Nano | Receives the newest camera frame, runs ONNX inference, returns a steering result |
 | Major System Manager | Raspberry Pi 5 | Controller input, camera, LiDAR, GPS, motor PWM, steering servo, logs, safety arbitration |
-| AI Model Manager | NVIDIA Jetson Orin Nano | Receives the newest camera frame, runs ONNX inference, returns a steering result |
-| Display System Manager | Raspberry Pi Zero 2 W | Receives USB-network telemetry and renders the Waveshare 64x32 HUB75 dashboard |
+| Display System Manager | Zero 2 W | Receives USB-network telemetry and renders the Waveshare 64x32 HUB75 dashboard |
 
-The Raspberry Pi remains authoritative. The Jetson proposes steering; it does not directly operate the servo. The Zero 2 W observes the system; it does not control motion.
+The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano proposes steering; it does not directly operate the servo. The Zero 2 W observes the system; it does not control motion.
 
 ## Runtime Architecture
 
@@ -18,13 +18,13 @@ The control path is:
 
 ```text
 Xbox controller ----------------------------+
-Pi Camera -> Raspberry Pi -> Jetson model --+--> arbitration -> servo and motors
+Raspberry Pi Camera -> Raspberry Pi -> Jetson Orin Nano model --+--> arbitration -> servo and motors
 LiDAR --------------------------------------+         |
 GPS and hall sensor ------------------------+         +--> logs and photos
                                                       +--> Zero 2 W dashboard
 ```
 
-Manual input is sampled in the Raspberry Pi loop. Camera transmission and Jetson inference run in a background worker, so normal connection waits to an offline Jetson are not performed in the controller loop. LiDAR has its own reader and decision path. Dashboard transmission is also asynchronous. This reduces coupling but is not a formal worst-case latency guarantee.
+Manual input is sampled in the Raspberry Pi 5 loop. Camera transmission and Jetson Orin Nano inference run in a background worker, so normal connection waits to an offline Jetson Orin Nano are not performed in the controller loop. LiDAR has its own reader and decision path. Dashboard transmission is also asynchronous. This reduces coupling but is not a formal worst-case latency guarantee.
 
 See [Runtime Loop](../runtime-code/runtime-loop.md) and [Data Flow](../autonomy-stack/architecture/data-flow.md) for exact timing and ownership.
 
@@ -58,7 +58,7 @@ The AEB toggle controls all LiDAR slowdown and braking. When AEB is off, LiDAR d
 
 Driving sessions save camera images with logical `0..180` steering labels and absolute physical throttle fractions. The trainer sorts the images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets. Series 3/4 apply lighting, color, flip, and synthetic-shadow augmentation, then evaluate exact steering classes, adjacent classes, error magnitude, and signed bias.
 
-Series 3 and 4 use the same **81,237 real labeled images** and split procedure. The generated report adapts all four architecture families and scores all 46 checkpoints on a common 6,952-frame challenge subset. Series 1-3 model repositories and the datasets are published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat); Series 4 publication waits for field results. Training runs are recorded through [Weights & Biases](https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot).
+Series 3 and 4 use the same **81,237 real labeled images** and split procedure. The generated report adapts all four architecture families and scores all 46 checkpoints on a common 6,952-frame challenge subset. Series 1-3 model repositories and the datasets are published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat); Series 4 publication waits for field results. Training runs are recorded in the project's configured experiment tracker.
 
 ## Physical Hardware
 
@@ -80,7 +80,7 @@ The detailed component map is in [System at a Glance](system-at-a-glance.md).
 
 | Path | Purpose |
 |---|---|
-| `code/controller/current/` | Live Raspberry Pi, Jetson, and Zero 2 W runtime |
+| `code/controller/current/` | Live Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W runtime |
 | `code/controller/current/rc_car_app/` | Runtime modules for config, hardware, LiDAR, navigation, telemetry, and vision |
 | `code/ai_models_datasets/` | Series-specific trainers, metadata, and local datasets |
 | `code/ai_models/` | Local/Hugging Face PTH and ONNX artifacts; binaries are ignored by Git |
@@ -94,7 +94,7 @@ The detailed component map is in [System at a Glance](system-at-a-glance.md).
 
 - Camera-based steering on the physical car during supervised field runs.
 - Manual takeover and shutdown through the Xbox controller.
-- Model selection, camera capture, label collection, and Jetson inference.
+- Model selection, camera capture, label collection, and Jetson Orin Nano inference.
 - LiDAR slowdown and emergency braking in the center corridor.
 - GPS route-planning software and a live external dashboard.
 

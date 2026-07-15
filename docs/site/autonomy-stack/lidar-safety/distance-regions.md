@@ -7,7 +7,7 @@ The LiDAR policy evaluates only points in the car-relative center corridor: `for
 | No point or `>= 1.65 m` | Normal | 100% reference |
 | `1.65 m` down to `1.25 m` | Slow | Linear 100% to 60% reference |
 | `1.25 m` down to `1.05 m` | Creep/hold | 60% reference |
-| `<= 1.05 m` | Emergency brake | Zero throttle + hard brake |
+| `<= 1.05 m` | Emergency brake | zero throttle + hard brake |
 
 ## Reference and Physical Throttle
 

@@ -6,16 +6,16 @@ and transport run in a latest-payload worker rather than directly in the control
 
 ## Hazard
 
-The dashboard link (Pi 5 `192.168.10.1` to Zero 2 W `192.168.10.2` over USB Ethernet,
+The dashboard link (Raspberry Pi 5 `192.168.10.1` to Zero 2 W `192.168.10.2` over USB Ethernet,
 UDP port 8765) can drop because of a cable, power, interface, or neighbor-resolution
 failure. The architecture keeps this observability path outside routine actuator arbitration.
 
 ## Detection
 
-- **Pi side:** `AsyncDashboardSender` accepts the newest state snapshot immediately and
+- **Raspberry Pi 5 side:** `AsyncDashboardSender` accepts the newest state snapshot immediately and
   calls `Hub75DashboardSender` from its worker thread. `sendto()` failures are caught and
   logged. Sends are throttled to `HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1`.
-- **Zero side:** the receiver renders `NO LINK` when it is alive but has not received a
+- **Zero 2 W side:** the receiver renders `NO LINK` when it is alive but has not received a
   packet recently, so a dropped link is visible on the panel.
 - **USB link health** is checked with `ip -br addr show usb0`, `cat
   /sys/class/net/usb0/carrier`, `ip neigh show dev usb0`, and a ping both ways.
@@ -27,7 +27,7 @@ does not intentionally change a motion command. Recovery is by the USB keeper/re
 (`code/test_files/setup/install_usb_dashboard_link.sh`), not by anything in the driving loop.
 
 Linked shutdown is preserved: when the controller quits, it calls
-`dashboard_sender.send_shutdown()` so the Zero receiver is told to stop; the sender
+`dashboard_sender.send_shutdown()` so the Zero 2 W receiver is told to stop; the sender
 also advertises an idle-exit window (`HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0`).
 
 ## Stop condition and who triggers it
@@ -48,7 +48,7 @@ or process-isolation guarantee.
 
 ## Series 3 note
 
-Series 3 does not touch the dashboard link; telemetry is a Pi/Zero concern unrelated to
+Series 3 does not touch the dashboard link; telemetry is a Raspberry Pi 5/Zero 2 W concern unrelated to
 where the steering model runs.
 
 ## Related pages

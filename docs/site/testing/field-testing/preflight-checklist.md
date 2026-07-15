@@ -4,7 +4,7 @@ The preflight checklist is the fixed set of checks I run before every autonomous
 
 ## Procedure
 
-Run on the Pi 5 from `code/controller/current`. The checklist maps directly to the subsystems `runtime.py` starts.
+Run on the Raspberry Pi 5 from `code/controller/current`. The checklist maps directly to the subsystems `runtime.py` starts.
 
 ### 1. Power and controller
 
@@ -14,18 +14,18 @@ Run on the Pi 5 from `code/controller/current`. The checklist maps directly to t
 
 ### 2. Sensors reporting
 
-- **Camera/model:** Pi Camera Module 3 Wide via Picamera2 opens and the selected model returns fresh results. Local analysis uses a 0.75-second frame guard; Series 3/4 require a matching Jetson result no more than 0.25 seconds old.
+- **Camera/model:** Raspberry Pi Camera Module 3 Wide via Picamera2 opens and the selected model returns fresh results. Local analysis uses a 0.75-second frame guard; Series 3/4 require a matching Jetson Orin Nano result no more than 0.25 seconds old.
 - **LiDAR (FHL-LD19):** motor spinning, points arriving. If disconnected the runtime keeps retrying and reports `NONE`/zero points; do not start an autonomous run with no LiDAR (AEB is your safety net). Baud `230400`; the runtime prefers the CP2102 by-id path and normally falls back to `/dev/ttyUSB0` (formerly GPIO UART `/dev/ttyAMA2`).
 - **GPS (BN880) on `/dev/ttyAMA0`, 9600:** only required if the route uses GPS navigation segments; a fix is needed before an `AUTO`/`MNUL` A* route.
 - **Hall sensor (GPIO24):** pulses when a wheel turns, so speed and cruise control read non-zero.
 
 ### 3. Dashboard link
 
-- Zero 2 W dashboard shows telemetry, not `NO LINK`. USB Ethernet: Pi `192.168.10.1`, Zero `192.168.10.2`, UDP `8765`. This is how I watch drive mode, AEB state, and steering while the car drives away from me.
+- Zero 2 W dashboard shows telemetry, not `NO LINK`. USB Ethernet: Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, UDP `8765`. This is how I watch drive mode, AEB state, and steering while the car drives away from me.
 
 ### 4. Model and safety arming
 
-- Launch with the intended version: run `car`, then select `<version>` on the dashboard model page (e.g. `car` followed by dashboard model selection). Series 3 versions resolve on Jon.
+- Launch with the intended version: run `car`, then select `<version>` on the dashboard model page (e.g. `car` followed by dashboard model selection). Series 3 versions resolve on Jetson Orin Nano.
 - Confirm the model actually loaded (dashboard model page / startup log), not a silent fallback.
 - **AEB armed:** confirm `AEB:ON` on the dashboard (toggle is button `14`). AEB limits throttle in the governed center range and applies a hard brake at the emergency distance; it never steers.
 - Gear starts in `P`; shift to `D` only when you're ready to drive.

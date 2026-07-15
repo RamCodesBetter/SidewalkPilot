@@ -11,7 +11,7 @@ QAT would only be justified after a reproducible post-training quantization expe
 ## Evidence Required Before Adoption
 
 1. A fixed FP32 ONNX baseline.
-2. A documented calibrated INT8 baseline on Jon.
+2. A documented calibrated INT8 baseline on Jetson Orin Nano.
 3. An identical held-out evaluation for FP32, PTQ, and QAT.
 4. Latency, memory, and power measurements.
 5. Field retests for turns and harsh shadows.

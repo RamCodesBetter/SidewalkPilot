@@ -17,21 +17,21 @@ The Raspberry Pi 5 controller is a 60 Hz arbitration loop owned by `run()` in `c
 
 | Work | Owner | Main-loop behavior |
 |---|---|---|
-| Pi camera capture | `WebcamVisionProcessor` thread | Copy latest BGR frame |
+| Raspberry Pi 5 camera capture | `WebcamVisionProcessor` thread | Copy latest BGR frame |
 | Photo JPEG writes | Camera save worker | Queue frame or report queue full |
 | LiDAR USB-serial parsing | `LidarParser` thread | Read latest scan |
 | GPS UART parsing | `GpsReader` thread | Read latest fix |
 | IMU serial parsing | `ImuReader` thread | Read latest yaw rate |
-| Jetson TCP/JPEG/inference | `AsyncJetsonSteeringClient` thread | Submit latest frame and read fresh cached result |
+| Jetson Orin Nano TCP/JPEG/inference | `AsyncJetsonSteeringClient` thread | Submit latest frame and read fresh cached result |
 | Dashboard UDP/JSON | `AsyncDashboardSender` thread | Replace pending payload with newest state |
 | Influx telemetry | `InfluxLogger` worker | Queue measurement |
 | Interruption clip encoding | Recorder worker | Queue captured JPEGs |
 
-Both Jetson and dashboard workers are **latest-value** boundaries. If consumption is slower than capture, old pending work is replaced instead of building an increasingly stale queue.
+Both Jetson Orin Nano and dashboard workers are **latest-value** boundaries. If consumption is slower than capture, old pending work is replaced instead of building an increasingly stale queue.
 
-## Offline Jetson Behavior
+## Offline Jetson Orin Nano Behavior
 
-Jon uses `10.42.0.2:8770`. A failed TCP connect can consume the complete `0.4 s` socket timeout, but that wait occurs only in `AsyncJetsonSteeringClient`. Manual steering and dashboard updates continue while Jon is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.
+Jetson Orin Nano uses `10.42.0.2:8770`. A failed TCP connect can consume the complete `0.4 s` socket timeout, but that wait occurs only in `AsyncJetsonSteeringClient`. Manual steering and dashboard updates continue while Jetson Orin Nano is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.
 
 `JETSON_RESULT_MAX_AGE_SEC` is `0.25 s`. A result older than that is unavailable for control even if it remains in the cache.
 
@@ -43,12 +43,12 @@ The runtime emits:
 [loop-stall] control loop paused 412ms (auto=0)
 ```
 
-for pauses at or above 100 ms, rate-limited to one message per second. A repeating message with Jon off indicates a regression: network I/O has reached the control thread again. Camera, LiDAR, dashboard, and servo updates pausing together is also evidence of a main-loop stall rather than Bluetooth latency.
+for pauses at or above 100 ms, rate-limited to one message per second. A repeating message with Jetson Orin Nano off indicates a regression: network I/O has reached the control thread again. Camera, LiDAR, dashboard, and servo updates pausing together is also evidence of a main-loop stall rather than Bluetooth latency.
 
 ## Bench Check
 
 1. Keep the wheels clear of the ground.
-2. Power the Pi 5 and Zero 2 W, but leave Jon off.
+2. Power the Raspberry Pi 5 and Zero 2 W, but leave Jetson Orin Nano off.
 3. Start the controller service and move the steering stick continuously.
 4. Change dashboard pages while watching the camera/LiDAR pages.
 5. Confirm servo and display motion stay smooth and `journalctl` has no repeating loop-stall pattern.

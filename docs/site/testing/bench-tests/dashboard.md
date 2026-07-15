@@ -1,6 +1,6 @@
 # Dashboard Bench Test
 
-The current dashboard is one Waveshare 64x32 HUB75 panel driven by the Raspberry Pi Zero 2 W. The earlier MAX7219 panel is no longer part of the live display.
+The current dashboard is one Waveshare 64x32 HUB75 panel driven by the Zero 2 W. The earlier MAX7219 panel is no longer part of the live display.
 
 ## Direct Panel Test
 
@@ -16,9 +16,9 @@ python3 code/test_files/display/display_panel_test.py --glyph-set digits
 ## Full Link Test
 
 1. Confirm `usb0` is up on both computers.
-2. Confirm Pi `192.168.10.1` can ping Zero `192.168.10.2`.
-3. Start the Zero dashboard service or `dash` alias.
-4. Start `car` on the Pi.
+2. Confirm Raspberry Pi 5 `192.168.10.1` can ping Zero 2 W `192.168.10.2`.
+3. Start the Zero 2 W dashboard service or `dash` alias.
+4. Start `car` on the Raspberry Pi 5.
 5. Confirm live values replace `NO LINK` and update without freezing.
 
 ## Interpretation

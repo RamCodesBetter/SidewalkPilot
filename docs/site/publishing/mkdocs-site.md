@@ -44,7 +44,7 @@ Before a build is treated as publishable, check:
 
 1. **Accuracy** - facts on the page match the actual source code, config, and current model
    versions; v3.3/v3.3b are recorded as field regressions, Series 4 is marked as
-   not yet field-tested, and Jetson quantization is documented as future work.
+   not yet field-tested, and Jetson Orin Nano quantization is documented as future work.
 2. **Privacy** - no private IPs, hostnames, addresses, or unreviewed media leaked into a
    public page.
 3. **Links** - internal links resolve after `mkdocs build`, and external references (models,

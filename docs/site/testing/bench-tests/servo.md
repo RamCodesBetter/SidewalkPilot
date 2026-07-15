@@ -10,7 +10,7 @@ The servo bench test is the lowest-level steering check: does the PCA9685 actual
 
 ## Command
 
-Run on the Pi 5, wheels off the ground:
+Run on the Raspberry Pi 5, wheels off the ground:
 
 ```bash
 python3 code/test_files/steering/pca9685_servo_test.py

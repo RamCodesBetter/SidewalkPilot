@@ -23,7 +23,7 @@ A disconnect currently fails *open* with respect to AEB rather than phantom-stop
 Follow the hardware playbook, not guesswork: stop the car service so there is only one reader, then confirm the port and raw bytes.
 
 ```bash
-# Pi 5
+# Raspberry Pi 5
 sudo systemctl stop sidewalkpilot-rpi-car.service
 stty -F /dev/ttyUSB0 230400 raw -echo
 timeout 5s cat /dev/ttyUSB0 | hexdump -C
@@ -33,7 +33,7 @@ Check enumeration, cable/port, exclusive ownership of the serial device, and bau
 
 ## Test setup
 
-- **Setup:** Pi 5 controller, FHL-LD19 on `/dev/ttyUSB0` (CP2102), branch `lidar-aeb-v2`.
+- **Setup:** Raspberry Pi 5 controller, FHL-LD19 on `/dev/ttyUSB0` (CP2102), branch `lidar-aeb-v2`.
 - **Procedure:** run the car, then physically unplug/replug the LiDAR USB mid-run and watch the log for the reconnect messages and the dashboard LiDAR field.
 - **Pass/warn/fail for reconnect behavior:** pass = the worker reports loss, the dashboard indicates missing data, and the stream reconnects without an observed controller-loop pause; warn = delayed reconnect; fail = crash or sustained controller-loop pause. This test does not make fail-open motion safe.
 - **Evidence to attach (planned):** runtime log showing `mark_fault`/reconnect, dashboard capture of the LiDAR field, `hexdump` of raw bytes after replug.

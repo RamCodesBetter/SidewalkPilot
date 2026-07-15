@@ -10,8 +10,8 @@ The flags are read at import time and consumed by `hardware.py` (which periphera
 |---|---|---|
 | `ENABLE_HALL_SENSOR` | `True` | Bring up the GPIO 24 hall sensor for speed/odometry |
 | `ENABLE_WEBCAM_VISION` | `True` | Enable the camera-to-steering vision path |
-| `USE_PI_CAMERA` | `True` | Use the Pi Camera Module (via Picamera2) rather than a USB webcam |
-| `PI_CAMERA_NUM` | `0` | Which Pi camera to open |
+| `USE_PI_CAMERA` | `True` | Use the Raspberry Pi Camera Module (via Picamera2) rather than a USB webcam |
+| `PI_CAMERA_NUM` | `0` | Which Raspberry Pi 5 camera to open |
 | `PI_CAMERA_ROTATE_180` | `True` | Rotate the frame 180 deg (camera is mounted inverted) |
 
 A second block contains current and legacy autonomy constants. Presence in `config.py` does

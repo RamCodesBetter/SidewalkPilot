@@ -46,7 +46,7 @@ preprocessing is a faithful mirror of the training preprocessing, with the fewes
 moving parts. Any lighting-robustness experiment (see the CLAHE page) becomes an
 explicit per-version opt-in instead of a silent global change, which keeps model
 comparisons honest. Skipping the extra HSV/CLAHE round-trip also keeps this path the
-cheapest per frame, which matters on the Pi's CPU.
+cheapest per frame, which matters on the Raspberry Pi 5's CPU.
 
 ## Failure symptom
 

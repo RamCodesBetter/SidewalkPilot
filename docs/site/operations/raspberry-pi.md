@@ -13,7 +13,7 @@ The Raspberry Pi 5 owns camera capture, controller input, sensor reads, final sa
 | LiDAR | LD19 through CP2102 USB serial, normally `/dev/ttyUSB0`, 230400 baud |
 | GPS | BN880 serial data on `/dev/ttyAMA0`, 9600 baud |
 | Dashboard | UDP `192.168.10.2:8765` over the dedicated `usb0` link |
-| Jon | Direct Ethernet to `10.42.0.2:8770` |
+| Jetson Orin Nano | Direct Ethernet to `10.42.0.2:8770` |
 
 ## Start
 
@@ -28,6 +28,6 @@ car
 
 ## Verify
 
-Check the startup log for joystick, PCA9685/GPIO, LiDAR, GPS, camera, Jon, and dashboard status. A missing optional sensor may not stop manual control, but it changes what can be tested safely; record the degraded state rather than treating the run as fully representative.
+Check the startup log for joystick, PCA9685/GPIO, LiDAR, GPS, camera, Jetson Orin Nano, and dashboard status. A missing optional sensor may not stop manual control, but it changes what can be tested safely; record the degraded state rather than treating the run as fully representative.
 
-The Pi keeps local manual control responsive while camera transmission and Jon inference run asynchronously. It accepts only fresh results for the currently selected model.
+The Raspberry Pi 5 keeps local manual control responsive while camera transmission and Jetson Orin Nano inference run asynchronously. It accepts only fresh results for the currently selected model.

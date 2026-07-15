@@ -12,16 +12,16 @@ Line numbers are omitted because they become stale after normal refactors. Searc
 | `cycle_steering_model` | `rc_car_app/runtime.py` | Dashboard-driven model selection |
 | `Hardware` | `rc_car_app/hardware.py` | GPIO/PWM/PCA9685/hall ownership |
 | `PCA9685SteeringServo` | `rc_car_app/hardware.py` | Servo pulse output |
-| `WebcamVisionProcessor` | `rc_car_app/vision.py` | Camera capture and Pi-side inference interface |
-| `JetsonSteeringClient` | `rc_car_app/vision.py` | Background latest-frame Jon client |
+| `WebcamVisionProcessor` | `rc_car_app/vision.py` | Camera capture and Raspberry Pi 5 inference interface |
+| `JetsonSteeringClient` | `rc_car_app/vision.py` | Background latest-frame Jetson Orin Nano client |
 | `resolve_steering_model_path` | `rc_car_app/vision.py` | Early-model local artifact resolution |
 | `SteeringInferenceServer` | `rc_car_app/jetson_inference_server.py` | ONNX loading, invocation, and decode |
 | `LidarParser` | `rc_car_app/lidar.py` | FHL-LD19 packet parsing |
 | `decide_lidar_action` | `rc_car_app/lidar_avoidance.py` | Center-corridor slowdown/hold/emergency decision |
 | `NavigationManager` | `rc_car_app/navigation.py` | Route/navigation state |
 | `GpsReader` | `rc_car_app/navigation.py` | Background NMEA input |
-| `Hub75DashboardSender` | `rc_car_app/hub75_dashboard.py` | Pi-side telemetry transport |
-| `DashboardRenderer` | `z2w_dashboard.py` | Zero-side HUB75 rendering |
+| `Hub75DashboardSender` | `rc_car_app/hub75_dashboard.py` | Raspberry Pi 5 telemetry transport |
+| `DashboardRenderer` | `z2w_dashboard.py` | Zero 2 W HUB75 rendering |
 
 ## Training and Evaluation
 

@@ -34,7 +34,7 @@ The field report lacks exact route/time/weather/video/takeover metadata, and eac
 
 ## Series 4 Release State
 
-The six Series 4 artifacts are trained, exported, included in the common evaluator, and supported by the live Jetson code. They are not yet field-tested and no public `SidewalkPilot-v4.0*` model repository exists. Do not publish a Series 4 card that implies field selection. When release review begins, each card must document its PC/CF/PCF contract, ONNX inputs, horizon shape, causal-history behavior, and the common 6,952-frame metrics.
+The six Series 4 artifacts are trained, exported, included in the common evaluator, and supported by the live Jetson Orin Nano code. They are not yet field-tested and no public `SidewalkPilot-v4.0*` model repository exists. Do not publish a Series 4 card that implies field selection. When release review begins, each card must document its PC/CF/PCF contract, ONNX inputs, horizon shape, causal-history behavior, and the common 6,952-frame metrics.
 
 ## Authentication and Upload
 

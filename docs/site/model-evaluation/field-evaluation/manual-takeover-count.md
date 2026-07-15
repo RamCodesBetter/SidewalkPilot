@@ -6,7 +6,7 @@ and exposure time are preserved.
 
 ## How it works
 
-When the controller is connected and the Pi loop is responsive, qualifying steering input,
+When the controller is connected and the Raspberry Pi 5 loop is responsive, qualifying steering input,
 gas above the runtime threshold, or brake input calls `cancel_autonomous_mode(...)` on a
 processed control iteration. The CSV records autonomous state and intervention fields. A
 mid-route `On` to `Off` transition can therefore be reviewed with nearby telemetry and the

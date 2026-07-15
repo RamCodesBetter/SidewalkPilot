@@ -1,6 +1,6 @@
 # Camera Steering Overview
 
-The Pi captures a forward frame and submits the newest image through a background worker. Jon runs the selected ONNX model and returns steering plus class probabilities. The Pi rejects stale output, applies smoothing, calibration, and safety policy, and remains the only computer that writes the steering servo.
+The Raspberry Pi 5 captures a forward frame and submits the newest image through a background worker. Jetson Orin Nano runs the selected ONNX model and returns steering plus class probabilities. The Raspberry Pi 5 rejects stale output, applies smoothing, calibration, and safety policy, and remains the only computer that writes the steering servo.
 
 ## Model Contracts
 
@@ -11,8 +11,8 @@ The Pi captures a forward frame and submits the newest image through a backgroun
 
 ## Failure Boundary
 
-Normal Jetson connection and inference waits occur in the worker rather than the manual-control loop. A missing, invalid, or stale prediction is not accepted as fresh steering. Manual input and LiDAR braking remain outside the learned model. No formal worst-case scheduling guarantee is claimed.
+Normal Jetson Orin Nano connection and inference waits occur in the worker rather than the manual-control loop. A missing, invalid, or stale prediction is not accepted as fresh steering. Manual input and LiDAR braking remain outside the learned model. No formal worst-case scheduling guarantee is claimed.
 
 v3.4 is the field-selected baseline. All six Series 4 models are runtime-supported but await physical comparison.
 
-See [Jetson Inference Link](jetson-inference-link.md), [Servo Output](servo-output.md), and [Model Choices](../../runtime-code/vision/model-choices.md).
+See [Jetson Orin Nano Inference Link](jetson-inference-link.md), [Servo Output](servo-output.md), and [Model Choices](../../runtime-code/vision/model-choices.md).

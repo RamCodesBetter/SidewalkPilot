@@ -52,7 +52,7 @@ nav:
       - Model Inference: autonomy-stack/camera-steering/model-inference.md
       - Servo Output: autonomy-stack/camera-steering/servo-output.md
       - Series Differences: autonomy-stack/camera-steering/series-differences.md
-      - Jetson Inference Link: autonomy-stack/camera-steering/jetson-inference-link.md
+      - Jetson Orin Nano Inference Link: autonomy-stack/camera-steering/jetson-inference-link.md
       - Yaw-Rate PID Steering: autonomy-stack/camera-steering/yaw-rate-pid.md
       - Temporal Smoothing: autonomy-stack/camera-steering/temporal-smoothing.md
       - Steering Hysteresis: autonomy-stack/camera-steering/steering-hysteresis.md
@@ -94,7 +94,7 @@ nav:
       - Correction JSON As Label Source: engineering-process/design-decisions/correction-json-as-label-source.md
       - CARLA Weighting: engineering-process/design-decisions/carla-weighting.md
       - B Checkpoints: engineering-process/design-decisions/b-checkpoints.md
-      - Pi 5 + Jetson Compute Split: engineering-process/design-decisions/pi-plus-jetson-compute-split.md
+      - Jetson Orin Nano + Raspberry Pi 5 Compute Split: engineering-process/design-decisions/pi-plus-jetson-compute-split.md
       - Motor Imbalance vs Steering Trim: engineering-process/design-decisions/motor-imbalance-vs-steering-trim.md
       - Hybrid Head vs Regression: engineering-process/design-decisions/hybrid-head-vs-regression.md
     - Iteration Records:
@@ -216,7 +216,7 @@ nav:
       - INT8 PTQ: ai-and-models/deployment/int8-ptq.md
       - QAT: ai-and-models/deployment/qat.md
       - TensorRT: ai-and-models/deployment/tensorrt.md
-      - Jetson Runtime: ai-and-models/deployment/jetson-runtime.md
+      - Jetson Orin Nano Runtime: ai-and-models/deployment/jetson-runtime.md
   - Model Evaluation:
     - Offline Evaluation:
       - Overview: model-evaluation/offline-evaluation/overview.md
@@ -395,5 +395,5 @@ nav:
     - Retraining: roadmap/retraining.md
     - Sensor Fusion: roadmap/sensor-fusion.md
     - Reproducibility: roadmap/reproducibility.md
-    - Jetson Quantization: roadmap/jetson-quantization.md
+    - Jetson Orin Nano Quantization: roadmap/jetson-quantization.md
     - Turn-In-Shadow Collection: roadmap/turn-in-shadow-collection.md

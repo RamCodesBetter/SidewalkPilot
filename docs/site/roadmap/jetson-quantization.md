@@ -1,11 +1,11 @@
-# Jetson Quantization
+# Jetson Orin Nano Quantization
 
-Quantization is an optional future experiment, not part of the current vehicle deployment. The live Jetson path runs FP32 ONNX models through ONNX Runtime with CUDA.
+Quantization is an optional future experiment, not part of the current vehicle deployment. The live Jetson Orin Nano path runs FP32 ONNX models through ONNX Runtime with CUDA.
 
 ## Current Status
 
 - Series 3 and Series 4 trainers export FP32 ONNX artifacts.
-- Jon currently uses `CUDAExecutionProvider`, with CPU as a compatibility fallback.
+- Jetson Orin Nano currently uses `CUDAExecutionProvider`, with CPU as a compatibility fallback.
 - No FP16 or INT8 engine has been accepted through offline evaluation and a field retest.
 - The former calibrated TensorRT builder described by older notes is not in the current repository.
 - The Series 3 trainer still has an optional `--build-tensorrt` wrapper around `trtexec`, but that flag is not the live deployment recipe and does not supply a calibration dataset by itself.
@@ -14,8 +14,8 @@ Quantization is an optional future experiment, not part of the current vehicle d
 
 If ONNX Runtime later becomes a measured bottleneck, test precision in this order:
 
-1. Record the FP32 ONNX baseline on Jon: model, provider, latency distribution, memory, power mode, and offline metrics.
-2. Build an FP16 TensorRT engine on the target Jetson.
+1. Record the FP32 ONNX baseline on Jetson Orin Nano: model, provider, latency distribution, memory, power mode, and offline metrics.
+2. Build an FP16 TensorRT engine on the target Jetson Orin Nano.
 3. Re-run the same evaluator and a controlled field test.
 4. Consider calibrated INT8 only if FP16 is still insufficient.
 

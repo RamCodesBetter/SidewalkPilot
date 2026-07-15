@@ -8,7 +8,7 @@ In recorded operator observations, some earlier models held open concrete and th
 
 ## Suspected cause
 
-The classic fallback estimator in `code/controller/current/rc_car_app/vision.py` illustrates one possible mechanism: `estimate_path_bias_from_frame` builds a neutral-gray, low-color-spread, lit mask (`chroma < 18`, `bgr_spread < 55`, `gray > 45`). A hard shadow can remove concrete pixels from that mask. The current Series 3/4 path uses the Jon neural result rather than that heuristic, so this example does not prove what the neural model learned.
+The classic fallback estimator in `code/controller/current/rc_car_app/vision.py` illustrates one possible mechanism: `estimate_path_bias_from_frame` builds a neutral-gray, low-color-spread, lit mask (`chroma < 18`, `bgr_spread < 55`, `gray > 45`). A hard shadow can remove concrete pixels from that mask. The current Series 3/4 path uses the Jetson Orin Nano neural result rather than that heuristic, so this example does not prove what the neural model learned.
 
 The field observation is a **turn-vs-shadow tradeoff**: some turn-eager checkpoints also chased shadow edges, while more center-biased behavior could miss turns. Targeted real turn-in-shadow footage is the most direct next data experiment. The existing evidence does not prove that augmentation can never solve the problem or that one collection run guarantees a fix.
 
@@ -20,7 +20,7 @@ The field observation is a **turn-vs-shadow tradeoff**: some turn-eager checkpoi
 
 ## Test setup
 
-- **Setup:** Pi 5 controller, Pi Camera Module 3 Wide, bright direct sun; branch `lidar-aeb-v2`.
+- **Setup:** Raspberry Pi 5 controller, Raspberry Pi Camera Module 3 Wide, bright direct sun; branch `lidar-aeb-v2`.
 - **Procedure:** drive a known sidewalk stretch that has a strong diagonal tree/fence shadow; run `car`, then select `<version>` on the dashboard model page.
 - **Pass/warn/fail:** pass = holds true edge through the shadow; warn = visible wobble but recovers; fail = tracks the shadow and needs manual takeover.
 - **Evidence to attach (planned):** runtime CSV log, on-sidewalk video of the shadow stretch, manual-takeover count, model version.

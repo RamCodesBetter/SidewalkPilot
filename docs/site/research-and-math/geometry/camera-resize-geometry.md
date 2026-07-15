@@ -1,12 +1,12 @@
 # Camera Resize Geometry
 
-Every steering model sees a small, fixed-size image, but the RPi Camera Module 3 Wide captures a large one. Camera resize geometry is the deterministic step that maps the full camera frame down to the exact tensor shape a model was trained on. If the resize at inference time does not match the resize used in training, the model's learned geometry no longer lines up with the pixels it is given, so this is a correctness step, not just a convenience.
+Every steering model sees a small, fixed-size image, but the Raspberry Pi Camera Module 3 Wide captures a large one. Camera resize geometry is the deterministic step that maps the full camera frame down to the exact tensor shape a model was trained on. If the resize at inference time does not match the resize used in training, the model's learned geometry no longer lines up with the pixels it is given, so this is a correctness step, not just a convenience.
 
 ## How it works
 
 The camera is configured in `vision.py` to `CAMERA_FRAME_WIDTH = 1280` × `CAMERA_FRAME_HEIGHT = 720` in BGR888. `CAMERA_FPS = 30` is a nominal constant; because the current Picamera2 configuration does not pass it as a control, the measured runtime FPS may differ. From there the model families resize differently:
 
-**Series 1/2 (SteeringAutonomyV2, runs on the Pi).** In `preprocess_steering_frame`:
+**Series 1/2 (SteeringAutonomyV2, runs on the Raspberry Pi 5).** In `preprocess_steering_frame`:
 
 ```python
 img = cv2.resize(frame, (STEERING_MODEL_WIDTH, STEERING_MODEL_HEIGHT),
@@ -19,7 +19,7 @@ img = np.transpose(img, (2, 0, 1))               # HWC -> CHW
 - **Input:** a `720 × 1280 × 3` BGR frame (`H × W × C`).
 - **Output:** a `1 × 3 × 66 × 200` float tensor in `[-1, 1]` (`STEERING_MODEL_WIDTH = 200`, `STEERING_MODEL_HEIGHT = 66`).
 
-**Series 3 (SidewalkPilotV3, runs on Jon).** The trainer's `resize_image_uint8` (in `code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py`) resizes to `320 × 180` with the same `cv2.INTER_AREA`, then converts to a tensor — so the Jetson pipeline must resize the Pi's captured frame to `320 × 180` before inference to match training.
+**Series 3 (SidewalkPilotV3, runs on Jetson Orin Nano).** The trainer's `resize_image_uint8` (in `code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py`) resizes to `320 × 180` with the same `cv2.INTER_AREA`, then converts to a tensor — so the Jetson Orin Nano pipeline must resize the Raspberry Pi 5's captured frame to `320 × 180` before inference to match training.
 
 Two geometry details matter:
 
@@ -29,7 +29,7 @@ Two geometry details matter:
 ### Runtime use
 
 - Series 1/2: `preprocess_steering_frame` in `code/controller/current/rc_car_app/vision.py`, called by `WebcamVisionProcessor._estimate_path_bias` before every inference. The model output (0–180° servo angle) is folded to a `[-1, 1]` heading bias.
-- Series 3/4: trainer preprocessing and `jetson_inference_server.py` both use the canonical `320 × 180` geometry. The current Jetson runtime reproduces this resize before ONNX inference.
+- Series 3/4: trainer preprocessing and `jetson_inference_server.py` both use the canonical `320 × 180` geometry. The current Jetson Orin Nano runtime reproduces this resize before ONNX inference.
 
 ## Why this choice
 

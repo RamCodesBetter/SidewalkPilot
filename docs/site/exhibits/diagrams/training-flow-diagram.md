@@ -1,6 +1,6 @@
 # Training Flow Diagram
 
-This page diagrams how a driven photo becomes a trained steering model: from labeled field captures, through the dataset and augmentation pipeline, into the network, and out to a checkpoint that either runs on the Pi (Series 1/2) or on the Jetson (Series 3/4). It is the offline counterpart to the runtime diagrams.
+This page diagrams how a driven photo becomes a trained steering model: from labeled field captures, through the dataset and augmentation pipeline, into the network, and out to a checkpoint that either runs on the Raspberry Pi 5 (Series 1/2) or on the Jetson Orin Nano (Series 3/4). It is the offline counterpart to the runtime diagrams.
 
 ```text
 manual drive
@@ -23,7 +23,7 @@ common offline evaluation -> controlled physical field test -> promotion decisio
 
 ## From Capture to Label
 
-Photos are captured live on the Pi into dated run folders with absolute steering/throttle labels. The published Series 3/4 dataset contains 81,237 labeled real images. Capture count alone is not a quality claim; source, lighting, steering balance, and split integrity remain part of the audit.
+Photos are captured live on the Raspberry Pi 5 into dated run folders with absolute steering/throttle labels. The published Series 3/4 dataset contains 81,237 labeled real images. Capture count alone is not a quality claim; source, lighting, steering balance, and split integrity remain part of the audit.
 
 ## Dataset and augmentation
 
@@ -35,13 +35,13 @@ The trainers live in `code/ai_models_datasets/series_1_and_2/` and `code/ai_mode
 
 ## Network and outputs
 
-- **Series 1/2 - `SteeringAutonomyV2`, ~0.67M params:** a small CNN backbone with a single `tanh` regression head that outputs one steering angle (`90 + scale * tanh`). It can run directly on the Pi.
-- **Series 3 — `SidewalkPilotV3`, 5,534,115 params:** a six-convolution backbone for Jon. Its hybrid head emits 9 steering-class logits, 9 class-local offsets, and 1 throttle value. The runtime selects a class and decodes its local offset into a servo angle.
+- **Series 1/2 - `SteeringAutonomyV2`, ~0.67M params:** a small CNN backbone with a single `tanh` regression head that outputs one steering angle (`90 + scale * tanh`). It can run directly on the Raspberry Pi 5.
+- **Series 3 — `SidewalkPilotV3`, 5,534,115 params:** a six-convolution backbone for Jetson Orin Nano. Its hybrid head emits 9 steering-class logits, 9 class-local offsets, and 1 throttle value. The runtime selects a class and decodes its local offset into a servo angle.
 - **Series 4 — PC, CF, and PCF experiments, about 5.54-5.57M params:** reuse the visual backbone and 18-value steering horizon. Previous targets are causal inputs for PC/PCF; future targets are training supervision for CF/PCF, never runtime inputs.
 
 ## Export and telemetry
 
-Series 3 checkpoints export to ONNX for the Jetson; deploying a new version means adding it to the Pi's `STEERING_MODEL_VERSIONS` and copying the `.onnx` to Jon, which auto-resolves it. Training runs report metrics to Weights & Biases.
+Series 3 checkpoints export to ONNX for the Jetson Orin Nano; deploying a new version means adding it to the Raspberry Pi 5's `STEERING_MODEL_VERSIONS` and copying the `.onnx` to Jetson Orin Nano, which auto-resolves it. Training runs report metrics to Weights & Biases.
 
 ## Key Finding
 

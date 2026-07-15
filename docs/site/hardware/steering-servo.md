@@ -1,6 +1,6 @@
 # Steering Servo
 
-Steering is done by a single servo that turns the Ackermann linkage. The Pi 5 does not
+Steering is done by a single servo that turns the Ackermann linkage. The Raspberry Pi 5 does not
 drive the servo directly; it sends the servo's PWM through a PCA9685 16-channel PWM
 driver over I2C. This is the actuator the steering model ultimately commands.
 
@@ -38,7 +38,7 @@ From `config.py` / `hardware.py`:
 ## Why this choice
 
 - The PCA9685 generates the 50 Hz servo pulse in dedicated hardware and offloads pulse
-  timing from the Pi. This reduces dependence on control-loop timing, but does not remove
+  timing from the Raspberry Pi 5. This reduces dependence on control-loop timing, but does not remove
   power, I2C, calibration, servo, or linkage sources of jitter.
 - Keeping all servo-specific compensation in the mapping layer keeps the logical steering
   labels clean for training and for the dashboard.

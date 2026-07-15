@@ -10,7 +10,7 @@ Version rules keep model, preprocessing, labels, and dataset identity together. 
 | 3 | `SidewalkPilotV3`, 5.53M params | 320x180 | v3.1+ hybrid steering + optional throttle loss | image key, `steering`, `throttle` | shared 81,237-frame dataset |
 | 4 | PC / CF / PCF, 5.54-5.57M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | experimental, trained; field test pending |
 
-Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jon and the larger 320x180 visual backbone. Series 4 shares the 81,237-frame dataset but removes throttle prediction and adds temporal-target experiments.
+Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson Orin Nano and the larger 320x180 visual backbone. Series 4 shares the 81,237-frame dataset but removes throttle prediction and adds temporal-target experiments.
 
 ## The Rules
 

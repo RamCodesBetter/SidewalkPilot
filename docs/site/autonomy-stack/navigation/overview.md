@@ -50,7 +50,7 @@ the current segment should be driven by the model (`AUTO`) or handed to the huma
 | A* + turn penalties | Compute the route over the graph | `astar()` in `navigation.py` |
 | Segment planner | Split path into AI vs manual stretches | `build_segment_plan()` |
 | GPS reader | Localize the car on the graph | `GpsReader` in `navigation.py` |
-| Camera model | Follow the local sidewalk on AI segments | `vision.py` (Series 3 on Jon) |
+| Camera model | Follow the local sidewalk on AI segments | `vision.py` (Series 3 on Jetson Orin Nano) |
 
 ## Related pages
 

@@ -33,7 +33,7 @@ A quick before/after for intuition:
 ## Why this choice
 
 - ELU supplies the nonlinearity needed between learned linear operations and preserves a gradient for negative finite inputs.
-- It is compatible with the project's PyTorch-to-ONNX export and ONNX Runtime CUDA deployment path on Jon.
+- It is compatible with the project's PyTorch-to-ONNX export and ONNX Runtime CUDA deployment path on Jetson Orin Nano.
 - The current evidence shows that models containing ELU train and deploy. It does not show that ELU itself causes smoother steering or better field behavior.
 
 ## Planned / not yet tested

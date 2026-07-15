@@ -57,7 +57,7 @@ camera-confidence hard-stop remain the active stop conditions when LiDAR is down
 
 ## Series 3 note
 
-LiDAR handling is unchanged by Series 3; it runs on the Pi and feeds the same AEB
+LiDAR handling is unchanged by Series 3; it runs on the Raspberry Pi 5 and feeds the same AEB
 arbitration regardless of where the steering model runs.
 
 ## Related pages

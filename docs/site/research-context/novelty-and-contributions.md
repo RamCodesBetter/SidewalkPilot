@@ -36,10 +36,10 @@ future targets are training supervision, not unavailable future inputs at deploy
 The current common-set report ranks `4.0p` highest by Bal9 among the Series 3/4 candidates,
 but that is an offline screening result. It does not replace the ordered physical test.
 
-## 4. Integrated Pi, Jetson, sensors, and dashboard
+## 4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard
 
-**Status: implemented engineering.** The Pi owns controller input, sensors, actuator output,
-logging, and dashboard telemetry. Jon performs Series 3/4 ONNX inference over direct
+**Status: implemented engineering.** The Raspberry Pi 5 owns controller input, sensors, actuator output,
+logging, and dashboard telemetry. Jetson Orin Nano performs Series 3/4 ONNX inference over direct
 Ethernet. The Zero 2 W renders the USB-linked dashboard. Splitting real-time I/O from heavier
 inference is an established systems pattern; the contribution is the working integration
 and debugging record on this vehicle.

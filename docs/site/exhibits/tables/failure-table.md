@@ -35,10 +35,10 @@ LiDAR is a Youyeetoo FHL-LD19 at 230400 baud used for AEB, which arbitrates over
 
 | Failure | Recorded symptom | Supported interpretation | Response / status |
 |---|---|---|---|
-| `NO LINK` on display | Zero receiver alive but no recent packets | USB Ethernet ARP/carrier issue or car not sending | Check `usb0` carrier + ping both ways; keeper service recovers ARP |
+| `NO LINK` on display | Zero 2 W receiver alive but no recent packets | USB Ethernet ARP/carrier issue or car not sending | Check `usb0` carrier + ping both ways; keeper service recovers ARP |
 | Carrier up but ping fails | `carrier=1`, ping/ARP still fail | Stale ARP on the USB gadget link | Restart keeper / run the documented USB hard reset |
 | Wrong dashboard page rendered | Display shows the wrong page/field | A page/constant hardcoded as a literal in the packet serializer | Thread the constant through ALL layers (runtime -> `hub75_dashboard.py` -> `z2w_dashboard.py`); import, don't hardcode |
-| USB enumerate fail (-110 / -62) | Zero will not enumerate over USB | The recorded failures were consistent with power/USB-link instability; the error code alone does not prove one cause | Use the working USB port and known power arrangement, then verify enumeration, carrier, ARP, and ping in order |
+| USB enumerate fail (-110 / -62) | Zero 2 W will not enumerate over USB | The recorded failures were consistent with power/USB-link instability; the error code alone does not prove one cause | Use the working USB port and known power arrangement, then verify enumeration, carrier, ARP, and ping in order |
 
 The "wrong page" case is a documented incident that cost ~2.5 hours: the real cause was a hardcoded literal in the serializer, found only by grepping the constant across every file. The lesson recorded here is to grep the value across all layers first, and prove rather than assume.
 

@@ -13,7 +13,7 @@ All paths below are relative to `code/test_files/` and include their subsystem f
 | Steering | `steering/model_steering_test.py` | Model-to-steering bench response | Camera, model, optionally servo |
 | LiDAR | `lidar/lidar_viewer.py` | Live scan visualization and point stream | FHL-LD19 LiDAR |
 | LiDAR policy | `lidar/test_lidar_center_aeb.py` | Center-corridor slowdown/stop policy | none in unit-test mode |
-| Camera | `camera/test_camera_preview.py` | Picamera2 capture/preview | RPi Camera Module 3 Wide |
+| Camera | `camera/test_camera_preview.py` | Picamera2 capture/preview | Raspberry Pi Camera Module 3 Wide |
 | Camera | `camera/test_camera_flip.py` | Mounted orientation | Camera |
 | Display | `display/hub75_rgbmatrix_test.py` | HUB75 panel bring-up | Waveshare LED matrix |
 | Display policy | `display/test_z2w_lidar_layout.py` | Dashboard LiDAR layout rendering | none in layout-test mode |
@@ -45,8 +45,8 @@ Each utility isolates one subsystem, prints observable output, and touches only 
 |---|---|
 | Per-subsystem bench utilities | Present for steering, LiDAR, camera, display, sensors, controller, navigation, data |
 | IMU yaw-rate steering | Firmware, verifier, reader, and live `straight`-mode controller implemented; controlled field validation still required |
-| Series 3 INT8/TensorRT throughput test on Jon | Planned / not-yet-measured |
-| End-to-end field autonomy metrics from CSV logs | Planned (compute from runtime CSV logs, store on Jon) |
+| Series 3 INT8/TensorRT throughput test on Jetson Orin Nano | Planned / not-yet-measured |
+| End-to-end field autonomy metrics from CSV logs | Planned (compute from runtime CSV logs, store on Jetson Orin Nano) |
 
 ## Related pages
 

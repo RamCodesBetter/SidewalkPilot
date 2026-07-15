@@ -83,7 +83,7 @@ PC is the strongest first field candidate because `4.0p` leads the class-balance
 
 ## Live Runtime Contract
 
-The Pi still sends only the JPEG and selected model version over the private Ethernet link. Jon reads the ONNX input metadata:
+The Raspberry Pi 5 still sends only the JPEG and selected model version over the private Ethernet link. Jetson Orin Nano reads the ONNX input metadata:
 
 - Image-only graph: run CF directly;
 - Graph with `target_history`: initialize `[90,90,90]`, feed it, decode horizon 0, then append that decoded target for the next inference.
@@ -94,4 +94,4 @@ History resets on model load/switch, reconnect, and status-only/manual periods. 
 
 Series 4 is **trained and runtime-supported**, but **not field-selected**. It must beat v3.4 on the same physical shadow/turn route, remain smooth under autoregressive history, satisfy inference-freshness checks, and preserve AEB behavior before the live default changes.
 
-See [Series 4 Models](../model-zoo/series-4.md), [Bal9](../../model-evaluation/offline-evaluation/bal9.md), and [Jetson Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
+See [Series 4 Models](../model-zoo/series-4.md), [Bal9](../../model-evaluation/offline-evaluation/bal9.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

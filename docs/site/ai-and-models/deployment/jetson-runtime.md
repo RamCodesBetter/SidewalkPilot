@@ -1,14 +1,14 @@
-# Jetson Runtime (Jon)
+# Jetson Orin Nano Runtime
 
-Jon is the Jetson Orin Nano inference computer. It is linked directly to the Raspberry Pi 5 over Ethernet at `10.42.0.2:8770`; the link does not depend on Wi-Fi.
+The Jetson Orin Nano is the inference computer. It is linked directly to the Raspberry Pi 5 over Ethernet at `10.42.0.2:8770`; the link does not depend on Wi-Fi.
 
 ## Live Data Path
 
-1. The Pi captures the current camera frame.
+1. The Raspberry Pi 5 captures the current camera frame.
 2. `AsyncJetsonSteeringClient` keeps only the newest pending frame and selected model version.
-3. Jon's `jetson_inference_server.py` loads the matching ONNX artifact, preprocesses the frame, and runs ONNX Runtime.
-4. Jon decodes the model-family-specific output and returns steering plus model telemetry.
-5. The Pi accepts only a fresh response for the selected version, then applies local safety arbitration before writing actuators.
+3. Jetson Orin Nano's `jetson_inference_server.py` loads the matching ONNX artifact, preprocesses the frame, and runs ONNX Runtime.
+4. Jetson Orin Nano decodes the model-family-specific output and returns steering plus model telemetry.
+5. The Raspberry Pi 5 accepts only a fresh response for the selected version, then applies local safety arbitration before writing actuators.
 
 ## Supported Families
 
@@ -21,6 +21,6 @@ CUDA is preferred when available. CPU remains a fallback for compatibility and b
 
 ## Failure Behavior
 
-The Pi-side client does not block the control loop while waiting for Jon. If no fresh response exists, autonomous driving does not receive a valid new steering command. Manual control and Pi-local LiDAR braking remain on the Pi.
+The Raspberry Pi 5 client does not block the control loop while waiting for Jetson Orin Nano. If no fresh response exists, autonomous driving does not receive a valid new steering command. Manual control and local Raspberry Pi 5 LiDAR braking remain on the Raspberry Pi 5.
 
 Model selection is performed from the dashboard or `RC_CAR_STEERING_MODEL`; the live runtime currently defaults to v3.4.

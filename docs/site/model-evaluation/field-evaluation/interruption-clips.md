@@ -6,11 +6,11 @@ provide steering ground truth by themselves.
 
 ## Implemented capture path
 
-When enabled, `InterruptionClipRecorder` buffers the JPEG frames sent to Jon. On
+When enabled, `InterruptionClipRecorder` buffers the JPEG frames sent to Jetson Orin Nano. On
 an autonomous-to-manual transition after at least the configured autonomous
 duration, a background worker writes approximately the preceding two seconds to
 `~/interruption_clips/`. On shutdown, the runtime attempts to copy saved clips to
-Jon and keeps local files if the transfer fails.
+Jetson Orin Nano and keeps local files if the transfer fails.
 
 The recorder can skip a clip if the autonomous segment is too short, no usable
 frames are buffered, the video writer fails, or capture is disabled. Therefore,

@@ -21,7 +21,7 @@ v4.0p leads common-set Bal9/turn metrics, v4.0c leads MAE/median, and v4.0r lead
 ## Procedure
 
 1. Record branch/commit, ONNX hash, model version, AEB state, steering calibration, battery state, route, lighting, and weather.
-2. Confirm the intended version loaded on Jon and appears on the dashboard.
+2. Confirm the intended version loaded on Jetson Orin Nano and appears on the dashboard.
 3. Drive ordinary left and right turns plus the known hard-shadow cases.
 4. Record every takeover and reason.
 5. For PC/PCF, watch for autoregressive drift, lag, or oscillation after model switches and manual periods.

@@ -8,7 +8,7 @@ This page documents the I2C bus on the Raspberry Pi 5 and the single device on i
 |---|---|
 | Part | HiLetGo PCA9685 16-channel 12-bit PWM driver |
 | Role | Generates the 50 Hz servo pulse that drives the Ackermann steering servo |
-| Bus | I2C bus 1 (Pi 5 `SDA1` / `SCL1`, the default `board.SDA` / `board.SCL`) |
+| Bus | I2C bus 1 (Raspberry Pi 5 `SDA1` / `SCL1`, the default `board.SDA` / `board.SCL`) |
 | Address | `0x40` |
 | Channel | `0` (of the 16 PWM outputs) |
 | Frequency | 50 Hz |
@@ -18,18 +18,18 @@ This page documents the I2C bus on the Raspberry Pi 5 and the single device on i
 
 The runtime opens the bus with Adafruit's `busio.I2C(board.SCL, board.SDA)` and drives the board through `adafruit_servokit.ServoKit`, targeting address `0x40` and servo channel `0` at 50 Hz. All of these come from constants in `rc_car_app/config.py` (`PCA9685_I2C_ADDRESS`, `PCA9685_SERVO_CHANNEL`, `PCA9685_FREQUENCY_HZ`, `STEERING_SERVO_MIN_PULSE_US`, `STEERING_SERVO_MAX_PULSE_US`, `STEERING_SERVO_ACTUATION_RANGE_DEG`) and are consumed by `PCA9685SteeringServo` in `rc_car_app/hardware.py`.
 
-Logical steering is `0 = left`, `90 = center`, `180 = right`. The hardware layer maps that logical angle to a servo pulse and applies a small center trim (`STEERING_SERVO_CENTER_OFFSET`, `STEERING_SERVO_CENTER_PRELOAD`, `STEERING_SERVO_CENTER_PRELOAD_WINDOW`) before writing the pulse. The I2C bus only carries the servo command; the servo is powered separately (see power wiring), and the PCA9685 is the only I2C peripheral on the Pi in the current build.
+Logical steering is `0 = left`, `90 = center`, `180 = right`. The hardware layer maps that logical angle to a servo pulse and applies a small center trim (`STEERING_SERVO_CENTER_OFFSET`, `STEERING_SERVO_CENTER_PRELOAD`, `STEERING_SERVO_CENTER_PRELOAD_WINDOW`) before writing the pulse. The I2C bus only carries the servo command; the servo is powered separately (see power wiring), and the PCA9685 is the only I2C peripheral on the Raspberry Pi 5 in the current build.
 
 ## Why this choice
 
-Offloading servo timing to a dedicated PWM chip keeps precise 50 Hz pulses off the Pi's software-timed GPIO, which is busy with the control loop, camera, and sensors. It also isolates steering electrically from the motor GPIO. Documenting the bus separately matters because a steering fault can look like a model failure: if the servo does not move, the first check is whether `0x40` still enumerates on the bus, not whether the model output is wrong.
+Offloading servo timing to a dedicated PWM chip keeps precise 50 Hz pulses off the Raspberry Pi 5's software-timed GPIO, which is busy with the control loop, camera, and sensors. It also isolates steering electrically from the motor GPIO. Documenting the bus separately matters because a steering fault can look like a model failure: if the servo does not move, the first check is whether `0x40` still enumerates on the bus, not whether the model output is wrong.
 
 ## Test
 
 Verify the device enumerates before any drive test:
 
 ```bash
-# Pi 5
+# Raspberry Pi 5
 i2cdetect -y 1        # expect 0x40 to appear
 ```
 

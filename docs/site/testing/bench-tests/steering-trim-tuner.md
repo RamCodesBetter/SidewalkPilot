@@ -11,7 +11,7 @@ The steering trim tuner is the windowless, SSH-friendly utility I use to measure
 
 ## Command
 
-Run on the Pi 5 over SSH, Xbox controller connected, wheels off the ground:
+Run on the Raspberry Pi 5 over SSH, Xbox controller connected, wheels off the ground:
 
 ```bash
 python3 code/test_files/steering/steering_trim_tuner.py

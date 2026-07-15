@@ -43,7 +43,7 @@ autonomous decision is most dangerous and where the training data gives the leas
 support. Handing off to a human at those segments keeps the safety story honest —
 autonomy is claimed only where it is actually earned — and the `HANDOFF_ALERT_M`
 warning gives the operator time to react instead of being surprised at the curb.
-Manual input is processed regardless of segment type while the controller and Pi loop are responsive. A physical stop remains necessary for failures that prevent software override.
+Manual input is processed regardless of segment type while the controller and Raspberry Pi 5 loop are responsive. A physical stop remains necessary for failures that prevent software override.
 
 ## How to know it worked (test gate)
 

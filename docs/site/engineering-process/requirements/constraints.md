@@ -12,17 +12,17 @@ These are the verified constraints that shape the current design.
 
 ## Compute and Connectivity
 
-- The Pi owns final actuator and safety decisions.
-- Jon performs Series 3/4 ONNX inference over direct Ethernet at `10.42.0.2:8770`.
-- Camera/Jon work is asynchronous so it does not block local controller polling.
-- Dashboard telemetry is UDP over the dedicated Pi-to-Zero USB network. There is no Wi-Fi fallback in the current configuration.
+- The Raspberry Pi 5 owns final actuator and safety decisions.
+- Jetson Orin Nano performs Series 3/4 ONNX inference over direct Ethernet at `10.42.0.2:8770`.
+- Camera/Jetson Orin Nano work is asynchronous so it does not block local controller polling.
+- Dashboard telemetry is UDP over the dedicated Raspberry Pi 5–Zero 2 W USB network. There is no Wi-Fi fallback in the current configuration.
 - Each computer must be restarted or have its owning service restarted after synced code changes.
 
 ## Safety
 
 - Manual takeover remains available from the Xbox controller.
 - LiDAR does not steer. When AEB is enabled, it can cap forward throttle and request a hard brake from center-corridor clearance.
-- A stale or unavailable Jon result is not a valid autonomous command.
+- A stale or unavailable Jetson Orin Nano result is not a valid autonomous command.
 - Configured distance thresholds are policy values, not proof of stopping distance. Physical tests under the real payload are still required.
 
 ## Data and Claims

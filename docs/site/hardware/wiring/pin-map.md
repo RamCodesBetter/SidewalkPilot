@@ -4,7 +4,7 @@ A consolidated table of the runtime's primary sensors, actuators, and inter-comp
 
 ## How it works
 
-The Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (servo driver via PCA9685), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in `rc_car_app/config.py`, `rc_car_app/lidar.py`, and `rc_car_app/navigation.py`, so the table below is copied directly from those source files rather than from memory.
+The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (servo driver via PCA9685), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in `rc_car_app/config.py`, `rc_car_app/lidar.py`, and `rc_car_app/navigation.py`, so the table below is copied directly from those source files rather than from memory.
 
 ## Master pin / port table
 
@@ -18,10 +18,10 @@ The Pi 5 is the real-time I/O controller. Every actuator and sensor connects to 
 | Hall / speed sensor | Wheel hall sensor | GPIO (BCM), pull-up | `GPIO 24` | `HALL_SENSOR_GPIO_PIN` |
 | GPS | BN880 GPS receiver | UART | `/dev/ttyAMA0` @ `9600` | `GPS_PORT`, `GPS_BAUD` (`navigation.py`) |
 | Compass (bench only) | BN880 HMC5883L-compatible magnetometer | I2C | Detected by `bn880_test.py`; not consumed by live navigation | bench utility only |
-| IMU | Seeed XIAO MG24 Sense (6-axis) | UART, Pi GPIO8/9 | `/dev/ttyAMA3` @ `115200` | `STEERING_YAW_PID_PORT`, `STEERING_YAW_PID_BAUD` |
+| IMU | Seeed XIAO MG24 Sense (6-axis) | UART, Raspberry Pi 5 GPIO8/9 | `/dev/ttyAMA3` @ `115200` | `STEERING_YAW_PID_PORT`, `STEERING_YAW_PID_BAUD` |
 | LiDAR (current) | Youyeetoo FHL-LD19 via CP2102 adapter | USB serial | `/dev/ttyUSB0` @ `230400` (auto-resolved) | `lidar.py` `resolve_lidar_serial_port` |
 | LiDAR (former) | Youyeetoo FHL-LD19 | GPIO UART | `/dev/ttyAMA2` @ `230400` | earlier config, now superseded |
-| Dashboard link | Zero 2 W over USB Ethernet gadget | USB (usb0) | Pi `192.168.10.1`, Zero `192.168.10.2`, UDP `8765` | `HUB75_DASHBOARD_*` (`config.py`) |
+| Dashboard link | Zero 2 W over USB Ethernet gadget | USB (usb0) | Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, UDP `8765` | `HUB75_DASHBOARD_*` (`config.py`) |
 
 Notes:
 

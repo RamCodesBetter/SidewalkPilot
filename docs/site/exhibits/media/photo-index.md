@@ -7,7 +7,7 @@ where the full dataset lives.
 
 ## How photos are captured
 
-Frames come from the RPi Camera Module 3 Wide on the Pi 5 via Picamera2. The camera
+Frames come from the Raspberry Pi Camera Module 3 Wide on the Raspberry Pi 5 via Picamera2. The camera
 streams at 1280x720 (`CAMERA_FRAME_WIDTH` x `CAMERA_FRAME_HEIGHT` in `vision.py`,
 BGR888) and is rotated 180 degrees (`PI_CAMERA_ROTATE_180 = True`, applied as an
 hflip+vflip transform). A photo is saved when the driver presses the capture button

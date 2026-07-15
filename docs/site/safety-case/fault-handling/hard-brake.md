@@ -53,7 +53,7 @@ an active AEB hard-stop while AEB is enabled.
 
 ## Series 3 note
 
-Hard braking is a Pi/hardware behavior and is independent of which steering model is
+Hard braking is a Raspberry Pi 5/hardware behavior and is independent of which steering model is
 running, so Series 3 does not change it.
 
 ## Related pages

@@ -12,11 +12,11 @@ The trainer will write to the path implied by the selected version. Reusing a ve
 
 ## Runtime rollback
 
-The Pi dashboard selects a registered version. For Series 3/4, Jon receives that name, resolves the matching ONNX artifact, and hot-swaps models. A rollback is complete only after:
+The Raspberry Pi 5 dashboard selects a registered version. For Series 3/4, Jetson Orin Nano receives that name, resolves the matching ONNX artifact, and hot-swaps models. A rollback is complete only after:
 
-1. The intended artifact is present on Jon;
-2. Jon logs a successful load with the expected execution provider;
-3. The Pi receives fresh results tagged for that model; and
+1. The intended artifact is present on Jetson Orin Nano;
+2. Jetson Orin Nano logs a successful load with the expected execution provider;
+3. The Raspberry Pi 5 receives fresh results tagged for that model; and
 4. A restrained bench check confirms expected steering direction before motion.
 
 A controller restart is not normally required for the current hot-swap path. Restart the owning process only when deployment state or logs show that the switch did not take effect.
@@ -29,7 +29,7 @@ v3.4 is the current field-selected baseline from the bounded July 13 comparison.
 
 - A previous field result is condition-specific, not a guarantee that the artifact is safe in every environment.
 - Rollback does not undo runtime/config/hardware changes made at the same time. Preserve those revisions separately.
-- A name on the dashboard does not prove the intended bytes loaded on Jon.
+- A name on the dashboard does not prove the intended bytes loaded on Jetson Orin Nano.
 
 ## Related pages
 

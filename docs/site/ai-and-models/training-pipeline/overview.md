@@ -14,7 +14,7 @@ manual/supervised drive
   -> final and best-validation checkpoints
   -> ONNX export
   -> common challenge-set evaluation and PDF report
-  -> Jetson deployment
+  -> Jetson Orin Nano deployment
   -> supervised field comparison
 ```
 
@@ -110,7 +110,7 @@ Training produces two paired artifacts:
 - Regular: final epoch;
 - `b`: best validation checkpoint.
 
-Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specified. TensorRT build flags remain available, but current Jetson throughput is sufficient to run the ONNX models directly; quantization is not required for the present operating target.
+Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specified. TensorRT build flags remain available, but current Jetson Orin Nano throughput is sufficient to run the ONNX models directly; quantization is not required for the present operating target.
 
 ## Evaluation and Promotion
 

@@ -4,7 +4,7 @@ A driveway interrupts normal sidewalk-edge geometry: concrete widens or crosses 
 
 ## Current implementation
 
-`estimate_path_bias_from_frame()` in `vision.py` contains a classic image-processing fallback with a `driveway_cut_hint`. That heuristic remains in the source for diagnostics or fallback work, but the current Series 3/4 Jetson result sets `driveway_cut_hint = False` and supplies a neural steering result directly. The live Series 3/4 path therefore does **not** have a verified driveway classifier or an active driveway-specific stop gate.
+`estimate_path_bias_from_frame()` in `vision.py` contains a classic image-processing fallback with a `driveway_cut_hint`. That heuristic remains in the source for diagnostics or fallback work, but the current Series 3/4 Jetson Orin Nano result sets `driveway_cut_hint = False` and supplies a neural steering result directly. The live Series 3/4 path therefore does **not** have a verified driveway classifier or an active driveway-specific stop gate.
 
 The runtime recognizes `stop_reason == "driveway_cut"` for dashboard alert formatting, but the current neural path does not generate that reason. A dormant state field is not evidence of an active safety feature.
 

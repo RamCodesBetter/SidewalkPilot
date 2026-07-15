@@ -10,7 +10,7 @@ Servo calibration is the step-and-find-the-endpoints test: I nudge the steering 
 
 ## Command
 
-Run on the Pi 5, wheels off the ground:
+Run on the Raspberry Pi 5, wheels off the ground:
 
 ```bash
 # offset / center finder (A = +0.01, D = -0.01, Q = quit)

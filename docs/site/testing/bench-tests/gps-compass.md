@@ -11,7 +11,7 @@ The GPS/compass bench test checks whether the BN-880 module reports a plausible 
 
 ## Command
 
-Run on the Pi 5:
+Run on the Raspberry Pi 5:
 
 ```bash
 # live GPS + heading table

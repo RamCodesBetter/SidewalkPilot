@@ -46,7 +46,7 @@ manual override still active.
 
 ## Series 3 note
 
-Series 3 does not change GPS handling; navigation and GPS stay on the Pi and are
+Series 3 does not change GPS handling; navigation and GPS stay on the Raspberry Pi 5 and are
 independent of the steering model host.
 
 ## Related pages

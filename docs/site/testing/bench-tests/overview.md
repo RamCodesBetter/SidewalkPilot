@@ -2,13 +2,13 @@
 
 The bench-tests section documents standalone utilities used on the bench, over SSH, or with the car restrained before a field drive. Hardware and navigation utilities are grouped under matching `camera/`, `controller/`, `display/`, `lidar/`, `navigation/`, `sensors/`, `setup/`, and `steering/` folders inside `code/test_files/`; cross-cutting experiments remain at its root. Experiments stay outside the live control loop so they can be run and reviewed independently.
 
-A bench test exists to answer one question with proof: does this sensor stream real data, does this servo hit the angle I command, does this model turn the wheels the way the picture says it should. Every page here states what is being tested, the exact command, and what counts as pass, warn, or fail. Because these are hardware tests, most of them talk to real GPIO, I2C (PCA9685 at `0x40`), or a UART, so the page also notes which device the command runs on (Pi 5 controller vs. Zero 2 W dashboard) and whether it moves anything.
+A bench test exists to answer one question with proof: does this sensor stream real data, does this servo hit the angle I command, does this model turn the wheels the way the picture says it should. Every page here states what is being tested, the exact command, and what counts as pass, warn, or fail. Because these are hardware tests, most of them talk to real GPIO, I2C (PCA9685 at `0x40`), or a UART, so the page also notes which device the command runs on (Raspberry Pi 5 controller vs. Zero 2 W dashboard) and whether it moves anything.
 
 ## What a good bench-test record captures
 
 | Test record field | What I fill in |
 |---|---|
-| Setup | Device (Pi 5 / Zero 2 W), branch, model version, wiring |
+| Setup | Device (Raspberry Pi 5 / Zero 2 W), branch, model version, wiring |
 | Procedure | The exact command with its flags, and which state the car must be in (motors off, wheels up, controller connected) |
 | Pass / warn / fail | Defined before running, in terms of the values printed |
 | Evidence | Command output, a short clip, a CSV row, or a note of the value found |

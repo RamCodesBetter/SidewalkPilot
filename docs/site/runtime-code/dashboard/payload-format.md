@@ -1,6 +1,6 @@
 # Dashboard Payload Format
 
-The Pi 5 sends one compact JSON object per telemetry update. UDP sends one JSON object per datagram; serial mode sends the same object followed by a newline. The sender is `Hub75DashboardSender` and the receiver is `code/controller/current/z2w_dashboard.py`.
+The Raspberry Pi 5 sends one compact JSON object per telemetry update. UDP sends one JSON object per datagram; serial mode sends the same object followed by a newline. The sender is `Hub75DashboardSender` and the receiver is `code/controller/current/z2w_dashboard.py`.
 
 ## Main Groups
 

@@ -13,7 +13,7 @@ output horizon, deployment target, and evaluation criteria.
 | Temporal input | none | none | none for CF; three previous targets for PC/PCF |
 | Head | single `tanh` regression | 9 logits + 9 offsets + throttle | 18 values per steering horizon, no throttle |
 | Horizons | current steering | current steering/throttle | current only for PC; current + three future for CF/PCF |
-| Runs on | Pi | Jetson "Jon" | Jetson runtime-supported; not field-promoted |
+| Runs on | Raspberry Pi 5 | Jetson Orin Nano | Jetson Orin Nano runtime-supported; not field-promoted |
 | Throttle | fixed runtime value | present in contract, disabled in steering-focused training | runtime-owned; removed from learned output |
 
 The nine Series-3 buckets are HL, L, L+, SL, ST, SR, R, R+, HR. Series 1 uses an output
@@ -23,12 +23,12 @@ else Series 1).
 
 ## Design progression
 
-Series 1/2 established the compact Pi-capable regression path. v3.0 tested a larger
+Series 1/2 established the compact Raspberry Pi 5-capable regression path. v3.0 tested a larger
 regression model on 320x180 input. v3.1 and later changed the steering contract to a class
 plus within-class offset, which makes class recall directly measurable while retaining a
 continuous angle. The Series 3 graph also contains a throttle output, but current training
-and deployment do not use learned throttle. The larger visual model is deployed on Jon;
-the project has not published a Pi-versus-Jon latency benchmark for this architecture.
+and deployment do not use learned throttle. The larger visual model is deployed on Jetson Orin Nano;
+the project has not published a Raspberry Pi 5-versus-Jetson Orin Nano latency benchmark for this architecture.
 
 ## Key findings
 
@@ -43,7 +43,7 @@ the project has not published a Pi-versus-Jon latency benchmark for this archite
 v3.4 is the current field-selected baseline. In the July 13 comparison it handled every
 presented shadow case; v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was
 much worse than v3.2b. All three Series 4 runs completed. Their six ONNX artifacts passed
-signature and CUDA inference checks, and the Jetson runtime supports all three contracts.
+signature and CUDA inference checks, and the Jetson Orin Nano runtime supports all three contracts.
 No Series 4 field test has occurred, so offline results order candidates but do not select
 a field baseline.
 

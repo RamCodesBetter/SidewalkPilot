@@ -1,6 +1,6 @@
 # GPIO Pins
 
-This page documents the GPIO pin assignments and hardware-address constants that the runtime uses to reach the Pi 5's motors, hall sensor, and steering servo. All of these constants live in `code/controller/current/rc_car_app/config.py` and are consumed by `code/controller/current/rc_car_app/hardware.py`, which is the only module that touches the pins directly.
+This page documents the GPIO pin assignments and hardware-address constants that the runtime uses to reach the Raspberry Pi 5's motors, hall sensor, and steering servo. All of these constants live in `code/controller/current/rc_car_app/config.py` and are consumed by `code/controller/current/rc_car_app/hardware.py`, which is the only module that touches the pins directly.
 
 ## How it works
 

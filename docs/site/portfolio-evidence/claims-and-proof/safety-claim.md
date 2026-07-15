@@ -5,7 +5,7 @@ SidewalkPilot implements layered control safeguards. This is an implementation c
 ## Implemented Layers
 
 - Manual Xbox input can cancel autonomous control.
-- The Pi rejects stale/unavailable autonomous model results.
+- The Raspberry Pi 5 rejects stale/unavailable autonomous model results.
 - With AEB enabled, center-corridor LiDAR clearance can cap forward throttle in manual or autonomous drive.
 - At or inside 1.05 m, the LiDAR policy requests zero throttle and a full hard brake.
 - LiDAR never supplies steering; the camera model is the sole autonomous steering owner.
