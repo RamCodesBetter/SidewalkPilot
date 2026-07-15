@@ -1435,7 +1435,7 @@ def build_pdf(results, samples, s34_samples, pdf_out):
         "MAE and within-degree counts can reward straight collapse. Use the class-balanced and turn-recall columns for selection, with MAE as supporting evidence.",
         "Offline MAE does not prove real-world reliability. The car can still fail on lighting, turns, driveways, road-edge ambiguity, speed, and sensor conditions.",
         "The shared-set comparison measures each complete checkpoint and training pipeline. It does not isolate architecture from differences in training data or augmentation.",
-        "Series 1/2 training was CARLA-assisted; the shared challenge set contains real field images rather than synthetic training frames.",
+        "Historical checkpoint source mixes are not inferred from trainer defaults. A model should be called CARLA-assisted only when its saved command, run configuration, or source-count log proves that CARLA roots were used.",
         "The Series 3/4 report set is held out by the frozen 100-frame window split and requires three valid previous and three valid future frames without split crossings or timestamp gaps.",
         f"The shared source dataset contains 81,237 curated real field frames across five manual-driving runs from July 2 through July 12, 2026; {len(s34_samples):,} anchors satisfy the common report contract.",
         "The hold-last baseline repeats the most recent previous target. It is a persistence reference for Series 4 history models, not a deployed controller behavior.",
