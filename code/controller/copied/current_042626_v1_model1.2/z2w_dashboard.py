@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+#
+# This file depends on rpi-rgb-led-matrix, which is licensed under
+# GPL-2.0-or-later.
+#
+# If this file is distributed together with that dependency as part of a
+# combined program, GPL obligations may apply to the combined work.
 from __future__ import annotations
 
 import argparse

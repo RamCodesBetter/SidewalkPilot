@@ -1,19 +1,16 @@
 # Next Steps
 
-TODO:
+This page contains work that is not yet a proven capability.
 
-- [ ] Add page-specific notes for `roadmap/next-steps.md` after inspecting the real project files.
-- [ ] Cross-link `Next Steps` to the most relevant code, data, testing, and safety pages.
-- [ ] State what is already proven before listing future work.
-- [ ] Separate near-term fixes from long-term research ideas.
-- [ ] List dependencies, risks, and test gates for this next step.
-- [ ] Add what data, hardware, or code must change.
-- [ ] Add how success would be measured.
-- [ ] Keep future claims clearly marked as planned, not completed.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
-- [ ] Add links to related pages that a public reader should follow next.
+| Priority | Planned work | Dependency | Success gate |
+|---:|---|---|---|
+| 1 | Compare all six Series 4 models with v3.4 | Jon deployment and fixed supervised route | Logged shadow/turn runs with hashes, clips, takeovers, and a clear verdict |
+| 2 | Preserve a physical test of current LiDAR slowdown/hold/emergency behavior | Controlled obstacle setup | Repeatable pass/fail record with AEB state and distances |
+| 3 | Publish only the Series 4 artifacts that pass review | Prior field verdict | Clean Hugging Face repos/cards with exact contracts and evidence limits |
+| 4 | Collect the next targeted field dataset | A repeatable failure from the model comparison | New batch closes the named gap without changing unrelated data |
+| 5 | Strengthen external technical collaboration | Reproducible logs and privacy review | A collaborator can inspect useful records without relying on autonomy claims |
+| 6 | Evaluate larger-scale hardware integration | Stable current system and documented requirements | A reviewed design improves reliability without weakening serviceability or safety |
+
+Quantization is not a current requirement because FP32 ONNX Runtime/CUDA meets the operating target. It should return to the roadmap only if measured latency, power, or memory creates a real constraint.
+
+No item on this page should be described elsewhere as complete until its success gate is met.

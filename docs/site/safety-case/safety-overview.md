@@ -1,19 +1,47 @@
 # Safety Overview
 
-TODO:
+SidewalkPilot moves a physical RC-scale vehicle. Its current safeguards reduce
+specific risks during supervised tests; they do not constitute certification or
+a complete functional-safety system.
 
-- [ ] Add page-specific notes for `safety-case/safety-overview.md` after inspecting the real project files.
-- [ ] Cross-link `Safety Overview` to the most relevant code, data, testing, and safety pages.
-- [ ] State the safety claim this page needs to support.
-- [ ] List the software, hardware, and operator safeguards involved.
-- [ ] Document what evidence proves the safeguard works.
-- [ ] Add failure cases where the safeguard is not enough.
-- [ ] Add test steps that must pass before outdoor autonomous testing.
-- [ ] Add public-facing limitations without overstating safety.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+## Implemented layers
+
+1. **Operator control:** while the Xbox controller is connected and the Pi loop
+   is responsive, steering, gas, or brake input cancels autonomy. The Share
+   button requests an orderly shutdown. The operator also needs an independent
+   way to cut power.
+2. **LiDAR longitudinal intervention:** when AEB is enabled and fresh center-
+   corridor returns are available, the policy can cap forward throttle and
+   request a hard brake at 1.05 m. LiDAR never commands steering.
+3. **Inference freshness:** unavailable or stale model results cause the
+   autonomous path to request a hard stop. The current neural path assigns
+   confidence `1.0` to accepted fresh results, so the confidence field is not a
+   calibrated detector for wrong scenes.
+4. **Operating procedure:** tests require line-of-sight supervision, bounded
+   routes, dry conditions, and no autonomous public-road operation. The declared
+   `MAX_AUTONOMOUS_SPEED_MPH` is not wired into a measured-speed governor and must
+   not be described as an enforced cap.
+
+## Known gaps
+
+- Stale or empty LiDAR data removes obstacle intervention rather than forcing a
+  stop.
+- Software override depends on a connected controller and responsive process.
+- Configured LiDAR thresholds do not prove physical stopping distance.
+- No arbitrary-pedestrian, all-weather, or unattended-operation claim is made.
+- Quantitative false-trigger, disconnect, stopping-distance, and override-latency
+  records still need controlled physical tests.
+
+## Evidence standard
+
+Code and unit tests establish the configured arbitration logic. Physical claims
+require a preserved setup, payload, speed, route, logs, video, and pass/fail
+record. The July 13 model comparison selected v3.4 in the cases presented, but it
+was not a safety certification or complete route benchmark.
+
+## Related pages
+
+- [Limits](../safety-and-ethics/limits.md)
+- [Manual Override](fault-handling/manual-override.md)
+- [Sensor Disconnect Risk](hazard-analysis/sensor-disconnect-risk.md)
+- [Preflight Checklist](../testing/field-testing/preflight-checklist.md)

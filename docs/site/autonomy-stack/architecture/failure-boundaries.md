@@ -1,19 +1,15 @@
 # Failure Boundaries
 
-TODO:
+The runtime contains explicit handling for several failures, but not every subsystem is fail-closed.
 
-- [ ] Add page-specific notes for `autonomy-stack/architecture/failure-boundaries.md` after inspecting the real project files.
-- [ ] Cross-link `Failure Boundaries` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact input entering this subsystem.
-- [ ] Document the exact output leaving this subsystem.
-- [ ] Map the subsystem to the owning runtime file or module.
-- [ ] Describe the control priority when this subsystem disagrees with another subsystem.
-- [ ] List the settings, constants, and flags that change this behavior.
-- [ ] Add a failure-mode checklist for field testing.
-- [ ] Add how to verify the subsystem on the bench before a driving test.
-- [ ] Add how to verify the subsystem during a real outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+| Failure | Current response | Important limit |
+|---|---|---|
+| Jon/model unavailable or result stale | Autonomous command is rejected and the autonomous path requests a stop | Manual control still depends on a healthy Pi/controller path |
+| Low model confidence | Autonomous path requests a stop | Confidence calibration is model-dependent |
+| LiDAR serial disconnect | Reader retries in a background thread | An empty/stale scan does **not** prove the path is clear; do not start/continue an autonomous safety test without healthy points |
+| Center obstacle at or inside 1.05 m with AEB enabled | Zero throttle and full hard brake in forward drive | Stopping distance still depends on speed, payload, surface, power, and detection coverage |
+| Servo write fault | Brake is forced and throttle is zeroed | Requires the fault to be detected by the write path |
+| Dashboard link failure | Driving loop continues; display shows link failure when receiver is alive | Operator loses dashboard observability |
+| Human takeover/quit | Autonomy is cancelled or shutdown begins | Measured end-to-end takeover latency is not claimed here |
+
+The most important honest gap is LiDAR loss: reconnect is non-blocking, but the current center-corridor policy does not treat missing returns as a guaranteed emergency stop. Sensor health is therefore a preflight and operational gate.

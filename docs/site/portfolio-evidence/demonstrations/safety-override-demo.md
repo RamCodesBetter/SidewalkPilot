@@ -1,19 +1,21 @@
-# Safety Override Demo
+# LiDAR Safety Demonstration
 
-TODO:
+This demonstration should show the current center-corridor throttle governor and emergency brake without implying obstacle classification or steering avoidance.
 
-- [ ] Add page-specific notes for `portfolio-evidence/demonstrations/safety-override-demo.md` after inspecting the real project files.
-- [ ] Cross-link `Safety Override Demo` to the most relevant code, data, testing, and safety pages.
-- [ ] Identify the exact claim this page is supposed to support.
-- [ ] List the public-facing evidence needed for this claim.
-- [ ] Add links to videos, photos, logs, screenshots, or reports that prove the claim.
-- [ ] State what a general reader should understand after seeing the evidence.
-- [ ] State what a technical reviewer should be able to verify from the evidence.
-- [ ] Separate proven results from still-in-progress work.
-- [ ] Add dates, model versions, dataset names, and test conditions where relevant.
-- [ ] Add limitations so the evidence is honest and not overstated.
-- [ ] Add the demo file, date, model version, and what behavior is visible.
-- [ ] Add what a viewer should not infer from this demo.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
+## Procedure
+
+1. Restrain the car or unload the drive wheels.
+2. Confirm AEB is enabled and the LiDAR stream is healthy.
+3. Move a broad stationary test target through the 1.65 m, 1.25 m, and 1.05 m boundaries.
+4. Record dashboard state, CSV telemetry, requested throttle, and brake output.
+5. Repeat at controlled low speed only after the static policy test passes.
+
+## Expected Behavior
+
+- Above 1.65 m: no LiDAR throttle reduction.
+- 1.65 m to 1.25 m: progressive reduction.
+- 1.25 m to 1.05 m: 60% reference hold.
+- At or inside 1.05 m: zero throttle and hard brake.
+- Steering remains unchanged by LiDAR throughout.
+
+The demo passes only when the observed behavior and recorded distance agree repeatedly. A source-code test alone is not a physical stopping result.

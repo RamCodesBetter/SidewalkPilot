@@ -1,19 +1,55 @@
-# Mac Pc Sync
+# Mac / PC Sync
 
-TODO:
+Moving code, datasets, photos, and models between the Mac and the NVIDIA PC (and out to the Pi) without a sync accidentally deleting the docs tree or a photo run. This is the operation that has bitten the project hardest, so the rules here are conservative on purpose.
 
-- [ ] Add page-specific notes for `operations/mac-pc-sync.md` after inspecting the real project files.
-- [ ] Cross-link `Mac Pc Sync` to the most relevant code, data, testing, and safety pages.
-- [ ] Write the exact command or procedure for this operation.
-- [ ] List which machine the command runs on and which paths it touches.
-- [ ] Document expected output and how long it usually takes.
-- [ ] Add danger notes for commands that can overwrite or delete files.
-- [ ] Add rollback or recovery steps if the operation goes wrong.
-- [ ] Add verification commands after the operation completes.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
-- [ ] Add links to related pages that a public reader should follow next.
+## How it works
+
+Two directions of sync exist, and they are not symmetric:
+
+- **Push code to the Pi**: sends the local branch's controller/runtime code to the Pi after switching and pulling the chosen branch. This is the safe, everyday direction.
+- **Pull the whole remote tree back**: mirrors a remote checkout onto the local machine. This is the direction that can delete local files when `--delete` is used and the remote is missing a tree (docs, generated site, a photo run).
+
+Data lives in a few well-known places and is treated as data, not source:
+
+- `~/logs/` (or `RC_CAR_LOG_DIR`) — runtime CSV logs, outside the repository by default.
+- `media/photos/YYYY_MM_DD_run_N/` — field photo runs, often with a JSON manifest.
+- `code/ai_models/*.pth` — model checkpoints.
+
+## Why this choice
+
+- A reverse whole-repo `rsync --delete` is dangerous: it has produced docs/site/generated-site deletion symptoms when the remote did not contain those trees. For photo pulls, sync **only** the target `media/photos/...` folder, or drop `--delete` entirely.
+- Photos, logs, datasets, and checkpoints are never staged, renamed, or deleted as a side effect of a sync. They are the project's irreplaceable field data.
+- Keeping "push code to Pi" and "pull tree to laptop" as clearly distinct operations stops the risky direction from being run by muscle memory.
+
+## Public-safe examples
+
+Use placeholders for private hosts and pull only the folder you actually want:
+
+```bash
+# Pull ONE photo run from a device, no --delete
+rsync -av <user>@<device>:~/rc_car_code/media/photos/2026_07_02_run_1/ \
+  ./media/photos/2026_07_02_run_1/
+
+# Push code changes to the Pi (safe direction), scoped to the controller
+rsync -av ./code/controller/current/ <user>@<pi>:~/rc_car_code/code/controller/current/
+```
+
+Never run a whole-repo reverse sync with `--delete`.
+
+## Failure and recovery
+
+- **Docs / site disappeared after a pull**: a reverse `--delete` sync removed trees the remote lacked. Recover from git (`git status`, `git checkout` the deleted paths) rather than re-syncing.
+- **A photo run looks truncated**: verify the manifest count against the files on disk before assuming loss; do not delete anything to "clean up."
+- **Uncertain which direction to run**: default to the push-to-Pi direction and pull only a named data folder. When in doubt, drop `--delete`.
+
+## Evidence to attach
+
+- Dry-run (`rsync -avn ...`) output before the real run
+- Branch status on both ends
+- File/manifest counts before and after
+
+## Related pages
+
+- `operations/mac-pc-sync.md`
+- `runbooks/sync-day/sync-verification.md`
+- `publishing/mkdocs-site.md`

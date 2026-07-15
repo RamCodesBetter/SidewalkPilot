@@ -5,14 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>A Star Search - SidewalkPilot RC Car</title>
+    <title>A* Search - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "A Star Search";
+        var mkdocs_page_name = "A* Search";
         var mkdocs_page_input_path = "research-and-math/algorithms/a-star-search.md";
         var mkdocs_page_url = null;
       </script>
@@ -49,7 +50,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/mission/">Mission</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../start-here/system-at-a-glance/">System At A Glance</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../start-here/system-at-a-glance/">System at a Glance</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/current-status/">Current Status</a>
                   </li>
@@ -86,7 +87,7 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >Claims And Proof</a>
+                  <li class="toctree-l1"><a class="reference internal" >Claims and Proof</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/autonomy-claim/">Autonomy Claim</a>
                 </li>
@@ -135,6 +136,16 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/temporal-smoothing/">Temporal Smoothing</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/steering-hysteresis/">Steering Hysteresis</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/throttle-control/">Throttle Control</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >LiDAR Safety</a>
@@ -147,9 +158,13 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/aeb/">AEB</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/override-steering/">Override Steering</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/override-steering/">Why LiDAR Does Not Steer</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/reconnect-behavior/">Reconnect Behavior</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/clearance-and-heading-scoring/">Clearance & Heading Scoring</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/object-clustering/">Object Clustering</a>
                 </li>
     </ul>
                   </li>
@@ -161,7 +176,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/graph-format/">Graph Format</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/a-star/">A Star</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/a-star/">A*</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/turn-penalties/">Turn Penalties</a>
                 </li>
@@ -172,6 +187,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/resume-radius/">Resume Radius</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/house-snapping/">House Snapping</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/compass-heading/">Compass Heading</a>
                 </li>
     </ul>
                   </li>
@@ -212,13 +229,19 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/hybrid-head-vs-regression/">Hybrid Head vs Regression</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Iteration Records</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure To Dataset</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure to Dataset</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/retest-policy/">Retest Policy</a>
                 </li>
@@ -226,10 +249,16 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/historical-metrics-policy/">Historical Metrics Policy</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/bang-bang-collapse/">Bang-Bang Collapse</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/shadow-aug-and-flip/">Shadow Aug and Turn Flip</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/turn-vs-shadow-tradeoff/">Turn vs Shadow Tradeoff</a>
+                </li>
     </ul>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Research And Math</span></p>
+              <p class="caption"><span class="caption-text">Research and Math</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" >Geometry</a>
     <ul>
@@ -247,8 +276,18 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >Algorithms</a>
     <ul class="current">
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">A Star Search</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">A* Search</a>
     <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#how-it-works">How it works</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#worked-example">Worked example</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#what-can-go-wrong">What can go wrong</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#related-pages">Related pages</a>
+    </li>
     </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../turn-penalty-state/">Turn Penalty State</a>
@@ -257,7 +296,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../pid-cruise-control/">PID Cruise Control</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../speed-from-hall-pulses/">Speed From Hall Pulses</a>
+                <li class="toctree-l2"><a class="reference internal" href="../speed-from-hall-pulses/">Speed from Hall Pulses</a>
                 </li>
     </ul>
                   </li>
@@ -271,9 +310,18 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../machine-learning/overfitting-risk/">Overfitting Risk</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../machine-learning/sim-to-real-gap/">Sim To Real Gap</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../machine-learning/sim-to-real-gap/">Sim to Real Gap</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../machine-learning/quantization-math/">Quantization Math</a>
                 </li>
     </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Research Context</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../research-context/related-work/">Related Work / Prior Art</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Novelty & Contributions</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
@@ -281,6 +329,12 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/controller-entrypoint/">Controller Entrypoint</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/controller-mapping/">Controller Mapping</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/photo-capture/">Photo Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/prnd-gears/">PRND Gears</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Config</a>
     <ul>
@@ -361,6 +415,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../hardware/gps-compass/">GPS Compass</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../hardware/imu/">IMU (Yaw Rate)</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../hardware/dashboard-display/">Dashboard Display</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Wiring</a>
@@ -375,10 +431,24 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../hardware/wiring/usb/">USB</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/wiring/pin-map/">Pin Map</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >PCB</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/overview/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/schematic/">Schematic</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/gpio-mapping/">GPIO Mapping</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/revisions/">Revisions</a>
+                </li>
     </ul>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">AI And Models</span></p>
+              <p class="caption"><span class="caption-text">AI and Models</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" >Training Pipeline</a>
     <ul>
@@ -404,6 +474,8 @@
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/cnn/">CNN</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/series-4-plan/">Series 4 Temporal Experiments</a>
+                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/tensor-shape/">Tensor Shape</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/conv-layers/">Conv Layers</a>
@@ -416,59 +488,37 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/tanh-output/">Tanh Output</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/series-3-hybrid-head/">Series 3 Hybrid Head</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/steering-class-bins/">Steering Class Bins</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Model Zoo</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-0/">v1.0</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/series-3/">Series 3</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-0b/">v1.0b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/series-4/">Series 4</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-1/">v1.1</a>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Deployment</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-1b/">v1.1b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/onnx-export/">ONNX Export</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-2/">v1.2</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/fp16/">FP16 Half Precision</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-2b/">v1.2b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/int8-ptq/">INT8 PTQ</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-3/">v1.3</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/qat/">QAT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-3b/">v1.3b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-4/">v1.4</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-4b/">v1.4b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-5/">v1.5</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-5b/">v1.5b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-6/">v1.6</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-6b/">v1.6b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-7/">v1.7</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-7b/">v1.7b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-8/">v1.8</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-8b/">v1.8b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-9/">v1.9</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-9b/">v1.9b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-0/">v2.0</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-0b/">v2.0b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-1/">v2.1</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-1b/">v2.1b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -478,6 +528,8 @@
                   <li class="toctree-l1"><a class="reference internal" >Offline Evaluation</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/overview/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/mae/">MAE</a>
                 </li>
@@ -490,6 +542,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/within-degree-buckets/">Within Degree Buckets</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/per-dataset-breakdown/">Per Dataset Breakdown</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/confusion-matrix/">Confusion Matrix</a>
                 </li>
     </ul>
                   </li>
@@ -511,12 +565,12 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/field-evaluation/evening-robustness/">Evening Robustness</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/field-evaluation/interruption-clips/">Interruption Clips</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Comparisons</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/1-9-vs-2-0-vs-2-1/">1.9 vs 2.0 vs 2.1</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/b-versions/">B Versions</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/raw-bgr-vs-clahe/">Raw BGR vs CLAHE</a>
@@ -524,6 +578,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/offline-vs-field/">Offline vs Field</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/model-selection-rubric/">Model Selection Rubric</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/mae-vs-turn-capability/">MAE vs Turn Capability</a>
                 </li>
     </ul>
                   </li>
@@ -535,26 +591,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../data/corrections-json/">Corrections JSON</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../data/manual-image-folder/">Manual Image Folder</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0328/">D0328</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0329/">D0329</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0425/">D0425</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0426/">D0426</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0427/">D0427</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0429/">D0429</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0502-12/">D0502 12</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0502-19/">D0502 19</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0503/">D0503</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0506/">D0506</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Relabeling</a>
     <ul>
@@ -606,6 +642,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/lighting-coverage/">Lighting Coverage</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/turn-coverage/">Turn Coverage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/collection-countdown/">Collection Countdown</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/train-val-leakage/">Train Val Leakage</a>
                 </li>
@@ -664,9 +702,15 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/dashboard/">Dashboard</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/a-star-cli/">A Star CLI</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/a-star-cli/">A* CLI</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/geojson-graph/">GeoJSON Graph</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/steering-trim-tuner/">Steering Trim Tuner</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/servo-calibration/">Servo Calibration</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/imu-verifier/">IMU Verifier</a>
                 </li>
     </ul>
                   </li>
@@ -736,6 +780,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../operations/troubleshooting/">Troubleshooting</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/telemetry/">Telemetry</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Runbooks</span></p>
               <ul>
@@ -775,9 +821,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Sync Day</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/mac-to-pc/">Mac To PC</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/mac-to-pc/">Mac to PC</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/pc-to-mac/">PC To Mac</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/pc-to-mac/">PC to Mac</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/delete-risk/">Delete Risk</a>
                 </li>
@@ -791,6 +837,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../publishing/reports/">Reports</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../publishing/pdf-report/">PDF Report</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../publishing/huggingface/">Hugging Face (Models & Datasets)</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../publishing/huggingface-model-cards/">Hugging Face Model Cards</a>
                   </li>
@@ -859,7 +907,7 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../code-reference/test-files/">Test Files</a>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Safety And Ethics</span></p>
+              <p class="caption"><span class="caption-text">Safety and Ethics</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../safety-and-ethics/research-scope/">Research Scope</a>
                   </li>
@@ -880,6 +928,10 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
+                  </li>
               </ul>
       </div>
     </div>
@@ -895,9 +947,9 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Research And Math</li>
+          <li class="breadcrumb-item">Research and Math</li>
           <li class="breadcrumb-item">Algorithms</li>
-      <li class="breadcrumb-item active">A Star Search</li>
+      <li class="breadcrumb-item active">A* Search</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -906,24 +958,72 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="a-star-search">A Star Search</h1>
-<p>TODO:</p>
+                <h1 id="a-search">A* Search</h1>
+<p>A* search is the graph pathfinder that turns a start and destination into an ordered list of sidewalk nodes for SidewalkPilot to follow. It runs on the Raspberry Pi 5 controller inside <code>code/controller/current/rc_car_app/navigation.py</code> (the <code>astar</code> function), over the Trossachs route graph stored in <code>code/controller/current/rc_car_app/trossachs_nav_graph.json</code>.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>A<em> is best-first search that expands the state minimizing <code>f = g + h</code>, where <code>g</code> is the accumulated route cost and <code>h</code> estimates remaining cost. Under the usual conditions used here (nonnegative costs, an admissible heuristic, and the implementation's state bookkeeping), A</em> returns a minimum-cost path for the defined graph/cost function. The heuristic can reduce explored states, but the amount depends on the graph.</p>
+<p>In this project:</p>
 <ul>
-<li>[ ] Add page-specific notes for <code>research-and-math/algorithms/a-star-search.md</code> after inspecting the real project files.</li>
-<li>[ ] Cross-link <code>A Star Search</code> to the most relevant code, data, testing, and safety pages.</li>
-<li>[ ] Define the concept with the exact project use case.</li>
-<li>[ ] List formulas, units, inputs, and outputs.</li>
-<li>[ ] Map the concept to the source file or runtime behavior using it.</li>
-<li>[ ] Add a small worked example using project-style values.</li>
-<li>[ ] Add numerical edge cases or assumptions.</li>
-<li>[ ] Add how to test the implementation against expected results.</li>
-<li>[ ] Add the exact source path, artifact path, or hardware component name.</li>
-<li>[ ] Add the command or procedure needed to reproduce the result.</li>
-<li>[ ] Add expected inputs and outputs.</li>
-<li>[ ] Add the settings, flags, constants, or calibration values that control it.</li>
-<li>[ ] Add known failure modes and how they appear in logs, video, or field behavior.</li>
-<li>[ ] Add validation steps and pass/fail criteria.</li>
-<li>[ ] Add links to related pages that a public reader should follow next.</li>
+<li><strong>Nodes / edges.</strong> Sidewalk, crosswalk, intersection, and house-access points are graph nodes with <code>lat</code>/<code>lon</code>. <code>build_graph</code> walks the edge list, keeps only edges that <code>edge_allowed</code> accepts (for example a <code>sidewalk</code> edge must join two sidewalk-type nodes), and stores each as a bidirectional neighbor with a scalar cost.</li>
+<li><strong>Edge cost <code>g</code>.</strong> <code>edge_cost</code> starts from the edge's stored metric distance and adds fixed penalties for less-preferred edge kinds: <code>+220 m</code> for a <code>crosswalk_transfer</code>, <code>+48 m</code> for an <code>intersection</code> or <code>osm_gap</code>, <code>+36 m</code> for an <code>inferred_crosswalk</code>. This biases routes toward continuous sidewalks and away from unnecessary road crossings without ever making the search inadmissible for distance.</li>
+<li><strong>Heuristic <code>h</code>.</strong> The straight-line great-circle distance to the goal, computed by <code>haversine(nodes[nxt], nodes[goal])</code> on a 6,371,000 m Earth radius. For graph edges whose stored distance is at least their endpoint straight-line distance, with only nonnegative added penalties, this heuristic does not overestimate the remaining defined cost.</li>
+<li><strong>State = (previous node, current node).</strong> The search state is a <code>(prev_id, current)</code> tuple rather than just the current node. This is what lets the cost function charge a <code>turn_penalty</code> for the bend <code>prev -&gt; current -&gt; next</code> (see the Turn Penalty State page). The priority queue is Python's <code>heapq</code>; each pop takes the lowest-<code>f</code> state, and <code>came_from</code> plus <code>reconstruct_path</code> rebuild the node sequence once the goal is popped.</li>
+<li><strong>House filtering.</strong> Intermediate <code>house</code>-type nodes are skipped (<code>if nodes[nxt].get("type") == "house" and nxt not in (start, goal): continue</code>) so the router never cuts a path through someone's driveway that is not the actual origin or destination.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Concept field</th>
+<th>Value in this project</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Algorithm</td>
+<td>A* (<code>f = g + h</code>) over a <code>heapq</code> priority queue, <code>astar()</code> in <code>navigation.py</code></td>
+</tr>
+<tr>
+<td><code>g</code> (path cost)</td>
+<td><code>edge_cost</code> (metres + edge-kind penalties) plus accumulated <code>turn_penalty</code>, units metres</td>
+</tr>
+<tr>
+<td><code>h</code> (heuristic)</td>
+<td><code>haversine</code> great-circle distance to goal, units metres, admissible</td>
+</tr>
+<tr>
+<td>State</td>
+<td><code>(prev_id, current_id)</code> to support turn penalties</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>Ordered node-id list plus <code>path_distance</code> (sum of leg haversines, metres)</td>
+</tr>
+<tr>
+<td>Runtime use</td>
+<td><code>navigation.py</code>; graph from <code>trossachs_nav_graph.json</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-this-choice">Why this choice</h2>
+<p>A* searches the explicit graph while using the heuristic to prioritize promising states. Edge-kind penalties encode a project preference for continuous sidewalk and fewer crossings in an inspectable cost function rather than a learned route policy. Given the same graph, costs, and implementation ordering, the result is repeatable and can be debugged from the selected edges.</p>
+<h2 id="worked-example">Worked example</h2>
+<p>Take a start node S and goal G that are 100 m apart in a straight line, with two candidate legs from the current node:</p>
+<ul>
+<li>Leg A: a 60 m <code>sidewalk</code> edge to node X, no turn. Cost <code>g = 60</code>. If X is 55 m straight-line from G, <code>f = 60 + 55 = 115</code>.</li>
+<li>Leg B: a 40 m <code>intersection</code> edge to node Y. Cost <code>g = 40 + 48 = 88</code>. If Y is 70 m from G, <code>f = 88 + 70 = 158</code>.</li>
+</ul>
+<p>A* pops Leg A first (115 &lt; 158), correctly preferring the longer-but-continuous sidewalk over the shorter path that forces a penalized intersection crossing. This is the intended behavior: the intersection penalty makes the router "pay" for crossings.</p>
+<h2 id="what-can-go-wrong">What can go wrong</h2>
+<ul>
+<li><strong>Inadmissible heuristic.</strong> If <code>h</code> overestimated remaining defined cost, A* could return a non-minimum route. Straight-line distance is appropriate only while graph distance and added penalties satisfy the assumptions above.</li>
+<li><strong>Disconnected graph.</strong> If <code>edge_allowed</code> filters out every path between the snapped start and goal, <code>astar</code> returns <code>([], inf)</code>. That surfaces as a no-route result, which is why sidewalk-snapping and connectivity fixes (tasks around GPS snap and unreachable snaps) live upstream of the search.</li>
+<li><strong>Bad graph coordinates.</strong> The heuristic and costs trust the node <code>lat</code>/<code>lon</code>; corrupt coordinates degrade both <code>g</code> and <code>h</code> but do not break admissibility.</li>
+</ul>
+<h2 id="related-pages">Related pages</h2>
+<ul>
+<li><code>research-and-math/machine-learning/regression-framing.md</code></li>
+<li><code>ai-and-models/training-pipeline/overview.md</code></li>
+<li><code>autonomy-stack/navigation/overview.md</code></li>
 </ul>
               
             </div>

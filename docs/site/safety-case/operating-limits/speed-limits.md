@@ -1,19 +1,21 @@
 # Speed Limits
 
-TODO:
+SidewalkPilot does not currently enforce a closed-loop autonomous top-speed limit in miles per hour.
 
-- [ ] Add page-specific notes for `safety-case/operating-limits/speed-limits.md` after inspecting the real project files.
-- [ ] Cross-link `Speed Limits` to the most relevant code, data, testing, and safety pages.
-- [ ] State the safety claim this page needs to support.
-- [ ] List the software, hardware, and operator safeguards involved.
-- [ ] Document what evidence proves the safeguard works.
-- [ ] Add failure cases where the safeguard is not enough.
-- [ ] Add test steps that must pass before outdoor autonomous testing.
-- [ ] Add public-facing limitations without overstating safety.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+## What the Code Enforces
+
+- Motor commands are clamped to the `0..1` physical PWM range.
+- Manual cruise control uses hall-sensor feedback and a PID target selected by the operator.
+- With AEB enabled in forward drive, the center-corridor LiDAR policy caps throttle according to clearance.
+- At 1.65 m or farther, the LiDAR governor allows the requested command up to full throttle.
+- Between 1.65 m and 1.25 m, it reduces the cap from 100% to 60% reference throttle.
+- From 1.25 m to 1.05 m, it holds that cap.
+- At or inside 1.05 m, it requests zero throttle and full braking.
+
+The reference range maps the useful moving range onto physical PWM. On this car, 0% reference is the measured 55% physical dead-zone boundary, and 60% reference maps to 82% physical PWM. Saved training labels remain on the absolute physical `0..100%` scale.
+
+## Important Limit
+
+`MAX_AUTONOMOUS_SPEED_MPH = 3.2` is declared in `config.py` but is not used as a final speed governor. It must not be presented as an enforced 3.2 mph limit. A future hard speed cap would need to use measured hall-sensor speed in the final throttle path and then be tested under the real payload and surface conditions.
+
+Field operation therefore stays supervised and conservative. Stopping-distance tests, not a config constant or inference rate, define a defensible operating speed.

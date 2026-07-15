@@ -1,19 +1,41 @@
 # Lighting Limits
 
-TODO:
+Autonomous steering is camera-driven, so lighting outside the tested distribution
+is an operating limit.
 
-- [ ] Add page-specific notes for `safety-case/operating-limits/lighting-limits.md` after inspecting the real project files.
-- [ ] Cross-link `Lighting Limits` to the most relevant code, data, testing, and safety pages.
-- [ ] State the safety claim this page needs to support.
-- [ ] List the software, hardware, and operator safeguards involved.
-- [ ] Document what evidence proves the safeguard works.
-- [ ] Add failure cases where the safeguard is not enough.
-- [ ] Add test steps that must pass before outdoor autonomous testing.
-- [ ] Add public-facing limitations without overstating safety.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+## Current Runtime Behavior
+
+The Pi stops autonomy when the camera/model result is unavailable or stale. A
+fresh Pi-local or Jon model prediction currently carries confidence `1.0`; the
+`LOW_CAMERA_CONFIDENCE` gate therefore does **not** estimate uncertainty for a
+fresh neural prediction. It is mainly an availability/freshness gate on the
+active model path.
+
+This means a well-formed but wrong prediction under glare or unusual light may
+not trigger an automatic camera-confidence stop. Manual override and LiDAR AEB
+remain separate layers, but LiDAR does not validate sidewalk boundaries or model
+steering.
+
+## Bounded Field Evidence
+
+- The 81,237-frame Series 3/4 dataset contains real outdoor captures and shadow
+  cases, plus training-time lighting/shadow augmentation.
+- In the July 13 field comparison, v3.4 handled every shadow case presented and
+  became the field-selected baseline.
+- An earlier v3.1b operator note records a failure near orange artificial light.
+- Direct lens glare, wet reflections, headlights, weather extremes, and broad
+  autonomous night operation do not have a controlled validation record here.
+
+These observations are condition-specific, not universal robustness claims.
+
+## Operating Rule
+
+Use supervised daylight testing on a known, controlled route. Stop for saturated,
+dark, obscured, or unfamiliar camera conditions. Do not interpret fresh-result
+confidence `1.0` as calibrated perception confidence.
+
+## Related Pages
+
+- [Night Driving Risk](../hazard-analysis/night-driving-risk.md)
+- [Shadow Failures](../../testing/failures/shadow-failures.md)
+- [Field Evaluation](../../model-evaluation/field-evaluation/overview.md)

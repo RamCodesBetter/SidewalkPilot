@@ -1,19 +1,26 @@
 # Runtime States
 
-TODO:
+The current runtime combines gear, drive mode, navigation state, AEB state, and selected model state.
 
-- [ ] Add page-specific notes for `autonomy-stack/architecture/runtime-states.md` after inspecting the real project files.
-- [ ] Cross-link `Runtime States` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact input entering this subsystem.
-- [ ] Document the exact output leaving this subsystem.
-- [ ] Map the subsystem to the owning runtime file or module.
-- [ ] Describe the control priority when this subsystem disagrees with another subsystem.
-- [ ] List the settings, constants, and flags that change this behavior.
-- [ ] Add a failure-mode checklist for field testing.
-- [ ] Add how to verify the subsystem on the bench before a driving test.
-- [ ] Add how to verify the subsystem during a real outdoor run.
-- [ ] Trace one loop iteration from sensor input to actuator command.
-- [ ] List timing expectations and what can block the loop.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
+## Gear
+
+- `P`: throttle zero, brake applied.
+- `R`: manual reverse; the forward AEB stop rule is excluded.
+- `N`: motor command zero without the Park brake state.
+- `D`: manual, cruise-control, or autonomous forward operation.
+
+## Drive Mode
+
+`get_dashboard_drive_mode()` reports:
+
+- `ATO` when autonomous mode is active;
+- `CC` when cruise control is active; and
+- `MAN` otherwise.
+
+The former `LDR` steering-override mode is not part of the current arbitration because LiDAR no longer changes steering. LiDAR state is instead visible through its throttle cap, center occupancy, emergency flag, AEB status, and alerts.
+
+## Model and Safety State
+
+The selected steering version can change from the dashboard. Jon resets Series 4 causal history on load/switch and other discontinuities. Autonomous control requires a fresh result for the selected version. LiDAR/AEB is an independent toggle and, when enabled, can cap forward throttle or request braking in either manual or autonomous Drive.
+
+Navigation can still request automatic or manual route segments, but the operator remains responsible for road crossings and immediate takeover.

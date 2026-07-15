@@ -1,19 +1,26 @@
 # LiDAR Polar Coordinates
 
-TODO:
+The LD19 reports angle, distance, and confidence. SidewalkPilot converts each valid point into car-relative lateral and forward coordinates for the center-corridor safety policy.
 
-- [ ] Add page-specific notes for `research-and-math/geometry/lidar-polar-coordinates.md` after inspecting the real project files.
-- [ ] Cross-link `LiDAR Polar Coordinates` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the concept with the exact project use case.
-- [ ] List formulas, units, inputs, and outputs.
-- [ ] Map the concept to the source file or runtime behavior using it.
-- [ ] Add a small worked example using project-style values.
-- [ ] Add numerical edge cases or assumptions.
-- [ ] Add how to test the implementation against expected results.
-- [ ] Document serial port, packet format, reconnect behavior, and stale-scan handling.
-- [ ] Add bench test steps with the LiDAR disconnected and reconnected.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+## Coordinate Conversion
+
+The parser reports angles in `0..360` degrees with zero mounted forward. Safety code normalizes angles above 180 degrees by subtracting 360, then computes:
+
+```text
+lateral = distance * sin(angle)
+forward = distance * cos(angle)
+```
+
+A point is in the governed corridor when:
+
+- `forward > 0`;
+- `abs(lateral) <= LIDAR_CENTER_HALF_WIDTH_M`; and
+- The point is valid, nonzero, and has confidence at least `LIDAR_MIN_CONFIDENCE`.
+
+`center_forward_distance()` returns the nearest such forward distance. `governor_target()` maps that distance to the current 100%-to-60%-reference throttle policy, and `evaluate()` requests a hard stop at the emergency boundary.
+
+The older front/left/right/back sector function still supplies general dashboard direction/distance telemetry. It does not choose autonomous steering. The current safety decision comes from `rc_car_app/lidar_avoidance.py` and one center corridor.
+
+## Limits
+
+An empty sector or corridor does not prove that the sensor is healthy. Sensor freshness and point arrival must be checked separately before a run. LiDAR range points also do not identify the sidewalk boundary, which is why the removed swerve logic was not retained.

@@ -1,19 +1,70 @@
 # Version Rules
 
-TODO:
+Version rules keep model, preprocessing, labels, and dataset identity together. A model name alone is not enough to reproduce a run.
 
-- [ ] Add page-specific notes for `data-governance/dataset-versioning/version-rules.md` after inspecting the real project files.
-- [ ] Cross-link `Version Rules` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the rule this page enforces for data or labels.
-- [ ] List files, folders, and scripts affected by the rule.
-- [ ] Add the validation command or inspection step for the rule.
-- [ ] Add what stale or duplicate data looks like.
-- [ ] Add recovery steps if the rule was broken.
-- [ ] Add public-release checks for privacy and traceability.
-- [ ] List dataset tag, image count, label count, source, and purpose.
-- [ ] Add how to verify filenames, annotations, and correction labels match.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+## The Series and Their Contracts
+
+| Series | Model | Input | Target | Label fields | Status |
+|---|---|---|---|---|---|
+| 1 / 2 | `SteeringAutonomyV2`, ~0.67M params | 200x66 | steering only (single tanh regression) | `image`, `steering`, `repeat`, `source` | Frozen (2,224 images) |
+| 3 | `SidewalkPilotV3`, 5.53M params | 320x180 | v3.1+ hybrid steering + optional throttle loss | image key, `steering`, `throttle` | shared 81,237-frame dataset |
+| 4 | PC / CF / PCF, 5.54-5.57M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | experimental, trained; field test pending |
+
+Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jon and the larger 320x180 visual backbone. Series 4 shares the 81,237-frame dataset but removes throttle prediction and adds temporal-target experiments.
+
+## The Rules
+
+1. **Labels must match the image and loader.** Steering is stored as logical degrees (`0`=left, `90`=straight, `180`=right). Series 3/4 base rows also retain absolute physical throttle as `0.0..1.0`.
+2. **Series 3 must include throttle on every entry.** The trainer skips any sample it cannot read a throttle for (`skipped_bad`). Throttle range is `0.00`-`1.00`; reverse is not a model output.
+3. **Preserve capture provenance.** The parser cannot tell whether a command came from a human, autonomy, or simulation. Training inclusion must be based on recorded source/run evidence, not a guess made later.
+4. **Public data must pass privacy review** before it goes to Hugging Face (faces, plates, identifiable private property).
+5. **Do not infer CARLA use from support code.** A checkpoint is CARLA-assisted only when its saved roots, run configuration, or source-count log demonstrates that CARLA data was loaded.
+
+## Why this choice
+
+Offline metrics are only comparable when architecture adapters, dataset snapshot,
+split, and command are known. These rules prevent later documentation from
+inventing provenance that the artifacts do not contain.
+
+## Good vs bad example
+
+Good — a Series 3 entry with matching schema:
+
+```json
+{ "photo_20260520_123456.jpg": { "steering": 92, "throttle": 0.37 } }
+```
+
+Bad — a row missing a field required by the Series 3 loader:
+
+```json
+{ "photo_20260510_201501.jpg": { "steering": 74 } }
+```
+
+## Validation
+
+The Series 3 trainer prints `skipped bad labels`, `skipped missing images`, and per-source counts every time it loads a dataset; a fresh capture with a nonzero bad-label count means throttle is missing somewhere. Series 1/2 shape can be checked directly:
+
+```bash
+python3 - <<'PY'
+import json
+rows = json.load(open("code/ai_models_datasets/series_1_and_2/steering_corrections.json"))
+print("rows", len(rows),
+      "throttle-fields (should be 0 for S1/2)",
+      sum("throttle" in r for r in rows))
+PY
+```
+
+An empty list was valid when a new dataset was first initialized. It is not the current state: the Series 3/4 dataset now contains 81,237 labeled frames.
+
+## Recovery when a rule is broken
+
+- Missing throttle in Series 3: re-derive it from that run's CSV log for the affected frames and re-write the label file; do not backfill a constant.
+- Unknown provenance: quarantine the row from a claimed reproducible snapshot until the capture source is established.
+
+Never delete images or label files to "fix" a rule violation without Ram's sign-off — count and report the bad rows first.
+
+## Related pages
+
+- `data/dataset-overview.md`
+- `data-governance/dataset-versioning/active-label-set.md`
+- `publishing/huggingface.md`

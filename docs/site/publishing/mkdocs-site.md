@@ -1,19 +1,70 @@
-# Mkdocs Site
+# MkDocs Site
 
-TODO:
+This documentation is a MkDocs site. It is the public, human-facing front door to the whole
+SidewalkPilot project - the autonomy stack, hardware, models, evaluation, safety case, and
+runbooks are all authored as Markdown and built into a static site by MkDocs.
 
-- [ ] Add page-specific notes for `publishing/mkdocs-site.md` after inspecting the real project files.
-- [ ] Cross-link `Mkdocs Site` to the most relevant code, data, testing, and safety pages.
-- [ ] List the exact artifact this page helps publish.
-- [ ] Document source files that feed the public artifact.
-- [ ] Add what must be checked for accuracy before publication.
-- [ ] Add privacy and safety review items.
-- [ ] Add versioning rules and naming rules.
-- [ ] Add how to rebuild or regenerate the artifact.
-- [ ] Keep the page as public documentation guidance, not a private planning note.
-- [ ] Add the command to preview or build the site once MkDocs is installed.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+## How it works
+
+The site is configured by `mkdocs.yml` at the repo root:
+
+- `site_name: SidewalkPilot RC Car`
+- `docs_dir: docs/site` - every page lives under `docs/site/**/*.md`.
+- `theme: readthedocs` - the built-in Read the Docs theme.
+- The full navigation tree is defined by the `nav:` block in `mkdocs.yml`; adding a page
+  means adding both the Markdown file *and* its `nav` entry.
+
+Source Markdown is edited under `docs/site/**`. Running the build turns that into a static
+HTML site under `site/` at the repo root:
+
+```bash
+cd /home/rsabavat/rc_car_code
+mkdocs build          # renders docs/site/** into site/**
+mkdocs serve          # live local preview at http://127.0.0.1:8000
+```
+
+The generated `site/**` tree is committed output. **Edit the source under `docs/site/`, then
+rebuild - do not hand-edit `site/**`**, or the next build
+will overwrite the change.
+
+## Why this choice
+
+- **One source, many readers.** Markdown keeps the docs diffable in git and lets the same
+  content render as a browsable site for technical reviewers, mentors, and collaborators.
+- **Read the Docs theme** gives a clean, searchable, sidebar-navigated layout with no custom
+  front-end work, which fits a solo project.
+- **Publishing is separated from drafting.** Public pages should never contain private paths,
+  home addresses, private hostnames/IPs, stale claims, or unreviewed field media. Keeping the
+  source in `docs/site/` and reviewing before build/publish keeps those out of the public
+  artifact.
+
+## Review before publishing
+
+Before a build is treated as publishable, check:
+
+1. **Accuracy** - facts on the page match the actual source code, config, and current model
+   versions; v3.3/v3.3b are recorded as field regressions, Series 4 is marked as
+   not yet field-tested, and Jetson quantization is documented as future work.
+2. **Privacy** - no private IPs, hostnames, addresses, or unreviewed media leaked into a
+   public page.
+3. **Links** - internal links resolve after `mkdocs build`, and external references (models,
+   datasets) point at the correct Hugging Face repos rather than local paths.
+
+## What lives where (GitHub vs Read the Docs vs Hugging Face)
+
+- **This MkDocs site** - the narrative: architecture, engineering process, evaluation method,
+  safety case, runbooks. It links out to the model/dataset cards; it does not duplicate them.
+- **Hugging Face** - the canonical home for full model cards, dataset cards, checkpoints, and
+  ONNX exports. Those descriptions live there, not here (see the Hugging Face page).
+- **GitHub** - the code, `mkdocs.yml`, and the built `site/**` output.
+
+No documentation deployment workflow is checked into `.github/workflows/` or a
+`.readthedocs.yml` file. The repository tracks locally generated `site/**` output;
+the hosting configuration itself is external to this source tree.
+
+## Related pages
+
+- `publishing/reports.md`
+- `publishing/pdf-report.md`
+- `publishing/huggingface.md`
+- `operations/mac-pc-sync.md`

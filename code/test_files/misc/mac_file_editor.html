@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mac File Editor</title>
+  <style>
+    :root {
+      --bg: #f5f7f8;
+      --panel: #ffffff;
+      --panel-2: #eef2f4;
+      --line: #d5dde2;
+      --text: #162027;
+      --muted: #63717b;
+      --accent: #1b7f5f;
+      --accent-dark: #126449;
+      --danger: #a33737;
+      --warn: #9a6a12;
+      --shadow: 0 10px 28px rgba(20, 32, 39, 0.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 7px 10px;
+      cursor: pointer;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      border-color: #9fb0ba;
+      background: #f8fafb;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    button.primary:hover {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    button.danger {
+      color: var(--danger);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(260px, 340px) 1fr;
+      height: 100vh;
+      min-height: 0;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .title {
+      font-weight: 700;
+      margin-right: auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tree-tools {
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tree-tools input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 9px;
+      outline: none;
+    }
+
+    .tree-tools input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(27, 127, 95, 0.15);
+    }
+
+    .tree-options {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tree-options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tree {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 8px 6px 12px;
+    }
+
+    .empty {
+      margin: 18px 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .node {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 28px;
+      border-radius: 6px;
+      padding: 0 8px;
+      cursor: pointer;
+      user-select: none;
+      min-width: max-content;
+    }
+
+    .node:hover {
+      background: var(--panel-2);
+    }
+
+    .node.active {
+      background: rgba(27, 127, 95, 0.12);
+      color: var(--accent-dark);
+      font-weight: 650;
+    }
+
+    .twisty {
+      width: 14px;
+      color: var(--muted);
+      text-align: center;
+      flex: 0 0 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .icon {
+      width: 18px;
+      flex: 0 0 18px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .node-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 300px;
+    }
+
+    .node-children {
+      margin-left: 18px;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .editor-toolbar {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .path {
+      color: var(--muted);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-right: auto;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 9px;
+      color: var(--muted);
+      background: #fafbfc;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .badge.dirty {
+      color: var(--warn);
+      border-color: rgba(154, 106, 18, 0.35);
+      background: rgba(154, 106, 18, 0.08);
+    }
+
+    .notice {
+      display: none;
+      border-bottom: 1px solid #e2cf9b;
+      background: #fff8df;
+      color: #6d510b;
+      padding: 9px 12px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .notice.visible {
+      display: block;
+    }
+
+    .editor-shell {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      background: #fbfcfd;
+    }
+
+    .workbench {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 42%);
+      background: #fbfcfd;
+    }
+
+    .editor-pane {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      border-right: 1px solid var(--line);
+    }
+
+    .preview-pane {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 34px 1fr;
+      background: #fff;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      padding: 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
+      min-width: 0;
+    }
+
+    .preview-header span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: white;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      resize: none;
+      border: 0;
+      outline: none;
+      padding: 18px 20px;
+      background: #fbfcfd;
+      color: #101820;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.55;
+      tab-size: 2;
+      white-space: pre;
+    }
+
+    .placeholder {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      padding: 30px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .statusbar {
+      height: 28px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .statusbar span {
+      white-space: nowrap;
+    }
+
+    .statusbar .grow {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: 42vh 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workbench {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(260px, 1fr) minmax(220px, 0.8fr);
+      }
+
+      .editor-pane {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="topbar">
+        <div class="title">File Editor</div>
+        <button id="openFolderBtn" class="primary" title="Open a local folder">Open Folder</button>
+        <button id="openFilesBtn" class="hidden" title="Open files without write access">Open Files</button>
+      </div>
+
+      <div class="tree-tools">
+        <input id="filterInput" type="search" placeholder="Filter loaded files">
+        <button id="refreshBtn" title="Reload the folder tree">Refresh</button>
+        <div class="tree-options">
+          <label><input id="hiddenToggle" type="checkbox"> Show hidden</label>
+          <span id="modeText">No folder selected</span>
+        </div>
+      </div>
+
+      <div id="tree" class="tree">
+        <div class="empty">Open a folder to edit files directly from the browser. Use Chrome or Edge on macOS for real save-back support.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="editor-toolbar">
+        <div id="activePath" class="path">No file open</div>
+        <span id="dirtyBadge" class="badge">Clean</span>
+        <button id="newFileBtn" title="Create a file in the selected folder">New File</button>
+        <button id="newFolderBtn" title="Create a folder in the selected folder">New Folder</button>
+        <button id="deleteBtn" class="danger" title="Delete selected file or empty folder">Delete</button>
+        <button id="previewToggle" title="Show or hide the rendered preview">Preview</button>
+        <button id="saveBtn" class="primary" title="Save the current file">Save</button>
+      </div>
+
+      <div id="apiNotice" class="notice">
+        Direct folder saving is not available in this browser. You can still open files and export edits as downloads. For direct save-back on macOS, use Chrome or Edge.
+      </div>
+
+      <div class="editor-shell">
+        <div id="workbench" class="workbench">
+          <div id="editorPane" class="editor-pane">
+            <div id="placeholder" class="placeholder">
+              Select a text file from the tree. Shortcuts: Cmd+O opens a folder, Cmd+S saves, Cmd+N creates a file.
+            </div>
+            <textarea id="editor" class="hidden" spellcheck="false"></textarea>
+          </div>
+          <section id="previewPane" class="preview-pane">
+            <div class="preview-header"><span id="previewTitle">Preview</span></div>
+            <iframe id="previewFrame" class="preview-frame" title="Current file preview" sandbox=""></iframe>
+          </section>
+        </div>
+        <div class="statusbar">
+          <span id="lineCol">Ln 1, Col 1</span>
+          <span id="charCount">0 chars</span>
+          <span id="saveMode">read/write</span>
+          <span id="statusText" class="grow">Ready</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <input id="fileInput" class="hidden" type="file" multiple webkitdirectory>
+
+  <script>
+    const hasNativeFs = "showDirectoryPicker" in window;
+    const state = {
+      rootHandle: null,
+      rootNode: null,
+      selectedNode: null,
+      selectedDir: null,
+      activeFile: null,
+      dirty: false,
+      fallbackFiles: [],
+      fallbackTree: null,
+      fallbackMode: false,
+      showHidden: false,
+      previewVisible: true,
+    };
+
+    const els = {
+      openFolderBtn: document.getElementById("openFolderBtn"),
+      openFilesBtn: document.getElementById("openFilesBtn"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      filterInput: document.getElementById("filterInput"),
+      hiddenToggle: document.getElementById("hiddenToggle"),
+      tree: document.getElementById("tree"),
+      modeText: document.getElementById("modeText"),
+      activePath: document.getElementById("activePath"),
+      dirtyBadge: document.getElementById("dirtyBadge"),
+      newFileBtn: document.getElementById("newFileBtn"),
+      newFolderBtn: document.getElementById("newFolderBtn"),
+      deleteBtn: document.getElementById("deleteBtn"),
+      previewToggle: document.getElementById("previewToggle"),
+      saveBtn: document.getElementById("saveBtn"),
+      apiNotice: document.getElementById("apiNotice"),
+      workbench: document.getElementById("workbench"),
+      editorPane: document.getElementById("editorPane"),
+      previewPane: document.getElementById("previewPane"),
+      previewTitle: document.getElementById("previewTitle"),
+      previewFrame: document.getElementById("previewFrame"),
+      placeholder: document.getElementById("placeholder"),
+      editor: document.getElementById("editor"),
+      fileInput: document.getElementById("fileInput"),
+      lineCol: document.getElementById("lineCol"),
+      charCount: document.getElementById("charCount"),
+      saveMode: document.getElementById("saveMode"),
+      statusText: document.getElementById("statusText"),
+    };
+
+    const textExtensions = new Set([
+      "txt", "md", "markdown", "py", "js", "ts", "tsx", "jsx", "html", "css", "scss",
+      "json", "jsonl", "yml", "yaml", "toml", "ini", "cfg", "conf", "sh", "zsh",
+      "bash", "csv", "tsv", "xml", "svg", "swift", "c", "h", "cc", "cpp", "hpp",
+      "java", "kt", "rs", "go", "rb", "php", "sql", "log", "gitignore", "env"
+    ]);
+
+    function setStatus(message) {
+      els.statusText.textContent = message;
+    }
+
+    function isHiddenName(name) {
+      return name.startsWith(".");
+    }
+
+    function getExtension(name) {
+      const base = name.split("/").pop() || name;
+      if (base === ".gitignore" || base === ".env") return base.slice(1);
+      const index = base.lastIndexOf(".");
+      return index === -1 ? "" : base.slice(index + 1).toLowerCase();
+    }
+
+    function isLikelyTextFile(name, size) {
+      if (size > 8 * 1024 * 1024) return false;
+      const ext = getExtension(name);
+      return textExtensions.has(ext) || !ext;
+    }
+
+    function normalizeRelativePath(path) {
+      const clean = path.trim().replaceAll("\\", "/").replace(/^\/+/, "");
+      if (!clean || clean.includes("..") || clean.split("/").some(part => !part.trim())) {
+        throw new Error("Use a relative path without empty parts or '..'.");
+      }
+      return clean;
+    }
+
+    function sortNodes(nodes) {
+      return nodes.sort((a, b) => {
+        if (a.kind !== b.kind) return a.kind === "directory" ? -1 : 1;
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+      });
+    }
+
+    function makeNode(name, kind, handle, path, parent = null) {
+      return {
+        name,
+        kind,
+        handle,
+        path,
+        parent,
+        expanded: false,
+        childrenLoaded: false,
+        children: [],
+      };
+    }
+
+    async function requestReadWrite(handle) {
+      if (!handle || !handle.requestPermission) return true;
+      const opts = { mode: "readwrite" };
+      if ((await handle.queryPermission(opts)) === "granted") return true;
+      return (await handle.requestPermission(opts)) === "granted";
+    }
+
+    async function loadChildren(node) {
+      if (!node || node.kind !== "directory" || state.fallbackMode) return;
+      const children = [];
+      for await (const [name, handle] of node.handle.entries()) {
+        if (!state.showHidden && isHiddenName(name)) continue;
+        const childPath = node.path ? `${node.path}/${name}` : name;
+        children.push(makeNode(name, handle.kind, handle, childPath, node));
+      }
+      node.children = sortNodes(children);
+      node.childrenLoaded = true;
+    }
+
+    function ensureEditorVisible(visible) {
+      els.placeholder.classList.toggle("hidden", visible);
+      els.editor.classList.toggle("hidden", !visible);
+      updatePreview();
+    }
+
+    function updateButtons() {
+      const nativeWrite = hasNativeFs && !state.fallbackMode && state.rootHandle;
+      els.saveBtn.disabled = !state.activeFile || (!state.dirty && nativeWrite);
+      els.newFileBtn.disabled = !nativeWrite;
+      els.newFolderBtn.disabled = !nativeWrite;
+      els.deleteBtn.disabled = !nativeWrite || !state.selectedNode || state.selectedNode === state.rootNode;
+      els.refreshBtn.disabled = !state.rootNode && !state.fallbackTree;
+      els.dirtyBadge.textContent = state.dirty ? "Modified" : "Clean";
+      els.dirtyBadge.classList.toggle("dirty", state.dirty);
+      els.saveMode.textContent = state.fallbackMode ? "download export" : "read/write";
+      els.previewToggle.textContent = state.previewVisible ? "Hide Preview" : "Preview";
+    }
+
+    function updateCursorStats() {
+      const value = els.editor.value;
+      const pos = els.editor.selectionStart || 0;
+      const before = value.slice(0, pos);
+      const lines = before.split("\n");
+      els.lineCol.textContent = `Ln ${lines.length}, Col ${lines[lines.length - 1].length + 1}`;
+      els.charCount.textContent = `${value.length.toLocaleString()} chars`;
+    }
+
+    function setDirty(dirty) {
+      state.dirty = dirty;
+      updateButtons();
+      updatePreview();
+    }
+
+    function maybeConfirmDiscard() {
+      if (!state.dirty) return true;
+      return window.confirm("Discard unsaved edits?");
+    }
+
+    async function openFolder() {
+      if (!hasNativeFs) {
+        els.fileInput.click();
+        return;
+      }
+      if (!maybeConfirmDiscard()) return;
+      try {
+        const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+        if (!(await requestReadWrite(handle))) {
+          setStatus("Folder permission was not granted.");
+          return;
+        }
+        state.fallbackMode = false;
+        state.rootHandle = handle;
+        state.rootNode = makeNode(handle.name, "directory", handle, "", null);
+        state.rootNode.expanded = true;
+        state.selectedDir = state.rootNode;
+        state.selectedNode = state.rootNode;
+        await loadChildren(state.rootNode);
+        clearEditor();
+        renderTree();
+        els.modeText.textContent = `Folder: ${handle.name}`;
+        setStatus("Folder opened.");
+      } catch (err) {
+        if (err.name !== "AbortError") setStatus(err.message || "Could not open folder.");
+      }
+    }
+
+    function clearEditor() {
+      state.activeFile = null;
+      setDirty(false);
+      els.activePath.textContent = "No file open";
+      els.editor.value = "";
+      ensureEditorVisible(false);
+      updateCursorStats();
+      updatePreview();
+    }
+
+    async function openNode(node) {
+      if (!node) return;
+      state.selectedNode = node;
+      if (node.kind === "directory") {
+        state.selectedDir = node;
+        node.expanded = !node.expanded;
+        if (!node.childrenLoaded) await loadChildren(node);
+        renderTree();
+        updateButtons();
+        return;
+      }
+      await openFileNode(node);
+    }
+
+    async function openFileNode(node) {
+      if (!maybeConfirmDiscard()) return;
+      try {
+        const file = state.fallbackMode ? node.file : await node.handle.getFile();
+        if (!isLikelyTextFile(file.name || node.name, file.size)) {
+          const ok = window.confirm("This file may be binary or large. Open it as text anyway?");
+          if (!ok) return;
+        }
+        const text = await file.text();
+        state.activeFile = node;
+        state.selectedNode = node;
+        state.selectedDir = node.parent || state.rootNode;
+        els.editor.value = text;
+        els.activePath.textContent = node.path || node.name;
+        ensureEditorVisible(true);
+        setDirty(false);
+        updateCursorStats();
+        updatePreview();
+        renderTree();
+        setStatus(`Opened ${node.path || node.name}`);
+        els.editor.focus();
+      } catch (err) {
+        setStatus(err.message || "Could not open file.");
+      }
+    }
+
+    async function saveFile() {
+      if (!state.activeFile) return;
+      try {
+        if (state.fallbackMode) {
+          downloadText(state.activeFile.name, els.editor.value);
+          setDirty(false);
+          setStatus("Downloaded edited copy.");
+          return;
+        }
+        if (!(await requestReadWrite(state.activeFile.handle))) {
+          setStatus("Write permission was not granted.");
+          return;
+        }
+        const writable = await state.activeFile.handle.createWritable();
+        await writable.write(els.editor.value);
+        await writable.close();
+        setDirty(false);
+        setStatus(`Saved ${state.activeFile.path}`);
+      } catch (err) {
+        setStatus(err.message || "Save failed.");
+      }
+    }
+
+    function downloadText(name, text) {
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name || "edited-file.txt";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function renderInlineMarkdown(value) {
+      return escapeHtml(value)
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        .replace(/&lt;(https?:\/\/.+?)&gt;/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    }
+
+    function markdownToHtml(markdown) {
+      const lines = String(markdown).replace(/\r\n/g, "\n").split("\n");
+      const out = [];
+      let inCode = false;
+      let inUl = false;
+      let inOl = false;
+
+      function closeLists() {
+        if (inUl) {
+          out.push("</ul>");
+          inUl = false;
+        }
+        if (inOl) {
+          out.push("</ol>");
+          inOl = false;
+        }
+      }
+
+      const isTableSep = s => /^\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?$/.test(s) && s.includes("-");
+      const splitRow = s => s.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(c => c.trim());
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.trim().startsWith("```")) {
+          if (inCode) {
+            out.push("</code></pre>");
+            inCode = false;
+          } else {
+            closeLists();
+            inCode = true;
+            out.push("<pre><code>");
+          }
+          continue;
+        }
+
+        if (inCode) {
+          out.push(`${escapeHtml(line)}\n`);
+          continue;
+        }
+
+        const trimmed = line.trim();
+        if (!trimmed) {
+          closeLists();
+          continue;
+        }
+
+        if (trimmed.includes("|") && i + 1 < lines.length && isTableSep(lines[i + 1].trim())) {
+          closeLists();
+          const header = splitRow(trimmed);
+          const body = [];
+          i += 2;
+          while (i < lines.length && lines[i].trim().includes("|") && lines[i].trim()) {
+            body.push(splitRow(lines[i].trim()));
+            i++;
+          }
+          i--;
+          let tbl = "<table><thead><tr>" + header.map(h => `<th>${renderInlineMarkdown(h)}</th>`).join("") + "</tr></thead><tbody>";
+          for (const brow of body) tbl += "<tr>" + brow.map(c => `<td>${renderInlineMarkdown(c)}</td>`).join("") + "</tr>";
+          tbl += "</tbody></table>";
+          out.push(tbl);
+          continue;
+        }
+
+        const heading = /^(#{1,6})\s+(.+)$/.exec(trimmed);
+        if (heading) {
+          closeLists();
+          const level = heading[1].length;
+          out.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`);
+          continue;
+        }
+
+        const unordered = /^[-*]\s+(.+)$/.exec(trimmed);
+        if (unordered) {
+          if (inOl) {
+            out.push("</ol>");
+            inOl = false;
+          }
+          if (!inUl) {
+            out.push("<ul>");
+            inUl = true;
+          }
+          out.push(`<li>${renderInlineMarkdown(unordered[1])}</li>`);
+          continue;
+        }
+
+        const ordered = /^\d+\.\s+(.+)$/.exec(trimmed);
+        if (ordered) {
+          if (inUl) {
+            out.push("</ul>");
+            inUl = false;
+          }
+          if (!inOl) {
+            out.push("<ol>");
+            inOl = true;
+          }
+          out.push(`<li>${renderInlineMarkdown(ordered[1])}</li>`);
+          continue;
+        }
+
+        closeLists();
+        out.push(`<p>${renderInlineMarkdown(trimmed)}</p>`);
+      }
+
+      closeLists();
+      if (inCode) out.push("</code></pre>");
+      return out.join("\n");
+    }
+
+    function previewDocument(title, body, mode = "preview") {
+      return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      padding: 18px;
+      color: #152129;
+      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; margin: 1.1em 0 0.45em; }
+    h1:first-child, h2:first-child, h3:first-child { margin-top: 0; }
+    h1 { font-size: 26px; }
+    h2 { font-size: 21px; border-bottom: 1px solid #d8e0e5; padding-bottom: 5px; }
+    h3 { font-size: 17px; }
+    p { margin: 0.65em 0; }
+    ul, ol { padding-left: 1.4em; }
+    code {
+      background: #eef2f4;
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    pre {
+      overflow: auto;
+      background: #f4f7f8;
+      border: 1px solid #d8e0e5;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; margin: 0.8em 0; font-size: 0.95em; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8e0e5; padding: 6px 10px; text-align: left; vertical-align: top; }
+    th { background: #eef2f4; }
+    a { color: #1b7f5f; }
+    img { max-width: 100%; height: auto; }
+    .empty {
+      display: grid;
+      min-height: 45vh;
+      place-items: center;
+      color: #697983;
+      text-align: center;
+    }
+    .plain-title {
+      color: #697983;
+      font-size: 12px;
+      margin-bottom: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+  </style>
+  <title>${escapeHtml(title)}</title>
+</head>
+<body class="${mode}">${body}</body>
+</html>`;
+    }
+
+    function updatePreview() {
+      if (!els.previewPane || !els.previewFrame) return;
+      els.previewPane.classList.toggle("hidden", !state.previewVisible);
+      els.workbench.style.gridTemplateColumns = state.previewVisible
+        ? "minmax(0, 1fr) minmax(300px, 42%)"
+        : "minmax(0, 1fr)";
+
+      if (!state.previewVisible) {
+        return;
+      }
+
+      if (!state.activeFile) {
+        els.previewTitle.textContent = "Preview";
+        els.previewFrame.srcdoc = previewDocument("Preview", '<div class="empty">Open a file to preview it here.</div>');
+        return;
+      }
+
+      const path = state.activeFile.path || state.activeFile.name;
+      const ext = getExtension(path);
+      const content = els.editor.value;
+      els.previewTitle.textContent = `Preview: ${path}`;
+
+      if (ext === "html" || ext === "htm" || ext === "svg") {
+        els.previewFrame.srcdoc = content;
+      } else if (ext === "md" || ext === "markdown") {
+        els.previewFrame.srcdoc = previewDocument(path, markdownToHtml(content), "markdown");
+      } else {
+        const body = `<div class="plain-title">${escapeHtml(path)}</div><pre><code>${escapeHtml(content)}</code></pre>`;
+        els.previewFrame.srcdoc = previewDocument(path, body, "plain");
+      }
+    }
+
+    async function getDirectoryForPath(baseNode, parts, create) {
+      let handle = baseNode.handle;
+      let node = baseNode;
+      for (const part of parts) {
+        handle = await handle.getDirectoryHandle(part, { create });
+        let child = node.children.find(item => item.kind === "directory" && item.name === part);
+        if (!child) {
+          child = makeNode(part, "directory", handle, node.path ? `${node.path}/${part}` : part, node);
+          node.children.push(child);
+          node.children = sortNodes(node.children);
+        }
+        node = child;
+      }
+      return { handle, node };
+    }
+
+    async function createFile() {
+      if (state.fallbackMode || !state.selectedDir) return;
+      const raw = window.prompt("File path relative to selected folder:");
+      if (!raw) return;
+      try {
+        const clean = normalizeRelativePath(raw);
+        const parts = clean.split("/");
+        const fileName = parts.pop();
+        const { handle: dirHandle, node: dirNode } = await getDirectoryForPath(state.selectedDir, parts, true);
+        const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+        dirNode.childrenLoaded = false;
+        dirNode.expanded = true;
+        await loadChildren(dirNode);
+        renderTree();
+        const created = dirNode.children.find(item => item.kind === "file" && item.name === fileName);
+        if (created) await openFileNode(created);
+        setStatus(`Created ${clean}`);
+      } catch (err) {
+        setStatus(err.message || "Could not create file.");
+      }
+    }
+
+    async function createFolder() {
+      if (state.fallbackMode || !state.selectedDir) return;
+      const raw = window.prompt("Folder path relative to selected folder:");
+      if (!raw) return;
+      try {
+        const clean = normalizeRelativePath(raw);
+        const parts = clean.split("/");
+        await getDirectoryForPath(state.selectedDir, parts, true);
+        state.selectedDir.childrenLoaded = false;
+        state.selectedDir.expanded = true;
+        await loadChildren(state.selectedDir);
+        renderTree();
+        setStatus(`Created ${clean}`);
+      } catch (err) {
+        setStatus(err.message || "Could not create folder.");
+      }
+    }
+
+    async function deleteSelected() {
+      const node = state.selectedNode;
+      if (!node || node === state.rootNode || state.fallbackMode || !node.parent) return;
+      const ok = window.confirm(`Delete ${node.path}? Directories must be empty.`);
+      if (!ok) return;
+      try {
+        await node.parent.handle.removeEntry(node.name, { recursive: false });
+        if (state.activeFile === node) clearEditor();
+        node.parent.childrenLoaded = false;
+        await loadChildren(node.parent);
+        state.selectedNode = node.parent;
+        state.selectedDir = node.parent;
+        renderTree();
+        setStatus(`Deleted ${node.path}`);
+      } catch (err) {
+        setStatus(err.message || "Delete failed. Directory may not be empty.");
+      }
+    }
+
+    async function refreshTree() {
+      if (state.fallbackMode) {
+        renderTree();
+        return;
+      }
+      if (!state.rootNode) return;
+      const expandedPaths = new Set();
+      collectExpanded(state.rootNode, expandedPaths);
+      state.rootNode.childrenLoaded = false;
+      await loadChildren(state.rootNode);
+      restoreExpanded(state.rootNode, expandedPaths);
+      renderTree();
+      setStatus("Tree refreshed.");
+    }
+
+    function collectExpanded(node, paths) {
+      if (node.expanded) paths.add(node.path);
+      for (const child of node.children || []) collectExpanded(child, paths);
+    }
+
+    function restoreExpanded(node, paths) {
+      node.expanded = paths.has(node.path);
+      for (const child of node.children || []) restoreExpanded(child, paths);
+    }
+
+    function matchesFilter(node, filter) {
+      if (!filter) return true;
+      const path = (node.path || node.name).toLowerCase();
+      return path.includes(filter);
+    }
+
+    function subtreeMatches(node, filter) {
+      if (matchesFilter(node, filter)) return true;
+      return (node.children || []).some(child => subtreeMatches(child, filter));
+    }
+
+    function renderTree() {
+      const root = state.fallbackMode ? state.fallbackTree : state.rootNode;
+      els.tree.textContent = "";
+      if (!root) {
+        els.tree.innerHTML = '<div class="empty">Open a folder to edit files directly from the browser. Use Chrome or Edge on macOS for real save-back support.</div>';
+        updateButtons();
+        return;
+      }
+      const filter = els.filterInput.value.trim().toLowerCase();
+      const fragment = document.createDocumentFragment();
+      renderNode(root, fragment, filter, true);
+      els.tree.appendChild(fragment);
+      updateButtons();
+    }
+
+    function renderNode(node, parentEl, filter, isRoot = false) {
+      if (filter && !subtreeMatches(node, filter)) return;
+      if (!state.showHidden && !isRoot && isHiddenName(node.name)) return;
+
+      const row = document.createElement("div");
+      row.className = "node";
+      if (state.selectedNode === node || state.activeFile === node) row.classList.add("active");
+      row.style.paddingLeft = isRoot ? "8px" : "8px";
+
+      const twisty = document.createElement("span");
+      twisty.className = "twisty";
+      twisty.textContent = node.kind === "directory" ? (node.expanded || filter ? "v" : ">") : "";
+
+      const icon = document.createElement("span");
+      icon.className = "icon";
+      icon.textContent = node.kind === "directory" ? "[D]" : "[F]";
+
+      const name = document.createElement("span");
+      name.className = "node-name";
+      name.textContent = isRoot ? (node.name || "Selected files") : node.name;
+
+      row.append(twisty, icon, name);
+      row.title = node.path || node.name;
+      row.addEventListener("click", async () => {
+        await openNode(node);
+      });
+      parentEl.appendChild(row);
+
+      const shouldShowChildren = node.kind === "directory" && (node.expanded || filter);
+      if (shouldShowChildren) {
+        const childrenWrap = document.createElement("div");
+        childrenWrap.className = "node-children";
+        for (const child of node.children || []) renderNode(child, childrenWrap, filter, false);
+        parentEl.appendChild(childrenWrap);
+      }
+    }
+
+    function buildFallbackTree(files) {
+      const root = makeNode("Selected files", "directory", null, "", null);
+      root.expanded = true;
+      root.childrenLoaded = true;
+
+      for (const file of files) {
+        const relPath = file.webkitRelativePath || file.name;
+        const parts = relPath.split("/").filter(Boolean);
+        let current = root;
+        let path = "";
+        parts.forEach((part, index) => {
+          path = path ? `${path}/${part}` : part;
+          const isFile = index === parts.length - 1;
+          let child = current.children.find(item => item.name === part && item.kind === (isFile ? "file" : "directory"));
+          if (!child) {
+            child = makeNode(part, isFile ? "file" : "directory", null, path, current);
+            child.childrenLoaded = true;
+            current.children.push(child);
+            current.children = sortNodes(current.children);
+          }
+          if (isFile) child.file = file;
+          current = child;
+        });
+      }
+      return root;
+    }
+
+    function openFallbackFiles(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      if (!maybeConfirmDiscard()) return;
+      state.fallbackMode = true;
+      state.fallbackFiles = files;
+      state.fallbackTree = buildFallbackTree(files);
+      state.rootNode = null;
+      state.rootHandle = null;
+      state.selectedNode = state.fallbackTree;
+      state.selectedDir = state.fallbackTree;
+      clearEditor();
+      renderTree();
+      els.modeText.textContent = `${files.length.toLocaleString()} files loaded`;
+      setStatus("Fallback mode: saves download edited copies.");
+    }
+
+    function setupBrowserMode() {
+      if (!hasNativeFs) {
+        els.openFolderBtn.classList.add("hidden");
+        els.openFilesBtn.classList.remove("hidden");
+        els.apiNotice.classList.add("visible");
+        els.modeText.textContent = "Fallback mode";
+      }
+    }
+
+    els.openFolderBtn.addEventListener("click", openFolder);
+    els.openFilesBtn.addEventListener("click", () => els.fileInput.click());
+    els.fileInput.addEventListener("change", openFallbackFiles);
+    els.saveBtn.addEventListener("click", saveFile);
+    els.newFileBtn.addEventListener("click", createFile);
+    els.newFolderBtn.addEventListener("click", createFolder);
+    els.deleteBtn.addEventListener("click", deleteSelected);
+    els.previewToggle.addEventListener("click", () => {
+      state.previewVisible = !state.previewVisible;
+      updateButtons();
+      updatePreview();
+    });
+    els.refreshBtn.addEventListener("click", refreshTree);
+    els.filterInput.addEventListener("input", renderTree);
+    els.hiddenToggle.addEventListener("change", async () => {
+      state.showHidden = els.hiddenToggle.checked;
+      if (state.rootNode && !state.fallbackMode) await refreshTree();
+      renderTree();
+    });
+
+    els.editor.addEventListener("input", () => {
+      setDirty(true);
+      updateCursorStats();
+      updatePreview();
+    });
+    els.editor.addEventListener("keyup", updateCursorStats);
+    els.editor.addEventListener("click", updateCursorStats);
+
+    els.editor.addEventListener("keydown", event => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        const start = els.editor.selectionStart;
+        const end = els.editor.selectionEnd;
+        const value = els.editor.value;
+        els.editor.value = `${value.slice(0, start)}  ${value.slice(end)}`;
+        els.editor.selectionStart = els.editor.selectionEnd = start + 2;
+        setDirty(true);
+        updateCursorStats();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      const mod = event.metaKey || event.ctrlKey;
+      if (!mod) return;
+      const key = event.key.toLowerCase();
+      if (key === "s") {
+        event.preventDefault();
+        saveFile();
+      } else if (key === "o") {
+        event.preventDefault();
+        openFolder();
+      } else if (key === "n") {
+        event.preventDefault();
+        createFile();
+      }
+    });
+
+    window.addEventListener("beforeunload", event => {
+      if (!state.dirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    });
+
+    setupBrowserMode();
+    updateButtons();
+    updateCursorStats();
+    updatePreview();
+  </script>
+</body>
+</html>

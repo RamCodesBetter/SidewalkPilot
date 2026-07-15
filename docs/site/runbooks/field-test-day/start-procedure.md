@@ -1,19 +1,33 @@
 # Start Procedure
 
-TODO:
+Use this sequence for a controlled field test.
 
-- [ ] Add page-specific notes for `runbooks/field-test-day/start-procedure.md` after inspecting the real project files.
-- [ ] Cross-link `Start Procedure` to the most relevant code, data, testing, and safety pages.
-- [ ] Write the step-by-step procedure in the order it must be done.
-- [ ] List preconditions that must be true before starting.
-- [ ] List exact commands, files, hardware switches, and dashboard checks.
-- [ ] Add stop conditions where the runbook should be aborted.
-- [ ] Add evidence to save after completing the runbook.
-- [ ] Add post-run cleanup and sync steps.
-- [ ] Add test date, time, weather, route, model version, and manual takeover count.
-- [ ] Add what failed, what worked, and what data should be collected next.
-- [ ] Add the exact test command or manual test procedure.
-- [ ] Record expected result, failure result, and evidence to save.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
+## Before Motion
+
+1. Inspect steering linkage, wheels, wiring, batteries, and emergency-stop access.
+2. Power the computers and confirm the Xbox controller is connected.
+3. Confirm the Pi-to-Zero USB network and Pi-to-Jon Ethernet link.
+4. Keep the car lifted or physically restrained during startup checks.
+
+## Start Services
+
+On the Zero 2 W, confirm `sidewalkpilot-z2w-dashboard.service` is running. On Jon, confirm the inference service is running. Then start the Pi controller:
+
+```bash
+cd ~/rc_car_code/code/controller/current
+car
+```
+
+Do not append `--model`; the entrypoint does not accept that option. Select the intended model from the dashboard and verify the reported version before enabling autonomy.
+
+## Required Checks
+
+- Joystick input is immediate and the control map prints.
+- GPIO/PCA9685 initialization succeeds.
+- LiDAR connects on the expected USB serial device.
+- Camera capture starts.
+- Jon responds with the selected model and a GPU provider.
+- Dashboard values update instead of showing `NO LINK` or stale data.
+- Steering and throttle respond correctly while the wheels are unloaded.
+
+Abort the autonomous test if the selected model, safety sensor, controller, or required link is unavailable. Record every degraded subsystem in the run notes.

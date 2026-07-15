@@ -1,19 +1,27 @@
-# Hero Run
+# Hero Run Evidence Standard
 
-TODO:
+This page defines what a future end-to-end hero-run artifact must contain. It does not claim that a complete, indexed hero clip and matching log are already published.
 
-- [ ] Add page-specific notes for `portfolio-evidence/demonstrations/hero-run.md` after inspecting the real project files.
-- [ ] Cross-link `Hero Run` to the most relevant code, data, testing, and safety pages.
-- [ ] Identify the exact claim this page is supposed to support.
-- [ ] List the public-facing evidence needed for this claim.
-- [ ] Add links to videos, photos, logs, screenshots, or reports that prove the claim.
-- [ ] State what a general reader should understand after seeing the evidence.
-- [ ] State what a technical reviewer should be able to verify from the evidence.
-- [ ] Separate proven results from still-in-progress work.
-- [ ] Add dates, model versions, dataset names, and test conditions where relevant.
-- [ ] Add limitations so the evidence is honest and not overstated.
-- [ ] Add the demo file, date, model version, and what behavior is visible.
-- [ ] Add what a viewer should not infer from this demo.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
+## What a Valid Clip Shows
+
+1. The selected model version and live Jon inference state.
+2. Camera-driven steering reaching the PCA9685 servo.
+3. Forward motion through the AT8236 motor controller.
+4. Live dashboard values over USB Ethernet.
+5. The operator present with a connected controller and line of sight.
+6. A matching CSV log for the run.
+
+LiDAR does not steer around obstacles. With AEB enabled, it can reduce forward throttle in the center corridor or request a hard brake at the emergency boundary.
+
+## Claim Boundary
+
+A hero clip proves an integrated run under the recorded route, model, lighting, payload, and operator conditions. It does not prove unrestricted autonomy, a universal top speed, detection of every obstacle, or safe unsupervised operation.
+
+The July 13 comparison selected v3.4 after the tested normal and shadow turn cases, but its exact clip and route metadata were not preserved here. Series 4 has no hero-run or field verdict yet.
+
+## Evidence
+
+- Matching video and `~/logs/log_*.csv` file, or the equivalent file under the configured `RC_CAR_LOG_DIR`.
+- Model/version startup log.
+- Dashboard view showing current state.
+- Run notes describing route, light, AEB state, interventions, and limitations.

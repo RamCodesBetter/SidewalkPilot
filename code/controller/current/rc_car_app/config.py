@@ -3,7 +3,7 @@ import datetime
 import math
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # --- SELF-DRIVING BUILD FLAGS ---
 ENABLE_HALL_SENSOR = True
@@ -14,6 +14,10 @@ PI_CAMERA_ROTATE_180 = True
 
 AUTONOMOUS_CRUISE_PWM = 1.0
 AUTONOMOUS_TURN_PWM = 1.0
+# Autonomous stints shorter than this don't count toward AUT (avg uptime) or IPKM
+# (interventions/km) -- a quick tap in/out isn't a real stint. They STILL count toward
+# ADT (distance) and ICSE (last cause code).
+AUTONOMY_MIN_SEGMENT_S = 6.0
 AUTONOMOUS_WARN_PWM = 0.8
 AUTONOMOUS_LIDAR_OVERRIDE_PWM = 0.5
 CAMERA_STEER_GAIN = 0.75
@@ -38,32 +42,37 @@ HIGH_CAMERA_CONFIDENCE = 0.60
 DRIVEWAY_CUT_MIN_FORWARD_CLEARANCE_M = 1.2
 DRIVEWAY_CUT_DETECTION_SECONDS = 0.35
 FORWARD_OBSTACLE_STOP_DISTANCE_M = 0.5
-PARTIAL_BLOCKAGE_MIN_CLEARANCE_M = 0.8
-LIDAR_OVERRIDE_EMERGENCY_STOP_M = 0.95   # hard-stop backstop (raised for earlier reaction)
-LIDAR_OVERRIDE_SIDE_CLEARANCE_M = 0.75
-LIDAR_OVERRIDE_STEER_DEG = 38.0
+LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05   # hard-stop backstop (raised for earlier reaction)
 
-# --- LiDAR AVOIDANCE (validated in test_files/lidar_avoidance_sim.py) ---
-# Forward cone (+/-) that can BLOCK the path; wider = brakes for more off-center stuff.
-LIDAR_FORWARD_CONE_DEG = 30.0        # forward cone that BLOCKS the path (matches the V7H1 cone rays)
-LIDAR_NEAR_ANGLE_DEG = 75.0          # full sensed fan; the 30..75 wedges = swerve-clearance only
+# --- LiDAR CENTER-CORRIDOR AEB ---
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762  # dashboard preview: half of a 5ft sidewalk
+LIDAR_CENTER_HALF_WIDTH_M = LIDAR_CORRIDOR_HALF_WIDTH_M / 3.0
 LIDAR_MIN_CONFIDENCE = 150           # ignore low-confidence points
-LIDAR_WARN_M = 1.30                  # forward point closer than this triggers classify/react
-LIDAR_GOV_FULL_M = 1.55              # governor full throttle at/above this clearance
-LIDAR_GOV_STOP_M = 1.15              # governor throttle 0 at/below this (above the 0.95 emergency)
-LIDAR_MIN_MOVE_PWM = 0.55            # car can't move below this -> governor floors "moving" here
-LIDAR_AVOID_SIDE_CLEAR_M = 0.40      # a side needs this much room to swerve into
-LIDAR_CLUSTER_GAP_DEG = 8.0          # angular gap that splits one object into two (separates legs)
-LIDAR_NARROW_MAX_DEG = 15.0          # narrower than this = post/mailbox (swervable)
-LIDAR_WIDE_MIN_DEG = 18.0            # wider than this = wall/person (full stop)
-LIDAR_LEG_GAP_MAX_DEG = 45.0         # two clusters within this apart = a person's two legs
-LIDAR_LEG_RANGE_TOL_M = 0.40         # ...and at matching range = same person
-LIDAR_SWERVE_MIN_DEG = 20.0          # gentle swerve when the mailbox is far (~WARN)
-LIDAR_SWERVE_MAX_DEG = 80.0          # hard swerve when it's close (~GOV_STOP); logical 90 -/+ this
-LIDAR_SWERVE_THROTTLE_DROP = 0.30    # sharper swerves shed this much throttle (gentle=full, hardest=CRUISE-drop)
+LIDAR_WARN_M = 1.40                  # warning rung inside the governed center corridor
+LIDAR_GOV_FULL_M = 1.65              # governor full throttle at/above this clearance
+LIDAR_GOV_STOP_M = 1.25              # governor reaches its hold throttle at/below this
+LIDAR_MIN_MOVE_PWM = 0.55            # physical motor dead-zone boundary (reference 0%)
+LIDAR_GOV_MIN_REFERENCE = 0.60       # closest non-EMR governor target on the useful scale
+
+
+def absolute_throttle_to_reference(absolute_pwm: float) -> float:
+    """Map physical motor PWM to the useful 0..1 range without changing saved labels."""
+    absolute = max(0.0, min(1.0, abs(float(absolute_pwm))))
+    if absolute <= LIDAR_MIN_MOVE_PWM:
+        return 0.0
+    usable_span = 1.0 - LIDAR_MIN_MOVE_PWM
+    return (absolute - LIDAR_MIN_MOVE_PWM) / usable_span
+
+
+def reference_throttle_to_absolute(reference_throttle: float) -> float:
+    """Map useful-range throttle to physical PWM without changing saved labels."""
+    reference = max(0.0, min(1.0, abs(float(reference_throttle))))
+    return LIDAR_MIN_MOVE_PWM + reference * (1.0 - LIDAR_MIN_MOVE_PWM)
+
+
+LIDAR_GOV_MIN_PWM = reference_throttle_to_absolute(LIDAR_GOV_MIN_REFERENCE)
 
 # --- GPIO SETUP ---
-STEERING_SERVO_PIN = 12
 HALL_SENSOR_GPIO_PIN = 24
 # LiDAR is on USB 3.0 now (CP2102, /dev/ttyUSB0) — no GPIO motor-enable pin needed.
 MOTOR_RIGHT_FWD_PIN = 19
@@ -88,7 +97,7 @@ STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG = float(
 STEERING_SERVO_CENTER_OFFSET = float(
     os.environ.get(
         "RC_CAR_STEERING_SERVO_CENTER_OFFSET",
-        str(12.0 / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),
+        str(12.0 / (STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0)),  # DELT center trim = +12deg (Ram, 2026-07-13)
     )
 )
 STEERING_SERVO_CENTER_PRELOAD = 0.0
@@ -99,11 +108,10 @@ STEERING_SERVO_CENTER_PRELOAD_WINDOW = 0.0
 STEERING_CENTER_SNAP_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SNAP_DEG", "0.5"))
 
 # --- IMU yaw-rate closed-loop steering (MG24 on /dev/ttyAMA3) ---
-# Pure PID (no feed-forward). Default "straight" = hold yaw=0 when commanding ~center
-# (turns pass through open-loop). "full" = also track turns. "off" = no IMU.
-# Tune the gains right here (edit the numbers): the INTEGRAL discovers the steering
-# offset needed to go straight, so push Ki up if it drifts and never centers, push
-# Kp up for snappier correction, add a little Kd if it oscillates.
+# Direction-dependent feed-forward plus PID correction. Default "straight" = hold
+# yaw=0 when commanding near center (turns pass through open-loop). "full" = also
+# track turns. "off" = no IMU. The integral term corrects residual steady-state
+# error around the measured feed-forward; Kp controls response and Kd adds damping.
 STEERING_YAW_PID_MODE = "straight"
 STEERING_YAW_PID_PORT = "/dev/ttyAMA3"
 STEERING_YAW_PID_BAUD = 115200
@@ -113,26 +121,25 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # gyro is inverted vs the controller's assumption -> flip it. If a future test shows
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
-# Gentle P+D, NO integral. The left drift at speed is a MOTOR imbalance (thrust
-# differential that scales with throttle), which the steering servo can't cancel --
-# proven: +5deg of correction didn't dent the -10dps drift at max. So kI=0 (an
-# integral just winds up and lurches on decel without fixing anything). The real fix
-# is balancing LEFT/RIGHT_MOTOR_PWM_SCALE. For manual photo collection this is fine:
-# labels are the stick command; you keep the car on the path by eye.
-STEERING_YAW_PID_KP = 0.15
-STEERING_YAW_PID_KI = 0.00
+# Ram-set gains (2026-07-07): stronger P plus a small I term to hold the line. A pull
+# with centered steering does not establish one cause; motor balance, linkage geometry,
+# wheel loading, surface slope, servo mapping, and trim remain separate candidates.
+# The anti-windup clamp bounds integral growth. If deceleration exposes a correction
+# lurch, reduce Ki and repeat the same controlled test.
+STEERING_YAW_PID_KP = 2.15
+STEERING_YAW_PID_KI = 0.20
 STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
-# powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
-# feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
+# powers c0..c4. Its root (curvature=0) is the open-loop straight angle (~109); full
+# mode also reads target curvature from it. These coefficients came from a local
+# calibration run; its raw CSV is not a tracked publication artifact.
 STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
-# Direction-dependent straight-angle feed-forwards, MEASURED by ff_calibrate.py at
-# ~max driving speed (~1.3 m/s) -- the straight angle is SPEED-dependent (pulls left
-# harder at speed), so it's calibrated at the speed Ram drives. LFF = straight servo
-# angle when the last steer was LEFT; RFF = when last steer was RIGHT (picked by
-# _last_side). Re-run ff_calibrate.py --throttle 1.0 to remeasure at full speed.
-STEERING_YAW_PID_LFF_DEG = 119.5
-STEERING_YAW_PID_RFF_DEG = 107.8
+# Direction-dependent straight-angle feed-forwards. LFF = straight servo angle when
+# the last steer was LEFT; RFF = when last steer was RIGHT (picked by _last_side).
+# Reverted (2026-07-08, Ram) to the ff_calibrate.py measured straight angles: the
+# open-loop command uses the calibrated angle and the PID corrects around it.
+STEERING_YAW_PID_LFF_DEG = 119.5   # measured (left-approach)
+STEERING_YAW_PID_RFF_DEG = 107.8   # measured (right-approach)
 # A side only counts as "the last steer" once the stick DWELLS there this long.
 # Kills flick / spring-back overshoot: on a quick release the stick briefly crosses
 # center to the opposite side; without this dwell that transient flips the hysteresis
@@ -320,6 +327,18 @@ PHOTO_RUN_CAPTURE_FPS = 10.0
 # Pi5<->Zero2W dashboard USB link.
 JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
+JETSON_RESULT_MAX_AGE_SEC = 0.25
+CONTROL_LOOP_STALL_WARN_SEC = 0.10
+
+# Interruption clip recorder (dad+son suggestion #1). While autonomous, keep a rolling
+# buffer of the exact JPEGs sent to Jon; the instant the driver takes over
+# (autonomous -> manual) a background thread saves the last INTERRUPTION_CLIP_SECONDS
+# to INTERRUPTION_CLIP_DIR as clip_<stamp>.mp4 -- the moments right before the takeover.
+# At quit every clip is rsync'd to Jon:/nvme/interruption_clips/ for clip_bucket_analyzer.py.
+# Records ONLY while autonomous, strictly the seconds BEFORE the takeover (no post-roll).
+INTERRUPTION_CLIP_ENABLED = True
+INTERRUPTION_CLIP_SECONDS = 2.0
+INTERRUPTION_CLIP_DIR = "~/interruption_clips"
 
 NAV_SELECT_BUTTON = 3
 QUIT_BUTTON = 15
@@ -370,6 +389,11 @@ def create_state():
         "lidar_forward_clearance_m": 12.0,
         "lidar_override_active": False,
         "lidar_override_side": "",
+        "lidar_lane_occupancy": "",
+        "lidar_emergency_lane_occupancy": "",
+        "lidar_lane_action": "normal",
+        "lidar_throttle_cap": 1.0,
+        "lidar_emergency_stop": False,
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,
@@ -406,12 +430,15 @@ class Metrics:
     max_speed_recall: float = 0.0
     total_distance_cm: float = 0.0
     # --- autonomy metrics (V2H2 dashboard page) ---
-    auto_distance_cm: float = 0.0      # ADT: distance driven while autonomous
-    auto_time_s: float = 0.0           # total autonomous time (for AUT)
-    auto_intervention_count: int = 0   # disengagements (for IPKM)
-    auto_segments: int = 0             # number of autonomous engagements (for AUT avg)
+    # Segments shorter than AUTONOMY_MIN_SEGMENT_S are ignored for AUT + IPKM (a quick
+    # tap-in/tap-out isn't a real autonomous stint) but STILL count for ADT + ICSE.
+    auto_distance_cm: float = 0.0      # ADT: distance driven while autonomous (ALL segments)
+    auto_time_s: float = 0.0           # AUT numerator: summed uptime of COUNTED (>=6s) segments
+    auto_intervention_count: int = 0   # IPKM: disengagements from COUNTED (>=6s) segments only
+    auto_segments: int = 0             # AUT denominator: number of COUNTED (>=6s) segments
+    auto_segment_s: float = 0.0        # duration of the CURRENT autonomous segment (in progress)
     auto_prev_engaged: bool = False    # edge-detect autonomous_mode
-    auto_last_cause_code: str = ""     # ICSE: last disengagement cause code
+    auto_last_cause_code: str = ""     # ICSE: last disengagement cause code (ALL segments)
     start_time: float = time.time()
     pid_integral_error: float = 0.0
     pid_previous_error: float = 0.0
@@ -443,10 +470,6 @@ class Metrics:
     dashboard_cpu_temp_last_sample_time: float = 0.0
     dashboard_photos_run: int = 0
     dashboard_photos_all: int = 0
-    dashboard_photo_run_stats: dict = field(
-        default_factory=lambda: {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
-    )
-    dashboard_photo_stats_last_sample_time: float = 0.0
     auto_photo_next_time: float = 0.0
     servo_error_count: int = 0
     servo_error_last_log_time: float = 0.0

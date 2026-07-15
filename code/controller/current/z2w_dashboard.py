@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+#
+# This file depends on rpi-rgb-led-matrix, which is licensed under
+# GPL-2.0-or-later.
+#
+# If this file is distributed together with that dependency as part of a
+# combined program, GPL obligations may apply to the combined work.
 from __future__ import annotations
 
 import argparse
@@ -50,7 +57,22 @@ LIDAR_POINT_YELLOW: Color = (255, 220, 0)    # < 1.2 m
 LIDAR_POINT_GREEN: Color = (0, 255, 70)      # < 2.0 m
 LIDAR_POINT_CYAN: Color = (0, 220, 220)      # < 3.0 m
 LIDAR_POINT_BLUE: Color = (0, 120, 255)      # >= 3.0 m (far)
-LIDAR_CONE: Color = (60, 180, 255)           # forward +/-30 deg cone rays
+LIDAR_CENTER_GUIDE: Color = (48, 144, 240)
+LIDAR_LANE_CLEAR: Color = LIDAR_POINT_BLUE
+LIDAR_CORRIDOR_HALF_WIDTH_M = 0.762          # full 5ft scan preview, including side telemetry
+LIDAR_CENTER_HALF_WIDTH_M = LIDAR_CORRIDOR_HALF_WIDTH_M / 3.0
+LIDAR_PREVIEW_SIDE_PADDING_PX = 6
+LIDAR_PREVIEW_X = (LIDAR_PREVIEW_SIDE_PADDING_PX, PANEL_WIDTH - 1 - LIDAR_PREVIEW_SIDE_PADDING_PX)
+LIDAR_CENTER_GUIDE_X = (23, 40)
+LIDAR_FORWARD_SCALE_PX_PER_M = 11.0
+# Horizontal rungs across the corridor at the LiDAR avoidance distances -- MIRROR config.py
+# (EMERGENCY 1.05 / GOV_STOP 1.25 / WARN 1.40 / GOV_FULL 1.65); update here if those change.
+LIDAR_RUNG_DISTANCES = [
+    (1.05, LIDAR_POINT_RED),      # emergency hard-stop
+    (1.25, LIDAR_POINT_ORANGE),   # governor stop
+    (1.40, LIDAR_POINT_YELLOW),   # warn / react
+    (1.65, LIDAR_POINT_GREEN),    # governor full-throttle above
+]
 LIDAR_CAR: Color = (255, 255, 255)
 RIGHT_TURN_SIGNAL_INDEX = 28
 LEFT_TURN_SIGNAL_INDEX = 29
@@ -62,6 +84,19 @@ ALL_GLYPH_INDEX = 57
 PLUS_GLYPH_INDEX = 0
 MINUS_GLYPH_INDEX = 1
 MIN_VISIBLE_BRIGHTNESS_PERCENT = 5
+
+
+def lidar_lane_for_coordinates(lateral_m: float, forward_m: float) -> str | None:
+    if forward_m <= 0.0 or abs(lateral_m) > LIDAR_CENTER_HALF_WIDTH_M:
+        return None
+    return "C"
+
+
+def lidar_lane_zone_color(forward_m: float) -> Color:
+    for threshold_m, color in LIDAR_RUNG_DISTANCES:
+        if forward_m <= threshold_m:
+            return color
+    return LIDAR_LANE_CLEAR
 
 def load_glyphs_from_header(path: Path) -> List[Glyph]:
     text = path.read_text(encoding="utf-8")
@@ -180,6 +215,18 @@ class DashboardRenderer:
         base_y = (row_index * CELL_SIZE) + y_offset_px
         for row in range(8):
             row_bits = glyph[row]
+            for bit in range(8):
+                if row_bits & (1 << (7 - bit)):
+                    self._set_pixel(base_x + bit, base_y + row, color)
+
+    def _draw_glyph_pixels(
+        self,
+        glyph: Sequence[int],
+        base_x: int,
+        base_y: int,
+        color: Color,
+    ):
+        for row, row_bits in enumerate(glyph):
             for bit in range(8):
                 if row_bits & (1 << (7 - bit)):
                     self._set_pixel(base_x + bit, base_y + row, color)
@@ -336,7 +383,8 @@ class DashboardRenderer:
         left_signal_visible: bool,
         right_signal_visible: bool,
         dashboard_alert: str,
-        notification_rows: Sequence[Sequence[str]],
+        run_number: int,
+        clock_hms: str,
         odometer_total_m: float = 0.0,
         y_offset_px: int = 0,
     ):
@@ -364,8 +412,15 @@ class DashboardRenderer:
             odo = max(0, min(9999, int(float(odometer_total_m))))
             for offset, char in enumerate(f"{odo:04d}", start=2):
                 self._draw_glyph_at(self.digit_map.get(char, self.letter_map[" "]), 3, offset, TEXT_WHITE, y_offset_px)
-        for row_offset, cells in enumerate(list(notification_rows)[:2], start=1):
-            self._draw_notification_row(row_offset, cells, NOTIFICATION_WHITE, y_offset_px)
+        # Row 2 (idx 1): run number today "R###"  ·  Row 3 (idx 2): clock HH:MM:SS (24h).
+        # (Replaces the old transient notification rows.)
+        rn = f"R{max(0, int(run_number)) % 1000:03d}"
+        pad = (8 - len(rn)) // 2                       # center R### across the 8-cell row
+        self._draw_text_row(1, [""] * pad + list(rn) + [""] * (8 - pad - len(rn)),
+                            NOTIFICATION_WHITE, y_offset_px)
+        hms = str(clock_hms).strip()
+        if len(hms) == 8:
+            self._draw_text_row(2, list(hms), TEXT_CYAN, y_offset_px)
 
     def _draw_page_two(self, payload: Dict[str, object], y_offset_px: int = 0):
         servo_cells = self._format_three_digits(float(payload.get("servo_deg", 90.0)))
@@ -400,7 +455,7 @@ class DashboardRenderer:
         self._draw_decimal_point_at(3, 5, TEXT_ORANGE, y_offset_px)           # dot between MM and SS
 
     def _draw_page_three(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # PRUN / PALL / FPS / STS
+        # V3H1: photos this run / photos all / camera FPS / system status.
         photos_run = max(0, min(99999, int(payload.get("photos_run", 0))))
         photos_all = max(0, min(99999, int(payload.get("photos_all", 0))))
         fps_val = max(0.0, min(99.99, float(payload.get("camera_fps", 0.0))))
@@ -423,25 +478,32 @@ class DashboardRenderer:
         self._draw_text_row(3, ["S", "T", "S", ":", sts[0], sts[1], sts[2], sts[3]], sts_color, y_offset_px)
 
     def _draw_lidar_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        # Forward-facing view: car at bottom-centre, forward = up. Two guide rays mark the
-        # +/-30 deg forward cone; points colored by range (red near -> blue far).
-        car_x = PANEL_WIDTH // 2
+        # Side returns remain visible, but only the blue center guides define the active
+        # throttle/brake corridor. The camera model owns every steering command.
+        preview_left_x, preview_right_x = LIDAR_PREVIEW_X
+        center_left_x, center_right_x = LIDAR_CENTER_GUIDE_X
+        preview_center_x = (preview_left_x + preview_right_x) / 2.0
+        car_x = int(round(preview_center_x))
         car_y = (PANEL_HEIGHT - 1) + y_offset_px
-        scale = 9.0                       # px per metre (forward ~0..3.4 m fills the height)
-        for cone_deg in (-30.0, 30.0):    # forward +/-30 deg cone guide rays
-            cr = math.radians(cone_deg)
-            d = 0.2
-            while d <= 6.0:                               # long rays (clip at the panel edge)
-                gx = int(round(car_x + math.sin(cr) * d * scale))
-                gy = int(round(car_y - math.cos(cr) * d * scale))
-                self._set_pixel(gx, gy, LIDAR_CONE)   # bright blue cone rays
-                d += 0.12
+        forward_scale = LIDAR_FORWARD_SCALE_PX_PER_M
+        lateral_scale = (
+            (preview_right_x - preview_left_x) / (2.0 * LIDAR_CORRIDOR_HALF_WIDTH_M)
+        )
+        for gx in LIDAR_CENTER_GUIDE_X:
+            for gy in range(y_offset_px, car_y + 1):      # straight up the panel
+                self._set_pixel(gx, gy, LIDAR_CENTER_GUIDE)
+        # Horizontal rungs span only the active center corridor.
+        for dist_m, rung_color in LIDAR_RUNG_DISTANCES:
+            ry = car_y - int(round(dist_m * forward_scale))
+            if ry < y_offset_px:
+                continue
+            for rx in range(center_left_x, center_right_x + 1):
+                self._set_pixel(rx, ry, rung_color)
+        occupied = str(payload.get("lidar_lane_occupancy", "")).upper()
+        emergency_occupied = str(payload.get("lidar_emergency_lane_occupancy", "")).upper()
         raw_points = payload.get("lidar_points", [])
-        point_count = max(0, int(payload.get("lidar_point_count", 0)))
-        if not raw_points:
-            self._draw_text_row(0, ["L", "D", "R", ":", "N", "O", "N", "E"], ALERT_RED_DIM, y_offset_px)
-            count_cells = self._format_three_digits(point_count)
-            self._draw_text_row(1, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
+        parsed_points = []
+        center_forward_m = math.inf
         if isinstance(raw_points, list):
             for raw_point in raw_points:
                 if not isinstance(raw_point, list) or len(raw_point) < 2:
@@ -452,8 +514,21 @@ class DashboardRenderer:
                 except (TypeError, ValueError):
                     continue
                 angle_rad = math.radians(angle_deg)
-                x = int(round(car_x + math.sin(angle_rad) * distance_m * scale))
-                y = int(round(car_y - math.cos(angle_rad) * distance_m * scale))
+                lateral_m = math.sin(angle_rad) * distance_m
+                forward_m = math.cos(angle_rad) * distance_m
+                parsed_points.append((angle_rad, distance_m))
+                lane = lidar_lane_for_coordinates(lateral_m, forward_m)
+                if lane == "C":
+                    center_forward_m = min(center_forward_m, forward_m)
+        point_count = max(0, int(payload.get("lidar_point_count", 0)))
+        if not raw_points:
+            self._draw_text_row(0, ["L", "D", "R", ":", "N", "O", "N", "E"], ALERT_RED_DIM, y_offset_px)
+            count_cells = self._format_three_digits(point_count)
+            self._draw_text_row(1, ["P", "T", "S", ":", "", *count_cells], TEXT_CYAN, y_offset_px)
+        else:
+            for angle_rad, distance_m in parsed_points:
+                x = int(round(preview_center_x + math.sin(angle_rad) * distance_m * lateral_scale))
+                y = int(round(car_y - math.cos(angle_rad) * distance_m * forward_scale))
                 if distance_m < 0.6:
                     color = LIDAR_POINT_RED
                 elif distance_m < 0.9:
@@ -467,15 +542,40 @@ class DashboardRenderer:
                 else:
                     color = LIDAR_POINT_BLUE
                 self._set_pixel(x, y, color)
+            color = lidar_lane_zone_color(center_forward_m)
+            if "C" in occupied and color in (LIDAR_LANE_CLEAR, LIDAR_POINT_GREEN):
+                color = LIDAR_POINT_YELLOW
+            if "C" in emergency_occupied:
+                color = LIDAR_POINT_RED
+            label_x = int(round(
+                ((center_left_x + center_right_x) / 2.0) - ((CELL_SIZE - 1) / 2.0)
+            ))
+            self._draw_glyph_pixels(
+                self.letter_map.get("C", self.letter_map[" "]),
+                label_x,
+                y_offset_px,
+                color,
+            )
         for dx, dy in ((-1, 0), (0, 0), (1, 0), (0, -1)):
             self._set_pixel(car_x + dx, car_y + dy, LIDAR_CAR)
+        action = str(payload.get("lidar_lane_action", "normal")).lower()
+        if action == "brake":
+            for dx in range(-3, 4):
+                self._set_pixel(car_x + dx, car_y - 3, LIDAR_POINT_RED)
+        elif action == "creep":
+            for dy in (-4, -3, -2):
+                self._set_pixel(car_x, car_y + dy, LIDAR_POINT_ORANGE)
+        elif action == "slow":
+            for dx in range(-2, 3):
+                self._set_pixel(car_x + dx, car_y - 3, LIDAR_POINT_YELLOW)
 
     def _format_model_cells(self, model_choice: str) -> List[str]:
         model_choice = str(model_choice)
         match = re.search(r"(\d+)\.(\d+)", model_choice)
         if not match:
             return ["0.", "0", ""]
-        suffix = "b" if model_choice.strip().lower().endswith("b") else ""
+        suffix_match = re.search(r"[a-z]$", model_choice.strip().lower())
+        suffix = suffix_match.group(0) if suffix_match else ""
         return [f"{match.group(1)[-1]}.", match.group(2)[0], suffix]
 
     def _draw_page_four(self, payload: Dict[str, object], y_offset_px: int = 0):
@@ -567,25 +667,6 @@ class DashboardRenderer:
         self._draw_text_row(1, ["S", "A", "T", "S", ":", *sats_cells], TEXT_CYAN, y_offset_px)
         self._draw_text_row(2, ["O", "D", "O", ":", *odo_cells], ARROW_YELLOW, y_offset_px)
         self._draw_text_row(3, ["S", "S", "T", ":", *sts_cells], sts_color, y_offset_px)
-
-    def _photo_run_stats(self, payload: Dict[str, object]) -> Dict[str, int]:
-        raw_stats = payload.get("photo_run_stats", {})
-        if not isinstance(raw_stats, dict):
-            raw_stats = {}
-        stats = {}
-        for key in ("left", "center", "right", "throttle_below_50"):
-            try:
-                stats[key] = max(0, int(raw_stats.get(key, 0)))
-            except (TypeError, ValueError):
-                stats[key] = 0
-        return stats
-
-    def _draw_photo_run_stats_page(self, payload: Dict[str, object], y_offset_px: int = 0):
-        stats = self._photo_run_stats(payload)
-        self._draw_text_row(0, ["L", "P", ":", *self._digits(stats["left"], 5)], TEXT_CYAN, y_offset_px)
-        self._draw_text_row(1, ["C", "P", ":", *self._digits(stats["center"], 5)], TEXT_GREEN, y_offset_px)
-        self._draw_text_row(2, ["R", "P", ":", *self._digits(stats["right"], 5)], TEXT_ORANGE, y_offset_px)
-        self._draw_text_row(3, ["<", "5", ":", *self._digits(stats["throttle_below_50"], 5)], ARROW_YELLOW, y_offset_px)
 
     def _gain_cells(self, formatted: str) -> List[str]:
         """'000.5' -> ['0','0','0.','5'] : the decimal point rides on the digit cell
@@ -782,9 +863,6 @@ class DashboardRenderer:
         if page == 11:
             self._draw_page_six(payload, y_offset_px)
             return
-        if page == 12:
-            self._draw_photo_run_stats_page(payload, y_offset_px)
-            return
         if page == 13:
             self._draw_tuning_page(payload, y_offset_px)
             return
@@ -806,7 +884,8 @@ class DashboardRenderer:
             bool(payload.get("left_signal_visible", False)),
             bool(payload.get("right_signal_visible", False)),
             str(payload.get("dashboard_alert", ""))[:4],
-            notification_rows,
+            int(payload.get("run_number", 0)),
+            str(payload.get("clock_hms", "")),
             float(self._nav_payload(payload).get("odometer_m", 0.0)),  # same source as the V5 ODO
             y_offset_px,
         )
@@ -932,6 +1011,8 @@ def main():
     brightness_percent = args.led_brightness
     dashboard_page = 1
     dashboard_page_transition = ""
+    run_number = 0
+    clock_hms = ""
     servo_deg = 90.0
     yaw_rate_dps = 0.0
     yaw_pid_correction_deg = 0.0
@@ -941,6 +1022,9 @@ def main():
     drive_mode = "MAN"
     lidar_points: List[List[float]] = []
     lidar_point_count = 0
+    lidar_lane_occupancy = ""
+    lidar_emergency_lane_occupancy = ""
+    lidar_lane_action = "normal"
     model_choice = ""
     camera_confidence_percent = 0
     cpu_temp_c = 0.0
@@ -950,7 +1034,6 @@ def main():
     camera_pixels: List[str] = []
     photos_run = 0
     photos_all = 0
-    photo_run_stats: Dict[str, int] = {}
     camera_fps = 0.0
     system_status = "GOOD"
     nav_status: Dict[str, object] = {}
@@ -1003,6 +1086,8 @@ def main():
                 "dashboard_alert": dashboard_alert,
                 "dashboard_page": dashboard_page,
                 "dashboard_page_transition": dashboard_page_transition,
+                "run_number": run_number,
+                "clock_hms": clock_hms,
                 "servo_deg": servo_deg,
                 "yaw_rate_dps": yaw_rate_dps,
                 "yaw_pid_correction_deg": yaw_pid_correction_deg,
@@ -1012,6 +1097,9 @@ def main():
                 "drive_mode": drive_mode,
                 "lidar_points": lidar_points,
                 "lidar_point_count": lidar_point_count,
+                "lidar_lane_occupancy": lidar_lane_occupancy,
+                "lidar_emergency_lane_occupancy": lidar_emergency_lane_occupancy,
+                "lidar_lane_action": lidar_lane_action,
                 "model_choice": model_choice,
                 "camera_confidence_percent": camera_confidence_percent,
                 "cpu_temp_c": cpu_temp_c,
@@ -1021,7 +1109,6 @@ def main():
                 "camera_pixels": camera_pixels,
                 "photos_run": photos_run,
                 "photos_all": photos_all,
-                "photo_run_stats": photo_run_stats,
                 "camera_fps": camera_fps,
                 "system_status": status_override or system_status,
                 "nav_status": nav_status,
@@ -1064,6 +1151,8 @@ def main():
         nonlocal brightness_percent
         nonlocal dashboard_page
         nonlocal dashboard_page_transition
+        nonlocal run_number
+        nonlocal clock_hms
         nonlocal servo_deg
         nonlocal yaw_rate_dps
         nonlocal yaw_pid_correction_deg
@@ -1073,6 +1162,9 @@ def main():
         nonlocal drive_mode
         nonlocal lidar_points
         nonlocal lidar_point_count
+        nonlocal lidar_lane_occupancy
+        nonlocal lidar_emergency_lane_occupancy
+        nonlocal lidar_lane_action
         nonlocal model_choice
         nonlocal camera_confidence_percent
         nonlocal cpu_temp_c
@@ -1082,7 +1174,6 @@ def main():
         nonlocal camera_pixels
         nonlocal photos_run
         nonlocal photos_all
-        nonlocal photo_run_stats
         nonlocal camera_fps
         nonlocal system_status
         nonlocal nav_status
@@ -1114,6 +1205,8 @@ def main():
         brightness_percent = max(0, min(100, int(payload.get("brightness_percent", brightness_percent))))
         dashboard_page = max(1, min(DASHBOARD_PAGE_COUNT, int(payload.get("dashboard_page", dashboard_page))))
         dashboard_page_transition = str(payload.get("dashboard_page_transition", ""))[:8]
+        run_number = max(0, int(payload.get("run_number", run_number)))
+        clock_hms = str(payload.get("clock_hms", clock_hms))[:8]
         servo_deg = max(0.0, min(180.0, float(payload.get("servo_deg", servo_deg))))
         yaw_rate_dps = float(payload.get("yaw_rate_dps", yaw_rate_dps))
         yaw_pid_correction_deg = float(payload.get("yaw_pid_correction_deg", yaw_pid_correction_deg))
@@ -1131,14 +1224,16 @@ def main():
         if isinstance(raw_lidar_points, list):
             lidar_points = raw_lidar_points[:180]
         lidar_point_count = max(0, int(payload.get("lidar_point_count", len(lidar_points))))
+        lidar_lane_occupancy = str(payload.get("lidar_lane_occupancy", lidar_lane_occupancy)).upper()[:1]
+        lidar_emergency_lane_occupancy = str(
+            payload.get("lidar_emergency_lane_occupancy", lidar_emergency_lane_occupancy)
+        ).upper()[:1]
+        lidar_lane_action = str(payload.get("lidar_lane_action", lidar_lane_action)).lower()[:16]
         raw_camera_pixels = payload.get("camera_pixels", camera_pixels)
         if isinstance(raw_camera_pixels, list):
             camera_pixels = [str(row)[: PANEL_WIDTH * 4] for row in raw_camera_pixels[:PANEL_HEIGHT]]
         photos_run = max(0, int(payload.get("photos_run", photos_run)))
         photos_all = max(0, int(payload.get("photos_all", photos_all)))
-        raw_photo_run_stats = payload.get("photo_run_stats", photo_run_stats)
-        if isinstance(raw_photo_run_stats, dict):
-            photo_run_stats = dict(raw_photo_run_stats)
         camera_fps = max(0.0, float(payload.get("camera_fps", camera_fps)))
         system_status = str(payload.get("system_status", system_status))[:4].upper() or "GOOD"
         raw_nav_status = payload.get("nav_status", nav_status)

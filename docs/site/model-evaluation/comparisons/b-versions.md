@@ -1,19 +1,19 @@
 # B Versions
 
-TODO:
+What the `b` suffix on a checkpoint actually means (e.g. `v3.0` vs `v3.0b`), and why the `b` — the "best" checkpoint — is the one to be suspicious of, not the one to trust.
 
-- [ ] Add page-specific notes for `model-evaluation/comparisons/b-versions.md` after inspecting the real project files.
-- [ ] Cross-link `B Versions` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
+## What b compares
+
+Each `b` is an alternate checkpoint (often earlier epoch) of the same numeric version. Comparing
+`X` vs `Xb` shows the epoch trade: `b` frequently has lower MAE but is more straight-collapsed.
+
+## Verdict pattern
+
+For v3.3, deploy the FINAL balanced `3.3`, not `3.3b`. HF cards list versions only up to
+themselves (a v3.1 card must not show v3.1b).
+
+## Related pages
+
+- `ai-and-models/training-pipeline/metrics.md`
+- `testing/field-testing/model-retest-plan.md`
+- `portfolio-evidence/claims-and-proof/model-claim.md`

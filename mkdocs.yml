@@ -3,12 +3,15 @@ docs_dir: docs/site
 theme:
   name: readthedocs
 
+extra_css:
+  - stylesheets/extra.css
+
 nav:
   - Home: index.md
   - Start Here:
     - Project Overview: start-here/project-overview.md
     - Mission: start-here/mission.md
-    - System At A Glance: start-here/system-at-a-glance.md
+    - System at a Glance: start-here/system-at-a-glance.md
     - Current Status: start-here/current-status.md
     - Build Timeline: start-here/build-timeline.md
   - Project Evidence:
@@ -24,7 +27,7 @@ nav:
       - Navigation Demo: portfolio-evidence/demonstrations/navigation-demo.md
       - Dashboard Demo: portfolio-evidence/demonstrations/dashboard-demo.md
       - Night Failure Demo: portfolio-evidence/demonstrations/night-failure-demo.md
-    - Claims And Proof:
+    - Claims and Proof:
       - Autonomy Claim: portfolio-evidence/claims-and-proof/autonomy-claim.md
       - Safety Claim: portfolio-evidence/claims-and-proof/safety-claim.md
       - Data Claim: portfolio-evidence/claims-and-proof/data-claim.md
@@ -46,23 +49,31 @@ nav:
       - Model Inference: autonomy-stack/camera-steering/model-inference.md
       - Servo Output: autonomy-stack/camera-steering/servo-output.md
       - Series Differences: autonomy-stack/camera-steering/series-differences.md
+      - Jetson Inference Link: autonomy-stack/camera-steering/jetson-inference-link.md
+      - Yaw-Rate PID Steering: autonomy-stack/camera-steering/yaw-rate-pid.md
+      - Temporal Smoothing: autonomy-stack/camera-steering/temporal-smoothing.md
+      - Steering Hysteresis: autonomy-stack/camera-steering/steering-hysteresis.md
+      - Throttle Control: autonomy-stack/camera-steering/throttle-control.md
     - LiDAR Safety:
       - Overview: autonomy-stack/lidar-safety/overview.md
       - Packet Parsing: autonomy-stack/lidar-safety/packet-parsing.md
       - Distance Regions: autonomy-stack/lidar-safety/distance-regions.md
       - AEB: autonomy-stack/lidar-safety/aeb.md
-      - Override Steering: autonomy-stack/lidar-safety/override-steering.md
+      - Why LiDAR Does Not Steer: autonomy-stack/lidar-safety/override-steering.md
       - Reconnect Behavior: autonomy-stack/lidar-safety/reconnect-behavior.md
+      - Clearance & Heading Scoring: autonomy-stack/lidar-safety/clearance-and-heading-scoring.md
+      - Object Clustering: autonomy-stack/lidar-safety/object-clustering.md
     - Navigation:
       - Overview: autonomy-stack/navigation/overview.md
       - GPS Reader: autonomy-stack/navigation/gps-reader.md
       - Graph Format: autonomy-stack/navigation/graph-format.md
-      - A Star: autonomy-stack/navigation/a-star.md
+      - A*: autonomy-stack/navigation/a-star.md
       - Turn Penalties: autonomy-stack/navigation/turn-penalties.md
       - AI Manual Segments: autonomy-stack/navigation/ai-manual-segments.md
       - Crosswalk Handoff: autonomy-stack/navigation/crosswalk-handoff.md
       - Resume Radius: autonomy-stack/navigation/resume-radius.md
       - House Snapping: autonomy-stack/navigation/house-snapping.md
+      - Compass Heading: autonomy-stack/navigation/compass-heading.md
   - Engineering Process:
     - Requirements:
       - Goals: engineering-process/requirements/goals.md
@@ -80,13 +91,19 @@ nav:
       - Correction JSON As Label Source: engineering-process/design-decisions/correction-json-as-label-source.md
       - CARLA Weighting: engineering-process/design-decisions/carla-weighting.md
       - B Checkpoints: engineering-process/design-decisions/b-checkpoints.md
+      - Pi 5 + Jetson Compute Split: engineering-process/design-decisions/pi-plus-jetson-compute-split.md
+      - Motor Imbalance vs Steering Trim: engineering-process/design-decisions/motor-imbalance-vs-steering-trim.md
+      - Hybrid Head vs Regression: engineering-process/design-decisions/hybrid-head-vs-regression.md
     - Iteration Records:
       - Model Iteration Method: engineering-process/iteration-records/model-iteration-method.md
-      - Field Failure To Dataset: engineering-process/iteration-records/field-failure-to-dataset.md
+      - Field Failure to Dataset: engineering-process/iteration-records/field-failure-to-dataset.md
       - Retest Policy: engineering-process/iteration-records/retest-policy.md
       - Rollback Policy: engineering-process/iteration-records/rollback-policy.md
       - Historical Metrics Policy: engineering-process/iteration-records/historical-metrics-policy.md
-  - Research And Math:
+      - Bang-Bang Collapse: engineering-process/iteration-records/bang-bang-collapse.md
+      - Shadow Aug and Turn Flip: engineering-process/iteration-records/shadow-aug-and-flip.md
+      - Turn vs Shadow Tradeoff: engineering-process/iteration-records/turn-vs-shadow-tradeoff.md
+  - Research and Math:
     - Geometry:
       - Haversine Distance: research-and-math/geometry/haversine-distance.md
       - Bearing: research-and-math/geometry/bearing.md
@@ -94,20 +111,27 @@ nav:
       - LiDAR Polar Coordinates: research-and-math/geometry/lidar-polar-coordinates.md
       - Camera Resize Geometry: research-and-math/geometry/camera-resize-geometry.md
     - Algorithms:
-      - A Star Search: research-and-math/algorithms/a-star-search.md
+      - A* Search: research-and-math/algorithms/a-star-search.md
       - Turn Penalty State: research-and-math/algorithms/turn-penalty-state.md
       - Weighted Sampling: research-and-math/algorithms/weighted-sampling.md
       - PID Cruise Control: research-and-math/algorithms/pid-cruise-control.md
-      - Speed From Hall Pulses: research-and-math/algorithms/speed-from-hall-pulses.md
+      - Speed from Hall Pulses: research-and-math/algorithms/speed-from-hall-pulses.md
     - Machine Learning:
       - Regression Framing: research-and-math/machine-learning/regression-framing.md
       - Loss Function: research-and-math/machine-learning/loss-function.md
       - Validation Split: research-and-math/machine-learning/validation-split.md
       - Overfitting Risk: research-and-math/machine-learning/overfitting-risk.md
-      - Sim To Real Gap: research-and-math/machine-learning/sim-to-real-gap.md
+      - Sim to Real Gap: research-and-math/machine-learning/sim-to-real-gap.md
+      - Quantization Math: research-and-math/machine-learning/quantization-math.md
+  - Research Context:
+    - Related Work / Prior Art: research-context/related-work.md
+    - Novelty & Contributions: research-context/novelty-and-contributions.md
   - Runtime Code:
     - Controller Entrypoint: runtime-code/controller-entrypoint.md
     - Runtime Loop: runtime-code/runtime-loop.md
+    - Controller Mapping: runtime-code/controller-mapping.md
+    - Photo Capture: runtime-code/photo-capture.md
+    - PRND Gears: runtime-code/prnd-gears.md
     - Config:
       - Build Flags: runtime-code/config/build-flags.md
       - GPIO Pins: runtime-code/config/gpio-pins.md
@@ -143,6 +167,7 @@ nav:
     - Camera: hardware/camera.md
     - LiDAR: hardware/lidar.md
     - GPS Compass: hardware/gps-compass.md
+    - IMU (Yaw Rate): hardware/imu.md
     - Dashboard Display: hardware/dashboard-display.md
     - Wiring:
       - Power Wiring: hardware/wiring/power-wiring.md
@@ -150,7 +175,13 @@ nav:
       - I2C: hardware/wiring/i2c.md
       - UART: hardware/wiring/uart.md
       - USB: hardware/wiring/usb.md
-  - AI And Models:
+      - Pin Map: hardware/wiring/pin-map.md
+    - PCB:
+      - Overview: hardware/pcb/overview.md
+      - Schematic: hardware/pcb/schematic.md
+      - GPIO Mapping: hardware/pcb/gpio-mapping.md
+      - Revisions: hardware/pcb/revisions.md
+  - AI and Models:
     - Training Pipeline:
       - Overview: ai-and-models/training-pipeline/overview.md
       - Training Script: ai-and-models/training-pipeline/training-script.md
@@ -162,47 +193,38 @@ nav:
       - Metrics: ai-and-models/training-pipeline/metrics.md
     - Architecture:
       - CNN: ai-and-models/architecture/cnn.md
+      - Series 4 Temporal Experiments: ai-and-models/architecture/series-4-plan.md
       - Tensor Shape: ai-and-models/architecture/tensor-shape.md
       - Conv Layers: ai-and-models/architecture/conv-layers.md
       - BatchNorm: ai-and-models/architecture/batchnorm.md
       - ELU: ai-and-models/architecture/elu.md
       - Linear Head: ai-and-models/architecture/linear-head.md
       - Tanh Output: ai-and-models/architecture/tanh-output.md
+      - Series 3 Hybrid Head: ai-and-models/architecture/series-3-hybrid-head.md
+      - Steering Class Bins: ai-and-models/architecture/steering-class-bins.md
     - Model Zoo:
       - Overview: ai-and-models/model-zoo/overview.md
-      - v1.0: ai-and-models/model-zoo/v1-0.md
-      - v1.0b: ai-and-models/model-zoo/v1-0b.md
-      - v1.1: ai-and-models/model-zoo/v1-1.md
-      - v1.1b: ai-and-models/model-zoo/v1-1b.md
-      - v1.2: ai-and-models/model-zoo/v1-2.md
-      - v1.2b: ai-and-models/model-zoo/v1-2b.md
-      - v1.3: ai-and-models/model-zoo/v1-3.md
-      - v1.3b: ai-and-models/model-zoo/v1-3b.md
-      - v1.4: ai-and-models/model-zoo/v1-4.md
-      - v1.4b: ai-and-models/model-zoo/v1-4b.md
-      - v1.5: ai-and-models/model-zoo/v1-5.md
-      - v1.5b: ai-and-models/model-zoo/v1-5b.md
-      - v1.6: ai-and-models/model-zoo/v1-6.md
-      - v1.6b: ai-and-models/model-zoo/v1-6b.md
-      - v1.7: ai-and-models/model-zoo/v1-7.md
-      - v1.7b: ai-and-models/model-zoo/v1-7b.md
-      - v1.8: ai-and-models/model-zoo/v1-8.md
-      - v1.8b: ai-and-models/model-zoo/v1-8b.md
-      - v1.9: ai-and-models/model-zoo/v1-9.md
-      - v1.9b: ai-and-models/model-zoo/v1-9b.md
-      - v2.0: ai-and-models/model-zoo/v2-0.md
-      - v2.0b: ai-and-models/model-zoo/v2-0b.md
-      - v2.1: ai-and-models/model-zoo/v2-1.md
-      - v2.1b: ai-and-models/model-zoo/v2-1b.md
+      - Series 3: ai-and-models/model-zoo/series-3.md
+      - Series 4: ai-and-models/model-zoo/series-4.md
+    - Deployment:
+      - Overview: ai-and-models/deployment/overview.md
+      - ONNX Export: ai-and-models/deployment/onnx-export.md
+      - FP16 Half Precision: ai-and-models/deployment/fp16.md
+      - INT8 PTQ: ai-and-models/deployment/int8-ptq.md
+      - QAT: ai-and-models/deployment/qat.md
+      - TensorRT: ai-and-models/deployment/tensorrt.md
+      - Jetson Runtime: ai-and-models/deployment/jetson-runtime.md
   - Model Evaluation:
     - Offline Evaluation:
       - Overview: model-evaluation/offline-evaluation/overview.md
+      - Bal9: model-evaluation/offline-evaluation/bal9.md
       - MAE: model-evaluation/offline-evaluation/mae.md
       - Median AE: model-evaluation/offline-evaluation/median-ae.md
       - Max AE: model-evaluation/offline-evaluation/max-ae.md
       - Signed Error: model-evaluation/offline-evaluation/signed-error.md
       - Within Degree Buckets: model-evaluation/offline-evaluation/within-degree-buckets.md
       - Per Dataset Breakdown: model-evaluation/offline-evaluation/per-dataset-breakdown.md
+      - Confusion Matrix: model-evaluation/offline-evaluation/confusion-matrix.md
     - Field Evaluation:
       - Overview: model-evaluation/field-evaluation/overview.md
       - Test Route: model-evaluation/field-evaluation/test-route.md
@@ -212,26 +234,17 @@ nav:
       - Curb Hugging: model-evaluation/field-evaluation/curb-hugging.md
       - Shadow Robustness: model-evaluation/field-evaluation/shadow-robustness.md
       - Evening Robustness: model-evaluation/field-evaluation/evening-robustness.md
+      - Interruption Clips: model-evaluation/field-evaluation/interruption-clips.md
     - Comparisons:
-      - 1.9 vs 2.0 vs 2.1: model-evaluation/comparisons/1-9-vs-2-0-vs-2-1.md
       - B Versions: model-evaluation/comparisons/b-versions.md
       - Raw BGR vs CLAHE: model-evaluation/comparisons/raw-bgr-vs-clahe.md
       - Offline vs Field: model-evaluation/comparisons/offline-vs-field.md
       - Model Selection Rubric: model-evaluation/comparisons/model-selection-rubric.md
+      - MAE vs Turn Capability: model-evaluation/comparisons/mae-vs-turn-capability.md
   - Data:
     - Dataset Overview: data/dataset-overview.md
     - Corrections JSON: data/corrections-json.md
     - Manual Image Folder: data/manual-image-folder.md
-    - D0328: data/datasets/d0328.md
-    - D0329: data/datasets/d0329.md
-    - D0425: data/datasets/d0425.md
-    - D0426: data/datasets/d0426.md
-    - D0427: data/datasets/d0427.md
-    - D0429: data/datasets/d0429.md
-    - D0502 12: data/datasets/d0502-12.md
-    - D0502 19: data/datasets/d0502-19.md
-    - D0503: data/datasets/d0503.md
-    - D0506: data/datasets/d0506.md
     - Relabeling:
       - Workflow: data/relabeling/workflow.md
       - Merge Rules: data/relabeling/merge-rules.md
@@ -254,6 +267,7 @@ nav:
       - Image Quality Checks: data-governance/data-quality/image-quality-checks.md
       - Lighting Coverage: data-governance/data-quality/lighting-coverage.md
       - Turn Coverage: data-governance/data-quality/turn-coverage.md
+      - Collection Countdown: data-governance/data-quality/collection-countdown.md
       - Train Val Leakage: data-governance/data-quality/train-val-leakage.md
       - Sync Audit: data-governance/data-quality/sync-audit.md
   - Testing:
@@ -279,8 +293,11 @@ nav:
       - LiDAR Viewer: testing/bench-tests/lidar-viewer.md
       - GPS Compass: testing/bench-tests/gps-compass.md
       - Dashboard: testing/bench-tests/dashboard.md
-      - A Star CLI: testing/bench-tests/a-star-cli.md
+      - A* CLI: testing/bench-tests/a-star-cli.md
       - GeoJSON Graph: testing/bench-tests/geojson-graph.md
+      - Steering Trim Tuner: testing/bench-tests/steering-trim-tuner.md
+      - Servo Calibration: testing/bench-tests/servo-calibration.md
+      - IMU Verifier: testing/bench-tests/imu-verifier.md
   - Safety Case:
     - Safety Overview: safety-case/safety-overview.md
     - Hazard Analysis:
@@ -310,6 +327,7 @@ nav:
     - Zero 2 W Dashboard: operations/zero-2w-dashboard.md
     - Command Cookbook: operations/command-cookbook.md
     - Troubleshooting: operations/troubleshooting.md
+    - Telemetry: operations/telemetry.md
   - Runbooks:
     - Field Test Day:
       - Before Leaving: runbooks/field-test-day/before-leaving.md
@@ -327,13 +345,14 @@ nav:
       - After Training: runbooks/training-day/after-training.md
       - Model Export: runbooks/training-day/model-export.md
     - Sync Day:
-      - Mac To PC: runbooks/sync-day/mac-to-pc.md
-      - PC To Mac: runbooks/sync-day/pc-to-mac.md
+      - Mac to PC: runbooks/sync-day/mac-to-pc.md
+      - PC to Mac: runbooks/sync-day/pc-to-mac.md
       - Delete Risk: runbooks/sync-day/delete-risk.md
       - Sync Verification: runbooks/sync-day/sync-verification.md
   - Publishing:
     - Reports: publishing/reports.md
     - PDF Report: publishing/pdf-report.md
+    - Hugging Face (Models & Datasets): publishing/huggingface.md
     - Hugging Face Model Cards: publishing/huggingface-model-cards.md
     - MkDocs Site: publishing/mkdocs-site.md
   - Exhibits:
@@ -363,7 +382,7 @@ nav:
     - Runtime Modules: code-reference/runtime-modules.md
     - Training Modules: code-reference/training-modules.md
     - Test Files: code-reference/test-files.md
-  - Safety And Ethics:
+  - Safety and Ethics:
     - Research Scope: safety-and-ethics/research-scope.md
     - Limits: safety-and-ethics/limits.md
     - Privacy: safety-and-ethics/privacy.md
@@ -373,3 +392,5 @@ nav:
     - Retraining: roadmap/retraining.md
     - Sensor Fusion: roadmap/sensor-fusion.md
     - Reproducibility: roadmap/reproducibility.md
+    - Jetson Quantization: roadmap/jetson-quantization.md
+    - Turn-In-Shadow Collection: roadmap/turn-in-shadow-collection.md

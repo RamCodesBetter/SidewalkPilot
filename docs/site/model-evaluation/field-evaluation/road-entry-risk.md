@@ -1,19 +1,16 @@
-# Road Entry Risk
+# Road-Entry Risk
 
-TODO:
+Road-entry risk is a camera-steering and operating-domain hazard. A flat sidewalk-to-road boundary may not produce a LiDAR obstacle return, so LiDAR braking cannot be treated as road-edge protection.
 
-- [ ] Add page-specific notes for `model-evaluation/field-evaluation/road-entry-risk.md` after inspecting the real project files.
-- [ ] Cross-link `Road Entry Risk` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] Add route, lighting, weather, operator, model version, and manual takeovers.
-- [ ] Separate subjective field notes from measurable field results.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add test date, time, weather, route, model version, and manual takeover count.
-- [ ] Add what failed, what worked, and what data should be collected next.
+## Evaluation
+
+On road-adjacent sections, record every model command and human takeover where the car approaches the road-side edge. Review the matching interruption clip for:
+
+- Wrong steering direction;
+- Correct direction but late response;
+- Correct command that physical drift or steering response did not execute; and
+- Shadow or surface features that preceded the event.
+
+Earlier working notes associate some v3.2b interruptions with road-side drift and dappled shadows, but their complete clips and route record are not indexed here. The July 13 v3.4 comparison improved the tested shadow cases, but that does not establish universal road-edge safety.
+
+The current mitigation remains supervised testing, conservative speed, route selection, a connected controller with software-priority cancellation, and continued shadow/edge data collection. No model version authorizes autonomous roadway operation.

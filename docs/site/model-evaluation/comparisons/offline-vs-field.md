@@ -1,19 +1,34 @@
-# Offline Vs Field
+# Offline Versus Field Evaluation
 
-TODO:
+Offline evaluation and physical testing answer different questions.
 
-- [ ] Add page-specific notes for `model-evaluation/comparisons/offline-vs-field.md` after inspecting the real project files.
-- [ ] Cross-link `Offline Vs Field` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add test date, time, weather, route, model version, and manual takeover count.
-- [ ] Add what failed, what worked, and what data should be collected next.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
+## Offline evidence
+
+The common evaluator applies every compatible checkpoint to the same labeled
+challenge subset. It can expose class collapse, directional bias, large errors,
+and candidates worth driving. It cannot reproduce closed-loop error growth,
+servo load, wheel behavior, route hazards, or a particular lighting geometry.
+
+## Field evidence
+
+A supervised field comparison reveals whether the car actually holds the tested
+route. The result is strongest when the route, lighting, artifact hash, takeover
+count, logs, and clips are preserved. A successful run remains bounded to those
+conditions.
+
+The July 13, 2026 comparison rejected v3.3 and v3.3b, found v3.4b slightly worse
+than v3.4, and selected v3.4. Its route and clip record was incomplete, so the
+verdict is qualitative rather than a repeatable benchmark. Series 4 remains
+offline-only until the planned physical comparison.
+
+## Promotion rule
+
+Use offline metrics to order candidates, then require a supervised physical run
+before changing the field baseline. Neither stage alone establishes general
+safety or universal robustness.
+
+## Related pages
+
+- [Offline Evaluation](../offline-evaluation/overview.md)
+- [Field Testing](../../testing/field-testing/overview.md)
+- [Model Claim](../../portfolio-evidence/claims-and-proof/model-claim.md)
