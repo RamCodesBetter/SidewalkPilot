@@ -4,6 +4,7 @@ import datetime as dt
 import json
 import math
 import re
+import sys
 from collections import Counter
 from io import BytesIO
 from pathlib import Path
@@ -53,7 +54,10 @@ S3_WIDTH = 320
 S3_HEIGHT = 180
 S3_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "sidewalkpilot_dataset"
 S3_TRAINER_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "series_3_sidewalkpilot_trainer.py"
+S4_COMMON_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "series_4_common.py"
 S3_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.pth$")
+S4_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>4\.0[acfgpr])\.(?P<ext>onnx|pt|pth)$")
+S4_SUFFIX_ORDER = {"p": 0, "r": 1, "f": 2, "g": 3, "a": 4, "c": 5}
 
 BUCKETS = [
     ("HL 0-45", 0.0, 45.0),
@@ -143,10 +147,17 @@ class SteeringAutonomyV2(nn.Module):
 
 
 def version_key(version):
-    suffix = 1 if version.endswith("b") else 0
-    base = version[:-1] if suffix else version
-    major, minor = base.split(".")
-    return int(major), int(minor), suffix
+    match = re.fullmatch(r"(?P<major>\d+)\.(?P<minor>\d+)(?P<suffix>[a-z]?)", version)
+    if match is None:
+        raise ValueError(f"Invalid SidewalkPilot version: {version}")
+    major = int(match.group("major"))
+    minor = int(match.group("minor"))
+    suffix = match.group("suffix")
+    if major == 4 and minor == 0:
+        suffix_rank = S4_SUFFIX_ORDER.get(suffix, -1)
+    else:
+        suffix_rank = 1 if suffix == "b" else 0
+    return major, minor, suffix_rank
 
 
 def discover_models(models_dir):
@@ -155,19 +166,21 @@ def discover_models(models_dir):
     models = []
     for path in sorted(models_dir.glob("SidewalkPilot-v*.pth")):
         match = MODEL_RE.match(path.name)
-        if match and not match.group("version").startswith("3."):
+        if match and series_for_version(match.group("version")) in {1, 2}:
             models.append((match.group("version"), path))
     return sorted(models, key=lambda item: version_key(item[0]))
 
 
 def series_for_version(version):
+    if version.startswith("4."):
+        return 4
     if version.startswith("3."):
         return 3
     return 2 if version.startswith("2.") else 1
 
 
 def preprocessing_for_version(version):
-    if version.startswith("3."):
+    if version.startswith(("3.", "4.")):
         return "raw BGR 320x180"
     return "HSV/CLAHE -> BGR" if version in {"2.0", "2.0b"} else "raw BGR"
 
@@ -542,6 +555,21 @@ def _load_s3_module():
     return module
 
 
+def _load_s4_module():
+    """Load the shared Series 4 data/architecture module from its trainer directory."""
+    import importlib.util
+
+    trainer_dir = str(S4_COMMON_PATH.parent)
+    if trainer_dir not in sys.path:
+        sys.path.insert(0, trainer_dir)
+    module_name = "series_4_common_for_eval"
+    spec = importlib.util.spec_from_file_location(module_name, S4_COMMON_PATH)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def _decode_s3_steering(out, s3mod):
     """Decode a Series 3 model output batch -> steering degrees [0..180]. Handles BOTH
     the legacy 2-output unit-control head (v3.0/3.0b) and the v3.1+ hybrid head
@@ -694,6 +722,217 @@ def evaluate_series3(models_dir, device, batch_size, versions=None):
               flush=True)
 
     return results, samples
+
+
+def _discover_series34_paths(models_dir, versions=None):
+    """Prefer ONNX artifacts and return separate Series 3 and Series 4 path lists."""
+    wanted = set(versions) if versions else None
+    patterns = {
+        3: re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.(?P<ext>onnx|pt|pth)$"),
+        4: S4_MODEL_RE,
+    }
+    discovered = {3: {}, 4: {}}
+    rank = {"onnx": 0, "pt": 1, "pth": 2}
+    for path in sorted(models_dir.glob("SidewalkPilot-v*")):
+        for series, pattern in patterns.items():
+            match = pattern.match(path.name)
+            if match is None:
+                continue
+            version = match.group("version")
+            if wanted is not None and version not in wanted:
+                break
+            candidate = (rank[match.group("ext")], path)
+            if version not in discovered[series] or candidate[0] < discovered[series][version][0]:
+                discovered[series][version] = candidate
+            break
+    return {
+        series: [entries[version][1] for version in sorted(entries, key=version_key)]
+        for series, entries in discovered.items()
+    }
+
+
+def load_series34_validation_data():
+    """Build one held-out temporal subset shared by every Series 3 and Series 4 model."""
+    s4mod = _load_s4_module()
+    frames = s4mod.load_frames([S3_DATASET_DIR.resolve()])
+    split_by_frame, _ = s4mod.frozen_series3_split(frames, 0.10, 100)
+    temporal, stats = s4mod.build_temporal_samples(
+        frames,
+        split_by_frame,
+        history_steps=3,
+        future_steps=3,
+        max_gap_sec=0.25,
+    )
+    validation = [sample for sample in temporal if sample.split == "val"]
+    if not validation:
+        raise ValueError("Series 3/4 temporal validation subset is empty.")
+
+    tensors = []
+    histories = []
+    targets = []
+    samples = []
+    for index, sample in enumerate(validation, start=1):
+        frame = cv2.imread(str(sample.anchor.path), cv2.IMREAD_COLOR)
+        if frame is None:
+            raise FileNotFoundError(sample.anchor.path)
+        image = s4mod.S3.resize_image_uint8(frame, S3_WIDTH, S3_HEIGHT, 0.0)
+        tensors.append(np.transpose(image, (2, 0, 1)))
+        histories.append(sample.history)
+        targets.append(sample.targets[0])
+        image_name = sample.anchor.path.name
+        run = image_name.split("__", 1)[0]
+        image_part = image_name.split("__", 1)[1] if "__" in image_name else image_name
+        samples.append({"run": run, "date": _run_date_mmdd(run), "hour": _image_hour(image_part)})
+        if index % 500 == 0 or index == len(validation):
+            print(f"[images.s34] loaded={index}/{len(validation)}", flush=True)
+
+    run_labels = _s3_source_labels(samples)
+    for sample in samples:
+        sample["dataset"] = sample["source"] = run_labels[sample["run"]]
+
+    inputs_u8 = np.stack(tensors)
+    history_values = np.asarray(histories, dtype=np.float32)
+    current_targets = np.asarray(targets, dtype=np.float32)
+    hold_last_mae = float(np.mean(np.abs(history_values[:, -1] - current_targets)))
+    print(
+        f"[eval.s34] common validation images={len(samples)} hold_last_mae={hold_last_mae:.3f} "
+        f"sequence_stats={stats}",
+        flush=True,
+    )
+    return {
+        "inputs_u8": inputs_u8,
+        "histories": history_values,
+        "targets": current_targets,
+        "samples": samples,
+        "hold_last_mae": hold_last_mae,
+    }
+
+
+def _normalized_image_batch(inputs_u8, start, stop):
+    batch = inputs_u8[start:stop].astype(np.float32) / 255.0
+    return (batch - 0.5) / 0.5
+
+
+def _onnx_session(path, device):
+    import onnxruntime as ort
+
+    available = ort.get_available_providers()
+    if device.type == "cuda" and "CUDAExecutionProvider" not in available:
+        raise RuntimeError(
+            "--device cuda requested, but ONNX Runtime does not provide CUDAExecutionProvider. "
+            "Install onnxruntime-gpu before running the report."
+        )
+    providers = [
+        provider
+        for provider in ("CUDAExecutionProvider", "CPUExecutionProvider")
+        if provider in available and (device.type == "cuda" or provider == "CPUExecutionProvider")
+    ] or ["CPUExecutionProvider"]
+    session = ort.InferenceSession(str(path), providers=providers)
+    print(f"[eval] model={path.stem.removeprefix('SidewalkPilot-v')} ONNX providers={session.get_providers()}", flush=True)
+    return session
+
+
+def _decode_s4_current(output, s3mod):
+    output = np.asarray(output, dtype=np.float32)
+    if output.ndim != 3 or output.shape[2] != 18:
+        raise ValueError(f"Unexpected Series 4 output shape: {output.shape}")
+    current = output[:, 0, :]
+    logits = current[:, :9]
+    offsets = 1.0 / (1.0 + np.exp(-current[:, 9:18]))
+    classes = np.argmax(logits, axis=1)
+    lows = np.asarray(s3mod._STEER_BIN_LO, dtype=np.float32)[classes]
+    highs = np.asarray(s3mod._STEER_BIN_HI, dtype=np.float32)[classes]
+    chosen = offsets[np.arange(len(classes)), classes]
+    return np.clip(lows + chosen * (highs - lows), 0.0, 180.0)
+
+
+def _series34_result(path, version, series, preds, data, output_head):
+    targets = data["targets"]
+    samples = data["samples"]
+    datasets = [sample["dataset"] for sample in samples]
+    sources = [sample["source"] for sample in samples]
+    by_dataset = {}
+    for name in sorted(set(datasets)):
+        indices = [index for index, value in enumerate(datasets) if value == name]
+        by_dataset[name] = metric_block(preds[indices], targets[indices])
+    by_source = {}
+    for name in sorted(set(sources)):
+        indices = [index for index, value in enumerate(sources) if value == name]
+        by_source[name] = metric_block(preds[indices], targets[indices])
+    return {
+        "checkpoint": str(path.resolve()),
+        "series": series,
+        "preprocessing": "raw BGR 320x180",
+        "output_head": output_head,
+        "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+        "output_scale_deg": None,
+        "hold_last_mae_deg": data["hold_last_mae"],
+        "overall": metric_block(preds, targets),
+        "by_dataset": by_dataset,
+        "by_source": by_source,
+        **bucket_summary(preds, targets),
+    }
+
+
+def evaluate_series34(models_dir, device, batch_size, versions=None):
+    """Evaluate Series 3 and 4 on one sequence-valid held-out set for direct comparison."""
+    paths = _discover_series34_paths(models_dir, versions)
+    if not paths[3] and not paths[4]:
+        return {}, []
+    data = load_series34_validation_data()
+    s3mod = _load_s3_module()
+    results = {}
+
+    for path in paths[3]:
+        if path.suffix.lower() != ".onnx":
+            raise RuntimeError(f"Series 3 report evaluation requires ONNX: {path}")
+        version = re.match(r"^SidewalkPilot-v(.+)\.onnx$", path.name).group(1)
+        print(f"[eval] model={version} checkpoint={path.name}", flush=True)
+        session = _onnx_session(path, device)
+        image_name = session.get_inputs()[0].name
+        predictions = []
+        for start in range(0, len(data["inputs_u8"]), batch_size):
+            batch = _normalized_image_batch(data["inputs_u8"], start, start + batch_size)
+            output = session.run(None, {image_name: batch})[0]
+            predictions.append(_decode_s3_steering(output, s3mod))
+        preds = np.concatenate(predictions).astype(np.float32)
+        output_head = (
+            "2 continuous controls (steering + throttle)"
+            if version in {"3.0", "3.0b"}
+            else "19 hybrid outputs (9 classes + 9 offsets + throttle)"
+        )
+        results[version] = _series34_result(path, version, 3, preds, data, output_head)
+        overall = results[version]["overall"]
+        print(f"[eval] done model={version} mae={overall['mae']:.3f} median={overall['median_ae']:.3f}", flush=True)
+
+    for path in paths[4]:
+        if path.suffix.lower() != ".onnx":
+            raise RuntimeError(f"Series 4 report evaluation requires ONNX: {path}")
+        match = S4_MODEL_RE.match(path.name)
+        version = match.group("version")
+        print(f"[eval] model={version} checkpoint={path.name}", flush=True)
+        session = _onnx_session(path, device)
+        input_defs = session.get_inputs()
+        image_def = next(item for item in input_defs if item.name == "image" or len(item.shape) == 4)
+        history_defs = [item for item in input_defs if item.name != image_def.name]
+        predictions = []
+        horizon_count = None
+        for start in range(0, len(data["inputs_u8"]), batch_size):
+            stop = min(start + batch_size, len(data["inputs_u8"]))
+            feeds = {image_def.name: _normalized_image_batch(data["inputs_u8"], start, stop)}
+            if history_defs:
+                feeds[history_defs[0].name] = data["histories"][start:stop]
+            output = session.run(None, feeds)[0]
+            horizon_count = int(output.shape[1])
+            predictions.append(_decode_s4_current(output, s3mod))
+        preds = np.concatenate(predictions).astype(np.float32)
+        contract = "PCF" if history_defs and horizon_count > 1 else ("PC" if history_defs else "CF")
+        output_head = f"{contract}: {horizon_count} x 18 hybrid steering outputs"
+        results[version] = _series34_result(path, version, 4, preds, data, output_head)
+        overall = results[version]["overall"]
+        print(f"[eval] done model={version} mae={overall['mae']:.3f} median={overall['median_ae']:.3f}", flush=True)
+
+    return results, data["samples"]
 
 
 def fmt_num(value, digits=2):
@@ -878,7 +1117,7 @@ def make_table(rows, col_widths=None, repeat_rows=1, header_color=colors.HexColo
     return table
 
 
-def build_pdf(results, samples, s3_samples, pdf_out):
+def build_pdf(results, samples, s34_samples, pdf_out):
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         "TitleCenter",
@@ -897,10 +1136,12 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     series1 = [version for version in versions if series_for_version(version) == 1]
     series2 = [version for version in versions if series_for_version(version) == 2]
     series3 = [version for version in versions if series_for_version(version) == 3]
+    series4 = [version for version in versions if series_for_version(version) == 4]
     series12 = series1 + series2
+    series34 = series3 + series4
     ranked12 = rank_versions(results, series12)
-    ranked3 = rank_versions(results, series3)
-    ranked = ranked12 + ranked3
+    ranked34 = rank_versions(results, series34)
+    ranked = ranked12 + ranked34
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     doc = SimpleDocTemplate(
@@ -918,13 +1159,14 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     story.append(
         paragraph(
             f"Generated {generated}. Series 1/2 checkpoints are evaluated on their original {len(samples):,}-image corrected "
-            f"real field dataset. Series 3 checkpoints are evaluated on the current {len(s3_samples):,}-image Series 3 field "
-            "dataset. Rankings and metric gradients are therefore separated by evaluation dataset; values must not be used "
-            "for direct cross-dataset ranking. Checkpoint naming uses X.Y for the final epoch and X.Yb for the best epoch.",
+            f"real field dataset. Series 3/4 checkpoints are evaluated on the same {len(s34_samples):,}-image frozen temporal "
+            "validation subset from the shared 81,237-frame dataset. Rankings and metric gradients are separated by evaluation "
+            "dataset; Series 1/2 values must not be compared directly with Series 3/4 values. Series 4 uses paired experiment "
+            "names: p/r for PC, f/g for CF, and a/c for PCF (final/best respectively).",
             normal,
         )
     )
-    for label, group in (("Series 1/2", ranked12), ("Series 3", ranked3)):
+    for label, group in (("Series 1/2", ranked12), ("Series 3/4", ranked34)):
         if not group:
             continue
         best = group[0]
@@ -940,13 +1182,14 @@ def build_pdf(results, samples, s3_samples, pdf_out):
             "Series 1 uses raw BGR and output scale 86. Series 2 uses output scale 85; v2.0/v2.0b use legacy HSV/CLAHE "
             "preprocessing, while v2.1 and newer use raw BGR. Series 1/2 produce one continuous steering value. Series 3.0 "
             "and 3.0b produce two continuous values (steering and throttle). Series 3.1 and newer produce 19 raw values: "
-            "9 steering-class logits, 9 within-class offsets, and throttle. Every architecture is decoded to steering degrees "
-            "before the common steering metrics are calculated.",
+            "9 steering-class logits, 9 within-class offsets, and throttle. Series 4 removes throttle and emits one or four "
+            "18-value hybrid steering horizons; PC/PCF also consume three previous targets. Every architecture is decoded to "
+            "current steering degrees before the common metrics are calculated.",
             normal,
         )
     )
 
-    for label, group_samples in (("Series 1/2", samples), ("Series 3", s3_samples)):
+    for label, group_samples in (("Series 1/2", samples), ("Series 3/4", s34_samples)):
         source_counts = Counter(sample["dataset"] for sample in group_samples)
         source_rows = [["Source", "Count", "Purpose"]]
         for source_name in sorted(source_counts):
@@ -962,7 +1205,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
         ]))
 
     story.append(Spacer(1, 0.16 * inch))
-    for label, group in (("Series 1/2", ranked12), ("Series 3", ranked3)):
+    for label, group in (("Series 1/2", ranked12), ("Series 3/4", ranked34)):
         if not group:
             continue
         rank_rows = ranking_rows(results, group)
@@ -993,7 +1236,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
                 version,
                 Path(results[version]["checkpoint"]).name,
                 str(results[version]["series"]),
-                "S3" if results[version]["series"] == 3 else "S1/2",
+                "S3/4" if results[version]["series"] >= 3 else "S1/2",
                 results[version]["preprocessing"],
                 (f"{results[version]['output_scale_deg']:.0f}"
                  if results[version]["output_scale_deg"] is not None else "-"),
@@ -1008,7 +1251,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
         )
     story.append(paragraph("Chronological Model Growth", h2))
     story.append(paragraph(
-        "S1/2 and S3 rows use different evaluation sets. Compare chronology and metrics only within the same eval-set group.", small))
+        "S1/2 and S3/4 rows use different evaluation sets. Compare chronology and metrics only within the same eval-set group.", small))
     growth_table = make_table(
         growth_rows,
         col_widths=[0.42 * inch, 1.45 * inch, 0.4 * inch, 0.48 * inch, 0.95 * inch, 0.4 * inch, 0.45 * inch, 0.45 * inch, 0.48 * inch, 0.42 * inch, 0.42 * inch, 0.47 * inch, 0.54 * inch],
@@ -1017,7 +1260,7 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     story.append(growth_table)
 
     story.append(PageBreak())
-    for label, group in (("Series 1/2", ranked12), ("Series 3", ranked3)):
+    for label, group in (("Series 1/2", ranked12), ("Series 3/4", ranked34)):
         if not group:
             continue
         dataset_names = sorted({name for version in group for name in results[version]["by_dataset"]})
@@ -1077,6 +1320,8 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     ]
     if series3:
         graph_specs.append(("Graph 3: Series 3 all models", series3, build_line_chart))
+    if series4:
+        graph_specs.append(("Graph 4: Series 4 all models", series4, build_line_chart))
     for title, chart_versions, chart_fn in graph_specs:
         if not chart_versions:
             continue
@@ -1084,21 +1329,21 @@ def build_pdf(results, samples, s3_samples, pdf_out):
         image_data = chart_fn(results, title, chart_versions)
         story.append(Image(image_data, width=9.1 * inch, height=3.1 * inch))
 
-    # 9-class steering-bucket confusion heatmaps for the 4 LATEST models (always Series 3)
-    s3_latest = sorted(
-        (v for v in versions if results[v].get("series") == 3
+    # Show all six Series 4 experiments plus the latest Series 3 final/best pair.
+    recent_hybrid = sorted(
+        (v for v in versions if results[v].get("series") in {3, 4}
          and "bucket9_confusion_ground_rows_pred_cols" in results[v]),
-        key=version_key, reverse=True)[:4]
-    if s3_latest:
+        key=version_key, reverse=True)[:8]
+    if recent_hybrid:
         story.append(PageBreak())
-        story.append(paragraph("Steering-Bucket Confusion (9-class) — latest 4 models", h2))
+        story.append(paragraph("Steering-Bucket Confusion (9-class) - latest Series 3/4 models", h2))
         story.append(paragraph(
             "Rows = the TRUE steering bucket, columns = the model's PREDICTED bucket. "
             "Green diagonal = correct; red off-diagonal = confusion. Shading = share of that true "
             "bucket (each row sums to ~100%). Buckets: HL 0-45, L 45-60, L+ 60-75, SL 75-85, "
             "ST 85-95, SR 95-105, R 105-120, R+ 120-135, HR 135-180.", small))
         labels9 = [name for name, _, _ in BUCKETS9]
-        for version in s3_latest:
+        for version in recent_hybrid:
             conf = results[version]["bucket9_confusion_ground_rows_pred_cols"]
             grand = max(1, sum(sum(conf[r].values()) for r in labels9))
             exact9 = sum(conf[labels9[i]][labels9[i]] for i in range(9))
@@ -1139,15 +1384,16 @@ def build_pdf(results, samples, s3_samples, pdf_out):
     story.append(PageBreak())
     story.append(paragraph("Notes", h2))
     notes = [
-        f"Series 1/2 checkpoints were evaluated on {len(samples):,} original corrected real images. Series 3 checkpoints were evaluated on {len(s3_samples):,} current Series 3 images. Cross-dataset metric values are not directly comparable.",
+        f"Series 1/2 checkpoints were evaluated on {len(samples):,} original corrected real images. Series 3/4 checkpoints were evaluated on the same {len(s34_samples):,} sequence-valid frozen validation anchors. Cross-group values are not directly comparable.",
         "Series 2 v2.0/v2.0b used their required HSV/CLAHE preprocessing; all other Series 1/2 models used raw BGR.",
         "MAE and within-degree counts can reward straight collapse. Use the class-balanced and turn-recall columns for selection, with MAE as supporting evidence.",
         "Offline MAE does not prove real-world reliability. The car can still fail on lighting, turns, driveways, road-edge ambiguity, speed, and sensor conditions.",
         "Series 1/2 training was CARLA-assisted, but this report follows the historical evaluator and scores them on the 2,224 corrected real-image set rather than synthetic training frames.",
-        "Series 3 models were trained on overlapping images from this dataset, so their scores are fit checks, not held-out generalization estimates.",
-        f"The Series 3 evaluation set contains {len(s3_samples):,} curated real field frames across five manual-driving runs from July 2 through July 12, 2026.",
+        "The Series 3/4 report set is held out by the frozen 100-frame window split and requires three valid previous and three valid future frames without split crossings or timestamp gaps.",
+        f"The shared source dataset contains 81,237 curated real field frames across five manual-driving runs from July 2 through July 12, 2026; {len(s34_samples):,} anchors satisfy the common report contract.",
+        "The hold-last baseline repeats the most recent previous target. It is a persistence reference for Series 4 history models, not a deployed controller behavior.",
         "Series 3 throttle labels are near-constant at full throttle, so this report evaluates steering only; throttle control remains disabled pending varied-throttle data.",
-        "v3.3, v3.3b, v3.4, and v3.4b still require field testing before any deployment winner is declared.",
+        "The July 13 field comparison selected v3.4 from the cases presented. Series 4 checkpoints remain experimental and require deployment-compatible integration and field testing.",
     ]
     for note in notes:
         story.append(paragraph(f"- {note}", normal))
@@ -1191,15 +1437,15 @@ def main():
             samples, raw_inputs, clahe_inputs, targets, models, args.batch_size, device))
         del raw_inputs, clahe_inputs, targets
 
-    s3_results, s3_samples = evaluate_series3(
+    s34_results, s34_samples = evaluate_series34(
         args.models_dir,
         device,
         args.batch_size,
         versions=wanted if args.versions else None,
     )
-    results.update(s3_results)
+    results.update(s34_results)
     print(
-        f"[start] models={len(results)} s12_samples={len(samples)} s3_samples={len(s3_samples)}",
+        f"[start] models={len(results)} s12_samples={len(samples)} s34_samples={len(s34_samples)}",
         flush=True,
     )
 
@@ -1209,7 +1455,7 @@ def main():
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.pdf_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(json.dumps(results, indent=2) + "\n")
-    build_pdf(results, samples, s3_samples, args.pdf_out)
+    build_pdf(results, samples, s34_samples, args.pdf_out)
     print(f"[done] wrote {args.json_out}", flush=True)
     print(f"[done] wrote {args.pdf_out}", flush=True)
 
