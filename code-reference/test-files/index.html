@@ -957,9 +957,8 @@
               
                 <h1 id="test-files">Test Files</h1>
 <p><code>code/test_files/</code> contains standalone bench, calibration, data, evaluation, and
-setup utilities. Hardware and navigation utilities are grouped into subsystem
-folders; cross-cutting dataset, model-evaluation, and controller experiments remain
-at the directory root.</p>
+setup utilities. Checked-in utilities are grouped by the subsystem or workflow they
+exercise; the directory root contains folders rather than a second unsorted tool list.</p>
 <h2 id="main-utilities">Main utilities</h2>
 <table>
 <thead>
@@ -972,28 +971,38 @@ at the directory root.</p>
 <tbody>
 <tr>
 <td>Steering</td>
-<td><code>steering/pca9685_servo_test.py</code>, <code>steering/calibrate_servo.py</code>, <code>steering/model_steering_test.py</code>, <code>steering_trim_tuner.py</code>, <code>servo_step_controller.py</code></td>
-<td>Servo motion, center calibration, and model-to-steering checks</td>
+<td><code>steering/pca9685_servo_test.py</code>, <code>steering/calibrate_servo.py</code>, <code>steering/steering_trim_tuner.py</code>, <code>steering/servo_step_controller.py</code>, <code>steering/ff_calibrate.py</code>, <code>steering/imu_steering_calibrate.py</code>, <code>steering/pid_autotune.py</code></td>
+<td>Servo motion, centering, feed-forward measurement, IMU steering calibration, and yaw-control tuning</td>
 </tr>
 <tr>
 <td>LiDAR</td>
-<td><code>lidar/lidar_viewer.py</code>, <code>lidar_uart_test.py</code>, <code>lidar_avoidance_sim.py</code>, <code>test_lidar_center_aeb.py</code></td>
+<td><code>lidar/lidar_viewer.py</code>, <code>lidar/lidar_uart_test.py</code>, <code>lidar/lidar_avoidance_sim.py</code>, <code>lidar/test_lidar_center_aeb.py</code></td>
 <td>Raw transport, visualization, policy simulation, and center-corridor tests</td>
 </tr>
 <tr>
-<td>Camera/data</td>
-<td><code>camera/test_camera_preview.py</code>, <code>camera/test_camera_flip.py</code>, <code>photo_run_to_dataset.py</code>, <code>check_dataset_frames.py</code>, <code>camera/preview_series3_augmentations.py</code></td>
-<td>Capture, orientation, dataset conversion/audit, and augmentation preview</td>
+<td>Camera</td>
+<td><code>camera/test_camera_preview.py</code>, <code>camera/test_camera_flip.py</code>, <code>camera/preview_series3_augmentations.py</code>, <code>camera/preview_shadow_augmentations.py</code></td>
+<td>Capture, orientation, and augmentation preview</td>
+</tr>
+<tr>
+<td>Data and logs</td>
+<td><code>data/photo_run_to_dataset.py</code>, <code>data/check_dataset_frames.py</code>, <code>data/dataset_cosine_similarity.py</code>, <code>data/dataset_clusters.py</code>, <code>data/dataset_scene_tags.py</code>, <code>data/takeover_log_report.py</code></td>
+<td>Dataset assembly/audit, scene analysis, and CSV takeover reporting</td>
 </tr>
 <tr>
 <td>Display</td>
-<td><code>display/hub75_rgbmatrix_test.py</code>, <code>display/display_panel_test.py</code>, <code>test_z2w_lidar_layout.py</code></td>
+<td><code>display/hub75_rgbmatrix_test.py</code>, <code>display/display_panel_test.py</code>, <code>display/test_z2w_lidar_layout.py</code></td>
 <td>HUB75 bring-up and dashboard layout checks</td>
 </tr>
 <tr>
-<td>Sensors/input</td>
-<td><code>sensors/bn880_test.py</code>, <code>sensors/hall_sensor_test.py</code>, <code>imu_yaw_test.py</code>, <code>controller/xbox_test.py</code></td>
-<td>GPS/compass, wheel speed, IMU, and controller checks</td>
+<td>Sensors</td>
+<td><code>sensors/bn880_test.py</code>, <code>sensors/hall_sensor_test.py</code>, <code>sensors/imu_yaw_test.py</code></td>
+<td>GPS/compass, wheel speed, and IMU stream checks</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td><code>controller/xbox_test.py</code>, <code>controller/joystick_velocity_test.py</code>, <code>controller/flick_detector_test.py</code>, <code>controller/test_async_jetson_client.py</code></td>
+<td>Input-device behavior and non-blocking Jetson-client checks</td>
 </tr>
 <tr>
 <td>Navigation</td>
@@ -1002,12 +1011,12 @@ at the directory root.</p>
 </tr>
 <tr>
 <td>Models</td>
-<td><code>evaluate_sidewalkpilot_models.py</code>, <code>test_series_4_common.py</code>, <code>test_jetson_series4_runtime.py</code>, <code>clip_bucket_analyzer.py</code></td>
+<td><code>models/evaluate_sidewalkpilot_models.py</code>, <code>models/test_series_4_common.py</code>, <code>models/test_jetson_series4_runtime.py</code>, <code>models/clip_bucket_analyzer.py</code></td>
 <td>Cross-model report, Series 4 contracts/runtime, and clip diagnosis</td>
 </tr>
 <tr>
 <td>Setup</td>
-<td><code>setup/setup_and_verify.sh</code>, <code>install_usb_dashboard_link.sh</code></td>
+<td><code>setup/setup_and_verify.sh</code>, <code>setup/install_usb_dashboard_link.sh</code></td>
 <td>Environment checks and USB dashboard link installation</td>
 </tr>
 </tbody>
@@ -1018,9 +1027,9 @@ result, and date separately.</p>
 <h2 id="support-assets">Support assets</h2>
 <p>GeoJSON files, navigation graphs, the route-planner HTML, and
 <code>house_stop_overrides.json</code> live under <code>code/test_files/navigation/</code>.
-<code>mg24_yaw_firmware/</code> and <code>hsv_clahe_comparisons/</code> are checked-in supporting
-subdirectories. Local generated caches or reports are not part of the published
-repository merely because they appear in a working copy.</p>
+<code>mg24_yaw_firmware/</code> and <code>camera/hsv_clahe_comparisons/</code> are checked-in supporting
+directories. Local generated caches or reports under <code>data/</code> are not part of the
+published repository merely because they appear in a working copy.</p>
 <h2 id="verification">Verification</h2>
 <pre><code class="language-bash">cd /home/rsabavat/rc_car_code
 python -m py_compile code/test_files/steering/pca9685_servo_test.py

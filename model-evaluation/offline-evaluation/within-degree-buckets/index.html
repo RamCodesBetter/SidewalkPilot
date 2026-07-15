@@ -960,7 +960,7 @@ tolerance of the human label — within 2°, 5°, 10°, and 20° of servo angle.
 MAE compresses everything into one average, these buckets show the <em>shape</em> of the
 error: how much of the set is genuinely precise versus merely "close enough."</p>
 <h2 id="how-it-works">How it works</h2>
-<p>In <code>code/test_files/evaluate_sidewalkpilot_models.py</code>, <code>metric_block()</code> computes the
+<p>In <code>code/test_files/models/evaluate_sidewalkpilot_models.py</code>, <code>metric_block()</code> computes the
 absolute error <code>ae = abs(preds - targets)</code> per
 frame and then counts:</p>
 <table>

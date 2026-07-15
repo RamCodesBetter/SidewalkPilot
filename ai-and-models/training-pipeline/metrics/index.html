@@ -1087,7 +1087,7 @@
 <p>There are 4,741 straight targets and 2,211 turn targets in the 6,952-frame challenge set. Predicting center frequently can lower MAE and median error while missing the steering events that keep the car on the sidewalk. v3.4b illustrates the pattern: lower MAE than v3.4, but weaker turn metrics and worse physical behavior.</p>
 <p>The rule is not “ignore MAE.” It is “do not let MAE hide class collapse.” Bal9 and turn recall gate the model; MAE, signed error, smoothness, and field behavior complete the decision.</p>
 <h2 id="common-evaluator">Common Evaluator</h2>
-<p><code>code/test_files/evaluate_sidewalkpilot_models.py</code> evaluates all 46 checkpoints on the same 6,952-frame Series 3/4 validation subset. It adapts input resolution and output decoding by series, writes <code>docs/steering_eval_current_labels.json</code>, and generates <code>docs/steering_model_report.pdf</code>.</p>
+<p><code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> evaluates all 46 checkpoints on the same 6,952-frame Series 3/4 validation subset. It adapts input resolution and output decoding by series, writes <code>docs/steering_eval_current_labels.json</code>, and generates <code>docs/steering_model_report.pdf</code>.</p>
 <p>Older Series 1/2 own-dataset results are retained under each model's <code>historical_evaluation</code> block. They remain useful for historical reproduction but are not mixed into the common ranking.</p>
 <p>See <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>, <a href="../../../model-evaluation/comparisons/mae-vs-turn-capability/">MAE vs Turn Capability</a>, and <a href="../../../model-evaluation/comparisons/model-selection-rubric/">Model Selection Rubric</a>.</p>
               

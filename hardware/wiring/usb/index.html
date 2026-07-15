@@ -1003,7 +1003,7 @@ ping -c 3 192.168.10.2               # from Pi 5
 # Zero 2 W — dashboard receiver listening
 ss -lunp | grep 8765
 </code></pre>
-<p>Failure symptoms: a missing <code>/dev/ttyUSB0</code> means the expected adapter did not appear at that name; check the stable by-id path, <code>lsusb</code>, cable, host port, power, and adapter. Descriptor error <code>-110</code> records a USB timeout but does not identify which component caused it. On the dashboard link, carrier <code>1</code> with failed ping means the interface reports a physical link but IP/ARP traffic is not completing; the keeper service and <code>code/test_files/install_usb_dashboard_link.sh</code> provide the project recovery path. <code>NO LINK</code> on the display means the receiver is alive but has not seen a recent packet.</p>
+<p>Failure symptoms: a missing <code>/dev/ttyUSB0</code> means the expected adapter did not appear at that name; check the stable by-id path, <code>lsusb</code>, cable, host port, power, and adapter. Descriptor error <code>-110</code> records a USB timeout but does not identify which component caused it. On the dashboard link, carrier <code>1</code> with failed ping means the interface reports a physical link but IP/ARP traffic is not completing; the keeper service and <code>code/test_files/setup/install_usb_dashboard_link.sh</code> provide the project recovery path. <code>NO LINK</code> on the display means the receiver is alive but has not seen a recent packet.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><code>hardware/build-overview.md</code></li>

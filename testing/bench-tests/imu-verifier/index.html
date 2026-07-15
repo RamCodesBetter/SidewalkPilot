@@ -959,7 +959,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="imu-verifier">IMU Verifier</h1>
-<p>The IMU verifier is the bench check for the Seeed XIAO MG24 6-axis IMU used by the live yaw-control path. It confirms which gyro axis is yaw, checks its sign, and exposes filter behavior before the runtime is allowed to use that signal. It runs the checked-in <code>code/test_files/imu_yaw_test.py</code>.</p>
+<p>The IMU verifier is the bench check for the Seeed XIAO MG24 6-axis IMU used by the live yaw-control path. It confirms which gyro axis is yaw, checks its sign, and exposes filter behavior before the runtime is allowed to use that signal. It runs the checked-in <code>code/test_files/sensors/imu_yaw_test.py</code>.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li>It reads the MG24's gyro CSV stream (<code>gx,gy,gz</code> in deg/s) off a serial port and shows the raw three axes alongside a filtered yaw value, so I can (a) confirm the yaw axis and (b) tune the filter.</li>
@@ -971,9 +971,9 @@
 </ul>
 <h2 id="command">Command</h2>
 <p>Run on the Pi 5 (IMU is on the GPIO UART <code>/dev/ttyAMA3</code>, Pi GPIO8/9):</p>
-<pre><code class="language-bash">python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3
+<pre><code class="language-bash">python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3
 # tune: pick the yaw axis and filter
-python3 code/test_files/imu_yaw_test.py --port /dev/ttyAMA3 --axis 2 --median 5 --ema 0.3 --deadband 2.0
+python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3 --axis 2 --median 5 --ema 0.3 --deadband 2.0
 </code></pre>
 <h2 id="pass-warn-fail">Pass / warn / fail</h2>
 <ul>

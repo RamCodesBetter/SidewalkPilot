@@ -961,7 +961,7 @@ human-corrected label. It is the tail-risk metric — the number that says "on i
 worst frame, how wrong was this model?"</p>
 <h2 id="how-it-works">How it works</h2>
 <p>The current evaluator computes it in <code>metric_block()</code> as <code>max(abs(preds - targets))</code> in
-servo degrees (<code>code/test_files/evaluate_sidewalkpilot_models.py</code>). Because steering is clamped to
+servo degrees (<code>code/test_files/models/evaluate_sidewalkpilot_models.py</code>). Because steering is clamped to
 <code>0..180</code>, the theoretical ceiling is 180° (predicting hard-right on a hard-left
 frame), but a realistic worst case is a full turn class in the wrong direction.</p>
 <h2 id="why-it-matters">Why it matters</h2>

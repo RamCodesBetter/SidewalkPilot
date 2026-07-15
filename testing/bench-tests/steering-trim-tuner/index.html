@@ -957,7 +957,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="steering-trim-tuner">Steering Trim Tuner</h1>
-<p>The steering trim tuner is the windowless, SSH-friendly utility I use to measure and set the steering center without launching the whole runtime. It drives only the steering servo — never the motors — so I can jog the wheels to true straight over an SSH session and read off the trim angle, then decide whether a constant needs to change. It lives at <code>code/test_files/steering_trim_tuner.py</code>.</p>
+<p>The steering trim tuner is the windowless, SSH-friendly utility I use to measure and set the steering center without launching the whole runtime. It drives only the steering servo — never the motors — so I can jog the wheels to true straight over an SSH session and read off the trim angle, then decide whether a constant needs to change. It lives at <code>code/test_files/steering/steering_trim_tuner.py</code>.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li>It runs headless: it sets <code>SDL_VIDEODRIVER=dummy</code> so pygame reads the Xbox controller without opening any window, which is what makes it usable purely over SSH.</li>
@@ -967,9 +967,9 @@
 </ul>
 <h2 id="command">Command</h2>
 <p>Run on the Pi 5 over SSH, Xbox controller connected, wheels off the ground:</p>
-<pre><code class="language-bash">python3 code/test_files/steering_trim_tuner.py
+<pre><code class="language-bash">python3 code/test_files/steering/steering_trim_tuner.py
 # custom start and finer step:
-python3 code/test_files/steering_trim_tuner.py --start 90 --step 0.5
+python3 code/test_files/steering/steering_trim_tuner.py --start 90 --step 0.5
 </code></pre>
 <p>D-pad to jog the wheels straight, button <code>0</code> to print the trim, button <code>1</code> to reset, button <code>15</code> to quit.</p>
 <h2 id="why-it-matters">Why it matters</h2>

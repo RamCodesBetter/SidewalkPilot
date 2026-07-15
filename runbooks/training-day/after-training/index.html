@@ -974,7 +974,7 @@
 <ol>
 <li>Run the common evaluator from the repository root. It discovers supported Series 1-4 checkpoints, evaluates the selected versions on the frozen common Series 3/4 subset, and updates the JSON and PDF:
    <code>bash
-   python3 code/test_files/evaluate_sidewalkpilot_models.py \
+   python3 code/test_files/models/evaluate_sidewalkpilot_models.py \
      --device cuda \
      --versions 3.x 3.xb</code></li>
 <li>Read the metrics as a set, not one number: Bal9, turn exact, turn +/-1, straight exact, steering MAE, median absolute error, signed steering error, and the confusion matrix. A collapsed model usually concentrates predictions near straight and leaves turn rows weak.</li>

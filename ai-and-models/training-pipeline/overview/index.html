@@ -1108,7 +1108,7 @@
 </ul>
 <p>Both are exported to ONNX. PTH files are removed unless <code>--keep-pth</code> is specified. TensorRT build flags remain available, but current Jetson throughput is sufficient to run the ONNX models directly; quantization is not required for the present operating target.</p>
 <h2 id="evaluation-and-promotion">Evaluation and Promotion</h2>
-<p>The evaluator at <code>code/test_files/evaluate_sidewalkpilot_models.py</code> produces the cross-model report. Current ranking considers:</p>
+<p>The evaluator at <code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> produces the cross-model report. Current ranking considers:</p>
 <ul>
 <li>Balanced nine-class accuracy;</li>
 <li>Turn exact and turn within one class;</li>

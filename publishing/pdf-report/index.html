@@ -988,11 +988,11 @@ The current result places v4.0p first by Bal9 and v4.0c first by shared-set MAE,
 remains the field-selected model based on the July 13 comparison.</p>
 <h2 id="generation">Generation</h2>
 <p>The evaluator is:</p>
-<pre><code class="language-text">code/test_files/evaluate_sidewalkpilot_models.py
+<pre><code class="language-text">code/test_files/models/evaluate_sidewalkpilot_models.py
 </code></pre>
 <p>Run it from the repository root:</p>
 <pre><code class="language-bash">/home/rsabavat/.gpu-env/bin/python -u \
-  code/test_files/evaluate_sidewalkpilot_models.py \
+  code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 </code></pre>
 <p>The evaluator writes JSON first and then renders the PDF. A wrong value must be corrected in
