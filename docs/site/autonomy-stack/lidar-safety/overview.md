@@ -1,56 +1,63 @@
-# LiDAR Safety Overview
+# Overview
 
-SidewalkPilot uses LiDAR as a longitudinal safety layer. The camera model owns steering; LiDAR can only reduce forward throttle or request a hard brake for a return directly inside the car-relative center safety corridor.
+The LiDAR safety layer is SidewalkPilot's deterministic center-corridor throttle and
+braking guard. It sits outside the neural steering model: the model owns steering,
+while LiDAR can reduce forward throttle or request a stop when AEB is enabled. It does
+not select a swerve direction.
 
-## Geometry
+The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
+connects over USB through a CP2102 UART bridge (auto-resolved from
+`/dev/serial/by-id/*CP2102*`, falling back to `/dev/ttyUSB*`); an earlier wiring used the
+Pi's GPIO UART at `/dev/ttyAMA2`. A background reader thread
+(`rc_car_app/lidar.py`, `LidarParser`) parses the raw packet stream into a full 360-degree
+scan of `LidarPoint` objects, and the main control loop in `rc_car_app/runtime.py` pulls
+the latest scan once per iteration with `get_latest_scan()`.
 
-The dashboard displays a five-foot (`1.524 m`) scan width for context. Only its center third is active for control:
+## How it works
 
-- center half-width: `0.254 m`;
-- total active width: `0.508 m`;
-- left/right side returns: visible telemetry only; and
-- corridor frame: car/LiDAR-relative, not sidewalk-edge-relative.
+The pipeline is a straight line from bytes to a throttle or braking decision:
 
-For each valid point, the policy converts polar range/angle to:
+1. **Parse.** `LidarParser` reads the LD19's 47-byte packets, extracts 12 measurement
+   points each (angle, distance in mm, confidence), and accumulates them into a rolling
+   full scan. See `lidar-safety/packet-parsing.md`.
+2. **Measure the center corridor.** `lidar_avoidance.center_forward_distance()` filters
+   invalid or low-confidence points and returns the nearest positive-forward point within
+   the center safety corridor.
+3. **Govern throttle.** At 1.65 m or more the target remains full. It falls linearly to
+   60% reference throttle at 1.25 m and holds that target to 1.05 m.
+4. **Brake.** At or inside 1.05 m, AEB requests zero throttle and full braking. This
+   applies in manual and autonomous forward driving when AEB is enabled; reverse is
+   excluded. See `lidar-safety/aeb.md`.
 
-```text
-lateral = distance * sin(angle)
-forward = distance * cos(angle)
-```
+The same computed policy is reused within a control iteration, so autonomous command
+generation and final hardware arbitration do not intentionally interpret two different
+scans. Operator input can cancel autonomy while the controller and Pi loop are responsive.
 
-A point contributes only when `forward > 0` and `abs(lateral) <= 0.254 m`. The nearest qualifying forward distance controls AEB.
+## Why this choice
 
-## Distance Policy
+Keeping close-range throttle and braking outside the neural network makes those decisions
+explicit and auditable. The model handles visual path choice; LiDAR handles measured
+center clearance. This is a bounded design decision, not a claim that LiDAR detects every
+hazard or that the configured threshold guarantees a particular stopping distance.
 
-| Center clearance | Physical command with AEB ON |
-|---:|---|
-| `>= 1.65 m` | Full requested throttle allowed |
-| `1.65..1.25 m` | Proportional cap from 100% down to 60% reference |
-| `1.25..1.05 m` | Hold 60% reference (82% physical PWM) |
-| `<= 1.05 m` | Hard brake / zero throttle |
+## Layer priority
 
-The dashboard maps physical `55..100%` to reference `0..100%`. Therefore, the 60% reference hold target is 82% physical PWM. Training/photo labels remain absolute physical commands, so a frame captured at that target is labeled `0.82`, not `0.60`.
+| Layer | Role | Priority |
+|---|---|---|
+| Manual override | Cancel autonomy and drive via Xbox controller | Highest software authority while controller/loop are responsive |
+| LiDAR / AEB | Center clearance, throttle cap, emergency brake | Overrides forward throttle only |
+| Camera model | Autonomous steering command | Sole autonomous steering owner |
 
-## Control Priority
+## Current status
 
-With AEB ON, an emergency stop overrides manual throttle, cruise control, and autonomous throttle. It does not generate steering. Servo faults and stale/unavailable model stops are separate safety mechanisms and remain active regardless of the LiDAR AEB toggle.
+Implemented and wired into the runtime: packet parsing, background reconnect, center
+occupancy, progressive throttle governance, AEB braking, and dashboard telemetry. The
+earlier left/center/right swerve-through design was removed because range points alone do
+not identify a safe sidewalk boundary. Quantitative stopping-distance, false-positive,
+and obstacle-coverage evidence is still to be collected.
 
-With AEB OFF, center occupancy is still sent to the dashboard, but LiDAR returns full throttle permission and no stop in both manual and autonomous modes.
+## Related pages
 
-## Implementation
-
-- `rc_car_app/lidar.py`: UART packet acquisition and reconnect behavior.
-- `rc_car_app/lidar_avoidance.py`: point validation, center geometry, governor, and emergency decision.
-- `rc_car_app/runtime.py`: one policy evaluation per loop and application to manual/autonomous motor commands.
-- `z2w_dashboard.py`: scan points, two center guides, four distance rungs, and the C status glyph.
-
-Run the deterministic checks from the repository root:
-
-```bash
-python3 code/test_files/test_lidar_center_aeb.py -v
-python3 code/test_files/test_z2w_lidar_layout.py -v
-```
-
-## Failure Boundary
-
-An empty, disconnected, stale, or entirely low-confidence scan has no qualifying center point and therefore cannot trigger AEB. The LiDAR connection/status must be verified before an outdoor autonomous run; AEB ON is a policy state, not a sensor-health guarantee.
+- `autonomy-stack/architecture/layered-autonomy.md`
+- `runtime-code/runtime-loop.md`
+- `safety-case/safety-overview.md`

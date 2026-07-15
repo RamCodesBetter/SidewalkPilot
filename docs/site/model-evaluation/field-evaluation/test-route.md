@@ -1,19 +1,36 @@
 # Test Route
 
-TODO:
+A fixed route is the intended protocol for comparing field models, but the existing field record is not complete enough to claim that every historical run used one identical route, start pose, speed, weather condition, and scoring procedure.
 
-- [ ] Add page-specific notes for `model-evaluation/field-evaluation/test-route.md` after inspecting the real project files.
-- [ ] Cross-link `Test Route` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] Add route, lighting, weather, operator, model version, and manual takeovers.
-- [ ] Separate subjective field notes from measurable field results.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add test date, time, weather, route, model version, and manual takeover count.
-- [ ] Add what failed, what worked, and what data should be collected next.
+## Known route context
+
+Testing occurs on controlled private sidewalk routes in the Trossachs area, which also supplies the checked-in navigation graph. The training dataset includes frames from the project's real driving routes. This creates useful in-distribution tests, but it does not establish performance on unseen neighborhoods or all conditions within the known route.
+
+The July 13 comparison supports the bounded conclusion that v3.4 handled the normal and harsh-shadow cases presented better than v3.3, v3.3b, and v3.4b. Exact route, clip, weather, start-pose, and takeover metadata were not preserved well enough for a quantitative route-level claim.
+
+## Required comparison protocol
+
+For the Series 4 field test, preserve:
+
+1. Route identifier and direction;
+2. Fixed start pose and speed policy;
+3. Model version and code/config revision;
+4. Lighting/weather and approximate time;
+5. CSV path and continuous video or takeover clips;
+6. Autonomous distance, interventions, causes, and completion status; and
+7. The same ordered cases for every candidate.
+
+Run `3.4`, `4.0p`, `4.0r`, `4.0a`, `4.0c`, `3.4b`, `4.0f`, and `4.0g` in that order unless a safety or hardware failure stops the session. Repeating `3.4` at the end can reveal route or lighting drift during the test. Offline ranking selects candidates; it does not replace this physical comparison.
+
+## Interpretation limits
+
+- A fixed route controls some geometry, but lighting, pedestrians, parked vehicles, GPS, battery state, and starting alignment can still vary.
+- Testing on a trained route is an in-distribution check, not proof of generalization.
+- A lower takeover count is meaningful only when route distance, operator policy, and failure definitions are held constant.
+- If video or CSV is missing, report the run as qualitative rather than reconstructing precise metrics from memory.
+
+## Related pages
+
+- [Field Evaluation Overview](overview.md)
+- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
+- [Manual Takeover Count](manual-takeover-count.md)

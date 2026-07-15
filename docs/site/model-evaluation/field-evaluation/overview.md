@@ -1,34 +1,52 @@
-# Field Evaluation
+# Field Evaluation Overview
 
-Field evaluation is the final model-selection gate because offline metrics do not fully represent a moving, mechanically loaded car on real sidewalks.
+Field evaluation checks behavior that an image-label report cannot measure:
+Pi-to-Jon latency, steering smoothness, shadow response, mechanical drift,
+operator takeovers, and LiDAR braking on the assembled vehicle.
 
-## What It Catches
+## Offline Versus Field Evidence
 
-- shadow edges mistaken for sidewalk boundaries;
-- center-biased models that obtain low MAE by avoiding real turns;
-- left/right asymmetry hidden by aggregate metrics;
-- delayed or stale Jetson commands;
-- oscillation introduced by class changes or smoothing; and
-- interactions among steering trim, weight, linkage play, and model output.
+The common evaluator writes `docs/steering_eval_current_labels.json` and
+`docs/steering_model_report.pdf` for 46 checkpoints on a frozen 6,952-frame
+Series 3/4 subset. Bal9 and turn metrics help reject center-collapsed candidates;
+MAE, median error, and signed error add magnitude and bias context.
 
-## Current Result
+Those values do not select a field baseline by themselves. A model must load
+through the live ONNX path, preserve manual response, and complete a
+supervised field comparison under the condition it is intended to improve.
 
-The July 13, 2026 comparison selected regular v3.4 over v3.4b, v3.3, and v3.3b. See [Shadow Robustness](shadow-robustness.md) for the recorded qualitative result and its missing metadata.
+## Current Field Record
 
-## Minimum Comparison Procedure
+The July 13 comparison is an operator-observed, bounded field result:
 
-1. Use the same car hardware, `+12D` steering trim, camera position, route, and direction for every checkpoint.
-2. Confirm the Jetson reports the requested model on the `MODL` dashboard row.
-3. Drive the same normal left turn, normal right turn, straight shadow crossing, diagonal shadow, and mixed bright/dark segment.
-4. Record takeover count and reason rather than relying only on memory.
-5. Stop a model comparison after any repeated sidewalk departure or unsafe command.
-6. Save the controller CSV, video, conditions, model name, and AEB state.
+- v3.4 handled every shadow case presented in that run and is the current
+  field-selected baseline;
+- v3.4b was slightly worse;
+- v3.3 was worse than v3.2;
+- v3.3b was much worse than v3.2b.
 
-The LiDAR AEB test is separate from the steering comparison. LiDAR may slow or stop for a center obstacle, but it never supplies steering, so a successful swerve is evidence about the camera model only.
+This record does not contain enough repeated-route quantitative measurements to
+claim a universal success rate. Series 4 has completed offline evaluation and
+runtime/CUDA smoke testing but has not yet been field tested.
 
-## Evidence Sources
+## Run Record
 
-- `logs/log_<timestamp>.csv`: runtime state and AEB/model telemetry.
-- `docs/steering_model_report.pdf`: reproducible offline comparison.
-- `code/test_files/evaluate_sidewalkpilot_models.py`: report generator.
-- Field video/interruption clips: visual evidence of path behavior.
+A reproducible field comparison should retain:
+
+- Model version and artifact hash;
+- Route, surface, lighting, weather, battery, and payload;
+- Start/end time and distance;
+- Takeover count and cause;
+- Runtime CSV (nominal 10 Hz, 46 columns);
+- Video/clip identifiers;
+- AEB state and any LiDAR intervention;
+- Pass, warning, or failure decision made before examining the next model.
+
+The operator keeps the Xbox controller ready. Steering, gas, or brake input
+cancels autonomy through `cancel_autonomous_mode()`.
+
+## Related Pages
+
+- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
+- [Manual Takeover Count](manual-takeover-count.md)
+- [Bal9](../offline-evaluation/bal9.md)

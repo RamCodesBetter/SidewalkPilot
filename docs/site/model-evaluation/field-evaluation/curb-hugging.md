@@ -1,19 +1,36 @@
-# Curb Hugging
+# House-Side Edge Drift
 
-TODO:
+House-side edge drift means the vehicle approaches the lawn, dirt, hedge, or other boundary
+opposite the road side. It is a useful field category, but the current record does not
+support a normalized event rate or a claim that this is the most frequent drift direction.
 
-- [ ] Add page-specific notes for `model-evaluation/field-evaluation/curb-hugging.md` after inspecting the real project files.
-- [ ] Cross-link `Curb Hugging` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] Add route, lighting, weather, operator, model version, and manual takeovers.
-- [ ] Separate subjective field notes from measurable field results.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add test date, time, weather, route, model version, and manual takeover count.
-- [ ] Add what failed, what worked, and what data should be collected next.
+## Evaluation
+
+For each event, preserve:
+
+- Model and artifact hash;
+- Route position, surface, and lighting;
+- Requested steering and physical outcome;
+- CSV time range and linked clip;
+- Whether LiDAR intervened; and
+- The operator's takeover reason.
+
+Review whether the neural command was wrong, late, unstable, or physically not executed as
+expected. Grass or a hedge may produce LiDAR points, but the center-corridor policy is not a
+sidewalk-edge detector and must not be credited with general lateral containment.
+
+## Current Evidence Limit
+
+Older notes associate some v3.2b interruptions with house-side drift and dappled shadows,
+but the complete clips, route record, and normalized exposure are not indexed here. Exact
+counts and causal attribution are therefore not carried forward as verified results.
+
+The next fixed-route comparison should report house-side and road-side events separately.
+That record can support a directional rate only when every candidate receives comparable
+distance, speed, lighting, and intervention criteria.
+
+## Related Pages
+
+- [Road-Entry Risk](road-entry-risk.md)
+- [Manual Takeover Count](manual-takeover-count.md)
+- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)

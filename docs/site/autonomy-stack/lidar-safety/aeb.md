@@ -1,46 +1,64 @@
-# Automatic Emergency Braking
+# AEB
 
-The RSB controller button toggles LiDAR AEB. The toggle has the same meaning in manual and autonomous driving:
+Automatic Emergency Braking (AEB) gates the center-corridor LiDAR intervention policy. When
+enabled, LiDAR may progressively cap forward throttle and request a full brake at the
+emergency boundary. The driver can toggle the policy.
 
-| AEB state | Center slowdown | Center emergency stop | LiDAR steering |
-|---|---|---|---|
-| ON | Enabled | Enabled | Never |
-| OFF | Disabled | Disabled | Never |
+## How it works
 
-This fixes the previous split behavior where the final brake respected the toggle but an earlier autonomous `SWR/CRP` path could still alter control.
+Each control-loop iteration evaluates the current scan once through
+`lidar_avoidance.evaluate(scan, enabled=metrics.aeb_enabled)`. The result contains the
+center clearance, throttle cap, occupancy, action, and stop request. The final brake check
+is:
 
-## Runtime Path
-
-`update_gpio()` calls:
-
-```python
-lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+```
+aeb_stop_active = metrics.aeb_enabled and gear_mode != "R" and is_stop_brake_condition(state)
 ```
 
-once per control loop. The resulting throttle cap and stop flag are shared by manual and autonomous paths. The same result populates dashboard occupancy/action fields, preventing control and display logic from using different interpretations of the scan.
+`is_stop_brake_condition()` includes the policy's `lidar_emergency_stop` state. At or
+inside 1.05 m in the center corridor, the policy sets that state and zero throttle.
 
-In Drive gear:
+When AEB is active the runtime forces `brake_force = 1.0`, sets the target PWM to `0.0`,
+selects `AEB_BRAKE_RATE = 10.0`, sets `metrics.aeb_triggered = True`, and cancels cruise
+control. Because the force is full scale, the hard-brake branch snaps motor PWM straight
+to zero and commands H-bridge brake mode instead of using the ramp. The LiDAR policy has
+already recorded `stop_reason = "lidar_emergency"`; the fallback `"aeb_stop"` value is
+used only if the reason was empty. When the stop condition clears, `aeb_triggered` returns
+to false.
 
-- manual throttle or cruise control is capped by the policy throttle;
-- autonomous throttle is capped before motor output;
-- an emergency result activates the existing AT8236 hard-brake output; and
-- Reverse is not subject to forward AEB.
+AEB is suppressed in reverse (`gear_mode == "R"`) because the center-forward corridor does
+not describe what is behind the car. There is no LiDAR steering override.
 
-## Bench Test
+## Enabling / disabling
 
-Keep the wheels lifted or mechanically unable to move during the first test.
+AEB defaults to enabled (`Metrics.aeb_enabled = True`). The driver toggles it with
+controller button `AEB_TOGGLE_BUTTON = 14`; the change prints to the console and queues a
+dashboard notification. The dashboard shows the state as `AEB:ON` / `AEB:OFF`.
+`AEB_ACTIVATION_DELAY_SEC = 1.0` remains declared in `config.py`, but no current code reads
+it. It therefore does not create an activation delay.
 
-1. Start the controller and open the LiDAR dashboard page.
-2. Confirm only two blue center guides and one `C` glyph are shown.
-3. Switch AEB OFF. Move an object through every rung in the center. Confirm no control intervention.
-4. Switch AEB ON. Put the object outside either center guide. Confirm no intervention.
-5. Move it between the center guides from beyond 1.65 m toward 1.25 m. Confirm throttle decreases smoothly.
-6. Hold it between 1.25 m and 1.05 m. Confirm the dashboard target is 60% reference (82% physical PWM).
-7. Move it to 1.05 m or closer. Confirm hard brake and `C`/brake indication.
-8. Repeat with autonomous mode enabled and verify model steering remains unchanged by LiDAR.
+## Why this choice
 
-Abort on any side-object brake, any LiDAR steering change, failure to stop at the emergency boundary, stale scan, or unexpected motor direction.
+AEB is outside the neural model so the configured intervention is explicit: progressive
+slowdown followed by a close-range brake. It does not prove that all obstacles will be
+detected or that 1.05 m is sufficient under every speed, surface, payload, and brake state;
+those are field-test questions.
 
-## Automated Regression
+## Key constants
 
-`code/test_files/test_lidar_center_aeb.py` proves the threshold behavior, side-point exclusion, AEB-disabled behavior, and the invariant that every result has `steer=None`.
+| Constant | Value | Meaning |
+|---|---|---|
+| `AEB_BRAKE_RATE` | 10.0 | Selected for AEB deceleration; full-force AEB takes the direct hard-brake branch |
+| `AEB_ACTIVATION_DELAY_SEC` | 1.0 | Legacy, currently unused declaration |
+| `AEB_TOGGLE_BUTTON` | 14 | Controller button to toggle AEB |
+| `LIDAR_GOV_FULL_M` | 1.65 m | Full-throttle boundary |
+| `LIDAR_GOV_STOP_M` | 1.25 m | Minimum governed-throttle boundary |
+| `LIDAR_OVERRIDE_EMERGENCY_STOP_M` | 1.05 m | Emergency-brake boundary |
+
+Field-test logs and video demonstrating an AEB stop are planned to be attached.
+
+## Related pages
+
+- `autonomy-stack/architecture/layered-autonomy.md`
+- `runtime-code/runtime-loop.md`
+- `safety-case/safety-overview.md`

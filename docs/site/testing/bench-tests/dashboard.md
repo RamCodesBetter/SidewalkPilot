@@ -1,19 +1,28 @@
-# Dashboard
+# Dashboard Bench Test
 
-TODO:
+The current dashboard is one Waveshare 64x32 HUB75 panel driven by the Raspberry Pi Zero 2 W. The earlier MAX7219 panel is no longer part of the live display.
 
-- [ ] Add page-specific notes for `testing/bench-tests/dashboard.md` after inspecting the real project files.
-- [ ] Cross-link `Dashboard` to the most relevant code, data, testing, and safety pages.
-- [ ] State the test purpose and what risk it catches.
-- [ ] List exact setup steps, hardware state, and environment assumptions.
-- [ ] List the command, file, or manual procedure used to run the test.
-- [ ] Define pass, warning, and fail conditions.
-- [ ] Add what logs, screenshots, dashboard values, or videos to save.
-- [ ] Add what to do when the test fails.
-- [ ] Add when this test must be repeated.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
+## Direct Panel Test
+
+Run on the Zero 2 W with the car stationary:
+
+```bash
+cd ~/rc_car_code
+python3 code/test_files/display/display_panel_test.py --glyph-set digits
+```
+
+`display_panel_test.py` directly exercises the HUB75 wiring, patterns, and glyph headers without requiring UDP telemetry. It separates a panel/power fault from a USB-network or dashboard-receiver fault.
+
+## Full Link Test
+
+1. Confirm `usb0` is up on both computers.
+2. Confirm Pi `192.168.10.1` can ping Zero `192.168.10.2`.
+3. Start the Zero dashboard service or `dash` alias.
+4. Start `car` on the Pi.
+5. Confirm live values replace `NO LINK` and update without freezing.
+
+## Interpretation
+
+- Correct direct patterns but `NO LINK`: inspect the USB network, UDP port `8765`, and sender/receiver processes.
+- No direct pattern: inspect HUB75 power, ground, signal wiring, and test dependencies.
+- Frozen values: verify packets continue and that only one receiver owns UDP port `8765`.

@@ -78,7 +78,7 @@ STEERING_MODEL_VERSIONS = (
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 # v3.4 won the 2026-07-13 shadow/turn field comparison. Keep newer and b checkpoints
-# selectable, but do not infer the production default from list order.
+# selectable, but do not infer the live research default from list order.
 DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", "3.4")
 YOLO_IMGSZ = 640
 YOLO_CONF = 0.20

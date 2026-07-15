@@ -1,19 +1,35 @@
-# Flags Index
+# Flags and Overrides Index
 
-TODO:
+## Car Runtime
 
-- [ ] Add page-specific notes for `code-reference/flags-index.md` after inspecting the real project files.
-- [ ] Cross-link `Flags Index` to the most relevant code, data, testing, and safety pages.
-- [ ] Name the exact file, module, function, class, or flag being documented.
-- [ ] Document inputs, outputs, side effects, and failure modes.
-- [ ] List callers and downstream behavior affected by changes.
-- [ ] Add command examples for running or testing the code.
-- [ ] Add important constants, defaults, units, and assumptions.
-- [ ] Add known edge cases and how to reproduce them.
-- [ ] List every flag name exactly as written in the code.
-- [ ] For each flag, add default, type, unit, allowed values, and failure risk.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
+The live `rc_car.py` intentionally has no command-line model flag. Run `car`, then select the model on the dashboard model page. Startup can be overridden with:
+
+| Environment variable | Purpose | Default |
+|---|---|---|
+| `RC_CAR_STEERING_MODEL` | Initial model name | `3.4` |
+| `RC_CAR_STEERING_MODEL_PATH` | Explicit local early-model checkpoint | unset |
+| `RC_CAR_STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG` | Hardware reference left limit | current config value |
+| `RC_CAR_STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG` | Hardware reference right limit | current config value |
+| `RC_CAR_STEERING_SERVO_CENTER_OFFSET` | Hardware center calibration | current `+12D` mapping |
+
+Jon host/port, dashboard transport, sensor ports, AEB thresholds, and controller mappings are defined in `rc_car_app/config.py`. Treat the source as authoritative because deployment units can override environment values.
+
+## Trainer Flags
+
+The Series 3 trainer and three Series 4 wrappers expose their current arguments through `--help`. Common controls include dataset roots, epochs, batch size, learning rate, augmentation probabilities, throttle-loss weight for Series 3, temporal history/future steps for Series 4, output names, W&B mode, and `--keep-pth`.
+
+Do not copy an old command without recording:
+
+- Git commit;
+- Dataset snapshot;
+- Train/validation split identity;
+- Full command line;
+- Random seed;
+- W&B run ID;
+- Artifact SHA-256.
+
+## Evaluator Flags
+
+`code/test_files/models/evaluate_sidewalkpilot_models.py --help` is the source of truth. The current report run uses CUDA and a batch size selected for the evaluation GPU. It writes both JSON and PDF artifacts.
+
+See [Training Command Setup](../runbooks/training-day/command-setup.md) and [Model Selection](../runbooks/field-test-day/model-selection.md).

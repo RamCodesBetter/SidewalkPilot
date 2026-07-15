@@ -1,19 +1,30 @@
 # Input Labels
 
-TODO:
+Each usable field sample pairs an image with the physical command associated with that frame.
 
-- [ ] Add page-specific notes for `ai-and-models/training-pipeline/input-labels.md` after inspecting the real project files.
-- [ ] Cross-link `Input Labels` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact training or inference file related to this page.
-- [ ] List relevant command-line flags and their current intended values.
-- [ ] Document input tensor shape, label format, and output steering range where relevant.
-- [ ] Explain what changed between model versions if this page covers a model.
-- [ ] Add the dataset names used and whether any labels are historical or current.
-- [ ] Add offline metrics that belong on the page once retested.
-- [ ] Add field behavior that must be checked before trusting the model.
-- [ ] Add known failure cases and what data would improve them.
-- [ ] Reference `code/ai_models_data/train_autonomy_v2.py` where relevant.
-- [ ] Reference `code/ai_models_data/steering_corrections.json` where relevant.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add the full training command with every flag.
+| Field | Stored convention |
+|---|---|
+| steering | absolute logical degrees, 0 left / 90 center / 180 right |
+| throttle | absolute physical PWM fraction, 0.0 to 1.0 |
+| source/run | capture provenance and sequence boundary |
+| timestamp/order | ordering used by split and temporal windows |
+
+The trainer normalizes values internally. Storage stays in readable physical units. Steering trim and motor dead-zone mapping are not baked into the dataset.
+
+## Series Use
+
+- Series 1/2 learn steering only.
+- Series 3 accepts steering and throttle; current steering-focused experiments can set throttle loss to zero.
+- Series 4 learns steering only and derives previous/future targets from ordered records.
+
+For Series 4, future targets are supervision. The deployed model never receives a future label.
+
+## Collection Caution
+
+A manually driven photo can be an imitation target. A photo captured under autonomous control must be labeled according to the intended data policy rather than automatically treated as human ground truth. Corrections must retain image/source provenance.
+
+## Validation
+
+Reject missing files, invalid numeric values, unreviewed duplicate conflicts, and temporal windows that cross a run, split, or excessive timestamp gap.
+
+See [Label Schema](../../data-governance/labeling/label-schema.md) and [Dataset Overview](../../data/dataset-overview.md).

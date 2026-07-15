@@ -1,19 +1,18 @@
-# Overview
+# Camera Steering Overview
 
-TODO:
+The Pi captures a forward frame and submits the newest image through a background worker. Jon runs the selected ONNX model and returns steering plus class probabilities. The Pi rejects stale output, applies smoothing, calibration, and safety policy, and remains the only computer that writes the steering servo.
 
-- [ ] Add page-specific notes for `autonomy-stack/camera-steering/overview.md` after inspecting the real project files.
-- [ ] Cross-link `Overview` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact input entering this subsystem.
-- [ ] Document the exact output leaving this subsystem.
-- [ ] Map the subsystem to the owning runtime file or module.
-- [ ] Describe the control priority when this subsystem disagrees with another subsystem.
-- [ ] List the settings, constants, and flags that change this behavior.
-- [ ] Add a failure-mode checklist for field testing.
-- [ ] Add how to verify the subsystem on the bench before a driving test.
-- [ ] Add how to verify the subsystem during a real outdoor run.
-- [ ] Document capture resolution, color order, frame rate, rotation, and model input size.
-- [ ] Add how to verify live frames are current and correctly oriented.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
+## Model Contracts
+
+- Series 1/2: direct steering regression at 200x66.
+- Series 3 v3.0: two-output regression at 320x180.
+- Series 3 v3.1+: 19-value hybrid class/offset/throttle output.
+- Series 4: 18-value steering horizons, optionally with causal three-target history.
+
+## Failure Boundary
+
+Normal Jetson connection and inference waits occur in the worker rather than the manual-control loop. A missing, invalid, or stale prediction is not accepted as fresh steering. Manual input and LiDAR braking remain outside the learned model. No formal worst-case scheduling guarantee is claimed.
+
+v3.4 is the field-selected baseline. All six Series 4 models are runtime-supported but await physical comparison.
+
+See [Jetson Inference Link](jetson-inference-link.md), [Servo Output](servo-output.md), and [Model Choices](../../runtime-code/vision/model-choices.md).

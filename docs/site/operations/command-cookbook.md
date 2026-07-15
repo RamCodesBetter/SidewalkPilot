@@ -1,19 +1,42 @@
 # Command Cookbook
 
-TODO:
+Commands are machine-specific. Confirm the shell prompt before running anything that can move the car.
 
-- [ ] Add page-specific notes for `operations/command-cookbook.md` after inspecting the real project files.
-- [ ] Cross-link `Command Cookbook` to the most relevant code, data, testing, and safety pages.
-- [ ] Write the exact command or procedure for this operation.
-- [ ] List which machine the command runs on and which paths it touches.
-- [ ] Document expected output and how long it usually takes.
-- [ ] Add danger notes for commands that can overwrite or delete files.
-- [ ] Add rollback or recovery steps if the operation goes wrong.
-- [ ] Add verification commands after the operation completes.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
-- [ ] Add links to related pages that a public reader should follow next.
+## Start and Inspect
+
+| Machine | Command | Verification |
+|---|---|---|
+| Pi 5 | `car` | Controller initialization completes; dashboard model page shows intended version |
+| Zero 2 W | `dash` or its systemd unit | Exactly one UDP listener owns port 8765 |
+| Pi 5 | `sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager` | Unit state and current process |
+| Zero 2 W | `sudo systemctl status sidewalkpilot-z2w-dashboard.service -l --no-pager` | Unit state and receiver process |
+| Either USB endpoint | `ip -br addr show usb0` | Pi is `192.168.10.1/24`; Zero is `192.168.10.2/24` |
+| Pi 5 | `ping -c 3 192.168.10.2` | USB network reaches the dashboard |
+| Zero 2 W | `ping -c 3 192.168.10.1` | Return path reaches the Pi |
+
+The live controller has no `--model` flag. Select all Series 1-4 versions on the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup.
+
+## Logs
+
+```bash
+journalctl -u sidewalkpilot-rpi-car.service -n 100 -l --no-pager
+journalctl -u sidewalkpilot-z2w-dashboard.service -n 100 -l --no-pager
+```
+
+## Source Verification
+
+```bash
+python3 -m py_compile code/controller/current/rc_car.py \
+  code/controller/current/z2w_dashboard.py \
+  code/controller/current/rc_car_app/jetson_inference_server.py
+python3 -m compileall code/controller/current/rc_car_app
+```
+
+## Failure Notes
+
+- `NO LINK` means the display process has not received fresh telemetry. Check Pi process, USB address/carrier, ping, then the Zero receiver.
+- “No joystick detected” means the required manual-control interface was unavailable.
+- A source edit does not affect a running process until the owning process restarts.
+- Do not start a second dashboard receiver while the systemd receiver already owns UDP 8765.
+
+See [Troubleshooting](troubleshooting.md), [Model Selection](../runbooks/field-test-day/model-selection.md), and [USB Link](../hardware/wiring/usb.md).

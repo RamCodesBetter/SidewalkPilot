@@ -1,26 +1,40 @@
-# LiDAR Steering Override
+# Removed Override Steering
 
-**Current status: removed from production.**
+This page preserves an important design reversal. SidewalkPilot previously implemented a
+fixed LiDAR left/right steering override. That behavior has been removed. The current
+runtime never derives steering from LiDAR; the camera model owns autonomous steering.
 
-Older SidewalkPilot revisions divided the sidewalk corridor into L/C/R bands and emitted `SWR` or `CRP` commands. That design could steer toward grass because LiDAR knew obstacle position but did not know the actual sidewalk boundaries. It also allowed autonomous steering intervention to occur before the AEB toggle was checked.
+## How it works
 
-The current design has one center safety corridor and no LiDAR steering output. `lidar_avoidance.evaluate()` always returns `steer=None`; the camera model remains the only autonomous steering source.
+Current `lidar_avoidance.py` behavior:
 
-## Why It Was Removed
+1. Filter valid points at confidence 150 or above.
+2. Measure nearest forward clearance in the center safety corridor.
+3. Reduce reference throttle from 100% at 1.65 m to 60% at 1.25 m.
+4. Hold 60% reference throttle until 1.05 m.
+5. Request a hard brake at or inside 1.05 m.
+6. Always return `steer = None`.
 
-- Side clearance is not proof that the clear space is sidewalk.
-- A reactive swerve can conflict with the camera model's path estimate.
-- Steering and emergency braking have different safety responsibilities.
-- Regular v3.4 demonstrated strong enough shadow/turn behavior to keep path selection with vision.
-- One center slowdown/stop corridor is easier to test deterministically.
+## Why this choice
 
-## Current Responsibility Split
+The old rule knew where obstacle points were but did not know where the sidewalk ended.
+Choosing the apparently clearer side could send the car into grass, a curb, or an unseen
+hazard. A single steering owner is easier to reason about: the model handles path choice,
+while LiDAR retains a deterministic longitudinal intervention.
 
-| Subsystem | Responsibility |
-|---|---|
-| Camera model on Jetson | Choose steering path |
-| LiDAR on Pi | Limit forward throttle and hard-stop in center corridor |
-| Operator | Enable/disable AEB, take over, and stop the run |
-| Servo-fault/model-freshness checks | Stop for control-system faults independently of AEB |
+## Key constants
 
-Historical swerve prototypes may remain under copied controller snapshots or old experiment files, but the live files under `code/controller/current/` contain no `SWR`, `CRP`, `swerve_left`, or `swerve_right` control path.
+| Constant | Value | Meaning |
+|---|---|---|
+| `LIDAR_GOV_FULL_M` | 1.65 m | Full target at or above this clearance |
+| `LIDAR_GOV_STOP_M` | 1.25 m | Governor reaches its minimum moving target |
+| `LIDAR_GOV_MIN_REFERENCE` | 0.60 | Minimum non-emergency reference target |
+| `LIDAR_OVERRIDE_EMERGENCY_STOP_M` | 1.05 m | Hard-stop boundary |
+
+The historical filename remains so existing documentation links do not break.
+
+## Related pages
+
+- `autonomy-stack/architecture/layered-autonomy.md`
+- `runtime-code/runtime-loop.md`
+- `safety-case/safety-overview.md`

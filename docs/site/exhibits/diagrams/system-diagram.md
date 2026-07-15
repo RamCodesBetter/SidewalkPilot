@@ -1,19 +1,48 @@
 # System Diagram
 
-TODO:
+This page is the top-level block diagram of SidewalkPilot: the three-device compute split, the sensors and actuators wired to each device, and the links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.
 
-- [ ] Add page-specific notes for `exhibits/diagrams/system-diagram.md` after inspecting the real project files.
-- [ ] Cross-link `System Diagram` to the most relevant code, data, testing, and safety pages.
-- [ ] List the exact visual, log, video, or artifact to include.
-- [ ] Add the date, model version, dataset, and test condition for the artifact.
-- [ ] Explain what the artifact proves in one checklist item.
-- [ ] Add what the artifact does not prove or where it is limited.
-- [ ] Add source file paths for regenerating or validating the artifact.
-- [ ] Add public-release review for privacy and clarity.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
-- [ ] Add links to related pages that a public reader should follow next.
+## What the diagram shows
+
+SidewalkPilot runs across three boards, each doing the job it is best at:
+
+- **Raspberry Pi 5 (`raspberrypi5`) — the controller.** Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the RPi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through a PCA9685, drives the two motors through the AT8236 H-bridge, writes CSV logs, and sends dashboard telemetry. The main loop lives in `code/controller/current/rc_car_app/runtime.py` and ticks at up to 60 Hz (`clock.tick(60)`).
+- **Jetson Orin Nano ("Jon") at `10.42.0.2:8770` — the heavy model host.** Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Pi sends a camera frame and model selection; Jon returns decoded steering plus model/runtime telemetry. Series 1/2 models (`SteeringAutonomyV2`, ~0.67M parameters, 200x66 input) still load directly on the Pi inside `vision.py`.
+- **Raspberry Pi Zero 2 W (`zero2w`) - the dashboard.** Receives telemetry over USB Ethernet and renders it on one HUB75 LED panel. Rendering code is `z2w_dashboard.py`.
+
+## Links between devices
+
+- **Pi 5 <-> Zero 2 W:** USB Ethernet gadget. Pi is `192.168.10.1`, Zero is `192.168.10.2`, dashboard telemetry is UDP to `192.168.10.2:8765` at a `0.1 s` send interval (`HUB75_DASHBOARD_SEND_INTERVAL_SEC`). This is USB-only by decision; there is no Wi-Fi fallback. When the controller quits it tells the Zero to shut down (linked shutdown, `HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0`).
+- **Pi 5 <-> Jon:** direct Ethernet request/response for the selected model. The exact returned contract depends on the model family; the Pi receives decoded steering and telemetry.
+- **Telemetry out:** training runs report to Weights & Biases; every controller launch writes a local CSV; InfluxDB logging is optional and activates only when the Pi has a valid `~/.influxdb.json` configuration.
+
+## Why this split
+
+The RPi Camera Module 3 Wide is connected to the Pi, and the current 81,237-image Series 3/4 dataset was captured through the Pi camera path. Jon supplies GPU inference without taking actuator authority. Final actuator and AEB decisions remain on the Pi.
+
+## What this exhibit documents
+
+The checked-in separation of responsibilities: controller and actuator ownership on the Pi, GPU inference on Jon, and observability on the Zero. It does not establish hard-real-time timing or fault tolerance for every link.
+
+## System block view
+
+```text
+Camera + controller + LiDAR + GPS + IMU + hall sensor
+                         |
+                         v
+                  Raspberry Pi 5
+               /         |          \
+      private Ethernet   I/O     USB Ethernet
+             /            |             \
+            v             v              v
+    Jetson Orin Nano   motors/servo   Zero 2 W -> HUB75
+       FP32 ONNX       final control     dashboard
+```
+
+Source anchors: `code/controller/current/rc_car_app/runtime.py`, `config.py`, `vision.py`, `jetson_inference_server.py`, `hub75_dashboard.py`, and `z2w_dashboard.py`.
+
+## Related pages
+
+- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `publishing/reports.md`
+- `exhibits/tables/test-matrix-table.md`

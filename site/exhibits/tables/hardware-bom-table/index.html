@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -49,7 +50,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/mission/">Mission</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../start-here/system-at-a-glance/">System At A Glance</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../start-here/system-at-a-glance/">System at a Glance</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/current-status/">Current Status</a>
                   </li>
@@ -86,7 +87,7 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >Claims And Proof</a>
+                  <li class="toctree-l1"><a class="reference internal" >Claims and Proof</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/autonomy-claim/">Autonomy Claim</a>
                 </li>
@@ -135,6 +136,16 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/temporal-smoothing/">Temporal Smoothing</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/steering-hysteresis/">Steering Hysteresis</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/throttle-control/">Throttle Control</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >LiDAR Safety</a>
@@ -147,9 +158,13 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/aeb/">AEB</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/override-steering/">Override Steering</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/override-steering/">Why LiDAR Does Not Steer</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/reconnect-behavior/">Reconnect Behavior</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/clearance-and-heading-scoring/">Clearance & Heading Scoring</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/lidar-safety/object-clustering/">Object Clustering</a>
                 </li>
     </ul>
                   </li>
@@ -161,7 +176,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/graph-format/">Graph Format</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/a-star/">A Star</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/a-star/">A*</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/turn-penalties/">Turn Penalties</a>
                 </li>
@@ -172,6 +187,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/resume-radius/">Resume Radius</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/house-snapping/">House Snapping</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/navigation/compass-heading/">Compass Heading</a>
                 </li>
     </ul>
                   </li>
@@ -212,13 +229,19 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/hybrid-head-vs-regression/">Hybrid Head vs Regression</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Iteration Records</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure To Dataset</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure to Dataset</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/retest-policy/">Retest Policy</a>
                 </li>
@@ -226,10 +249,16 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/historical-metrics-policy/">Historical Metrics Policy</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/bang-bang-collapse/">Bang-Bang Collapse</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/shadow-aug-and-flip/">Shadow Aug and Turn Flip</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/turn-vs-shadow-tradeoff/">Turn vs Shadow Tradeoff</a>
+                </li>
     </ul>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Research And Math</span></p>
+              <p class="caption"><span class="caption-text">Research and Math</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" >Geometry</a>
     <ul>
@@ -247,7 +276,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Algorithms</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/algorithms/a-star-search/">A Star Search</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/algorithms/a-star-search/">A* Search</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/algorithms/turn-penalty-state/">Turn Penalty State</a>
                 </li>
@@ -255,7 +284,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/algorithms/pid-cruise-control/">PID Cruise Control</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/algorithms/speed-from-hall-pulses/">Speed From Hall Pulses</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/algorithms/speed-from-hall-pulses/">Speed from Hall Pulses</a>
                 </li>
     </ul>
                   </li>
@@ -269,9 +298,18 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/machine-learning/overfitting-risk/">Overfitting Risk</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/machine-learning/sim-to-real-gap/">Sim To Real Gap</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/machine-learning/sim-to-real-gap/">Sim to Real Gap</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../research-and-math/machine-learning/quantization-math/">Quantization Math</a>
                 </li>
     </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Research Context</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../research-context/related-work/">Related Work / Prior Art</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Novelty & Contributions</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
@@ -279,6 +317,12 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/controller-entrypoint/">Controller Entrypoint</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/controller-mapping/">Controller Mapping</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/photo-capture/">Photo Capture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/prnd-gears/">PRND Gears</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Config</a>
     <ul>
@@ -359,6 +403,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../hardware/gps-compass/">GPS Compass</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../hardware/imu/">IMU (Yaw Rate)</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../hardware/dashboard-display/">Dashboard Display</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Wiring</a>
@@ -373,10 +419,24 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../hardware/wiring/usb/">USB</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/wiring/pin-map/">Pin Map</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >PCB</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/overview/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/schematic/">Schematic</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/gpio-mapping/">GPIO Mapping</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../hardware/pcb/revisions/">Revisions</a>
+                </li>
     </ul>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">AI And Models</span></p>
+              <p class="caption"><span class="caption-text">AI and Models</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" >Training Pipeline</a>
     <ul>
@@ -402,6 +462,8 @@
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/cnn/">CNN</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/series-4-plan/">Series 4 Temporal Experiments</a>
+                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/tensor-shape/">Tensor Shape</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/conv-layers/">Conv Layers</a>
@@ -414,59 +476,37 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/tanh-output/">Tanh Output</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/series-3-hybrid-head/">Series 3 Hybrid Head</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/architecture/steering-class-bins/">Steering Class Bins</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Model Zoo</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-0/">v1.0</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/series-3/">Series 3</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-0b/">v1.0b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/series-4/">Series 4</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-1/">v1.1</a>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Deployment</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-1b/">v1.1b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/onnx-export/">ONNX Export</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-2/">v1.2</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/fp16/">FP16 Half Precision</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-2b/">v1.2b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/int8-ptq/">INT8 PTQ</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-3/">v1.3</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/qat/">QAT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-3b/">v1.3b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-4/">v1.4</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-4b/">v1.4b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-5/">v1.5</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-5b/">v1.5b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-6/">v1.6</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-6b/">v1.6b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-7/">v1.7</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-7b/">v1.7b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-8/">v1.8</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-8b/">v1.8b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-9/">v1.9</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v1-9b/">v1.9b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-0/">v2.0</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-0b/">v2.0b</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-1/">v2.1</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/model-zoo/v2-1b/">v2.1b</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -476,6 +516,8 @@
                   <li class="toctree-l1"><a class="reference internal" >Offline Evaluation</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/overview/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/mae/">MAE</a>
                 </li>
@@ -488,6 +530,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/within-degree-buckets/">Within Degree Buckets</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/per-dataset-breakdown/">Per Dataset Breakdown</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/offline-evaluation/confusion-matrix/">Confusion Matrix</a>
                 </li>
     </ul>
                   </li>
@@ -509,12 +553,12 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/field-evaluation/evening-robustness/">Evening Robustness</a>
                 </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/field-evaluation/interruption-clips/">Interruption Clips</a>
+                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Comparisons</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/1-9-vs-2-0-vs-2-1/">1.9 vs 2.0 vs 2.1</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/b-versions/">B Versions</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/raw-bgr-vs-clahe/">Raw BGR vs CLAHE</a>
@@ -522,6 +566,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/offline-vs-field/">Offline vs Field</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/model-selection-rubric/">Model Selection Rubric</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../model-evaluation/comparisons/mae-vs-turn-capability/">MAE vs Turn Capability</a>
                 </li>
     </ul>
                   </li>
@@ -533,26 +579,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../data/corrections-json/">Corrections JSON</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../data/manual-image-folder/">Manual Image Folder</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0328/">D0328</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0329/">D0329</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0425/">D0425</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0426/">D0426</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0427/">D0427</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0429/">D0429</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0502-12/">D0502 12</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0502-19/">D0502 19</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0503/">D0503</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../data/datasets/d0506/">D0506</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Relabeling</a>
     <ul>
@@ -604,6 +630,8 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/lighting-coverage/">Lighting Coverage</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/turn-coverage/">Turn Coverage</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/collection-countdown/">Collection Countdown</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../data-governance/data-quality/train-val-leakage/">Train Val Leakage</a>
                 </li>
@@ -662,9 +690,15 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/dashboard/">Dashboard</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/a-star-cli/">A Star CLI</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/a-star-cli/">A* CLI</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/geojson-graph/">GeoJSON Graph</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/steering-trim-tuner/">Steering Trim Tuner</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/servo-calibration/">Servo Calibration</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../testing/bench-tests/imu-verifier/">IMU Verifier</a>
                 </li>
     </ul>
                   </li>
@@ -734,6 +768,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../operations/troubleshooting/">Troubleshooting</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/telemetry/">Telemetry</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Runbooks</span></p>
               <ul>
@@ -773,9 +809,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Sync Day</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/mac-to-pc/">Mac To PC</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/mac-to-pc/">Mac to PC</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/pc-to-mac/">PC To Mac</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/pc-to-mac/">PC to Mac</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../runbooks/sync-day/delete-risk/">Delete Risk</a>
                 </li>
@@ -789,6 +825,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../publishing/reports/">Reports</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../publishing/pdf-report/">PDF Report</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../publishing/huggingface/">Hugging Face (Models & Datasets)</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../publishing/huggingface-model-cards/">Hugging Face Model Cards</a>
                   </li>
@@ -835,6 +873,8 @@
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Hardware BOM Table</a>
     <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#reading-the-table">Reading the table</a>
+    </li>
     </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../test-matrix-table/">Test Matrix Table</a>
@@ -859,7 +899,7 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../code-reference/test-files/">Test Files</a>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Safety And Ethics</span></p>
+              <p class="caption"><span class="caption-text">Safety and Ethics</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../safety-and-ethics/research-scope/">Research Scope</a>
                   </li>
@@ -879,6 +919,10 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/sensor-fusion/">Sensor Fusion</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
               </ul>
       </div>
@@ -906,25 +950,370 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="hardware-bom-table">Hardware Bom Table</h1>
-<p>TODO:</p>
-<ul>
-<li>[ ] Add page-specific notes for <code>exhibits/tables/hardware-bom-table.md</code> after inspecting the real project files.</li>
-<li>[ ] Cross-link <code>Hardware Bom Table</code> to the most relevant code, data, testing, and safety pages.</li>
-<li>[ ] List the exact visual, log, video, or artifact to include.</li>
-<li>[ ] Add the date, model version, dataset, and test condition for the artifact.</li>
-<li>[ ] Explain what the artifact proves in one checklist item.</li>
-<li>[ ] Add what the artifact does not prove or where it is limited.</li>
-<li>[ ] Add source file paths for regenerating or validating the artifact.</li>
-<li>[ ] Add public-release review for privacy and clarity.</li>
-<li>[ ] Add the exact source path, artifact path, or hardware component name.</li>
-<li>[ ] Add the command or procedure needed to reproduce the result.</li>
-<li>[ ] Add expected inputs and outputs.</li>
-<li>[ ] Add the settings, flags, constants, or calibration values that control it.</li>
-<li>[ ] Add known failure modes and how they appear in logs, video, or field behavior.</li>
-<li>[ ] Add validation steps and pass/fail criteria.</li>
-<li>[ ] Add links to related pages that a public reader should follow next.</li>
-</ul>
+                <h1 id="hardware-bom-bill-of-materials">Hardware BOM (Bill of Materials)</h1>
+<p>Every part, its role, price, and purchase link. <strong>Prices are as of 2026-07-12 and drift over time.</strong> Source sheet: <code>RC_Car_Parts_List.xlsx</code>.</p>
+<p><strong>Totals:</strong> subtotal $1,636.04 · +WA tax 10.3% ≈ <strong>$1,804.55</strong> · budget $5,000 (~36.1% used) · 43 items.</p>
+<p>"Bought" records purchasing history, not the current vehicle configuration. In particular, the MAX7219 display was purchased and used in an earlier revision but has been removed; the current dashboard uses only the 64x32 HUB75 panel.</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Part</th>
+<th>Role</th>
+<th style="text-align: right;">Price</th>
+<th style="text-align: center;">Link</th>
+<th style="text-align: center;">Bought</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td>CanaKit Raspberry Pi 5 (8GB) w/128GB microSSD card</td>
+<td>Major System Manager (RPI5)</td>
+<td style="text-align: right;">$259.95</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/CanaKit-Raspberry-Starter-Kit-PRO/dp/B0CRSNCJ6Y/ref=sr_1_1?crid=2KJXH5J8QMGM5&amp;dib=eyJ2IjoiMSJ9.Kkq2_fapGYpPiZS_hoWs-L662J8iglskUJLh2UCEXv-dSIeRmI3s2fPriTORr6gPhoX3hjabnWILwJoQlnxE0V5AIn8OyCdK1BtISCmMQeQ5f7mCHAyh-mlzis6Laci-KM4kUZvYkM9rrCLm-PxaXtJi1EN2j_B7njNTbDVbjkqdsBa_wV8M5b7uhjKTvTSDjc0oxifO6ujBfgw850yXKdRykBboVOno72rj8_jaQO0.aJJVkHnRsWYwQWB-GVVDfDxZdR5lUPfElrCzrFjvfKI&amp;dib_tag=se&amp;keywords=canakit%2Braspberry%2Bpi%2B5&amp;qid=1779569916&amp;sprefix=canakit%2B%2Caps%2C217&amp;sr=8-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Compute</td>
+<td>NVIDIA Jetson Orin Nano Super Developer Kit</td>
+<td>AI Model Manager (JON)</td>
+<td style="text-align: right;">$249.00</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/NVIDIA-Jetson-Orin-Nano-Developer/dp/B0BZJTQ5YP/ref=sr_1_1?crid=1E41405DHE29A&amp;dib=eyJ2IjoiMSJ9.-Qcfiym3dCBWxloj1t7RYwfS_0swdzZJlGUrMNMIE9GmEGb3Od7sFGseilXmSLiGcx_O4uKnhYQ6UZXKYRyL09HCichiu5PUQCIwAyGeH8pGJFkgcvYR1jttT4RUw9N1DBqxClrW628iA_g5KPgrG74g3m32YOSAmcTBHCYGL4ptFVcu66w24hJing_I2mb2h4C7ixLEI9pVw2rdUw99Zhfs-2SK5lbCJDqf7K72Gag.WrBwwSnnS3Y2fyqYkwTqXIyKPr8TqqM25zlBXyFmCXU&amp;dib_tag=se&amp;keywords=jetson%2Borin%2Bnano&amp;qid=1779525329&amp;sprefix=jetson%2Borin%2Bnano%2Caps%2C204&amp;sr=8-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Compute</td>
+<td>Seeed Studio Zero 2 WH Kit</td>
+<td>Display System Manager (Z2W)</td>
+<td style="text-align: right;">$43.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Raspberry-Heatsink-Adapter-Quad-core-Bluetooth/dp/B0DRRDJKDV/ref=sr_1_1?crid=15DVO4Q9PB1MN&amp;dib=eyJ2IjoiMSJ9.i3UYaONsZmTQiPr0KpsjieMvTMZNRXtKHyyM881pB7WTer_Wkh9VsxjB2QYas_rL74kjRLGC0xB0WtMfjFtpDS3QYogo6qf58YaaXd0_I0hNnSIUnc7pFcm5JZO1NxsxyPHj8Hs8bWU2ZJEi7SUdrqn0eZ1XaTbtADGwoUJ1c-gMxwnbhjDaU6B4rxJZM0zYiFOF3k6z6j5ycFkiKPBKEEwAUZPmHx1_gH3Y7WCYna8.z_UJDgXqw6MXfjENoK7o4Mm8IS8q8scf6XEyc7TopNA&amp;dib_tag=se&amp;keywords=zero2w%2Bpresoldered&amp;qid=1779525128&amp;sprefix=zero2w%2Bpresoldere%2Caps%2C160&amp;sr=8-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Compute</td>
+<td>RPI5 Breakout Board (x5) PCBA</td>
+<td>Custom RPI5 Breakout Board</td>
+<td style="text-align: right;">$120.72</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Xbox Wireless Controller</td>
+<td>Controller to Control Car</td>
+<td style="text-align: right;">$67.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Xbox-Wireless-Controller-Black-one/dp/B01LPZM7VI/ref=sr_1_15?crid=VEPL88HYAS8M&amp;dib=eyJ2IjoiMSJ9.HPWdXXGb0i-gcc3uERo7VyNR_U98Q94PcwbvqGleHXWcu9EUuPGKos9bf9q0x_Rw84WUmNGjyAfbd8f67527v4ny2ONHDMOx5cYQjJk0HHvRw7VMiGvQcZrDHN8xqychx4Y_o8L-fVcz41ZByLj2UMi7YeHXJ_XVXVtr27uEKayU-PECac_GSWwLuUJd2-A7yxjyNiUAVg1HUGU1j0a6WB8G3n179jst8fSBhohGOpItO6N4_JOFPdXYwH6QZ-jOC07dnFbRpvcmRgBQdrTDlYYw3rK2YSlxhyFtZUhXC78.Mq9jcg3oy4PeXKzLmRVg7fB3KXRXj8YzdCHahRbYbnE&amp;dib_tag=se&amp;keywords=xbox+controller&amp;qid=1779579698&amp;s=electronics&amp;sprefix=xbox+controlle%2Celectronics%2C185&amp;sr=1-15">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Yahboom AT8236 Motor Controller</td>
+<td>Motor Controller</td>
+<td style="text-align: right;">$12.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Yahboom-Controller-AT8236-H-Bridge-Raspberry/dp/B0BVW7PBYW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.uPNafB0Kecl7MEifvky-Os4jq9LSVLKfYZ7ng7QQyCusNhtxa5eWjFZ0gjil7eLqQtz6A-GbYKyZXwdw432rlWBHtOqQWKJaU9NIKS05CPcQ9cay-cspsfSoXnukBXOGOoMaqYK5hOnGgK2L1PYDXVb9lNHt7H6HH1stR_3gc1O4vMcXviPEp4CKCcOh8c2F_DAkKhYTZGDTjyLmKcLu__rs3sfnahMZBBAGsrQoyvHIROsZDXMkPHNpqFdAV74yTVv22c8zVqZE3uDRF7uhoXd5wNsgoVEj5WDY3Y9kkkk.cDRzL8BTvFn8RCop3P581cf5S1qfAQCxjEKbVSsehe0&amp;dib_tag=se&amp;keywords=Yahboom%2BDual%2BMotor%2BDrive%2BController%2BBoard%2BModule%2BAT8236%2BDual%2BH-Bridge%2BDC%2BStepper%2Bfor%2BArduino%2BRaspberry%2BPi%2BSTM32%2B(Motor%2BDrive%2BModule%2B%2BPower%2BCable)&amp;nsdOptOutParam=true&amp;qid=1779578440&amp;sr=8-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Adeepts Raspberry Pi GPIO Expansion Board</td>
+<td>GPIO Expansion Board</td>
+<td style="text-align: right;">$9.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B09XD51BRD?&amp;linkCode=sl1&amp;tag=ramcodes-20&amp;linkId=95e39b5ed946f481d1f70c2423659341&amp;language=en_US&amp;ref_=as_li_ss_tl">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>HiLetGo PCA9685 16 Channel 12-Bit PWM Driver</td>
+<td>Servo Controller</td>
+<td style="text-align: right;">$8.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B01D1D0CX2?psc=1&amp;ref=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&amp;ref_=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&amp;social_share=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Pedroshaw Wireless Controller</td>
+<td>Controller to Control Car</td>
+<td style="text-align: right;">$43.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/gp/product/B0G5WLW6YD/ref=ewc_pr_img_1?smid=A3DQADHOXZ42NL&amp;psc=1">link</a></td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Cooling</td>
+<td>RGB PWM Controllable Fan x2</td>
+<td>Cooling Ambient RC Car Temperature</td>
+<td style="text-align: right;">$19.98</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Raspberry-Controllable-Control-Fan%EF%BC%8CRaspberry-40x40x10mm/dp/B0C4PN9BHK/ref=sr_1_4?crid=2JC25MCNQZHCX&amp;dib=eyJ2IjoiMSJ9.hqiSLXkCoH6aL7G0bq1YG3UDQQ33JteXxmvKImDmkk9pyB9LUwgoNtsOGAcscJdINk7_tpUEV7gbVFhaa4iLQ2stf0eJqEPbp2_ZxHV3rPiFmmmXDxUOwZPQ5ffpgt8x09sp6Cwy1wnL2YuVWD-VtyFLW3R28RX7Y86fBZOHDGCT2KI67oQBTrxVYYOneijG9uEBE7Fb2a4x6zW6wHInj2WV7qg7dPa8U79HNtmTMD-y8y5nX2ZPdx4RnvDS609JcERL7Ql7rr5jl-mkBG1eIg3Wpm2rqLHZ5NlKIvpIz_4.ihLVuw2JCyB-vMO-Gz4qYoOqlCu96Avfi3JoZNShxfA&amp;dib_tag=se&amp;keywords=rgb+gpio+fan&amp;qid=1779580705&amp;s=electronics&amp;sprefix=rgb+gpio+fan%2Celectronics%2C167&amp;sr=1-4">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Cooling</td>
+<td>5V 30mm DC Quiet Fans (4 pcs)</td>
+<td>Cooling DC buck converter</td>
+<td style="text-align: right;">$9.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B0792BW2VH?ref=cm_sw_r_apin_ct_5YETRG92KGC9KH8DW5AK&amp;ref_=cm_sw_r_apin_ct_5YETRG92KGC9KH8DW5AK&amp;social_share=cm_sw_r_apin_ct_5YETRG92KGC9KH8DW5AK&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Display</td>
+<td>Waveshare RGB 4mm 64x32 (2048) Pixel LED Display</td>
+<td>LED Debug/Info Display</td>
+<td style="text-align: right;">$32.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Full-Color-Individual-Adjustable-Brightness-Compatible/dp/B0B2ZC85KN/ref=sr_1_3?crid=24O79QDYHDU7T&amp;dib=eyJ2IjoiMSJ9.wPjGB83y1dRO2t_g5qkiujbIUdOUiAcaXOrtl6NiU30rQjvBzxDKvM8sfBiLbpRIo0_06rvBugrSvHY2SSkdqXmCxsM63DuOe3HaRnwbVijzk8vxJSkgsOBT-tpPp34JKdaAAz_pnflIaOvTPedk-MQ7wQ_P3Jf6egxifZohLhT4ERFJCVib2N_WdCQvhbRwJmOZTD_Ar2AWc-28IaCw4SHba63E-03oMtZqVnvILC4.r27KLh9yDOHDBYrRW0pYivpytU-vMrUvF1_dBv0DkaI&amp;dib_tag=se&amp;keywords=waveshare+64x32+rgb+led+matrix&amp;qid=1779578692&amp;sprefix=waveshare+64x32%2Caps%2C188&amp;sr=8-3">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Display</td>
+<td>HiLetGo MAX7219 8x32 Display</td>
+<td>Decor/Debug Display</td>
+<td style="text-align: right;">$8.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/HiLetgo-MAX7219-Arduino-Microcontroller-Display/dp/B07FFV537V/ref=sr_1_4?crid=3GGRP7Q33AK1I&amp;dib=eyJ2IjoiMSJ9.1wzrBhsxgn8ywr_-v2KXJhb2c1noSOXVavP1ondVX3sCgvofA_6lYV7j7zyoEiQkhm0oeE_hn-Zub6H6h3ttGpIiGzgnmeTStnci7js8pvXQF18HWRm_Thar7yUIVUmQNl-Ewm_1lj9ZBQP74wfXX9npUcI5Kz325XXgDgj3bMYKTaqjwlBIrsW-apg3mrFFhIJrLjEFC7BdQy10A2YgagzuZkyI7jWxIG-QobCn5_aKd-BTO0R27sXHlRtA0uMx-faT0MjLev6cMCnv2FHQ0nnqKW5rn4Em2TLx7jzpyVc.KM1vdm4zCa5Gtfqj58flq9orPpKbE2iX8kmofifdPzQ&amp;dib_tag=se&amp;keywords=max7219+8x32&amp;qid=1779579088&amp;s=electronics&amp;sprefix=max7219+8x32%2Celectronics%2C179&amp;sr=1-4">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Mechanical</td>
+<td>Yahboom Ackermann 520M Chassis</td>
+<td>Chassis for RC Car</td>
+<td style="text-align: right;">$99.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B0BR9PGZWN?th=1&amp;linkCode=sl1&amp;tag=ramcodes-20&amp;linkId=2d71e1269d116bb03b4dca16401e9028&amp;language=en_US&amp;ref_=as_li_ss_tl">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Mechanical</td>
+<td>Jetson Orin Nano Case</td>
+<td>Protection for JON</td>
+<td style="text-align: right;">$23.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Waveshare-Aluminum-Mini-Computer-Compatible-withJetson/dp/B0CG38BS5S/ref=sr_1_1?crid=9MHDXL6HW0TF&amp;dib=eyJ2IjoiMSJ9.QqVdvEj7pISfCQ8tTHY8kJJcPc9pZJkUdZCmZshFQrIpTR0ZDEyFiz-CZ3HE2VT6LY4idcscnTKicNRWmzvaePrIZLKfJW91VucNKEbqjzYekQqlViBrX3dw4N0wkLGqJbtzjnSaO5ztpOKNnzgiSfm3IjjfFEe8YIyvVCZi1jgMlezlfyb-JoPxWvGyTskp7SNlYOvb6yXaGe_JqSLQe3EiAXwHRHpjp8GOhBa6lEQ.luiEm3Ma1g8aiMqUvPxb0JLhBESt__vrqgDV6s9c9nw&amp;dib_tag=se&amp;keywords=Waveshare+Aluminum+Alloy+Case+for+Jetson+Orin%2C+with+Camera+Holder%2C+Mini-Computer+Case%2C+Compatible+with+Jetson+Orin+Nano+Super+Developer+Kit%2FOrin+Nano+and+Jetson+Orin+NX+Kits&amp;nsdOptOutParam=true&amp;qid=1779578033&amp;sprefix=%2Caps%2C181&amp;sr=8-1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Mechanical</td>
+<td>M.2 2280SSD PCIe NVMe Mounting Screws</td>
+<td>Screws for Installing NVMe SSD</td>
+<td style="text-align: right;">$4.79</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/gp/product/B08S7NV2B7/ref=ewc_pr_img_3?smid=A2PL6UUXJC5K5G&amp;psc=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Mechanical</td>
+<td>1/10 65mm Soft Rubber Tires</td>
+<td>Fresh Non-Slip Tires</td>
+<td style="text-align: right;">$11.00</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/gp/product/B0B3RK7QMQ/ref=ewc_pr_img_8?smid=A85ZEQRLQ31E1&amp;psc=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>INIU 27000mAh 140W Power Bank</td>
+<td>Power Bank for JON</td>
+<td style="text-align: right;">$79.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/INIU-27000mAh-Capacity-Powerbank-Compatible/dp/B0CB1FWNMK/ref=sr_1_3_mod_primary_new?crid=22FOBL7945FZM&amp;dib=eyJ2IjoiMSJ9.meZepEu5vSz4vwHLYuqoo3Wk8qnZzXWmECTNX4Fy-hwokHJfR_rLAERXNYRFtflcpxZiXtyQoNX8zHQK-jS2xYdaUkUVVJN5nILgx954U5yQSRI_FGsMB-eooQbnzdHXm471o1A6WEBL9nH3LBbE3_j6cfYBtf4SxlXue5KzZ0L8OL4CNj23hupNeq0SVmsAxeG7KKm3b2lNio0926YPKOgj015yjHNnkRG3eSe8ECw.ibBDjkUT7hHlWrPVS5tOXojkxmcJoJ-ppJOM8oeBads&amp;dib_tag=se&amp;keywords=27000mah+140w&amp;qid=1779577022&amp;sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&amp;sprefix=27000mah+140%2Caps%2C196&amp;sr=8-3">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>Dual Battery Charger 1-6S/15S</td>
+<td>Charger to Charge LiPo Batteries</td>
+<td style="text-align: right;">$67.19</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Battery-Charger-Discharger-Screen-Balance/dp/B0DFWPXG2Q/ref=sr_1_8?dib=eyJ2IjoiMSJ9.kzkcy5FkdiED7IABXACV7pCj3VJGqOga5QXx5W1aZlZJ4brzLGrunkFJVaDHIFIS3BAQ8GpUKk0Xj6aEu_zVubYtptpX4ePANlZ7c_REsRhg9ZwZIEv7bjSItr8tgPaY_NN6p72YYgC2kMrNZ-UaflWaNoYpEAZkEaAcXCpSAOC431y2hikExFETz-ZhNQh5X_IOkBgR5gDv3G7M1qJ5fK33bq01hnXFQGvDzUvjIhBVdZg5NqbgQmjsSHa81q-UhZFPzIcld1Wd46llDgsgjVxT-GfqN3vzS49ayqTvmuk.cY7ofG1sAA1HQpxFycu766HcNPGyGZy5bGWzlqhSBko&amp;dib_tag=se&amp;keywords=dual%2Blipo%2Bcharger&amp;qid=1779580280&amp;sr=8-8&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>INIU 10000mAh 45W Power Bank</td>
+<td>Power Bank for RPI5 and Z2W</td>
+<td style="text-align: right;">$32.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/INIU-Portable-10000mAh-Essentials-Powerbank/dp/B0DQD35SQ4/ref=sr_1_1?crid=3EZM7ZXSIIYHR&amp;dib=eyJ2IjoiMSJ9.PQH0AEJTF9npwSGLbl37ZJixwnZGEgdPfZSmiB5bW5Jzk8OJaQEdxmYa8VcexMyjU2nZxBJy_Le73m5NcbuoSHvumWaXRDD6vSNuMwZhn6R73-nOf_lKLV69v_l46rJh4GYlY3ICUgLDd70C-CZUIZr1zQEAtN477JrB37CEQaZ-tDm_Nl0MXoKomyZGojkRc_L8OTQW0sbK1YUkpCQX3c7v_xgexZ9qrB-u_MdpftCcK2cefdX-OD0mPzw4pGIvHRUh90TLcCzt7QOIlSmr9OjWIuIUVY7PvuEmBkHRvgM.96j1ymi3b_iU1LATDSZpMJ20_48qqIH_rN91wbLzJFw&amp;dib_tag=se&amp;keywords=10000mah%2B45W%2Biniu&amp;qid=1779599391&amp;s=electronics&amp;sprefix=10000mah%2B45w%2Biniu%2Celectronics%2C191&amp;sr=1-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>OVONIC 3S (11.1V) 5200mAh 80C</td>
+<td>LiPo Battery for Motors</td>
+<td style="text-align: right;">$23.19</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Battery-5200mAh-Connector-Helicopter-Airplane/dp/B09CTSFH36/ref=sr_1_6?crid=3H64SMSI4JUY&amp;dib=eyJ2IjoiMSJ9.fiey7ED5TFt2eRNAPonxeN42prQGtRqAPbbpM-NzuVePYlXmslxIvnNNx6mv4vr0loRZGmkeqIjNElGIidLJu9YZQKTHuCo-hLo5UIqmu7_eIbqXm27rFV7K5sjKZNQn1-uU5bg_dEUkjex1EdxojbL47J-Vl00uzxogiBi0L121OsBcT-4qKB1BFXL4i6LafU0AI_-ELB8BV7S_XLPGoucb6SfPfjCpTYZVBuuOVNUyA2MMXjJQQSNmkY8iTrIGPjx0Ax3g4Gry4zYt2N68zfJeSOWlZpo8V_1oEjsrd_Q.gHxUD6G3WiwP4qgW87419c_bNutITqGr0lJD7I4weqs&amp;dib_tag=se&amp;keywords=3s+5200mah+lipo+battery&amp;qid=1779577058&amp;sprefix=3s+5200%2Caps%2C197&amp;sr=8-6">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>10000uF Electrolytic Capacitors</td>
+<td>Capacitor for Voltage Stability</td>
+<td style="text-align: right;">$20.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B0B758BH5L?psc=1&amp;ref=cm_sw_r_cso_wa_apin_ct_73FXRE8SQ0B67B7WRX48&amp;ref_=cm_sw_r_cso_wa_apin_ct_73FXRE8SQ0B67B7WRX48&amp;social_share=cm_sw_r_cso_wa_apin_ct_73FXRE8SQ0B67B7WRX48">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>DROK DC Buck Converter</td>
+<td>Buck converter for display LiPo and screen</td>
+<td style="text-align: right;">$17.49</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B078Q1624B?ref=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V&amp;ref_=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V&amp;social_share=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>ATC/ATO 14AWG 10A AMP Fuses</td>
+<td>Fuses and Holders for Display</td>
+<td style="text-align: right;">$15.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B07Q9PL4R6?ref=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&amp;ref_=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&amp;social_share=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>OVONIC 2S (7.4V) 5200mAh 50C</td>
+<td>LiPo Battery for LED Display</td>
+<td style="text-align: right;">$13.29</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/OVONIC-5200mAh-Connector-Airplane-Helicopter/dp/B07JJ4Q65Z/ref=sr_1_8?crid=2NY4T275TZZDB&amp;dib=eyJ2IjoiMSJ9.Rx8egGP6AfIhC3F36F5hy8xQM1pkK1UUD4O91eWDFWOL-Fw_cr1d5doCeeuUT0vxny-_y3O_y6AvLNoltS2AIQGWh2vtm95tvG8lWMBekmPIH12AGF8m8L9jMd0PL185T55rPshJNzElpkimOm41_aKg9BzsrzMo2SwYsfhdHiOs76vWOg0-0VAyHhjtpP_DZLezpPq5ng148Zxdwn0YhipqGVkLzsBOTkzVveF1asJP3y7wRCdIfSB99gM3_zZT0jaL8XqqjPpJpKtFuqUgeO5Y3tqUu8EIWLsFjBN5xiU.lwZBeg8mwdMMPBLFXqVR_ZQzgn0Lq4VTwuzRRhEU7AE&amp;dib_tag=se&amp;keywords=ovonic+2s+lipo+battery+5200mah+t+plug&amp;qid=1779576913&amp;sprefix=ovonic+2s+lipo+battery+5200mah+t+plu%2Caps%2C177&amp;sr=8-8">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Sensor</td>
+<td>Youyeetoo FHL-LD19 360 12M 30K Lux LiDAR</td>
+<td>LiDAR Sensor</td>
+<td style="text-align: right;">$71.90</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/youyeetoo-D300-Resistant-Raspberry-Tutorial/dp/B0B1QCV4XR/ref=sr_1_1_sspa?crid=3PEW81EWE77M7&amp;dib=eyJ2IjoiMSJ9.xRO1HLsQgyMGosjt-JLHK9NqlXmGjamO5bCBS0lTVvkKceKizVjNtRJ3cI42GtjPJxSbJA4rzaZDZM4Z43hq8VfxQSR5uKnsO5NMGsJTmzSih8dLVOIXbmJpmVdPm1Buyj2lSyYpqdF4PS0G0R8_dBrWu-5AYZNAj_wmSIGBrgeO_OGNC_uhA6_08faa9d5yj2dfggXqZCbPKTx8zgCmSA8voegwEa_e2ndl5pjxQNA.L1wKA35gI2jbHtEu054aB8yYEMsVkcJbPMc74HFGLcM&amp;dib_tag=se&amp;keywords=youyeetoo+lidar&amp;qid=1779578773&amp;sprefix=youyeetoo+lidar%2Caps%2C182&amp;sr=8-1-spons&amp;sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&amp;psc=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Sensor</td>
+<td>RPI Camera Module 3 Wide</td>
+<td>Image Taker for AI Model</td>
+<td style="text-align: right;">$69.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Raspberry-Pi-Camera-Module-Wide/dp/B0BRY757NX?ref_=ast_sto_dp&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Sensor</td>
+<td>BN880 GPS Module with HMC5883L</td>
+<td>GPS Module for Navigation</td>
+<td style="text-align: right;">$33.98</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Geekstory-Navigation-Raspberry-Aircraft-Controller/dp/B078Y6323W/ref=sr_1_1?crid=11E0TMTZNTPEW&amp;dib=eyJ2IjoiMSJ9.lSbdcLk7wwVdqd53Tw4NBuhT5XOMygBLYjY5jVspVPybtMQnA99WVMzlC8_j1CsvxaRKx9XgN4b5KhVveSR54WHJXFKDf-iSPapWIcQiyH9-y83yzg35qv0hw8mFAJUm77b6UdN6iObi31usEx_kxlhn1T4N6mwRMHrsJDZyzOC4VNrgW0DFn5dgvd_WWVI1Lj2s5GA4lpd3i1fh87ub_s61VfXUxDszRuTKBCONfbmSEGUbaNXu12K-tYs8_KeCrONdNbG_udvGQhSviQtwh0I2iYEQ8g5IoFeHLi-VTx0.msDaC2RQmowR-0TLZyxZ9b-i7OEqQv7YDCqyOlhrigg&amp;dib_tag=se&amp;keywords=bn880&amp;qid=1779579754&amp;s=electronics&amp;sprefix=bn880%2Celectronics%2C188&amp;sr=1-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Sensor</td>
+<td>Seeed Studio XIAO MG24 Sense</td>
+<td>IMU for Steering Stabilization</td>
+<td style="text-align: right;">$19.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Seeed-Studio-Sense-Pre-Soldered-Board/dp/B0F4BML71Y/ref=sr_1_1_sspa?crid=1PGK12VRC3M5W&amp;dib=eyJ2IjoiMSJ9.M5Ijbvu_I-mwMg4PzXV3dEKAj-0UrNaKKRyNALrJTKqnI3YTks5eK6NXD7P6uqKS.pRJMdOwQDsWr2tDcLLMj6LSN9L134ieOeEyilfqEzQI&amp;dib_tag=se&amp;keywords=mg24%2Bsense&amp;qid=1783846094&amp;sprefix=mg24%2Bsense%2B%2Caps%2C193&amp;sr=8-1-spons&amp;sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>Jiavarry 6-inch LCD digital caliper, stainless steel</td>
+<td>Digital caliper for CAD measurement</td>
+<td style="text-align: right;">$19.98</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B08Y8M54M9?ref=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_3&amp;ref_=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_3&amp;social_share=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_3&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>EZlifego Double Sided Tape</td>
+<td>Strong Adhesive for Attachments</td>
+<td style="text-align: right;">$14.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/EZlifego-Multipurpose-Removable-Transparent-Household/dp/B07VNSXY31/ref=sr_1_1_sspa?crid=FBAQ5Q2IXPVL&amp;dib=eyJ2IjoiMSJ9.NKDrXjP4tPEoOFkm_Ro_FYL1UVqmZGKgIj6g7PPL2qMJl_6I40Jz8vN0tTN7bhhWWAcQQaeWT7fa8oWdfjq7oEqLqWTGhpFi526pCLgsMrC6KFRoDMxLJvqCdjjNUNcvc2R-OeMvbGrJNnAipDwylmN1nMqQMQIO2xAkRY6nkScWrnfN9jdjINyfWxjTn9RciwoZlqjCkX1yQWtKC9Hg_Lo5PffP57R8UI01F373u1b9QEcWZlqL2Qf_Ongnzkseej3bgF7A-Iyj0FakLx2tFXC9jWzbtG8gDIRfeeaCxtE.yLzaCCbWZDnarnZKXJzH-HMGheK-B1FPjZSJ3a3hjGY&amp;dib_tag=se&amp;keywords=double%2Bsided%2Btape&amp;qid=1779776310&amp;s=hi&amp;sprefix=souble%2Bsided%2Ctools%2C180&amp;sr=1-1-spons&amp;sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>Nilight 50005R Heat Shrink 2:1 Electric Insulation 45mm Flame Retardant</td>
+<td>Heat Shrinks for Soldering Connections</td>
+<td style="text-align: right;">$10.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Nilight-50005R-Heat-Shrink-Insulation/dp/B07D33MSLZ/ref=sr_1_8?crid=34R3DZ4D8F823&amp;dib=eyJ2IjoiMSJ9.OFAuL09icdYIBcJAMargVkTS2npwg1Q7BCobE2cyy9RtRPYT_TPFg3VZ3JSITMxIE3Gmvgq2F3xsmqGu_Gl-Rck2yH5TOWM5KfBPFOHm16jZ8CdL4mABmxBoDgUhDfoAOK0i3KcTSI7WwlB9m0j5K430zkUhHGCj9IDRcYjRiHclupLM3V15NTQ615u5DmIQDPOAeDVlyHXh_AJpXsIQuhNo3ZRsfb8KnjFc7I7i8FWZ_x1tKuHTizhp04zel4VgacT_iP2bBOz_Ji9BguJPrELJIc80px6tYrk9rEiJZDg.E3xrS5kG5eiPOoIXow8yX5Xvwtfm5rHnbFjaIBmSsOU&amp;dib_tag=se&amp;keywords=heat%2Bshrinks&amp;qid=1779776380&amp;s=hi&amp;sprefix=heat%2Bstrink%2Ctools%2C180&amp;sr=1-8&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>80W 110V LCD Soldering Iron</td>
+<td>Soldering Iron</td>
+<td style="text-align: right;">$9.89</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B08R3515SF?ref=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_6&amp;ref_=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_6&amp;social_share=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_6&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>Scotch Vinyl 700 Electrical Tape</td>
+<td>Electrical Tape for Solder Protection</td>
+<td style="text-align: right;">$4.59</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B001AXD0EY?ref=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_2&amp;ref_=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_2&amp;social_share=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_2&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>USBC (PD) to Barrel 20V/100W 3.9ft</td>
+<td>Power Cable Bank - JON</td>
+<td style="text-align: right;">$15.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Yancincny-Charger-Trigger-Conversion-Display/dp/B0GRJC9TR1/ref=sr_1_2?crid=3FOZWFP100JP3&amp;dib=eyJ2IjoiMSJ9.ilxGpoNSb4vBb5yz0WE1n_Xy_Cpzt9OYak9mp8pdYaMfMbiNTm6Q0ipm1vtazmPtQlDS_k5b5sdJoxKAlI9XrW6kolBYodHrh_bAyXoPzTRg6gk4PyNllMhC3PlxOM9qPyvKWuFs2TKNZ2-7rRKVHJy_NqWKc33s3y6sch5dXco68xOAq7U3T78-VGPnbj392Se1kklxc93BEEOi6i8AjHXKc0XGDAAhnJiqXGecCQZ-XoSdEYaaqHENJ3F65VierrSOYgg3HHnQ7Uhabhrssap3dhYpfCB_v465mzupScE.Ne-2_--IzkajCiL2OiJRfXRYdXEaahmpXHChkvbAgXc&amp;dib_tag=se&amp;keywords=100W%2BUSB%2BC%2Bto%2BDC%2BCharger%2C%2BBarrel%2BPD%2BTrigger%2BCable%2Bwith%2B8%2BDC%2BConversion%2BHeads%2Band%2BLED%2BDisplay%2BScreen%2C%2BDC%2B5V%2F9V%2F12V%2F15V%2F20V%2Bto%2BDC%2BAdapter%2BCable%2Bfor%2BNetbook%2C%2BTablets%2C%2BLed%2BLight%2C%2BRouters%2B(3.9ft)&amp;nsdOptOutParam=true&amp;qid=1779577908&amp;s=industrial&amp;sprefix=100w%2Busb%2Bc%2Bto%2Bdc%2Bcharger%2C%2Bbarrel%2Bpd%2Btrigger%2Bcable%2Bwith%2B8%2Bdc%2Bconversion%2Bheads%2Band%2Bled%2Bdisplay%2Bscreen%2C%2Bdc%2B5v%2F9v%2F12v%2F15v%2F20v%2Bto%2Bdc%2Badapter%2Bcable%2Bfor%2Bnetbook%2C%2Btablets%2C%2Bled%2Blight%2C%2Brouters%2B3.9ft%2B%2Cindustrial%2C147&amp;sr=1-2&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>Breadboard and Dupont Jumper Wires</td>
+<td>Clean GPIO Wiring</td>
+<td style="text-align: right;">$9.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B09VKYLYN7?&amp;linkCode=sl1&amp;tag=ramcodes-20&amp;linkId=36564ef21caa232803c43f9afeef866b&amp;language=en_US&amp;ref_=as_li_ss_tl">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>USBA to Micro USB 0.56FT to 4FT</td>
+<td>Power Cable Bank - Z2W</td>
+<td style="text-align: right;">$9.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/CableCreation-Charging-Compatible-Android-Smartphone/dp/B075GMNY1Y/ref=sr_1_3?crid=VQIN769U41OD&amp;dib=eyJ2IjoiMSJ9.vax3LzQoIO0GOTodtwAhYrKuRZCEtGtBCAf7cNZJro7CM5wB2Zj9Kk2lITzChZkFAsufmLqINkVcKzd_GC6TlWhyPrDktKU9IrawBZ3cifqzns9eXV-i7JAaqBkKrMgJqPBT_M6inA2RcGahXwI1wvSKkIAzNcU9pWdHMQtEVsxrUt2_63SqqwnDqflZcW1xzuywSGKVMfPSo5vNATywgjbrrd3Rg8QletemC8zpzuBV3VVioSTRib3E9_Yva1jcwpGVLaIb1HSWqW8osgO8vZEhYRVDiJr0FKQgwssSHVM.paaWm9ZQCeokdHLiGRSdwY34_iy9-cyrhqlCz4NTbP0&amp;dib_tag=se&amp;keywords=spiral%2Bcable%2Busb%2Bto%2Bmicro%2Busb%2B5%2Bin%2Bto%2B4%2Bft&amp;nsdOptOutParam=true&amp;qid=1779577671&amp;s=electronics&amp;sprefix=spiral%2Bcable%2Busb%2Bto%2Bmicro%2Busb%2B5%2Bin%2Bto%2B4%2Bft%2Celectronics%2C156&amp;sr=1-3&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>Electrical Wire 14AWG 400 Strands 0.08mm Copper</td>
+<td>Fuse to Buck 14AWG Wire</td>
+<td style="text-align: right;">$9.88</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B0746H96QK?ref=cm_sw_r_apin_ct_9780Y10WJQA5KCHW9TXP_1&amp;ref_=cm_sw_r_apin_ct_9780Y10WJQA5KCHW9TXP_1&amp;social_share=cm_sw_r_apin_ct_9780Y10WJQA5KCHW9TXP_1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>USB3.1A to USB C 1.5FT</td>
+<td>Data Cable RPI5 - JON</td>
+<td style="text-align: right;">$8.49</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/SUNGUY-Braided-Charging-Transfer-Compatible/dp/B0B2JZXW8L/ref=sr_1_1?crid=24OMSLGZCSFDV&amp;dib=eyJ2IjoiMSJ9.PQF8pYnF9y-3YOk4wikYeHxq0sKCFHdYtg5mXGXU1sBkWOHtZQgA2s897yRFfNrcrBPVMbcVy3MV8bC6al7dmyJ7k174vxP6L7NFPAkQvAHXOrHY8rd11xfdp_ymPuplU2uxZYvuobzgCVS_oRK1gA5LD1G1oNgZYx_rkZbNkOBoPtX5FsBKRSC8g8YuZA4dsbEXJx7htVBZ39qOVF-I7TLVWZ2O3auG63t9PAQRFrIvwalHLIkwgG4LX7aSF7fRtsdy51xSoajafRbZ7Z5XGRAZdAUa0aw3p4oPVU-bFzM.LwuCTwKBhefJmwimSc06BjfX7SrHThub69ZFbVumHUk&amp;dib_tag=se&amp;keywords=SUNGUY%2B10Gbps%2BAndroid%2BAuto%2BUSB%2BC%2BCable%2C%2B1.5FT%2B3A%2BUSB%2B3.1%2BGen%2B2%2BFast%2BCharge%2B%26%2BData%2BTransfer%2BUSB%2BC%2BCarPlay%2BCable%2C%2BCompatible%2Bwith%2BiPhone%2B15%2F15%2BPro%2BMax%2C%2BSamsung%2BT7%2C%2BGalaxy%2BS23%2BS22%2BUltra%2BNote%2B20%2C%2BSSD&amp;nsdOptOutParam=true&amp;qid=1779577803&amp;s=industrial&amp;sprefix=sunguy%2B10gbps%2Bandroid%2Bauto%2Busb%2Bc%2Bcable%2C%2B1.5ft%2B3a%2Busb%2B3.1%2Bgen%2B2%2Bfast%2Bcharge%2B%26%2Bdata%2Btransfer%2Busb%2Bc%2Bcarplay%2Bcable%2C%2Bcompatible%2Bwith%2Biphone%2B15%2F15%2Bpro%2Bmax%2C%2Bsamsung%2Bt7%2C%2Bgalaxy%2Bs23%2Bs22%2Bultra%2Bnote%2B20%2C%2Bssd%2Cindustrial%2C163&amp;sr=1-1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>Male T-Plug 10cm 14AWG Wire</td>
+<td>Power Cable Buck - LiPo 2s</td>
+<td style="text-align: right;">$7.98</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/T-Plug-T-Connectors-Deans-Style-BDHI-28/dp/B07MDGT5C1/ref=sr_1_6?crid=1N8BUGLF5WHYU&amp;dib=eyJ2IjoiMSJ9.t5K0FEXY5Ap1oANMSA_23bfga3fzeWm4i98rbBL39Ai0J5vIAZxM6Kt0k6KDTQIpGoasqonwVOe20pgZpEcEIRKnUrvtdXAARGphzDDCyudkzj0JQawc9Kilderrp9sv79buOonATq2tPJoOPoRu1XFSzoX3cyc2xmv9XaSVXOSgEAqY4NHO--siGHi7v9TYNG6DuevLCWf1pFJUnJYuMNZV47ThIdsU0j05OSyHzcaZbf-iy1Q8AIoLueEDhtwOoHYW91iwmr9GB5lE1ewMcyLS5Dj6_pR9iSkSEAOOWlA.7Tnl_mfTnx5DQUSd31ksH13RYkSDXfZN_qUWsKyk9ek&amp;dib_tag=se&amp;keywords=deans+connector+tplug+14awg&amp;qid=1779581256&amp;s=electronics&amp;sprefix=deans+connector+tplug+14awg%2Celectronics%2C163&amp;sr=1-6">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>USBA to Micro USB 24AWG 0.5FT</td>
+<td>Data Cable RPI5 - Z2W</td>
+<td style="text-align: right;">$6.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B013G4EAEI?ref=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_1&amp;ref_=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_1&amp;social_share=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V_1&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>Electrical Insulated Solderless Crimp Terminals</td>
+<td>Crimp Terminals for Fuse - T-Plug</td>
+<td style="text-align: right;">$5.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/dp/B0FJ8PNH55?psc=1&amp;ref=cm_sw_r_apin_ct_6W1JNR1JHVKJ46JF5Y6E&amp;ref_=cm_sw_r_apin_ct_6W1JNR1JHVKJ46JF5Y6E&amp;social_share=cm_sw_r_apin_ct_6W1JNR1JHVKJ46JF5Y6E">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+<tr>
+<td>Wiring</td>
+<td>Vabogu CAT8 1.5FT 26AWG RJ45 STP Cable</td>
+<td>Ethernet RPI5 - JON</td>
+<td style="text-align: right;">$3.99</td>
+<td style="text-align: center;"><a href="https://www.amazon.com/Ethernet-Internet-Network-Professional-Shielded/dp/B08PL53JG3/ref=sr_1_3?crid=2AIIDQ120OBQD&amp;dib=eyJ2IjoiMSJ9.erGgHVGBVoKdl4HE34t4leqehgyqvhyq-KtVpDTwMHnMnf_ZfuredySfLYqy91gEIGEEO3NDSGdtgTmcnpb4nTzTxEhlWf2UPNtKTmIpv_FTbjtRMpmkNayoHBnChbLuvjhjP6FbAqRIlHGfi09GMsuhTbso94Dgp16HJ7xb8Ph8T0RfE6loUV2PyXSt5cXVuPreQv4hMqVTt3OfzphKV7uMvwgL4x6RJELhHjUWdlqV40If1CNYTUcSBLLOPHtbCOD3JLA1xL3RUAuxxow1wlvwfzJgCoR6xgn84XpTGDo.BygwUMp_3enwATpyV7hc51JPFSBJEtGLkuhgHXAVlIk&amp;dib_tag=se&amp;keywords=1.5ft%2Bcat%2B8%2Bcable&amp;qid=1779775924&amp;s=electronics&amp;sprefix=1.5ft%2Bcat%2B8%2Bcabl%2Celectronics%2C163&amp;sr=1-3&amp;th=1">link</a></td>
+<td style="text-align: center;">Yes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reading-the-table">Reading the table</h2>
+<p>Prices are historical purchase/reference values and can change. The <code>Bought</code> column records acquisition, not current installation. Current-build pages and the notes above take precedence when a purchased component was superseded.</p>
               
             </div>
           </div><footer>

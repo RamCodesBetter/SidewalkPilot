@@ -73,7 +73,6 @@ def reference_throttle_to_absolute(reference_throttle: float) -> float:
 LIDAR_GOV_MIN_PWM = reference_throttle_to_absolute(LIDAR_GOV_MIN_REFERENCE)
 
 # --- GPIO SETUP ---
-STEERING_SERVO_PIN = 12
 HALL_SENSOR_GPIO_PIN = 24
 # LiDAR is on USB 3.0 now (CP2102, /dev/ttyUSB0) — no GPIO motor-enable pin needed.
 MOTOR_RIGHT_FWD_PIN = 19
@@ -109,11 +108,10 @@ STEERING_SERVO_CENTER_PRELOAD_WINDOW = 0.0
 STEERING_CENTER_SNAP_DEG = float(os.environ.get("RC_CAR_STEERING_CENTER_SNAP_DEG", "0.5"))
 
 # --- IMU yaw-rate closed-loop steering (MG24 on /dev/ttyAMA3) ---
-# Pure PID (no feed-forward). Default "straight" = hold yaw=0 when commanding ~center
-# (turns pass through open-loop). "full" = also track turns. "off" = no IMU.
-# Tune the gains right here (edit the numbers): the INTEGRAL discovers the steering
-# offset needed to go straight, so push Ki up if it drifts and never centers, push
-# Kp up for snappier correction, add a little Kd if it oscillates.
+# Direction-dependent feed-forward plus PID correction. Default "straight" = hold
+# yaw=0 when commanding near center (turns pass through open-loop). "full" = also
+# track turns. "off" = no IMU. The integral term corrects residual steady-state
+# error around the measured feed-forward; Kp controls response and Kd adds damping.
 STEERING_YAW_PID_MODE = "straight"
 STEERING_YAW_PID_PORT = "/dev/ttyAMA3"
 STEERING_YAW_PID_BAUD = 115200
@@ -123,24 +121,23 @@ STEERING_YAW_PID_AXIS = 2  # 0=X 1=Y 2=Z (yaw)
 # gyro is inverted vs the controller's assumption -> flip it. If a future test shows
 # the correction still pushes INTO the drift, set this back to +1.0.
 STEERING_YAW_PID_YAW_SIGN = -1.0
-# Ram-set gains (2026-07-07): stronger P + a small I to hold the line. NOTE: the left
-# drift at speed is partly a MOTOR imbalance (thrust differential that scales with
-# throttle) the steering servo can't fully cancel -- the real fix is balancing
-# LEFT/RIGHT_MOTOR_PWM_SCALE. The small kI is being trialled anyway; the anti-windup
-# clamp (STEERING_YAW_PID_MAX_CORRECTION_DEG) bounds its wind-up. Watch for a lurch on
-# decel; if it winds up and jerks, drop kI back toward 0.
+# Ram-set gains (2026-07-07): stronger P plus a small I term to hold the line. A pull
+# with centered steering does not establish one cause; motor balance, linkage geometry,
+# wheel loading, surface slope, servo mapping, and trim remain separate candidates.
+# The anti-windup clamp bounds integral growth. If deceleration exposes a correction
+# lurch, reduce Ki and repeat the same controlled test.
 STEERING_YAW_PID_KP = 2.15
 STEERING_YAW_PID_KI = 0.20
 STEERING_YAW_PID_KD = 0.05
 # Curvature quartic from calibration: curvature(x) [deg/m] vs servo angle x, ascending
-# powers c0..c4. Its root (curvature=0) is the open-loop STRAIGHT angle (~109) = the
-# feed-forward F; full mode also reads the target curvature off it. From imu_calib.csv.
+# powers c0..c4. Its root (curvature=0) is the open-loop straight angle (~109); full
+# mode also reads target curvature from it. These coefficients came from a local
+# calibration run; its raw CSV is not a tracked publication artifact.
 STEERING_YAW_PID_CURVATURE_COEFFS = (69.59605, -0.242301, -0.0077307, 4.86308e-5, -1.02946e-7)
 # Direction-dependent straight-angle feed-forwards. LFF = straight servo angle when
 # the last steer was LEFT; RFF = when last steer was RIGHT (picked by _last_side).
-# REVERTED (2026-07-08, Ram) to the ff_calibrate.py MEASURED straight-angles: the
-# open-loop hand pushes to the calibrated angle and the PID corrects around it.
-# LFF = left-approach, RFF = right-approach (picked by _last_side).
+# Reverted (2026-07-08, Ram) to the ff_calibrate.py measured straight angles: the
+# open-loop command uses the calibrated angle and the PID corrects around it.
 STEERING_YAW_PID_LFF_DEG = 119.5   # measured (left-approach)
 STEERING_YAW_PID_RFF_DEG = 107.8   # measured (right-approach)
 # A side only counts as "the last steer" once the stick DWELLS there this long.

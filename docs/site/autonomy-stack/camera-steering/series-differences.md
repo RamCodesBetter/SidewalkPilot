@@ -1,33 +1,54 @@
-# Steering Model Series
+# Series Differences
 
-SidewalkPilot keeps model generations separate because they have different preprocessing, output contracts, and deployment assumptions.
+Series 1/2, Series 3, and experimental Series 4 are different answers to the same question:
+look at a sidewalk and decide how to steer. They differ in architecture, input history,
+output horizon, deployment target, and evaluation criteria.
 
-| Series | Input | Prediction design | Deployment role |
+## How it works
+
+| | Series 1/2 (`SteeringAutonomyV2`) | Series 3 (`SidewalkPilotV3`) | Series 4 experimental (`SidewalkPilotV4`) |
 |---|---|---|---|
-| 1 | `200x66` image | Direct continuous steering | Original proof that camera-only sidewalk steering works |
-| 2 | `200x66` image | Refined direct steering; selected versions test HSV/CLAHE preprocessing | Historical Pi-era refinement and comparison baseline |
-| 3.0 | `320x180` image | Two-output steering/throttle regression | First heavy Jetson-only Series 3 design |
-| 3.1-3.4 | `320x180` image | 19 raw outputs: 9 class logits, 9 within-class offsets, 1 throttle | Current hybrid Jetson architecture |
-| 4 | Not frozen | Parallel architecture research | Planning only; no model or runtime selection yet |
+| Params | ~0.67M | ~5.5M | ~5.54-5.57M, contract-dependent |
+| Image input | 200x66 | 320x180 | 320x180 |
+| Temporal input | none | none | none for CF; three previous targets for PC/PCF |
+| Head | single `tanh` regression | 9 logits + 9 offsets + throttle | 18 values per steering horizon, no throttle |
+| Horizons | current steering | current steering/throttle | current only for PC; current + three future for CF/PCF |
+| Runs on | Pi | Jetson "Jon" | Jetson runtime-supported; not field-promoted |
+| Throttle | fixed runtime value | present in contract, disabled in steering-focused training | runtime-owned; removed from learned output |
 
-## Current Production Choice
+The nine Series-3 buckets are HL, L, L+, SL, ST, SR, R, R+, HR. Series 1 uses an output
+scale of `86.0°`, Series 2 uses `85.0°` (`SERIES_1/2_STEERING_OUTPUT_SCALE_DEG`), and the
+runtime picks Series by the model-choice prefix (`steering_model_series()`: `2.` → Series 2,
+else Series 1).
 
-Regular **v3.4** is the field-selected default as of July 13, 2026. The controller keeps every earlier model selectable for comparison, but `DEFAULT_STEERING_MODEL_CHOICE` in `code/controller/current/rc_car_app/vision.py` explicitly names `3.4`; list order no longer chooses the default.
+## Design progression
 
-The field comparison found v3.4 strongest across the tested shadows and normal turns. v3.4b was slightly worse. v3.3 and v3.3b were regressions relative to their v3.2 counterparts. See [Shadow Robustness](../../model-evaluation/field-evaluation/shadow-robustness.md).
+Series 1/2 established the compact Pi-capable regression path. v3.0 tested a larger
+regression model on 320x180 input. v3.1 and later changed the steering contract to a class
+plus within-class offset, which makes class recall directly measurable while retaining a
+continuous angle. The Series 3 graph also contains a throttle output, but current training
+and deployment do not use learned throttle. The larger visual model is deployed on Jon;
+the project has not published a Pi-versus-Jon latency benchmark for this architecture.
 
-## Runtime Contract
+## Key findings
 
-The Pi captures `1280x720` BGR frames and sends them with the selected model version to the Jetson. The Jetson inference server resolves `SidewalkPilot-v<version>.onnx` before `.pt` or `.pth`, preprocesses according to the model family, decodes the output by architecture, and returns steering plus throttle telemetry. The Pi currently uses model steering while LiDAR owns only center-corridor throttle limiting and emergency braking.
+- **Turn-vs-shadow observation.** Some field-tested iterations that reacted more strongly
+  to turn cues also followed shadow edges; more center-biased checkpoints could miss turns.
+  Targeted turn-in-shadow data is the current collection response, not a claim that one data
+  type is mathematically guaranteed to solve every case.
+- **MAE is insufficient.** A center-biased checkpoint can score well on a straight-heavy
+  set while retaining weak turn recall. Series 3/4 comparisons therefore include Bal9,
+  turn exact, turn +/-1, ST exact, signed error, and physical testing.
 
-Source files:
+v3.4 is the current field-selected baseline. In the July 13 comparison it handled every
+presented shadow case; v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was
+much worse than v3.2b. All three Series 4 runs completed. Their six ONNX artifacts passed
+signature and CUDA inference checks, and the Jetson runtime supports all three contracts.
+No Series 4 field test has occurred, so offline results order candidates but do not select
+a field baseline.
 
-- `code/controller/current/rc_car_app/vision.py`: model list and production default.
-- `code/controller/current/rc_car_app/jetson_client.py`: frame/version request.
-- `code/controller/current/rc_car_app/jetson_inference_server.py`: model resolution, preprocessing, decode, and inference.
-- `code/ai_models_datasets/series_3/sidewalkpilot_trainer.py`: Series 3 architecture and training.
-- `code/ai_models_datasets/series_4/SERIES4_PLAN.md`: Series 4 experiment contract.
+## Related pages
 
-## Validation Rule
-
-Offline error cannot select a production model by itself. The dataset is straight-heavy, so a model can improve aggregate MAE by predicting near-center too often while losing turns. Promotion requires turn-class behavior, signed error, shadow testing, normal left/right turns, command freshness, and manual-takeover review.
+- `autonomy-stack/architecture/layered-autonomy.md`
+- `runtime-code/runtime-loop.md`
+- `safety-case/safety-overview.md`

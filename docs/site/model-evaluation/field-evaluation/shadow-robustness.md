@@ -1,36 +1,42 @@
 # Shadow Robustness
 
-Shadow robustness means maintaining the intended sidewalk path when hard sunlight/shadow boundaries cross the camera image without treating those boundaries as sidewalk edges.
+Shadow robustness asks whether a steering model follows the sidewalk rather than a
+high-contrast lighting boundary. Dappled tree shade and hard diagonal shadows have been
+repeated field failure conditions for this project.
 
-## July 13, 2026 Comparison
+## Evaluation Protocol
 
-The same field session compared four Series 3 checkpoints on shadow cases and normal left/right turns.
+Run each candidate over the same supervised route sections containing ordinary turns and
+known shadow cases. Preserve the model hash, route, time, weather, starting pose, CSV,
+continuous video or interruption clips, and every manual takeover. Score a case as pass,
+warning, or failure using a rule chosen before comparing the next model.
 
-| Rank | Model | Operator field verdict |
-|---:|---|---|
-| 1 | **3.4** | Completed every shadow case presented during the run; strongest overall |
-| 2 | 3.4b | Slightly worse than regular 3.4 |
-| 3 | 3.3 | Major regression; worse than 3.2 |
-| 4 | 3.3b | Severe regression; much worse than 3.2b |
+The interruption recorder and `code/test_files/models/clip_bucket_analyzer.py` can help inspect the commands before
+a takeover. A clip does not contain steering ground truth or a measured wheel angle, so it
+supports diagnosis but cannot prove a single root cause.
 
-The comparison promotes `SidewalkPilot-v3.4.onnx` as the runtime default. It does not prove universal shadow handling: route, exact time, weather, video, and manual-takeover count were not recorded in the chat report and must not be invented after the run.
+## Evidence Record
+
+Earlier working notes describe a seven-clip v3.2b review associated with dappled shadows.
+The clips and complete analysis record are not indexed in this repository, so the exact
+counts, directions, and confidence statistics from that draft are not reported as verified
+results. The current remote neural path also assigns confidence `1.0` to every fresh accepted
+result; that field is not a calibrated shadow or image-quality score.
+
+The strongest preserved field statement is the bounded July 13 comparison: v3.4 handled
+every shadow case presented in that run and performed better than v3.4b, v3.3, and v3.3b.
+The exact route, clip identifiers, and takeover count were not retained, so this is a
+qualitative field selection rather than a shadow success rate.
 
 ## Interpretation
 
-The v3.3 trainer used a more aggressive shadow regime that produced unstable, bang-bang behavior. The v3.4 adjustments softened the problematic tree-shadow path and restored useful field behavior. This is evidence that augmentation realism and probability matter more than simply maximizing augmentation strength.
+Shadow-following is consistent with a visual model treating a lighting boundary as path
+geometry, but the project has not isolated one causal training feature. Dataset membership,
+labels, augmentation, preprocessing, and closed-loop behavior can all contribute. Future
+experiments should change one factor at a time and repeat the same preserved field cases.
 
-Offline MAE remains secondary. A straight-heavy validation set can reward center collapse even when field turns are poor. Use the model report for reproducible metrics, but use this fixed field comparison to decide which checkpoint drives the car.
+## Related Pages
 
-## Required Retest Record
-
-For the next comparison, save:
-
-- date and local time;
-- route/side of road and direction of travel;
-- sun position, weather, and surface condition;
-- model version and regular/b checkpoint type;
-- every manual takeover and reason;
-- a video or interruption clip for every failure; and
-- whether left turn, right turn, diagonal shadow, tree shadow, and bright-to-dark transition passed.
-
-Retest after changing the dataset, augmentation, preprocessing, temporal smoothing, steering trim, camera position, or model architecture.
+- [Interruption Clips](interruption-clips.md)
+- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
+- [Model Claim](../../portfolio-evidence/claims-and-proof/model-claim.md)
