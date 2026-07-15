@@ -1,19 +1,16 @@
-# Tanh Output
+# Tanh Regression Output
 
-TODO:
+Tanh regression is the output design used by Series 1/2 and the v3.0 regression contract. It is not the v3.1+ or Series 4 steering decoder.
 
-- [ ] Add page-specific notes for `ai-and-models/architecture/tanh-output.md` after inspecting the real project files.
-- [ ] Cross-link `Tanh Output` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact training or inference file related to this page.
-- [ ] List relevant command-line flags and their current intended values.
-- [ ] Document input tensor shape, label format, and output steering range where relevant.
-- [ ] Explain what changed between model versions if this page covers a model.
-- [ ] Add the dataset names used and whether any labels are historical or current.
-- [ ] Add offline metrics that belong on the page once retested.
-- [ ] Add field behavior that must be checked before trusting the model.
-- [ ] Add known failure cases and what data would improve them.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
+For direct steering regression:
+
+```text
+unit = tanh(raw)
+steering = 90 + scale * unit
+```
+
+Tanh bounds the result and gives a simple continuous command, but on a straight-heavy dataset an average-error loss can favor predictions near 90 degrees. That failure mode motivated the later class-plus-offset head.
+
+Series 3 v3.1+ and Series 4 use unbounded class logits plus sigmoid-bounded local offsets. Throttle handling is separate and Series 4 does not learn throttle.
+
+See [Regression Framing](../../research-and-math/machine-learning/regression-framing.md) and [Series 3 Hybrid Head](series-3-hybrid-head.md).

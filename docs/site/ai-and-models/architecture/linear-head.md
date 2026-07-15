@@ -1,19 +1,21 @@
-# Linear Head
+# Linear Heads
 
-TODO:
+Most Series 3/4 parameters are in the dense image encoder after the convolutional feature map is pooled to `160x6x10` (9,600 values).
 
-- [ ] Add page-specific notes for `ai-and-models/architecture/linear-head.md` after inspecting the real project files.
-- [ ] Cross-link `Linear Head` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact training or inference file related to this page.
-- [ ] List relevant command-line flags and their current intended values.
-- [ ] Document input tensor shape, label format, and output steering range where relevant.
-- [ ] Explain what changed between model versions if this page covers a model.
-- [ ] Add the dataset names used and whether any labels are historical or current.
-- [ ] Add offline metrics that belong on the page once retested.
-- [ ] Add field behavior that must be checked before trusting the model.
-- [ ] Add known failure cases and what data would improve them.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
+## Series 3
+
+The dense path is:
+
+```text
+9600 -> 512 -> 256 -> 64 -> output
+```
+
+v3.0 ends in two regression outputs. v3.1+ ends in 19 values: nine logits, nine offsets, and throttle.
+
+## Series 4
+
+Series 4 first produces a 256-value image feature. CF maps it to 64 features and uses four `64 -> 18` horizon heads. PC/PCF encode three history targets through `3 -> 32 -> 64`, concatenate history with image features, fuse `320 -> 128 -> 64`, then use one or four 18-value heads.
+
+The history/fusion branch accounts for most of the difference between the approximately 22.15 MB CF file and approximately 22.28-22.29 MB PC/PCF files.
+
+See [CNN](cnn.md) and [Series 4 Temporal Experiments](series-4-plan.md).

@@ -1,19 +1,34 @@
 # Reproducibility
 
-TODO:
+SidewalkPilot publishes code, model artifacts, dataset releases, and evaluation reports, but it does not claim bit-for-bit reproducibility across machines.
 
-- [ ] Add page-specific notes for `roadmap/reproducibility.md` after inspecting the real project files.
-- [ ] Cross-link `Reproducibility` to the most relevant code, data, testing, and safety pages.
-- [ ] State what is already proven before listing future work.
-- [ ] Separate near-term fixes from long-term research ideas.
-- [ ] List dependencies, risks, and test gates for this next step.
-- [ ] Add what data, hardware, or code must change.
-- [ ] Add how success would be measured.
-- [ ] Keep future claims clearly marked as planned, not completed.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
-- [ ] Add links to related pages that a public reader should follow next.
+## What Exists
+
+| Area | Current evidence |
+|---|---|
+| Source | Trainers and runtime code are versioned in GitHub. |
+| Data | Series 1/2, Series 3/4, and CARLA dataset repositories are published separately on Hugging Face. |
+| Training | Trainer commands, fixed seeds, hyperparameters, and Weights & Biases runs record the main experiment settings. |
+| Models | Named ONNX artifacts identify each deployed or evaluated checkpoint. |
+| Evaluation | `code/test_files/evaluate_sidewalkpilot_models.py` evaluates every checkpoint on a frozen shared subset and writes JSON plus the PDF report. |
+| Deployment | The Pi selects a version and Jon resolves the matching ONNX model for ONNX Runtime inference. |
+
+## What Must Be Recorded Per Model
+
+1. Git commit and trainer filename.
+2. Dataset repository and revision.
+3. Exact training command, seed, epochs, and model version.
+4. Weights & Biases run ID.
+5. Final and best artifact names.
+6. Evaluator JSON/PDF revision.
+7. Field-test conditions and verdict.
+
+## Limits
+
+- The image datasets do not belong in Git history.
+- GPU libraries and nondeterministic kernels can prevent byte-identical reruns even with the same seed.
+- Offline metrics do not replace field validation.
+- Series 4 has completed training, export, and offline evaluation, but it has not yet received a field verdict or public model cards.
+- TensorRT engines are not part of the present reproducibility claim.
+
+The useful target is a traceable experiment that produces comparable behavior and metrics, not identical artifact bytes on unrelated systems.

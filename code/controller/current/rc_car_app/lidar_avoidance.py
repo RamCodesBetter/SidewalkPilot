@@ -1,155 +1,127 @@
-"""lidar_avoidance.py -- autonomous LiDAR obstacle avoidance.
+"""Center-corridor LiDAR throttle governor and emergency brake.
 
-Validated offline in test_files/lidar_avoidance_sim.py; this is the production port.
+The camera model owns every steering command. LiDAR points outside the center safety
+corridor are telemetry only and never cause a swerve. A valid point directly ahead can
+reduce the reference throttle target from 100% to 60% and can request a hard stop at
+the emergency boundary. The 60% reference target is 82% physical PWM because the
+physical 0..55% motor dead zone maps to reference 0%.
 
-Two ideas:
-  * FORWARD CONE (+/-LIDAR_FORWARD_CONE_DEG) decides brake/stop + feeds the throttle governor.
-    The side wedges (cone..NEAR_ANGLE) only decide whether there's room to swerve, so hedges/
-    fences running ALONGSIDE the path never trigger a brake.
-  * Classify the near forward object:
-      EMERGENCY  (anything < emergency stop)         -> hard stop
-      PERSON     (two narrow leg clusters)           -> full stop, hold  (never swerve off sidewalk)
-      WALL       (one wide arc)                      -> full stop, hold
-      MAILBOX    (narrow, off-center) + a clear side -> swerve AWAY, proportional 20..80 deg
-      (boxed in: narrow but no clear side)           -> full stop, hold
-      CLEAR      (nothing near)                      -> follow the model
-  Throttle is governed by forward clearance: full at/above GOV_FULL, ramps down to MIN_MOVE,
-  then 0 at/below GOV_STOP. The runtime's existing ACCEL_RATE motor ramp handles the smooth
-  resume, so we just return the target here.
-
-evaluate(scan) -> dict the caller applies:
-  code   : "" (clear) | "SWR" (swerve) | "HLD" (person/wall/boxed stop) | "EMR" (emergency)
-  stop   : True -> hard stop (throttle 0, brake)
-  steer  : logical servo degrees to command (only for SWR); else None
-  throttle: governor target (0..CRUISE)
-  front_m: forward clearance used
-  reason : stop_reason string for the log/dashboard
+The caller passes the operator's AEB toggle into :func:`evaluate`. When disabled, this
+module reports occupancy for the dashboard but returns full throttle and no stop.
 """
+
+import math
+
 from . import config as C
 
+
 _MAX_RANGE_M = 12.0
-_CENTER_DEG = C.STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0
 
 
-def _valid(p):
-    return (getattr(p, "is_valid", False)
-            and getattr(p, "distance_mm", 0) > 0
-            and getattr(p, "confidence", 0) >= C.LIDAR_MIN_CONFIDENCE)
+def _valid(point) -> bool:
+    return (
+        getattr(point, "is_valid", False)
+        and getattr(point, "distance_mm", 0) > 0
+        and getattr(point, "confidence", 0) >= C.LIDAR_MIN_CONFIDENCE
+    )
 
 
-def _norm_angle(p):
-    a = float(getattr(p, "angle_deg", 0.0))
-    return a - 360.0 if a > 180.0 else a
+def _normalized_angle_deg(point) -> float:
+    angle = float(getattr(point, "angle_deg", 0.0))
+    return angle - 360.0 if angle > 180.0 else angle
 
 
-def _forward_and_wedges(scan):
-    """(forward_cone_min_m, left_wedge_min_m, right_wedge_min_m). Empty scan -> all clear."""
-    fwd = left = right = _MAX_RANGE_M
-    for p in scan or []:
-        if not _valid(p):
+def center_forward_distance(scan) -> float:
+    """Return the nearest forward distance inside the car-relative center corridor."""
+    nearest = _MAX_RANGE_M
+    for point in scan or []:
+        if not _valid(point):
             continue
-        a = _norm_angle(p)
-        d = p.distance_mm / 1000.0
-        if abs(a) <= C.LIDAR_FORWARD_CONE_DEG:
-            fwd = min(fwd, d)
-        elif -C.LIDAR_NEAR_ANGLE_DEG <= a < -C.LIDAR_FORWARD_CONE_DEG:
-            left = min(left, d)
-        elif C.LIDAR_FORWARD_CONE_DEG < a <= C.LIDAR_NEAR_ANGLE_DEG:
-            right = min(right, d)
-    return fwd, left, right
-
-
-def _forward_clusters(scan):
-    """Cluster the near (<= WARN) forward-cone points by angular gap."""
-    pts = []
-    for p in scan or []:
-        if not _valid(p):
+        angle_rad = math.radians(_normalized_angle_deg(point))
+        distance_m = float(point.distance_mm) / 1000.0
+        lateral_m = distance_m * math.sin(angle_rad)
+        forward_m = distance_m * math.cos(angle_rad)
+        if forward_m <= 0.0 or abs(lateral_m) > C.LIDAR_CENTER_HALF_WIDTH_M:
             continue
-        a = _norm_angle(p)
-        if abs(a) > C.LIDAR_FORWARD_CONE_DEG:
-            continue
-        d = p.distance_mm / 1000.0
-        if d <= C.LIDAR_WARN_M:
-            pts.append((a, d))
-    pts.sort()
-    clusters, cur = [], []
-    for a, d in pts:
-        if cur and a - cur[-1][0] > C.LIDAR_CLUSTER_GAP_DEG:
-            clusters.append(cur)
-            cur = []
-        cur.append((a, d))
-    if cur:
-        clusters.append(cur)
-    out = []
-    for c in clusters:
-        ang = [a for a, _ in c]
-        dd = [d for _, d in c]
-        out.append({"width": max(ang) - min(ang), "centre": sum(ang) / len(ang), "min_d": min(dd)})
-    return out
+        nearest = min(nearest, forward_m)
+    return nearest
 
 
-def governor_target(front_m):
-    """Steady-state throttle for a forward clearance; the runtime ramps toward it at ACCEL_RATE."""
-    if front_m <= C.LIDAR_GOV_STOP_M:
+def center_occupancy(scan, max_forward_m: float) -> str:
+    """Return ``C`` when the center corridor is occupied within the requested rung."""
+    return "C" if center_forward_distance(scan) <= float(max_forward_m) else ""
+
+
+def lane_occupancy(scan, max_forward_m: float) -> str:
+    """Compatibility name for dashboard telemetry; only the C lane now exists."""
+    return center_occupancy(scan, max_forward_m)
+
+
+def governor_target(front_m: float) -> float:
+    """Map center clearance to physical PWM, flooring the governor at 60% reference."""
+    if front_m <= C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
         return 0.0
+    if front_m <= C.LIDAR_GOV_STOP_M:
+        return C.LIDAR_GOV_MIN_PWM
     if front_m >= C.LIDAR_GOV_FULL_M:
         return C.AUTONOMOUS_CRUISE_PWM
-    frac = (front_m - C.LIDAR_GOV_STOP_M) / (C.LIDAR_GOV_FULL_M - C.LIDAR_GOV_STOP_M)
-    return C.LIDAR_MIN_MOVE_PWM + frac * (C.AUTONOMOUS_CRUISE_PWM - C.LIDAR_MIN_MOVE_PWM)
+    fraction = (front_m - C.LIDAR_GOV_STOP_M) / (
+        C.LIDAR_GOV_FULL_M - C.LIDAR_GOV_STOP_M
+    )
+    return C.LIDAR_GOV_MIN_PWM + fraction * (
+        C.AUTONOMOUS_CRUISE_PWM - C.LIDAR_GOV_MIN_PWM
+    )
 
 
-def _swerve_offset(front_m):
-    """Off-center swerve angle: gentle far (SWERVE_MIN), sharp close (SWERVE_MAX)."""
-    span = max(1e-6, C.LIDAR_WARN_M - C.LIDAR_GOV_STOP_M)
-    frac = max(0.0, min(1.0, (front_m - C.LIDAR_GOV_STOP_M) / span))   # 1 far, 0 close
-    return C.LIDAR_SWERVE_MIN_DEG + (1.0 - frac) * (C.LIDAR_SWERVE_MAX_DEG - C.LIDAR_SWERVE_MIN_DEG)
+def evaluate(scan, enabled: bool = True) -> dict:
+    """Return the center-corridor throttle/stop decision for manual or autonomous use."""
+    front_m = center_forward_distance(scan)
+    occupancy = "C" if front_m <= C.LIDAR_GOV_FULL_M else ""
+    emergency_occupancy = (
+        "C" if front_m <= C.LIDAR_OVERRIDE_EMERGENCY_STOP_M else ""
+    )
 
+    if not enabled:
+        return {
+            "code": "",
+            "stop": False,
+            "steer": None,
+            "throttle": C.AUTONOMOUS_CRUISE_PWM,
+            "front_m": front_m,
+            "reason": "",
+            "lane_occupancy": occupancy,
+            "emergency_lane_occupancy": emergency_occupancy,
+            "lane_action": "disabled",
+        }
 
-def evaluate(scan):
-    fwd, left_m, right_m = _forward_and_wedges(scan)
+    if emergency_occupancy:
+        return {
+            "code": "EMR",
+            "stop": True,
+            "steer": None,
+            "throttle": 0.0,
+            "front_m": front_m,
+            "reason": "lidar_emergency",
+            "lane_occupancy": occupancy,
+            "emergency_lane_occupancy": emergency_occupancy,
+            "lane_action": "brake",
+        }
 
-    if fwd < C.LIDAR_OVERRIDE_EMERGENCY_STOP_M:
-        return {"code": "EMR", "stop": True, "steer": None, "throttle": 0.0,
-                "front_m": fwd, "reason": "lidar_emergency"}
-
-    clusters = _forward_clusters(scan)
-    if not clusters:
-        return {"code": "", "stop": False, "steer": None, "throttle": governor_target(fwd),
-                "front_m": fwd, "reason": ""}                       # CLEAR -> follow model
-
-    front_m = min(c["min_d"] for c in clusters)
-
-    person = False
-    if len(clusters) == 2:
-        a, b = clusters
-        person = (abs(a["centre"] - b["centre"]) <= C.LIDAR_LEG_GAP_MAX_DEG
-                  and abs(a["min_d"] - b["min_d"]) <= C.LIDAR_LEG_RANGE_TOL_M
-                  and a["width"] < C.LIDAR_NARROW_MAX_DEG and b["width"] < C.LIDAR_NARROW_MAX_DEG)
-    widest = max(clusters, key=lambda c: c["width"])
-    if person or widest["width"] >= C.LIDAR_WIDE_MIN_DEG:
-        return {"code": "HLD", "stop": True, "steer": None, "throttle": 0.0,
-                "front_m": front_m, "reason": "lidar_hold"}         # person/wall -> full stop
-
-    # MAILBOX: swerve AWAY from the object, toward a clear side
-    left_clear = left_m >= C.LIDAR_AVOID_SIDE_CLEAR_M
-    right_clear = right_m >= C.LIDAR_AVOID_SIDE_CLEAR_M
-    away = "left" if widest["centre"] >= 0.0 else "right"
-    off = _swerve_offset(front_m)
-    if away == "left" and left_clear:
-        steer = _CENTER_DEG - off
-    elif away == "right" and right_clear:
-        steer = _CENTER_DEG + off
-    elif away == "left" and right_clear:
-        steer = _CENTER_DEG + off
-    elif away == "right" and left_clear:
-        steer = _CENTER_DEG - off
+    throttle = governor_target(front_m)
+    if throttle <= C.LIDAR_GOV_MIN_PWM and occupancy:
+        action = "creep"
+    elif throttle < C.AUTONOMOUS_CRUISE_PWM:
+        action = "slow"
     else:
-        return {"code": "HLD", "stop": True, "steer": None, "throttle": 0.0,
-                "front_m": front_m, "reason": "lidar_boxed"}        # no room -> full stop
-    # A mailbox/post is narrow -> clear it with the swerve. Gentle (far) swerve = full throttle
-    # (matches the old basic-swerve behavior); sharper (closer) swerves shed a little throttle.
-    off_frac = (off - C.LIDAR_SWERVE_MIN_DEG) / max(1e-6, C.LIDAR_SWERVE_MAX_DEG - C.LIDAR_SWERVE_MIN_DEG)
-    swerve_throttle = max(C.LIDAR_MIN_MOVE_PWM,
-                          C.AUTONOMOUS_CRUISE_PWM - off_frac * C.LIDAR_SWERVE_THROTTLE_DROP)
-    return {"code": "SWR", "stop": False, "steer": steer, "throttle": swerve_throttle,
-            "front_m": front_m, "reason": "lidar_override"}
+        action = "normal"
+    return {
+        "code": "",
+        "stop": False,
+        "steer": None,
+        "throttle": throttle,
+        "front_m": front_m,
+        "reason": "",
+        "lane_occupancy": occupancy,
+        "emergency_lane_occupancy": "",
+        "lane_action": action,
+    }

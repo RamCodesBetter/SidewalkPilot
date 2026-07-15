@@ -1,19 +1,63 @@
 # Overview
 
-TODO:
+The LiDAR safety layer is SidewalkPilot's deterministic center-corridor throttle and
+braking guard. It sits outside the neural steering model: the model owns steering,
+while LiDAR can reduce forward throttle or request a stop when AEB is enabled. It does
+not select a swerve direction.
 
-- [ ] Add page-specific notes for `autonomy-stack/lidar-safety/overview.md` after inspecting the real project files.
-- [ ] Cross-link `Overview` to the most relevant code, data, testing, and safety pages.
-- [ ] Document the exact input entering this subsystem.
-- [ ] Document the exact output leaving this subsystem.
-- [ ] Map the subsystem to the owning runtime file or module.
-- [ ] Describe the control priority when this subsystem disagrees with another subsystem.
-- [ ] List the settings, constants, and flags that change this behavior.
-- [ ] Add a failure-mode checklist for field testing.
-- [ ] Add how to verify the subsystem on the bench before a driving test.
-- [ ] Add how to verify the subsystem during a real outdoor run.
-- [ ] Document serial port, packet format, reconnect behavior, and stale-scan handling.
-- [ ] Add bench test steps with the LiDAR disconnected and reconnected.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
+The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
+connects over USB through a CP2102 UART bridge (auto-resolved from
+`/dev/serial/by-id/*CP2102*`, falling back to `/dev/ttyUSB*`); an earlier wiring used the
+Pi's GPIO UART at `/dev/ttyAMA2`. A background reader thread
+(`rc_car_app/lidar.py`, `LidarParser`) parses the raw packet stream into a full 360-degree
+scan of `LidarPoint` objects, and the main control loop in `rc_car_app/runtime.py` pulls
+the latest scan once per iteration with `get_latest_scan()`.
+
+## How it works
+
+The pipeline is a straight line from bytes to a throttle or braking decision:
+
+1. **Parse.** `LidarParser` reads the LD19's 47-byte packets, extracts 12 measurement
+   points each (angle, distance in mm, confidence), and accumulates them into a rolling
+   full scan. See `lidar-safety/packet-parsing.md`.
+2. **Measure the center corridor.** `lidar_avoidance.center_forward_distance()` filters
+   invalid or low-confidence points and returns the nearest positive-forward point within
+   the center safety corridor.
+3. **Govern throttle.** At 1.65 m or more the target remains full. It falls linearly to
+   60% reference throttle at 1.25 m and holds that target to 1.05 m.
+4. **Brake.** At or inside 1.05 m, AEB requests zero throttle and full braking. This
+   applies in manual and autonomous forward driving when AEB is enabled; reverse is
+   excluded. See `lidar-safety/aeb.md`.
+
+The same computed policy is reused within a control iteration, so autonomous command
+generation and final hardware arbitration do not intentionally interpret two different
+scans. Operator input can cancel autonomy while the controller and Pi loop are responsive.
+
+## Why this choice
+
+Keeping close-range throttle and braking outside the neural network makes those decisions
+explicit and auditable. The model handles visual path choice; LiDAR handles measured
+center clearance. This is a bounded design decision, not a claim that LiDAR detects every
+hazard or that the configured threshold guarantees a particular stopping distance.
+
+## Layer priority
+
+| Layer | Role | Priority |
+|---|---|---|
+| Manual override | Cancel autonomy and drive via Xbox controller | Highest software authority while controller/loop are responsive |
+| LiDAR / AEB | Center clearance, throttle cap, emergency brake | Overrides forward throttle only |
+| Camera model | Autonomous steering command | Sole autonomous steering owner |
+
+## Current status
+
+Implemented and wired into the runtime: packet parsing, background reconnect, center
+occupancy, progressive throttle governance, AEB braking, and dashboard telemetry. The
+earlier left/center/right swerve-through design was removed because range points alone do
+not identify a safe sidewalk boundary. Quantitative stopping-distance, false-positive,
+and obstacle-coverage evidence is still to be collected.
+
+## Related pages
+
+- `autonomy-stack/architecture/layered-autonomy.md`
+- `runtime-code/runtime-loop.md`
+- `safety-case/safety-overview.md`

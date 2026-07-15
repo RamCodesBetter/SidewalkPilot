@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-photo_run_to_dataset.py — assemble SidewalkPilot photo runs into Series 3 datasets.
+photo_run_to_dataset.py — assemble SidewalkPilot photo runs into the shared Series 3/4 dataset.
 
 The runtime writes each photo run's labels to media/photos/<run>/<run>.json as an
 image->label dict:
 
     { "photo_20260620_225745.jpg": {"steering": 90, "throttle": 0.42}, ... }
 
-The Series 3 trainer (code/ai_models_datasets/series_3/sidewalkpilot_trainer.py)
+The Series 3 trainer (code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py)
 auto-discovers dataset*/ folders that each contain a labels.json + image files,
 and its loader already accepts an image->label dict. So this tool just assembles
 each run into a trainer-ready folder:
 
-  media/photos/<run>/  ->  code/ai_models_datasets/series_3/dataset_real_<run>/
+  media/photos/<run>/  ->  code/ai_models_datasets/series_3_and_4/dataset_real_<run>/
                             (images linked/copied + labels.json written)
 
 Notes:
@@ -36,7 +36,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 PHOTOS_DIR = REPO / "media" / "photos"
-DATASET_DIR = REPO / "code" / "ai_models_datasets" / "series_3"
+DATASET_DIR = REPO / "code" / "ai_models_datasets" / "series_3_and_4"
 
 
 def clamp_steer(value):
@@ -180,7 +180,7 @@ def main():
                         help="symlink (default; local, space-saving) or copy (portable across machines)")
     parser.add_argument("--aggregate", nargs="?", const="sidewalkpilot_dataset", default=None,
                         metavar="DIRNAME",
-                        help="merge all selected runs into ONE series_3 folder (default name "
+                        help="merge all selected runs into ONE series_3_and_4 folder (default name "
                              "'sidewalkpilot_dataset') with a single combined labels.json")
     parser.add_argument("--exclude", nargs="*", default=[],
                         help="run-name substrings to skip (e.g. 2026_06_15 left-drift batch)")

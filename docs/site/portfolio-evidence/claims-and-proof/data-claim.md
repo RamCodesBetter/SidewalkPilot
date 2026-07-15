@@ -1,19 +1,34 @@
 # Data Claim
 
-TODO:
+SidewalkPilot is trained primarily from real field images captured by the car and paired with physical steering/throttle commands.
 
-- [ ] Add page-specific notes for `portfolio-evidence/claims-and-proof/data-claim.md` after inspecting the real project files.
-- [ ] Cross-link `Data Claim` to the most relevant code, data, testing, and safety pages.
-- [ ] Identify the exact claim this page is supposed to support.
-- [ ] List the public-facing evidence needed for this claim.
-- [ ] Add links to videos, photos, logs, screenshots, or reports that prove the claim.
-- [ ] State what a general reader should understand after seeing the evidence.
-- [ ] State what a technical reviewer should be able to verify from the evidence.
-- [ ] Separate proven results from still-in-progress work.
-- [ ] Add dates, model versions, dataset names, and test conditions where relevant.
-- [ ] Add limitations so the evidence is honest and not overstated.
-- [ ] Pair every claim with concrete evidence and a limitation.
-- [ ] Add the fastest way for a skeptical reader to verify the claim.
-- [ ] List dataset tag, image count, label count, source, and purpose.
-- [ ] Add how to verify filenames, annotations, and correction labels match.
-- [ ] Add the exact source path, artifact path, or hardware component name.
+## Verified Data State
+
+| Dataset | Evidence |
+|---|---|
+| Series 1/2 | 2,224 labeled real images across 13 sources; published on Hugging Face |
+| Series 3/4 | 81,237 labeled real images; shared by v3 and the S4 temporal experiments; published on Hugging Face |
+| CARLA | Separate published repository of pre-generated synthetic frames |
+
+The Series 3/4 trainer does not start CARLA. Synthetic data must already exist in a labeled folder before the trainer can use it.
+
+## Label Integrity
+
+- Steering is stored as an absolute 0-to-180 logical servo target.
+- Throttle capture is stored as an absolute physical PWM fraction from 0.0 to 1.0.
+- Hardware trim and useful-range throttle mapping remain runtime concerns and do not rewrite labels.
+- Path-sorted 100-sample windows reduce adjacent-frame train/validation leakage; they do not guarantee complete capture-run separation.
+- Series 4 temporal windows remain inside one source run, one split, and the configured maximum timestamp gap.
+
+## Limits
+
+Image count is not coverage proof. The dataset does not establish performance on every sidewalk, season, weather condition, obstacle, or lighting distribution. New collection should respond to documented field failures rather than chase a raw count target.
+
+## Evidence
+
+- [Hugging Face datasets](https://huggingface.co/ram-shreyas-naik-sabavat)
+- `code/ai_models_datasets/series_1_and_2/`
+- `code/ai_models_datasets/series_3_and_4/`
+- `docs/steering_eval_current_labels.json`
+
+See [Dataset Overview](../../data/dataset-overview.md) and [Evidence Map](../reader-paths/evidence-map.md).

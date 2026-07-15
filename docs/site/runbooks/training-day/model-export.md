@@ -1,19 +1,27 @@
 # Model Export
 
-TODO:
+Series 3 and Series 4 trainers export both final and best-validation checkpoints to ONNX automatically. The live Jetson runtime consumes those FP32 ONNX files directly.
 
-- [ ] Add page-specific notes for `runbooks/training-day/model-export.md` after inspecting the real project files.
-- [ ] Cross-link `Model Export` to the most relevant code, data, testing, and safety pages.
-- [ ] Write the step-by-step procedure in the order it must be done.
-- [ ] List preconditions that must be true before starting.
-- [ ] List exact commands, files, hardware switches, and dashboard checks.
-- [ ] Add stop conditions where the runbook should be aborted.
-- [ ] Add evidence to save after completing the runbook.
-- [ ] Add post-run cleanup and sync steps.
-- [ ] Add the full training command with every flag.
-- [ ] Document default value, unit, and reason for each training flag.
-- [ ] Add how to verify samples per epoch, roots, corrections, and source weights were used correctly.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
+## Export Rules
+
+- Plain Series 3 versions are final-epoch checkpoints; the `b` versions are best-validation checkpoints.
+- Series 4 names encode architecture and checkpoint role: `p/f/a` are final, while `r/g/c` are their best-validation partners.
+- Use `--keep-pth` only when a PyTorch checkpoint is needed for analysis, resuming, or another training experiment. Otherwise, successful ONNX export removes the corresponding `.pth`.
+- Keep model names on the `SidewalkPilot-v<version>.onnx` convention.
+
+## Validation Before Deployment
+
+1. Check the ONNX graph loads.
+2. Run a smoke inference with the model's real input contract.
+3. Run the shared evaluator and preserve its JSON/PDF output.
+4. Add the version to `STEERING_MODEL_VERSIONS` if it is not already registered.
+5. Copy the ONNX artifact to Jon's `code/ai_models/` directory.
+6. Restart the Jon service and Pi controller.
+7. Confirm the startup log reports the intended version and a GPU provider.
+8. Conduct a controlled field test before changing the live default or publishing a field verdict.
+
+## Series 4 Contract Check
+
+Series 4 PC and PCF models require a three-value steering-target history. The Jon runtime owns that history and resets it on model load/switch, reconnect, and manual/status-only periods. CF models use only the image. All three families return multiple horizon predictions where applicable; live control decodes horizon zero.
+
+TensorRT, FP16, and INT8 are optional future experiments. They are not required by this deployment runbook.

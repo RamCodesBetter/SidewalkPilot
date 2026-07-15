@@ -1,19 +1,44 @@
-# Per Dataset Breakdown
+# Per-Source Breakdown
 
-TODO:
+An overall score can hide a model that works on one collection run and fails on another.
+The evaluator therefore stores a `by_dataset` block for each checkpoint.
 
-- [ ] Add page-specific notes for `model-evaluation/offline-evaluation/per-dataset-breakdown.md` after inspecting the real project files.
-- [ ] Cross-link `Per Dataset Breakdown` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] Add exact evaluation script or command before adding any numbers.
-- [ ] Mark results historical if labels changed after the metric was produced.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] List dataset tag, image count, label count, source, and purpose.
-- [ ] Add how to verify filenames, annotations, and correction labels match.
+## Current Report Sources
+
+The common 6,952-frame Series 3/4 challenge set contains:
+
+| Source | Anchors |
+|---|---:|
+| D0702_16 | 4,230 |
+| D0707_16 | 652 |
+| D0712_16 | 2,070 |
+
+Each source block contains the same numeric metrics as the overall block, including count,
+MAE, median and maximum absolute error, signed error, within-degree counts, prediction mean,
+and target mean.
+
+The JSON also retains the original 13-source, 2,224-image Series 1/2 correction-set
+breakdown under each early model's `historical_evaluation`. Those blocks document the early
+project but are not used for top-level cross-series ranking.
+
+## Why It Matters
+
+The shared set is not uniform. Different days contain different turns, lighting, framing,
+and routes. A model with acceptable overall Bal9 or MAE can still have one source with a
+large signed bias or error tail. That pattern identifies where to inspect confusion rows and
+which physical case to repeat.
+
+Source differences are evidence of sensitivity, not an automatic root-cause diagnosis.
+The source key alone does not prove that lighting, route geometry, or labeling caused the
+difference; that conclusion needs the associated images and run notes.
+
+## Source
+
+`code/test_files/evaluate_sidewalkpilot_models.py` assigns D-codes from run/image timestamps
+and writes the full breakdown to `docs/steering_eval_current_labels.json`.
+
+## Related Pages
+
+- `model-evaluation/offline-evaluation/overview.md`
+- `model-evaluation/offline-evaluation/signed-error.md`
+- `testing/field-testing/field-logs.md`

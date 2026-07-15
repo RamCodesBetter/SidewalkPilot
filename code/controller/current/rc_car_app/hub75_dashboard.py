@@ -4,6 +4,8 @@ import socket
 import time
 from typing import Dict, List
 
+from .config import DASHBOARD_PAGE_COUNT   # single source of truth for the page clamp
+
 try:
     import serial
 except Exception:
@@ -127,6 +129,9 @@ class Hub75DashboardSender:
         drive_mode: str = "MAN",
         lidar_points: List[List[float]] | None = None,
         lidar_point_count: int = 0,
+        lidar_lane_occupancy: str = "",
+        lidar_emergency_lane_occupancy: str = "",
+        lidar_lane_action: str = "normal",
         model_choice: str = "",
         camera_confidence_percent: int = 0,
         cpu_temp_c: float = 0.0,
@@ -136,7 +141,6 @@ class Hub75DashboardSender:
         camera_pixels: List[str] | None = None,
         photos_run: int = 0,
         photos_all: int = 0,
-        photo_run_stats: Dict[str, int] | None = None,
         camera_fps: float = 0.0,
         system_status: str = "",
         nav_status: Dict[str, object] | None = None,
@@ -155,6 +159,7 @@ class Hub75DashboardSender:
         autonomy_distance_m: float = 0.0,
         autonomy_interv_per_km: float = 0.0,
         autonomy_avg_uptime_s: float = 0.0,
+        run_number: int = 0,
     ):
         now = time.monotonic()
         if now - self.last_send_time < self.send_interval_sec:
@@ -168,8 +173,10 @@ class Hub75DashboardSender:
             "left_signal_visible": bool(left_signal_visible),
             "right_signal_visible": bool(right_signal_visible),
             "dashboard_alert": str(dashboard_alert)[:4],
+            "run_number": max(0, int(run_number)),
+            "clock_hms": time.strftime("%H:%M:%S"),
             "brightness_percent": max(0, min(100, int(brightness_percent))),
-            "dashboard_page": max(1, min(17, int(dashboard_page))),
+            "dashboard_page": max(1, min(DASHBOARD_PAGE_COUNT, int(dashboard_page))),
             "dashboard_page_transition": str(dashboard_page_transition)[:8],
             "servo_deg": round(max(0.0, min(180.0, float(servo_deg))), 1),
             "throttle_percent": max(0, min(100, int(throttle_percent))),
@@ -177,6 +184,13 @@ class Hub75DashboardSender:
             "drive_mode": str(drive_mode)[:3],
             "lidar_points": lidar_points or [],
             "lidar_point_count": max(0, int(lidar_point_count)),
+            "lidar_lane_occupancy": "".join(
+                lane for lane in "C" if lane in str(lidar_lane_occupancy).upper()
+            ),
+            "lidar_emergency_lane_occupancy": "".join(
+                lane for lane in "C" if lane in str(lidar_emergency_lane_occupancy).upper()
+            ),
+            "lidar_lane_action": str(lidar_lane_action).lower()[:16],
             "model_choice": str(model_choice)[:4],
             "camera_confidence_percent": max(0, min(100, int(camera_confidence_percent))),
             "cpu_temp_c": round(max(0.0, min(99.0, float(cpu_temp_c))), 1),
@@ -186,7 +200,6 @@ class Hub75DashboardSender:
             "camera_pixels": camera_pixels or [],
             "photos_run": max(0, int(photos_run)),
             "photos_all": max(0, int(photos_all)),
-            "photo_run_stats": photo_run_stats or {},
             "camera_fps": round(max(0.0, float(camera_fps)), 2),
             "system_status": str(system_status)[:4],
             "nav_status": nav_status or {},

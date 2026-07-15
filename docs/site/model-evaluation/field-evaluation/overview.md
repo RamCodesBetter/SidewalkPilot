@@ -1,19 +1,52 @@
-# Overview
+# Field Evaluation Overview
 
-TODO:
+Field evaluation checks behavior that an image-label report cannot measure:
+Pi-to-Jon latency, steering smoothness, shadow response, mechanical drift,
+operator takeovers, and LiDAR braking on the assembled vehicle.
 
-- [ ] Add page-specific notes for `model-evaluation/field-evaluation/overview.md` after inspecting the real project files.
-- [ ] Cross-link `Overview` to the most relevant code, data, testing, and safety pages.
-- [ ] Define the metric or field result in one precise sentence.
-- [ ] List the script, command, or notebook that produces this result.
-- [ ] List the exact dataset split, label file, and model versions being compared.
-- [ ] Mark whether results are current or historical.
-- [ ] Add units, thresholds, and interpretation rules.
-- [ ] Add how this result can disagree with real field behavior.
-- [ ] Add the retest checklist needed after labels or runtime code changes.
-- [ ] Add route, lighting, weather, operator, model version, and manual takeovers.
-- [ ] Separate subjective field notes from measurable field results.
-- [ ] List model file path, version, preprocessing path, output scale, and known field behavior.
-- [ ] Add current vs historical metrics once retesting is complete.
-- [ ] Add test date, time, weather, route, model version, and manual takeover count.
-- [ ] Add what failed, what worked, and what data should be collected next.
+## Offline Versus Field Evidence
+
+The common evaluator writes `docs/steering_eval_current_labels.json` and
+`docs/steering_model_report.pdf` for 46 checkpoints on a frozen 6,952-frame
+Series 3/4 subset. Bal9 and turn metrics help reject center-collapsed candidates;
+MAE, median error, and signed error add magnitude and bias context.
+
+Those values do not select a field baseline by themselves. A model must load
+through the live ONNX path, preserve manual response, and complete a
+supervised field comparison under the condition it is intended to improve.
+
+## Current Field Record
+
+The July 13 comparison is an operator-observed, bounded field result:
+
+- v3.4 handled every shadow case presented in that run and is the current
+  field-selected baseline;
+- v3.4b was slightly worse;
+- v3.3 was worse than v3.2;
+- v3.3b was much worse than v3.2b.
+
+This record does not contain enough repeated-route quantitative measurements to
+claim a universal success rate. Series 4 has completed offline evaluation and
+runtime/CUDA smoke testing but has not yet been field tested.
+
+## Run Record
+
+A reproducible field comparison should retain:
+
+- Model version and artifact hash;
+- Route, surface, lighting, weather, battery, and payload;
+- Start/end time and distance;
+- Takeover count and cause;
+- Runtime CSV (nominal 10 Hz, 46 columns);
+- Video/clip identifiers;
+- AEB state and any LiDAR intervention;
+- Pass, warning, or failure decision made before examining the next model.
+
+The operator keeps the Xbox controller ready. Steering, gas, or brake input
+cancels autonomy through `cancel_autonomous_mode()`.
+
+## Related Pages
+
+- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
+- [Manual Takeover Count](manual-takeover-count.md)
+- [Bal9](../offline-evaluation/bal9.md)

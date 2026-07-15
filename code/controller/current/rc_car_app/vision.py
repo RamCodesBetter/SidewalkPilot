@@ -50,7 +50,7 @@ STEERING_MODEL_VERSIONS = (
     "2.3b",
     "2.4",
     "2.4b",
-    # Series 3 (heavy, Jetson-only): the Pi cannot run these locally — they are
+    # Series 3/4 (heavy, Jetson-only): the Pi cannot run these locally — they are
     # selectable so the model page can tell the Jetson ("Jon") to run them.
     # 3.0/3.0b = 2-output regression; 3.1+ = 19-output hybrid (9 class logits +
     # 9 within-bucket offsets + 1 throttle), decoded on Jon by output length.
@@ -58,12 +58,28 @@ STEERING_MODEL_VERSIONS = (
     "3.0b",
     "3.1",
     "3.1b",
+    "3.2",
+    "3.2b",
+    "3.3",
+    "3.3b",
+    "3.4",
+    "3.4b",
+    # Series 4 experimental temporal contracts, all steering-only hybrid models:
+    #   p/r = PC  (image + previous 3 targets -> current target)
+    #   f/g = CF  (image -> current + next 3 targets)
+    #   a/c = PCF (image + previous 3 targets -> current + next 3 targets)
+    # Final checkpoints are p/f/a; best-validation checkpoints are r/g/c.
+    "4.0p",
+    "4.0r",
+    "4.0f",
+    "4.0g",
+    "4.0a",
+    "4.0c",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
-# Default to the HIGHEST version (last in the ascending list, currently 3.0b). The Pi
-# sends this to Jon each frame, so Jon runs the best model by default and z2w MODL
-# shows it. Cycle to others on the model page. (RC_CAR_STEERING_MODEL still overrides.)
-DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", STEERING_MODEL_VERSIONS[-1])
+# v3.4 won the 2026-07-13 shadow/turn field comparison. Keep newer and b checkpoints
+# selectable, but do not infer the live research default from list order.
+DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", "3.4")
 YOLO_IMGSZ = 640
 YOLO_CONF = 0.20
 CAMERA_FRAME_WIDTH = 1280

@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Regression tests for the non-blocking Pi-to-Jetson control boundary."""
+
+import sys
+import threading
+import time
+import unittest
+from pathlib import Path
+
+
+CONTROLLER_DIR = Path(__file__).resolve().parents[1] / "controller" / "current"
+if str(CONTROLLER_DIR) not in sys.path:
+    sys.path.insert(0, str(CONTROLLER_DIR))
+
+from rc_car_app.jetson_client import AsyncJetsonSteeringClient  # noqa: E402
+
+
+class BlockingFakeClient:
+    """Behaves like an unavailable Jon until the test releases its socket wait."""
+
+    timeout = 0.4
+
+    def __init__(self):
+        self.status_started = threading.Event()
+        self.release_status = threading.Event()
+        self.inference_finished = threading.Event()
+        self.infer_calls = []
+        self.jon_cpu_temp_c = 47.0
+        self.jon_gpu_temp_c = 51.0
+        self.infer_fps = 29.5
+        self.infer_ms = 11.0
+        self.last_jpeg = None
+        self.bucket_probs = [0.1] * 9
+
+    def poll_status(self):
+        self.status_started.set()
+        self.release_status.wait(timeout=self.timeout)
+        return False
+
+    def infer(self, frame, model_version=None):
+        self.infer_calls.append((frame, model_version))
+        self.last_jpeg = b"test-jpeg"
+        self.inference_finished.set()
+        return 123.0, 0.75
+
+    def close(self):
+        self.release_status.set()
+
+
+class AsyncJetsonClientTest(unittest.TestCase):
+    def test_powered_off_status_timeout_never_blocks_control_calls(self):
+        fake = BlockingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            client=fake,
+        )
+        try:
+            self.assertTrue(fake.status_started.wait(timeout=0.2))
+
+            started = time.perf_counter()
+            first_sequence = client.submit("old-frame", model_version="3.3")
+            second_sequence = client.submit("latest-frame", model_version="3.4")
+            self.assertIsNone(
+                client.get_latest_sample(model_version="3.4", max_age_sec=1.0)
+            )
+            elapsed = time.perf_counter() - started
+
+            self.assertLess(elapsed, 0.02)
+            self.assertGreater(second_sequence, first_sequence)
+
+            fake.release_status.set()
+            self.assertTrue(fake.inference_finished.wait(timeout=0.5))
+
+            deadline = time.monotonic() + 0.5
+            sample = None
+            while sample is None and time.monotonic() < deadline:
+                sample = client.get_latest_sample(
+                    model_version="3.4",
+                    max_age_sec=1.0,
+                )
+                time.sleep(0.005)
+
+            self.assertIsNotNone(sample)
+            self.assertEqual(sample["sequence"], second_sequence)
+            self.assertEqual(sample["result"], (123.0, 0.75))
+            self.assertEqual(fake.infer_calls, [("latest-frame", "3.4")])
+            self.assertIsNone(
+                client.get_latest_sample(model_version="3.3", max_age_sec=1.0)
+            )
+            self.assertEqual(client.last_jpeg, b"test-jpeg")
+            self.assertEqual(client.infer_fps, 29.5)
+        finally:
+            fake.release_status.set()
+            client.close()
+
+
+if __name__ == "__main__":
+    unittest.main()

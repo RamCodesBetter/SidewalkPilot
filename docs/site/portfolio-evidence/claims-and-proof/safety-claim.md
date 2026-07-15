@@ -1,19 +1,19 @@
 # Safety Claim
 
-TODO:
+SidewalkPilot implements layered control safeguards. This is an implementation claim, not certification or proof of safe unsupervised operation.
 
-- [ ] Add page-specific notes for `portfolio-evidence/claims-and-proof/safety-claim.md` after inspecting the real project files.
-- [ ] Cross-link `Safety Claim` to the most relevant code, data, testing, and safety pages.
-- [ ] Identify the exact claim this page is supposed to support.
-- [ ] List the public-facing evidence needed for this claim.
-- [ ] Add links to videos, photos, logs, screenshots, or reports that prove the claim.
-- [ ] State what a general reader should understand after seeing the evidence.
-- [ ] State what a technical reviewer should be able to verify from the evidence.
-- [ ] Separate proven results from still-in-progress work.
-- [ ] Add dates, model versions, dataset names, and test conditions where relevant.
-- [ ] Add limitations so the evidence is honest and not overstated.
-- [ ] Pair every claim with concrete evidence and a limitation.
-- [ ] Add the fastest way for a skeptical reader to verify the claim.
-- [ ] Document the safety priority order and manual override behavior.
-- [ ] Add what must be true before any autonomous outdoor run.
-- [ ] Add the exact source path, artifact path, or hardware component name.
+## Implemented Layers
+
+- Manual Xbox input can cancel autonomous control.
+- The Pi rejects stale/unavailable autonomous model results.
+- With AEB enabled, center-corridor LiDAR clearance can cap forward throttle in manual or autonomous drive.
+- At or inside 1.05 m, the LiDAR policy requests zero throttle and a full hard brake.
+- LiDAR never supplies steering; the camera model is the sole autonomous steering owner.
+- Reverse excludes the forward AEB stop rule.
+- A servo-write fault forces braking.
+
+The throttle governor starts below 1.65 m, reaches 60% reference at 1.25 m, and holds that target until the 1.05 m emergency boundary. Sixty percent reference corresponds to 82% physical PWM under the current measured 55% motor dead-zone mapping. Saved labels remain absolute physical throttle.
+
+## Evidence and Limits
+
+Policy tests verify the configured logic, and 10 Hz CSV logging records the state used for later review. The current configuration still needs a preserved physical stopping-distance and false-trigger test under the actual payload. It cannot be claimed to detect every obstacle, classify pedestrians, keep the car inside every sidewalk, or support unattended use.

@@ -1,19 +1,38 @@
-# Harsh Sidewalk
+# Harsh Sidewalk Surfaces
 
-TODO:
+Expansion joints, cracks, repairs, leaves, stains, and mixed paving can change the
+visual features available to camera steering. Their effect on a neural checkpoint
+must be measured rather than inferred from one image.
 
-- [ ] Add page-specific notes for `testing/failures/harsh-sidewalk.md` after inspecting the real project files.
-- [ ] Cross-link `Harsh Sidewalk` to the most relevant code, data, testing, and safety pages.
-- [ ] State the test purpose and what risk it catches.
-- [ ] List exact setup steps, hardware state, and environment assumptions.
-- [ ] List the command, file, or manual procedure used to run the test.
-- [ ] Define pass, warning, and fail conditions.
-- [ ] Add what logs, screenshots, dashboard values, or videos to save.
-- [ ] Add what to do when the test fails.
-- [ ] Add when this test must be repeated.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
+## Two different paths
+
+The repository contains a classic image-processing fallback that uses color and
+edge heuristics. Its masks and edge fits can be disrupted by dark seams or strong
+interior lines. That explains the fallback's mechanism, but it does not explain a
+neural model failure.
+
+Series 3/4 uses the learned ONNX model on Jon. Its response depends on training
+coverage and learned features, and it does not expose a calibrated confidence for
+surface familiarity. A fresh neural result is normally reported with confidence
+`1.0`; the runtime will not necessarily stop merely because the pavement is
+unusual.
+
+## Evidence status
+
+The historical dataset includes batches described as harsh-sidewalk captures, but
+this page does not have a linked, repeated field benchmark for surface changes.
+No claim is made that v3.4 or a Series 4 candidate handles every crack, patch, or
+paver surface.
+
+## Test method
+
+Use a supervised route with identified surface transitions. Preserve video, CSV,
+model hash, route position, steering behavior, and takeover count. Repeat the same
+transitions with the v3.4 control and each candidate before attributing a change
+to the model.
+
+## Related pages
+
+- [Field Testing](../field-testing/overview.md)
+- [Operating Limits](../../safety-and-ethics/limits.md)
+- [Model Retest Plan](../field-testing/model-retest-plan.md)

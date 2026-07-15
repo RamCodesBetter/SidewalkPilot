@@ -1,19 +1,33 @@
 # Constraints
 
-TODO:
+These are the verified constraints that shape the current design.
 
-- [ ] Add page-specific notes for `engineering-process/requirements/constraints.md` after inspecting the real project files.
-- [ ] Cross-link `Constraints` to the most relevant code, data, testing, and safety pages.
-- [ ] State the engineering decision, requirement, or policy being documented.
-- [ ] List the options considered and why the current choice was made.
-- [ ] Connect the decision to field failures, metrics, or hardware limits.
-- [ ] Add files, flags, datasets, and tests affected by the decision.
-- [ ] Add what would make this decision need to change later.
-- [ ] Add how a reader can verify the decision from evidence in the repo.
-- [ ] Add the exact source path, artifact path, or hardware component name.
-- [ ] Add the command or procedure needed to reproduce the result.
-- [ ] Add expected inputs and outputs.
-- [ ] Add the settings, flags, constants, or calibration values that control it.
-- [ ] Add known failure modes and how they appear in logs, video, or field behavior.
-- [ ] Add validation steps and pass/fail criteria.
-- [ ] Add links to related pages that a public reader should follow next.
+## Hardware
+
+- The Camera Module 3 Wide is integrated through Picamera2 on the Raspberry Pi 5. The 81,237-frame Series 3/4 dataset was captured through this camera path.
+- Steering uses a PCA9685 at I2C `0x40`, channel `0`, 50 Hz. Logical labels remain `0..180`; physical steering compensation stays in `hardware.py`.
+- The LD19 LiDAR currently uses a CP2102 USB-serial adapter at 230400 baud, normally `/dev/ttyUSB0`. `/dev/ttyAMA2` is a former transport, not the current command path.
+- GPS data uses `/dev/ttyAMA0` at 9600 baud.
+- The XIAO MG24 IMU feeds the optional yaw-rate controller; IMU correction is bypassed when its mode is off, data is stale, the car is not moving, or reverse is selected.
+
+## Compute and Connectivity
+
+- The Pi owns final actuator and safety decisions.
+- Jon performs Series 3/4 ONNX inference over direct Ethernet at `10.42.0.2:8770`.
+- Camera/Jon work is asynchronous so it does not block local controller polling.
+- Dashboard telemetry is UDP over the dedicated Pi-to-Zero USB network. There is no Wi-Fi fallback in the current configuration.
+- Each computer must be restarted or have its owning service restarted after synced code changes.
+
+## Safety
+
+- Manual takeover remains available from the Xbox controller.
+- LiDAR does not steer. When AEB is enabled, it can cap forward throttle and request a hard brake from center-corridor clearance.
+- A stale or unavailable Jon result is not a valid autonomous command.
+- Configured distance thresholds are policy values, not proof of stopping distance. Physical tests under the real payload are still required.
+
+## Data and Claims
+
+- Stored steering labels are logical degrees; stored throttle labels use the absolute physical `0.0..1.0` PWM fraction (`0.55` means 55%).
+- The 81,237-frame Series 3/4 release is real driving data. CARLA is published separately; claims about whether a specific historical checkpoint used CARLA require that run's recorded roots or logs.
+- Offline metrics rank candidates. Only field testing promotes a live baseline.
+- Series 4 is trained, exported, evaluated, and runtime-supported, but not yet field-tested.

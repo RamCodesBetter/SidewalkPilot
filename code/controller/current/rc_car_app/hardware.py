@@ -33,7 +33,6 @@ from .config import (
     STEERING_SERVO_CENTER_PRELOAD_WINDOW,
     STEERING_SERVO_MAX_PULSE_US,
     STEERING_SERVO_MIN_PULSE_US,
-    STEERING_SERVO_PIN,
     STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG,
     STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG,
     USE_PCA9685_SERVO,
@@ -237,32 +236,6 @@ class Hardware:
                 )
                 print(
                     f"Using PCA9685 steering servo at 0x{PCA9685_I2C_ADDRESS:02x}, channel {PCA9685_SERVO_CHANNEL}."
-                )
-            else:
-                if LGPIOFactory is not None:
-                    try:
-                        self.pin_factory = LGPIOFactory()
-                        print("Using lgpio pin factory for servo PWM.")
-                    except Exception as e:
-                        print(f"lgpio unavailable, falling back to default PWM: {e}")
-
-                servo_kwargs = {
-                    "pin": STEERING_SERVO_PIN,
-                    "min_pulse_width": STEERING_SERVO_MIN_PULSE_US / 1_000_000.0,
-                    "max_pulse_width": STEERING_SERVO_MAX_PULSE_US / 1_000_000.0,
-                    "frame_width": 20 / 1000,
-                }
-                if self.pin_factory is not None:
-                    servo_kwargs["pin_factory"] = self.pin_factory
-                self.steering_servo = self._init_device(
-                    "steering servo",
-                    STEERING_SERVO_PIN,
-                    lambda: CenteredServoAdapter(
-                        Servo(**servo_kwargs),
-                        center_offset=STEERING_SERVO_CENTER_OFFSET,
-                        center_preload=STEERING_SERVO_CENTER_PRELOAD,
-                        center_preload_window=STEERING_SERVO_CENTER_PRELOAD_WINDOW,
-                    ),
                 )
             self.motor_left_fwd = self._init_pwm("left motor forward", MOTOR_LEFT_FWD_PIN)
             self.motor_left_bwd = self._init_pwm("left motor backward", MOTOR_LEFT_BWD_PIN)

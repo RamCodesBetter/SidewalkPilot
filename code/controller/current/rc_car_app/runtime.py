@@ -19,12 +19,18 @@ from .config import (
     AUTONOMOUS_CRUISE_PWM,
     AUTONOMOUS_LIDAR_OVERRIDE_PWM,
     AUTONOMOUS_TURN_PWM,
+    AUTONOMY_MIN_SEGMENT_S,
     AUTO_PHOTO_BUTTON,
     AUTO_PHOTO_MAX_INTERVAL_SEC,
     AUTO_PHOTO_MIN_INTERVAL_SEC,
     PHOTO_RUN_CAPTURE_FPS,
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
+    JETSON_RESULT_MAX_AGE_SEC,
+    CONTROL_LOOP_STALL_WARN_SEC,
+    INTERRUPTION_CLIP_ENABLED,
+    INTERRUPTION_CLIP_SECONDS,
+    INTERRUPTION_CLIP_DIR,
     STEERING_SMOOTH_ALPHA,
     BRAKE_RATE,
     CM_PER_SEC_TO_MPH,
@@ -51,9 +57,6 @@ from .config import (
     LEFT_MOTOR_PWM_SCALE,
     LOW_CAMERA_CONFIDENCE,
     LOG_INTERVAL_SEC,
-    LIDAR_OVERRIDE_EMERGENCY_STOP_M,
-    LIDAR_OVERRIDE_SIDE_CLEARANCE_M,
-    LIDAR_OVERRIDE_STEER_DEG,
     MAX_TARGET_HEADING_DEG,
     PHOTO_BUTTON,
     PHOTO_DIR,
@@ -107,6 +110,7 @@ from .config import (
     STEERING_DEADZONE,
     HUB75_DASHBOARD_IDLE_EXIT_SEC,
     HUB75_DASHBOARD_SHUTDOWN_ON_EXIT,
+    absolute_throttle_to_reference,
 )
 from .hardware import Hardware
 from .lidar import (
@@ -122,19 +126,15 @@ from .logging_utils import init_csv_logger, log_data_to_csv
 from .hub75_dashboard import Hub75DashboardSender
 from .navigation import GpsReader, NavigationManager
 from .yaw_pid import ImuReader, YawController
-from .jetson_client import JetsonSteeringClient
+from .jetson_client import AsyncJetsonSteeringClient
+from .influx_logger import InfluxLogger
+from .interruption_recorder import InterruptionClipRecorder
 from . import lidar_avoidance
 from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
 
 shutdown_flag = threading.Event()
 current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
-# Live L/C/R + slow-throttle counts, incremented per capture (O(1)) so the dashboard
-# stats don't re-parse a growing label file at 30fps. Reset when a new run starts.
-photo_run_live_stats: dict[str, int] = {"left": 0, "center": 0, "right": 0, "throttle_below_50": 0}
-DASHBOARD_PHOTO_STATS_INTERVAL_SEC = 5.0
-
-
 class AsyncDashboardSender:
     def __init__(self, sender: Hub75DashboardSender):
         self.sender = sender
@@ -285,8 +285,6 @@ def model_is_series_3(model_choice) -> bool:
 
 
 def get_dashboard_drive_mode(state) -> str:
-    if state.get("lidar_override_active"):
-        return "SWR"
     if state["autonomous_mode"]:
         return "ATO"
     if state["cc_active"]:
@@ -342,50 +340,6 @@ def cycle_steering_model(webcam_vision, current_choice: str, direction: int) -> 
     return current_choice
 
 
-def pick_lidar_override_side(state, lidar_scan) -> str | None:
-    left_clear = float(state.get("lidar_left_dist", 0.0)) >= LIDAR_OVERRIDE_SIDE_CLEARANCE_M
-    right_clear = float(state.get("lidar_right_dist", 0.0)) >= LIDAR_OVERRIDE_SIDE_CLEARANCE_M
-    if not left_clear and not right_clear:
-        return None
-
-    warn_distance = float(state.get("lidar_warn_threshold_m", OBSTACLE_WARN_THRESHOLD_M))
-    left_obstacle_score = 0.0
-    right_obstacle_score = 0.0
-    for point in lidar_scan or []:
-        if (
-            not getattr(point, "is_valid", False)
-            or getattr(point, "distance_mm", 0) <= 0
-            or getattr(point, "confidence", 0) < 150
-        ):
-            continue
-        angle = float(getattr(point, "angle_deg", 0.0))
-        if angle > 180.0:
-            angle -= 360.0
-        if angle < -75.0 or angle > 75.0:
-            continue
-        distance_m = float(getattr(point, "distance_mm", 0.0)) / 1000.0
-        if distance_m > warn_distance:
-            continue
-        score = max(0.0, warn_distance - distance_m) + 0.05
-        if angle < -5.0:
-            left_obstacle_score += score
-        elif angle > 5.0:
-            right_obstacle_score += score
-        else:
-            left_obstacle_score += score * 0.5
-            right_obstacle_score += score * 0.5
-
-    if left_obstacle_score > right_obstacle_score * 1.15:
-        return "right" if right_clear else None
-    if right_obstacle_score > left_obstacle_score * 1.15:
-        return "left" if left_clear else None
-    if right_clear and not left_clear:
-        return "right"
-    if left_clear and not right_clear:
-        return "left"
-    return "right" if float(state.get("lidar_right_dist", 0.0)) >= float(state.get("lidar_left_dist", 0.0)) else "left"
-
-
 # page number -> (vertical, horizontal) grid position. Page NUMBERS keep their draw
 # function + gates; only their grid position is set here to match the target layout.
 DASHBOARD_PAGE_COORDS = {
@@ -397,7 +351,6 @@ DASHBOARD_PAGE_COORDS = {
     4: (2, 2),    # V2H2 autonomy ICSE/ADT/IPKM/AUT
     16: (2, 3),   # V2H3 temps RTMP/JTMP/GTMP/ZTMP
     14: (3, 1),   # V3H1 photo counters PR/PA/FPS/STS (_draw_page_three)
-    12: (3, 2),   # V3H2 photo L/C/R balance LP/CP/RP/<5 (_draw_photo_run_stats_page)
     5: (4, 1),    # V4H1 nav entry NAVIGATE
     7: (4, 2),    # V4H2 route nodes OPR/PNDE/CNDE/NNDE
     9: (4, 3),    # V4H3 route distance RDT/NDT/SDT/TDT
@@ -733,7 +686,7 @@ def _disengagement_cause(reason: str) -> str:
 
 _CAUSE_CODES = {
     "steer": "STR", "throttle": "TLE", "brake": "BRK", "a": "BTN",
-    "nav": "NAV", "arrived": "ARR", "lidar": "SWR", "emergency": "EMR", "holding": "HLD",
+    "nav": "NAV", "arrived": "ARR", "lidar": "EMR", "emergency": "EMR", "holding": "HLD",
 }
 
 
@@ -964,17 +917,6 @@ def get_system_status(state, model_frame_is_stale: bool = False) -> str:
     return photo_status
 
 
-def count_photos_run() -> int:
-    if current_photo_run_dir is None or not current_photo_run_dir.exists():
-        return 0
-    return sum(1 for f in current_photo_run_dir.iterdir() if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
-
-
-def photo_run_stats() -> dict[str, int]:
-    # Live counters maintained per capture (no file re-parse at 30fps).
-    return dict(photo_run_live_stats)
-
-
 def count_photos_all() -> int:
     base = Path(PHOTO_DIR)
     if not base.exists():
@@ -982,39 +924,21 @@ def count_photos_all() -> int:
     return sum(1 for f in base.rglob("*") if f.suffix.lower() in (".jpg", ".jpeg", ".png"))
 
 
-def update_dashboard_photo_stats(metrics, now: float | None = None, force: bool = False) -> None:
-    current_time = time.time() if now is None else now
-    if not force and current_time - metrics.dashboard_photo_stats_last_sample_time < DASHBOARD_PHOTO_STATS_INTERVAL_SEC:
-        return
-    metrics.dashboard_photos_run = count_photos_run()
-    metrics.dashboard_photos_all = count_photos_all()
-    metrics.dashboard_photo_run_stats = photo_run_stats()
-    metrics.dashboard_photo_stats_last_sample_time = current_time
-
-
 def is_stop_brake_condition(state) -> bool:
-    if state.get("lidar_override_active"):
-        return False
-    return (
-        state["direction_arrow"] in ("STOP_WARNING", "BLOCKED")
-        or float(state.get("lidar_front_dist", MAX_LIDAR_RANGE_M))
-        < float(state.get("lidar_stop_threshold_m", FORWARD_OBSTACLE_STOP_DISTANCE_M))
-        or state.get("stop_reason") in ("blocked_path", "aeb_stop")
-    )
+    return bool(state.get("lidar_emergency_stop", False))
 
 
 def get_cpu_temp():
+    """Read the kernel thermal sensor directly; never fork from the control loop."""
     try:
-        result = subprocess.run(["vcgencmd", "measure_temp"], capture_output=True, text=True, check=True)
-        temp_str = result.stdout.strip()
-        return float(temp_str.split("=")[1].split("'")[0])
-    except Exception:
+        raw = Path("/sys/class/thermal/thermal_zone0/temp").read_text().strip()
+        value = float(raw)
+        return value / 1000.0 if value > 1000.0 else value
+    except (OSError, ValueError):
         return 0.0
 
 
 def create_photo_run_dir() -> Path:
-    for k in photo_run_live_stats:
-        photo_run_live_stats[k] = 0   # fresh run -> reset live counters
     base_dir = Path(PHOTO_DIR)
     base_dir.mkdir(parents=True, exist_ok=True)
     day_prefix = datetime.datetime.now().strftime("%Y_%m_%d")
@@ -1046,6 +970,7 @@ def cleanup_photo_run_dir() -> None:
 
 
 def current_forward_throttle_label(state) -> float:
+    """Return absolute physical PWM for training labels (55% remains 0.55)."""
     if state is None:
         return 0.0
     try:
@@ -1070,17 +995,6 @@ def append_photo_run_row(run_dir: Path, photo_name: str, servo_degrees: float, t
     except Exception as exc:
         print(f"Failed to append photo label row {csv_path}: {exc}")
         return
-    # live L/C/R + slow-throttle counters (match the dashboard buckets)
-    if steering < 85:
-        photo_run_live_stats["left"] += 1
-    elif steering > 95:
-        photo_run_live_stats["right"] += 1
-    else:
-        photo_run_live_stats["center"] += 1
-    if thr < 0.50:
-        photo_run_live_stats["throttle_below_50"] += 1
-
-
 def finalize_photo_run(run_dir: Path | None) -> None:
     """Build the trainer's <run>.json from the appended <run>_labels.csv. Called when
     a capture run ends (toggle off / shutdown) so the heavy JSON write happens once."""
@@ -1105,7 +1019,7 @@ def finalize_photo_run(run_dir: Path | None) -> None:
         print(f"Failed to finalize photo run {run_dir}: {exc}")
 
 
-def take_photo(webcam_vision=None, state=None, quiet=False):
+def take_photo(webcam_vision=None, state=None, metrics=None, quiet=False):
     global current_photo_run_dir, photo_status
     if current_photo_run_dir is None:
         current_photo_run_dir = create_photo_run_dir()
@@ -1128,12 +1042,18 @@ def take_photo(webcam_vision=None, state=None, quiet=False):
             if state is not None:
                 servo_degrees = float(state.get("steering_servo_deg", servo_degrees))
             append_photo_run_row(current_photo_run_dir, photo_name, servo_degrees, current_forward_throttle_label(state))
+            if metrics is not None:
+                metrics.dashboard_photos_run += 1
+                metrics.dashboard_photos_all += 1
             photo_status = "SAVE"
             if not quiet:
                 print(f"Photo queued from live Pi camera stream: {photo_name}")
             return True
         photo_status = "ERR"
-        print(f"Pi camera stream photo capture unavailable: {message}")
+        print(
+            "Pi camera stream photo capture unavailable: "
+            "no frame was available or the save queue was full."
+        )
     else:
         photo_status = "ERR"
         print("Pi camera stream photo capture unavailable: no active camera stream")
@@ -1176,7 +1096,7 @@ def update_auto_photo(state, metrics, webcam_vision, dashboard_sender=None):
     if (float(getattr(metrics, "smoothed_speed_mph", 0.0)) < 0.1
             and float(state.get("throttle", 0.0)) < 0.05):
         return
-    take_photo(webcam_vision, state, quiet=True)   # quiet: no per-frame spam at 30fps
+    take_photo(webcam_vision, state, metrics, quiet=True)   # quiet: no per-frame spam at 10 fps
     schedule_next_auto_photo(metrics, now)
 
 
@@ -1240,22 +1160,116 @@ def calculate_speed(state, metrics, dt):
     metrics.total_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
 
     # --- autonomy metrics (V2H2), edge-detected off autonomous_mode ---
+    # A stint under AUTONOMY_MIN_SEGMENT_S (6s) is a tap in/out, not a real segment:
+    # it's excluded from AUT (avg uptime) + IPKM (interventions), but still counts for
+    # ADT (distance, accumulated below) and ICSE (last cause code, set on every disengage).
     engaged = bool(state["autonomous_mode"])
-    if engaged:
-        metrics.auto_time_s += dt
-        metrics.auto_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt
-    if engaged and not metrics.auto_prev_engaged:          # engage -> new segment
-        metrics.auto_segments += 1
+    if engaged and not metrics.auto_prev_engaged:          # engage -> start a segment timer
+        metrics.auto_segment_s = 0.0
     elif metrics.auto_prev_engaged and not engaged:        # disengage
         code = _cause_code(state.get("intervention_cause", ""))
-        metrics.auto_last_cause_code = code
-        if code != "ARR":                                  # arrivals aren't interventions -> exclude from IPKM
-            metrics.auto_intervention_count += 1
+        metrics.auto_last_cause_code = code                # ICSE: every disengage
+        if metrics.auto_segment_s >= AUTONOMY_MIN_SEGMENT_S:   # only real stints count for AUT/IPKM
+            metrics.auto_time_s += metrics.auto_segment_s
+            metrics.auto_segments += 1
+            if code != "ARR":                              # arrivals aren't interventions
+                metrics.auto_intervention_count += 1
+        metrics.auto_segment_s = 0.0
+    if engaged:
+        metrics.auto_segment_s += dt
+        metrics.auto_distance_cm += (metrics.smoothed_speed_mph / CM_PER_SEC_TO_MPH) * dt  # ADT: all segments
     metrics.auto_prev_engaged = engaged
 
 
+def _run_number_today():
+    """Nth car launch today (1,2,3...), persisted in ~/.sidewalkpilot_runcount.json.
+    Resets when the date rolls over. Shown on the z2w V1H1 page as R###."""
+    path = os.path.expanduser("~/.sidewalkpilot_runcount.json")
+    today = time.strftime("%Y%m%d")
+    data = {}
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        pass
+    n = int(data.get("count", 0)) + 1 if data.get("date") == today else 1
+    try:
+        with open(path, "w") as f:
+            json.dump({"date": today, "count": n}, f)
+    except Exception:
+        pass
+    return n
+
+
+def _tf(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _ti(v):
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _drive_telemetry(state, metrics, jetson_client):
+    """Flatten the driving state into (influx_fields, influx_tags). Defensive -- missing
+    keys drop out, never raises. The 9 bucket probs come from Jon's last reply."""
+    g = state.get
+    fields = {
+        "servo_deg": _tf(g("steering_servo_deg")),
+        "steer_norm": _tf(g("steer")),
+        "steer_smoothed_deg": _tf(g("steer_smoothed_deg")),
+        "target_heading_deg": _tf(g("target_heading_deg")),
+        "camera_bias": _tf(g("camera_steering_bias")),
+        "camera_confidence": _tf(g("camera_confidence")),
+        "motor_pwm": _tf(g("current_motor_pwm")),
+        "throttle": _tf(g("throttle")),
+        "brake_force": _tf(g("brake_force")),
+        "lidar_front_m": _tf(g("lidar_front_dist")),
+        "lidar_left_m": _tf(g("lidar_left_dist")),
+        "lidar_right_m": _tf(g("lidar_right_dist")),
+        "lidar_back_m": _tf(g("lidar_back_dist")),
+        "lidar_clearance_m": _tf(g("lidar_forward_clearance_m")),
+        "num_lidar_points": _ti(g("num_lidar_points")),
+        "override_active": bool(g("lidar_override_active", False)),
+        "autonomous": bool(g("autonomous_mode", False)),
+        "speed_mph": _tf(getattr(metrics, "smoothed_speed_mph", None)),
+        "jon_cpu_c": _tf(g("jon_cpu_temp_c")),
+        "jon_gpu_c": _tf(g("jon_gpu_temp_c")),
+        "infer_ms": _tf(g("infer_ms")),
+        "infer_ips": _tf(g("infer_fps")),
+    }
+    if g("stop_reason"):
+        fields["stop_reason"] = str(g("stop_reason"))
+    probs = getattr(jetson_client, "bucket_probs", None) if jetson_client is not None else None
+    if probs and len(probs) == 9:
+        for i, p in enumerate(probs):
+            fields[f"p{i}"] = float(p)
+    fields = {k: v for k, v in fields.items() if v is not None}
+    tags = {"gear": str(g("gear_mode", "?")), "mode": "auto" if g("autonomous_mode") else "manual"}
+    return fields, tags
+
+
 def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_scan,
-                              jetson_client=None, active_model_choice=None):
+                              jetson_client=None, active_model_choice=None,
+                              lidar_policy=None):
+    # Apply an already-computed emergency decision before waiting on camera/Jetson work.
+    # The same policy object is reused below so one control loop cannot interpret two scans.
+    av = lidar_policy or lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+    state["lidar_forward_clearance_m"] = av["front_m"]
+    state["lidar_lane_occupancy"] = av["lane_occupancy"]
+    state["lidar_emergency_lane_occupancy"] = av["emergency_lane_occupancy"]
+    state["lidar_lane_action"] = av["lane_action"]
+    if av["code"]:
+        metrics.auto_last_cause_code = av["code"]
+    if av["stop"]:
+        apply_hard_stop_state(state, av["reason"])
+        return 0.0, True
+
     camera_analysis = {
         "heading_bias": 0.0,
         "confidence": 0.0,
@@ -1278,23 +1292,33 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             camera_analysis["method"] = "stale_model_frame"
 
     # Jetson ("Jon") inference: the Pi sends the live frame + active model choice
-    # and steers with what comes back. Replaces the (camera-only / empty) local
-    # analysis. If Jon is unreachable, confidence stays 0 -> safe hard stop below.
+    # through a latest-frame worker and consumes only cached results here. Network,
+    # JPEG, and model latency therefore never block controller events or GPIO writes.
+    # If Jon is unreachable or stale, confidence stays 0 -> safe hard stop below.
     if jetson_client is not None:
         frame = webcam_vision.grab_latest_frame() if webcam_vision else None
-        jon_result = (
-            jetson_client.infer(frame, model_version=active_model_choice)
-            if frame is not None else None
+        if frame is not None:
+            jetson_client.submit(frame, model_version=active_model_choice)
+        jon_sample = jetson_client.get_latest_sample(
+            model_version=active_model_choice,
+            max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
         )
-        if jon_result is not None:
+        if jon_sample is not None:
+            jon_result = jon_sample["result"]
             jon_steer_deg, _jon_throttle = jon_result
             # Temporal smoothing (EMA): the v3.1 hybrid head can flip steering buckets
             # frame-to-frame (blocky output). Blend with the previous command to damp it.
-            _prev_steer = state.get("steer_smoothed_deg")
-            if _prev_steer is not None and 0.0 < STEERING_SMOOTH_ALPHA < 1.0:
-                jon_steer_deg = (STEERING_SMOOTH_ALPHA * jon_steer_deg
-                                 + (1.0 - STEERING_SMOOTH_ALPHA) * _prev_steer)
-            state["steer_smoothed_deg"] = jon_steer_deg
+            # Apply the EMA once per completed inference, not once per 60 Hz control tick.
+            jon_sequence = int(jon_sample["sequence"])
+            if jon_sequence != int(state.get("_jon_result_sequence", 0)):
+                _prev_steer = state.get("steer_smoothed_deg")
+                if _prev_steer is not None and 0.0 < STEERING_SMOOTH_ALPHA < 1.0:
+                    jon_steer_deg = (STEERING_SMOOTH_ALPHA * jon_steer_deg
+                                     + (1.0 - STEERING_SMOOTH_ALPHA) * _prev_steer)
+                state["steer_smoothed_deg"] = jon_steer_deg
+                state["_jon_result_sequence"] = jon_sequence
+            else:
+                jon_steer_deg = float(state.get("steer_smoothed_deg", jon_steer_deg))
             # Jon reports its CPU/GPU temps + inference rate back with each frame
             state["jon_cpu_temp_c"] = float(getattr(jetson_client, "jon_cpu_temp_c", 0.0))
             state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))
@@ -1336,24 +1360,17 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     state["lidar_heading_confidence"] = 0.0
     state["lidar_forward_clearance_m"] = state["lidar_front_dist"]
 
-    # LiDAR avoidance (forward-cone classify + governor). No LiDAR -> scan empty -> reads
-    # clear -> model-only driving (the intended fallback).
-    av = lidar_avoidance.evaluate(lidar_scan)
-    state["lidar_forward_clearance_m"] = av["front_m"]
-    if av["code"]:                                  # SWR/EMR/HLD persist as the last interruption cause (V2H2 ICSE)
-        metrics.auto_last_cause_code = av["code"]
-    if av["stop"]:                                  # EMERGENCY / PERSON / WALL / boxed-in -> full stop
-        apply_hard_stop_state(state, av["reason"])
-        return 0.0, True
-    if av["code"] == "SWR":                          # swerve around a narrow obstacle (mailbox/post)
-        state["steering_servo_deg"] = clamp_servo_degrees(av["steer"])
-        state["steer"] = steering_degrees_to_normalized(state["steering_servo_deg"])
-        state["target_heading_deg"] = state["steer"] * MAX_TARGET_HEADING_DEG
-        state["lidar_override_active"] = True
-        state["lidar_override_side"] = "right" if av["steer"] > STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0 else "left"
-        state["stop_reason"] = av["reason"]
-        return av["throttle"], False
-    # CLEAR -> follow the model below; the governor still caps throttle by forward clearance.
+    # LiDAR never commands steering. It can only cap throttle or request an emergency
+    # stop in the center corridor, and the complete policy follows the AEB toggle.
+    # debug (throttled ~1s, autonomous only): shows WHY the car does/doesn't roll --
+    # forward clearance, avoidance code/stop, governed throttle, model confidence + source.
+    _adbg_now = time.time()
+    if _adbg_now >= state.get("_autodbg_next", 0.0):
+        state["_autodbg_next"] = _adbg_now + 1.0
+        print(f"[auto-dbg] fwd={av['front_m']:.2f}m code={av['code'] or 'CLEAR'} "
+              f"stop={av['stop']} gov_thr={av['throttle']:.2f} "
+              f"lanes={av['emergency_lane_occupancy'] or '-'} action={av['lane_action']} "
+              f"conf={camera_analysis['confidence']:.2f} method={camera_analysis['method']}", flush=True)
     lidar_governed_throttle = av["throttle"]
 
     camera_confidence = camera_analysis["confidence"]
@@ -1385,11 +1402,18 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     desired_pwm_from_input = 0.0
     effective_brake_from_input = state["brake"]
     effective_brake_force = max(0.0, min(1.0, float(state.get("brake_force", 0.0))))
+    lidar_policy = lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+    state["lidar_lane_occupancy"] = lidar_policy["lane_occupancy"]
+    state["lidar_emergency_lane_occupancy"] = lidar_policy["emergency_lane_occupancy"]
+    state["lidar_lane_action"] = lidar_policy["lane_action"]
+    state["lidar_throttle_cap"] = lidar_policy["throttle"]
+    state["lidar_emergency_stop"] = lidar_policy["stop"]
 
     if state["autonomous_mode"]:
         desired_pwm_from_input, effective_brake_from_input = apply_autonomous_controls(
             state, metrics, hardware, webcam_vision, lidar_scan,
-            jetson_client=jetson_client, active_model_choice=active_model_choice
+            jetson_client=jetson_client, active_model_choice=active_model_choice,
+            lidar_policy=lidar_policy,
         )
         desired_pwm_from_input = max(0.0, min(AUTONOMOUS_CRUISE_PWM, desired_pwm_from_input))
         state["throttle"] = desired_pwm_from_input
@@ -1455,6 +1479,11 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
                 metrics.pid_integral_error = 0.0
                 metrics.pid_previous_error = 0.0
                 metrics.pid_output = 0.0
+            if metrics.aeb_enabled:
+                desired_pwm_from_input = min(
+                    desired_pwm_from_input,
+                    float(lidar_policy["throttle"]),
+                )
 
     servo_degrees = clamp_servo_degrees(
         state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
@@ -1572,7 +1601,10 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         hardware.motor_right_bwd.value = right_pwm
         hardware.motor_left_fwd.value = left_pwm
 
-    state["dashboard_throttle_percent"] = int(round(pwm_val * 100.0)) if not effective_brake else 0
+    state["dashboard_throttle_percent"] = (
+        int(round(absolute_throttle_to_reference(pwm_val) * 100.0))
+        if not effective_brake else 0
+    )
     state["dashboard_brake_percent"] = int(round(max(0.0, min(1.0, effective_brake_force)) * 100.0)) if effective_brake else 0
 
     calculate_speed(state, metrics, dt)
@@ -1616,6 +1648,7 @@ def run(model_choice=None):
     lidar_parser = None
     webcam_vision = None
     jetson_client = None
+    clip_recorder = None
     dashboard_sender = None
     gps_reader = None
     navigation = NavigationManager()
@@ -1683,9 +1716,22 @@ def run(model_choice=None):
     jetson_host = (JETSON_STEERING_HOST or "").strip()
     jetson_client = None
     if jetson_host:
-        jetson_client = JetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
+        jetson_client = AsyncJetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
         print(f"Autonomy inference on Jetson (Jon) at {jetson_host}:{JETSON_STEERING_PORT}. "
               f"Pi will NOT run a local steering model.")
+
+    # Interruption clip recorder: rolling buffer of the exact JPEGs sent to Jon; on every
+    # autonomous->manual takeover it saves the 2s-before as a clip (background thread), and
+    # ships them to Jon at quit. Only meaningful when Jon is the inference source.
+    clip_recorder = InterruptionClipRecorder(
+        clip_seconds=INTERRUPTION_CLIP_SECONDS, out_dir=INTERRUPTION_CLIP_DIR,
+        enabled=INTERRUPTION_CLIP_ENABLED and jetson_client is not None)
+
+    # Telemetry -> local InfluxDB (non-blocking; disabled if ~/.influxdb.json absent).
+    # One run_id per car launch; browse at http://raspberrypi.local:8086.
+    drive_run_id = time.strftime("%Y%m%d_%H%M%S")
+    dashboard_run_number = _run_number_today()   # R### shown on z2w V1H1
+    influx = InfluxLogger(drive_run_id, base_tags={"model": str(active_model_choice), "device": "rpi5"})
 
     webcam_vision = WebcamVisionProcessor(
         model_choice=active_model_choice, camera_only=jetson_client is not None
@@ -1694,6 +1740,9 @@ def run(model_choice=None):
         webcam_vision = None
 
     csv_file, csv_writer = init_csv_logger(CSV_FILENAME, CSV_HEADERS)
+    # The all-time photo count can be expensive with a large dataset. Scan once before
+    # entering the real-time loop; successful captures increment this cached value.
+    metrics.dashboard_photos_all = count_photos_all()
     if ENABLE_HUB75_DASHBOARD_TELEMETRY:
         dashboard_sender = AsyncDashboardSender(Hub75DashboardSender(
             transport=HUB75_DASHBOARD_TRANSPORT,
@@ -1735,6 +1784,16 @@ def run(model_choice=None):
             current_loop_time = time.time()
             dt = current_loop_time - last_update_time
             last_update_time = current_loop_time
+            if (
+                dt >= CONTROL_LOOP_STALL_WARN_SEC
+                and current_loop_time >= state.get("_loop_stall_next_log", 0.0)
+            ):
+                state["_loop_stall_next_log"] = current_loop_time + 1.0
+                print(
+                    f"[loop-stall] control loop paused {dt * 1000.0:.0f}ms "
+                    f"(auto={int(bool(state['autonomous_mode']))})",
+                    flush=True,
+                )
 
             for event in pygame.event.get():
                 if DEBUG_CONTROLLER_INPUTS and event.type in (
@@ -1871,7 +1930,7 @@ def run(model_choice=None):
                         print(f"Automatic Emergency Braking (AEB): {'ENABLED' if metrics.aeb_enabled else 'DISABLED'}")
                         queue_aeb_toggle_notification(dashboard_sender, metrics.aeb_enabled)
                     elif event.button == PHOTO_BUTTON:
-                        take_photo(webcam_vision, state)
+                        take_photo(webcam_vision, state, metrics)
                     elif event.button == AUTO_PHOTO_BUTTON:
                         toggle_auto_photo(state, metrics, dashboard_sender)
                     elif event.button == NAV_SELECT_BUTTON:
@@ -2004,19 +2063,24 @@ def run(model_choice=None):
             update_gpio(state, metrics, hardware, webcam_vision, latest_scan, dt, dashboard_sender,
                         yaw_controller=yaw_controller, imu_reader=imu_reader,
                         jetson_client=jetson_client, active_model_choice=active_model_choice)
+            # buffer the exact frame just sent to Jon; saves a clip on the takeover edge
+            if clip_recorder is not None:
+                clip_recorder.update(bool(state["autonomous_mode"]),
+                                     getattr(jetson_client, "last_jpeg", None))
+            if influx.enabled:
+                _tel_fields, _tel_tags = _drive_telemetry(state, metrics, jetson_client)
+                influx.log(_tel_fields, tags=_tel_tags)
             update_turn_signal_blink(state, metrics)
             update_dashboard_page_selection(state, metrics)
             if current_loop_time - metrics.dashboard_cpu_temp_last_sample_time >= 1.0:
                 metrics.dashboard_cpu_temp_c = get_cpu_temp()
                 metrics.dashboard_cpu_temp_last_sample_time = current_loop_time
-                # keep Jon's temps/IFPS fresh on the dashboard even in manual mode
-                # (in autonomy, apply_autonomous_controls already refreshes them each frame)
+                # The asynchronous client refreshes these fields in its worker. Reading
+                # cached values here cannot wait on a powered-off or unreachable Jon.
                 if jetson_client is not None and not state["autonomous_mode"]:
-                    if jetson_client.poll_status():
-                        state["jon_cpu_temp_c"] = jetson_client.jon_cpu_temp_c
-                        state["jon_gpu_temp_c"] = jetson_client.jon_gpu_temp_c
-                        state["infer_fps"] = jetson_client.infer_fps
-            update_dashboard_photo_stats(metrics, current_loop_time)
+                    state["jon_cpu_temp_c"] = jetson_client.jon_cpu_temp_c
+                    state["jon_gpu_temp_c"] = jetson_client.jon_gpu_temp_c
+                    state["infer_fps"] = jetson_client.infer_fps
             gps_state = gps_reader.get_state() if gps_reader is not None else {"fix": False, "sats": 0}
             latest_nav = navigation.update(
                 gps_state,
@@ -2075,6 +2139,9 @@ def run(model_choice=None):
                     drive_mode=get_dashboard_drive_mode(state),
                     lidar_points=lidar_dashboard_points,
                     lidar_point_count=state["num_lidar_points"],
+                    lidar_lane_occupancy=state.get("lidar_lane_occupancy", ""),
+                    lidar_emergency_lane_occupancy=state.get("lidar_emergency_lane_occupancy", ""),
+                    lidar_lane_action=state.get("lidar_lane_action", "normal"),
                     model_choice=active_model_choice,
                     camera_confidence_percent=int(round(max(0.0, min(1.0, state["camera_confidence"])) * 100.0)),
                     cpu_temp_c=metrics.dashboard_cpu_temp_c,
@@ -2084,7 +2151,6 @@ def run(model_choice=None):
                     camera_pixels=camera_pixels,
                     photos_run=metrics.dashboard_photos_run,
                     photos_all=metrics.dashboard_photos_all,
-                    photo_run_stats=metrics.dashboard_photo_run_stats,
                     camera_fps=webcam_vision.camera_fps if webcam_vision is not None else 0.0,
                     system_status=get_system_status(state),
                     nav_status=latest_nav,
@@ -2104,6 +2170,7 @@ def run(model_choice=None):
                     autonomy_interv_per_km=(metrics.auto_intervention_count /
                         max(0.001, metrics.auto_distance_cm / 100.0 / 1000.0)),
                     autonomy_avg_uptime_s=metrics.auto_time_s / max(1, metrics.auto_segments),
+                    run_number=dashboard_run_number,
                 )
                 if dashboard_sent:
                     metrics.dashboard_page_transition = ""
@@ -2165,5 +2232,8 @@ def run(model_choice=None):
         if csv_file:
             csv_file.close()
         _ship_logs_to_jon()          # rsync logs -> Jon:/nvme/logs, delete local on success
+        if clip_recorder is not None:
+            clip_recorder.ship_to_jon(jetson_host)   # rsync interruption clips -> Jon:/nvme/interruption_clips
+        influx.close()               # drain remaining telemetry to InfluxDB
         cleanup_photo_run_dir()
         pygame.quit()
