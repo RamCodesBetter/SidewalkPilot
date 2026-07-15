@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -998,7 +998,7 @@
 </ul>
 <p>The Series 3 defaults include batch size 256, 50,000 weighted samples per epoch, seed 42, 10% validation, and ONNX opset 17. Record the actual command for every model rather than assuming defaults were unchanged.</p>
 <h2 id="current-deployment-boundary">Current Deployment Boundary</h2>
-<p>Training runs on the NVIDIA workstation. ONNX inference runs on Jon. The checked-in Series 3 trainer retains optional <code>trtexec</code> flags, but no current deployment or performance claim depends on TensorRT.</p>
+<p>Training runs on the NVIDIA workstation. ONNX inference runs on Jetson Orin Nano. The checked-in Series 3 trainer retains optional <code>trtexec</code> flags, but no current deployment or performance claim depends on TensorRT.</p>
 <h2 id="evidence">Evidence</h2>
 <ul>
 <li>The four trainers above;</li>

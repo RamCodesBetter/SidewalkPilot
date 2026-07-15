@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -970,7 +970,7 @@ safety corridor. It does not override steering.</p>
 <ul>
 <li><code>lidar.py</code> reads the scanner over a serial port at <code>230400</code> baud. The current wiring is
   <strong>USB via a CP2102 USB-to-UART adapter</strong> (<code>/dev/ttyUSB0</code>); an earlier setup ran it on the
-  Pi GPIO UART at <code>/dev/ttyAMA2</code>. The port is auto-resolved, preferring the CP2102
+  Raspberry Pi 5 GPIO UART at <code>/dev/ttyAMA2</code>. The port is auto-resolved, preferring the CP2102
   <code>by-id</code> path and falling back to <code>ttyUSB*</code>/<code>ttyACM*</code>.</li>
 <li>The parser decodes the LD19 packet format (47-byte packets, 12 measurement points each)
   into angle/distance/confidence points, with a max usable range of ~12 m.</li>

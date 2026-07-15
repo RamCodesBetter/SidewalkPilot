@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -955,7 +955,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-export">Model Export</h1>
-<p>Series 3 and Series 4 trainers export both final and best-validation checkpoints to ONNX automatically. The live Jetson runtime consumes those FP32 ONNX files directly.</p>
+<p>Series 3 and Series 4 trainers export both final and best-validation checkpoints to ONNX automatically. The live Jetson Orin Nano runtime consumes those FP32 ONNX files directly.</p>
 <h2 id="export-rules">Export Rules</h2>
 <ul>
 <li>Plain Series 3 versions are final-epoch checkpoints; the <code>b</code> versions are best-validation checkpoints.</li>
@@ -969,13 +969,13 @@
 <li>Run a smoke inference with the model's real input contract.</li>
 <li>Run the shared evaluator and preserve its JSON/PDF output.</li>
 <li>Add the version to <code>STEERING_MODEL_VERSIONS</code> if it is not already registered.</li>
-<li>Copy the ONNX artifact to Jon's <code>code/ai_models/</code> directory.</li>
-<li>Restart the Jon service and Pi controller.</li>
+<li>Copy the ONNX artifact to Jetson Orin Nano's <code>code/ai_models/</code> directory.</li>
+<li>Restart the Jetson Orin Nano service and Raspberry Pi 5 controller.</li>
 <li>Confirm the startup log reports the intended version and a GPU provider.</li>
 <li>Conduct a controlled field test before changing the live default or publishing a field verdict.</li>
 </ol>
 <h2 id="series-4-contract-check">Series 4 Contract Check</h2>
-<p>Series 4 PC and PCF models require a three-value steering-target history. The Jon runtime owns that history and resets it on model load/switch, reconnect, and manual/status-only periods. CF models use only the image. All three families return multiple horizon predictions where applicable; live control decodes horizon zero.</p>
+<p>Series 4 PC and PCF models require a three-value steering-target history. The Jetson Orin Nano runtime owns that history and resets it on model load/switch, reconnect, and manual/status-only periods. CF models use only the image. All three families return multiple horizon predictions where applicable; live control decodes horizon zero.</p>
 <p>TensorRT, FP16, and INT8 are optional future experiments. They are not required by this deployment runbook.</p>
               
             </div>

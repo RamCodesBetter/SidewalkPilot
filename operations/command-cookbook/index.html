@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -968,7 +968,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Pi 5</td>
+<td>Raspberry Pi 5</td>
 <td><code>car</code></td>
 <td>Controller initialization completes; dashboard model page shows intended version</td>
 </tr>
@@ -978,7 +978,7 @@
 <td>Exactly one UDP listener owns port 8765</td>
 </tr>
 <tr>
-<td>Pi 5</td>
+<td>Raspberry Pi 5</td>
 <td><code>sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager</code></td>
 <td>Unit state and current process</td>
 </tr>
@@ -990,17 +990,17 @@
 <tr>
 <td>Either USB endpoint</td>
 <td><code>ip -br addr show usb0</code></td>
-<td>Pi is <code>192.168.10.1/24</code>; Zero is <code>192.168.10.2/24</code></td>
+<td>Raspberry Pi 5 is <code>192.168.10.1/24</code>; Zero 2 W is <code>192.168.10.2/24</code></td>
 </tr>
 <tr>
-<td>Pi 5</td>
+<td>Raspberry Pi 5</td>
 <td><code>ping -c 3 192.168.10.2</code></td>
 <td>USB network reaches the dashboard</td>
 </tr>
 <tr>
 <td>Zero 2 W</td>
 <td><code>ping -c 3 192.168.10.1</code></td>
-<td>Return path reaches the Pi</td>
+<td>Return path reaches the Raspberry Pi 5</td>
 </tr>
 </tbody>
 </table>
@@ -1017,7 +1017,7 @@ python3 -m compileall code/controller/current/rc_car_app
 </code></pre>
 <h2 id="failure-notes">Failure Notes</h2>
 <ul>
-<li><code>NO LINK</code> means the display process has not received fresh telemetry. Check Pi process, USB address/carrier, ping, then the Zero receiver.</li>
+<li><code>NO LINK</code> means the display process has not received fresh telemetry. Check Raspberry Pi 5 process, USB address/carrier, ping, then the Zero 2 W receiver.</li>
 <li>“No joystick detected” means the required manual-control interface was unavailable.</li>
 <li>A source edit does not affect a running process until the owning process restarts.</li>
 <li>Do not start a second dashboard receiver while the systemd receiver already owns UDP 8765.</li>

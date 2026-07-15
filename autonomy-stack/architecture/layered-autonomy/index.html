@@ -142,7 +142,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -235,7 +235,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -512,7 +512,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -922,7 +922,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -953,11 +953,11 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="layered-autonomy">Layered Autonomy</h1>
-<p>The Raspberry Pi combines operator state, model output, LiDAR policy, and hardware limits before writing actuators.</p>
+<p>The Raspberry Pi 5 combines operator state, model output, LiDAR policy, and hardware limits before writing actuators.</p>
 <h2 id="current-order">Current Order</h2>
 <ol>
 <li>Poll Xbox events and runtime state.</li>
-<li>Read the newest camera/Jon result without blocking the control loop.</li>
+<li>Read the newest camera/Jetson Orin Nano result without blocking the control loop.</li>
 <li>Reject autonomous output that is stale, unavailable, from another model version, or below the configured confidence threshold.</li>
 <li>Compute the center-corridor LiDAR throttle/stop policy when AEB is enabled.</li>
 <li>Select manual, cruise-control, or autonomous throttle and steering according to gear/mode.</li>
@@ -969,7 +969,7 @@
 <li>The camera model is the sole autonomous steering source.</li>
 <li>LiDAR can cap forward throttle or request a hard brake; it cannot steer.</li>
 <li>Manual input can cancel autonomy.</li>
-<li>Jon never writes hardware directly.</li>
+<li>Jetson Orin Nano never writes hardware directly.</li>
 </ul>
 <p>This separation makes individual policies inspectable, but it is not a formal real-time or safety certification. Physical response, sensor coverage, and operator reaction still require field evidence.</p>
               

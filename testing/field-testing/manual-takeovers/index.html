@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -969,7 +969,7 @@
 <li><strong>Quit:</strong> button <code>15</code> (<code>QUIT_BUTTON</code>) sets the shutdown flag and ends the run cleanly (final log row, dashboard shutdown, GPIO cleanup).</li>
 </ul>
 <p><code>cancel_autonomous_mode()</code> zeroes requested throttle, clears brake force, resets PID state, and (for gas/brake) re-centers steering rather than intentionally retaining the model's command. If the run was on a GPS <code>AUTO</code> navigation segment, the same inputs also cancel the navigation route. Physical response still depends on loop timing, actuator health, traction, and power.</p>
-<p>The preflight checklist tests this path on a stand: qualifying input enters the Pi event loop and autonomy cancels on a following control iteration. A timed latency record is still needed before quoting an override time.</p>
+<p>The preflight checklist tests this path on a stand: qualifying input enters the Raspberry Pi 5 event loop and autonomy cancels on a following control iteration. A timed latency record is still needed before quoting an override time.</p>
 <h2 id="how-a-takeover-is-counted">How a takeover is counted</h2>
 <p>Takeovers are counted from the field logs, not from memory. In the run CSV, a takeover is where <code>Autonomous Mode (On/Off)</code> flips from On to Off mid-route (not from a planned segment handoff or arrival). The stdout cancel messages above name the trigger (steering / gas / brake). Each takeover is logged with:</p>
 <ul>
@@ -985,7 +985,7 @@
 </ul>
 <p>The direction I'm chasing is distance-per-takeover going up across model versions. This feeds the field-evaluation takeover-count metric.</p>
 <h2 id="field-note">Field note</h2>
-<p>Takeover counts are only meaningful against a fixed route and defined intervention criteria — otherwise "I grabbed it a couple times" isn't a measurement. The per-run takeover summary (count + trigger breakdown per route) is <strong>planned</strong> as an automated CSV rollup on Jon; today it's read by hand from the <code>Autonomous Mode</code> column of each run log.</p>
+<p>Takeover counts are only meaningful against a fixed route and defined intervention criteria — otherwise "I grabbed it a couple times" isn't a measurement. The per-run takeover summary (count + trigger breakdown per route) is <strong>planned</strong> as an automated CSV rollup on Jetson Orin Nano; today it's read by hand from the <code>Autonomous Mode</code> column of each run log.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><code>testing/field-testing/overview.md</code></li>

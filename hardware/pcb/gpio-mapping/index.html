@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -526,7 +526,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -936,7 +936,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -969,7 +969,7 @@
                 <h1 id="pcb-gpio-mapping">PCB GPIO Mapping</h1>
 <p>This page documents the GPIO / pin assignments the custom PCB has to break out. Important caveat: the pinout drawn on the <strong>current designed revision is OUTDATED</strong>. I re-pinned parts of the runtime after the board was laid out, so the numbers below are the ones the software actually uses today (from <code>config.py</code>), and the <em>next</em> PCB revision will be re-drawn to match them. Until then, treat <code>config.py</code> as the source of truth and the current board layout as stale.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>The PCB does not invent a pinout; it hard-wires the pinout the runtime already expects. Every trace on the board must land on the exact Pi 5 pin that <code>code/controller/current/rc_car_app/config.py</code> and the serial device modules reference, otherwise the software would need to change. The mapping below is read directly from the runtime source, not guessed.</p>
+<p>The PCB does not invent a pinout; it hard-wires the pinout the runtime already expects. Every trace on the board must land on the exact Raspberry Pi 5 pin that <code>code/controller/current/rc_car_app/config.py</code> and the serial device modules reference, otherwise the software would need to change. The mapping below is read directly from the runtime source, not guessed.</p>
 <h3 id="motor-driver-yahboom-at8236-h-bridge-gpio">Motor driver (Yahboom AT8236 H-bridge, GPIO)</h3>
 <p>Read from <code>config.py</code>:</p>
 <table>

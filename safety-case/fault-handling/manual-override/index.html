@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -964,14 +964,14 @@
               
                 <h1 id="manual-override">Manual Override</h1>
 <p>Manual override is the primary operational control layer. While the Xbox
-controller is connected and the Pi loop is responsive, operator input can cancel
+controller is connected and the Raspberry Pi 5 loop is responsive, operator input can cancel
 autonomy and the Share button can request shutdown. Physical power cutoff remains
 necessary for faults that prevent software input processing.</p>
 <h2 id="hazard">Hazard</h2>
 <p>Autonomous mode (camera model steering) or a navigation route could command a path
 the operator judges unsafe (a bad steering angle, driving toward a person, entering
 a road). The software override reduces this risk only while the controller is connected
-and the Pi event loop remains responsive; it is not a substitute for physical power control.</p>
+and the Raspberry Pi 5 event loop remains responsive; it is not a substitute for physical power control.</p>
 <h2 id="detection-and-trigger">Detection and trigger</h2>
 <p>The main loop watches the Xbox controller (pygame) every iteration. Autonomous mode
 is cancelled by <code>cancel_autonomous_mode()</code> when the loop processes any of these:</p>
@@ -1007,8 +1007,8 @@ ordering does not cover a disconnected controller or failed control process.</p>
   labeled, timed override-latency test has not yet been preserved.</li>
 </ul>
 <h2 id="series-3-note">Series 3 note</h2>
-<p>Series 3 moves steering inference to the Jetson (Jon), but override still lives on
-the Pi in the same loop and is unchanged: the Pi owns the controller and the motors,
+<p>Series 3 moves steering inference to the Jetson Orin Nano, but override still lives on
+the Raspberry Pi 5 in the same loop and is unchanged: the Raspberry Pi 5 owns the controller and the motors,
 so operator override does not depend on the model host being reachable.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>

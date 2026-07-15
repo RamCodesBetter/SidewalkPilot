@@ -146,7 +146,7 @@
     </li>
     </ul>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -1003,9 +1003,9 @@ output horizon, deployment target, and evaluation criteria.</p>
 </tr>
 <tr>
 <td>Runs on</td>
-<td>Pi</td>
-<td>Jetson "Jon"</td>
-<td>Jetson runtime-supported; not field-promoted</td>
+<td>Raspberry Pi 5</td>
+<td>Jetson Orin Nano</td>
+<td>Jetson Orin Nano runtime-supported; not field-promoted</td>
 </tr>
 <tr>
 <td>Throttle</td>
@@ -1020,12 +1020,12 @@ scale of <code>86.0°</code>, Series 2 uses <code>85.0°</code> (<code>SERIES_1/
 runtime picks Series by the model-choice prefix (<code>steering_model_series()</code>: <code>2.</code> → Series 2,
 else Series 1).</p>
 <h2 id="design-progression">Design progression</h2>
-<p>Series 1/2 established the compact Pi-capable regression path. v3.0 tested a larger
+<p>Series 1/2 established the compact Raspberry Pi 5-capable regression path. v3.0 tested a larger
 regression model on 320x180 input. v3.1 and later changed the steering contract to a class
 plus within-class offset, which makes class recall directly measurable while retaining a
 continuous angle. The Series 3 graph also contains a throttle output, but current training
-and deployment do not use learned throttle. The larger visual model is deployed on Jon;
-the project has not published a Pi-versus-Jon latency benchmark for this architecture.</p>
+and deployment do not use learned throttle. The larger visual model is deployed on Jetson Orin Nano;
+the project has not published a Raspberry Pi 5-versus-Jetson Orin Nano latency benchmark for this architecture.</p>
 <h2 id="key-findings">Key findings</h2>
 <ul>
 <li><strong>Turn-vs-shadow observation.</strong> Some field-tested iterations that reacted more strongly
@@ -1039,7 +1039,7 @@ the project has not published a Pi-versus-Jon latency benchmark for this archite
 <p>v3.4 is the current field-selected baseline. In the July 13 comparison it handled every
 presented shadow case; v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was
 much worse than v3.2b. All three Series 4 runs completed. Their six ONNX artifacts passed
-signature and CUDA inference checks, and the Jetson runtime supports all three contracts.
+signature and CUDA inference checks, and the Jetson Orin Nano runtime supports all three contracts.
 No Series 4 field test has occurred, so offline results order candidates but do not select
 a field baseline.</p>
 <h2 id="related-pages">Related pages</h2>
@@ -1053,7 +1053,7 @@ a field baseline.</p>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../servo-output/" class="btn btn-neutral float-left" title="Servo Output"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../jetson-inference-link/" class="btn btn-neutral float-right" title="Jetson Inference Link">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../jetson-inference-link/" class="btn btn-neutral float-right" title="Jetson Orin Nano Inference Link">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>

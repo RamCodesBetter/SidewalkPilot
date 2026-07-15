@@ -146,7 +146,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -971,13 +971,13 @@ decides who actually moves the servo and motors.</p>
 <li><strong>Human / manual override.</strong> In the <code>pygame</code> event loop, any steering input
    with <code>abs(value) &gt; 0.1</code>, any throttle <code>&gt; 0.05</code>, or any brake press calls
    <code>cancel_autonomous_mode(...)</code> and, where wired, route cancellation. The change
-   takes effect when the Pi loop processes the event; it depends on a connected
+   takes effect when the Raspberry Pi 5 loop processes the event; it depends on a connected
    controller and responsive process.</li>
 <li><strong>Center-corridor emergency stop.</strong> With AEB enabled, a valid point at or
    inside <code>LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05 m</code> requests a hard stop before
    model inference is used for motion.</li>
 <li><strong>Model availability gate.</strong> If there is no emergency stop, the camera model
-   gets a vote. Local Pi analysis uses a 0.75-second frame-age guard; a Jetson result
+   gets a vote. Local Raspberry Pi 5 analysis uses a 0.75-second frame-age guard; a Jetson Orin Nano result
    must be no more than <code>JETSON_RESULT_MAX_AGE_SEC = 0.25 s</code> old and match the selected
    model. Confidence must be ≥ <code>LOW_CAMERA_CONFIDENCE</code> (0.25). If the model is
    unavailable, stale, or below the configured confidence threshold, the runtime requests a hard stop with reason

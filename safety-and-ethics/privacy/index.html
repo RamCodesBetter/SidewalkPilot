@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -958,7 +958,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="privacy">Privacy</h1>
-<p>This page describes what data SidewalkPilot collects, where it is stored, and how privacy is handled. The car carries a forward camera (RPi Camera Module 3 Wide) and a GPS, so it captures images of real sidewalks and, potentially, of people, houses, and vehicles nearby. The project treats that as a real privacy responsibility, not an afterthought.</p>
+<p>This page describes what data SidewalkPilot collects, where it is stored, and how privacy is handled. The car carries a forward camera (Raspberry Pi Camera Module 3 Wide) and a GPS, so it captures images of real sidewalks and, potentially, of people, houses, and vehicles nearby. The project treats that as a real privacy responsibility, not an afterthought.</p>
 <h2 id="what-is-collected">What is collected</h2>
 <ul>
 <li><strong>Camera frames.</strong> The autonomy loop reads live frames for steering inference (<code>vision.py</code>). Frames are written to disk either when the operator presses B (<code>PHOTO_BUTTON = 1</code> in Pygame's zero-based numbering) or when the operator explicitly enables run capture with the Menu button. Run capture targets 10 fps while the car is moving and stops when toggled off or when the runtime exits.</li>
@@ -966,17 +966,17 @@
 <li><strong>Runtime CSV logs.</strong> The logger (<code>logging_utils.py</code>, headers in <code>config.py</code>) records vehicle telemetry: speed, gear, steering, brake, AEB state, LiDAR distances, CPU/temperature, camera confidence. These are numeric vehicle-state logs, not imagery, and they do not store raw GPS coordinates in the CSV headers as defined.</li>
 </ul>
 <h2 id="where-it-is-stored">Where it is stored</h2>
-<p>Field capture stays local to the vehicle. Photos are written under <code>media/photos/YYYY_MM_DD_run_N/</code> (<code>create_photo_run_dir</code>), one folder per run, named <code>photo_&lt;timestamp&gt;.jpg</code>. CSV logs are written under <code>~/logs</code> by default. Camera frames used for remote inference travel over the private Pi-to-Jetson Ethernet link; dashboard state travels over the private Pi-to-Zero USB Ethernet link. The runtime does not upload field images to a cloud service. Optional InfluxDB telemetry is numeric vehicle state and is configured separately through <code>~/.influxdb.json</code>.</p>
+<p>Field capture stays local to the vehicle. Photos are written under <code>media/photos/YYYY_MM_DD_run_N/</code> (<code>create_photo_run_dir</code>), one folder per run, named <code>photo_&lt;timestamp&gt;.jpg</code>. CSV logs are written under <code>~/logs</code> by default. Camera frames used for remote inference travel over the private Raspberry Pi 5–Jetson Orin Nano Ethernet link; dashboard state travels over the private Raspberry Pi 5–Zero 2 W USB Ethernet link. The runtime does not upload field images to a cloud service. Optional InfluxDB telemetry is numeric vehicle state and is configured separately through <code>~/.influxdb.json</code>.</p>
 <p>Training telemetry (Weights &amp; Biases) is generated from the training pipeline on a separate machine, not from the car during a drive, and covers model metrics rather than raw field imagery.</p>
 <h2 id="handling-and-limits">Handling and limits</h2>
 <ul>
-<li><strong>Local-first.</strong> Images live on the Pi until Ram intentionally pulls them to the Mac workstation for training-set curation. The documented sync guidance deliberately avoids destructive whole-repo mirroring so field data is not accidentally deleted or duplicated.</li>
+<li><strong>Local-first.</strong> Images live on the Raspberry Pi 5 until Ram intentionally pulls them to the Mac workstation for training-set curation. The documented sync guidance deliberately avoids destructive whole-repo mirroring so field data is not accidentally deleted or duplicated.</li>
 <li><strong>Purpose-scoped.</strong> Captured sidewalk images exist to train the steering model. They are not used to identify people, and the saved label carries no personal data.</li>
 <li><strong>Public dataset care.</strong> Datasets and model cards are published on Hugging Face (<code>ram-shreyas-naik-sabavat</code>). Incidental bystanders, plates, house details, and location clues remain a release risk. The project policy is to review or exclude sensitive imagery before publication; this page does not claim automated redaction or a completed frame-by-frame privacy certification.</li>
 <li><strong>Bystander minimization.</strong> The platform is human-supervised, and both single-photo and run-capture modes require an operator action. Run capture can record many frames, so route choice and pre-publication review remain necessary.</li>
 </ul>
 <h2 id="series-3-note">Series 3 note</h2>
-<p>Series 3 and Series 4 send frames from the Pi to the Jetson (Jon) at <code>10.42.0.2:8770</code> for inference. That local transfer is not itself a storage or publication path. Images are persisted only through the Pi's operator-controlled photo/run-capture flow. Any future inference-frame logging on Jon would be a new data path and should be reviewed against this page before use.</p>
+<p>Series 3 and Series 4 send frames from the Raspberry Pi 5 to the Jetson Orin Nano at <code>10.42.0.2:8770</code> for inference. That local transfer is not itself a storage or publication path. Images are persisted only through the Raspberry Pi 5's operator-controlled photo/run-capture flow. Any future inference-frame logging on Jetson Orin Nano would be a new data path and should be reviewed against this page before use.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><code>safety-case/safety-overview.md</code></li>

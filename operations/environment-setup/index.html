@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -960,7 +960,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="environment-setup">Environment Setup</h1>
-<p>How each SidewalkPilot machine is prepared before it can run its part of the stack: the Pi 5 controller, the Zero 2 W dashboard receiver, the Jetson (Jon) inference host, and the Mac/PC workstations. The goal is a repeatable setup so a fresh device can be brought online without guessing at paths or ports.</p>
+<p>How each SidewalkPilot machine is prepared before it can run its part of the stack: the Jetson Orin Nano inference host, Raspberry Pi 5 controller, Zero 2 W dashboard receiver, and Mac/PC workstations. The goal is a repeatable setup so a fresh device can be brought online without guessing at paths or ports.</p>
 <h2 id="how-it-works">How it works</h2>
 <p>The runtime discovers most of its layout from the repository itself and a small set of optional environment overrides, so setup is mostly "put the repo in the right place and connect the hardware."</p>
 <ul>
@@ -979,7 +979,12 @@
 </thead>
 <tbody>
 <tr>
-<td>Pi 5</td>
+<td>Jetson Orin Nano</td>
+<td>Series 3/4 ONNX inference host</td>
+<td>ONNX Runtime, model <code>.onnx</code> files copied over, headless inference service; reachable at <code>10.42.0.2:8770</code> over direct Ethernet</td>
+</tr>
+<tr>
+<td>Raspberry Pi 5</td>
 <td>Controller: Xbox controller, camera, LiDAR, GPS, hall sensor, servo, motors, logging, telemetry</td>
 <td>Repo cloned, Python deps (<code>gpiozero</code>, <code>adafruit-servokit</code>, <code>picamera2</code>, <code>pyserial</code>, <code>opencv</code>, <code>torch</code>), USB <code>usb0</code> at <code>192.168.10.1/24</code>, I2C enabled for the PCA9685 at <code>0x40</code></td>
 </tr>
@@ -987,11 +992,6 @@
 <td>Zero 2 W</td>
 <td>Dashboard receiver over USB Ethernet</td>
 <td>Repo synced (not a git checkout — populated by rsync/scp), <code>rpi-rgb-led-matrix</code> bindings built, USB <code>usb0</code> at <code>192.168.10.2/24</code>, valid <code>/etc/machine-id</code></td>
-</tr>
-<tr>
-<td>Jetson (Jon)</td>
-<td>Series 3/4 ONNX inference host</td>
-<td>ONNX Runtime, model <code>.onnx</code> files copied over, headless inference service; reachable at <code>10.42.0.2:8770</code> over direct Ethernet</td>
 </tr>
 <tr>
 <td>Mac / NVIDIA PC</td>
@@ -1002,24 +1002,24 @@
 </table>
 <h2 id="why-this-choice">Why this choice</h2>
 <ul>
-<li>Deriving paths from the repo location means a fresh checkout works without hand-editing constants, and the same code runs on the Pi and in a laptop simulation fallback (the hardware layer degrades to dummy devices when GPIO/I2C is absent).</li>
+<li>Deriving paths from the repo location means a fresh checkout works without hand-editing constants, and the same code runs on the Raspberry Pi 5 and in a laptop simulation fallback (the hardware layer degrades to dummy devices when GPIO/I2C is absent).</li>
 <li>Environment overrides exist for the few things that legitimately differ per host (log dir, photo dir, model dir) without turning the runtime into a pile of flags. Toggles that change behavior are kept in code, not asked of the operator at run time.</li>
-<li>Fixed USB Ethernet addresses (<code>.1</code> Pi, <code>.2</code> Zero) keep dashboard routing independent of Wi-Fi and mDNS.</li>
+<li>Fixed USB Ethernet addresses (<code>.1</code> Raspberry Pi 5, <code>.2</code> Zero 2 W) keep dashboard routing independent of Wi-Fi and mDNS.</li>
 </ul>
 <h2 id="verification">Verification</h2>
 <pre><code class="language-bash"># Any dev host: confirm the runtime modules import/compile cleanly
 python3 -m py_compile code/controller/current/rc_car.py code/controller/current/z2w_dashboard.py
 python3 -m compileall code/controller/current/rc_car_app
 
-# Pi 5 / Zero: confirm the USB link addresses
+# Raspberry Pi 5 / Zero 2 W: confirm the USB link addresses
 ip -br addr show usb0
 cat /sys/class/net/usb0/carrier
 </code></pre>
-<p>A healthy Pi controller prints <code>Hub75 dashboard telemetry transport: UDP (192.168.10.2:8765).</code> on startup, and the PCA9685 line <code>Using PCA9685 steering servo at 0x40, channel 0.</code> once I2C is up.</p>
+<p>A healthy Raspberry Pi 5 controller prints <code>Hub75 dashboard telemetry transport: UDP (192.168.10.2:8765).</code> on startup, and the PCA9685 line <code>Using PCA9685 steering servo at 0x40, channel 0.</code> once I2C is up.</p>
 <h2 id="failure-and-recovery">Failure and recovery</h2>
 <ul>
 <li><strong>Runtime drops to "simulation mode"</strong>: <code>hardware.py</code> caught a GPIO/I2C init error and swapped in dummy devices. Check wiring, I2C enablement, and that no other process holds the bus.</li>
-<li><strong>Zero boots then hangs headless</strong>: a missing <code>/etc/machine-id</code> triggers the systemd first-boot wizard. Regenerate the machine-id.</li>
+<li><strong>Zero 2 W boots then hangs headless</strong>: a missing <code>/etc/machine-id</code> triggers the systemd first-boot wizard. Regenerate the machine-id.</li>
 <li><strong>Model not found</strong>: confirm the checkpoint exists under <code>code/ai_models</code> (or set <code>RC_CAR_AI_MODELS_DIR</code>); the version string must match one in <code>STEERING_MODEL_VERSIONS</code>.</li>
 </ul>
 <h2 id="evidence-to-attach">Evidence to attach</h2>

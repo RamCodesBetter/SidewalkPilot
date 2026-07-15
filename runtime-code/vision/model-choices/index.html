@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -358,7 +358,7 @@
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#registry">Registry</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#pi-and-jon-responsibilities">Pi and Jon Responsibilities</a>
+    <li class="toctree-l3"><a class="reference internal" href="#raspberry-pi-5-and-jetson-orin-nano-responsibilities">Raspberry Pi 5 and Jetson Orin Nano Responsibilities</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#series-4">Series 4</a>
     </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -995,11 +995,11 @@
 </table>
 <p><code>DEFAULT_STEERING_MODEL_CHOICE</code> is <code>3.4</code>. The environment variable <code>RC_CAR_STEERING_MODEL</code> can override startup selection.</p>
 <p>The current <code>rc_car.py</code> intentionally has no <code>--model</code> flag. Run <code>car</code>, then use the dashboard model page and D-pad controls to cycle the tuple. This keeps field selection visible on the car instead of hidden in a shell command.</p>
-<h2 id="pi-and-jon-responsibilities">Pi and Jon Responsibilities</h2>
-<p>When <code>JETSON_STEERING_HOST</code> is configured, the Pi camera runs in capture-only mode. Selecting a model updates the version string attached to each JPEG request. Jon hot-swaps to <code>SidewalkPilot-v&lt;version&gt;.onnx</code> when available, preferring ONNX over TorchScript/PTH.</p>
-<p>The Pi does not load a heavy model in this mode. It keeps the active name, captures frames, receives decoded steering, rejects stale results, and applies smoothing/safety/hardware mapping.</p>
+<h2 id="raspberry-pi-5-and-jetson-orin-nano-responsibilities">Raspberry Pi 5 and Jetson Orin Nano Responsibilities</h2>
+<p>When <code>JETSON_STEERING_HOST</code> is configured, the Raspberry Pi 5 camera runs in capture-only mode. Selecting a model updates the version string attached to each JPEG request. Jetson Orin Nano hot-swaps to <code>SidewalkPilot-v&lt;version&gt;.onnx</code> when available, preferring ONNX over TorchScript/PTH.</p>
+<p>The Raspberry Pi 5 does not load a heavy model in this mode. It keeps the active name, captures frames, receives decoded steering, rejects stale results, and applies smoothing/safety/hardware mapping.</p>
 <h2 id="series-4">Series 4</h2>
-<p>Jon inspects ONNX metadata instead of hard-coding six filenames:</p>
+<p>Jetson Orin Nano inspects ONNX metadata instead of hard-coding six filenames:</p>
 <ul>
 <li>One image input and <code>[batch,4,18]</code> output -&gt; CF;</li>
 <li>Image plus <code>target_history[batch,3]</code> and <code>[batch,1,18]</code> -&gt; PC;</li>
@@ -1009,11 +1009,11 @@
 <h2 id="failure-behavior">Failure Behavior</h2>
 <ul>
 <li>Unknown name: rejected by the registry.</li>
-<li>Missing artifact on Jon: model switch logs a failure and does not fabricate an output.</li>
-<li>Powered-off/unreachable Jon: asynchronous network waits stay off the controller loop.</li>
+<li>Missing artifact on Jetson Orin Nano: model switch logs a failure and does not fabricate an output.</li>
+<li>Powered-off/unreachable Jetson Orin Nano: asynchronous network waits stay off the controller loop.</li>
 <li>Stale result: autonomy confidence drops and the runtime stops rather than replaying an old command.</li>
 </ul>
-<p>See <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a> and <a href="../../../ai-and-models/architecture/series-4-plan/">Series 4 Temporal Experiments</a>.</p>
+<p>See <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a> and <a href="../../../ai-and-models/architecture/series-4-plan/">Series 4 Temporal Experiments</a>.</p>
               
             </div>
           </div><footer>

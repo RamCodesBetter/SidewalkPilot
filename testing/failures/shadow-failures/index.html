@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -963,7 +963,7 @@
 <h2 id="what-goes-wrong">What goes wrong</h2>
 <p>In recorded operator observations, some earlier models held open concrete and then drifted near a sharp diagonal shadow. That pattern is consistent with visual feature confusion, but the existing record does not isolate perception from labels, mechanics, timing, or closed-loop recovery as the sole cause.</p>
 <h2 id="suspected-cause">Suspected cause</h2>
-<p>The classic fallback estimator in <code>code/controller/current/rc_car_app/vision.py</code> illustrates one possible mechanism: <code>estimate_path_bias_from_frame</code> builds a neutral-gray, low-color-spread, lit mask (<code>chroma &lt; 18</code>, <code>bgr_spread &lt; 55</code>, <code>gray &gt; 45</code>). A hard shadow can remove concrete pixels from that mask. The current Series 3/4 path uses the Jon neural result rather than that heuristic, so this example does not prove what the neural model learned.</p>
+<p>The classic fallback estimator in <code>code/controller/current/rc_car_app/vision.py</code> illustrates one possible mechanism: <code>estimate_path_bias_from_frame</code> builds a neutral-gray, low-color-spread, lit mask (<code>chroma &lt; 18</code>, <code>bgr_spread &lt; 55</code>, <code>gray &gt; 45</code>). A hard shadow can remove concrete pixels from that mask. The current Series 3/4 path uses the Jetson Orin Nano neural result rather than that heuristic, so this example does not prove what the neural model learned.</p>
 <p>The field observation is a <strong>turn-vs-shadow tradeoff</strong>: some turn-eager checkpoints also chased shadow edges, while more center-biased behavior could miss turns. Targeted real turn-in-shadow footage is the most direct next data experiment. The existing evidence does not prove that augmentation can never solve the problem or that one collection run guarantees a fix.</p>
 <h2 id="what-i-changed-plan-to-change">What I changed / plan to change</h2>
 <ul>
@@ -973,7 +973,7 @@
 </ul>
 <h2 id="test-setup">Test setup</h2>
 <ul>
-<li><strong>Setup:</strong> Pi 5 controller, Pi Camera Module 3 Wide, bright direct sun; branch <code>lidar-aeb-v2</code>.</li>
+<li><strong>Setup:</strong> Raspberry Pi 5 controller, Raspberry Pi Camera Module 3 Wide, bright direct sun; branch <code>lidar-aeb-v2</code>.</li>
 <li><strong>Procedure:</strong> drive a known sidewalk stretch that has a strong diagonal tree/fence shadow; run <code>car</code>, then select <code>&lt;version&gt;</code> on the dashboard model page.</li>
 <li><strong>Pass/warn/fail:</strong> pass = holds true edge through the shadow; warn = visible wobble but recovers; fail = tracks the shadow and needs manual takeover.</li>
 <li><strong>Evidence to attach (planned):</strong> runtime CSV log, on-sidewalk video of the shadow stretch, manual-takeover count, model version.</li>

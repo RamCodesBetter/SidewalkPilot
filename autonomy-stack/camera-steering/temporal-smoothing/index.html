@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -237,7 +237,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -968,11 +968,11 @@ argmax flipping between neighbors.</p>
 isolation. The per-class offset already softens <em>within</em> a bucket; smoothing softens the
 transitions <em>between</em> buckets. The trade-off is latency: too much smoothing lags real
 turns, while too little leaves the flip-flop in.</p>
-<p>The current runtime uses <code>STEERING_SMOOTH_ALPHA = 0.45</code>. The Pi applies this exponential
-blend once per newly completed Jetson inference result, not once per 60 Hz controller tick.
+<p>The current runtime uses <code>STEERING_SMOOTH_ALPHA = 0.45</code>. The Raspberry Pi 5 applies this exponential
+blend once per newly completed Jetson Orin Nano inference result, not once per 60 Hz controller tick.
 If <code>x_t</code> is the decoded steering result and <code>y_(t-1)</code> is the prior smoothed command, the
 new command is <code>y_t = 0.45*x_t + 0.55*y_(t-1)</code>. Series 1/2 use a continuous regression
-output and do not pass through this Jetson-result smoothing path.</p>
+output and do not pass through this Jetson Orin Nano result smoothing path.</p>
 <p>This shipped output filter is separate from Series 4's causal target history. Smoothing
 changes the command sent to the car; PC/PCF history changes the information supplied to
 the model at its next inference.</p>

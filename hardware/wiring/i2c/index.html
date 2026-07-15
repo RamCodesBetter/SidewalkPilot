@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -979,7 +979,7 @@
 </tr>
 <tr>
 <td>Bus</td>
-<td>I2C bus 1 (Pi 5 <code>SDA1</code> / <code>SCL1</code>, the default <code>board.SDA</code> / <code>board.SCL</code>)</td>
+<td>I2C bus 1 (Raspberry Pi 5 <code>SDA1</code> / <code>SCL1</code>, the default <code>board.SDA</code> / <code>board.SCL</code>)</td>
 </tr>
 <tr>
 <td>Address</td>
@@ -1001,12 +1001,12 @@
 </table>
 <h2 id="how-it-works">How it works</h2>
 <p>The runtime opens the bus with Adafruit's <code>busio.I2C(board.SCL, board.SDA)</code> and drives the board through <code>adafruit_servokit.ServoKit</code>, targeting address <code>0x40</code> and servo channel <code>0</code> at 50 Hz. All of these come from constants in <code>rc_car_app/config.py</code> (<code>PCA9685_I2C_ADDRESS</code>, <code>PCA9685_SERVO_CHANNEL</code>, <code>PCA9685_FREQUENCY_HZ</code>, <code>STEERING_SERVO_MIN_PULSE_US</code>, <code>STEERING_SERVO_MAX_PULSE_US</code>, <code>STEERING_SERVO_ACTUATION_RANGE_DEG</code>) and are consumed by <code>PCA9685SteeringServo</code> in <code>rc_car_app/hardware.py</code>.</p>
-<p>Logical steering is <code>0 = left</code>, <code>90 = center</code>, <code>180 = right</code>. The hardware layer maps that logical angle to a servo pulse and applies a small center trim (<code>STEERING_SERVO_CENTER_OFFSET</code>, <code>STEERING_SERVO_CENTER_PRELOAD</code>, <code>STEERING_SERVO_CENTER_PRELOAD_WINDOW</code>) before writing the pulse. The I2C bus only carries the servo command; the servo is powered separately (see power wiring), and the PCA9685 is the only I2C peripheral on the Pi in the current build.</p>
+<p>Logical steering is <code>0 = left</code>, <code>90 = center</code>, <code>180 = right</code>. The hardware layer maps that logical angle to a servo pulse and applies a small center trim (<code>STEERING_SERVO_CENTER_OFFSET</code>, <code>STEERING_SERVO_CENTER_PRELOAD</code>, <code>STEERING_SERVO_CENTER_PRELOAD_WINDOW</code>) before writing the pulse. The I2C bus only carries the servo command; the servo is powered separately (see power wiring), and the PCA9685 is the only I2C peripheral on the Raspberry Pi 5 in the current build.</p>
 <h2 id="why-this-choice">Why this choice</h2>
-<p>Offloading servo timing to a dedicated PWM chip keeps precise 50 Hz pulses off the Pi's software-timed GPIO, which is busy with the control loop, camera, and sensors. It also isolates steering electrically from the motor GPIO. Documenting the bus separately matters because a steering fault can look like a model failure: if the servo does not move, the first check is whether <code>0x40</code> still enumerates on the bus, not whether the model output is wrong.</p>
+<p>Offloading servo timing to a dedicated PWM chip keeps precise 50 Hz pulses off the Raspberry Pi 5's software-timed GPIO, which is busy with the control loop, camera, and sensors. It also isolates steering electrically from the motor GPIO. Documenting the bus separately matters because a steering fault can look like a model failure: if the servo does not move, the first check is whether <code>0x40</code> still enumerates on the bus, not whether the model output is wrong.</p>
 <h2 id="test">Test</h2>
 <p>Verify the device enumerates before any drive test:</p>
-<pre><code class="language-bash"># Pi 5
+<pre><code class="language-bash"># Raspberry Pi 5
 i2cdetect -y 1        # expect 0x40 to appear
 </code></pre>
 <p>Bench servo motion is covered by <code>code/test_files/steering/pca9685_servo_test.py</code> and <code>code/test_files/steering/calibrate_servo.py</code>.</p>

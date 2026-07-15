@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -961,15 +961,15 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="camera-preview">Camera Preview</h1>
-<p>The camera-preview bench test puts the live camera feed on screen with the model's read of it overlaid, so I can confirm the RPi Camera Module 3 Wide is capturing correctly, framed right, and feeding the vision pipeline before I collect training photos or trust autonomy. It runs <code>code/test_files/camera/test_camera_preview.py</code>.</p>
+<p>The camera-preview bench test puts the live camera feed on screen with the model's read of it overlaid, so I can confirm the Raspberry Pi Camera Module 3 Wide is capturing correctly, framed right, and feeding the vision pipeline before I collect training photos or trust autonomy. It runs <code>code/test_files/camera/test_camera_preview.py</code>.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li>It starts the same <code>WebcamVisionProcessor</code> the runtime uses (via Picamera2) and pulls preview frames from its cache, checking the same capture path before network encoding and remote inference.</li>
 <li>It draws each frame into a <code>640x360</code> pygame window and overlays a status bar with the analysis <code>method</code>, the model <code>confidence</code>, and the frame <code>age</code> in seconds, plus an <code>ESC to quit</code> hint. If no frame is available yet it shows <code>Waiting for camera frame...</code>.</li>
-<li>Because it reuses the runtime vision processor, a clean preview checks capture, orientation, and local frame handling. It does not by itself verify Jon connectivity, the selected ONNX artifact, or physical steering.</li>
+<li>Because it reuses the runtime vision processor, a clean preview checks capture, orientation, and local frame handling. It does not by itself verify Jetson Orin Nano connectivity, the selected ONNX artifact, or physical steering.</li>
 </ul>
 <h2 id="command">Command</h2>
-<p>Run on the Pi 5 (needs a display or forwarded X session):</p>
+<p>Run on the Raspberry Pi 5 (needs a display or forwarded X session):</p>
 <pre><code class="language-bash">python3 code/test_files/camera/test_camera_preview.py
 # ESC to quit
 </code></pre>
@@ -982,7 +982,7 @@
 </ul>
 <h2 id="why-it-matters">Why it matters</h2>
 <ul>
-<li>The 81,237 Series 3/4 images were captured through this Pi camera path, so framing, exposure, and orientation directly affect data quality. A preview is a low-cost pre-collection check, not proof that those properties stay fixed for the full run.</li>
+<li>The 81,237 Series 3/4 images were captured through this Raspberry Pi 5 camera path, so framing, exposure, and orientation directly affect data quality. A preview is a low-cost pre-collection check, not proof that those properties stay fixed for the full run.</li>
 <li>Sharing the runtime's vision processor means the preview doubles as a quick check that the model's input path is healthy, not just the raw camera.</li>
 </ul>
 <h2 id="evidence-to-attach">Evidence to attach</h2>

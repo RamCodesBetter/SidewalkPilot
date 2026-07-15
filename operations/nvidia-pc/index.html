@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -966,19 +966,19 @@
 <h2 id="how-it-works">How it works</h2>
 <p>The PC hosts the training code under <code>code/ai_models_datasets/</code>:</p>
 <ul>
-<li><code>series_1_and_2/sidewalkpilot_trainer.py</code> trains the <code>SteeringAutonomyV2</code> regression model (~0.67M params, 200x66 input, single tanh steering output) that runs on the Pi.</li>
+<li><code>series_1_and_2/sidewalkpilot_trainer.py</code> trains the <code>SteeringAutonomyV2</code> regression model (~0.67M params, 200x66 input, single tanh steering output) that runs on the Raspberry Pi 5.</li>
 <li><code>series_3_and_4/series_3_sidewalkpilot_trainer.py</code> trains <code>SidewalkPilotV3</code> (~5.5M params, 320x180 input) with the hybrid head: 9 steering-class logits + 9 per-class offsets + 1 throttle.</li>
 <li>Three Series 4 trainers implement PC, CF, and PCF experiments against the same Series 3/4 dataset.</li>
 </ul>
 <p>The nine Series 3 steering buckets are HL, L, L+, SL, ST, SR, R, R+, and HR. The Series 3/4 trainers read the selected dataset roots and can optionally accept explicit correction paths. The current Series 3/4 dataset uses <code>sidewalkpilot_dataset/labels.json</code> and no checked-in correction file. CARLA data, when listed as a root, enters as pre-generated files; the trainers do not drive the simulator.</p>
 <p>Once trained, a model reaches the field two ways:</p>
 <ul>
-<li><strong>Series 1/2</strong>: the <code>.pth</code> is copied into <code>code/ai_models</code> on the Pi and selected with <code>car</code> followed by dashboard model selection.</li>
-<li><strong>Series 3/4</strong>: the version is registered in <code>STEERING_MODEL_VERSIONS</code> and the <code>.onnx</code> is copied to Jon. Jon answers inference over the direct Ethernet link at <code>10.42.0.2:8770</code>.</li>
+<li><strong>Series 1/2</strong>: the <code>.pth</code> is copied into <code>code/ai_models</code> on the Raspberry Pi 5 and selected with <code>car</code> followed by dashboard model selection.</li>
+<li><strong>Series 3/4</strong>: the version is registered in <code>STEERING_MODEL_VERSIONS</code> and the <code>.onnx</code> is copied to Jetson Orin Nano. Jetson Orin Nano answers inference over the direct Ethernet link at <code>10.42.0.2:8770</code>.</li>
 </ul>
 <h2 id="why-this-choice">Why this choice</h2>
 <ul>
-<li>The heavy Series-3 model needs a GPU that neither the Pi nor a laptop has; the PC supplies that for training, and the Jetson supplies it for inference. The Pi stays dedicated to real-time I/O.</li>
+<li>The heavy Series-3 model needs a GPU that neither the Raspberry Pi 5 nor a laptop has; the PC supplies that for training, and the Jetson Orin Nano supplies it for inference. The Raspberry Pi 5 stays dedicated to real-time I/O.</li>
 <li>Keeping Series 1/2 and Series 3 trainers in separate directories prevents correction-JSON and checkpoint-naming crossover between the two very different architectures.</li>
 </ul>
 <h2 id="key-finding-to-remember">Key finding to remember</h2>
@@ -991,7 +991,7 @@ python3 -m py_compile code/ai_models_datasets/series_3_and_4/series_3_sidewalkpi
 <h2 id="failure-and-recovery">Failure and recovery</h2>
 <ul>
 <li><strong>Trainer picks the wrong labels or corrections</strong>: confirm the dataset root and printed scan counts. Series 1/2 has a checked-in <code>steering_corrections.json</code>; the current Series 3/4 repository uses <code>sidewalkpilot_dataset/labels.json</code> and has no checked-in corrections file.</li>
-<li><strong>Deployed model does not load on the Pi</strong>: the version string must be present in <code>STEERING_MODEL_VERSIONS</code> in <code>vision.py</code> and the checkpoint must exist in <code>code/ai_models</code>.</li>
+<li><strong>Deployed model does not load on the Raspberry Pi 5</strong>: the version string must be present in <code>STEERING_MODEL_VERSIONS</code> in <code>vision.py</code> and the checkpoint must exist in <code>code/ai_models</code>.</li>
 </ul>
 <p>Field-test verdicts are tracked with model evaluation, not inferred from a training run. The July 13 comparison rejected v3.3/v3.3b and selected v3.4. Series 4 still awaits field testing.</p>
 <h2 id="evidence-to-attach">Evidence to attach</h2>

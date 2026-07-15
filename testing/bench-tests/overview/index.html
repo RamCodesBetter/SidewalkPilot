@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -958,7 +958,7 @@
               
                 <h1 id="overview">Overview</h1>
 <p>The bench-tests section documents standalone utilities used on the bench, over SSH, or with the car restrained before a field drive. Hardware and navigation utilities are grouped under matching <code>camera/</code>, <code>controller/</code>, <code>display/</code>, <code>lidar/</code>, <code>navigation/</code>, <code>sensors/</code>, <code>setup/</code>, and <code>steering/</code> folders inside <code>code/test_files/</code>; cross-cutting experiments remain at its root. Experiments stay outside the live control loop so they can be run and reviewed independently.</p>
-<p>A bench test exists to answer one question with proof: does this sensor stream real data, does this servo hit the angle I command, does this model turn the wheels the way the picture says it should. Every page here states what is being tested, the exact command, and what counts as pass, warn, or fail. Because these are hardware tests, most of them talk to real GPIO, I2C (PCA9685 at <code>0x40</code>), or a UART, so the page also notes which device the command runs on (Pi 5 controller vs. Zero 2 W dashboard) and whether it moves anything.</p>
+<p>A bench test exists to answer one question with proof: does this sensor stream real data, does this servo hit the angle I command, does this model turn the wheels the way the picture says it should. Every page here states what is being tested, the exact command, and what counts as pass, warn, or fail. Because these are hardware tests, most of them talk to real GPIO, I2C (PCA9685 at <code>0x40</code>), or a UART, so the page also notes which device the command runs on (Raspberry Pi 5 controller vs. Zero 2 W dashboard) and whether it moves anything.</p>
 <h2 id="what-a-good-bench-test-record-captures">What a good bench-test record captures</h2>
 <table>
 <thead>
@@ -970,7 +970,7 @@
 <tbody>
 <tr>
 <td>Setup</td>
-<td>Device (Pi 5 / Zero 2 W), branch, model version, wiring</td>
+<td>Device (Raspberry Pi 5 / Zero 2 W), branch, model version, wiring</td>
 </tr>
 <tr>
 <td>Procedure</td>

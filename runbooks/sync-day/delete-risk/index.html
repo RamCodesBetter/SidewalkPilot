@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -936,7 +936,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -982,7 +982,7 @@
 <p>So a reverse whole-repo pull from a machine that never had <code>docs/site/</code> will delete <code>docs/site/</code> on the machine that did. That is exactly what happened: a reverse whole-repo <code>rsync --delete</code> produced docs/site/generated-site deletion symptoms because the remote did not contain those trees.</p>
 <h2 id="steps-the-check-i-run-before-every-pull">Steps (the check I run before every pull)</h2>
 <ol>
-<li><strong>Name the direction.</strong> Is this the safe push-code-to-Pi direction (<code>rpisync</code>), or the dangerous pull-whole-tree-back direction (<code>mrpisync</code>)? If it is the pull direction, I slow down.</li>
+<li><strong>Name the direction.</strong> Is this the safe push-code-to-Raspberry Pi 5 direction (<code>rpisync</code>), or the dangerous pull-whole-tree-back direction (<code>mrpisync</code>)? If it is the pull direction, I slow down.</li>
 <li><strong>Scope it.</strong> Sync only the folder I actually want — <code>media/photos/2026_07_02_run_1/</code>, one checkpoint, one run — never the whole repo.</li>
 <li><strong>Drop <code>--delete</code>.</strong> For any reverse/pull sync, remove <code>--delete</code> entirely. I only ever want additive copies of data.</li>
 <li><strong>Dry-run.</strong> <code>rsync -avn ...</code> and read the output. If it lists a single <code>deleting ...</code> line I did not intend, I stop.</li>
@@ -1007,7 +1007,7 @@
 </ul>
 <h2 id="notes-history">Notes / history</h2>
 <ul>
-<li>Recorded rule: reverse whole-repo <code>rsync --delete</code> is dangerous. <code>rpisync</code> pushes local branch code to the Pi (safe). <code>mrpisync</code> pulls the whole remote tree to local and is the risky one with <code>--delete</code>.</li>
+<li>Recorded rule: reverse whole-repo <code>rsync --delete</code> is dangerous. <code>rpisync</code> pushes local branch code to the Raspberry Pi 5 (safe). <code>mrpisync</code> pulls the whole remote tree to local and is the risky one with <code>--delete</code>.</li>
 <li>For photo pulls, sync only the <code>media/photos/...</code> folder, or remove <code>--delete</code> from the reverse sync.</li>
 </ul>
 <h2 id="evidence-to-attach">Evidence to attach</h2>

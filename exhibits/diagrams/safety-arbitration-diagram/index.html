@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -965,7 +965,7 @@
 <ol>
 <li><strong>Manual override (human).</strong> Real steering, throttle, or brake input cancels autonomous mode and an active navigation route.</li>
 <li><strong>Center-corridor emergency stop.</strong> With AEB enabled, a valid LiDAR point at or inside <code>LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05 m</code> requests zero throttle and full braking. Reverse is excluded from the automatic stop.</li>
-<li><strong>Model-availability gate.</strong> In autonomous mode, a missing model, a stale Pi camera analysis (older than 0.75 s), a missing or stale Jetson result (older than <code>JETSON_RESULT_MAX_AGE_SEC = 0.25 s</code>), or confidence below <code>LOW_CAMERA_CONFIDENCE = 0.25</code> stops the car instead of reusing a stale steering result.</li>
+<li><strong>Model-availability gate.</strong> In autonomous mode, a missing model, a stale Raspberry Pi 5 camera analysis (older than 0.75 s), a missing or stale Jetson Orin Nano result (older than <code>JETSON_RESULT_MAX_AGE_SEC = 0.25 s</code>), or confidence below <code>LOW_CAMERA_CONFIDENCE = 0.25</code> stops the car instead of reusing a stale steering result.</li>
 <li><strong>Camera-model steering.</strong> If the model result is valid, it supplies the steering command. LiDAR never changes that command and never chooses a left or right escape path.</li>
 <li><strong>Center-corridor throttle governor.</strong> With AEB enabled, clearance at or above 1.65 m allows full throttle. From 1.65 m to 1.25 m, the target falls linearly from 100% to 60% reference throttle. It holds that minimum governed target from 1.25 m to 1.05 m, then the emergency stop takes priority. Points outside the center corridor remain dashboard telemetry only.</li>
 </ol>

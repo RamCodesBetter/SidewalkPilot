@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -954,7 +954,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="dashboard-display">Dashboard Display</h1>
-<p>The display system is a Raspberry Pi Zero 2 W driving one Waveshare 64×32 RGB LED matrix through HUB75. The current renderer does not use a MAX7219 display.</p>
+<p>The display system is a Zero 2 W driving one Waveshare 64×32 RGB LED matrix through HUB75. The current renderer does not use a MAX7219 display.</p>
 <h2 id="software-boundary">Software Boundary</h2>
 <table>
 <thead>
@@ -966,11 +966,11 @@
 <tbody>
 <tr>
 <td><code>code/controller/current/rc_car_app/hub75_dashboard.py</code></td>
-<td>Pi 5 payload schema and UDP sender</td>
+<td>Raspberry Pi 5 payload schema and UDP sender</td>
 </tr>
 <tr>
 <td><code>code/controller/current/z2w_dashboard.py</code></td>
-<td>Zero receiver, page state, bitmaps, and HUB75 rendering</td>
+<td>Zero 2 W receiver, page state, bitmaps, and HUB75 rendering</td>
 </tr>
 <tr>
 <td><code>code/controller/current/8x8_bitmaps/</code></td>
@@ -988,10 +988,10 @@
 </table>
 <p>The panel is fixed at 64×32 pixels and uses an 8×8 cell system for text pages. Camera view is downsampled to the full panel and serialized as RGB565. The LiDAR page uses raw pixels for guides, rungs, points, the car marker, and an 8×8 <code>C</code> glyph.</p>
 <h2 id="runtime-parameters">Runtime Parameters</h2>
-<p>The receiver exposes matrix-driver settings for slowdown GPIO, row addressing, multiplexing, panel type, brightness, PWM bits, refresh limit, RGB sequence, and hardware pulse behavior. Deployed values belong in the Zero's systemd service rather than in page rendering code.</p>
+<p>The receiver exposes matrix-driver settings for slowdown GPIO, row addressing, multiplexing, panel type, brightness, PWM bits, refresh limit, RGB sequence, and hardware pulse behavior. Deployed values belong in the Zero 2 W's systemd service rather than in page rendering code.</p>
 <h2 id="bench-test">Bench Test</h2>
 <ol>
-<li>Power the panel from its intended regulated supply; do not rely on Zero GPIO power.</li>
+<li>Power the panel from its intended regulated supply; do not rely on Zero 2 W GPIO power.</li>
 <li>Verify the HUB75 ribbon orientation and common ground.</li>
 <li>Stop the dashboard service before running a direct matrix test.</li>
 <li>Run the glyph/color test and check red, green, blue, white, alignment, and refresh stability.</li>

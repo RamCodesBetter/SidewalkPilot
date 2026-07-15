@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -958,11 +958,11 @@
 <p>The current heavy-model deployment path is:</p>
 <pre><code class="language-text">PyTorch training checkpoint
   -&gt; FP32 ONNX export
-  -&gt; copy ONNX to Jon
+  -&gt; copy ONNX to Jetson Orin Nano
   -&gt; ONNX Runtime with CUDA
-  -&gt; decoded steering returned to Pi
+  -&gt; decoded steering returned to Raspberry Pi 5
 </code></pre>
-<p>The Pi remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jon is an inference service only.</p>
+<p>The Raspberry Pi 5 remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is an inference service only.</p>
 <h2 id="artifact-contracts">Artifact Contracts</h2>
 <table>
 <thead>
@@ -1005,7 +1005,7 @@
 <p>CUDA is preferred when ONNX Runtime reports <code>CUDAExecutionProvider</code>; CPU remains a fallback for compatibility/testing. A partially installed TensorRT provider is not registered ahead of CUDA because provider initialization failure can cause an accidental CPU retry.</p>
 <h2 id="tensorrt-status">TensorRT Status</h2>
 <p>TensorRT, FP16, and INT8 remain valid future optimization topics, but they are not the current live path. The old checked-in TensorRT builder described by earlier docs is no longer in the repository. No current field claim depends on a TensorRT engine or quantized model.</p>
-<p>See <a href="../onnx-export/">ONNX Export</a>, <a href="../jetson-runtime/">Jetson Runtime</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>.</p>
+<p>See <a href="../onnx-export/">ONNX Export</a>, <a href="../jetson-runtime/">Jetson Orin Nano Runtime</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>
           </div><footer>

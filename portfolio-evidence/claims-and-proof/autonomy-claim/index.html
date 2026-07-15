@@ -148,7 +148,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -241,7 +241,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -960,14 +960,14 @@
               
                 <h1 id="autonomy-claim">Autonomy Claim</h1>
 <h2 id="defensible-claim">Defensible Claim</h2>
-<p>SidewalkPilot has demonstrated supervised camera-based steering on a physical RC car, with Raspberry Pi control arbitration, Jetson inference, manual takeover, logging, and an independent LiDAR slowdown/braking layer.</p>
+<p>SidewalkPilot has demonstrated supervised camera-based steering on a physical RC car, with Raspberry Pi control arbitration, Jetson Orin Nano inference, manual takeover, logging, and an independent LiDAR slowdown/braking layer.</p>
 <p>The project does <strong>not</strong> claim SAE driving automation, unattended operation, public-road readiness, or safe operation around arbitrary pedestrians.</p>
 <h2 id="what-autonomous-means-here">What Autonomous Means Here</h2>
 <p>When autonomy is enabled:</p>
 <ol>
-<li>The Raspberry Pi captures and submits the newest camera frame;</li>
-<li>The Jetson predicts steering from the selected ONNX model;</li>
-<li>The Raspberry Pi accepts only a fresh result;</li>
+<li>The Raspberry Pi 5 captures and submits the newest camera frame;</li>
+<li>The Jetson Orin Nano predicts steering from the selected ONNX model;</li>
+<li>The Raspberry Pi 5 accepts only a fresh result;</li>
 <li>The model supplies autonomous steering;</li>
 <li>Runtime policy and enabled LiDAR AEB can reduce or stop longitudinal motion;</li>
 <li>The human operator can brake, take over, or quit.</li>
@@ -977,7 +977,7 @@
 <ul>
 <li>Physical-run demonstrations on the <a href="https://www.youtube.com/@SidewalkPilot">YouTube channel</a>.</li>
 <li>Live runtime in <code>code/controller/current/</code>.</li>
-<li>Fresh-result and powered-off-Jetson behavior in <code>rc_car_app/runtime.py</code> and its async-client tests.</li>
+<li>Fresh-result and powered-off Jetson Orin Nano behavior in <code>rc_car_app/runtime.py</code> and its async-client tests.</li>
 <li>Public model repositories and cards through Series 3 on <a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face</a>; Series 4 publication remains pending.</li>
 <li>Model-level evidence in the <a href="../model-claim/">Model Claim</a>.</li>
 <li>Safety boundaries in <a href="../../../autonomy-stack/lidar-safety/aeb/">LiDAR AEB</a>.</li>
@@ -987,7 +987,7 @@
 <ul>
 <li>Harsh lighting and shadows remain a continuing generalization risk even after v3.4;</li>
 <li>An empty or stale LiDAR scan can fail to produce an intervention;</li>
-<li>A disconnected Jetson removes autonomous steering but must not block manual control;</li>
+<li>A disconnected Jetson Orin Nano removes autonomous steering but must not block manual control;</li>
 <li>USB dashboard failure removes telemetry, not control authority;</li>
 <li>GPS/navigation software does not by itself make a route safe;</li>
 <li>The operator remains responsible for the environment and shutdown.</li>

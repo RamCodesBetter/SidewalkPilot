@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -776,9 +776,9 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#gps-permission-denied">GPS permission denied</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#usb-enumeration-errors-on-the-zero">USB enumeration errors on the Zero</a>
+    <li class="toctree-l2"><a class="reference internal" href="#usb-enumeration-errors-on-the-zero-2-w">USB enumeration errors on the Zero 2 W</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#zero-boots-then-hangs-headless">Zero boots then hangs headless</a>
+    <li class="toctree-l2"><a class="reference internal" href="#zero-2-w-boots-then-hangs-headless">Zero 2 W boots then hangs headless</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#why-this-discipline">Why this discipline</a>
     </li>
@@ -938,7 +938,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -970,12 +970,12 @@
                 <h1 id="troubleshooting">Troubleshooting</h1>
 <p>The consolidated failure playbook for SidewalkPilot: the dashboard link, the controller, sensors, and the USB gadget. Each entry names the machine, the check, what it can break, and how to confirm the fix. The guiding rule is prove, do not assume — grep the value across every layer and observe the wire before forming a theory.</p>
 <h2 id="dashboard-shows-no-link">Dashboard shows <code>NO LINK</code></h2>
-<p><code>NO LINK</code> means the Zero receiver is alive but has not received a packet recently. Work outward from the sender:</p>
+<p><code>NO LINK</code> means the Zero 2 W receiver is alive but has not received a packet recently. Work outward from the sender:</p>
 <ol>
-<li><strong>Pi 5 — controller running?</strong> Confirm the controller process is up and printed its UDP transport line.</li>
+<li><strong>Raspberry Pi 5 — controller running?</strong> Confirm the controller process is up and printed its UDP transport line.</li>
 <li><strong>Zero 2 W — receiver listening?</strong> <code>ss -lunp | grep 8765</code> should show exactly one listener.</li>
-<li><strong>Both — USB up?</strong> <code>ip -br addr show usb0</code> (Pi <code>.1</code>, Zero <code>.2</code>) and <code>cat /sys/class/net/usb0/carrier</code>.</li>
-<li><strong>Ping both ways</strong>: <code>ping -c 3 192.168.10.2</code> from the Pi, <code>ping -c 3 192.168.10.1</code> from the Zero.</li>
+<li><strong>Both — USB up?</strong> <code>ip -br addr show usb0</code> (Raspberry Pi 5 <code>.1</code>, Zero 2 W <code>.2</code>) and <code>cat /sys/class/net/usb0/carrier</code>.</li>
+<li><strong>Ping both ways</strong>: <code>ping -c 3 192.168.10.2</code> from the Raspberry Pi 5, <code>ping -c 3 192.168.10.1</code> from the Zero 2 W.</li>
 <li><strong>Carrier <code>1</code> but ping fails</strong> — the classic ARP/USB stall. Restart the USB keeper, or run the USB hard-reset sequence on both devices.</li>
 </ol>
 <h2 id="controller-exits-immediately">Controller exits immediately</h2>
@@ -994,12 +994,12 @@
 <li>The error looks like permission denied on <code>/dev/ttyAMA0</code>. Confirm the serial console is freed on that UART and check group membership / port ownership.</li>
 <li>Do not confuse the GPS port (<code>/dev/ttyAMA0</code>, <code>9600</code>) with the LiDAR port.</li>
 </ul>
-<h2 id="usb-enumeration-errors-on-the-zero">USB enumeration errors on the Zero</h2>
+<h2 id="usb-enumeration-errors-on-the-zero-2-w">USB enumeration errors on the Zero 2 W</h2>
 <ul>
 <li><code>-110</code>/<code>-62</code> or "device descriptor read" errors establish an enumeration failure; they do not identify power, cable, port, host, or device as the cause. Reproduce with the known working power arrangement, data cable, and host port before replacing hardware.</li>
-<li>If the Zero is reachable over Wi-Fi but not USB, fix the dedicated USB path before continuing dashboard debugging.</li>
+<li>If the Zero 2 W is reachable over Wi-Fi but not USB, fix the dedicated USB path before continuing dashboard debugging.</li>
 </ul>
-<h2 id="zero-boots-then-hangs-headless">Zero boots then hangs headless</h2>
+<h2 id="zero-2-w-boots-then-hangs-headless">Zero 2 W boots then hangs headless</h2>
 <ul>
 <li>A missing <code>/etc/machine-id</code> runs the systemd first-boot wizard, which stalls a headless boot. Regenerate the machine-id.</li>
 </ul>
@@ -1017,7 +1017,7 @@
 <tbody>
 <tr>
 <td><code>NO LINK</code></td>
-<td>Zero</td>
+<td>Zero 2 W</td>
 <td><code>ss -lunp \| grep 8765</code>, then ping both ways</td>
 </tr>
 <tr>
@@ -1027,27 +1027,27 @@
 </tr>
 <tr>
 <td>Controller exits</td>
-<td>Pi</td>
+<td>Raspberry Pi 5</td>
 <td>Look for "No joystick detected"</td>
 </tr>
 <tr>
 <td>"Simulation mode"</td>
-<td>Pi</td>
+<td>Raspberry Pi 5</td>
 <td>GPIO/I2C wiring + bus contention</td>
 </tr>
 <tr>
 <td>LiDAR none/zero</td>
-<td>Pi</td>
+<td>Raspberry Pi 5</td>
 <td>Motor spinning, single reader, port/baud</td>
 </tr>
 <tr>
 <td>GPS denied</td>
-<td>Pi</td>
+<td>Raspberry Pi 5</td>
 <td><code>/dev/ttyAMA0</code> console freed + group</td>
 </tr>
 <tr>
 <td>USB <code>-110</code>/<code>-62</code></td>
-<td>Zero</td>
+<td>Zero 2 W</td>
 <td>Known working power/cable/port, then <code>dmesg</code> and <code>lsusb</code></td>
 </tr>
 </tbody>

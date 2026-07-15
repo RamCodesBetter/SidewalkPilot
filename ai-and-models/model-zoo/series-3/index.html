@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -955,7 +955,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="series-3-models">Series 3 Models</h1>
-<p>Series 3 moved inference to the Jetson, increased image input to <code>320x180</code>, and introduced the hybrid steering head in v3.1. The table below uses the corrected common evaluation: every checkpoint was run on the same <strong>6,952-frame frozen Series 3/4 challenge subset</strong>. These are held-out replay metrics, not physical-car results.</p>
+<p>Series 3 moved inference to the Jetson Orin Nano, increased image input to <code>320x180</code>, and introduced the hybrid steering head in v3.1. The table below uses the corrected common evaluation: every checkpoint was run on the same <strong>6,952-frame frozen Series 3/4 challenge subset</strong>. These are held-out replay metrics, not physical-car results.</p>
 <h2 id="shared-challenge-metrics">Shared Challenge Metrics</h2>
 <table>
 <thead>
@@ -1094,7 +1094,7 @@
 <li>v3.0/v3.0b output: <code>[batch,2]</code> steering and throttle regression</li>
 <li>v3.1+ output: <code>[batch,19]</code> = 9 logits + 9 offsets + throttle</li>
 <li>Runtime default: <code>DEFAULT_STEERING_MODEL_CHOICE = "3.4"</code></li>
-<li>Deployment: ONNX Runtime CUDA on Jon</li>
+<li>Deployment: ONNX Runtime CUDA on Jetson Orin Nano</li>
 </ul>
 <p>See the <a href="../series-4/">Series 4 table</a> for the temporal experiments and the <a href="../../../steering_model_report.pdf">full PDF report</a> for confusion matrices and all 46 checkpoints.</p>
               

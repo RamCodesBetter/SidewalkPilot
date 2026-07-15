@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -241,7 +241,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -966,7 +966,7 @@ not select a swerve direction.</p>
 <p>The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
 connects over USB through a CP2102 UART bridge (auto-resolved from
 <code>/dev/serial/by-id/*CP2102*</code>, falling back to <code>/dev/ttyUSB*</code>); an earlier wiring used the
-Pi's GPIO UART at <code>/dev/ttyAMA2</code>. A background reader thread
+Raspberry Pi 5's GPIO UART at <code>/dev/ttyAMA2</code>. A background reader thread
 (<code>rc_car_app/lidar.py</code>, <code>LidarParser</code>) parses the raw packet stream into a full 360-degree
 scan of <code>LidarPoint</code> objects, and the main control loop in <code>rc_car_app/runtime.py</code> pulls
 the latest scan once per iteration with <code>get_latest_scan()</code>.</p>
@@ -987,7 +987,7 @@ the latest scan once per iteration with <code>get_latest_scan()</code>.</p>
 </ol>
 <p>The same computed policy is reused within a control iteration, so autonomous command
 generation and final hardware arbitration do not intentionally interpret two different
-scans. Operator input can cancel autonomy while the controller and Pi loop are responsive.</p>
+scans. Operator input can cancel autonomy while the controller and Raspberry Pi 5 loop are responsive.</p>
 <h2 id="why-this-choice">Why this choice</h2>
 <p>Keeping close-range throttle and braking outside the neural network makes those decisions
 explicit and auditable. The model handles visual path choice; LiDAR handles measured

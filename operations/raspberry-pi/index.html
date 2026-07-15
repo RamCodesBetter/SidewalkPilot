@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -993,7 +993,7 @@
 <td>UDP <code>192.168.10.2:8765</code> over the dedicated <code>usb0</code> link</td>
 </tr>
 <tr>
-<td>Jon</td>
+<td>Jetson Orin Nano</td>
 <td>Direct Ethernet to <code>10.42.0.2:8770</code></td>
 </tr>
 </tbody>
@@ -1005,8 +1005,8 @@ car
 </code></pre>
 <p><code>rc_car.py</code> intentionally has no <code>--model</code> flag. Select models on the dashboard, or set <code>RC_CAR_STEERING_MODEL</code> before startup. The default is v3.4.</p>
 <h2 id="verify">Verify</h2>
-<p>Check the startup log for joystick, PCA9685/GPIO, LiDAR, GPS, camera, Jon, and dashboard status. A missing optional sensor may not stop manual control, but it changes what can be tested safely; record the degraded state rather than treating the run as fully representative.</p>
-<p>The Pi keeps local manual control responsive while camera transmission and Jon inference run asynchronously. It accepts only fresh results for the currently selected model.</p>
+<p>Check the startup log for joystick, PCA9685/GPIO, LiDAR, GPS, camera, Jetson Orin Nano, and dashboard status. A missing optional sensor may not stop manual control, but it changes what can be tested safely; record the degraded state rather than treating the run as fully representative.</p>
+<p>The Raspberry Pi 5 keeps local manual control responsive while camera transmission and Jetson Orin Nano inference run asynchronously. It accepts only fresh results for the currently selected model.</p>
               
             </div>
           </div><footer>

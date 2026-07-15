@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -959,7 +959,7 @@
               
                 <h1 id="power">Power</h1>
 <p>The car carries its own power. The drive motors are fed from a 3S LiPo through the
-AT8236, while the compute boards (Pi 5, Jetson, Zero 2 W) run from high-output USB power
+AT8236, while the compute boards (Jetson Orin Nano, Raspberry Pi 5, Zero 2 W) run from high-output USB power
 banks. Separating the noisy motor rail from the clean logic rail is the main goal of the
 power design.</p>
 <h2 id="parts-amazon">Parts (Amazon)</h2>
@@ -980,7 +980,7 @@ power design.</p>
   large 10000 uF electrolytic capacitors buffer the motor rail against current spikes, and
   ATC/ATO fuses protect against shorts.</li>
 <li><strong>Logic rail:</strong> the compute boards run from USB power banks (a 27000 mAh 140W bank and a
-  10000 mAh 45W bank), keeping the Pi/Jetson/Zero off the noisy motor supply.</li>
+  10000 mAh 45W bank), keeping the Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W off the noisy motor supply.</li>
 <li><strong>Support gear:</strong> a dual LiPo charger/discharger and a 2S LiPo are part of the battery kit
   for charging and bench work.</li>
 </ul>

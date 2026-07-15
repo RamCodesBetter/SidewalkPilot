@@ -146,7 +146,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,8 +957,8 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="hardware-claim">Hardware Claim</h1>
-<p>SidewalkPilot is a physical Yahboom Ackermann 520M RC platform with a Raspberry Pi
-5 controller, Jetson Orin Nano inference host, and Raspberry Pi Zero 2 W dashboard.
+<p>SidewalkPilot is a physical Yahboom Ackermann 520M RC platform with a Jetson Orin Nano
+inference host, Raspberry Pi 5 controller, and Zero 2 W dashboard.
 The current code contains the interfaces and constants below. Configuration is
 evidence of implementation intent; physical photos, bench output, and field logs
 are the evidence that a particular assembly worked.</p>
@@ -966,7 +966,7 @@ are the evidence that a particular assembly worked.</p>
 <ul>
 <li><strong>Steering:</strong> PCA9685 at I2C <code>0x40</code>, channel <code>0</code>, 50 Hz. Logical steering is
   0/90/180 for left/center/right, with hardware mapping and trim in <code>hardware.py</code>.</li>
-<li><strong>Drive:</strong> AT8236 motor control through four Pi PWM outputs: right forward 19,
+<li><strong>Drive:</strong> AT8236 motor control through four Raspberry Pi 5 PWM outputs: right forward 19,
   right reverse 20, left forward 25, and left reverse 13.</li>
 <li><strong>Wheel speed:</strong> hall input on GPIO 24; software uses 455 pulses per revolution
   and a configured 7.0 cm wheel diameter.</li>
@@ -978,13 +978,13 @@ are the evidence that a particular assembly worked.</p>
 <li><strong>Camera:</strong> Raspberry Pi Camera Module 3 Wide through Picamera2, captured at
   1280x720 before model-specific preprocessing.</li>
 <li><strong>Dashboard:</strong> one Waveshare 64x32 HUB75 panel on a Zero 2 W, receiving UDP over
-  the fixed Pi-to-Zero USB network (<code>192.168.10.1</code> to <code>192.168.10.2</code>, port 8765).</li>
+  the fixed Raspberry Pi 5–Zero 2 W USB network (<code>192.168.10.1</code> to <code>192.168.10.2</code>, port 8765).</li>
 <li><strong>IMU:</strong> XIAO MG24 Sense yaw data on <code>/dev/ttyAMA3</code> at 115200 for the current
   experimental yaw-control path.</li>
 </ul>
 <h2 id="boundaries">Boundaries</h2>
 <ul>
-<li>The custom Pi breakout PCB is designed but not fabricated.</li>
+<li>The custom Raspberry Pi 5 breakout PCB is designed but not fabricated.</li>
 <li>Configuration does not prove water resistance, EMI immunity, stopping distance,
   or reliability.</li>
 <li>Series 4 ONNX models are integrated and smoke-tested but have no physical-car

@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -510,7 +510,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -920,7 +920,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -961,26 +961,26 @@
 </thead>
 <tbody>
 <tr>
+<td>Jetson Orin Nano</td>
+<td>Series 3/4 ONNX inference through ONNX Runtime, normally with CUDA</td>
+<td>Direct Ethernet at <code>10.42.0.2:8770</code></td>
+</tr>
+<tr>
 <td>Raspberry Pi 5</td>
 <td>Camera capture, Xbox input, sensors, final safety arbitration, motors, steering, logs, and dashboard sender</td>
 <td>Hardware buses, USB, Ethernet</td>
 </tr>
 <tr>
-<td>Jetson Orin Nano (Jon)</td>
-<td>Series 3/4 ONNX inference through ONNX Runtime, normally with CUDA</td>
-<td>Direct Ethernet at <code>10.42.0.2:8770</code></td>
-</tr>
-<tr>
-<td>Raspberry Pi Zero 2 W</td>
+<td>Zero 2 W</td>
 <td>Receives telemetry and renders the 64x32 HUB75 dashboard</td>
 <td>USB Ethernet at <code>192.168.10.2:8765</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="why-it-is-split">Why It Is Split</h2>
-<p>The Pi already owns the Camera Module 3 Wide and the complete actuator/sensor integration. Jon adds GPU inference without moving final control authority away from the Pi. The Zero isolates panel rendering from the control loop.</p>
-<p>Series 1/2 can run locally on the Pi. Series 3/4 use Jon because they have larger <code>320x180</code> networks and the project has selected the Jetson GPU path for them. Inference rate is runtime telemetry, not a fixed claim; report it with the model, provider, software build, and power mode used for the measurement.</p>
-<p>The Zero does not issue actuator commands. Losing the display removes observability but does not transfer control authority.</p>
+<p>The Raspberry Pi 5 already owns the Camera Module 3 Wide and the complete actuator/sensor integration. Jetson Orin Nano adds GPU inference without moving final control authority away from the Raspberry Pi 5. The Zero 2 W isolates panel rendering from the control loop.</p>
+<p>Series 1/2 can run locally on the Raspberry Pi 5. Series 3/4 use Jetson Orin Nano because they have larger <code>320x180</code> networks and the project has selected the Jetson Orin Nano GPU path for them. Inference rate is runtime telemetry, not a fixed claim; report it with the model, provider, software build, and power mode used for the measurement.</p>
+<p>The Zero 2 W does not issue actuator commands. Losing the display removes observability but does not transfer control authority.</p>
               
             </div>
           </div><footer>

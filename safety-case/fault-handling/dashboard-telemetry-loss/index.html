@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -967,15 +967,15 @@
 telemetry link does not intentionally change steering or motor state. Dashboard serialization
 and transport run in a latest-payload worker rather than directly in the controller loop.</p>
 <h2 id="hazard">Hazard</h2>
-<p>The dashboard link (Pi 5 <code>192.168.10.1</code> to Zero 2 W <code>192.168.10.2</code> over USB Ethernet,
+<p>The dashboard link (Raspberry Pi 5 <code>192.168.10.1</code> to Zero 2 W <code>192.168.10.2</code> over USB Ethernet,
 UDP port 8765) can drop because of a cable, power, interface, or neighbor-resolution
 failure. The architecture keeps this observability path outside routine actuator arbitration.</p>
 <h2 id="detection">Detection</h2>
 <ul>
-<li><strong>Pi side:</strong> <code>AsyncDashboardSender</code> accepts the newest state snapshot immediately and
+<li><strong>Raspberry Pi 5 side:</strong> <code>AsyncDashboardSender</code> accepts the newest state snapshot immediately and
   calls <code>Hub75DashboardSender</code> from its worker thread. <code>sendto()</code> failures are caught and
   logged. Sends are throttled to <code>HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1</code>.</li>
-<li><strong>Zero side:</strong> the receiver renders <code>NO LINK</code> when it is alive but has not received a
+<li><strong>Zero 2 W side:</strong> the receiver renders <code>NO LINK</code> when it is alive but has not received a
   packet recently, so a dropped link is visible on the panel.</li>
 <li><strong>USB link health</strong> is checked with <code>ip -br addr show usb0</code>, <code>cat
   /sys/class/net/usb0/carrier</code>, <code>ip neigh show dev usb0</code>, and a ping both ways.</li>
@@ -985,7 +985,7 @@ failure. The architecture keeps this observability path outside routine actuator
 does not intentionally change a motion command. Recovery is by the USB keeper/reset helpers
 (<code>code/test_files/setup/install_usb_dashboard_link.sh</code>), not by anything in the driving loop.</p>
 <p>Linked shutdown is preserved: when the controller quits, it calls
-<code>dashboard_sender.send_shutdown()</code> so the Zero receiver is told to stop; the sender
+<code>dashboard_sender.send_shutdown()</code> so the Zero 2 W receiver is told to stop; the sender
 also advertises an idle-exit window (<code>HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0</code>).</p>
 <h2 id="stop-condition-and-who-triggers-it">Stop condition and who triggers it</h2>
 <p>None. Dashboard telemetry loss has no motion-response rule. The worker boundary prevents
@@ -1002,7 +1002,7 @@ or process-isolation guarantee.</p>
   during link failure is not preserved here.</li>
 </ul>
 <h2 id="series-3-note">Series 3 note</h2>
-<p>Series 3 does not touch the dashboard link; telemetry is a Pi/Zero concern unrelated to
+<p>Series 3 does not touch the dashboard link; telemetry is a Raspberry Pi 5/Zero 2 W concern unrelated to
 where the steering model runs.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>

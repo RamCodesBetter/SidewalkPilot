@@ -142,7 +142,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -235,7 +235,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -512,7 +512,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -922,7 +922,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -995,9 +995,9 @@
 <td>Public metadata should be checked against the exact snapshot used for a run</td>
 </tr>
 <tr>
-<td>Manual control remains responsive when Jetson is off</td>
+<td>Manual control remains responsive when Jetson Orin Nano is off</td>
 <td>Background inference-client code, automated tests, July 14 hardware retest</td>
-<td>Powered-off inference no longer blocks the Pi control loop</td>
+<td>Powered-off inference no longer blocks the Raspberry Pi 5 control loop</td>
 <td>A long-duration latency trace is not yet published</td>
 </tr>
 <tr>
@@ -1030,7 +1030,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Pi controller entrypoint</td>
+<td>Raspberry Pi 5 controller entrypoint</td>
 <td><code>code/controller/current/rc_car.py</code></td>
 </tr>
 <tr>
@@ -1038,11 +1038,11 @@
 <td><code>code/controller/current/rc_car_app/runtime.py</code></td>
 </tr>
 <tr>
-<td>Jetson inference server</td>
+<td>Jetson Orin Nano inference server</td>
 <td><code>code/controller/current/rc_car_app/jetson_inference_server.py</code></td>
 </tr>
 <tr>
-<td>Pi inference client and model selection</td>
+<td>Raspberry Pi 5 inference client and model selection</td>
 <td><code>code/controller/current/rc_car_app/vision.py</code></td>
 </tr>
 <tr>
@@ -1088,10 +1088,6 @@
 <tr>
 <td>Public artifacts</td>
 <td><a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face profile</a></td>
-</tr>
-<tr>
-<td>Training runs</td>
-<td><a href="https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot">Weights &amp; Biases</a></td>
 </tr>
 </tbody>
 </table>

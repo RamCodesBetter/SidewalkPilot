@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -970,7 +970,7 @@
 <ol>
 <li>LiDAR points: confirm the scan is live, not stale. The parser marks a scan stale after <code>SCAN_STALE_SEC = 1.0</code> s and then returns an empty list. Watch the dashboard LiDAR page or the CSV column <code>Number of LiDAR Points in Scan</code> — it must be non-zero. Wave a hand in front and confirm <code>LiDAR Front Distance (m)</code> drops. Evidence: non-zero point count and a front distance that tracks a real obstacle.</li>
 <li>LiDAR direction/AEB arbitration: confirm the direction arrow reacts. <code>determine_turn_direction</code> returns <code>STOP_WARNING</code> under the stop threshold and <code>WARN_WARNING</code> under the warn threshold, and only points with confidence ≥ 150 count. AEB is armed by default (<code>Metrics.aeb_enabled = True</code>) and, in gear D, brakes hard when a stop condition is seen. Evidence: front distance under threshold flips the dashboard alert to <code>STOP</code>/<code>WARN</code>.</li>
-<li>Camera / model: confirm frames are flowing and the selected model produces changing steering results. Local Pi analysis has a 0.75-second frame guard; the live Series 3/4 path accepts only a matching Jetson result no more than 0.25 seconds old. Either stale condition requests a hard stop. Accepted neural results currently report confidence <code>1.0</code>, so confidence distinguishes unavailable/stale output but is not a calibrated scene-quality score. Evidence: fresh timestamps/inference rate and steering output that changes with the view.</li>
+<li>Camera / model: confirm frames are flowing and the selected model produces changing steering results. Local Raspberry Pi 5 analysis has a 0.75-second frame guard; the live Series 3/4 path accepts only a matching Jetson Orin Nano result no more than 0.25 seconds old. Either stale condition requests a hard stop. Accepted neural results currently report confidence <code>1.0</code>, so confidence distinguishes unavailable/stale output but is not a calibrated scene-quality score. Evidence: fresh timestamps/inference rate and steering output that changes with the view.</li>
 <li>GPS: confirm a fix if the run uses navigation. <code>GpsReader</code> reads <code>$GxGGA</code> sentences on <code>/dev/ttyAMA0</code> at 9600; check <code>fix</code> and <code>sats</code>. No fix is acceptable for manual-only driving but blocks A* navigation and crosswalk handoff. Evidence: fix true and satellite count.</li>
 <li>Hall / speed: roll the wheels by hand (or the lifted drive baseline) and confirm speed appears. Pulses come from GPIO24; the CSV <code>Current Speed (MPH)</code> and <code>Time Since Last Hall Sensor Pulse (s)</code> should update. No pulses means cruise control will refuse to engage (<code>try_toggle_cruise_control</code> needs speed &gt; 0.1 mph).</li>
 <li>Steering and IMU: command a small left and right and confirm the wheels track. Logical steering is <code>0=left, 90=center, 180=right</code>, mapped to the PCA9685 in <code>hardware.py</code>. With the checked-in <code>straight</code> yaw mode, confirm startup reports <code>Yaw-rate PID steering ENABLED</code>, yaw telemetry changes with rotation, and the controller reports fresh data before attributing a result to closed-loop correction. Evidence: wheels move both directions, return near center, and the IMU stream is fresh.</li>

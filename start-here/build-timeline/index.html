@@ -74,7 +74,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#july-13-2026-v34-field-selection">July 13, 2026: v3.4 Field Selection</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#july-14-2026-remove-powered-off-jetson-lag">July 14, 2026: Remove Powered-Off-Jetson Lag</a>
+    <li class="toctree-l2"><a class="reference internal" href="#july-14-2026-remove-powered-off-jetson-orin-nano-lag">July 14, 2026: Remove Powered-Off Jetson Orin Nano Lag</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#july-14-2026-series-4-temporal-experiments">July 14, 2026: Series 4 Temporal Experiments</a>
     </li>
@@ -160,7 +160,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -253,7 +253,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -530,7 +530,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -940,7 +940,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -972,7 +972,7 @@
                 <h1 id="build-timeline">Build Timeline</h1>
 <p>This timeline is organized by engineering phase because many early experiments were iterative rather than formal releases. The project began in early April 2025 after a smaller Raspberry Pi Pico project. Exact dates are included only where the project record supports them.</p>
 <h2 id="phase-1-build-a-drivable-research-car">Phase 1: Build a Drivable Research Car</h2>
-<p>The project began by turning an Ackermann-steering RC chassis into a software-controlled platform. The Raspberry Pi took ownership of motor direction, PWM throttle, PCA9685 servo control, camera capture, controller input, and cleanup.</p>
+<p>The project began by turning an Ackermann-steering RC chassis into a software-controlled platform. The Raspberry Pi 5 took ownership of motor direction, PWM throttle, PCA9685 servo control, camera capture, controller input, and cleanup.</p>
 <p>This phase established the non-negotiable baseline: manual driving had to remain available while every later autonomy feature was added.</p>
 <h2 id="phase-2-learn-steering-from-images">Phase 2: Learn Steering from Images</h2>
 <p>Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. Field photos and their steering corrections became the training source, and regular plus <code>b</code> checkpoints began to preserve final-epoch and best-validation behavior separately.</p>
@@ -983,11 +983,11 @@
 <h2 id="phase-4-split-the-work-across-three-computers">Phase 4: Split the Work Across Three Computers</h2>
 <p>The system grew into three managers:</p>
 <ul>
-<li>The Raspberry Pi 5 for hardware and final control;</li>
 <li>The Jetson Orin Nano for model inference;</li>
+<li>The Raspberry Pi 5 for hardware and final control;</li>
 <li>The Zero 2 W for the external dashboard.</li>
 </ul>
-<p>Dedicated Ethernet kept Jetson inference offline. A USB network carried dashboard telemetry. This split made the architecture more capable, but it also introduced real transport, boot-order, service, and stale-data problems that had to be engineered rather than assumed away.</p>
+<p>Dedicated Ethernet kept Jetson Orin Nano inference offline. A USB network carried dashboard telemetry. This split made the architecture more capable, but it also introduced real transport, boot-order, service, and stale-data problems that had to be engineered rather than assumed away.</p>
 <h2 id="phase-5-series-3-and-the-shadow-problem">Phase 5: Series 3 and the Shadow Problem</h2>
 <p>Series 3 increased input resolution to 320x180 and roughly doubled model capacity. v3.0 retained a simpler output contract. v3.1 and later introduced the 19-value hybrid head so the model could choose a coarse steering class before predicting a class-local offset.</p>
 <p>Harsh diagonal tree shadows became the defining failure. Earlier models sometimes followed a dark shadow edge as if it were the edge of the sidewalk. The training pipeline added stronger lighting and synthetic-shadow augmentation, while evaluation expanded beyond mean error to balanced nine-class and turn metrics.</p>
@@ -1009,9 +1009,9 @@
 <li>v3.3b was much worse than v3.2b.</li>
 </ul>
 <p>The exact route, weather, takeover count, and clip identifiers were not preserved in the test record, so this remains an honest qualitative field verdict rather than a fully instrumented benchmark.</p>
-<h2 id="july-14-2026-remove-powered-off-jetson-lag">July 14, 2026: Remove Powered-Off-Jetson Lag</h2>
+<h2 id="july-14-2026-remove-powered-off-jetson-orin-nano-lag">July 14, 2026: Remove Powered-Off Jetson Orin Nano Lag</h2>
 <p>Manual steering and the dashboard had been running smoothly for several seconds, pausing briefly, then resuming. A direct controller test was instantaneous, which ruled out Bluetooth as the main cause.</p>
-<p>The runtime audit found blocking work in the control path, especially repeated network waits to an offline Jetson, photo-directory scans, and temperature subprocesses. Jetson communication moved to a background worker with latest-frame semantics; dashboard sending remained asynchronous; recurring file and subprocess work left the loop. In one physical retest with the Jetson powered off, the previously observed periodic pauses were absent. A long-duration latency trace is still an evidence gap.</p>
+<p>The runtime audit found blocking work in the control path, especially repeated network waits to an offline Jetson Orin Nano, photo-directory scans, and temperature subprocesses. Jetson Orin Nano communication moved to a background worker with latest-frame semantics; dashboard sending remained asynchronous; recurring file and subprocess work left the loop. In one physical retest with the Jetson Orin Nano powered off, the previously observed periodic pauses were absent. A long-duration latency trace is still an evidence gap.</p>
 <h2 id="july-14-2026-series-4-temporal-experiments">July 14, 2026: Series 4 Temporal Experiments</h2>
 <p>The first Series 4 implementation compares three temporal contracts on the unchanged 81,237-image Series 3 dataset and the same deterministic split procedure:</p>
 <ul>
@@ -1019,7 +1019,7 @@
 <li>CF uses the image to predict current and future targets;</li>
 <li>PCF combines previous-target inputs with current/future supervision.</li>
 </ul>
-<p>The three 25-epoch W&amp;B runs completed and produced six final/best artifacts: <code>4.0p/4.0r</code>, <code>4.0f/4.0g</code>, and <code>4.0a/4.0c</code>. Each trainer exported a valid 320x180 ONNX graph. The live Jetson server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Pi-to-Jetson wire protocol.</p>
+<p>The three 25-epoch W&amp;B runs completed and produced six final/best artifacts: <code>4.0p/4.0r</code>, <code>4.0f/4.0g</code>, and <code>4.0a/4.0c</code>. Each trainer exported a valid 320x180 ONNX graph. The live Jetson Orin Nano server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Raspberry Pi 5–Jetson Orin Nano wire protocol.</p>
 <p>All 46 Series 1 through Series 4 checkpoints were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test makes the offline comparison more informative than comparing each family on a different image distribution. Series 4 remains experimental until physical-car testing; v3.4 remains the field-selected baseline.</p>
 <p>The current deployed research state is maintained in <a href="../current-status/">Current Status</a>.</p>
               

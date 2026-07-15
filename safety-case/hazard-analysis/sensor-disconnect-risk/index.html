@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -962,7 +962,7 @@
               
                 <h1 id="sensor-disconnect-risk">Sensor Disconnect Risk</h1>
 <p>Sensor Disconnect Risk covers what happens when a sensor the autonomy loop depends
-on drops out mid-run: the LiDAR (USB CP2102), the camera (Pi Camera Module 3
+on drops out mid-run: the LiDAR (USB CP2102), the camera (Raspberry Pi Camera Module 3
 Wide), the GPS (BN880), or the dashboard link. The desired behavior is a
 detectable, bounded degradation. The current implementation does not meet that
 goal uniformly: camera/model staleness requests a stop, while stale LiDAR data
@@ -982,7 +982,7 @@ different failure policy:</p>
   caveat: losing LiDAR removes the obstacle-stop layer, so autonomous driving
   should not continue without it; the driver must take manual control.</strong></li>
 <li><strong>Camera / model stale.</strong> The local analysis path marks its camera frame stale after
-  0.75 s. The remote Jon path accepts only a matching result no more than
+  0.75 s. The remote Jetson Orin Nano path accepts only a matching result no more than
   <code>JETSON_RESULT_MAX_AGE_SEC</code> (0.25 s) old. An unavailable/stale result leaves confidence
   zero and requests an autonomous hard stop. <code>LOW_CAMERA_CONFIDENCE</code> is 0.25, but accepted
   fresh neural results currently report confidence 1.0; this gate does not detect an
@@ -992,7 +992,7 @@ different failure policy:</p>
   GPS loss only disables route/segment autonomy — it does not stop manual driving
   and is not in the emergency path.</li>
 <li><strong>Dashboard link loss.</strong> Telemetry is sent best-effort over UDP through a latest-payload
-  worker; the Zero renders <code>NO LINK</code> when no packets arrive. A dead
+  worker; the Zero 2 W renders <code>NO LINK</code> when no packets arrive. A dead
   dashboard is an observability loss, not a control loss.</li>
 </ul>
 <h2 id="why-this-choice">Why this choice</h2>
@@ -1019,7 +1019,7 @@ and live telemetry must confirm that the sensor is producing data.</p>
 </tr>
 <tr>
 <td>Camera / model</td>
-<td>Local frame &gt; 0.75 s old, or matching Jon result unavailable/&gt;0.25 s old</td>
+<td>Local frame &gt; 0.75 s old, or matching Jetson Orin Nano result unavailable/&gt;0.25 s old</td>
 <td>Autonomous hard-stop request (<code>model_unavailable</code> / <code>model_low_confidence</code>)</td>
 </tr>
 <tr>
@@ -1029,17 +1029,17 @@ and live telemetry must confirm that the sensor is producing data.</p>
 </tr>
 <tr>
 <td>Dashboard (USB UDP)</td>
-<td>Zero shows <code>NO LINK</code></td>
+<td>Zero 2 W shows <code>NO LINK</code></td>
 <td>No dashboard data is used for motion; display observability is lost</td>
 </tr>
 </tbody>
 </table>
 <h2 id="series-3-impact">Series 3 impact</h2>
-<p>Series 3/4 steering runs remotely on Jon (<code>10.42.0.2:8770</code>). The current Pi client
+<p>Series 3/4 steering runs remotely on Jetson Orin Nano (<code>10.42.0.2:8770</code>). The current Raspberry Pi 5 client
 uses a background latest-frame worker, and missing or late results are treated as
 unavailable/stale by the autonomous control path. This code path is implemented;
 a preserved physical disconnect test is still needed before claiming measured
-stop behavior for a pulled Ethernet cable or powered-off Jon.</p>
+stop behavior for a pulled Ethernet cable or powered-off Jetson Orin Nano.</p>
 <h2 id="evidence-to-attach">Evidence to attach</h2>
 <ul>
 <li>LiDAR reconnect log excerpt (back-off retries)</li>

@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -982,7 +982,7 @@
 <tr>
 <td>IMU</td>
 <td>Seeed XIAO MG24 Sense (6-axis)</td>
-<td><code>/dev/ttyAMA3</code> (Pi GPIO8/9)</td>
+<td><code>/dev/ttyAMA3</code> (Raspberry Pi 5 GPIO8/9)</td>
 <td><code>115200</code></td>
 <td><code>STEERING_YAW_PID_PORT</code> / <code>STEERING_YAW_PID_BAUD</code></td>
 </tr>
@@ -1001,15 +1001,15 @@
 verifier, reader thread, and controller are implemented. The runtime defaults to
 <code>STEERING_YAW_PID_MODE = "straight"</code> and falls back to open-loop steering if the IMU cannot
 start or its samples are stale.</p>
-<p>The LiDAR was originally a GPIO-UART device on <code>/dev/ttyAMA2</code> at 230400 baud (with a Pi 5 UART overlay on GPIO4/5). It has since moved to a USB/CP2102 connection; see the USB wiring page. The <code>230400</code> baud and the FHL-LD19 packet format are unchanged, only the transport moved.</p>
+<p>The LiDAR was originally a GPIO-UART device on <code>/dev/ttyAMA2</code> at 230400 baud (with a Raspberry Pi 5 UART overlay on GPIO4/5). It has since moved to a USB/CP2102 connection; see the USB wiring page. The <code>230400</code> baud and the FHL-LD19 packet format are unchanged, only the transport moved.</p>
 <p>Because <code>/dev/ttyAMA0</code> is a real UART, the serial console must be freed from it or GPS reads fail with a permission/busy error. GPS is <code>/dev/ttyAMA0</code>; do not confuse it with the LiDAR's former <code>/dev/ttyAMA2</code>.</p>
 <h2 id="why-this-choice">Why this choice</h2>
 <p>Separate links let each serial device run at its own baud without sharing a byte stream: GPS is a 9600-baud NMEA stream, LiDAR is a 230400-baud USB-serial stream, and the IMU has its own GPIO UART. A failure can still affect shared power, USB, or process resources.</p>
 <h2 id="test">Test</h2>
-<pre><code class="language-bash"># Pi 5 — GPS (stop the car service first to avoid two readers)
+<pre><code class="language-bash"># Raspberry Pi 5 — GPS (stop the car service first to avoid two readers)
 timeout 5s cat /dev/ttyAMA0        # expect NMEA sentences ($GPGGA, $GPRMC ...)
 
-# Pi 5 — raw LiDAR bytes when on GPIO UART (former path)
+# Raspberry Pi 5 — raw LiDAR bytes when on GPIO UART (former path)
 stty -F /dev/ttyAMA2 230400 raw -echo
 timeout 5s cat /dev/ttyAMA2 | hexdump -C
 </code></pre>

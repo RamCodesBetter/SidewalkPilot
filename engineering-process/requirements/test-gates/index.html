@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -245,7 +245,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -522,7 +522,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -1006,7 +1006,7 @@ python -m compileall code/controller/current/rc_car_app
 <td>A* returns a followable route with correct AI/manual segments</td>
 </tr>
 <tr>
-<td>Zero display</td>
+<td>Zero 2 W display</td>
 <td><code>z2w_dashboard.py</code> + <code>hub75_dashboard.py</code></td>
 <td>New/changed value threaded through ALL layers (runtime → serializer → renderer), not just the draw function</td>
 </tr>
@@ -1019,7 +1019,7 @@ python -m compileall code/controller/current/rc_car_app
 </table>
 <h2 id="hardware-gates-do-not-skip-after-touching-hardware">Hardware gates (do not skip after touching hardware)</h2>
 <ul>
-<li><strong>USB dashboard:</strong> <code>ip -br addr show usb0</code>, <code>cat /sys/class/net/usb0/carrier</code>, <code>ip neigh show dev usb0</code>, then ping both ways (<code>192.168.10.2</code> from the Pi, <code>192.168.10.1</code> from the Zero). Carrier <code>1</code> with a failed ping is the known ARP failure mode — recover with the keeper service.</li>
+<li><strong>USB dashboard:</strong> <code>ip -br addr show usb0</code>, <code>cat /sys/class/net/usb0/carrier</code>, <code>ip neigh show dev usb0</code>, then ping both ways (<code>192.168.10.2</code> from the Raspberry Pi 5, <code>192.168.10.1</code> from the Zero 2 W). Carrier <code>1</code> with a failed ping is the known ARP failure mode — recover with the keeper service.</li>
 <li><strong>LiDAR:</strong> stop the car service first so there are not two readers, then check the current USB-serial stream:</li>
 </ul>
 <pre><code class="language-bash">sudo systemctl stop sidewalkpilot-rpi-car.service

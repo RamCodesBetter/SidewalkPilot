@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -241,7 +241,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -959,15 +959,15 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="dashboard-udp-telemetry">Dashboard UDP Telemetry</h1>
-<p>This page records the decision to send dashboard telemetry from the Pi 5 to the
+<p>This page records the decision to send dashboard telemetry from the Raspberry Pi 5 to the
 Zero 2 W over <strong>UDP across a USB Ethernet gadget link</strong>, instead of a serial
 cable or a Wi-Fi/mDNS connection.</p>
 <h2 id="decision">Decision</h2>
-<p>The Pi 5 controller sends a JSON telemetry packet roughly every 100 ms to the
+<p>The Raspberry Pi 5 controller sends a JSON telemetry packet roughly every 100 ms to the
 Zero 2 W dashboard receiver over UDP. The transport is fixed to the USB Ethernet
 gadget between the two boards:</p>
 <ul>
-<li>Pi 5 <code>usb0</code> = <code>192.168.10.1</code>, Zero 2 W <code>usb0</code> = <code>192.168.10.2</code></li>
+<li>Raspberry Pi 5 <code>usb0</code> = <code>192.168.10.1</code>, Zero 2 W <code>usb0</code> = <code>192.168.10.2</code></li>
 <li>Dashboard UDP target = <code>192.168.10.2:8765</code></li>
 </ul>
 <p>The sender is <code>Hub75DashboardSender</code> in
@@ -980,7 +980,7 @@ HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1
 </code></pre>
 <p>Each packet is one line of JSON (<code>json.dumps(payload) + "\n"</code>) carrying speed,
 gear, turn signals, servo angle, throttle/brake percent, drive mode, LiDAR
-points, camera pixels, CPU temp, nav status, and so on. The Zero renders it in
+points, camera pixels, CPU temp, nav status, and so on. The Zero 2 W renders it in
 <code>z2w_dashboard.py</code>.</p>
 <h2 id="alternatives-considered">Alternatives considered</h2>
 <table>
@@ -1005,7 +1005,7 @@ points, camera pixels, CPU temp, nav status, and so on. The Zero renders it in
 <tr>
 <td><strong>UDP over USB Ethernet gadget (chosen)</strong></td>
 <td>one cable provides a dedicated IP link; fixed numeric target avoids mDNS; no delivery handshake</td>
-<td>the USB gadget link needs keeper/recovery tooling, and UDP does not confirm that the Zero rendered a packet</td>
+<td>the USB gadget link needs keeper/recovery tooling, and UDP does not confirm that the Zero 2 W rendered a packet</td>
 </tr>
 </tbody>
 </table>
@@ -1023,7 +1023,7 @@ fallback was deliberately removed and must not be re-added unless Ram explicitly
 <ul>
 <li>The car log should print <code>Hub75 dashboard telemetry sending UDP to
   192.168.10.2:8765.</code> (if it says <code>zero2w.local</code>, stale code/env is active).</li>
-<li>On the Zero, <code>ss -lunp | grep 8765</code> shows the receiver listening.</li>
+<li>On the Zero 2 W, <code>ss -lunp | grep 8765</code> shows the receiver listening.</li>
 <li><code>NO LINK</code> on the display means the receiver is alive but no packets arrived
   recently — check <code>usb0</code> carrier, ARP, and ping both ways.</li>
 <li><code>code/test_files/setup/install_usb_dashboard_link.sh</code> installs the static IPs

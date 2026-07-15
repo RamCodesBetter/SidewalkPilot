@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -963,17 +963,17 @@
 <h2 id="preconditions">Preconditions</h2>
 <ul>
 <li>A test route is chosen. For AI/manual navigation segments, the route must already exist in <code>code/controller/current/rc_car_app/trossachs_nav_graph.json</code>; the current route manager uses GPS/odometry state with A* over that graph. The separate compass hardware is not an active route-planning input.</li>
-<li>The steering model to run is decided (see <code>model-selection.md</code>). Series 1/2 checkpoints in <code>code/ai_models/</code> run on the Pi; Series 3/4 ONNX models run on the Jetson (Jon, <code>10.42.0.2:8770</code>). v3.4 is the current field-selected baseline. Series 4 models require field testing before promotion.</li>
-<li>The latest code is on the Pi. The Pi's <code>~/rc_car_code</code> is the git repo; the Zero's copy is synced by rsync/scp and is not a repo, so a code change only takes effect after each device re-imports it.</li>
+<li>The steering model to run is decided (see <code>model-selection.md</code>). Series 1/2 checkpoints in <code>code/ai_models/</code> run on the Raspberry Pi 5; Series 3/4 ONNX models run on the Jetson Orin Nano at <code>10.42.0.2:8770</code>. v3.4 is the current field-selected baseline. Series 4 models require field testing before promotion.</li>
+<li>The latest code is on the Raspberry Pi 5. The Raspberry Pi 5's <code>~/rc_car_code</code> is the git repo; the Zero 2 W's copy is synced by rsync/scp and is not a repo, so a code change only takes effect after each device re-imports it.</li>
 </ul>
 <h2 id="steps">Steps</h2>
 <ol>
-<li>Charge and pack the 3S LiPo that powers the drive motors, plus the Pi/electronics power. Do the full battery inspection in <code>battery-check.md</code> before loading anything. Evidence: measured pack voltage.</li>
+<li>Charge and pack the 3S LiPo that powers the drive motors, plus the Raspberry Pi 5/electronics power. Do the full battery inspection in <code>battery-check.md</code> before loading anything. Evidence: measured pack voltage.</li>
 <li>Pack the Xbox controller and confirm it is charged/paired. The runtime hard-exits at startup with <code>!!! WARNING: No joystick detected</code> if pygame sees zero joysticks (<code>rc_car_app/runtime.py</code>, <code>pygame.joystick.get_count() == 0</code>), so a dead controller means no run.</li>
 <li>Confirm the sensor harness is intact: LiDAR (Youyeetoo FHL-LD19, USB <code>/dev/ttyUSB0</code> via CP2102, 230400 baud), GPS (BN880 on <code>/dev/ttyAMA0</code>, 9600), hall sensor (GPIO24), servo ribbon to the PCA9685 (I2C <code>0x40</code>, channel 0), and the motor leads to the AT8236 (GPIO 19/20 right, 25/13 left). Evidence: visual/tug check of each connector.</li>
-<li>Confirm the RPi Camera Module 3 Wide is seated and its ribbon is locked. The current camera integration and all 81,237 Series 3/4 images use this Pi camera path; a loose ribbon breaks capture and model input.</li>
-<li>Pack the Zero 2 W dashboard and the USB Ethernet cable. The dashboard is USB-only: Pi <code>usb0</code> is <code>192.168.10.1</code>, Zero <code>usb0</code> is <code>192.168.10.2</code>, telemetry is UDP to <code>192.168.10.2:8765</code>. Use the known working port and power arrangement; <code>-110</code>/<code>-62</code> enumeration errors indicate a failed USB transaction but do not by themselves prove whether the cause is power, cable, port, or gadget state.</li>
-<li>Clear space on the Pi for the run's output. Each run writes a CSV to <code>~/logs/log_YYYYMMDD_HHMMSS.csv</code> by default (or under <code>RC_CAR_LOG_DIR</code>) and photos to <code>media/photos/YYYY_MM_DD_run_N/</code> with a per-run JSON label file. Confirm free disk in both locations.</li>
+<li>Confirm the Raspberry Pi Camera Module 3 Wide is seated and its ribbon is locked. The current camera integration and all 81,237 Series 3/4 images use this Raspberry Pi 5 camera path; a loose ribbon breaks capture and model input.</li>
+<li>Pack the Zero 2 W dashboard and the USB Ethernet cable. The dashboard is USB-only: Raspberry Pi 5 <code>usb0</code> is <code>192.168.10.1</code>, Zero 2 W <code>usb0</code> is <code>192.168.10.2</code>, telemetry is UDP to <code>192.168.10.2:8765</code>. Use the known working port and power arrangement; <code>-110</code>/<code>-62</code> enumeration errors indicate a failed USB transaction but do not by themselves prove whether the cause is power, cable, port, or gadget state.</li>
+<li>Clear space on the Raspberry Pi 5 for the run's output. Each run writes a CSV to <code>~/logs/log_YYYYMMDD_HHMMSS.csv</code> by default (or under <code>RC_CAR_LOG_DIR</code>) and photos to <code>media/photos/YYYY_MM_DD_run_N/</code> with a per-run JSON label file. Confirm free disk in both locations.</li>
 <li>Bring the takeover plan: confirm the Xbox controller is connected and keep it in reach before any autonomous motion.</li>
 </ol>
 <h2 id="stop-condition">Stop condition</h2>

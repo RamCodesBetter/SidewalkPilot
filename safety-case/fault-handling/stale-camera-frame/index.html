@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -972,26 +972,26 @@ to steer through.</p>
 frame. A frozen or missing frame means the steering command no longer reflects the
 world ahead. Continuing to steer on it could run the car off the sidewalk.</p>
 <h2 id="detection">Detection</h2>
-<p>In <code>apply_autonomous_controls()</code> (<code>runtime.py</code>), local Pi analysis carries the timestamp
+<p>In <code>apply_autonomous_controls()</code> (<code>runtime.py</code>), local Raspberry Pi 5 analysis carries the timestamp
 of the frame it was computed from. That local frame is judged stale when:</p>
 <pre><code>model_frame_is_stale = time.time() - last_frame_time &gt; 0.75   # seconds
 </code></pre>
 <p>When stale, the local analysis is blanked (<code>heading_bias = 0</code>, <code>confidence = 0</code>, no
 edges) and tagged <code>method = "stale_model_frame"</code>.</p>
-<p>The live Series 3/4 path adds a separate Jetson cache-age check. The Pi accepts only a
+<p>The live Series 3/4 path adds a separate Jetson Orin Nano cache-age check. The Raspberry Pi 5 accepts only a
 result for the selected model that is no more than <code>JETSON_RESULT_MAX_AGE_SEC = 0.25</code>
 seconds old. If no matching fresh sample exists, the method becomes
 <code>jetson_unreachable</code>, confidence remains zero, and the same stop path is used.</p>
 <h2 id="response">Response</h2>
-<p>A stale frame or Jetson result is treated the same as no model / low confidence: the car does not
+<p>A stale frame or Jetson Orin Nano result is treated the same as no model / low confidence: the car does not
 guess a steering angle. <code>apply_hard_stop_state()</code> is called (via the confidence
 branch, since stale forces <code>confidence = 0 &lt; LOW_CAMERA_CONFIDENCE = 0.25</code>), which
 centers steering, zeroes throttle, sets brake force to <code>1.0</code>, and sets
 <code>stop_reason = "model_low_confidence"</code>. The car holds until fresh, confident frames
 resume or the operator takes over.</p>
 <h2 id="stop-condition-and-who-triggers-it">Stop condition and who triggers it</h2>
-<p>Automatic, evaluated every autonomous tick. Local Pi analysis uses the 0.75-second
-frame threshold; the live Jetson result uses the 0.25-second matching-sample threshold.
+<p>Automatic, evaluated every autonomous tick. Local Raspberry Pi 5 analysis uses the 0.75-second
+frame threshold; the live Jetson Orin Nano result uses the 0.25-second matching-sample threshold.
 The operator can override at any time; the model cannot resume driving until its result
 is fresh again.</p>
 <h2 id="evidence">Evidence</h2>
@@ -1004,7 +1004,7 @@ is fresh again.</p>
 <li>Field evidence: a forced stale-frame stop clip is <strong>planned / not-yet-captured</strong>.</li>
 </ul>
 <h2 id="series-34-note">Series 3/4 note</h2>
-<p>Series 3/4 send the newest frame to the Jetson through <code>AsyncJetsonSteeringClient</code>.
+<p>Series 3/4 send the newest frame to the Jetson Orin Nano through <code>AsyncJetsonSteeringClient</code>.
 Network and inference waits run in that worker rather than in the 60 Hz controller
 loop. The controller consumes only the newest cached, model-matching result and requests
 a hard stop when that result is unavailable or older than 0.25 seconds. This behavior is

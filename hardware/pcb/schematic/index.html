@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,18 +957,18 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="pcb-schematic">PCB Schematic</h1>
-<p>The schematic captures which sensors and actuators connect to which Pi 5 pins and buses on the custom breakout board. It is the electrical intent behind the <a href="../gpio-mapping/">GPIO map</a>: the same subsystems that are currently jumper-wired on a breadboard, drawn as fixed nets. Like the rest of the PCB work it is <strong>design-only</strong> — the board is not fabricated — and the pin nets shown on the current designed revision are <strong>outdated</strong>, so the finalized schematic will be re-drawn against the runtime pinout before fab.</p>
+<p>The schematic captures which sensors and actuators connect to which Raspberry Pi 5 pins and buses on the custom breakout board. It is the electrical intent behind the <a href="../gpio-mapping/">GPIO map</a>: the same subsystems that are currently jumper-wired on a breadboard, drawn as fixed nets. Like the rest of the PCB work it is <strong>design-only</strong> — the board is not fabricated — and the pin nets shown on the current designed revision are <strong>outdated</strong>, so the finalized schematic will be re-drawn against the runtime pinout before fab.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>The schematic groups the car into four electrical blocks, each hanging off the Pi 5 header:</p>
+<p>The schematic groups the car into four electrical blocks, each hanging off the Raspberry Pi 5 header:</p>
 <ul>
-<li><strong>Power / ground rails.</strong> Shared 5V and ground distributed to the servo driver, motor driver, and sensors, instead of daisy-chaining through breadboard rails. The 3S LiPo drives the motor side; logic power comes from the Pi.</li>
+<li><strong>Power / ground rails.</strong> Shared 5V and ground distributed to the servo driver, motor driver, and sensors, instead of daisy-chaining through breadboard rails. The 3S LiPo drives the motor side; logic power comes from the Raspberry Pi 5.</li>
 <li><strong>I2C bus.</strong> SDA/SCL run to the PCA9685 servo driver at address <code>0x40</code>, which drives the steering servo on channel 0 at 50 Hz. Same bus can carry the HMC5883L compass block if broken out.</li>
 <li><strong>Motor-driver GPIO block.</strong> Four direction/PWM nets to the Yahboom AT8236 H-bridge: right forward (GPIO 19), right backward (GPIO 20), left forward (GPIO 25), left backward (GPIO 13). The AT8236 output stage connects to the two drive motors.</li>
 <li><strong>Signal / serial block.</strong> The hall sensor pulse input (GPIO 24), plus serial connectors for the LiDAR (CP2102 USB, 230400 baud), GPS (<code>/dev/ttyAMA0</code>, 9600 baud), and IMU (XIAO MG24 on <code>/dev/ttyAMA3</code>).</li>
 </ul>
-<p>Each block is a net on the schematic that lands on the exact Pi pin the runtime already references, so swapping the breadboard for the board requires no code change. Full per-signal detail lives in the <a href="../gpio-mapping/">GPIO Mapping</a> page; the schematic is where those signals become connected nets with power and ground.</p>
+<p>Each block is a net on the schematic that lands on the exact Raspberry Pi 5 pin the runtime already references, so swapping the breadboard for the board requires no code change. Full per-signal detail lives in the <a href="../gpio-mapping/">GPIO Mapping</a> page; the schematic is where those signals become connected nets with power and ground.</p>
 <h2 id="why-it-matters">Why it matters</h2>
-<p>Drawing the schematic first is what turns a pile of jumper wires into something reproducible and reviewable. On a schematic I can see, before spending money on copper, whether a bus is overloaded, whether grounds are common, and whether the motor-driver power is isolated from Pi logic power — things that are invisible in a breadboard rat's nest and that show up as "random" faults in the field. It is also the artifact I can hand to someone reviewing the build for safety.</p>
+<p>Drawing the schematic first is what turns a pile of jumper wires into something reproducible and reviewable. On a schematic I can see, before spending money on copper, whether a bus is overloaded, whether grounds are common, and whether the motor-driver power is isolated from Raspberry Pi 5 logic power — things that are invisible in a breadboard rat's nest and that show up as "random" faults in the field. It is also the artifact I can hand to someone reviewing the build for safety.</p>
 <p>The cost is that a schematic freezes decisions. Because my runtime pinout moved after the first draw, the current schematic's nets are stale, and I would rather correct the drawing than fabricate a wrong board.</p>
 <h2 id="status">Status</h2>
 <ul>

@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -524,7 +524,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -934,7 +934,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -1173,7 +1173,7 @@
 </table>
 <p>PC is the strongest first field candidate because <code>4.0p</code> leads the class-balanced and turn metrics. PCF is close and has the best raw-error checkpoint. CF did not show the same benefit in this offline comparison. That result does not isolate the temporal contract from checkpoint selection or prove that future-target supervision is generally inferior.</p>
 <h2 id="live-runtime-contract">Live Runtime Contract</h2>
-<p>The Pi still sends only the JPEG and selected model version over the private Ethernet link. Jon reads the ONNX input metadata:</p>
+<p>The Raspberry Pi 5 still sends only the JPEG and selected model version over the private Ethernet link. Jetson Orin Nano reads the ONNX input metadata:</p>
 <ul>
 <li>Image-only graph: run CF directly;</li>
 <li>Graph with <code>target_history</code>: initialize <code>[90,90,90]</code>, feed it, decode horizon 0, then append that decoded target for the next inference.</li>
@@ -1181,7 +1181,7 @@
 <p>History resets on model load/switch, reconnect, and status-only/manual periods. This keeps history ordered in the single inference process and avoids changing the TCP packet format. CUDA is selected without registering a partially installed TensorRT provider that could force an accidental CPU fallback.</p>
 <h2 id="promotion-gate">Promotion Gate</h2>
 <p>Series 4 is <strong>trained and runtime-supported</strong>, but <strong>not field-selected</strong>. It must beat v3.4 on the same physical shadow/turn route, remain smooth under autoregressive history, satisfy inference-freshness checks, and preserve AEB behavior before the live default changes.</p>
-<p>See <a href="../../model-zoo/series-4/">Series 4 Models</a>, <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>.</p>
+<p>See <a href="../../model-zoo/series-4/">Series 4 Models</a>, <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>
           </div><footer>

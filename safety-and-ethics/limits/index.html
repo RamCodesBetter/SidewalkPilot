@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -964,7 +964,7 @@
 <ul>
 <li><strong>Speed stays conservative by operating procedure and throttle policy, not an enforced mph cap.</strong> <code>MAX_AUTONOMOUS_SPEED_MPH = 3.2</code> is declared but not wired into a final measured-speed governor. The current LiDAR policy can cap forward throttle when AEB is enabled; physical speed still depends on payload, surface, battery, and motor response.</li>
 <li><strong>Steering is bounded.</strong> Logical steering is <code>0</code> (left) to <code>180</code> (right), centered at <code>90</code>, mapped to the PCA9685 servo in <code>hardware.py</code>; the runtime clamps servo degrees before every write (<code>clamp_servo_degrees</code>). LiDAR never supplies a steering command.</li>
-<li><strong>Autonomy is opt-in, per drive.</strong> The car boots in gear <code>P</code> (park) with <code>autonomous_mode = False</code>. Autonomy engages only after the operator presses A (<code>AUTONOMY_TOGGLE_BUTTON = 0</code> in Pygame's zero-based numbering) and the camera/vision processor exists. The live result is then checked every tick; an unavailable Jetson/model result requests a hard stop rather than making the toggle itself prove readiness. Reverse (<code>R</code>) bypasses forward AEB by design so the operator can back out manually.</li>
+<li><strong>Autonomy is opt-in, per drive.</strong> The car boots in gear <code>P</code> (park) with <code>autonomous_mode = False</code>. Autonomy engages only after the operator presses A (<code>AUTONOMY_TOGGLE_BUTTON = 0</code> in Pygame's zero-based numbering) and the camera/vision processor exists. The live result is then checked every tick; an unavailable Jetson Orin Nano/model result requests a hard stop rather than making the toggle itself prove readiness. Reverse (<code>R</code>) bypasses forward AEB by design so the operator can back out manually.</li>
 </ul>
 <h2 id="fault-handling-detection-to-response">Fault handling (detection to response)</h2>
 <p>The runtime hard-stops autonomous motion when the camera/model result is unavailable. LiDAR is different: serial errors trigger reconnect attempts, but an empty or stale scan is not currently a fail-closed stop. The autonomous control path in <code>apply_autonomous_controls</code> (<code>runtime.py</code>) checks:</p>
@@ -981,7 +981,7 @@
 <tr>
 <td>Obstacle very close in center corridor</td>
 <td>Enabled AEB and center clearance <code>&lt;= LIDAR_OVERRIDE_EMERGENCY_STOP_M</code> (1.05 m)</td>
-<td>Zero throttle and full brake, reason <code>lidar_emergency</code> / <code>aeb_stop</code></td>
+<td>zero throttle and full brake, reason <code>lidar_emergency</code> / <code>aeb_stop</code></td>
 <td><code>lidar_avoidance.evaluate</code>, <code>update_gpio</code></td>
 </tr>
 <tr>
@@ -998,7 +998,7 @@
 </tr>
 <tr>
 <td>Stale model input/result</td>
-<td>Local Pi frame older than 0.75 s, or matching Jetson result unavailable/older than 0.25 s</td>
+<td>Local Raspberry Pi 5 frame older than 0.75 s, or matching Jetson Orin Nano result unavailable/older than 0.25 s</td>
 <td>Treat as unavailable/low confidence and hard stop</td>
 <td><code>apply_autonomous_controls</code></td>
 </tr>
@@ -1030,9 +1030,9 @@
 <li>Pressing the gas (cancels and returns manual throttle).</li>
 <li>Pressing the brake.</li>
 </ul>
-<p>The quit path is the quit button (<code>QUIT_BUTTON = 15</code>) or <code>Ctrl-C</code>, which sets <code>shutdown_flag</code>. A normal exit attempts to write a final log row, stop sensor/camera workers, send a linked-shutdown packet to the Zero dashboard, and call <code>hardware.cleanup()</code>. A forced process kill, controller disconnect, hardware fault, or power-stage fault may bypass that sequence. The operating rule is that a human types "go," keeps the controller ready, and remains able to cut power.</p>
+<p>The quit path is the quit button (<code>QUIT_BUTTON = 15</code>) or <code>Ctrl-C</code>, which sets <code>shutdown_flag</code>. A normal exit attempts to write a final log row, stop sensor/camera workers, send a linked-shutdown packet to the Zero 2 W dashboard, and call <code>hardware.cleanup()</code>. A forced process kill, controller disconnect, hardware fault, or power-stage fault may bypass that sequence. The operating rule is that a human types "go," keeps the controller ready, and remains able to cut power.</p>
 <h2 id="series-3-note">Series 3 note</h2>
-<p>Series 3/4 move steering inference to the Jetson (Jon) over direct Ethernet. A missing or stale Jetson result resolves to a hard stop in <code>apply_autonomous_controls</code>, while LiDAR AEB still arbitrates locally on the Pi. The Jetson client runs in a worker, so connection timeouts do not block controller input or GPIO updates. There is no enforced final mph speed cap; the current autonomy throttle and LiDAR governor are the active motion limits.</p>
+<p>Series 3/4 move steering inference to the Jetson Orin Nano over direct Ethernet. A missing or stale Jetson Orin Nano result resolves to a hard stop in <code>apply_autonomous_controls</code>, while LiDAR AEB still arbitrates locally on the Raspberry Pi 5. The Jetson Orin Nano client runs in a worker, so connection timeouts do not block controller input or GPIO updates. There is no enforced final mph speed cap; the current autonomy throttle and LiDAR governor are the active motion limits.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><code>safety-case/safety-overview.md</code></li>

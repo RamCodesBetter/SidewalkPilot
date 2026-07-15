@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>Pi 5 + Jetson Compute Split - SidewalkPilot RC Car</title>
+    <title>Jetson Orin Nano + Raspberry Pi 5 Compute Split - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Pi 5 + Jetson Compute Split";
+        var mkdocs_page_name = "Jetson Orin Nano + Raspberry Pi 5 Compute Split";
         var mkdocs_page_input_path = "engineering-process/design-decisions/pi-plus-jetson-compute-split.md";
         var mkdocs_page_url = null;
       </script>
@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#how-it-works">How it works</a>
     </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -949,7 +949,7 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Engineering Process</li>
           <li class="breadcrumb-item">Design Decisions</li>
-      <li class="breadcrumb-item active">Pi 5 + Jetson Compute Split</li>
+      <li class="breadcrumb-item active">Jetson Orin Nano + Raspberry Pi 5 Compute Split</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -958,30 +958,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="pi-5-jetson-compute-split">Pi 5 + Jetson Compute Split</h1>
+                <h1 id="jetson-orin-nano-raspberry-pi-5-compute-split">Jetson Orin Nano + Raspberry Pi 5 Compute Split</h1>
 <p>This page records the decision to run the controller on the <strong>Raspberry Pi 5</strong> <em>and</em> the
-steering model on the <strong>Jetson Orin Nano ("Jon")</strong>, instead of using a single computer.</p>
+steering model on the <strong>Jetson Orin Nano</strong>, instead of using a single computer.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
-<li>The <strong>Pi 5</strong> owns all real-time I/O and control: joystick, camera capture, LiDAR, GPS,
+<li>The <strong>Raspberry Pi 5</strong> owns all real-time I/O and control: joystick, camera capture, LiDAR, GPS,
   hall sensor, PCA9685 steering, motor PWM, safety arbitration, logging, and the dashboard
   link.</li>
-<li>The <strong>Jetson</strong> runs only the steering neural network (ONNX) and returns a steering angle</li>
-<li>throttle over the network (Jon at <code>10.42.0.2:8770</code>).</li>
-<li>The Pi 5 fuses the Jetson's command with LiDAR safety and GPS navigation before moving
+<li>The <strong>Jetson Orin Nano</strong> runs only the steering neural network (ONNX) and returns a steering angle</li>
+<li>throttle over the network (Jetson Orin Nano at <code>10.42.0.2:8770</code>).</li>
+<li>The Raspberry Pi 5 fuses the Jetson Orin Nano's command with LiDAR safety and GPS navigation before moving
   any wheel.</li>
 </ul>
 <h2 id="why-this-choice">Why this choice</h2>
 <ul>
-<li><strong>Pi owns real-time I/O.</strong> The Pi 5 already runs all GPIO, sensors, motors, steering,
-  LiDAR, and GPS reliably; the Jetson isn't as clean for that hardware wiring.</li>
-<li><strong>Reuse the established platform.</strong> The Pi was already the working, fully-wired base — faster
-  and cheaper to add a Jetson than to re-wire the whole car onto the Jetson.</li>
-<li><strong>Jetson = GPU for the heavy model.</strong> Series 3/4 ONNX inference uses the Jetson GPU through ONNX Runtime/CUDA, leaving the Pi focused on hardware control.</li>
+<li><strong>Raspberry Pi 5 owns real-time I/O.</strong> The Raspberry Pi 5 already runs all GPIO, sensors, motors, steering,
+  LiDAR, and GPS reliably; the Jetson Orin Nano isn't as clean for that hardware wiring.</li>
+<li><strong>Reuse the established platform.</strong> The Raspberry Pi 5 was already the working, fully-wired base — faster
+  and cheaper to add a Jetson Orin Nano than to re-wire the whole car onto the Jetson Orin Nano.</li>
+<li><strong>Jetson Orin Nano = GPU for the heavy model.</strong> Series 3/4 ONNX inference uses the Jetson Orin Nano GPU through ONNX Runtime/CUDA, leaving the Raspberry Pi 5 focused on hardware control.</li>
 <li><strong>Camera lock-in.</strong> The camera (Raspberry Pi Camera Module 3 Wide) is not compatible with
   the Jetson Orin Nano, and the entire 81,237-image Series 3/4 dataset was captured with it. No good
   alternative wide camera existed (the options were narrow or ultra-wide, wrong quality), so
-  moving to a Jetson-only rig would have invalidated the dataset. The Pi stays as the camera
+  moving to a Jetson Orin Nano-only rig would have invalidated the dataset. The Raspberry Pi 5 stays as the camera
   host.</li>
 </ul>
 <h2 id="options-considered">Options considered</h2>
@@ -995,34 +995,34 @@ steering model on the <strong>Jetson Orin Nano ("Jon")</strong>, instead of usin
 </thead>
 <tbody>
 <tr>
-<td>Jetson only</td>
+<td>Jetson Orin Nano only</td>
 <td>one board; GPU sits with compute</td>
-<td>Requires replacing the established Pi camera/GPIO/sensor integration and moving final actuator authority</td>
+<td>Requires replacing the established Raspberry Pi 5 camera/GPIO/sensor integration and moving final actuator authority</td>
 </tr>
 <tr>
-<td>Pi 5 only</td>
+<td>Raspberry Pi 5 only</td>
 <td>established GPIO/sensor integration; simple</td>
 <td>Does not provide the selected GPU inference path for Series 3/4</td>
 </tr>
 <tr>
-<td><strong>Pi 5 + Jetson (chosen)</strong></td>
-<td>Pi keeps current I/O + the wide camera; Jetson adds GPU for the heavy model</td>
+<td><strong>Jetson Orin Nano + Raspberry Pi 5 (chosen)</strong></td>
+<td>Raspberry Pi 5 keeps current I/O + the wide camera; Jetson Orin Nano adds GPU for the heavy model</td>
 <td>two boards to manage + a network hop for inference</td>
 </tr>
 </tbody>
 </table>
 <h2 id="capture-and-inference-path">Capture and inference path</h2>
 <ul>
-<li>The Pi captures the frame via <strong>Picamera2</strong> in OpenCV BGR (<code>_PiCameraCapture</code>,
+<li>The Raspberry Pi 5 captures the frame via <strong>Picamera2</strong> in OpenCV BGR (<code>_PiCameraCapture</code>,
   <code>code/controller/current/rc_car_app/vision.py</code>), resizes/normalizes it, and
-  sends it to <strong>Jon at <code>10.42.0.2:8770</code></strong>. Jon runs <code>SidewalkPilotV3</code> (ONNX) and
-  returns the 19-number hybrid vector, which the Pi decodes to a steering
+  sends it to <strong>Jetson Orin Nano at <code>10.42.0.2:8770</code></strong>. Jetson Orin Nano runs <code>SidewalkPilotV3</code> (ONNX) and
+  returns the 19-number hybrid vector, which the Raspberry Pi 5 decodes to a steering
   angle + throttle and then fuses with LiDAR safety and GPS navigation before
   writing to the servo/motors.</li>
 <li><strong>Speed motivation:</strong> Series 1/2 (<code>SteeringAutonomyV2</code>, ~0.67M params, 200x66)
-  ran locally on the Pi. Series 3 (<code>SidewalkPilotV3</code>,
+  ran locally on the Raspberry Pi 5. Series 3 (<code>SidewalkPilotV3</code>,
   ~5.53M params, 320x180) is ~8x the parameters at higher resolution and is far
-  is substantially larger and uses the dedicated Jetson path, leaving the Pi's CPU free for I/O. Exact throughput should be reported from the runtime telemetry for the tested model and software build rather than treated as a fixed architecture constant.</li>
+  is substantially larger and uses the dedicated Jetson Orin Nano path, leaving the Raspberry Pi 5's CPU free for I/O. Exact throughput should be reported from the runtime telemetry for the tested model and software build rather than treated as a fixed architecture constant.</li>
 <li><strong>Failure behavior:</strong> the model is one input to a safety-arbitrated loop, not
   the loop itself. LiDAR/AEB and manual override sit above it, and a stale or
   low-confidence model result triggers a safety stop rather than a blind command

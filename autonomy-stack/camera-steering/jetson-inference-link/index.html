@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>Jetson Inference Link - SidewalkPilot RC Car</title>
+    <title>Jetson Orin Nano Inference Link - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Jetson Inference Link";
+        var mkdocs_page_name = "Jetson Orin Nano Inference Link";
         var mkdocs_page_input_path = "autonomy-stack/camera-steering/jetson-inference-link.md";
         var mkdocs_page_url = null;
       </script>
@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Inference Link</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Orin Nano Inference Link</a>
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#frame-path">Frame Path</a>
     </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -947,7 +947,7 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Autonomy Stack</li>
           <li class="breadcrumb-item">Camera Steering</li>
-      <li class="breadcrumb-item active">Jetson Inference Link</li>
+      <li class="breadcrumb-item active">Jetson Orin Nano Inference Link</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -956,18 +956,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="jetson-inference-link">Jetson Inference Link</h1>
-<p>The Raspberry Pi 5 and NVIDIA Jetson Orin Nano communicate over a private point-to-point Ethernet network. The Pi is <code>10.42.0.1</code>; Jon is <code>10.42.0.2:8770</code>. The link does not depend on Wi-Fi or internet access.</p>
+                <h1 id="jetson-orin-nano-inference-link">Jetson Orin Nano Inference Link</h1>
+<p>The Raspberry Pi 5 and Jetson Orin Nano communicate over a private point-to-point Ethernet network. The Raspberry Pi 5 is <code>10.42.0.1</code>; Jetson Orin Nano is <code>10.42.0.2:8770</code>. The link does not depend on Wi-Fi or internet access.</p>
 <h2 id="frame-path">Frame Path</h2>
 <ol>
-<li>The Pi camera thread captures the latest OpenCV BGR frame.</li>
+<li>The Raspberry Pi 5 camera thread captures the latest OpenCV BGR frame.</li>
 <li>The asynchronous client keeps only the newest pending frame, preventing a backlog.</li>
 <li>The client JPEG-encodes the frame and sends the selected model version plus JPEG bytes over persistent TCP.</li>
-<li>Jon resolves/hot-swaps the requested artifact.</li>
-<li>Jon decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.</li>
-<li>Jon decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.</li>
-<li>The Pi accepts only a result for the active model that is no more than 0.25 seconds old.</li>
-<li>The Pi applies steering EMA, LiDAR/AEB arbitration, yaw/hardware mapping, and actuator commands.</li>
+<li>Jetson Orin Nano resolves/hot-swaps the requested artifact.</li>
+<li>Jetson Orin Nano decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.</li>
+<li>Jetson Orin Nano decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.</li>
+<li>The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.25 seconds old.</li>
+<li>The Raspberry Pi 5 applies steering EMA, LiDAR/AEB arbitration, yaw/hardware mapping, and actuator commands.</li>
 </ol>
 <p>JPEG encoding, connection attempts, sends, receives, and status polls run in <code>AsyncJetsonSteeringClient</code>, not the 60 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.</p>
 <h2 id="model-contracts">Model Contracts</h2>
@@ -1019,13 +1019,13 @@
 </tr>
 </tbody>
 </table>
-<p>For PC/PCF, Jon owns the causal history because it serializes inference. The history initializes to <code>[90,90,90]</code>, appends each decoded current target, and resets on model load/switch, reconnect, or status-only/manual periods.</p>
+<p>For PC/PCF, Jetson Orin Nano owns the causal history because it serializes inference. The history initializes to <code>[90,90,90]</code>, appends each decoded current target, and resets on model load/switch, reconnect, or status-only/manual periods.</p>
 <h2 id="gpu-selection">GPU Selection</h2>
-<p>Jon prefers <code>CUDAExecutionProvider</code> with CPU fallback. TensorRT is selected only when CUDA is unavailable. Registering both CUDA and a partially installed TensorRT provider can make ONNX Runtime reject the complete provider list and silently fall back to CPU; the runtime avoids that failure mode.</p>
+<p>Jetson Orin Nano prefers <code>CUDAExecutionProvider</code> with CPU fallback. TensorRT is selected only when CUDA is unavailable. Registering both CUDA and a partially installed TensorRT provider can make ONNX Runtime reject the complete provider list and silently fall back to CPU; the runtime avoids that failure mode.</p>
 <p>Series 4 was verified against all six real ONNX exports with CUDA active. The output shapes and probability sums matched their contracts.</p>
 <h2 id="failure-boundary">Failure Boundary</h2>
-<p>Jetson network and inference work runs outside the main controller loop, so the Pi does not intentionally wait on Jon before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Pi remains final software authority over motors, steering mapping, AEB, and cleanup.</p>
-<p>See <a href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi + Jetson Compute Split</a> and <a href="../../../runtime-code/runtime-loop/">Runtime Loop</a>.</p>
+<p>Jetson Orin Nano network and inference work runs outside the main controller loop, so the Raspberry Pi 5 does not intentionally wait on Jetson Orin Nano before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Raspberry Pi 5 remains final software authority over motors, steering mapping, AEB, and cleanup.</p>
+<p>See <a href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Raspberry Pi 5 + Jetson Orin Nano Compute Split</a> and <a href="../../../runtime-code/runtime-loop/">Runtime Loop</a>.</p>
               
             </div>
           </div><footer>

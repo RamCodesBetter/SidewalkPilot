@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,7 +957,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="gpio-pins">GPIO Pins</h1>
-<p>This page documents the GPIO pin assignments and hardware-address constants that the runtime uses to reach the Pi 5's motors, hall sensor, and steering servo. All of these constants live in <code>code/controller/current/rc_car_app/config.py</code> and are consumed by <code>code/controller/current/rc_car_app/hardware.py</code>, which is the only module that touches the pins directly.</p>
+<p>This page documents the GPIO pin assignments and hardware-address constants that the runtime uses to reach the Raspberry Pi 5's motors, hall sensor, and steering servo. All of these constants live in <code>code/controller/current/rc_car_app/config.py</code> and are consumed by <code>code/controller/current/rc_car_app/hardware.py</code>, which is the only module that touches the pins directly.</p>
 <h2 id="how-it-works">How it works</h2>
 <p>Keeping every pin number in one config block means the wiring is described once and imported everywhere else. <code>hardware.py</code> imports the pin constants and wraps each output in a <code>gpiozero</code> <code>PWMOutputDevice</code> (motors) or <code>DigitalInputDevice</code> (hall sensor). The steering servo is not a GPIO pin at all: it is driven over I2C through a PCA9685 board, so its "address" is an I2C address plus a channel rather than a BCM pin.</p>
 <p>Motor pins are set up as 1 kHz PWM outputs (<code>PWMOutputDevice(pin, frequency=1000, initial_value=0)</code>). The Yahboom AT8236 H-bridge takes a forward pin and a backward pin per side; the runtime drives one of the pair to move and holds the other low.</p>

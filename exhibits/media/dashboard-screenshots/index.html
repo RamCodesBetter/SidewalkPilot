@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -966,11 +966,11 @@ driven by the Zero 2 W — and the captured camera frames that go with them. The
 images are the proof that the telemetry and observability layer is real and readable
 during a drive, not just a claim in a table.</p>
 <h2 id="what-the-dashboard-is">What the dashboard is</h2>
-<p>The Pi 5 controller streams telemetry over USB Ethernet to a Raspberry Pi Zero 2 W,
+<p>The Raspberry Pi 5 controller streams telemetry over USB Ethernet to a Zero 2 W,
 which renders it on a small RGB LED dashboard. The transport is UDP-only by design:
-Pi 5 <code>usb0</code> is <code>192.168.10.1</code>, the Zero is <code>192.168.10.2</code>, and packets go to
+Raspberry Pi 5 <code>usb0</code> is <code>192.168.10.1</code>, the Zero 2 W is <code>192.168.10.2</code>, and packets go to
 <code>192.168.10.2:8765</code> about every 100 ms (<code>HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1</code>).
-The Pi side serializes the payload in <code>hub75_dashboard.py</code>; the Zero renders it in
+The Raspberry Pi 5 side serializes the payload in <code>hub75_dashboard.py</code>; the Zero 2 W renders it in
 <code>z2w_dashboard.py</code>. Because the display rows are tiny, every label is a short fixed
 token.</p>
 <p>The display uses a two-dimensional page grid with sparse internal IDs up to <code>17</code>, and the driver scrolls pages
@@ -1018,7 +1018,7 @@ so the full instrument cluster is documented.</p>
 <p>These are real, code-backed states — good screenshot targets because they show the
 system telling the truth about itself:</p>
 <ul>
-<li><strong><code>NO LINK</code></strong> — the Zero display is alive but has not received a packet recently.
+<li><strong><code>NO LINK</code></strong> — the Zero 2 W display is alive but has not received a packet recently.
   This is the exact failure signature that made USB link reliability a whole
   workstream, so a still of it is genuine evidence, not a bug to hide.</li>
 <li><strong>Photo-capture status field</strong> — the alert region cycles <code>GOOD</code> -&gt; <code>CTRE</code>

@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -936,7 +936,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -969,7 +969,7 @@
                 <h1 id="preflight-checklist">Preflight Checklist</h1>
 <p>The preflight checklist is the fixed set of checks I run before every autonomous field test, so a run fails for a <em>real</em> reason (the model, the route) and not because the LiDAR wasn't spinning or the controller wasn't paired. It exists because early runs wasted field time on avoidable setup faults, and because the car can move motors — nothing autonomous should start until manual override and the kill path are confirmed live.</p>
 <h2 id="procedure">Procedure</h2>
-<p>Run on the Pi 5 from <code>code/controller/current</code>. The checklist maps directly to the subsystems <code>runtime.py</code> starts.</p>
+<p>Run on the Raspberry Pi 5 from <code>code/controller/current</code>. The checklist maps directly to the subsystems <code>runtime.py</code> starts.</p>
 <h3 id="1-power-and-controller">1. Power and controller</h3>
 <ul>
 <li>Xbox controller is paired <em>before</em> launch. If no joystick is detected, <code>runtime.py</code> prints <code>!!! WARNING: No joystick detected</code> and <code>sys.exit(1)</code> — the run never starts.</li>
@@ -978,18 +978,18 @@
 </ul>
 <h3 id="2-sensors-reporting">2. Sensors reporting</h3>
 <ul>
-<li><strong>Camera/model:</strong> Pi Camera Module 3 Wide via Picamera2 opens and the selected model returns fresh results. Local analysis uses a 0.75-second frame guard; Series 3/4 require a matching Jetson result no more than 0.25 seconds old.</li>
+<li><strong>Camera/model:</strong> Raspberry Pi Camera Module 3 Wide via Picamera2 opens and the selected model returns fresh results. Local analysis uses a 0.75-second frame guard; Series 3/4 require a matching Jetson Orin Nano result no more than 0.25 seconds old.</li>
 <li><strong>LiDAR (FHL-LD19):</strong> motor spinning, points arriving. If disconnected the runtime keeps retrying and reports <code>NONE</code>/zero points; do not start an autonomous run with no LiDAR (AEB is your safety net). Baud <code>230400</code>; the runtime prefers the CP2102 by-id path and normally falls back to <code>/dev/ttyUSB0</code> (formerly GPIO UART <code>/dev/ttyAMA2</code>).</li>
 <li><strong>GPS (BN880) on <code>/dev/ttyAMA0</code>, 9600:</strong> only required if the route uses GPS navigation segments; a fix is needed before an <code>AUTO</code>/<code>MNUL</code> A* route.</li>
 <li><strong>Hall sensor (GPIO24):</strong> pulses when a wheel turns, so speed and cruise control read non-zero.</li>
 </ul>
 <h3 id="3-dashboard-link">3. Dashboard link</h3>
 <ul>
-<li>Zero 2 W dashboard shows telemetry, not <code>NO LINK</code>. USB Ethernet: Pi <code>192.168.10.1</code>, Zero <code>192.168.10.2</code>, UDP <code>8765</code>. This is how I watch drive mode, AEB state, and steering while the car drives away from me.</li>
+<li>Zero 2 W dashboard shows telemetry, not <code>NO LINK</code>. USB Ethernet: Raspberry Pi 5 <code>192.168.10.1</code>, Zero 2 W <code>192.168.10.2</code>, UDP <code>8765</code>. This is how I watch drive mode, AEB state, and steering while the car drives away from me.</li>
 </ul>
 <h3 id="4-model-and-safety-arming">4. Model and safety arming</h3>
 <ul>
-<li>Launch with the intended version: run <code>car</code>, then select <code>&lt;version&gt;</code> on the dashboard model page (e.g. <code>car</code> followed by dashboard model selection). Series 3 versions resolve on Jon.</li>
+<li>Launch with the intended version: run <code>car</code>, then select <code>&lt;version&gt;</code> on the dashboard model page (e.g. <code>car</code> followed by dashboard model selection). Series 3 versions resolve on Jetson Orin Nano.</li>
 <li>Confirm the model actually loaded (dashboard model page / startup log), not a silent fallback.</li>
 <li><strong>AEB armed:</strong> confirm <code>AEB:ON</code> on the dashboard (toggle is button <code>14</code>). AEB limits throttle in the governed center range and applies a hard brake at the emergency distance; it never steers.</li>
 <li>Gear starts in <code>P</code>; shift to <code>D</code> only when you're ready to drive.</li>

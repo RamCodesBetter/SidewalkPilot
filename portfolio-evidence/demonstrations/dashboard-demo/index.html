@@ -144,7 +144,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -237,7 +237,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -955,13 +955,13 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="dashboard-demo">Dashboard Demo</h1>
-<p>The dashboard demonstration shows live vehicle telemetry on a physical 64x32 HUB75 panel driven by a Raspberry Pi Zero 2 W.</p>
+<p>The dashboard demonstration shows live vehicle telemetry on a physical 64x32 HUB75 panel driven by a Zero 2 W.</p>
 <h2 id="what-it-demonstrates">What It Demonstrates</h2>
 <ul>
-<li>The Pi queues latest-value UDP telemetry to an asynchronous sender targeting <code>192.168.10.2:8765</code> over the dedicated USB-Ethernet link.</li>
-<li>The Zero renders gear, speed, control values, model state, autonomy metrics, temperatures, photos, navigation, GPS, camera preview, and LiDAR state.</li>
+<li>The Raspberry Pi 5 queues latest-value UDP telemetry to an asynchronous sender targeting <code>192.168.10.2:8765</code> over the dedicated USB-Ethernet link.</li>
+<li>The Zero 2 W renders gear, speed, control values, model state, autonomy metrics, temperatures, photos, navigation, GPS, camera preview, and LiDAR state.</li>
 <li><code>NO LINK</code> and <code>STALE</code> make transport failure visible instead of leaving apparently current values frozen on screen.</li>
-<li>The dashboard does not control the car; final control remains on the Pi.</li>
+<li>The dashboard does not control the car; final control remains on the Raspberry Pi 5.</li>
 </ul>
 <h2 id="current-page-grid">Current Page Grid</h2>
 <p>The visible grid contains 16 pages with sparse internal IDs up to <code>17</code>. The right stick moves vertically and horizontally through the grid. Current views include:</p>
@@ -978,8 +978,8 @@
 <p>The removed V3H2 and V3H3 collection-count pages are not part of the current grid.</p>
 <h2 id="evidence">Evidence</h2>
 <ul>
-<li>Pi sender: <code>code/controller/current/rc_car_app/hub75_dashboard.py</code></li>
-<li>Zero renderer: <code>code/controller/current/z2w_dashboard.py</code></li>
+<li>Raspberry Pi 5 sender: <code>code/controller/current/rc_car_app/hub75_dashboard.py</code></li>
+<li>Zero 2 W renderer: <code>code/controller/current/z2w_dashboard.py</code></li>
 <li>Link setup: <code>code/test_files/setup/install_usb_dashboard_link.sh</code></li>
 <li>Pixel/layout tests: <code>code/test_files/display/test_z2w_lidar_layout.py</code></li>
 </ul>

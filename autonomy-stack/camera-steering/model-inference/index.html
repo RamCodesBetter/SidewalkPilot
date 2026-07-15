@@ -146,7 +146,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,15 +957,15 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-inference">Model Inference</h1>
-<p>Live inference is split across the Raspberry Pi 5 and Jetson Orin Nano. The Pi owns camera capture and safety arbitration; Jon owns preprocessing, model execution, and output decoding.</p>
+<p>Live inference is split across the Raspberry Pi 5 and Jetson Orin Nano. The Raspberry Pi 5 owns camera capture and safety arbitration; Jetson Orin Nano owns preprocessing, model execution, and output decoding.</p>
 <h2 id="data-path">Data Path</h2>
 <ol>
-<li><code>WebcamVisionProcessor</code> captures <code>1280×720</code> <code>BGR888</code> frames from the Pi Camera. The code declares a nominal 30 FPS target and measures the actual rate at runtime.</li>
+<li><code>WebcamVisionProcessor</code> captures <code>1280×720</code> <code>BGR888</code> frames from the Raspberry Pi Camera. The code declares a nominal 30 FPS target and measures the actual rate at runtime.</li>
 <li><code>AsyncJetsonSteeringClient.submit()</code> replaces any unsent frame with the newest frame and selected model version.</li>
-<li>Its worker JPEG-encodes and sends the request to Jon at <code>10.42.0.2:8770</code>.</li>
+<li>Its worker JPEG-encodes and sends the request to Jetson Orin Nano at <code>10.42.0.2:8770</code>.</li>
 <li><code>jetson_inference_server.py</code> hot-switches to the requested <code>SidewalkPilot-v&lt;version&gt;</code> artifact when needed.</li>
-<li>Jon resizes and normalizes the BGR frame, runs ONNX Runtime, decodes steering, and returns control plus telemetry.</li>
-<li>The Pi consumes only a result for the selected version that is no more than <code>0.25 s</code> old.</li>
+<li>Jetson Orin Nano resizes and normalizes the BGR frame, runs ONNX Runtime, decodes steering, and returns control plus telemetry.</li>
+<li>The Raspberry Pi 5 consumes only a result for the selected version that is no more than <code>0.25 s</code> old.</li>
 </ol>
 <h2 id="model-contracts">Model Contracts</h2>
 <table>
@@ -1022,12 +1022,12 @@
 fraction = sigmoid(offset[class])
 steering = bucket_low[class] + fraction * bucket_width[class]
 </code></pre>
-<p>The model throttle output is returned for protocol compatibility but is not used for current driving. The Pi combines model steering with its own throttle policy and center-corridor LiDAR governor.</p>
+<p>The model throttle output is returned for protocol compatibility but is not used for current driving. The Raspberry Pi 5 combines model steering with its own throttle policy and center-corridor LiDAR governor.</p>
 <h2 id="gpu-selection">GPU Selection</h2>
-<p>Jon selects CUDA plus CPU fallback when CUDA is available. It selects TensorRT plus CPU only when CUDA is unavailable but the TensorRT provider is available. This avoids a partially installed TensorRT provider causing the complete provider list to fail and retry on CPU.</p>
+<p>Jetson Orin Nano selects CUDA plus CPU fallback when CUDA is available. It selects TensorRT plus CPU only when CUDA is unavailable but the TensorRT provider is available. This avoids a partially installed TensorRT provider causing the complete provider list to fail and retry on CPU.</p>
 <h2 id="non-blocking-and-freshness-rules">Non-Blocking and Freshness Rules</h2>
 <p>All TCP connect/send/receive and JPEG work stays in <code>AsyncJetsonSteeringClient</code>. The main loop never calls synchronous <code>infer()</code> or <code>poll_status()</code>. The worker keeps one pending frame, preventing an inference backlog.</p>
-<p>If Jon is off:</p>
+<p>If Jetson Orin Nano is off:</p>
 <ul>
 <li>Manual driving remains responsive;</li>
 <li>Temperature/IPS telemetry remains at its last cached value;</li>

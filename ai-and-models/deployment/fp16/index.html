@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -512,7 +512,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -922,7 +922,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -953,14 +953,14 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="fp16-half-precision">FP16 Half Precision</h1>
-<p>FP16 is a possible future Jetson optimization. It stores floating-point values with 16 bits instead of 32, which can reduce memory traffic and improve inference speed on supported hardware.</p>
+<p>FP16 is a possible future Jetson Orin Nano optimization. It stores floating-point values with 16 bits instead of 32, which can reduce memory traffic and improve inference speed on supported hardware.</p>
 <h2 id="sidewalkpilot-status">SidewalkPilot Status</h2>
 <p>The live path is FP32 ONNX Runtime with CUDA. SidewalkPilot has not published a measured FP16 latency, power, accuracy, or field result, and no FP16 artifact is the live baseline.</p>
 <p>The Series 3 trainer retains an optional <code>--build-tensorrt --trt-precision fp16</code> path that invokes <code>trtexec</code>. That makes an experiment possible; it does not prove that FP16 is faster or equivalent on the car.</p>
 <h2 id="required-comparison">Required Comparison</h2>
 <p>An FP16 experiment must use the same model and evaluation set as the FP32 baseline, then report:</p>
 <ul>
-<li>Latency distribution and sustained inference rate on Jon;</li>
+<li>Latency distribution and sustained inference rate on Jetson Orin Nano;</li>
 <li>Bal9, turn exact, turn +/-1, straight exact, MAE, median error, and signed error;</li>
 <li>Memory and power mode; and</li>
 <li>A real-car shadow and turn retest.</li>

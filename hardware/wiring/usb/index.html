@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -979,26 +979,26 @@
 </tr>
 <tr>
 <td>Dashboard link</td>
-<td>Raspberry Pi Zero 2 W</td>
+<td>Zero 2 W</td>
 <td>USB Ethernet gadget (<code>usb0</code>)</td>
-<td>Pi <code>192.168.10.1</code>, Zero <code>192.168.10.2</code>, UDP <code>8765</code></td>
+<td>Raspberry Pi 5 <code>192.168.10.1</code>, Zero 2 W <code>192.168.10.2</code>, UDP <code>8765</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="how-it-works">How it works</h2>
 <p><strong>LiDAR over USB.</strong> The FHL-LD19 connects through a Silicon Labs CP2102 USB-to-UART bridge and appears as a USB serial device. <code>rc_car_app/lidar.py</code> resolves the port automatically at startup: <code>resolve_lidar_serial_port</code> prefers a stable <code>/dev/serial/by-id/*CP2102*</code> / <code>*Silicon_Labs*</code> symlink, then falls back to <code>/dev/ttyUSB*</code> and <code>/dev/ttyACM*</code>, and only uses a fixed port if <code>RC_CAR_LIDAR_SERIAL_PORT</code> is set. Baud stays <code>230400</code>. This replaced the earlier GPIO-UART <code>/dev/ttyAMA2</code> path (see the UART page); the sensor and protocol are the same, only the transport moved to USB.</p>
-<p><strong>Dashboard USB Ethernet.</strong> The Pi 5 and Zero 2 W are linked by a USB Ethernet gadget that exposes <code>usb0</code> on both ends with fixed addresses: Pi <code>192.168.10.1/24</code>, Zero <code>192.168.10.2/24</code>. The Pi sends dashboard telemetry as UDP to <code>192.168.10.2:8765</code> (<code>HUB75_DASHBOARD_HOST</code> / <code>HUB75_DASHBOARD_UDP_PORT</code> in <code>config.py</code>). This link is USB-only by current project decision, with no Wi-Fi fallback. A serial fallback over <code>/dev/ttyACM0</code> at 115200 exists in code but is not the active transport.</p>
+<p><strong>Dashboard USB Ethernet.</strong> The Raspberry Pi 5 and Zero 2 W are linked by a USB Ethernet gadget that exposes <code>usb0</code> on both ends with fixed addresses: Raspberry Pi 5 <code>192.168.10.1/24</code>, Zero 2 W <code>192.168.10.2/24</code>. The Raspberry Pi 5 sends dashboard telemetry as UDP to <code>192.168.10.2:8765</code> (<code>HUB75_DASHBOARD_HOST</code> / <code>HUB75_DASHBOARD_UDP_PORT</code> in <code>config.py</code>). This link is USB-only by current project decision, with no Wi-Fi fallback. A serial fallback over <code>/dev/ttyACM0</code> at 115200 exists in code but is not the active transport.</p>
 <h2 id="why-this-choice">Why this choice</h2>
 <p>USB gives the LiDAR a serial path with a stable by-id symlink, so the runtime can auto-detect it and retry after a disconnect in its reader thread. The USB Ethernet dashboard link provides a fixed point-to-point IP path, and keeping telemetry USB-only removes Wi-Fi and mDNS from that path.</p>
 <h2 id="test">Test</h2>
-<pre><code class="language-bash"># Pi 5 — LiDAR port present and readable
+<pre><code class="language-bash"># Raspberry Pi 5 — LiDAR port present and readable
 ls -l /dev/serial/by-id/ | grep -i cp2102
 ls -l /dev/ttyUSB*
 
-# Pi 5 — USB Ethernet link to the Zero
+# Raspberry Pi 5 — USB Ethernet link to the Zero 2 W
 ip -br addr show usb0
 cat /sys/class/net/usb0/carrier      # 1 = link up
-ping -c 3 192.168.10.2               # from Pi 5
+ping -c 3 192.168.10.2               # from Raspberry Pi 5
 
 # Zero 2 W — dashboard receiver listening
 ss -lunp | grep 8765

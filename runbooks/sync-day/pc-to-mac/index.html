@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -966,7 +966,7 @@
 <p>Pulling the results of a training run — new model checkpoints and any exported artifacts — from the NVIDIA PC back to the Mac, so the Mac has the canonical copy for git, Hugging Face publishing, and deployment to the field devices. This is the return leg of a training day and, like every sync here, it is additive: nothing gets deleted on either machine.</p>
 <h2 id="preconditions">Preconditions</h2>
 <ul>
-<li>The PC has finished training and written the new checkpoint. Series 1/2 checkpoints follow <code>SidewalkPilot-vX.Y[b].pth</code> and live under <code>code/ai_models/</code>. Series 3 exports the ONNX that Jon (the Jetson) runs; it is copied to Jon separately and does not go on the Pi.</li>
+<li>The PC has finished training and written the new checkpoint. Series 1/2 checkpoints follow <code>SidewalkPilot-vX.Y[b].pth</code> and live under <code>code/ai_models/</code>. Series 3 exports the ONNX that Jetson Orin Nano runs; it is copied to Jetson Orin Nano separately and does not go on the Raspberry Pi 5.</li>
 <li>The Mac is on the model branch (<code>ai_models_v3</code>) so the checkpoint lands next to the versions already tracked there.</li>
 <li>I know exactly which files I want. A training day can leave several intermediate epoch files behind; I only pull the ones I mean to keep and publish.</li>
 </ul>

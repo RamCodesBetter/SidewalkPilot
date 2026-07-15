@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -963,7 +963,7 @@
 <h2 id="how-it-works">How it works</h2>
 <p>The policy is a two-gate rule. A change is not "done" until it passes both an offline gate and a field gate, in that order.</p>
 <p><strong>Offline gate.</strong> Run <code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> and read Bal9, turn exact, turn +/-1, straight exact, error magnitude, signed bias, and the confusion matrix. The offline gate catches gross regressions cheaply before hardware time. Passing it means "worth field-testing," not "good."</p>
-<p><strong>Field gate.</strong> Drive the car on the real situation the change was meant to fix. A compatible ONNX must exist on Jon and the version must exist in <code>STEERING_MODEL_VERSIONS</code>. Series 4 also requires the correct runtime contract: image-only CF or causal history for PC/PCF. Then re-drive the specific failing scenario, such as the shadow band that caused shadow-chasing or the mid-right turn that was missed, and confirm the behavior actually changed on the car.</p>
+<p><strong>Field gate.</strong> Drive the car on the real situation the change was meant to fix. A compatible ONNX must exist on Jetson Orin Nano and the version must exist in <code>STEERING_MODEL_VERSIONS</code>. Series 4 also requires the correct runtime contract: image-only CF or causal history for PC/PCF. Then re-drive the specific failing scenario, such as the shadow band that caused shadow-chasing or the mid-right turn that was missed, and confirm the behavior actually changed on the car.</p>
 <p>A critical operational catch sits underneath this: a config or code change only takes effect after the owning <em>process</em> re-imports it, on every device. Reloading via the <code>car</code> / <code>dash</code> / <code>ai</code> aliases restarts the process; editing a file on disk while the old process is still running verifies nothing. So "retest" always means "restart the owning process first, then observe."</p>
 <h2 id="why-this-choice">Why this choice</h2>
 <p>Offline metrics can miss the behavior that matters physically. A low MAE or validation loss can coexist with weak turn recall, and the recorded v3.1b field test exposed behavior not represented by its headline offline value. That bounded result is why the field gate remains mandatory.</p>
@@ -998,7 +998,7 @@
 <ul>
 <li>Eval JSON (bucket distribution) for the retested version.</li>
 <li>Field re-drive note / clip of the specific scenario.</li>
-<li>Confirmation of which process was restarted on which device (Pi <code>car</code>, Zero <code>dash</code>, Jon inference service).</li>
+<li>Confirmation of which process was restarted on which device (Jetson Orin Nano inference service, Raspberry Pi 5 <code>car</code>, Zero 2 W <code>dash</code>).</li>
 </ul>
 <h2 id="related-pages">Related pages</h2>
 <ul>

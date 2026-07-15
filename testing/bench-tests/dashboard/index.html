@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -955,7 +955,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="dashboard-bench-test">Dashboard Bench Test</h1>
-<p>The current dashboard is one Waveshare 64x32 HUB75 panel driven by the Raspberry Pi Zero 2 W. The earlier MAX7219 panel is no longer part of the live display.</p>
+<p>The current dashboard is one Waveshare 64x32 HUB75 panel driven by the Zero 2 W. The earlier MAX7219 panel is no longer part of the live display.</p>
 <h2 id="direct-panel-test">Direct Panel Test</h2>
 <p>Run on the Zero 2 W with the car stationary:</p>
 <pre><code class="language-bash">cd ~/rc_car_code
@@ -965,9 +965,9 @@ python3 code/test_files/display/display_panel_test.py --glyph-set digits
 <h2 id="full-link-test">Full Link Test</h2>
 <ol>
 <li>Confirm <code>usb0</code> is up on both computers.</li>
-<li>Confirm Pi <code>192.168.10.1</code> can ping Zero <code>192.168.10.2</code>.</li>
-<li>Start the Zero dashboard service or <code>dash</code> alias.</li>
-<li>Start <code>car</code> on the Pi.</li>
+<li>Confirm Raspberry Pi 5 <code>192.168.10.1</code> can ping Zero 2 W <code>192.168.10.2</code>.</li>
+<li>Start the Zero 2 W dashboard service or <code>dash</code> alias.</li>
+<li>Start <code>car</code> on the Raspberry Pi 5.</li>
 <li>Confirm live values replace <code>NO LINK</code> and update without freezing.</li>
 </ol>
 <h2 id="interpretation">Interpretation</h2>

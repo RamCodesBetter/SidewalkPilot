@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -963,10 +963,10 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="sync-audit">Sync Audit</h1>
-<p>The rule that when photo/log data moves between machines (Pi 5 capture device, Mac workstation, Jetson, training PC), every source frame arrives intact and nothing is silently deleted. Data quality is not only about label correctness — a batch that got half-copied or wiped by a bad sync flag is a quality failure too.</p>
+<p>The rule that when photo/log data moves between machines (Raspberry Pi 5 capture device, Mac workstation, Jetson Orin Nano, training PC), every source frame arrives intact and nothing is silently deleted. Data quality is not only about label correctness — a batch that got half-copied or wiped by a bad sync flag is a quality failure too.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>Photos originate on the Pi 5. <code>take_photo()</code> queues each JPG and appends its command label under a per-day, per-run folder created by <code>create_photo_run_dir()</code> in <code>code/controller/current/rc_car_app/runtime.py</code>, named <code>YYYY_MM_DD_run_N</code>. <code>finalize_photo_run()</code> builds the JSON manifest, and <code>cleanup_photo_run_dir()</code> removes a run folder only if it is empty.</p>
-<p>Moving those folders off the Pi is the risky step. The project has a hard-won rule: never use reverse whole-repo <code>rsync --delete</code>. It has already caused docs/site/site trees to be deleted when the remote did not contain them — the <code>--delete</code> flag treats "missing on source" as "delete on destination." The <code>rpisync</code> helper pushes local branch code to the Pi; the <code>mrpisync</code> alias pulls the whole remote tree back and is the dangerous one when combined with <code>--delete</code>.</p>
+<p>Photos originate on the Raspberry Pi 5. <code>take_photo()</code> queues each JPG and appends its command label under a per-day, per-run folder created by <code>create_photo_run_dir()</code> in <code>code/controller/current/rc_car_app/runtime.py</code>, named <code>YYYY_MM_DD_run_N</code>. <code>finalize_photo_run()</code> builds the JSON manifest, and <code>cleanup_photo_run_dir()</code> removes a run folder only if it is empty.</p>
+<p>Moving those folders off the Raspberry Pi 5 is the risky step. The project has a hard-won rule: never use reverse whole-repo <code>rsync --delete</code>. It has already caused docs/site/site trees to be deleted when the remote did not contain them — the <code>--delete</code> flag treats "missing on source" as "delete on destination." The <code>rpisync</code> helper pushes local branch code to the Raspberry Pi 5; the <code>mrpisync</code> alias pulls the whole remote tree back and is the dangerous one when combined with <code>--delete</code>.</p>
 <p>So a sync audit is a before-and-after integrity check around any data move:</p>
 <ol>
 <li>Count files on the source run folder before the sync (photos and label JSON).</li>
@@ -978,11 +978,11 @@
 <p>A truncated or partially-synced batch is indistinguishable from a small batch until the trainer scans it and reports a low <code>used</code> count or a wall of <code>skipped_missing</code> rows (labels whose images never made it across). Worse, a reverse <code>--delete</code> can destroy data or generated docs that only existed on one side. Because photos, logs, datasets, and checkpoints are never to be staged, deleted, or renamed without Ram's explicit say-so, sync integrity is the guardrail that keeps an automated copy from doing it by accident.</p>
 <h2 id="good-vs-bad-example">Good vs bad example</h2>
 <ul>
-<li>Good: <code>rsync -a</code> (no <code>--delete</code>) of just <code>media/photos/2026_07_02_run_1/</code> from Pi to Mac, then a file-count diff confirming source and destination match.</li>
+<li>Good: <code>rsync -a</code> (no <code>--delete</code>) of just <code>media/photos/2026_07_02_run_1/</code> from Raspberry Pi 5 to Mac, then a file-count diff confirming source and destination match.</li>
 <li>Bad: a reverse <code>rsync -a --delete</code> of the whole repo from a machine that lacks <code>docs/site/</code> — it deletes the docs tree on the destination. This is the exact failure mode already recorded in the repo rules.</li>
 </ul>
 <h2 id="validation-command">Validation command</h2>
-<p>Compare counts across a link (label paths not present on the destination are the leak indicator). On the Pi source:</p>
+<p>Compare counts across a link (label paths not present on the destination are the leak indicator). On the Raspberry Pi 5 source:</p>
 <pre><code class="language-bash">find /home/rsabavat/rc_car_code/media/photos/2026_07_02_run_1 -type f | wc -l
 </code></pre>
 <p>Then the same <code>find | wc -l</code> on the destination copy and diff the two numbers. To catch labels that point at missing images after a partial copy, run the trainer scan (see Image Quality Checks) and confirm <code>missing=0</code>.</p>

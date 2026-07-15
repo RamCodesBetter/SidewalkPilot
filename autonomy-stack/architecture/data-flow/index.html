@@ -148,7 +148,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -241,7 +241,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -961,31 +961,31 @@
                 <h1 id="runtime-data-flow">Runtime Data Flow</h1>
 <p>SidewalkPilot separates hardware ownership, inference, display, and safety so a slow secondary computer cannot directly stall actuator control.</p>
 <pre><code class="language-text">Xbox controller ─┐
-Pi Camera ───────┤
+Raspberry Pi Camera ───────┤
 LiDAR USB serial ┤
 GPS fixes ───────┤→ Raspberry Pi 5 arbitration → PCA9685 steering + AT8236 drive
 Hall sensor ─────┤             │
 USB IMU ─────────┘             ├→ UDP/USB Ethernet → Zero 2 W → HUB75 display
-                               └→ JPEG/TCP/Ethernet → Jetson ONNX → cached steering
+                               └→ JPEG/TCP/Ethernet → Jetson Orin Nano ONNX → cached steering
 </code></pre>
 <h2 id="raspberry-pi-5">Raspberry Pi 5</h2>
-<p>The Pi 5 is the only computer that writes steering, motor, and brake hardware. It reads the Xbox controller, sensors, and latest Jon result, then applies gear, manual takeover, AEB, model freshness, yaw correction, and servo limits.</p>
+<p>The Raspberry Pi 5 is the only computer that writes steering, motor, and brake hardware. It reads the Xbox controller, sensors, and latest Jetson Orin Nano result, then applies gear, manual takeover, AEB, model freshness, yaw correction, and servo limits.</p>
 <h2 id="jetson-orin-nano">Jetson Orin Nano</h2>
-<p>Jon receives the newest camera frame and requested model version over the private Ethernet link at <code>10.42.0.2:8770</code>. It returns steering, unused model throttle, temperatures, inference timing, and nine hybrid-bucket probabilities. It does not command GPIO directly.</p>
+<p>Jetson Orin Nano receives the newest camera frame and requested model version over the private Ethernet link at <code>10.42.0.2:8770</code>. It returns steering, unused model throttle, temperatures, inference timing, and nine hybrid-bucket probabilities. It does not command GPIO directly.</p>
 <h2 id="zero-2-w">Zero 2 W</h2>
-<p>The Zero receives JSON telemetry at <code>192.168.10.2:8765</code> over USB Ethernet and renders the HUB75 panel. Dashboard failure does not stop the Pi control loop. Linked shutdown is explicit application behavior, not control authority.</p>
+<p>The Zero 2 W receives JSON telemetry at <code>192.168.10.2:8765</code> over USB Ethernet and renders the HUB75 panel. Dashboard failure does not stop the Raspberry Pi 5 control loop. Linked shutdown is explicit application behavior, not control authority.</p>
 <h2 id="safety-arbitration">Safety Arbitration</h2>
 <ol>
 <li>Quit/manual takeover and gear state define whether motion is permitted.</li>
 <li>Servo/model freshness faults can stop motion.</li>
 <li>With AEB enabled, center-corridor emergency occupancy hard-brakes.</li>
 <li>LiDAR slowdown caps requested forward throttle.</li>
-<li>Camera/Jon provides autonomous steering only.</li>
+<li>Camera/Jetson Orin Nano provides autonomous steering only.</li>
 <li>Manual or autonomous throttle reaches motor mapping only after these gates.</li>
 </ol>
 <p>LiDAR does not select a path or output steering. Side returns are telemetry because empty space beside an obstacle is not proof of sidewalk.</p>
 <h2 id="timing-boundary">Timing Boundary</h2>
-<p>Camera, LiDAR, GPS, IMU, Jetson transport, dashboard transport, photo writes, and telemetry use workers or cached snapshots. The 60 Hz runtime loop consumes those snapshots. See <a href="../../../runtime-code/runtime-loop/">Runtime Loop</a> for ownership and stall diagnostics.</p>
+<p>Camera, LiDAR, GPS, IMU, Jetson Orin Nano transport, dashboard transport, photo writes, and telemetry use workers or cached snapshots. The 60 Hz runtime loop consumes those snapshots. See <a href="../../../runtime-code/runtime-loop/">Runtime Loop</a> for ownership and stall diagnostics.</p>
               
             </div>
           </div><footer>

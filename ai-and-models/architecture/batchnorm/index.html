@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -520,7 +520,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -961,7 +961,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="batchnorm">BatchNorm</h1>
-<p>BatchNorm documents the normalization layers placed after each convolution in the SidewalkPilot CNN. This page explains how BatchNorm stabilizes feature values during training, where it appears in the model, and whether it stays helpful for Series 3 Jetson deployment.</p>
+<p>BatchNorm documents the normalization layers placed after each convolution in the SidewalkPilot CNN. This page explains how BatchNorm stabilizes feature values during training, where it appears in the model, and whether it stays helpful for Series 3 Jetson Orin Nano deployment.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li>A convolution layer outputs many feature channels, and those channel activations drift as the weights change during training.</li>
@@ -1009,7 +1009,7 @@
 <ul>
 <li>BatchNorm usually makes CNN training less fragile when the dataset has heavy lighting, shadow, and exposure variation - exactly the SidewalkPilot case, where the trainer deliberately injects mixed lighting, diagonal shadow bands, tree-dapple, and glare.</li>
 <li>The parameter cost is small relative to the dense head.</li>
-<li>At inference, BatchNorm uses stored running statistics rather than batch statistics. ONNX Runtime handles the exported graph on Jon.</li>
+<li>At inference, BatchNorm uses stored running statistics rather than batch statistics. ONNX Runtime handles the exported graph on Jetson Orin Nano.</li>
 </ul>
 <h2 id="planned-not-yet-tested">Planned / not yet tested</h2>
 <ul>

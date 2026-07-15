@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>Jetson Runtime - SidewalkPilot RC Car</title>
+    <title>Jetson Orin Nano Runtime - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Jetson Runtime";
+        var mkdocs_page_name = "Jetson Orin Nano Runtime";
         var mkdocs_page_input_path = "ai-and-models/deployment/jetson-runtime.md";
         var mkdocs_page_url = null;
       </script>
@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Runtime</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Orin Nano Runtime</a>
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#live-data-path">Live Data Path</a>
     </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -945,7 +945,7 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">AI and Models</li>
           <li class="breadcrumb-item">Deployment</li>
-      <li class="breadcrumb-item active">Jetson Runtime</li>
+      <li class="breadcrumb-item active">Jetson Orin Nano Runtime</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -954,15 +954,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="jetson-runtime-jon">Jetson Runtime (Jon)</h1>
-<p>Jon is the Jetson Orin Nano inference computer. It is linked directly to the Raspberry Pi 5 over Ethernet at <code>10.42.0.2:8770</code>; the link does not depend on Wi-Fi.</p>
+                <h1 id="jetson-orin-nano-runtime">Jetson Orin Nano Runtime</h1>
+<p>The Jetson Orin Nano is the inference computer. It is linked directly to the Raspberry Pi 5 over Ethernet at <code>10.42.0.2:8770</code>; the link does not depend on Wi-Fi.</p>
 <h2 id="live-data-path">Live Data Path</h2>
 <ol>
-<li>The Pi captures the current camera frame.</li>
+<li>The Raspberry Pi 5 captures the current camera frame.</li>
 <li><code>AsyncJetsonSteeringClient</code> keeps only the newest pending frame and selected model version.</li>
-<li>Jon's <code>jetson_inference_server.py</code> loads the matching ONNX artifact, preprocesses the frame, and runs ONNX Runtime.</li>
-<li>Jon decodes the model-family-specific output and returns steering plus model telemetry.</li>
-<li>The Pi accepts only a fresh response for the selected version, then applies local safety arbitration before writing actuators.</li>
+<li>Jetson Orin Nano's <code>jetson_inference_server.py</code> loads the matching ONNX artifact, preprocesses the frame, and runs ONNX Runtime.</li>
+<li>Jetson Orin Nano decodes the model-family-specific output and returns steering plus model telemetry.</li>
+<li>The Raspberry Pi 5 accepts only a fresh response for the selected version, then applies local safety arbitration before writing actuators.</li>
 </ol>
 <h2 id="supported-families">Supported Families</h2>
 <ul>
@@ -973,7 +973,7 @@
 </ul>
 <p>CUDA is preferred when available. CPU remains a fallback for compatibility and bench diagnosis. TensorRT is not the current live path.</p>
 <h2 id="failure-behavior">Failure Behavior</h2>
-<p>The Pi-side client does not block the control loop while waiting for Jon. If no fresh response exists, autonomous driving does not receive a valid new steering command. Manual control and Pi-local LiDAR braking remain on the Pi.</p>
+<p>The Raspberry Pi 5 client does not block the control loop while waiting for Jetson Orin Nano. If no fresh response exists, autonomous driving does not receive a valid new steering command. Manual control and local Raspberry Pi 5 LiDAR braking remain on the Raspberry Pi 5.</p>
 <p>Model selection is performed from the dashboard or <code>RC_CAR_STEERING_MODEL</code>; the live runtime currently defaults to v3.4.</p>
               
             </div>

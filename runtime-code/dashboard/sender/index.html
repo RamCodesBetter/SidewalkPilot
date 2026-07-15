@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -992,7 +992,7 @@
 <p>The main loop calls <code>AsyncDashboardSender.send()</code> with current state. That method replaces the pending argument snapshot and returns immediately. The worker sends at the configured rate. If several 60 Hz updates occur between 10 Hz transmissions, only the newest survives; stale dashboard packets never form a backlog.</p>
 <p>Transient notification rows use a small FIFO because notifications, unlike state, must not disappear merely because another state update arrived.</p>
 <h2 id="failure-behavior">Failure Behavior</h2>
-<p>UDP is intentionally connectionless. A successful <code>sendto()</code> proves only that the local kernel accepted the datagram, not that the Zero rendered it. Link health is verified with <code>ping</code>, receiver service status, and the display's <code>NO LINK</code>/<code>STALE</code> states.</p>
+<p>UDP is intentionally connectionless. A successful <code>sendto()</code> proves only that the local kernel accepted the datagram, not that the Zero 2 W rendered it. Link health is verified with <code>ping</code>, receiver service status, and the display's <code>NO LINK</code>/<code>STALE</code> states.</p>
 <pre><code class="language-bash">ping -c 3 192.168.10.2
 journalctl -u sidewalkpilot-rpi-car.service -n 80 -l --no-pager
 </code></pre>

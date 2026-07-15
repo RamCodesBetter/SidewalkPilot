@@ -150,7 +150,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -243,7 +243,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -520,7 +520,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -962,30 +962,30 @@
                 <h1 id="system-at-a-glance">System at a Glance</h1>
 <h2 id="three-computer-design">Three-Computer Design</h2>
 <ul>
+<li><strong>Jetson Orin Nano:</strong> The inference computer on an offline Ethernet link
+  through the Raspberry Pi 5. It runs <code>jetson_inference_server.py</code>. The Raspberry Pi 5 discards missing
+  or stale predictions and keeps its control loop running.</li>
 <li><strong>Raspberry Pi 5:</strong> The central controller. It runs <code>rc_car.py</code> and
   <code>rc_car_app</code>; manual control and local safety remain authoritative.</li>
-<li><strong>Jetson Orin Nano:</strong> The inference computer on an offline Ethernet link
-  through the Pi. It runs <code>jetson_inference_server.py</code>. The Pi discards missing
-  or stale predictions and keeps its control loop running.</li>
-<li><strong>Raspberry Pi Zero 2 W:</strong> The dashboard computer on the dedicated USB
+<li><strong>Zero 2 W:</strong> The dashboard computer on the dedicated USB
   network at <code>192.168.10.2</code>. It runs <code>z2w_dashboard.py</code>. The dashboard shows
   <code>NO LINK</code> when telemetry stops, while motion control continues independently.</li>
 </ul>
 <h2 id="hardware-map">Hardware Map</h2>
 <ul>
-<li><strong>Forward vision:</strong> Pi Camera Module 3 Wide, connected to the Pi 5 through
+<li><strong>Forward vision:</strong> Raspberry Pi Camera Module 3 Wide, connected to the Raspberry Pi 5 through
   libcamera/Picamera2.</li>
-<li><strong>Obstacle distance:</strong> FHL-LD19 LiDAR, connected to the Pi 5 through CP2102
+<li><strong>Obstacle distance:</strong> FHL-LD19 LiDAR, connected to the Raspberry Pi 5 through CP2102
   USB serial. It normally appears as <code>/dev/ttyUSB0</code> or a stable by-id path.</li>
-<li><strong>Position:</strong> BN880 GPS, connected to the Pi 5 through UART.</li>
+<li><strong>Position:</strong> BN880 GPS, connected to the Raspberry Pi 5 through UART.</li>
 <li><strong>Compass Heading (Bench Only):</strong> HMC5883L-compatible compass, connected to
-  the Pi 5 through I2C. Live navigation does not consume its heading.</li>
-<li><strong>Wheel speed:</strong> Hall-effect sensor, connected to the Pi 5 through GPIO.</li>
-<li><strong>Steering:</strong> High-torque servo through the PCA9685, controlled by the Pi 5
+  the Raspberry Pi 5 through I2C. Live navigation does not consume its heading.</li>
+<li><strong>Wheel speed:</strong> Hall-effect sensor, connected to the Raspberry Pi 5 through GPIO.</li>
+<li><strong>Steering:</strong> High-torque servo through the PCA9685, controlled by the Raspberry Pi 5
   over I2C PWM.</li>
-<li><strong>Drive motors:</strong> AT8236 motor controller, controlled by the Pi 5 through
+<li><strong>Drive motors:</strong> AT8236 motor controller, controlled by the Raspberry Pi 5 through
   GPIO PWM and direction lines.</li>
-<li><strong>Human control:</strong> Xbox Series X controller, connected to the Pi 5 through
+<li><strong>Human control:</strong> Xbox Series X controller, connected to the Raspberry Pi 5 through
   Bluetooth HID.</li>
 <li><strong>Telemetry:</strong> Waveshare 64x32 HUB75 panel, driven by the Zero 2 W through
   its GPIO matrix driver.</li>
@@ -1013,22 +1013,22 @@ Series 4 PCF: 4 x (9 logits + 9 offsets), plus three-target history input
 <li>Steering center trim: <code>+12D</code>.</li>
 <li>Normalized center offset: <code>0.133333</code>.</li>
 <li>Physical servo center command: approximately 102 degrees.</li>
-<li>Camera and inference cadence target: approximately 30 frames/inferences per second; the runtime reports measured camera FPS and Jetson IPS separately, and neither is guaranteed by the target value.</li>
+<li>Camera and inference cadence target: approximately 30 frames/inferences per second; the runtime reports measured camera FPS and Jetson Orin Nano IPS separately, and neither is guaranteed by the target value.</li>
 <li>Main control-loop target: 60 Hz.</li>
-<li>Jetson steering freshness limit: 0.25 seconds.</li>
+<li>Jetson Orin Nano steering freshness limit: 0.25 seconds.</li>
 <li>LiDAR center corridor only; no obstacle-avoidance steering.</li>
 <li>AEB slowdown begins at 1.65 m and hard braking begins at 1.05 m.</li>
 </ul>
 <p>These are software settings and measured operating choices, not a safety certification. See <a href="../current-status/">Current Status</a> and <a href="../../safety-case/safety-overview/">Operating Limits</a>.</p>
 <h2 id="fast-verification">Fast Verification</h2>
-<p>On the Raspberry Pi:</p>
+<p>On the Raspberry Pi 5:</p>
 <pre><code class="language-bash">sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager
 journalctl -u sidewalkpilot-rpi-car.service -n 100 -l --no-pager
 </code></pre>
-<p>Check the direct Ethernet link from the Raspberry Pi:</p>
+<p>Check the direct Ethernet link from the Raspberry Pi 5:</p>
 <pre><code class="language-bash">ping -c 3 10.42.0.2
 </code></pre>
-<p>On Jon:</p>
+<p>On the Jetson Orin Nano:</p>
 <pre><code class="language-bash">ip -br addr
 ss -ltnp | grep 8770
 pgrep -af jetson_inference_server.py

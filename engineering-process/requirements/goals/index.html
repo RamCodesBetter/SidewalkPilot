@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -959,11 +959,11 @@
                 <h1 id="goals">Goals</h1>
 <p>This page states what SidewalkPilot is actually trying to achieve, in priority order, so every design decision can be traced back to a goal instead of being justified after the fact.</p>
 <h2 id="what-i-am-building-toward">What I am building toward</h2>
-<p>SidewalkPilot is a real RC car that drives itself on sidewalks and private test routes. It is not a screen demo. Every goal below has to survive contact with real hardware, real weather, and a real Xbox controller that I can grab at any moment. I built the platform on a Raspberry Pi 5 for real-time I/O (Xbox controller via pygame, RPi Camera Module 3 Wide via Picamera2, LiDAR, GPS, hall sensor, PCA9685 steering servo, AT8236 drive motors, CSV logging, and USB dashboard telemetry), and I offload the heavy Series 3 steering model to a Jetson Orin Nano ("Jon") because the Pi owns the timing-critical loop and the Jetson supplies the GPU.</p>
+<p>SidewalkPilot is a real RC car that drives itself on sidewalks and private test routes. It is not a screen demo. Every goal below has to survive contact with real hardware, real weather, and a real Xbox controller that I can grab at any moment. I built the platform on a Raspberry Pi 5 for real-time I/O (Xbox controller via pygame, Raspberry Pi Camera Module 3 Wide via Picamera2, LiDAR, GPS, hall sensor, PCA9685 steering servo, AT8236 drive motors, CSV logging, and USB dashboard telemetry), and I offload the heavy Series 3 steering model to a Jetson Orin Nano because the Raspberry Pi 5 owns the timing-critical loop and the Jetson Orin Nano supplies the GPU.</p>
 <p>My goals, in the order I actually care about them:</p>
 <ol>
 <li><strong>Maintain clean, traceable training data.</strong> The 81,237-image Series 3/4 dataset must retain stable absolute steering/throttle labels, source provenance, split integrity, and targeted coverage of failures. Diversity and label quality matter more than increasing the raw count.</li>
-<li><strong>Drive the sidewalk from camera.</strong> Steering comes from the vision model. Series 1/2 use <code>SteeringAutonomyV2</code> (672,877 parameters, 200x66, single tanh regression). Series 3 uses 320x180 input: v3.0/v3.0b output steering and throttle directly, while v3.1-v3.4b use nine class logits, nine local offsets, and one throttle output. Series 4 keeps the 320x180 visual backbone, removes throttle prediction, and compares causal-history and future-supervision designs. Series 3/4 ONNX inference runs on Jon.</li>
+<li><strong>Drive the sidewalk from camera.</strong> Steering comes from the vision model. Series 1/2 use <code>SteeringAutonomyV2</code> (672,877 parameters, 200x66, single tanh regression). Series 3 uses 320x180 input: v3.0/v3.0b output steering and throttle directly, while v3.1-v3.4b use nine class logits, nine local offsets, and one throttle output. Series 4 keeps the 320x180 visual backbone, removes throttle prediction, and compares causal-history and future-supervision designs. Series 3/4 ONNX inference runs on Jetson Orin Nano.</li>
 <li><strong>Stay safe.</strong> The design target is for enabled LiDAR AEB to constrain forward motion and for qualifying controller input to cancel autonomy on a responsive loop. These software priorities do not cover every sensor, controller, process, power, or mechanical fault.</li>
 <li><strong>Navigate a route.</strong> GPS + A* over a route graph (<code>navigation.py</code>, <code>trossachs_nav_graph.json</code>) with AI and manual segments and a crosswalk handoff.</li>
 <li><strong>Stay observable.</strong> The Zero 2 W USB dashboard shows live car state, every controller launch writes a local CSV, training telemetry goes to Weights &amp; Biases, and local InfluxDB telemetry is available when explicitly configured.</li>

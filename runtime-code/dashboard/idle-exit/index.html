@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -989,26 +989,26 @@ arrives, <code>handle_payload()</code> returns <code>0</code> immediately. That 
 case (the car quitting), not idle exit. Idle exit specifically covers the <em>silent</em>
 case where the link drops without a shutdown packet — a pulled USB cable, a crashed
 car process, or a network stall.</p>
-<p>The Pi side also defines <code>HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0</code> in <code>config.py</code>, but
-that is only printed in the Pi's startup log for reference; the value that actually
-governs receiver exit is the Zero's <code>--idle-exit-sec</code> argument.</p>
+<p>The Raspberry Pi 5 side also defines <code>HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0</code> in <code>config.py</code>, but
+that is only printed in the Raspberry Pi 5's startup log for reference; the value that actually
+governs receiver exit is the Zero 2 W's <code>--idle-exit-sec</code> argument.</p>
 <h2 id="why-this-choice">Why this choice</h2>
 <p>A frozen dashboard is worse than a blank one — it implies the car state is current
 when it is not. Exiting cleanly makes the failure obvious (blank panel / stopped
 service) and lets the service manager decide whether to restart. Requiring
-<code>have_received_payload</code> first is what prevents a boot-order race: the Zero can come
-up before the Pi and simply wait, only arming the watchdog once real data has flowed.</p>
+<code>have_received_payload</code> first is what prevents a boot-order race: the Zero 2 W can come
+up before the Raspberry Pi 5 and simply wait, only arming the watchdog once real data has flowed.</p>
 <h2 id="failure-symptom">Failure symptom</h2>
 <ul>
 <li>Panel goes blank and the <code>dash</code> process/service stops a few seconds after the car
-  stops sending — this is idle exit working as intended; check the Pi and the
-  <code>usb0</code> link, not the Zero.</li>
+  stops sending — this is idle exit working as intended; check the Raspberry Pi 5 and the
+  <code>usb0</code> link, not the Zero 2 W.</li>
 <li>The log line on exit states the configured timeout value.</li>
 </ul>
 <h2 id="evidence-to-attach">Evidence to attach</h2>
 <ul>
 <li>Source: <code>code/controller/current/z2w_dashboard.py</code> (<code>handle_idle</code>, <code>--idle-exit-sec</code>)</li>
-<li>Pi reference constant: <code>code/controller/current/rc_car_app/config.py</code>
+<li>Raspberry Pi 5 reference constant: <code>code/controller/current/rc_car_app/config.py</code>
   (<code>HUB75_DASHBOARD_IDLE_EXIT_SEC</code>)</li>
 <li>Compile check: <code>python -m py_compile code/controller/current/z2w_dashboard.py</code></li>
 </ul>

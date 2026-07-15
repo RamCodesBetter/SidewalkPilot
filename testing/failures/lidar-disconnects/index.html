@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -975,7 +975,7 @@
 <p>A disconnect currently fails <em>open</em> with respect to AEB rather than phantom-stopping. That means the safety layer is unavailable until reconnect. The dashboard indication and preflight check are operational mitigations, not substitutes for fail-closed sensor-health logic.</p>
 <h2 id="debug-order-when-lidar-shows-nonezero">Debug order when LiDAR shows none/zero</h2>
 <p>Follow the hardware playbook, not guesswork: stop the car service so there is only one reader, then confirm the port and raw bytes.</p>
-<pre><code class="language-bash"># Pi 5
+<pre><code class="language-bash"># Raspberry Pi 5
 sudo systemctl stop sidewalkpilot-rpi-car.service
 stty -F /dev/ttyUSB0 230400 raw -echo
 timeout 5s cat /dev/ttyUSB0 | hexdump -C
@@ -983,7 +983,7 @@ timeout 5s cat /dev/ttyUSB0 | hexdump -C
 <p>Check enumeration, cable/port, exclusive ownership of the serial device, and baud (<code>230400</code>). The former GPIO-UART motor-enable instructions do not apply to the current CP2102 USB path.</p>
 <h2 id="test-setup">Test setup</h2>
 <ul>
-<li><strong>Setup:</strong> Pi 5 controller, FHL-LD19 on <code>/dev/ttyUSB0</code> (CP2102), branch <code>lidar-aeb-v2</code>.</li>
+<li><strong>Setup:</strong> Raspberry Pi 5 controller, FHL-LD19 on <code>/dev/ttyUSB0</code> (CP2102), branch <code>lidar-aeb-v2</code>.</li>
 <li><strong>Procedure:</strong> run the car, then physically unplug/replug the LiDAR USB mid-run and watch the log for the reconnect messages and the dashboard LiDAR field.</li>
 <li><strong>Pass/warn/fail for reconnect behavior:</strong> pass = the worker reports loss, the dashboard indicates missing data, and the stream reconnects without an observed controller-loop pause; warn = delayed reconnect; fail = crash or sustained controller-loop pause. This test does not make fail-open motion safe.</li>
 <li><strong>Evidence to attach (planned):</strong> runtime log showing <code>mark_fault</code>/reconnect, dashboard capture of the LiDAR field, <code>hexdump</code> of raw bytes after replug.</li>

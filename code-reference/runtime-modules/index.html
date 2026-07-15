@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -981,7 +981,7 @@
 </tr>
 <tr>
 <td><code>rc_car_app/vision.py</code></td>
-<td>Model registry, camera capture, local early-model support, and asynchronous Pi-to-Jon client</td>
+<td>Model registry, camera capture, local early-model support, and asynchronous Raspberry Pi 5–Jetson Orin Nano client</td>
 </tr>
 <tr>
 <td><code>rc_car_app/jetson_inference_server.py</code></td>
@@ -1001,7 +1001,7 @@
 </tr>
 <tr>
 <td><code>rc_car_app/hub75_dashboard.py</code></td>
-<td>Pi-side dashboard serialization and UDP/serial transport, used behind <code>AsyncDashboardSender</code></td>
+<td>Raspberry Pi 5 dashboard serialization and UDP/serial transport, used behind <code>AsyncDashboardSender</code></td>
 </tr>
 <tr>
 <td><code>rc_car_app/logging_utils.py</code></td>
@@ -1015,16 +1015,16 @@
 </table>
 <h2 id="runtime-flow">Runtime Flow</h2>
 <p><code>runtime.run()</code> initializes state and hardware, connects sensors and the camera, starts background workers, then reads the controller and applies arbitration each tick. Manual stop and LiDAR braking take priority over autonomous motion. Dashboard/logging work must not block actuator updates.</p>
-<p>When Jon is configured, the Pi submits only the newest frame. A powered-off or slow Jon cannot make the controller wait synchronously. Returned predictions have a freshness limit; old results are rejected.</p>
+<p>When Jetson Orin Nano is configured, the Raspberry Pi 5 submits only the newest frame. A powered-off or slow Jetson Orin Nano cannot make the controller wait synchronously. Returned predictions have a freshness limit; old results are rejected.</p>
 <h2 id="model-flow">Model Flow</h2>
-<p>The model registry contains all 46 checkpoints. Early Series 1/2 models can use local PyTorch inference when configured. Series 3/4 run as ONNX on Jon. Series 4 PC/PCF maintain causal history inside the single inference server; CF remains image-only.</p>
+<p>The model registry contains all 46 checkpoints. Early Series 1/2 models can use local PyTorch inference when configured. Series 3/4 run as ONNX on Jetson Orin Nano. Series 4 PC/PCF maintain causal history inside the single inference server; CF remains image-only.</p>
 <h2 id="verification">Verification</h2>
 <pre><code class="language-bash">python3 -m py_compile code/controller/current/rc_car.py \
   code/controller/current/z2w_dashboard.py \
   code/controller/current/rc_car_app/jetson_inference_server.py
 python3 -m compileall code/controller/current/rc_car_app
 </code></pre>
-<p>See <a href="../../runtime-code/runtime-loop/">Runtime Loop</a> and <a href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>.</p>
+<p>See <a href="../../runtime-code/runtime-loop/">Runtime Loop</a> and <a href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>
           </div><footer>

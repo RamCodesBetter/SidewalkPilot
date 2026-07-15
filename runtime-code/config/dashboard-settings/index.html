@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,9 +957,9 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="dashboard-settings">Dashboard Settings</h1>
-<p>This page documents the HUB75 dashboard-telemetry constants in <code>code/controller/current/rc_car_app/config.py</code>, the Pi-side sender <code>code/controller/current/rc_car_app/hub75_dashboard.py</code>, and the Zero-side receiver/renderer <code>code/controller/current/z2w_dashboard.py</code>. The link is USB Ethernet only: the Pi 5 sends UDP to the Zero 2 W.</p>
+<p>This page documents the HUB75 dashboard-telemetry constants in <code>code/controller/current/rc_car_app/config.py</code>, the Raspberry Pi 5 sender <code>code/controller/current/rc_car_app/hub75_dashboard.py</code>, and the Zero 2 W receiver/renderer <code>code/controller/current/z2w_dashboard.py</code>. The link is USB Ethernet only: the Raspberry Pi 5 sends UDP to the Zero 2 W.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>The Pi 5 is <code>192.168.10.1</code> and the Zero 2 W is <code>192.168.10.2</code> over the <code>usb0</code> gadget. The Pi packs a small JSON payload every send interval and sends it by UDP to <code>192.168.10.2:8765</code>; the Zero receives it and draws the current page on the LED panel.</p>
+<p>The Raspberry Pi 5 is <code>192.168.10.1</code> and the Zero 2 W is <code>192.168.10.2</code> over the <code>usb0</code> gadget. The Raspberry Pi 5 packs a small JSON payload every send interval and sends it by UDP to <code>192.168.10.2:8765</code>; the Zero 2 W receives it and draws the current page on the LED panel.</p>
 <table>
 <thead>
 <tr>
@@ -987,7 +987,7 @@
 <tr>
 <td><code>HUB75_DASHBOARD_UDP_PORT</code></td>
 <td><code>8765</code></td>
-<td>UDP port the Zero receiver listens on</td>
+<td>UDP port the Zero 2 W receiver listens on</td>
 </tr>
 <tr>
 <td><code>HUB75_DASHBOARD_SERIAL_PORT</code></td>
@@ -1027,12 +1027,12 @@
 </tbody>
 </table>
 <p>The fixed numeric target keeps dashboard telemetry on the USB Ethernet gadget rather than a Wi-Fi/mDNS route or dedicated serial transport.</p>
-<p>The highest page ID is threaded through every layer. <code>DASHBOARD_PAGE_COUNT = 17</code> in <code>config.py</code>, while <code>DASHBOARD_PAGE_COORDS</code> defines the visible two-dimensional grid. IDs are sparse because removed pages were not renumbered. Any page change must be updated in the controller grid, serializer clamp, and Zero renderer.</p>
+<p>The highest page ID is threaded through every layer. <code>DASHBOARD_PAGE_COUNT = 17</code> in <code>config.py</code>, while <code>DASHBOARD_PAGE_COORDS</code> defines the visible two-dimensional grid. IDs are sparse because removed pages were not renumbered. Any page change must be updated in the controller grid, serializer clamp, and Zero 2 W renderer.</p>
 <p>The sender also clamps the other payload fields defensively — <code>brightness_percent</code> and the various percent/confidence fields to <code>0..100</code>, <code>servo_deg</code> to <code>0..180</code>, <code>cpu_temp_c</code> to <code>0..99</code> — so a bad upstream value cannot corrupt the display packet.</p>
 <h2 id="why-this-choice">Why this choice</h2>
 <p>USB-only telemetry is a deliberate, standing decision based on the project's observed Wi-Fi/mDNS link problems. Wi-Fi fallback and the old <code>zero2w.local</code> hostname were intentionally removed and should not be re-added without an explicit decision. The serial path and its constants remain only as a non-default fallback.</p>
 <h2 id="failure-symptom">Failure symptom</h2>
-<p><code>NO LINK</code> on the LED panel means the Zero receiver process is alive but has not received a packet recently — the render side is fine, the packets are not arriving. Typical causes: the Pi controller is not running, <code>usb0</code> shows carrier <code>1</code> but ARP/ping fails, or the sender never connected. On a healthy Pi boot the log prints <code>Hub75 dashboard telemetry sending UDP to 192.168.10.2:8765.</code>; if it instead prints a <code>zero2w.local</code> target, stale code or an env override is active. Debug order: car service up, Zero receiver listening on <code>8765</code>, <code>usb0</code> up with carrier, ping both ways, then read logs.</p>
+<p><code>NO LINK</code> on the LED panel means the Zero 2 W receiver process is alive but has not received a packet recently — the render side is fine, the packets are not arriving. Typical causes: the Raspberry Pi 5 controller is not running, <code>usb0</code> shows carrier <code>1</code> but ARP/ping fails, or the sender never connected. On a healthy Raspberry Pi 5 boot the log prints <code>Hub75 dashboard telemetry sending UDP to 192.168.10.2:8765.</code>; if it instead prints a <code>zero2w.local</code> target, stale code or an env override is active. Debug order: car service up, Zero 2 W receiver listening on <code>8765</code>, <code>usb0</code> up with carrier, ping both ways, then read logs.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><code>runtime-code/runtime-loop.md</code></li>

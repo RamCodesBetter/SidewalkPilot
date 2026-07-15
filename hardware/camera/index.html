@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -960,11 +960,11 @@
                 <h1 id="camera">Camera</h1>
 <p>The camera is the primary sensor for SidewalkPilot: it feeds the steering model and
 it is the source of the current 81,237-image real Series 3/4 dataset. It is a Raspberry Pi Camera Module 3 Wide
-connected to the Pi 5 over the CSI ribbon and driven through Picamera2 in
+connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2 in
 <code>code/controller/current/rc_car_app/vision.py</code>.</p>
 <h2 id="parts-amazon">Parts (Amazon)</h2>
 <ul>
-<li><a href="https://www.amazon.com/Raspberry-Pi-Camera-Module-Wide/dp/B0BRY757NX?ref_=ast_sto_dp&amp;th=1">RPI Camera Module 3 Wide</a> — $69.99</li>
+<li><a href="https://www.amazon.com/Raspberry-Pi-Camera-Module-Wide/dp/B0BRY757NX?ref_=ast_sto_dp&amp;th=1">Raspberry Pi Camera Module 3 Wide</a> — $69.99</li>
 </ul>
 <h2 id="how-it-works">How it works</h2>
 <ul>
@@ -976,7 +976,7 @@ connected to the Pi 5 over the CSI ribbon and driven through Picamera2 in
   applies a <code>Transform(hflip=True, vflip=True)</code> in the capture configuration to give an
   upright frame.</li>
 <li>Each captured frame is resized before inference. Series 1/2 preprocessing resizes to
-  <code>200x66</code>; Series 3/4 use a <code>320x180</code> input on the Jetson. Operator-enabled capture saves
+  <code>200x66</code>; Series 3/4 use a <code>320x180</code> input on the Jetson Orin Nano. Operator-enabled capture saves
   selected frames under <code>media/photos/</code> for dataset preparation.</li>
 <li>If Picamera2 is unavailable, the vision processor has no live frame. Manual operation can
   continue, while the autonomous path treats the model result as unavailable.</li>
@@ -985,7 +985,7 @@ connected to the Pi 5 over the CSI ribbon and driven through Picamera2 in
 <ul>
 <li>The Module 3 <strong>Wide</strong> was selected to retain more sidewalk context near the image edges
   during turns. This project has not preserved a controlled wide-versus-standard comparison.</li>
-<li>The module is integrated through the Raspberry Pi camera path, and the current 81,237-image Series 3/4 dataset was captured
+<li>The module is integrated through the Raspberry Pi 5 camera path, and the current 81,237-image Series 3/4 dataset was captured
   with it. Keeping the same camera avoids one source of sensor-domain shift, although
   lighting, exposure, mounting, route, and weather can still change the image distribution.</li>
 </ul>

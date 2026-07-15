@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -975,7 +975,7 @@
 <ul>
 <li><strong>Segment mode</strong> — the planner marks crossing-family segments <code>MNUL</code> instead of <code>AUTO</code>.</li>
 <li><strong>LiDAR / AEB</strong> — when enabled and receiving qualifying center-corridor points, LiDAR can reduce forward throttle or request a stop. It does not recognize roads or guarantee detection of a curb, vehicle, or person.</li>
-<li><strong>Manual override</strong> — processed by the Pi loop while the Xbox controller is connected and responsive.</li>
+<li><strong>Manual override</strong> — processed by the Raspberry Pi 5 loop while the Xbox controller is connected and responsive.</li>
 <li><strong>Supervision</strong> — the project is operated on controlled private test routes with an operator ready to stop motion; it is not approved for unattended road-adjacent operation.</li>
 </ul>
 <h2 id="next-change">Next change</h2>
@@ -984,7 +984,7 @@
 </ul>
 <h2 id="test-setup">Test setup</h2>
 <ul>
-<li><strong>Setup:</strong> Pi 5 controller with GPS (BN880 on <code>/dev/ttyAMA0</code>), LiDAR/AEB armed, Pi Camera Module 3 Wide; a planned route that ends an AI segment at a crosswalk/road.</li>
+<li><strong>Setup:</strong> Raspberry Pi 5 controller with GPS (BN880 on <code>/dev/ttyAMA0</code>), LiDAR/AEB armed, Raspberry Pi Camera Module 3 Wide; a planned route that ends an AI segment at a crosswalk/road.</li>
 <li><strong>Procedure:</strong> run <code>car</code>, then select <code>&lt;version&gt;</code> on the dashboard model page, drive the route toward the crossing; watch for the handoff alert and the mode switch to manual.</li>
 <li><strong>Pass/warn/fail:</strong> pass = handoff alert fires by ~3 m and control drops to manual before the road edge; warn = alert late but operator takes over cleanly; fail = car keeps AI-steering toward/into the road boundary.</li>
 <li><strong>Evidence to attach (planned):</strong> route + segment-mode log, handoff-alert timing from the runtime CSV, dashboard capture, manual-takeover count, model version.</li>

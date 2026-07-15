@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -976,41 +976,41 @@
 <tr>
 <td>Series 1</td>
 <td><code>1.0/1.0b</code> through <code>1.9/1.9b</code></td>
-<td>Pi when local inference is used, or Jon through ONNX</td>
+<td>Raspberry Pi 5 when local inference is used, or Jetson Orin Nano through ONNX</td>
 </tr>
 <tr>
 <td>Series 2</td>
 <td><code>2.0/2.0b</code> through <code>2.4/2.4b</code></td>
-<td>Pi when local inference is used, or Jon through ONNX</td>
+<td>Raspberry Pi 5 when local inference is used, or Jetson Orin Nano through ONNX</td>
 </tr>
 <tr>
 <td>Series 3</td>
 <td><code>3.0/3.0b</code> through <code>3.4/3.4b</code></td>
-<td>Jon</td>
+<td>Jetson Orin Nano</td>
 </tr>
 <tr>
 <td>Series 4 PC</td>
 <td><code>4.0p</code>, <code>4.0r</code></td>
-<td>Jon, image plus causal history</td>
+<td>Jetson Orin Nano, image plus causal history</td>
 </tr>
 <tr>
 <td>Series 4 CF</td>
 <td><code>4.0f</code>, <code>4.0g</code></td>
-<td>Jon, image only</td>
+<td>Jetson Orin Nano, image only</td>
 </tr>
 <tr>
 <td>Series 4 PCF</td>
 <td><code>4.0a</code>, <code>4.0c</code></td>
-<td>Jon, image plus causal history</td>
+<td>Jetson Orin Nano, image plus causal history</td>
 </tr>
 </tbody>
 </table>
 <p>The startup default is v3.4. <code>RC_CAR_STEERING_MODEL</code> can override it before launch. The current <code>rc_car.py</code> has no <code>--model</code> option; field switching happens on the dashboard model page.</p>
 <h2 id="preconditions">Preconditions</h2>
 <ol>
-<li>Copy the intended <code>SidewalkPilot-v&lt;version&gt;.onnx</code> to Jon's <code>code/ai_models/</code> directory.</li>
-<li>Confirm the runtime revision containing that model name is synchronized to the Pi and Jon.</li>
-<li>Start the Jon inference server and the Pi controller.</li>
+<li>Copy the intended <code>SidewalkPilot-v&lt;version&gt;.onnx</code> to Jetson Orin Nano's <code>code/ai_models/</code> directory.</li>
+<li>Confirm the runtime revision containing that model name is synchronized to the Raspberry Pi 5 and Jetson Orin Nano.</li>
+<li>Start the Jetson Orin Nano inference server and the Raspberry Pi 5 controller.</li>
 <li>Keep AEB state, steering trim, tire pressure, battery state, and route constant across comparisons.</li>
 <li>Prepare a run record with date/time, lighting, route segment, model hash, clips/logs, and takeover fields.</li>
 </ol>
@@ -1018,11 +1018,11 @@
 <ol>
 <li>Open the dashboard model page.</li>
 <li>Use the D-pad control to cycle to the intended version.</li>
-<li>Watch the Pi and Jon logs for the successful model switch/load message.</li>
+<li>Watch the Raspberry Pi 5 and Jetson Orin Nano logs for the successful model switch/load message.</li>
 <li>Confirm the dashboard displays the intended full model suffix, including <code>p/r/f/g/a/c</code> for Series 4.</li>
 <li>With the wheels safely unloaded or the car restrained, confirm fresh steering responses before placing it on the route.</li>
 </ol>
-<p>Jon inspects the ONNX signature. CF uses only the image. PC and PCF use a three-value target history that starts at <code>[90,90,90]</code>, updates from each completed model prediction, and resets after a model switch, reconnect, or manual/status period.</p>
+<p>Jetson Orin Nano inspects the ONNX signature. CF uses only the image. PC and PCF use a three-value target history that starts at <code>[90,90,90]</code>, updates from each completed model prediction, and resets after a model switch, reconnect, or manual/status period.</p>
 <h2 id="comparison-order">Comparison Order</h2>
 <p>The common evaluator orders the first Series 4 field pass as:</p>
 <ol>
@@ -1041,7 +1041,7 @@
 <p>Do not arm autonomy when:</p>
 <ul>
 <li>The intended artifact fails to load;</li>
-<li>Jon is unreachable or results are stale;</li>
+<li>Jetson Orin Nano is unreachable or results are stale;</li>
 <li>The displayed version does not match the planned run;</li>
 <li>Manual takeover, brake, steering, or AEB checks fail;</li>
 <li>A PC/PCF model shows unstable autoregressive behavior;</li>

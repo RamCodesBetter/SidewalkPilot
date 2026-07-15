@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Jetson Quantization - SidewalkPilot RC Car</title>
+    <title>Jetson Orin Nano Quantization - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Jetson Quantization";
+        var mkdocs_page_name = "Jetson Orin Nano Quantization";
         var mkdocs_page_input_path = "roadmap/jetson-quantization.md";
         var mkdocs_page_url = null;
       </script>
@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -916,7 +916,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Jetson Quantization</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Jetson Orin Nano Quantization</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#current-status">Current Status</a>
     </li>
@@ -946,7 +946,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Roadmap</li>
-      <li class="breadcrumb-item active">Jetson Quantization</li>
+      <li class="breadcrumb-item active">Jetson Orin Nano Quantization</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -955,12 +955,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="jetson-quantization">Jetson Quantization</h1>
-<p>Quantization is an optional future experiment, not part of the current vehicle deployment. The live Jetson path runs FP32 ONNX models through ONNX Runtime with CUDA.</p>
+                <h1 id="jetson-orin-nano-quantization">Jetson Orin Nano Quantization</h1>
+<p>Quantization is an optional future experiment, not part of the current vehicle deployment. The live Jetson Orin Nano path runs FP32 ONNX models through ONNX Runtime with CUDA.</p>
 <h2 id="current-status">Current Status</h2>
 <ul>
 <li>Series 3 and Series 4 trainers export FP32 ONNX artifacts.</li>
-<li>Jon currently uses <code>CUDAExecutionProvider</code>, with CPU as a compatibility fallback.</li>
+<li>Jetson Orin Nano currently uses <code>CUDAExecutionProvider</code>, with CPU as a compatibility fallback.</li>
 <li>No FP16 or INT8 engine has been accepted through offline evaluation and a field retest.</li>
 <li>The former calibrated TensorRT builder described by older notes is not in the current repository.</li>
 <li>The Series 3 trainer still has an optional <code>--build-tensorrt</code> wrapper around <code>trtexec</code>, but that flag is not the live deployment recipe and does not supply a calibration dataset by itself.</li>
@@ -968,8 +968,8 @@
 <h2 id="required-experiment">Required Experiment</h2>
 <p>If ONNX Runtime later becomes a measured bottleneck, test precision in this order:</p>
 <ol>
-<li>Record the FP32 ONNX baseline on Jon: model, provider, latency distribution, memory, power mode, and offline metrics.</li>
-<li>Build an FP16 TensorRT engine on the target Jetson.</li>
+<li>Record the FP32 ONNX baseline on Jetson Orin Nano: model, provider, latency distribution, memory, power mode, and offline metrics.</li>
+<li>Build an FP16 TensorRT engine on the target Jetson Orin Nano.</li>
 <li>Re-run the same evaluator and a controlled field test.</li>
 <li>Consider calibrated INT8 only if FP16 is still insufficient.</li>
 </ol>

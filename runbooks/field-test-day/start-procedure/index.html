@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -960,11 +960,11 @@
 <ol>
 <li>Inspect steering linkage, wheels, wiring, batteries, and emergency-stop access.</li>
 <li>Power the computers and confirm the Xbox controller is connected.</li>
-<li>Confirm the Pi-to-Zero USB network and Pi-to-Jon Ethernet link.</li>
+<li>Confirm the Raspberry Pi 5–Zero 2 W USB network and Raspberry Pi 5–Jetson Orin Nano Ethernet link.</li>
 <li>Keep the car lifted or physically restrained during startup checks.</li>
 </ol>
 <h2 id="start-services">Start Services</h2>
-<p>On the Zero 2 W, confirm <code>sidewalkpilot-z2w-dashboard.service</code> is running. On Jon, confirm the inference service is running. Then start the Pi controller:</p>
+<p>On the Zero 2 W, confirm <code>sidewalkpilot-z2w-dashboard.service</code> is running. On Jetson Orin Nano, confirm the inference service is running. Then start the Raspberry Pi 5 controller:</p>
 <pre><code class="language-bash">cd ~/rc_car_code/code/controller/current
 car
 </code></pre>
@@ -975,7 +975,7 @@ car
 <li>GPIO/PCA9685 initialization succeeds.</li>
 <li>LiDAR connects on the expected USB serial device.</li>
 <li>Camera capture starts.</li>
-<li>Jon responds with the selected model and a GPU provider.</li>
+<li>Jetson Orin Nano responds with the selected model and a GPU provider.</li>
 <li>Dashboard values update instead of showing <code>NO LINK</code> or stale data.</li>
 <li>Steering and throttle respond correctly while the wheels are unloaded.</li>
 </ul>

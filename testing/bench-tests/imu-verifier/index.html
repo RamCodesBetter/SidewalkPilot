@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -970,7 +970,7 @@
 <li>Defaults: <code>--baud 115200</code>, <code>--axis 2</code> (yaw = Z; <code>0=X</code>, <code>1=Y</code>, <code>2=Z</code>), <code>--median 5</code>, <code>--ema 0.3</code>, <code>--deadband 3.5</code> deg/s. If no <code>--port</code> is given it auto-scans <code>/dev/ttyACM*</code> and <code>/dev/ttyUSB*</code>; for the GPIO UART you pass the port explicitly. It prints the raw <code>X/Y/Z</code> and the filtered yaw live, and the correct verification is: hold the sensor still and the filtered yaw should sit at <code>0</code>.</li>
 </ul>
 <h2 id="command">Command</h2>
-<p>Run on the Pi 5 (IMU is on the GPIO UART <code>/dev/ttyAMA3</code>, Pi GPIO8/9):</p>
+<p>Run on the Raspberry Pi 5 (IMU is on the GPIO UART <code>/dev/ttyAMA3</code>, Raspberry Pi 5 GPIO8/9):</p>
 <pre><code class="language-bash">python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3
 # tune: pick the yaw axis and filter
 python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3 --axis 2 --median 5 --ema 0.3 --deadband 2.0

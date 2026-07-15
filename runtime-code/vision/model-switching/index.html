@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -368,9 +368,9 @@
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#registered-choices">Registered choices</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#current-jetson-path">Current Jetson path</a>
+    <li class="toctree-l3"><a class="reference internal" href="#current-jetson-orin-nano-path">Current Jetson Orin Nano path</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#local-pi-path">Local Pi path</a>
+    <li class="toctree-l3"><a class="reference internal" href="#local-raspberry-pi-5-path">Local Raspberry Pi 5 path</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#verification">Verification</a>
     </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -959,7 +959,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-switching">Model Switching</h1>
-<p>The dashboard can cycle all 46 registered Series 1-4 version names while the controller process remains running. Selection behavior differs between local Pi inference and the current camera-only/Jetson path.</p>
+<p>The dashboard can cycle all 46 registered Series 1-4 version names while the controller process remains running. Selection behavior differs between local Raspberry Pi 5 inference and the current camera-only/Jetson Orin Nano path.</p>
 <h2 id="registered-choices">Registered choices</h2>
 <p><code>STEERING_MODEL_VERSIONS</code> in <code>vision.py</code> contains:</p>
 <ul>
@@ -968,23 +968,23 @@
 <li>6 Series 4 names (<code>4.0p</code>, <code>4.0r</code>, <code>4.0f</code>, <code>4.0g</code>, <code>4.0a</code>, <code>4.0c</code>).</li>
 </ul>
 <p><code>cycle_steering_model()</code> moves through that tuple with wraparound and updates the active name only when <code>WebcamVisionProcessor.set_model_choice()</code> returns true.</p>
-<h2 id="current-jetson-path">Current Jetson path</h2>
-<p>In <code>camera_only</code> mode, the Pi does not load a local checkpoint. It records the requested name, clears cached analysis, and sends the name with subsequent frames. A successful Pi-side selection proves only that the name was accepted; Jon logs and a fresh matching response are required to prove that the ONNX artifact loaded.</p>
-<p>For Series 4 PC/PCF models, Jon resets causal steering history on load or switch so commands from the previous model do not enter the new model's input history.</p>
-<h2 id="local-pi-path">Local Pi path</h2>
+<h2 id="current-jetson-orin-nano-path">Current Jetson Orin Nano path</h2>
+<p>In <code>camera_only</code> mode, the Raspberry Pi 5 does not load a local checkpoint. It records the requested name, clears cached analysis, and sends the name with subsequent frames. A successful Raspberry Pi 5 selection proves only that the name was accepted; Jetson Orin Nano logs and a fresh matching response are required to prove that the ONNX artifact loaded.</p>
+<p>For Series 4 PC/PCF models, Jetson Orin Nano resets causal steering history on load or switch so commands from the previous model do not enter the new model's input history.</p>
+<h2 id="local-raspberry-pi-5-path">Local Raspberry Pi 5 path</h2>
 <p>When local PyTorch inference is enabled, <code>_load_steering_model()</code> builds and loads the requested Series 1/2 checkpoint before taking the model lock. If loading fails, the method returns false and retains the previous model. After a successful swap, cached analysis and timestamps are cleared.</p>
 <p>The lock ordering avoids intentionally exposing a partially assigned model/reference pair to the camera worker. It is a concurrency design, not a formal guarantee against every process or hardware fault.</p>
 <h2 id="verification">Verification</h2>
 <ul>
 <li>Confirm the dashboard reports the intended name.</li>
 <li>For local models, confirm the successful-load log and fresh inference.</li>
-<li>For Series 3/4, confirm Jon logs the matching ONNX path/provider and the Pi receives fresh results for that exact model name.</li>
+<li>For Series 3/4, confirm Jetson Orin Nano logs the matching ONNX path/provider and the Raspberry Pi 5 receives fresh results for that exact model name.</li>
 <li>Keep autonomy off during the switch and initial verification.</li>
 </ul>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><a href="../model-choices/">Model Choices</a></li>
-<li><a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a></li>
+<li><a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a></li>
 <li><a href="../../../testing/bench-tests/model-steering/">Model Steering Bench Test</a></li>
 </ul>
               

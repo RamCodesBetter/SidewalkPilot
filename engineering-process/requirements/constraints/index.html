@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -239,7 +239,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -968,17 +968,17 @@
 </ul>
 <h2 id="compute-and-connectivity">Compute and Connectivity</h2>
 <ul>
-<li>The Pi owns final actuator and safety decisions.</li>
-<li>Jon performs Series 3/4 ONNX inference over direct Ethernet at <code>10.42.0.2:8770</code>.</li>
-<li>Camera/Jon work is asynchronous so it does not block local controller polling.</li>
-<li>Dashboard telemetry is UDP over the dedicated Pi-to-Zero USB network. There is no Wi-Fi fallback in the current configuration.</li>
+<li>The Raspberry Pi 5 owns final actuator and safety decisions.</li>
+<li>Jetson Orin Nano performs Series 3/4 ONNX inference over direct Ethernet at <code>10.42.0.2:8770</code>.</li>
+<li>Camera/Jetson Orin Nano work is asynchronous so it does not block local controller polling.</li>
+<li>Dashboard telemetry is UDP over the dedicated Raspberry Pi 5–Zero 2 W USB network. There is no Wi-Fi fallback in the current configuration.</li>
 <li>Each computer must be restarted or have its owning service restarted after synced code changes.</li>
 </ul>
 <h2 id="safety">Safety</h2>
 <ul>
 <li>Manual takeover remains available from the Xbox controller.</li>
 <li>LiDAR does not steer. When AEB is enabled, it can cap forward throttle and request a hard brake from center-corridor clearance.</li>
-<li>A stale or unavailable Jon result is not a valid autonomous command.</li>
+<li>A stale or unavailable Jetson Orin Nano result is not a valid autonomous command.</li>
 <li>Configured distance thresholds are policy values, not proof of stopping distance. Physical tests under the real payload are still required.</li>
 </ul>
 <h2 id="data-and-claims">Data and Claims</h2>

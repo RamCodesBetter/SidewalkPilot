@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -974,16 +974,16 @@
 <td><code>192.168.10.1/24</code></td>
 </tr>
 <tr>
-<td>Raspberry Pi Zero 2 W</td>
+<td>Zero 2 W</td>
 <td>USB gadget <code>usb0</code></td>
 <td><code>192.168.10.2/24</code></td>
 </tr>
 </tbody>
 </table>
-<p>The Zero receives UDP telemetry on port <code>8765</code> and drives the 64×32 HUB75 panel. Wi-Fi can remain available for SSH, but the controller does not send dashboard packets to a Wi-Fi hostname.</p>
+<p>The Zero 2 W receives UDP telemetry on port <code>8765</code> and drives the 64×32 HUB75 panel. Wi-Fi can remain available for SSH, but the controller does not send dashboard packets to a Wi-Fi hostname.</p>
 <h2 id="install-permanent-recovery">Install Permanent Recovery</h2>
 <p>Run the role matching each machine from the repository root:</p>
-<pre><code class="language-bash"># Pi 5
+<pre><code class="language-bash"># Raspberry Pi 5
 sudo code/test_files/setup/install_usb_dashboard_link.sh rpi
 code/test_files/setup/install_usb_dashboard_link.sh verify-rpi
 </code></pre>
@@ -991,19 +991,19 @@ code/test_files/setup/install_usb_dashboard_link.sh verify-rpi
 sudo code/test_files/setup/install_usb_dashboard_link.sh z2w
 code/test_files/setup/install_usb_dashboard_link.sh verify-z2w
 </code></pre>
-<p>The installer creates static addressing and <code>sidewalkpilot-usb0-keeper.service</code>. The keeper restores addresses, flushes failed neighbor entries, cycles the interface after repeated failures, and reloads <code>dwc2/g_ether</code> on the Zero when its gadget interface disappears.</p>
+<p>The installer creates static addressing and <code>sidewalkpilot-usb0-keeper.service</code>. The keeper restores addresses, flushes failed neighbor entries, cycles the interface after repeated failures, and reloads <code>dwc2/g_ether</code> on the Zero 2 W when its gadget interface disappears.</p>
 <h2 id="start-and-verify">Start and Verify</h2>
 <pre><code class="language-bash"># Zero 2 W
 sudo systemctl restart sidewalkpilot-z2w-dashboard.service
 sudo systemctl status sidewalkpilot-z2w-dashboard.service -l --no-pager
 ss -lunp | grep 8765
 </code></pre>
-<pre><code class="language-bash"># Pi 5
+<pre><code class="language-bash"># Raspberry Pi 5
 ping -c 3 192.168.10.2
 sudo systemctl restart sidewalkpilot-rpi-car.service
 journalctl -u sidewalkpilot-rpi-car.service -n 80 -l --no-pager
 </code></pre>
-<p>Pass criteria are carrier on both <code>usb0</code> interfaces, successful peer ping, UDP port <code>8765</code> bound on the Zero, and live page updates without <code>NO LINK</code> or <code>STALE</code>.</p>
+<p>Pass criteria are carrier on both <code>usb0</code> interfaces, successful peer ping, UDP port <code>8765</code> bound on the Zero 2 W, and live page updates without <code>NO LINK</code> or <code>STALE</code>.</p>
 <h2 id="inspect-the-link">Inspect the Link</h2>
 <p>Run on each device with the appropriate peer address:</p>
 <pre><code class="language-bash">ip -br addr show usb0
@@ -1011,11 +1011,11 @@ cat /sys/class/net/usb0/carrier
 ip neigh show dev usb0
 sudo systemctl status sidewalkpilot-usb0-keeper.service -l --no-pager
 </code></pre>
-<p><code>carrier=1</code> with an <code>INCOMPLETE</code> neighbor means USB electrical enumeration succeeded but Ethernet frames are not completing. Inspect both devices; restarting only the sender cannot repair the Zero's gadget state.</p>
+<p><code>carrier=1</code> with an <code>INCOMPLETE</code> neighbor means USB electrical enumeration succeeded but Ethernet frames are not completing. Inspect both devices; restarting only the sender cannot repair the Zero 2 W's gadget state.</p>
 <h2 id="linked-shutdown">Linked Shutdown</h2>
 <p>When the controller exits normally, it sends several shutdown datagrams. The receiver logs <code>Dashboard receiver shutdown requested by controller.</code> and exits. Restart both services before a new run if the service units do not automatically restart after clean exit.</p>
 <h2 id="physical-failure-boundary">Physical Failure Boundary</h2>
-<p>Repeated USB descriptor errors (<code>-110</code>, <code>-62</code>, or <code>unable to enumerate</code>) occur below the application layer. Move to a known-good Pi 5 USB port/cable and verify <code>lsusb</code> before changing Python. A cable carrying power does not prove its data path is healthy.</p>
+<p>Repeated USB descriptor errors (<code>-110</code>, <code>-62</code>, or <code>unable to enumerate</code>) occur below the application layer. Move to a known-good Raspberry Pi 5 USB port/cable and verify <code>lsusb</code> before changing Python. A cable carrying power does not prove its data path is healthy.</p>
               
             </div>
           </div><footer>

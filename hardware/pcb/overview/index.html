@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,10 +957,10 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="custom-pcb-overview">Custom PCB Overview</h1>
-<p>The custom RPi5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects every sensor and actuator to the Raspberry Pi 5. It is <strong>DESIGNED ONLY</strong> right now: the board has been laid out but it has <strong>not been ordered and not been fabricated</strong>, so nothing on the car runs on it yet. On top of that, the current layout is already outdated. I moved several pins around in the runtime after the board was drawn, so the design's GPIO map no longer matches <code>config.py</code>. A new revision with the corrected GPIO is planned before I ever send anything to a fab house.</p>
+<p>The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects every sensor and actuator to the Raspberry Pi 5. It is <strong>DESIGNED ONLY</strong> right now: the board has been laid out but it has <strong>not been ordered and not been fabricated</strong>, so nothing on the car runs on it yet. On top of that, the current layout is already outdated. I moved several pins around in the runtime after the board was drawn, so the design's GPIO map no longer matches <code>config.py</code>. A new revision with the corrected GPIO is planned before I ever send anything to a fab house.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>Today the whole car is wired point-to-point: the Xbox-controller-driven Pi 5 fans out to a PCA9685 servo driver over I2C, to a Yahboom AT8236 H-bridge over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.</p>
-<p>The PCB collapses that harness into one board that seats on the Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Pi pin:</p>
+<p>Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 servo driver over I2C, to a Yahboom AT8236 H-bridge over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.</p>
+<p>The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:</p>
 <ul>
 <li>The <strong>PCA9685</strong> servo driver breaks out on the I2C bus (<code>0x40</code>, channel 0).</li>
 <li>The <strong>AT8236 motor driver</strong> takes the four motor GPIOs (right fwd/bwd, left fwd/bwd).</li>

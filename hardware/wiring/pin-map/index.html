@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -959,7 +959,7 @@
                 <h1 id="pin-map">Pin Map</h1>
 <p>A consolidated table of the runtime's primary sensors, actuators, and inter-computer links. The other wiring pages break the same connections down by bus type.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>The Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (servo driver via PCA9685), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
+<p>The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (servo driver via PCA9685), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
 <h2 id="master-pin-port-table">Master pin / port table</h2>
 <table>
 <thead>
@@ -1031,7 +1031,7 @@
 <tr>
 <td>IMU</td>
 <td>Seeed XIAO MG24 Sense (6-axis)</td>
-<td>UART, Pi GPIO8/9</td>
+<td>UART, Raspberry Pi 5 GPIO8/9</td>
 <td><code>/dev/ttyAMA3</code> @ <code>115200</code></td>
 <td><code>STEERING_YAW_PID_PORT</code>, <code>STEERING_YAW_PID_BAUD</code></td>
 </tr>
@@ -1053,7 +1053,7 @@
 <td>Dashboard link</td>
 <td>Zero 2 W over USB Ethernet gadget</td>
 <td>USB (usb0)</td>
-<td>Pi <code>192.168.10.1</code>, Zero <code>192.168.10.2</code>, UDP <code>8765</code></td>
+<td>Raspberry Pi 5 <code>192.168.10.1</code>, Zero 2 W <code>192.168.10.2</code>, UDP <code>8765</code></td>
 <td><code>HUB75_DASHBOARD_*</code> (<code>config.py</code>)</td>
 </tr>
 </tbody>

@@ -148,7 +148,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -241,7 +241,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -958,7 +958,7 @@
               
                 <h1 id="sidewalkpilot">SidewalkPilot</h1>
 <p>SidewalkPilot is a solo-built autonomous RC-car research platform that uses a camera model to steer along sidewalks while a separate LiDAR layer can slow or stop the vehicle. The project began in early April 2025 after a smaller Raspberry Pi Pico project. It grew from a drivable RC chassis into a complete hardware, data, model, deployment, and safety system.</p>
-<p>It is a real, working vehicle rather than a simulation-only demonstration. A Raspberry Pi 5 operates the hardware and safety loop, an NVIDIA Jetson Orin Nano runs neural-network inference, and a Raspberry Pi Zero 2 W drives a live 64x32 dashboard. An Xbox controller remains the manual takeover and shutdown interface.</p>
+<p>It is a real, working vehicle rather than a simulation-only demonstration. An Jetson Orin Nano runs neural-network inference, a Raspberry Pi 5 operates the hardware and safety loop, and a Zero 2 W drives a live 64x32 dashboard. An Xbox controller remains the manual takeover and shutdown interface.</p>
 <blockquote>
 <p>SidewalkPilot is a supervised research and learning project. It is not presented as certified or approved for unattended or public-road operation, and it is not a finished autonomous vehicle.</p>
 </blockquote>
@@ -972,10 +972,10 @@
 <p>Offline scores did not choose the winner by themselves. v3.4b had a slightly lower mean absolute error, but v3.4 had stronger balanced turn behavior and won on the physical car.</p>
 <h2 id="what-the-car-does">What the Car Does</h2>
 <ol>
-<li>The Pi Camera captures a forward sidewalk view.</li>
-<li>The Raspberry Pi 5 submits the newest frame to a background Jetson client so connection and inference waits do not run in the controller loop.</li>
-<li>The Jetson runs the selected ONNX model and returns a steering prediction.</li>
-<li>The Raspberry Pi applies steering, throttle policy, manual takeover, and LiDAR emergency braking.</li>
+<li>The Raspberry Pi Camera captures a forward sidewalk view.</li>
+<li>The Raspberry Pi 5 submits the newest frame to a background Jetson Orin Nano client so connection and inference waits do not run in the controller loop.</li>
+<li>The Jetson Orin Nano runs the selected ONNX model and returns a steering prediction.</li>
+<li>The Raspberry Pi 5 applies steering, throttle policy, manual takeover, and LiDAR emergency braking.</li>
 <li>The Zero 2 W displays steering, model, navigation, camera, temperature, and LiDAR telemetry over a dedicated USB network.</li>
 <li>Camera frames and absolute steering/throttle labels are saved for the next training iteration.</li>
 </ol>
@@ -1002,7 +1002,6 @@
 <li><a href="https://github.com/RamCodesBetter/SidewalkPilot">GitHub</a></li>
 <li><a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face models and datasets</a></li>
 <li><a href="https://www.youtube.com/@SidewalkPilot">YouTube</a></li>
-<li><a href="https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot">Weights &amp; Biases</a></li>
 <li><a href="start-here/current-status/">Project status</a></li>
 </ul>
               
@@ -1053,5 +1052,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-07-15 09:48:17.344209+00:00
+Build Date UTC : 2026-07-15 19:09:25.311281+00:00
 -->

@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -958,7 +958,7 @@
 <p>The IMU is a Seeed XIAO MG24 with a 6-axis sensor (3-axis accelerometer + 3-axis
 gyroscope). It was added to give the steering loop a direct measurement of how fast
 the car is actually rotating (yaw rate), rather than inferring turn from the servo
-command alone. It is wired to the Pi 5 UART on <code>/dev/ttyAMA3</code> (GPIO 8/9).</p>
+command alone. It is wired to the Raspberry Pi 5 UART on <code>/dev/ttyAMA3</code> (GPIO 8/9).</p>
 <p><strong>Status: implemented and experimental.</strong> Firmware, verifier, and calibration utilities
 exist in <code>code/test_files</code>. The live runtime starts <code>ImuReader</code> and <code>YawController</code> when
 <code>STEERING_YAW_PID_MODE</code> is not <code>off</code>; the checked-in default is <code>straight</code>. In that mode,
@@ -969,7 +969,7 @@ startup <code>Yaw-rate PID steering ENABLED</code> line and fresh yaw telemetry 
 attributed to the controller.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
-<li>The MG24 streams inertial data over UART to the Pi 5. The gyro's yaw axis gives the car's
+<li>The MG24 streams inertial data over UART to the Raspberry Pi 5. The gyro's yaw axis gives the car's
   turn rate directly.</li>
 <li>In default <code>straight</code> mode, commands within 5 degrees of logical center target zero yaw;
   the PID trims around direction-dependent feed-forward values. <code>full</code> mode can also track

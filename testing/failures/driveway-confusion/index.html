@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -506,7 +506,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -959,7 +959,7 @@
                 <h1 id="driveway-confusion">Driveway Confusion</h1>
 <p>A driveway interrupts normal sidewalk-edge geometry: concrete widens or crosses a vehicle path, a curb may ramp down, and one visual boundary can weaken. A steering model can interpret that opening as a turn instead of continuing across the sidewalk alignment.</p>
 <h2 id="current-implementation">Current implementation</h2>
-<p><code>estimate_path_bias_from_frame()</code> in <code>vision.py</code> contains a classic image-processing fallback with a <code>driveway_cut_hint</code>. That heuristic remains in the source for diagnostics or fallback work, but the current Series 3/4 Jetson result sets <code>driveway_cut_hint = False</code> and supplies a neural steering result directly. The live Series 3/4 path therefore does <strong>not</strong> have a verified driveway classifier or an active driveway-specific stop gate.</p>
+<p><code>estimate_path_bias_from_frame()</code> in <code>vision.py</code> contains a classic image-processing fallback with a <code>driveway_cut_hint</code>. That heuristic remains in the source for diagnostics or fallback work, but the current Series 3/4 Jetson Orin Nano result sets <code>driveway_cut_hint = False</code> and supplies a neural steering result directly. The live Series 3/4 path therefore does <strong>not</strong> have a verified driveway classifier or an active driveway-specific stop gate.</p>
 <p>The runtime recognizes <code>stop_reason == "driveway_cut"</code> for dashboard alert formatting, but the current neural path does not generate that reason. A dormant state field is not evidence of an active safety feature.</p>
 <h2 id="plausible-contributors">Plausible contributors</h2>
 <ul>

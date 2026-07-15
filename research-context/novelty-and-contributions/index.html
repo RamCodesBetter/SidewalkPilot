@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -317,7 +317,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#3-series-4-temporal-experiments">3. Series 4 temporal experiments</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#4-integrated-pi-jetson-sensors-and-dashboard">4. Integrated Pi, Jetson, sensors, and dashboard</a>
+    <li class="toctree-l2"><a class="reference internal" href="#4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#5-evaluation-beyond-mae">5. Evaluation beyond MAE</a>
     </li>
@@ -522,7 +522,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -932,7 +932,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -988,9 +988,9 @@ history (<code>4.0p/r</code>), future supervision (<code>4.0f/g</code>), and com
 future targets are training supervision, not unavailable future inputs at deployment.</p>
 <p>The current common-set report ranks <code>4.0p</code> highest by Bal9 among the Series 3/4 candidates,
 but that is an offline screening result. It does not replace the ordered physical test.</p>
-<h2 id="4-integrated-pi-jetson-sensors-and-dashboard">4. Integrated Pi, Jetson, sensors, and dashboard</h2>
-<p><strong>Status: implemented engineering.</strong> The Pi owns controller input, sensors, actuator output,
-logging, and dashboard telemetry. Jon performs Series 3/4 ONNX inference over direct
+<h2 id="4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard</h2>
+<p><strong>Status: implemented engineering.</strong> The Raspberry Pi 5 owns controller input, sensors, actuator output,
+logging, and dashboard telemetry. Jetson Orin Nano performs Series 3/4 ONNX inference over direct
 Ethernet. The Zero 2 W renders the USB-linked dashboard. Splitting real-time I/O from heavier
 inference is an established systems pattern; the contribution is the working integration
 and debugging record on this vehicle.</p>

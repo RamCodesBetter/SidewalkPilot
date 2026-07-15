@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -516,7 +516,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +926,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -957,7 +957,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="camera-capture">Camera Capture</h1>
-<p>Camera Capture covers how the runtime opens the RPi Camera Module 3 Wide, pulls
+<p>Camera Capture covers how the runtime opens the Raspberry Pi Camera Module 3 Wide, pulls
 frames, and hands them to the steering estimator. All of this lives in
 <code>code/controller/current/rc_car_app/vision.py</code>, inside the <code>_PiCameraCapture</code>
 helper and the <code>WebcamVisionProcessor</code> capture thread.</p>
@@ -1029,7 +1029,7 @@ latency. This is a concurrency design, not a formal guarantee that Python schedu
 process-wide camera fault can never affect loop timing.</p>
 <h2 id="failure-symptom">Failure symptom</h2>
 <p>If Picamera2 is unavailable or the camera fails to start, <code>start()</code> prints
-<code>Failed to open Pi Camera for vision processing: ...</code> (or <code>Pi camera vision
+<code>Failed to open Raspberry Pi Camera for vision processing: ...</code> (or <code>Raspberry Pi 5 camera vision
 processor started.</code> on success) and returns <code>False</code>, leaving no active camera processor. If
 autonomy is requested without a fresh accepted model result, the autonomous path requests a
 hard stop. A camera that opens but never produces frames leaves

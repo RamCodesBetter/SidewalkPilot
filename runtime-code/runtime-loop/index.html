@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -322,7 +322,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#worker-ownership">Worker Ownership</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#offline-jetson-behavior">Offline Jetson Behavior</a>
+    <li class="toctree-l2"><a class="reference internal" href="#offline-jetson-orin-nano-behavior">Offline Jetson Orin Nano Behavior</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#timing-diagnostics">Timing Diagnostics</a>
     </li>
@@ -518,7 +518,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -928,7 +928,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -981,7 +981,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Pi camera capture</td>
+<td>Raspberry Pi 5 camera capture</td>
 <td><code>WebcamVisionProcessor</code> thread</td>
 <td>Copy latest BGR frame</td>
 </tr>
@@ -1006,7 +1006,7 @@
 <td>Read latest yaw rate</td>
 </tr>
 <tr>
-<td>Jetson TCP/JPEG/inference</td>
+<td>Jetson Orin Nano TCP/JPEG/inference</td>
 <td><code>AsyncJetsonSteeringClient</code> thread</td>
 <td>Submit latest frame and read fresh cached result</td>
 </tr>
@@ -1027,19 +1027,19 @@
 </tr>
 </tbody>
 </table>
-<p>Both Jetson and dashboard workers are <strong>latest-value</strong> boundaries. If consumption is slower than capture, old pending work is replaced instead of building an increasingly stale queue.</p>
-<h2 id="offline-jetson-behavior">Offline Jetson Behavior</h2>
-<p>Jon uses <code>10.42.0.2:8770</code>. A failed TCP connect can consume the complete <code>0.4 s</code> socket timeout, but that wait occurs only in <code>AsyncJetsonSteeringClient</code>. Manual steering and dashboard updates continue while Jon is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.</p>
+<p>Both Jetson Orin Nano and dashboard workers are <strong>latest-value</strong> boundaries. If consumption is slower than capture, old pending work is replaced instead of building an increasingly stale queue.</p>
+<h2 id="offline-jetson-orin-nano-behavior">Offline Jetson Orin Nano Behavior</h2>
+<p>Jetson Orin Nano uses <code>10.42.0.2:8770</code>. A failed TCP connect can consume the complete <code>0.4 s</code> socket timeout, but that wait occurs only in <code>AsyncJetsonSteeringClient</code>. Manual steering and dashboard updates continue while Jetson Orin Nano is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.</p>
 <p><code>JETSON_RESULT_MAX_AGE_SEC</code> is <code>0.25 s</code>. A result older than that is unavailable for control even if it remains in the cache.</p>
 <h2 id="timing-diagnostics">Timing Diagnostics</h2>
 <p>The runtime emits:</p>
 <pre><code class="language-text">[loop-stall] control loop paused 412ms (auto=0)
 </code></pre>
-<p>for pauses at or above 100 ms, rate-limited to one message per second. A repeating message with Jon off indicates a regression: network I/O has reached the control thread again. Camera, LiDAR, dashboard, and servo updates pausing together is also evidence of a main-loop stall rather than Bluetooth latency.</p>
+<p>for pauses at or above 100 ms, rate-limited to one message per second. A repeating message with Jetson Orin Nano off indicates a regression: network I/O has reached the control thread again. Camera, LiDAR, dashboard, and servo updates pausing together is also evidence of a main-loop stall rather than Bluetooth latency.</p>
 <h2 id="bench-check">Bench Check</h2>
 <ol>
 <li>Keep the wheels clear of the ground.</li>
-<li>Power the Pi 5 and Zero 2 W, but leave Jon off.</li>
+<li>Power the Raspberry Pi 5 and Zero 2 W, but leave Jetson Orin Nano off.</li>
 <li>Start the controller service and move the steering stick continuously.</li>
 <li>Change dashboard pages while watching the camera/LiDAR pages.</li>
 <li>Confirm servo and display motion stay smooth and <code>journalctl</code> has no repeating loop-stall pattern.</li>

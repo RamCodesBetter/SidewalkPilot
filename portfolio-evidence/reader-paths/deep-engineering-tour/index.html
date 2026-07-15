@@ -166,7 +166,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -259,7 +259,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -536,7 +536,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -946,7 +946,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -979,8 +979,8 @@
                 <h1 id="deep-engineering-tour">Deep Engineering Tour</h1>
 <p>This tour connects the project story to the source files, model contracts, data, evaluation, and failure-handling decisions a technical reviewer can inspect.</p>
 <h2 id="1-three-computers-one-authority">1. Three Computers, One Authority</h2>
+<p>The Jetson Orin Nano is an inference service. The Raspberry Pi 5 sends the newest JPEG and selected model version over dedicated Ethernet. Jetson Orin Nano loads the matching ONNX, returns decoded steering/probabilities, and never directly controls an actuator.</p>
 <p>The Raspberry Pi 5 is the final control authority. It reads the Xbox controller, captures camera frames, reads LiDAR/GPS/IMU/hall telemetry, applies safety policy, drives the PCA9685 steering servo and motor controller, and records logs.</p>
-<p>The Jetson Orin Nano is an inference service. The Pi sends the newest JPEG and selected model version over dedicated Ethernet. Jon loads the matching ONNX, returns decoded steering/probabilities, and never directly controls an actuator.</p>
 <p>The Zero 2 W is a display service. It receives UDP telemetry over a dedicated USB network and renders the Waveshare 64x32 HUB75 panel. Dashboard failure does not control motion.</p>
 <table>
 <thead>
@@ -1003,11 +1003,11 @@
 <td><code>code/controller/current/rc_car_app/hardware.py</code></td>
 </tr>
 <tr>
-<td>Model registry and Pi inference client</td>
+<td>Model registry and Raspberry Pi 5 inference client</td>
 <td><code>code/controller/current/rc_car_app/vision.py</code></td>
 </tr>
 <tr>
-<td>Jon ONNX server</td>
+<td>Jetson Orin Nano ONNX server</td>
 <td><code>code/controller/current/rc_car_app/jetson_inference_server.py</code></td>
 </tr>
 <tr>
@@ -1029,9 +1029,9 @@
 </tbody>
 </table>
 <h2 id="2-keeping-manual-control-responsive">2. Keeping Manual Control Responsive</h2>
-<p>An earlier runtime failure looked like Bluetooth lag: steering and dashboard updates ran smoothly, paused, then resumed. <code>jstest</code> changed instantly, including while Jon was off, so the controller link was not the bottleneck.</p>
-<p>The audit found recurring work on the control path, especially network waits to an unavailable Jon, repeated photo-directory scans, and temperature subprocesses. Camera-to-Jon communication now uses a background worker with latest-frame semantics. Dashboard networking is asynchronous, and recurring file/subprocess work is cached or moved away from each controller tick.</p>
-<p>The field retest with Jon powered off removed the observed pauses. That is a bounded result from one hardware retest, not a general hard-real-time guarantee.</p>
+<p>An earlier runtime failure looked like Bluetooth lag: steering and dashboard updates ran smoothly, paused, then resumed. <code>jstest</code> changed instantly, including while Jetson Orin Nano was off, so the controller link was not the bottleneck.</p>
+<p>The audit found recurring work on the control path, especially network waits to an unavailable Jetson Orin Nano, repeated photo-directory scans, and temperature subprocesses. Camera-to-Jetson Orin Nano communication now uses a background worker with latest-frame semantics. Dashboard networking is asynchronous, and recurring file/subprocess work is cached or moved away from each controller tick.</p>
+<p>The field retest with Jetson Orin Nano powered off removed the observed pauses. That is a bounded result from one hardware retest, not a general hard-real-time guarantee.</p>
 <h2 id="3-model-evolution">3. Model Evolution</h2>
 <h3 id="series-1-and-2">Series 1 and 2</h3>
 <p><code>SteeringAutonomyV2</code> accepts a <code>3x66x200</code> normalized image and directly regresses steering. It contains 672,877 trainable parameters. Series 1 established the end-to-end loop; Series 2 refined data and tested fixed HSV/CLAHE preprocessing.</p>

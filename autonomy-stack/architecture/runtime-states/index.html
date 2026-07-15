@@ -144,7 +144,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -237,7 +237,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -514,7 +514,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -924,7 +924,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -972,7 +972,7 @@
 </ul>
 <p>The former <code>LDR</code> steering-override mode is not part of the current arbitration because LiDAR no longer changes steering. LiDAR state is instead visible through its throttle cap, center occupancy, emergency flag, AEB status, and alerts.</p>
 <h2 id="model-and-safety-state">Model and Safety State</h2>
-<p>The selected steering version can change from the dashboard. Jon resets Series 4 causal history on load/switch and other discontinuities. Autonomous control requires a fresh result for the selected version. LiDAR/AEB is an independent toggle and, when enabled, can cap forward throttle or request braking in either manual or autonomous Drive.</p>
+<p>The selected steering version can change from the dashboard. Jetson Orin Nano resets Series 4 causal history on load/switch and other discontinuities. Autonomous control requires a fresh result for the selected version. LiDAR/AEB is an independent toggle and, when enabled, can cap forward throttle or request braking in either manual or autonomous Drive.</p>
 <p>Navigation can still request automatic or manual route segments, but the operator remains responsible for road crossings and immediate takeover.</p>
               
             </div>

@@ -136,7 +136,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
                 </li>
@@ -229,7 +229,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
                 </li>
@@ -520,7 +520,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -930,7 +930,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -1016,7 +1016,7 @@
 <p>The early network uses five convolution stages with channels <code>3 -&gt; 24 -&gt; 36 -&gt; 48 -&gt; 64 -&gt; 64</code>, adaptive pooling to <code>64x4x8</code>, and a compact dense steering head. The output is bounded by <code>tanh</code> and decoded around logical center:</p>
 <pre><code class="language-text">steering = 90 + output_scale * tanh(raw)
 </code></pre>
-<p>Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. The model is small enough for local Pi inference and established the first complete image-to-servo pipeline.</p>
+<p>Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. The model is small enough for local Raspberry Pi 5 inference and established the first complete image-to-servo pipeline.</p>
 <h2 id="series-3-visual-network">Series 3 Visual Network</h2>
 <p>Series 3 uses channels <code>3 -&gt; 32 -&gt; 48 -&gt; 64 -&gt; 96 -&gt; 128 -&gt; 160</code>, adaptive pooling to <code>160x6x10</code>, and dense layers that turn the 9,600 pooled features into the output head.</p>
 <p>v3.0 uses the early two-output contract. v3.1 and later use the hybrid steering head:</p>
@@ -1031,15 +1031,15 @@ steering = class_low + fraction * (class_high - class_low)
 <p>CF has no history branch and maps <code>256 -&gt; 64</code>. Each horizon then uses its own <code>64 -&gt; 18</code> output layer. The extra history/fusion layers explain why PC/PCF are slightly larger than CF; the four small horizon heads add much less capacity than the dense visual encoder.</p>
 <h2 id="input-preprocessing">Input Preprocessing</h2>
 <ul>
-<li>Frames originate as OpenCV BGR arrays from Pi camera capture.</li>
+<li>Frames originate as OpenCV BGR arrays from Raspberry Pi 5 camera capture.</li>
 <li>Each family resizes to its required dimensions.</li>
 <li>Pixel values are normalized to the range expected by the matching trainer.</li>
 <li>Series 2 v2.0/v2.0b can use the documented CLAHE path; other current models use raw BGR preprocessing plus training-time augmentation.</li>
 </ul>
 <p>Preprocessing is part of the model contract. A checkpoint evaluated with the wrong resize, channel order, or decoder is not a valid comparison.</p>
 <h2 id="deployment">Deployment</h2>
-<p>Series 3/4 ONNX inference runs on Jon through ONNX Runtime with CUDA when available. The server inspects input names and output shapes to choose the decoder. TensorRT is not required for the current models and should not be claimed as the active path unless a TensorRT engine is actually built and measured.</p>
-<p>See <a href="../series-3-hybrid-head/">Series 3 Hybrid Head</a>, <a href="../series-4-plan/">Series 4 Temporal Experiments</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>.</p>
+<p>Series 3/4 ONNX inference runs on Jetson Orin Nano through ONNX Runtime with CUDA when available. The server inspects input names and output shapes to choose the decoder. TensorRT is not required for the current models and should not be claimed as the active path unless a TensorRT engine is actually built and measured.</p>
+<p>See <a href="../series-3-hybrid-head/">Series 3 Hybrid Head</a>, <a href="../series-4-plan/">Series 4 Temporal Experiments</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>
           </div><footer>
