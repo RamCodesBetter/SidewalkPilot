@@ -4,7 +4,7 @@ This timeline is organized by engineering phase because many early experiments w
 
 ## Phase 1: Build a Drivable Research Car
 
-The project began by turning an Ackermann-steering RC chassis into a software-controlled platform. The Raspberry Pi took ownership of motor direction, PWM throttle, PCA9685 servo control, camera capture, controller input, and cleanup.
+The project began by turning an Ackermann-steering RC chassis into a software-controlled platform. The Raspberry Pi 5 took ownership of motor direction, PWM throttle, PCA9685 servo control, camera capture, controller input, and cleanup.
 
 This phase established the non-negotiable baseline: manual driving had to remain available while every later autonomy feature was added.
 
@@ -24,11 +24,11 @@ The lesson was that preprocessing can help one condition while changing useful v
 
 The system grew into three managers:
 
-- The Raspberry Pi 5 for hardware and final control;
 - The Jetson Orin Nano for model inference;
+- The Raspberry Pi 5 for hardware and final control;
 - The Zero 2 W for the external dashboard.
 
-Dedicated Ethernet kept Jetson inference offline. A USB network carried dashboard telemetry. This split made the architecture more capable, but it also introduced real transport, boot-order, service, and stale-data problems that had to be engineered rather than assumed away.
+Dedicated Ethernet kept Jetson Orin Nano inference offline. A USB network carried dashboard telemetry. This split made the architecture more capable, but it also introduced real transport, boot-order, service, and stale-data problems that had to be engineered rather than assumed away.
 
 ## Phase 5: Series 3 and the Shadow Problem
 
@@ -65,11 +65,11 @@ Four recent models were compared on the physical car in shadow cases and normal 
 
 The exact route, weather, takeover count, and clip identifiers were not preserved in the test record, so this remains an honest qualitative field verdict rather than a fully instrumented benchmark.
 
-## July 14, 2026: Remove Powered-Off-Jetson Lag
+## July 14, 2026: Remove Powered-Off Jetson Orin Nano Lag
 
 Manual steering and the dashboard had been running smoothly for several seconds, pausing briefly, then resuming. A direct controller test was instantaneous, which ruled out Bluetooth as the main cause.
 
-The runtime audit found blocking work in the control path, especially repeated network waits to an offline Jetson, photo-directory scans, and temperature subprocesses. Jetson communication moved to a background worker with latest-frame semantics; dashboard sending remained asynchronous; recurring file and subprocess work left the loop. In one physical retest with the Jetson powered off, the previously observed periodic pauses were absent. A long-duration latency trace is still an evidence gap.
+The runtime audit found blocking work in the control path, especially repeated network waits to an offline Jetson Orin Nano, photo-directory scans, and temperature subprocesses. Jetson Orin Nano communication moved to a background worker with latest-frame semantics; dashboard sending remained asynchronous; recurring file and subprocess work left the loop. In one physical retest with the Jetson Orin Nano powered off, the previously observed periodic pauses were absent. A long-duration latency trace is still an evidence gap.
 
 ## July 14, 2026: Series 4 Temporal Experiments
 
@@ -79,7 +79,7 @@ The first Series 4 implementation compares three temporal contracts on the uncha
 - CF uses the image to predict current and future targets;
 - PCF combines previous-target inputs with current/future supervision.
 
-The three 25-epoch W&B runs completed and produced six final/best artifacts: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live Jetson server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Pi-to-Jetson wire protocol.
+The three 25-epoch W&B runs completed and produced six final/best artifacts: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live Jetson Orin Nano server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Raspberry Pi 5–Jetson Orin Nano wire protocol.
 
 All 46 Series 1 through Series 4 checkpoints were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test makes the offline comparison more informative than comparing each family on a different image distribution. Series 4 remains experimental until physical-car testing; v3.4 remains the field-selected baseline.
 

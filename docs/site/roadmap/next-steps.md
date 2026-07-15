@@ -4,7 +4,7 @@ This page contains work that is not yet a proven capability.
 
 | Priority | Planned work | Dependency | Success gate |
 |---:|---|---|---|
-| 1 | Compare all six Series 4 models with v3.4 | Jon deployment and fixed supervised route | Logged shadow/turn runs with hashes, clips, takeovers, and a clear verdict |
+| 1 | Compare all six Series 4 models with v3.4 | Jetson Orin Nano deployment and fixed supervised route | Logged shadow/turn runs with hashes, clips, takeovers, and a clear verdict |
 | 2 | Preserve a physical test of current LiDAR slowdown/hold/emergency behavior | Controlled obstacle setup | Repeatable pass/fail record with AEB state and distances |
 | 3 | Publish only the Series 4 artifacts that pass review | Prior field verdict | Clean Hugging Face repos/cards with exact contracts and evidence limits |
 | 4 | Collect the next targeted field dataset | A repeatable failure from the model comparison | New batch closes the named gap without changing unrelated data |

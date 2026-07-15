@@ -37,29 +37,29 @@ case (the car quitting), not idle exit. Idle exit specifically covers the *silen
 case where the link drops without a shutdown packet — a pulled USB cable, a crashed
 car process, or a network stall.
 
-The Pi side also defines `HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0` in `config.py`, but
-that is only printed in the Pi's startup log for reference; the value that actually
-governs receiver exit is the Zero's `--idle-exit-sec` argument.
+The Raspberry Pi 5 side also defines `HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0` in `config.py`, but
+that is only printed in the Raspberry Pi 5's startup log for reference; the value that actually
+governs receiver exit is the Zero 2 W's `--idle-exit-sec` argument.
 
 ## Why this choice
 
 A frozen dashboard is worse than a blank one — it implies the car state is current
 when it is not. Exiting cleanly makes the failure obvious (blank panel / stopped
 service) and lets the service manager decide whether to restart. Requiring
-`have_received_payload` first is what prevents a boot-order race: the Zero can come
-up before the Pi and simply wait, only arming the watchdog once real data has flowed.
+`have_received_payload` first is what prevents a boot-order race: the Zero 2 W can come
+up before the Raspberry Pi 5 and simply wait, only arming the watchdog once real data has flowed.
 
 ## Failure symptom
 
 - Panel goes blank and the `dash` process/service stops a few seconds after the car
-  stops sending — this is idle exit working as intended; check the Pi and the
-  `usb0` link, not the Zero.
+  stops sending — this is idle exit working as intended; check the Raspberry Pi 5 and the
+  `usb0` link, not the Zero 2 W.
 - The log line on exit states the configured timeout value.
 
 ## Evidence to attach
 
 - Source: `code/controller/current/z2w_dashboard.py` (`handle_idle`, `--idle-exit-sec`)
-- Pi reference constant: `code/controller/current/rc_car_app/config.py`
+- Raspberry Pi 5 reference constant: `code/controller/current/rc_car_app/config.py`
   (`HUB75_DASHBOARD_IDLE_EXIT_SEC`)
 - Compile check: `python -m py_compile code/controller/current/z2w_dashboard.py`
 

@@ -1,6 +1,6 @@
 # Dashboard Receiver
 
-`code/controller/current/z2w_dashboard.py` runs on the Raspberry Pi Zero 2 W. It receives controller JSON, retains the last value for every field, and renders the current page with `rpi-rgb-led-matrix`.
+`code/controller/current/z2w_dashboard.py` runs on the Zero 2 W. It receives controller JSON, retains the last value for every field, and renders the current page with `rpi-rgb-led-matrix`.
 
 ## Normal Service
 
@@ -27,6 +27,6 @@ Malformed JSON is ignored. A socket or serial exception is logged, followed by a
 
 ## Live Transport
 
-The receiver binds UDP on all local interfaces, but live packets arrive on USB Ethernet at `192.168.10.2:8765`. Binding `0.0.0.0` does not mean Wi-Fi fallback is configured; routing on the Pi 5 still targets the fixed USB address.
+The receiver binds UDP on all local interfaces, but live packets arrive on USB Ethernet at `192.168.10.2:8765`. Binding `0.0.0.0` does not mean Wi-Fi fallback is configured; routing on the Raspberry Pi 5 still targets the fixed USB address.
 
 See [Zero 2 W Dashboard](../../operations/zero-2w-dashboard.md) for permanent link installation and recovery.

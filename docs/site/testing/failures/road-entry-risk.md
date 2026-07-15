@@ -18,7 +18,7 @@ The risk is any path where the car keeps steering itself toward the road instead
 
 - **Segment mode** — the planner marks crossing-family segments `MNUL` instead of `AUTO`.
 - **LiDAR / AEB** — when enabled and receiving qualifying center-corridor points, LiDAR can reduce forward throttle or request a stop. It does not recognize roads or guarantee detection of a curb, vehicle, or person.
-- **Manual override** — processed by the Pi loop while the Xbox controller is connected and responsive.
+- **Manual override** — processed by the Raspberry Pi 5 loop while the Xbox controller is connected and responsive.
 - **Supervision** — the project is operated on controlled private test routes with an operator ready to stop motion; it is not approved for unattended road-adjacent operation.
 
 ## Next change
@@ -27,7 +27,7 @@ The risk is any path where the car keeps steering itself toward the road instead
 
 ## Test setup
 
-- **Setup:** Pi 5 controller with GPS (BN880 on `/dev/ttyAMA0`), LiDAR/AEB armed, Pi Camera Module 3 Wide; a planned route that ends an AI segment at a crosswalk/road.
+- **Setup:** Raspberry Pi 5 controller with GPS (BN880 on `/dev/ttyAMA0`), LiDAR/AEB armed, Raspberry Pi Camera Module 3 Wide; a planned route that ends an AI segment at a crosswalk/road.
 - **Procedure:** run `car`, then select `<version>` on the dashboard model page, drive the route toward the crossing; watch for the handoff alert and the mode switch to manual.
 - **Pass/warn/fail:** pass = handoff alert fires by ~3 m and control drops to manual before the road edge; warn = alert late but operator takes over cleanly; fail = car keeps AI-steering toward/into the road boundary.
 - **Evidence to attach (planned):** route + segment-mode log, handoff-alert timing from the runtime CSV, dashboard capture, manual-takeover count, model version.

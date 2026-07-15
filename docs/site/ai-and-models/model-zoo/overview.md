@@ -8,7 +8,7 @@ SidewalkPilot has **46 evaluated checkpoints** across four series. Version numbe
 |---|---|---|---:|---|
 | 1 | `200x66` | direct steering regression | 672,877 | original camera-steering proof |
 | 2 | `200x66` | refined direct regression; CLAHE in 2.0/2.0b | 672,877 | historical comparison family |
-| 3.0 | `320x180` | steering/throttle regression | about 5.53M | first large Jetson architecture |
+| 3.0 | `320x180` | steering/throttle regression | about 5.53M | first large Jetson Orin Nano architecture |
 | 3.1-3.4 | `320x180` | 9 classes + 9 offsets + throttle | 5,534,115 | field-tested family; v3.4 selected |
 | 4.0 PC | `320x180` + 3 targets | one 18-value steering horizon | 5,569,186 | strongest offline temporal candidate |
 | 4.0 CF | `320x180` | four 18-value steering horizons | 5,537,560 | future-supervision experiment |

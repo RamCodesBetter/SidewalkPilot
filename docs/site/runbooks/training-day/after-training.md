@@ -42,7 +42,7 @@ After Training is the runbook that turns a finished run into a judged, recorded 
 
 ## Notes
 
-- Deploying to the field is a separate step handled in Model Export: the deploy candidate is exported to ONNX, its version is added to the Pi's `STEERING_MODEL_VERSIONS`, and the `.onnx` is copied to Jon, which auto-resolves it.
+- Deploying to the field is a separate step handled in Model Export: the deploy candidate is exported to ONNX, its version is added to the Raspberry Pi 5's `STEERING_MODEL_VERSIONS`, and the `.onnx` is copied to Jetson Orin Nano, which auto-resolves it.
 
 ## Related pages
 

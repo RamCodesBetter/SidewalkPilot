@@ -16,13 +16,13 @@ The priority chain is enforced in two functions in
 1. **Human / manual override.** In the `pygame` event loop, any steering input
    with `abs(value) > 0.1`, any throttle `> 0.05`, or any brake press calls
    `cancel_autonomous_mode(...)` and, where wired, route cancellation. The change
-   takes effect when the Pi loop processes the event; it depends on a connected
+   takes effect when the Raspberry Pi 5 loop processes the event; it depends on a connected
    controller and responsive process.
 2. **Center-corridor emergency stop.** With AEB enabled, a valid point at or
    inside `LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05 m` requests a hard stop before
    model inference is used for motion.
 3. **Model availability gate.** If there is no emergency stop, the camera model
-   gets a vote. Local Pi analysis uses a 0.75-second frame-age guard; a Jetson result
+   gets a vote. Local Raspberry Pi 5 analysis uses a 0.75-second frame-age guard; a Jetson Orin Nano result
    must be no more than `JETSON_RESULT_MAX_AGE_SEC = 0.25 s` old and match the selected
    model. Confidence must be ≥ `LOW_CAMERA_CONFIDENCE` (0.25). If the model is
    unavailable, stale, or below the configured confidence threshold, the runtime requests a hard stop with reason

@@ -1,16 +1,16 @@
 # Camera Preview
 
-The camera-preview bench test puts the live camera feed on screen with the model's read of it overlaid, so I can confirm the RPi Camera Module 3 Wide is capturing correctly, framed right, and feeding the vision pipeline before I collect training photos or trust autonomy. It runs `code/test_files/camera/test_camera_preview.py`.
+The camera-preview bench test puts the live camera feed on screen with the model's read of it overlaid, so I can confirm the Raspberry Pi Camera Module 3 Wide is capturing correctly, framed right, and feeding the vision pipeline before I collect training photos or trust autonomy. It runs `code/test_files/camera/test_camera_preview.py`.
 
 ## How it works
 
 - It starts the same `WebcamVisionProcessor` the runtime uses (via Picamera2) and pulls preview frames from its cache, checking the same capture path before network encoding and remote inference.
 - It draws each frame into a `640x360` pygame window and overlays a status bar with the analysis `method`, the model `confidence`, and the frame `age` in seconds, plus an `ESC to quit` hint. If no frame is available yet it shows `Waiting for camera frame...`.
-- Because it reuses the runtime vision processor, a clean preview checks capture, orientation, and local frame handling. It does not by itself verify Jon connectivity, the selected ONNX artifact, or physical steering.
+- Because it reuses the runtime vision processor, a clean preview checks capture, orientation, and local frame handling. It does not by itself verify Jetson Orin Nano connectivity, the selected ONNX artifact, or physical steering.
 
 ## Command
 
-Run on the Pi 5 (needs a display or forwarded X session):
+Run on the Raspberry Pi 5 (needs a display or forwarded X session):
 
 ```bash
 python3 code/test_files/camera/test_camera_preview.py
@@ -27,7 +27,7 @@ Related camera utilities are `code/test_files/camera/test_camera_flip.py` for or
 
 ## Why it matters
 
-- The 81,237 Series 3/4 images were captured through this Pi camera path, so framing, exposure, and orientation directly affect data quality. A preview is a low-cost pre-collection check, not proof that those properties stay fixed for the full run.
+- The 81,237 Series 3/4 images were captured through this Raspberry Pi 5 camera path, so framing, exposure, and orientation directly affect data quality. A preview is a low-cost pre-collection check, not proof that those properties stay fixed for the full run.
 - Sharing the runtime's vision processor means the preview doubles as a quick check that the model's input path is healthy, not just the raw camera.
 
 ## Evidence to attach

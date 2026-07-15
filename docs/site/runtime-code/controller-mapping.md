@@ -27,7 +27,7 @@ sync. The values below are read straight from `config.py` and the event handler 
 | Left trigger | `5` | `BRAKE_AXIS` | Brake (`brake` engages above `0.1`) |
 
 Qualifying manual steering, throttle, or brake input while autonomy is on calls the cancel
-path when that input is processed by the Pi loop. A timed worst-case override latency has
+path when that input is processed by the Raspberry Pi 5 loop. A timed worst-case override latency has
 not yet been measured.
 
 ## Buttons
@@ -60,7 +60,7 @@ observed on this controller.
 - These are the indices as they exist in the code today. If `config.py` button constants
   change, this table is the place to re-verify against `run()`'s event handler.
 - Physical labels (A/B/X/Y) reflect how this Xbox controller enumerates under pygame on
-  the Pi; the code keys off the numeric index, not the label.
+  the Raspberry Pi 5; the code keys off the numeric index, not the label.
 
 ## Related pages
 

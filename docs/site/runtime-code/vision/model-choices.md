@@ -17,15 +17,15 @@ The live runtime can select all 46 evaluated checkpoints from Series 1 through S
 
 The current `rc_car.py` intentionally has no `--model` flag. Run `car`, then use the dashboard model page and D-pad controls to cycle the tuple. This keeps field selection visible on the car instead of hidden in a shell command.
 
-## Pi and Jon Responsibilities
+## Raspberry Pi 5 and Jetson Orin Nano Responsibilities
 
-When `JETSON_STEERING_HOST` is configured, the Pi camera runs in capture-only mode. Selecting a model updates the version string attached to each JPEG request. Jon hot-swaps to `SidewalkPilot-v<version>.onnx` when available, preferring ONNX over TorchScript/PTH.
+When `JETSON_STEERING_HOST` is configured, the Raspberry Pi 5 camera runs in capture-only mode. Selecting a model updates the version string attached to each JPEG request. Jetson Orin Nano hot-swaps to `SidewalkPilot-v<version>.onnx` when available, preferring ONNX over TorchScript/PTH.
 
-The Pi does not load a heavy model in this mode. It keeps the active name, captures frames, receives decoded steering, rejects stale results, and applies smoothing/safety/hardware mapping.
+The Raspberry Pi 5 does not load a heavy model in this mode. It keeps the active name, captures frames, receives decoded steering, rejects stale results, and applies smoothing/safety/hardware mapping.
 
 ## Series 4
 
-Jon inspects ONNX metadata instead of hard-coding six filenames:
+Jetson Orin Nano inspects ONNX metadata instead of hard-coding six filenames:
 
 - One image input and `[batch,4,18]` output -> CF;
 - Image plus `target_history[batch,3]` and `[batch,1,18]` -> PC;
@@ -36,8 +36,8 @@ Only the current horizon commands the car. PC/PCF history starts centered and up
 ## Failure Behavior
 
 - Unknown name: rejected by the registry.
-- Missing artifact on Jon: model switch logs a failure and does not fabricate an output.
-- Powered-off/unreachable Jon: asynchronous network waits stay off the controller loop.
+- Missing artifact on Jetson Orin Nano: model switch logs a failure and does not fabricate an output.
+- Powered-off/unreachable Jetson Orin Nano: asynchronous network waits stay off the controller loop.
 - Stale result: autonomy confidence drops and the runtime stops rather than replaying an old command.
 
-See [Jetson Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md) and [Series 4 Temporal Experiments](../../ai-and-models/architecture/series-4-plan.md).
+See [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md) and [Series 4 Temporal Experiments](../../ai-and-models/architecture/series-4-plan.md).

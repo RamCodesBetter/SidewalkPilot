@@ -7,7 +7,7 @@ A checkpoint moves through three gates: artifact validity, offline capability, a
 - Checkpoint and ONNX file load;
 - Input names and shapes match the runtime contract;
 - Output shape and decoder agree;
-- CUDA provider is active on Jon;
+- CUDA provider is active on Jetson Orin Nano;
 - Inference is fresh and does not block manual control;
 - Temporal state resets safely on model switch/reconnect.
 

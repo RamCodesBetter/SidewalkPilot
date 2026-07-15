@@ -8,7 +8,7 @@ Arbitration happens inside `apply_autonomous_controls()` and `update_gpio()` in 
 
 1. **Manual override (human).** Real steering, throttle, or brake input cancels autonomous mode and an active navigation route.
 2. **Center-corridor emergency stop.** With AEB enabled, a valid LiDAR point at or inside `LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05 m` requests zero throttle and full braking. Reverse is excluded from the automatic stop.
-3. **Model-availability gate.** In autonomous mode, a missing model, a stale Pi camera analysis (older than 0.75 s), a missing or stale Jetson result (older than `JETSON_RESULT_MAX_AGE_SEC = 0.25 s`), or confidence below `LOW_CAMERA_CONFIDENCE = 0.25` stops the car instead of reusing a stale steering result.
+3. **Model-availability gate.** In autonomous mode, a missing model, a stale Raspberry Pi 5 camera analysis (older than 0.75 s), a missing or stale Jetson Orin Nano result (older than `JETSON_RESULT_MAX_AGE_SEC = 0.25 s`), or confidence below `LOW_CAMERA_CONFIDENCE = 0.25` stops the car instead of reusing a stale steering result.
 4. **Camera-model steering.** If the model result is valid, it supplies the steering command. LiDAR never changes that command and never chooses a left or right escape path.
 5. **Center-corridor throttle governor.** With AEB enabled, clearance at or above 1.65 m allows full throttle. From 1.65 m to 1.25 m, the target falls linearly from 100% to 60% reference throttle. It holds that minimum governed target from 1.25 m to 1.05 m, then the emergency stop takes priority. Points outside the center corridor remain dashboard telemetry only.
 

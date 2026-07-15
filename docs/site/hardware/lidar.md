@@ -13,7 +13,7 @@ safety corridor. It does not override steering.
 
 - `lidar.py` reads the scanner over a serial port at `230400` baud. The current wiring is
   **USB via a CP2102 USB-to-UART adapter** (`/dev/ttyUSB0`); an earlier setup ran it on the
-  Pi GPIO UART at `/dev/ttyAMA2`. The port is auto-resolved, preferring the CP2102
+  Raspberry Pi 5 GPIO UART at `/dev/ttyAMA2`. The port is auto-resolved, preferring the CP2102
   `by-id` path and falling back to `ttyUSB*`/`ttyACM*`.
 - The parser decodes the LD19 packet format (47-byte packets, 12 measurement points each)
   into angle/distance/confidence points, with a max usable range of ~12 m.

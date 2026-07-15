@@ -47,7 +47,7 @@ Moving code, datasets, and captured photos from the Mac (my git and photo-pull w
 
 ## Notes / history
 
-- The everyday code-to-Pi direction is `rpisync` (pushes the local branch to the Pi). That is the safe push. The dangerous alias is `mrpisync`, which pulls the whole remote tree back and can delete local files when combined with `--delete` — never use it for a Mac↔PC photo move.
+- The everyday code-to-Raspberry Pi 5 direction is `rpisync` (pushes the local branch to the Raspberry Pi 5). That is the safe push. The dangerous alias is `mrpisync`, which pulls the whole remote tree back and can delete local files when combined with `--delete` — never use it for a Mac↔PC photo move.
 - Photos, logs, datasets, and checkpoints are treated as irreplaceable data. They are never staged, renamed, or deleted as a side effect of a sync.
 
 ## Evidence to attach

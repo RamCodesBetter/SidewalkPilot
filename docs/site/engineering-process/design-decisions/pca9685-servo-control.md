@@ -8,7 +8,7 @@ directly from a Raspberry Pi GPIO pin.
 
 The steering servo is wired to a PCA9685 at I2C address `0x40`, channel `0`,
 running at 50 Hz, and is driven through the Adafruit `ServoKit` abstraction. The
-Pi never toggles the servo signal line itself; it writes an angle to the
+Raspberry Pi 5 never toggles the servo signal line itself; it writes an angle to the
 PCA9685, which owns the pulse-width generation in dedicated hardware. The exact
 configuration lives in `code/controller/current/rc_car_app/config.py`:
 
@@ -28,12 +28,12 @@ degrees.
 
 | Option | Pros | Cons |
 |---|---|---|
-| Direct Pi GPIO PWM (software or hardware PWM pin) | one fewer board; no I2C dependency | the Pi's software PWM jitters under CPU load, causing servo twitch; competes with the many other GPIO/PWM users already on the Pi (four motor pins, hall sensor) |
-| **PCA9685 over I2C (chosen)** | dedicated 50 Hz pulse generation reduces dependence on Pi loop timing; frees Pi GPIO; reuses the Adafruit `ServoKit` library | one extra board + I2C, power, calibration, and servo dependencies |
+| Direct Raspberry Pi 5 GPIO PWM (software or hardware PWM pin) | one fewer board; no I2C dependency | the Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch; competes with the many other GPIO/PWM users already on the Raspberry Pi 5 (four motor pins, hall sensor) |
+| **PCA9685 over I2C (chosen)** | dedicated 50 Hz pulse generation reduces dependence on Raspberry Pi 5 loop timing; frees Raspberry Pi 5 GPIO; reuses the Adafruit `ServoKit` library | one extra board + I2C, power, calibration, and servo dependencies |
 
 ## Reason
 
-The Pi is already running a real-time control loop that also reads LiDAR, GPS,
+The Raspberry Pi 5 is already running a real-time control loop that also reads LiDAR, GPS,
 the camera, and the hall sensor while pushing motor PWM. A software-timed servo
 pulse on that same CPU jitters whenever the loop is busy, and steering jitter is
 directly visible and bad for both driving and clean training data. Offloading

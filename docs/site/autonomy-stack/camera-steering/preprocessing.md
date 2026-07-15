@@ -5,7 +5,7 @@ reorder channels, and (for some models) enhance contrast.
 
 ## How it works
 
-Preprocessing for the on-Pi Series 1/2 path lives in `preprocess_steering_frame()` in
+Preprocessing for the on-Raspberry Pi 5 Series 1/2 path lives in `preprocess_steering_frame()` in
 `code/controller/current/rc_car_app/vision.py`. Given a captured BGR frame it:
 
 1. Optionally applies CLAHE contrast enhancement (see below).
@@ -18,10 +18,10 @@ The input size differs by series, and this is a hard fact from the code:
 
 - **Series 1/2** (`SteeringAutonomyV2`) uses `STEERING_MODEL_WIDTH = 200`,
   `STEERING_MODEL_HEIGHT = 66` — a NVIDIA-PilotNet-style small input that keeps inference
-  cheap enough to run on the Pi.
+  cheap enough to run on the Raspberry Pi 5.
 - **Series 3** (`SidewalkPilotV3`) is trained at **320x180** (see `preprocess_image()` /
-  `resize_image_uint8()` in the Series 3 trainer). Because Series 3 runs on the Jetson,
-  the Pi's job for that path is to hand off a preprocessed frame; see
+  `resize_image_uint8()` in the Series 3 trainer). Because Series 3 runs on the Jetson Orin Nano,
+  the Raspberry Pi 5's job for that path is to hand off a preprocessed frame; see
   `jetson-inference-link.md`.
 
 CLAHE (Contrast Limited Adaptive Histogram Equalization, `clipLimit=2.0`,

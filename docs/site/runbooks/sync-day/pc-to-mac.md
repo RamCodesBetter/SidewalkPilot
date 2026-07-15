@@ -4,7 +4,7 @@ Pulling the results of a training run — new model checkpoints and any exported
 
 ## Preconditions
 
-- The PC has finished training and written the new checkpoint. Series 1/2 checkpoints follow `SidewalkPilot-vX.Y[b].pth` and live under `code/ai_models/`. Series 3 exports the ONNX that Jon (the Jetson) runs; it is copied to Jon separately and does not go on the Pi.
+- The PC has finished training and written the new checkpoint. Series 1/2 checkpoints follow `SidewalkPilot-vX.Y[b].pth` and live under `code/ai_models/`. Series 3 exports the ONNX that Jetson Orin Nano runs; it is copied to Jetson Orin Nano separately and does not go on the Raspberry Pi 5.
 - The Mac is on the model branch (`ai_models_v3`) so the checkpoint lands next to the versions already tracked there.
 - I know exactly which files I want. A training day can leave several intermediate epoch files behind; I only pull the ones I mean to keep and publish.
 

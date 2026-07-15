@@ -20,7 +20,7 @@ So a reverse whole-repo pull from a machine that never had `docs/site/` will del
 
 ## Steps (the check I run before every pull)
 
-1. **Name the direction.** Is this the safe push-code-to-Pi direction (`rpisync`), or the dangerous pull-whole-tree-back direction (`mrpisync`)? If it is the pull direction, I slow down.
+1. **Name the direction.** Is this the safe push-code-to-Raspberry Pi 5 direction (`rpisync`), or the dangerous pull-whole-tree-back direction (`mrpisync`)? If it is the pull direction, I slow down.
 2. **Scope it.** Sync only the folder I actually want — `media/photos/2026_07_02_run_1/`, one checkpoint, one run — never the whole repo.
 3. **Drop `--delete`.** For any reverse/pull sync, remove `--delete` entirely. I only ever want additive copies of data.
 4. **Dry-run.** `rsync -avn ...` and read the output. If it lists a single `deleting ...` line I did not intend, I stop.
@@ -47,7 +47,7 @@ So a reverse whole-repo pull from a machine that never had `docs/site/` will del
 
 ## Notes / history
 
-- Recorded rule: reverse whole-repo `rsync --delete` is dangerous. `rpisync` pushes local branch code to the Pi (safe). `mrpisync` pulls the whole remote tree to local and is the risky one with `--delete`.
+- Recorded rule: reverse whole-repo `rsync --delete` is dangerous. `rpisync` pushes local branch code to the Raspberry Pi 5 (safe). `mrpisync` pulls the whole remote tree to local and is the risky one with `--delete`.
 - For photo pulls, sync only the `media/photos/...` folder, or remove `--delete` from the reverse sync.
 
 ## Evidence to attach

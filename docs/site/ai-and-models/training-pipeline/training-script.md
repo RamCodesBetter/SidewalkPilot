@@ -22,7 +22,7 @@ The Series 3 defaults include batch size 256, 50,000 weighted samples per epoch,
 
 ## Current Deployment Boundary
 
-Training runs on the NVIDIA workstation. ONNX inference runs on Jon. The checked-in Series 3 trainer retains optional `trtexec` flags, but no current deployment or performance claim depends on TensorRT.
+Training runs on the NVIDIA workstation. ONNX inference runs on Jetson Orin Nano. The checked-in Series 3 trainer retains optional `trtexec` flags, but no current deployment or performance claim depends on TensorRT.
 
 ## Evidence
 

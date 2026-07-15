@@ -1,7 +1,7 @@
 # Motors
 
 The drive motors move the car forward and backward. They are driven by a Yahboom
-AT8236 dual H-bridge, which the Pi 5 controls with PWM on four GPIO pins. Steering is
+AT8236 dual H-bridge, which the Raspberry Pi 5 controls with PWM on four GPIO pins. Steering is
 separate (a servo on the PCA9685); these motors only provide thrust.
 
 ## Parts (Amazon)

@@ -1,6 +1,6 @@
 # PCB Revisions
 
-This is the revision history of the custom RPi5 breakout board. I am keeping it honest and short: the board has never been fabricated, so there is no "manufactured rev" yet. There is one drawn design, it is already outdated, and a corrected revision is planned before I order anything.
+This is the revision history of the custom Raspberry Pi 5 breakout board. I am keeping it honest and short: the board has never been fabricated, so there is no "manufactured rev" yet. There is one drawn design, it is already outdated, and a corrected revision is planned before I order anything.
 
 ## How it works
 

@@ -17,11 +17,11 @@ isolation. The per-class offset already softens *within* a bucket; smoothing sof
 transitions *between* buckets. The trade-off is latency: too much smoothing lags real
 turns, while too little leaves the flip-flop in.
 
-The current runtime uses `STEERING_SMOOTH_ALPHA = 0.45`. The Pi applies this exponential
-blend once per newly completed Jetson inference result, not once per 60 Hz controller tick.
+The current runtime uses `STEERING_SMOOTH_ALPHA = 0.45`. The Raspberry Pi 5 applies this exponential
+blend once per newly completed Jetson Orin Nano inference result, not once per 60 Hz controller tick.
 If `x_t` is the decoded steering result and `y_(t-1)` is the prior smoothed command, the
 new command is `y_t = 0.45*x_t + 0.55*y_(t-1)`. Series 1/2 use a continuous regression
-output and do not pass through this Jetson-result smoothing path.
+output and do not pass through this Jetson Orin Nano result smoothing path.
 
 This shipped output filter is separate from Series 4's causal target history. Smoothing
 changes the command sent to the car; PC/PCF history changes the information supplied to

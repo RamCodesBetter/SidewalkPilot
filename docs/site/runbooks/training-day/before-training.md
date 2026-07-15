@@ -6,7 +6,7 @@ Before Training is the gate runbook: the last set of checks that must pass befor
 
 - Command Setup is complete: the exact trainer command is assembled and saved.
 - Data Audit is complete: image counts, corrupt-file count, bucket balance, and the count decision are recorded.
-- Training runs on the GPU box (the NVIDIA PC), not the Pi and not Jon.
+- Training runs on the GPU box (the NVIDIA PC), not the Raspberry Pi 5 and not Jetson Orin Nano.
 
 ## Steps
 

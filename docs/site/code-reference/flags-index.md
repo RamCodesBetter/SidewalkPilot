@@ -12,7 +12,7 @@ The live `rc_car.py` intentionally has no command-line model flag. Run `car`, th
 | `RC_CAR_STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG` | Hardware reference right limit | current config value |
 | `RC_CAR_STEERING_SERVO_CENTER_OFFSET` | Hardware center calibration | current `+12D` mapping |
 
-Jon host/port, dashboard transport, sensor ports, AEB thresholds, and controller mappings are defined in `rc_car_app/config.py`. Treat the source as authoritative because deployment units can override environment values.
+Jetson Orin Nano host/port, dashboard transport, sensor ports, AEB thresholds, and controller mappings are defined in `rc_car_app/config.py`. Treat the source as authoritative because deployment units can override environment values.
 
 ## Trainer Flags
 

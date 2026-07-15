@@ -4,15 +4,15 @@ Last updated: **July 15, 2026**.
 
 ## Working Baseline
 
-- **Field-selected steering model:** v3.4, running as FP32 ONNX on the NVIDIA Jetson Orin Nano.
+- **Field-selected steering model:** v3.4, running as FP32 ONNX on the Jetson Orin Nano.
 - **Field result:** v3.4 completed every harsh-shadow case presented in the July 13 comparison and ranked above v3.4b, v3.3, and v3.3b.
-- **Series 4:** all three temporal experiments completed 25 epochs. Six ONNX checkpoints exist and are supported by the live Pi/Jetson model selector, but none has been field-tested or promoted over v3.4.
+- **Series 4:** all three temporal experiments completed 25 epochs. Six ONNX checkpoints exist and are supported by the live Raspberry Pi 5/Jetson Orin Nano model selector, but none has been field-tested or promoted over v3.4.
 - **Steering calibration:** `+12D` center trim, normalized PCA9685 center offset `0.133333`, and physical center command near 102 degrees.
-- **LiDAR connection:** FHL-LD19 through CP2102 USB serial. The runtime prefers its stable `/dev/serial/by-id/` path and normally falls back to `/dev/ttyUSB0`; scan processing is independent from Jetson inference.
+- **LiDAR connection:** FHL-LD19 through CP2102 USB serial. The runtime prefers its stable `/dev/serial/by-id/` path and normally falls back to `/dev/ttyUSB0`; scan processing is independent from Jetson Orin Nano inference.
 - **LiDAR control:** one center safety corridor. It can reduce throttle or hard-brake, but it never steers.
 - **AEB toggle:** gates every LiDAR throttle/brake intervention in manual and autonomous modes. Telemetry remains visible while intervention is disabled.
 - **Dashboard:** Zero 2 W plus one Waveshare 64x32 HUB75 panel over a dedicated USB network. There is no current MAX7219 display or Wi-Fi telemetry fallback.
-- **Control responsiveness:** in one physical retest with the Jetson powered off, the previously observed periodic control pauses were absent after network, file-scan, and temperature work was removed from the manual-control path. This is a bounded retest result, not a latency benchmark.
+- **Control responsiveness:** in one physical retest with the Jetson Orin Nano powered off, the previously observed periodic control pauses were absent after network, file-scan, and temperature work was removed from the manual-control path. This is a bounded retest result, not a latency benchmark.
 
 ## Series 4 Result
 

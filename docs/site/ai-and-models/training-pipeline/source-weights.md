@@ -18,7 +18,7 @@ Source Weights documents how real driving data, CARLA data, and correction sampl
 
 ## Why this choice
 
-- **Real** data matches the physical RC car and RPi Camera Module 3 Wide deployment domain, so its default is `2.0`.
+- **Real** data matches the physical RC car and Raspberry Pi Camera Module 3 Wide deployment domain, so its default is `2.0`.
 - **CARLA-tagged** roots receive `0.6` by default to account for a sim-to-real gap. The trainer consumes pre-generated files; it does not create simulation coverage on demand.
 - **Corrections** target frames the model is already known to get wrong, so they earn the highest weight (`3.0`) — and they can additionally be `repeat`-duplicated. The caution is that this power can overfit a handful of frames if pushed too far, so heavy correction weighting should be a deliberate experiment, not a default reflex.
 

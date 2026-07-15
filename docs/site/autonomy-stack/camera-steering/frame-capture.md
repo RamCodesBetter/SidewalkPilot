@@ -1,6 +1,6 @@
 # Frame Capture
 
-The first stage of the camera-steering pipeline: getting a live frame off the RPi Camera
+The first stage of the camera-steering pipeline: getting a live frame off the Raspberry Pi Camera
 Module 3 Wide and into memory so the rest of the pipeline can preprocess and run it.
 
 ## How it works
@@ -27,7 +27,7 @@ stale and zeroes the steering bias rather than acting on an old view of the worl
 
 ## Why this choice
 
-The current Camera Module 3 Wide integration is on the Pi, and all of the
+The current Camera Module 3 Wide integration is on the Raspberry Pi 5, and all of the
 81,237 Series 3/4 training images were captured through that path. Runtime preprocessing must match the
 training capture geometry (same sensor, wide field of view, and 180-degree rotation) or the model
 would see a different image distribution than it was trained on. Capturing in BGR and

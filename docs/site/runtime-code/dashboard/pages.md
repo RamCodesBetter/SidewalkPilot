@@ -10,7 +10,7 @@ The controller owns the two-dimensional page grid in `DASHBOARD_PAGE_COORDS`; `D
 | V1H4 | 15 | Yaw rate, speed, correction, input/output steering |
 | V2H1 | 3 | Model, predicted servo angle, confidence, IPS |
 | V2H2 | 4 | Intervention cause, autonomous distance, interventions/km, uptime |
-| V2H3 | 16 | Pi, Jon CPU, Jon GPU, and Zero CPU temperatures |
+| V2H3 | 16 | Jetson Orin Nano CPU/GPU, Raspberry Pi 5 CPU, and Zero 2 W CPU temperatures |
 | V3H1 | 14 | Photos this run, photos all-time, camera FPS, status |
 | V4H1 | 5 | Navigation address entry |
 | V4H2 | 7 | Route node state |

@@ -35,12 +35,12 @@ the following must hold:
 
 - A human operator is present with the Xbox controller. Manual override is the
   top software decision layer (`decision-priority.md`): qualifying steering,
-  throttle, or brake input cancels autonomy when processed by the Pi loop.
+  throttle, or brake input cancels autonomy when processed by the Raspberry Pi 5 loop.
 - Autonomy is explicitly armed by the operator (`AUTONOMY_TOGGLE_BUTTON = 0`); it
   does not self-enable.
 - The camera stream is live. `apply_autonomous_controls(...)` hard-stops with
   `model_unavailable` or `model_low_confidence` if `webcam_vision` is missing, local
-  analysis is older than 0.75 seconds, a matching Jetson result is unavailable or older
+  analysis is older than 0.75 seconds, a matching Jetson Orin Nano result is unavailable or older
   than 0.25 seconds, or confidence is below `LOW_CAMERA_CONFIDENCE` (0.25). This verifies result freshness/availability;
   accepted neural confidence is not calibrated proof that the scene is understood.
 - The LiDAR safety layer is available for AEB. AEB is toggled by

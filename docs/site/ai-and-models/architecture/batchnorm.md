@@ -1,6 +1,6 @@
 # BatchNorm
 
-BatchNorm documents the normalization layers placed after each convolution in the SidewalkPilot CNN. This page explains how BatchNorm stabilizes feature values during training, where it appears in the model, and whether it stays helpful for Series 3 Jetson deployment.
+BatchNorm documents the normalization layers placed after each convolution in the SidewalkPilot CNN. This page explains how BatchNorm stabilizes feature values during training, where it appears in the model, and whether it stays helpful for Series 3 Jetson Orin Nano deployment.
 
 ## How it works
 
@@ -27,7 +27,7 @@ Series 1/2 (`SteeringAutonomyV2`): one `BatchNorm2d` after each of the five conv
 
 - BatchNorm usually makes CNN training less fragile when the dataset has heavy lighting, shadow, and exposure variation - exactly the SidewalkPilot case, where the trainer deliberately injects mixed lighting, diagonal shadow bands, tree-dapple, and glare.
 - The parameter cost is small relative to the dense head.
-- At inference, BatchNorm uses stored running statistics rather than batch statistics. ONNX Runtime handles the exported graph on Jon.
+- At inference, BatchNorm uses stored running statistics rather than batch statistics. ONNX Runtime handles the exported graph on Jetson Orin Nano.
 
 ## Planned / not yet tested
 

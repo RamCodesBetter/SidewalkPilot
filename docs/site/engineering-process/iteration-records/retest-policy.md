@@ -8,7 +8,7 @@ The policy is a two-gate rule. A change is not "done" until it passes both an of
 
 **Offline gate.** Run `code/test_files/models/evaluate_sidewalkpilot_models.py` and read Bal9, turn exact, turn +/-1, straight exact, error magnitude, signed bias, and the confusion matrix. The offline gate catches gross regressions cheaply before hardware time. Passing it means "worth field-testing," not "good."
 
-**Field gate.** Drive the car on the real situation the change was meant to fix. A compatible ONNX must exist on Jon and the version must exist in `STEERING_MODEL_VERSIONS`. Series 4 also requires the correct runtime contract: image-only CF or causal history for PC/PCF. Then re-drive the specific failing scenario, such as the shadow band that caused shadow-chasing or the mid-right turn that was missed, and confirm the behavior actually changed on the car.
+**Field gate.** Drive the car on the real situation the change was meant to fix. A compatible ONNX must exist on Jetson Orin Nano and the version must exist in `STEERING_MODEL_VERSIONS`. Series 4 also requires the correct runtime contract: image-only CF or causal history for PC/PCF. Then re-drive the specific failing scenario, such as the shadow band that caused shadow-chasing or the mid-right turn that was missed, and confirm the behavior actually changed on the car.
 
 A critical operational catch sits underneath this: a config or code change only takes effect after the owning *process* re-imports it, on every device. Reloading via the `car` / `dash` / `ai` aliases restarts the process; editing a file on disk while the old process is still running verifies nothing. So "retest" always means "restart the owning process first, then observe."
 
@@ -29,7 +29,7 @@ Offline metrics can miss the behavior that matters physically. A low MAE or vali
 
 - Eval JSON (bucket distribution) for the retested version.
 - Field re-drive note / clip of the specific scenario.
-- Confirmation of which process was restarted on which device (Pi `car`, Zero `dash`, Jon inference service).
+- Confirmation of which process was restarted on which device (Jetson Orin Nano inference service, Raspberry Pi 5 `car`, Zero 2 W `dash`).
 
 ## Related pages
 

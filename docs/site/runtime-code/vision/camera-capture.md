@@ -1,6 +1,6 @@
 # Camera Capture
 
-Camera Capture covers how the runtime opens the RPi Camera Module 3 Wide, pulls
+Camera Capture covers how the runtime opens the Raspberry Pi Camera Module 3 Wide, pulls
 frames, and hands them to the steering estimator. All of this lives in
 `code/controller/current/rc_car_app/vision.py`, inside the `_PiCameraCapture`
 helper and the `WebcamVisionProcessor` capture thread.
@@ -54,7 +54,7 @@ process-wide camera fault can never affect loop timing.
 ## Failure symptom
 
 If Picamera2 is unavailable or the camera fails to start, `start()` prints
-`Failed to open Pi Camera for vision processing: ...` (or `Pi camera vision
+`Failed to open Raspberry Pi Camera for vision processing: ...` (or `Raspberry Pi 5 camera vision
 processor started.` on success) and returns `False`, leaving no active camera processor. If
 autonomy is requested without a fresh accepted model result, the autonomous path requests a
 hard stop. A camera that opens but never produces frames leaves

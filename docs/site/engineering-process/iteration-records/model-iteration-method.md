@@ -11,7 +11,7 @@ SidewalkPilot treats model development as a closed physical engineering loop rat
 5. **Train regular and `b` checkpoints.** The regular artifact is the final epoch; `b` is the best validation epoch.
 6. **Evaluate compatible models.** Apply each family's input/output contract. Preserve its historical own-dataset result and use the common Series 3/4 challenge set only for the explicitly labeled cross-family comparison.
 7. **Read balanced metrics.** Bal9, turn exact, turn +/-1, straight exact, MAE, median error, signed error, and confusion patterns are considered together.
-8. **Deploy ONNX to the Jetson.** Confirm shape, preprocessing, decoder, and inference provider.
+8. **Deploy ONNX to the Jetson Orin Nano.** Confirm shape, preprocessing, decoder, and inference provider.
 9. **Field-test the physical car.** Test ordinary turns plus the failure condition that motivated the model.
 10. **Promote, revise, or roll back.** Preserve the reason, not only the winning filename.
 

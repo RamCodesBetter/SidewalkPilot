@@ -36,7 +36,7 @@ uses to localize the car onto the graph. It is the `GpsReader` class in
 
 ## Known constraints / notes
 
-- GPS shares the Pi's UART budget; a past issue was the serial console holding
+- GPS shares the Raspberry Pi 5's UART budget; a past issue was the serial console holding
   `/dev/ttyAMA0`. The console must be freed for GPS to open the port (see the GPS
   reboot-survival work in the runtime notes).
 - Consumer GPS accuracy is coarse relative to sidewalk width, so GPS is used for

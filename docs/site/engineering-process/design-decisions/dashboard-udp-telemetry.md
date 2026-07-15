@@ -1,16 +1,16 @@
 # Dashboard UDP Telemetry
 
-This page records the decision to send dashboard telemetry from the Pi 5 to the
+This page records the decision to send dashboard telemetry from the Raspberry Pi 5 to the
 Zero 2 W over **UDP across a USB Ethernet gadget link**, instead of a serial
 cable or a Wi-Fi/mDNS connection.
 
 ## Decision
 
-The Pi 5 controller sends a JSON telemetry packet roughly every 100 ms to the
+The Raspberry Pi 5 controller sends a JSON telemetry packet roughly every 100 ms to the
 Zero 2 W dashboard receiver over UDP. The transport is fixed to the USB Ethernet
 gadget between the two boards:
 
-- Pi 5 `usb0` = `192.168.10.1`, Zero 2 W `usb0` = `192.168.10.2`
+- Raspberry Pi 5 `usb0` = `192.168.10.1`, Zero 2 W `usb0` = `192.168.10.2`
 - Dashboard UDP target = `192.168.10.2:8765`
 
 The sender is `Hub75DashboardSender` in
@@ -26,7 +26,7 @@ HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1
 
 Each packet is one line of JSON (`json.dumps(payload) + "\n"`) carrying speed,
 gear, turn signals, servo angle, throttle/brake percent, drive mode, LiDAR
-points, camera pixels, CPU temp, nav status, and so on. The Zero renders it in
+points, camera pixels, CPU temp, nav status, and so on. The Zero 2 W renders it in
 `z2w_dashboard.py`.
 
 ## Alternatives considered
@@ -35,7 +35,7 @@ points, camera pixels, CPU temp, nav status, and so on. The Zero renders it in
 |---|---|---|
 | Serial cable (`/dev/ttyACM0`) | dead simple, no networking | a second dedicated cable; the transport is retained as a fallback but not the default |
 | Wi-Fi + mDNS (`zero2w.local`) | no cable at all | flaky and slow to resolve; competes for the air and adds latency/dropouts; explicitly removed as a default |
-| **UDP over USB Ethernet gadget (chosen)** | one cable provides a dedicated IP link; fixed numeric target avoids mDNS; no delivery handshake | the USB gadget link needs keeper/recovery tooling, and UDP does not confirm that the Zero rendered a packet |
+| **UDP over USB Ethernet gadget (chosen)** | one cable provides a dedicated IP link; fixed numeric target avoids mDNS; no delivery handshake | the USB gadget link needs keeper/recovery tooling, and UDP does not confirm that the Zero 2 W rendered a packet |
 
 ## Reason
 
@@ -54,7 +54,7 @@ fallback was deliberately removed and must not be re-added unless Ram explicitly
 
 - The car log should print `Hub75 dashboard telemetry sending UDP to
   192.168.10.2:8765.` (if it says `zero2w.local`, stale code/env is active).
-- On the Zero, `ss -lunp | grep 8765` shows the receiver listening.
+- On the Zero 2 W, `ss -lunp | grep 8765` shows the receiver listening.
 - `NO LINK` on the display means the receiver is alive but no packets arrived
   recently — check `usb0` carrier, ARP, and ping both ways.
 - `code/test_files/setup/install_usb_dashboard_link.sh` installs the static IPs

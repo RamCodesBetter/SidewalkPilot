@@ -1,7 +1,7 @@
 # Hardware Claim
 
-SidewalkPilot is a physical Yahboom Ackermann 520M RC platform with a Raspberry Pi
-5 controller, Jetson Orin Nano inference host, and Raspberry Pi Zero 2 W dashboard.
+SidewalkPilot is a physical Yahboom Ackermann 520M RC platform with a Jetson Orin Nano
+inference host, Raspberry Pi 5 controller, and Zero 2 W dashboard.
 The current code contains the interfaces and constants below. Configuration is
 evidence of implementation intent; physical photos, bench output, and field logs
 are the evidence that a particular assembly worked.
@@ -10,7 +10,7 @@ are the evidence that a particular assembly worked.
 
 - **Steering:** PCA9685 at I2C `0x40`, channel `0`, 50 Hz. Logical steering is
   0/90/180 for left/center/right, with hardware mapping and trim in `hardware.py`.
-- **Drive:** AT8236 motor control through four Pi PWM outputs: right forward 19,
+- **Drive:** AT8236 motor control through four Raspberry Pi 5 PWM outputs: right forward 19,
   right reverse 20, left forward 25, and left reverse 13.
 - **Wheel speed:** hall input on GPIO 24; software uses 455 pulses per revolution
   and a configured 7.0 cm wheel diameter.
@@ -22,13 +22,13 @@ are the evidence that a particular assembly worked.
 - **Camera:** Raspberry Pi Camera Module 3 Wide through Picamera2, captured at
   1280x720 before model-specific preprocessing.
 - **Dashboard:** one Waveshare 64x32 HUB75 panel on a Zero 2 W, receiving UDP over
-  the fixed Pi-to-Zero USB network (`192.168.10.1` to `192.168.10.2`, port 8765).
+  the fixed Raspberry Pi 5–Zero 2 W USB network (`192.168.10.1` to `192.168.10.2`, port 8765).
 - **IMU:** XIAO MG24 Sense yaw data on `/dev/ttyAMA3` at 115200 for the current
   experimental yaw-control path.
 
 ## Boundaries
 
-- The custom Pi breakout PCB is designed but not fabricated.
+- The custom Raspberry Pi 5 breakout PCB is designed but not fabricated.
 - Configuration does not prove water resistance, EMI immunity, stopping distance,
   or reliability.
 - Series 4 ONNX models are integrated and smoke-tested but have no physical-car

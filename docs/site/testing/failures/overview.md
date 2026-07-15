@@ -19,7 +19,7 @@ Each page tries to answer four questions in order:
 
 | Test record field | What it should contain |
 |---|---|
-| Setup | Hardware (Pi 5 controller, Zero 2 W dashboard, LiDAR/GPS/IMU as relevant), branch, model version, dataset tag |
+| Setup | Hardware (Raspberry Pi 5 controller, Zero 2 W dashboard, LiDAR/GPS/IMU as relevant), branch, model version, dataset tag |
 | Procedure | Exact command (run `car`, then select `<ver>` on the dashboard model page) or the field route walked |
 | Pass / warn / fail | Defined *before* the run, not after |
 | Evidence | Runtime CSV log, video clip, field photos, manual-takeover count |

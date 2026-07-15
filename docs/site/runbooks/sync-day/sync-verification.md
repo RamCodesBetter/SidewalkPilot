@@ -1,6 +1,6 @@
 # Sync Verification
 
-The before-and-after integrity check I run around every data move between the Pi 5 (capture device), the Mac (git/photo-pull workstation), the NVIDIA PC (training), and Jon (the Jetson). Data quality is not only about correct labels — a batch that got half-copied or clipped by a bad sync flag is a quality failure too, so no copy is "done" until source and destination counts match and no label lost its image.
+The before-and-after integrity check I run around every data move between the Raspberry Pi 5 (capture device), the Mac (git/photo-pull workstation), the NVIDIA PC (training), and Jetson Orin Nano. Data quality is not only about correct labels — a batch that got half-copied or clipped by a bad sync flag is a quality failure too, so no copy is "done" until source and destination counts match and no label lost its image.
 
 ## Preconditions
 

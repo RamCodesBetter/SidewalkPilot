@@ -42,7 +42,7 @@ The adaptive pool is what makes the `9,600`-length feature vector fixed: whateve
 ## Why this choice
 
 - Fixed image shapes simplify ONNX export and runtime validation. The Series 3 trainer exports input `image`, output `control_raw`, and a dynamic batch axis.
-- `320 x 180` preserves far more visual detail than the older `200 x 66` Series 1/2 input while staying light enough for the Jetson.
+- `320 x 180` preserves far more visual detail than the older `200 x 66` Series 1/2 input while staying light enough for the Jetson Orin Nano.
 - Documenting the shape flow prevents confusion when parameter count changes after an architecture edit - the jump from `2,048` to `9,600` flattened features is exactly why the Series 3 head is so much larger.
 
 ## Verification Note

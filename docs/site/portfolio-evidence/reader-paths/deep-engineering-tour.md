@@ -4,9 +4,9 @@ This tour connects the project story to the source files, model contracts, data,
 
 ## 1. Three Computers, One Authority
 
-The Raspberry Pi 5 is the final control authority. It reads the Xbox controller, captures camera frames, reads LiDAR/GPS/IMU/hall telemetry, applies safety policy, drives the PCA9685 steering servo and motor controller, and records logs.
+The Jetson Orin Nano is an inference service. The Raspberry Pi 5 sends the newest JPEG and selected model version over dedicated Ethernet. Jetson Orin Nano loads the matching ONNX, returns decoded steering/probabilities, and never directly controls an actuator.
 
-The Jetson Orin Nano is an inference service. The Pi sends the newest JPEG and selected model version over dedicated Ethernet. Jon loads the matching ONNX, returns decoded steering/probabilities, and never directly controls an actuator.
+The Raspberry Pi 5 is the final control authority. It reads the Xbox controller, captures camera frames, reads LiDAR/GPS/IMU/hall telemetry, applies safety policy, drives the PCA9685 steering servo and motor controller, and records logs.
 
 The Zero 2 W is a display service. It receives UDP telemetry over a dedicated USB network and renders the Waveshare 64x32 HUB75 panel. Dashboard failure does not control motion.
 
@@ -15,8 +15,8 @@ The Zero 2 W is a display service. It receives UDP telemetry over a dedicated US
 | Entrypoint | `code/controller/current/rc_car.py` |
 | Main loop and arbitration | `code/controller/current/rc_car_app/runtime.py` |
 | Hardware ownership | `code/controller/current/rc_car_app/hardware.py` |
-| Model registry and Pi inference client | `code/controller/current/rc_car_app/vision.py` |
-| Jon ONNX server | `code/controller/current/rc_car_app/jetson_inference_server.py` |
+| Model registry and Raspberry Pi 5 inference client | `code/controller/current/rc_car_app/vision.py` |
+| Jetson Orin Nano ONNX server | `code/controller/current/rc_car_app/jetson_inference_server.py` |
 | LiDAR parser | `code/controller/current/rc_car_app/lidar.py` |
 | LiDAR policy | `code/controller/current/rc_car_app/lidar_avoidance.py` |
 | Dashboard sender | `code/controller/current/rc_car_app/hub75_dashboard.py` |
@@ -24,11 +24,11 @@ The Zero 2 W is a display service. It receives UDP telemetry over a dedicated US
 
 ## 2. Keeping Manual Control Responsive
 
-An earlier runtime failure looked like Bluetooth lag: steering and dashboard updates ran smoothly, paused, then resumed. `jstest` changed instantly, including while Jon was off, so the controller link was not the bottleneck.
+An earlier runtime failure looked like Bluetooth lag: steering and dashboard updates ran smoothly, paused, then resumed. `jstest` changed instantly, including while Jetson Orin Nano was off, so the controller link was not the bottleneck.
 
-The audit found recurring work on the control path, especially network waits to an unavailable Jon, repeated photo-directory scans, and temperature subprocesses. Camera-to-Jon communication now uses a background worker with latest-frame semantics. Dashboard networking is asynchronous, and recurring file/subprocess work is cached or moved away from each controller tick.
+The audit found recurring work on the control path, especially network waits to an unavailable Jetson Orin Nano, repeated photo-directory scans, and temperature subprocesses. Camera-to-Jetson Orin Nano communication now uses a background worker with latest-frame semantics. Dashboard networking is asynchronous, and recurring file/subprocess work is cached or moved away from each controller tick.
 
-The field retest with Jon powered off removed the observed pauses. That is a bounded result from one hardware retest, not a general hard-real-time guarantee.
+The field retest with Jetson Orin Nano powered off removed the observed pauses. That is a bounded result from one hardware retest, not a general hard-real-time guarantee.
 
 ## 3. Model Evolution
 

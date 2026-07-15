@@ -22,7 +22,7 @@ Transient notification rows use a small FIFO because notifications, unlike state
 
 ## Failure Behavior
 
-UDP is intentionally connectionless. A successful `sendto()` proves only that the local kernel accepted the datagram, not that the Zero rendered it. Link health is verified with `ping`, receiver service status, and the display's `NO LINK`/`STALE` states.
+UDP is intentionally connectionless. A successful `sendto()` proves only that the local kernel accepted the datagram, not that the Zero 2 W rendered it. Link health is verified with `ping`, receiver service status, and the display's `NO LINK`/`STALE` states.
 
 ```bash
 ping -c 3 192.168.10.2

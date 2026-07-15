@@ -5,7 +5,7 @@ The 6-axis XIAO MG24 IMU provides yaw-rate feedback for closed-loop steering exp
 The IMU is a Seeed XIAO MG24 with a 6-axis sensor (3-axis accelerometer + 3-axis
 gyroscope). It was added to give the steering loop a direct measurement of how fast
 the car is actually rotating (yaw rate), rather than inferring turn from the servo
-command alone. It is wired to the Pi 5 UART on `/dev/ttyAMA3` (GPIO 8/9).
+command alone. It is wired to the Raspberry Pi 5 UART on `/dev/ttyAMA3` (GPIO 8/9).
 
 **Status: implemented and experimental.** Firmware, verifier, and calibration utilities
 exist in `code/test_files`. The live runtime starts `ImuReader` and `YawController` when
@@ -18,7 +18,7 @@ attributed to the controller.
 
 ## How it works
 
-- The MG24 streams inertial data over UART to the Pi 5. The gyro's yaw axis gives the car's
+- The MG24 streams inertial data over UART to the Raspberry Pi 5. The gyro's yaw axis gives the car's
   turn rate directly.
 - In default `straight` mode, commands within 5 degrees of logical center target zero yaw;
   the PID trims around direction-dependent feed-forward values. `full` mode can also track

@@ -16,7 +16,7 @@ Every published version is its own HF repo (`SidewalkPilot-v{version}`) with one
 
 **Series 3** — [v3.0](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.0) · [v3.0b](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.0b) · [v3.1](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.1) · [v3.1b](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.1b) · [v3.2](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.2) · [v3.2b](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.2b) · [v3.3](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.3) · [v3.3b](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.3b) · [v3.4](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.4) · [v3.4b](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.4b)
 
-**Series 4** — all six local artifacts are trained, exported to ONNX, included in the common evaluator, and supported by the Jetson runtime: `4.0p/4.0r` (PC), `4.0f/4.0g` (CF), and `4.0a/4.0c` (PCF). They are not yet field-tested or published as model repositories.
+**Series 4** — all six local artifacts are trained, exported to ONNX, included in the common evaluator, and supported by the Jetson Orin Nano runtime: `4.0p/4.0r` (PC), `4.0f/4.0g` (CF), and `4.0a/4.0c` (PCF). They are not yet field-tested or published as model repositories.
 
 ## Datasets
 

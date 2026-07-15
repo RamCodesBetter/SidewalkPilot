@@ -4,7 +4,7 @@ This page documents the GPIO / pin assignments the custom PCB has to break out. 
 
 ## How it works
 
-The PCB does not invent a pinout; it hard-wires the pinout the runtime already expects. Every trace on the board must land on the exact Pi 5 pin that `code/controller/current/rc_car_app/config.py` and the serial device modules reference, otherwise the software would need to change. The mapping below is read directly from the runtime source, not guessed.
+The PCB does not invent a pinout; it hard-wires the pinout the runtime already expects. Every trace on the board must land on the exact Raspberry Pi 5 pin that `code/controller/current/rc_car_app/config.py` and the serial device modules reference, otherwise the software would need to change. The mapping below is read directly from the runtime source, not guessed.
 
 ### Motor driver (Yahboom AT8236 H-bridge, GPIO)
 

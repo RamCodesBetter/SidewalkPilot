@@ -22,12 +22,12 @@ Test utilities are mostly flat files in `code/test_files/`. Changed Python utili
 | Model inference | `vision.py` (+ `config.py`) | Model loads, produces a steering angle, and confidence gating behaves |
 | AEB / LiDAR | `lidar.py`, `lidar_avoidance.py`, and `runtime.py` | Center-corridor throttle/stop behavior, no steering command, graceful reconnect |
 | Navigation | `navigation.py` + `trossachs_nav_graph.json` | A* returns a followable route with correct AI/manual segments |
-| Zero display | `z2w_dashboard.py` + `hub75_dashboard.py` | New/changed value threaded through ALL layers (runtime → serializer → renderer), not just the draw function |
+| Zero 2 W display | `z2w_dashboard.py` + `hub75_dashboard.py` | New/changed value threaded through ALL layers (runtime → serializer → renderer), not just the draw function |
 | Logs | `logging_utils.py` | CSV headers in `config.py` match the runtime row writes |
 
 ## Hardware gates (do not skip after touching hardware)
 
-- **USB dashboard:** `ip -br addr show usb0`, `cat /sys/class/net/usb0/carrier`, `ip neigh show dev usb0`, then ping both ways (`192.168.10.2` from the Pi, `192.168.10.1` from the Zero). Carrier `1` with a failed ping is the known ARP failure mode — recover with the keeper service.
+- **USB dashboard:** `ip -br addr show usb0`, `cat /sys/class/net/usb0/carrier`, `ip neigh show dev usb0`, then ping both ways (`192.168.10.2` from the Raspberry Pi 5, `192.168.10.1` from the Zero 2 W). Carrier `1` with a failed ping is the known ARP failure mode — recover with the keeper service.
 - **LiDAR:** stop the car service first so there are not two readers, then check the current USB-serial stream:
 
 ```bash

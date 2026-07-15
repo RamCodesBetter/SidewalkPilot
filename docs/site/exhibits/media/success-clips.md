@@ -15,7 +15,7 @@ the offline evaluation.
 | Field | What to record |
 |---|---|
 | Clip | File name or link |
-| Model version | e.g. Series 3 `v3.1b` (runs on Jon), or a Series 1/2 checkpoint on the Pi |
+| Model version | e.g. Series 3 `v3.1b` (runs on Jetson Orin Nano), or a Series 1/2 checkpoint on the Raspberry Pi 5 |
 | Route | Named sidewalk / test loop |
 | Condition | Daylight, dusk, night, dry, wet, shadowed |
 | Claim supported | What the run demonstrates |

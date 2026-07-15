@@ -6,7 +6,7 @@ a complete functional-safety system.
 
 ## Implemented layers
 
-1. **Operator control:** while the Xbox controller is connected and the Pi loop
+1. **Operator control:** while the Xbox controller is connected and the Raspberry Pi 5 loop
    is responsive, steering, gas, or brake input cancels autonomy. The Share
    button requests an orderly shutdown. The operator also needs an independent
    way to cut power.

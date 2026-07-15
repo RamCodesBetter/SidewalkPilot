@@ -5,12 +5,12 @@ The current heavy-model deployment path is:
 ```text
 PyTorch training checkpoint
   -> FP32 ONNX export
-  -> copy ONNX to Jon
+  -> copy ONNX to Jetson Orin Nano
   -> ONNX Runtime with CUDA
-  -> decoded steering returned to Pi
+  -> decoded steering returned to Raspberry Pi 5
 ```
 
-The Pi remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jon is an inference service only.
+The Raspberry Pi 5 remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is an inference service only.
 
 ## Artifact Contracts
 
@@ -32,4 +32,4 @@ CUDA is preferred when ONNX Runtime reports `CUDAExecutionProvider`; CPU remains
 
 TensorRT, FP16, and INT8 remain valid future optimization topics, but they are not the current live path. The old checked-in TensorRT builder described by earlier docs is no longer in the repository. No current field claim depends on a TensorRT engine or quantized model.
 
-See [ONNX Export](onnx-export.md), [Jetson Runtime](jetson-runtime.md), and [Jetson Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
+See [ONNX Export](onnx-export.md), [Jetson Orin Nano Runtime](jetson-runtime.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

@@ -1,6 +1,6 @@
 # Photo Capture
 
-Photo capture turns a live drive into image/command pairs. The Raspberry Pi queues a copy of the latest camera frame, records the logical steering command and absolute physical forward-throttle value sampled at that capture request, and groups the files into a dated run folder.
+Photo capture turns a live drive into image/command pairs. The Raspberry Pi 5 queues a copy of the latest camera frame, records the logical steering command and absolute physical forward-throttle value sampled at that capture request, and groups the files into a dated run folder.
 
 ## Controls
 

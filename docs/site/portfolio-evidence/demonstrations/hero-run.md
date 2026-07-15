@@ -4,7 +4,7 @@ This page defines what a future end-to-end hero-run artifact must contain. It do
 
 ## What a Valid Clip Shows
 
-1. The selected model version and live Jon inference state.
+1. The selected model version and live Jetson Orin Nano inference state.
 2. Camera-driven steering reaching the PCA9685 servo.
 3. Forward motion through the AT8236 motor controller.
 4. Live dashboard values over USB Ethernet.

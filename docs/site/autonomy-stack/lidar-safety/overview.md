@@ -8,7 +8,7 @@ not select a swerve direction.
 The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
 connects over USB through a CP2102 UART bridge (auto-resolved from
 `/dev/serial/by-id/*CP2102*`, falling back to `/dev/ttyUSB*`); an earlier wiring used the
-Pi's GPIO UART at `/dev/ttyAMA2`. A background reader thread
+Raspberry Pi 5's GPIO UART at `/dev/ttyAMA2`. A background reader thread
 (`rc_car_app/lidar.py`, `LidarParser`) parses the raw packet stream into a full 360-degree
 scan of `LidarPoint` objects, and the main control loop in `rc_car_app/runtime.py` pulls
 the latest scan once per iteration with `get_latest_scan()`.
@@ -31,7 +31,7 @@ The pipeline is a straight line from bytes to a throttle or braking decision:
 
 The same computed policy is reused within a control iteration, so autonomous command
 generation and final hardware arbitration do not intentionally interpret two different
-scans. Operator input can cancel autonomy while the controller and Pi loop are responsive.
+scans. Operator input can cancel autonomy while the controller and Raspberry Pi 5 loop are responsive.
 
 ## Why this choice
 

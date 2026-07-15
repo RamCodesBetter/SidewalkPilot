@@ -23,7 +23,7 @@ The value is the integration and iteration, not a claim that one neural-network 
 - A published 81,237-image real Series 3/4 dataset supports reproducible training work.
 - Forty-six checkpoints can be decoded and compared on one frozen challenge subset.
 - LiDAR software can govern throttle and command emergency braking without choosing steering direction.
-- Manual steering remained responsive in a hardware retest with Jon powered off after network work moved outside the control loop.
+- Manual steering remained responsive in a hardware retest with Jetson Orin Nano powered off after network work moved outside the control loop.
 - Six Series 4 artifacts completed training, ONNX export, offline evaluation, and runtime compatibility checks.
 
 ## Evidence Limits

@@ -12,7 +12,7 @@ The 46-column schema is defined by `CSV_HEADERS` in `config.py` and must remain 
 - Autonomy intervention fields; and
 - The dashboard payload.
 
-Logs are shipped to Jon on clean shutdown when passwordless SSH and the link are available; transfer failure keeps the files locally.
+Logs are shipped to Jetson Orin Nano on clean shutdown when passwordless SSH and the link are available; transfer failure keeps the files locally.
 
 ## Review Rule
 

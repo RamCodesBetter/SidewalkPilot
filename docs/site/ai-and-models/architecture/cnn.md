@@ -23,7 +23,7 @@ The early network uses five convolution stages with channels `3 -> 24 -> 36 -> 4
 steering = 90 + output_scale * tanh(raw)
 ```
 
-Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. The model is small enough for local Pi inference and established the first complete image-to-servo pipeline.
+Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. The model is small enough for local Raspberry Pi 5 inference and established the first complete image-to-servo pipeline.
 
 ## Series 3 Visual Network
 
@@ -49,7 +49,7 @@ CF has no history branch and maps `256 -> 64`. Each horizon then uses its own `6
 
 ## Input Preprocessing
 
-- Frames originate as OpenCV BGR arrays from Pi camera capture.
+- Frames originate as OpenCV BGR arrays from Raspberry Pi 5 camera capture.
 - Each family resizes to its required dimensions.
 - Pixel values are normalized to the range expected by the matching trainer.
 - Series 2 v2.0/v2.0b can use the documented CLAHE path; other current models use raw BGR preprocessing plus training-time augmentation.
@@ -58,6 +58,6 @@ Preprocessing is part of the model contract. A checkpoint evaluated with the wro
 
 ## Deployment
 
-Series 3/4 ONNX inference runs on Jon through ONNX Runtime with CUDA when available. The server inspects input names and output shapes to choose the decoder. TensorRT is not required for the current models and should not be claimed as the active path unless a TensorRT engine is actually built and measured.
+Series 3/4 ONNX inference runs on Jetson Orin Nano through ONNX Runtime with CUDA when available. The server inspects input names and output shapes to choose the decoder. TensorRT is not required for the current models and should not be claimed as the active path unless a TensorRT engine is actually built and measured.
 
-See [Series 3 Hybrid Head](series-3-hybrid-head.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Jetson Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
+See [Series 3 Hybrid Head](series-3-hybrid-head.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

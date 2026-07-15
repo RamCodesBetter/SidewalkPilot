@@ -1,7 +1,7 @@
 # Manual Override
 
 Manual override is the primary operational control layer. While the Xbox
-controller is connected and the Pi loop is responsive, operator input can cancel
+controller is connected and the Raspberry Pi 5 loop is responsive, operator input can cancel
 autonomy and the Share button can request shutdown. Physical power cutoff remains
 necessary for faults that prevent software input processing.
 
@@ -10,7 +10,7 @@ necessary for faults that prevent software input processing.
 Autonomous mode (camera model steering) or a navigation route could command a path
 the operator judges unsafe (a bad steering angle, driving toward a person, entering
 a road). The software override reduces this risk only while the controller is connected
-and the Pi event loop remains responsive; it is not a substitute for physical power control.
+and the Raspberry Pi 5 event loop remains responsive; it is not a substitute for physical power control.
 
 ## Detection and trigger
 
@@ -55,8 +55,8 @@ ordering does not cover a disconnected controller or failed control process.
 
 ## Series 3 note
 
-Series 3 moves steering inference to the Jetson (Jon), but override still lives on
-the Pi in the same loop and is unchanged: the Pi owns the controller and the motors,
+Series 3 moves steering inference to the Jetson Orin Nano, but override still lives on
+the Raspberry Pi 5 in the same loop and is unchanged: the Raspberry Pi 5 owns the controller and the motors,
 so operator override does not depend on the model host being reachable.
 
 ## Related pages

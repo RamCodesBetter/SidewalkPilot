@@ -37,7 +37,7 @@ models. But it has real costs:
 
 - It **changes the pixel statistics** the network sees, so it *must* be applied
   identically at train and inference or the model silently degrades. That's one
-  more place to get out of sync between the trainer, the Pi, and Jon.
+  more place to get out of sync between the trainer, the Raspberry Pi 5, and Jetson Orin Nano.
 - On tree-dappled / hard shadows it can *amplify* the very light/dark patches
   that already confuse the model, sharpening the distractor instead of the
   sidewalk edge.

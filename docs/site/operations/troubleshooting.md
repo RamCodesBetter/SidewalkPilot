@@ -4,12 +4,12 @@ The consolidated failure playbook for SidewalkPilot: the dashboard link, the con
 
 ## Dashboard shows `NO LINK`
 
-`NO LINK` means the Zero receiver is alive but has not received a packet recently. Work outward from the sender:
+`NO LINK` means the Zero 2 W receiver is alive but has not received a packet recently. Work outward from the sender:
 
-1. **Pi 5 — controller running?** Confirm the controller process is up and printed its UDP transport line.
+1. **Raspberry Pi 5 — controller running?** Confirm the controller process is up and printed its UDP transport line.
 2. **Zero 2 W — receiver listening?** `ss -lunp | grep 8765` should show exactly one listener.
-3. **Both — USB up?** `ip -br addr show usb0` (Pi `.1`, Zero `.2`) and `cat /sys/class/net/usb0/carrier`.
-4. **Ping both ways**: `ping -c 3 192.168.10.2` from the Pi, `ping -c 3 192.168.10.1` from the Zero.
+3. **Both — USB up?** `ip -br addr show usb0` (Raspberry Pi 5 `.1`, Zero 2 W `.2`) and `cat /sys/class/net/usb0/carrier`.
+4. **Ping both ways**: `ping -c 3 192.168.10.2` from the Raspberry Pi 5, `ping -c 3 192.168.10.1` from the Zero 2 W.
 5. **Carrier `1` but ping fails** — the classic ARP/USB stall. Restart the USB keeper, or run the USB hard-reset sequence on both devices.
 
 ## Controller exits immediately
@@ -28,12 +28,12 @@ The consolidated failure playbook for SidewalkPilot: the dashboard link, the con
 - The error looks like permission denied on `/dev/ttyAMA0`. Confirm the serial console is freed on that UART and check group membership / port ownership.
 - Do not confuse the GPS port (`/dev/ttyAMA0`, `9600`) with the LiDAR port.
 
-## USB enumeration errors on the Zero
+## USB enumeration errors on the Zero 2 W
 
 - `-110`/`-62` or "device descriptor read" errors establish an enumeration failure; they do not identify power, cable, port, host, or device as the cause. Reproduce with the known working power arrangement, data cable, and host port before replacing hardware.
-- If the Zero is reachable over Wi-Fi but not USB, fix the dedicated USB path before continuing dashboard debugging.
+- If the Zero 2 W is reachable over Wi-Fi but not USB, fix the dedicated USB path before continuing dashboard debugging.
 
-## Zero boots then hangs headless
+## Zero 2 W boots then hangs headless
 
 - A missing `/etc/machine-id` runs the systemd first-boot wizard, which stalls a headless boot. Regenerate the machine-id.
 
@@ -45,13 +45,13 @@ Repeatable, machine-labelled checks reduce accidental branch leaks, sync damage,
 
 | Symptom | Machine | First decisive check |
 |---|---|---|
-| `NO LINK` | Zero | `ss -lunp \| grep 8765`, then ping both ways |
+| `NO LINK` | Zero 2 W | `ss -lunp \| grep 8765`, then ping both ways |
 | Carrier 1, ping fails | Both | Restart USB keeper / hard reset |
-| Controller exits | Pi | Look for "No joystick detected" |
-| "Simulation mode" | Pi | GPIO/I2C wiring + bus contention |
-| LiDAR none/zero | Pi | Motor spinning, single reader, port/baud |
-| GPS denied | Pi | `/dev/ttyAMA0` console freed + group |
-| USB `-110`/`-62` | Zero | Known working power/cable/port, then `dmesg` and `lsusb` |
+| Controller exits | Raspberry Pi 5 | Look for "No joystick detected" |
+| "Simulation mode" | Raspberry Pi 5 | GPIO/I2C wiring + bus contention |
+| LiDAR none/zero | Raspberry Pi 5 | Motor spinning, single reader, port/baud |
+| GPS denied | Raspberry Pi 5 | `/dev/ttyAMA0` console freed + group |
+| USB `-110`/`-62` | Zero 2 W | Known working power/cable/port, then `dmesg` and `lsusb` |
 
 ## Evidence to attach
 

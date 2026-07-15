@@ -1,6 +1,6 @@
 # Series 3 Models
 
-Series 3 moved inference to the Jetson, increased image input to `320x180`, and introduced the hybrid steering head in v3.1. The table below uses the corrected common evaluation: every checkpoint was run on the same **6,952-frame frozen Series 3/4 challenge subset**. These are held-out replay metrics, not physical-car results.
+Series 3 moved inference to the Jetson Orin Nano, increased image input to `320x180`, and introduced the hybrid steering head in v3.1. The table below uses the corrected common evaluation: every checkpoint was run on the same **6,952-frame frozen Series 3/4 challenge subset**. These are held-out replay metrics, not physical-car results.
 
 ## Shared Challenge Metrics
 
@@ -30,6 +30,6 @@ v3.3 and v3.3b are useful negative results. They were trained to improve shadow 
 - v3.0/v3.0b output: `[batch,2]` steering and throttle regression
 - v3.1+ output: `[batch,19]` = 9 logits + 9 offsets + throttle
 - Runtime default: `DEFAULT_STEERING_MODEL_CHOICE = "3.4"`
-- Deployment: ONNX Runtime CUDA on Jon
+- Deployment: ONNX Runtime CUDA on Jetson Orin Nano
 
 See the [Series 4 table](series-4.md) for the temporal experiments and the [full PDF report](../../steering_model_report.pdf) for confusion matrices and all 46 checkpoints.

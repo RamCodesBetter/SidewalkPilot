@@ -21,7 +21,7 @@ This is an implemented planning and state-transition contract, not a certified r
 - GPS error or a wrong graph edge kind can move or omit the handoff.
 - The 3.0 m and 2.5 m values are policy constants, not measured guarantees.
 - LiDAR does not recognize traffic or road boundaries. When AEB is enabled, it reacts only to qualifying center-corridor range points.
-- Manual override depends on a connected controller and responsive Pi process.
+- Manual override depends on a connected controller and responsive Raspberry Pi 5 process.
 - No preserved live-GPS crosswalk run currently establishes end-to-end handoff timing and resume behavior.
 
 Therefore, crossing operation remains manual and supervised. The project does not claim unattended or autonomous road crossing.

@@ -1,7 +1,7 @@
 # Field Evaluation Overview
 
 Field evaluation checks behavior that an image-label report cannot measure:
-Pi-to-Jon latency, steering smoothness, shadow response, mechanical drift,
+Raspberry Pi 5–Jetson Orin Nano latency, steering smoothness, shadow response, mechanical drift,
 operator takeovers, and LiDAR braking on the assembled vehicle.
 
 ## Offline Versus Field Evidence

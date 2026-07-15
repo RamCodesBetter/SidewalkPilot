@@ -1,6 +1,6 @@
 # Runtime Flow Diagram
 
-This page describes the Raspberry Pi 5 control path in `runtime.py`. The main loop owns controller events and final actuator decisions; camera, Jetson I/O, LiDAR, GPS, dashboard transport, image writes, and optional telemetry use workers or cached latest values so routine I/O does not intentionally block manual control.
+This page describes the Raspberry Pi 5 control path in `runtime.py`. The main loop owns controller events and final actuator decisions; camera, Jetson Orin Nano I/O, LiDAR, GPS, dashboard transport, image writes, and optional telemetry use workers or cached latest values so routine I/O does not intentionally block manual control.
 
 ## Startup
 
@@ -10,7 +10,7 @@ This page describes the Raspberry Pi 5 control path in `runtime.py`. The main lo
 
 1. Creates runtime state and metrics;
 2. Initializes GPIO, PCA9685 steering, motors, and the pygame joystick;
-3. Starts available LiDAR, GPS, IMU, camera, Jetson-client, CSV, dashboard, and optional InfluxDB components; and
+3. Starts available LiDAR, GPS, IMU, camera, Jetson Orin Nano client, CSV, dashboard, and optional InfluxDB components; and
 4. Leaves unavailable optional components in their documented fallback state rather than claiming that every sensor is healthy.
 
 ## Main loop
@@ -21,7 +21,7 @@ The loop is capped by `clock.tick(60)`. Each pass performs these stages:
 2. **Capture scheduler:** if run capture is enabled and motion conditions are met, queue the next image/label pair at the configured 10 fps.
 3. **LiDAR snapshot:** read the parser's latest scan, compute distances and visualization state, and pass the scan into actuator arbitration. An empty scan does not create an obstacle stop.
 4. **Actuator arbitration:** `update_gpio()` computes manual or autonomous commands, applies enabled LiDAR throttle/brake limits, updates yaw correction when its conditions are met, rate-limits motor PWM, and writes steering and motor outputs.
-5. **Supporting state:** update takeover clips, optional Influx telemetry, turn signals, dashboard selection, cached temperatures, and Jetson status.
+5. **Supporting state:** update takeover clips, optional Influx telemetry, turn signals, dashboard selection, cached temperatures, and Jetson Orin Nano status.
 6. **Navigation:** update route state from GPS/odometry and select AUTO or MNUL segment behavior. A mode change affects the following actuator pass.
 7. **Dashboard:** enqueue the latest drive, model, camera, LiDAR, navigation, IMU, and system-status payload over the configured USB-network UDP link.
 8. **CSV:** write the 46-column telemetry row when `LOG_INTERVAL_SEC` elapses. The configured interval is `0.1 s`, so the nominal rate is 10 Hz; scheduling load can introduce jitter.
@@ -36,7 +36,7 @@ This is an ordered control loop plus asynchronous workers. It is not a hard-real
 
 - `run()` in `code/controller/current/rc_car_app/runtime.py`
 - `LOG_INTERVAL_SEC` and controller constants in `code/controller/current/rc_car_app/config.py`
-- `AsyncDashboardSender` and the asynchronous Jetson client in the runtime modules
+- `AsyncDashboardSender` and the asynchronous Jetson Orin Nano client in the runtime modules
 
 ## Related pages
 

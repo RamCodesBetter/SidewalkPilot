@@ -10,11 +10,11 @@ There are a few layered utilities:
 - `steering/model_or_fallback_steering_test.py` is the trimmed variant with just `--model` and `--no-servo`; it exercises the same vision path and the model-or-fallback logic without the dashboard sender.
 - `steering/autonomous_steering_test.py` is the broader autonomy-path variant.
 
-Series 1/2 can run through the Pi-local path. Series 3/4 use the Jetson inference link in the live architecture, so a full bench test also verifies that Ethernet service and model selection.
+Series 1/2 can run through the local Raspberry Pi 5 path. Series 3/4 use the Jetson Orin Nano inference link in the live architecture, so a full bench test also verifies that Ethernet service and model selection.
 
 ## Command
 
-Run on the Pi 5, wheels off the ground, motors stay OFF the whole test:
+Run on the Raspberry Pi 5, wheels off the ground, motors stay OFF the whole test:
 
 ```bash
 # move the servo from model predictions (drive motors forced off):

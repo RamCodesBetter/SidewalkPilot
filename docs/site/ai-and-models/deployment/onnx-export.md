@@ -1,6 +1,6 @@
 # ONNX Export
 
-ONNX is the portable artifact format used by Jon. Export occurs after training from the matching PyTorch architecture and checkpoint.
+ONNX is the portable artifact format used by Jetson Orin Nano. Export occurs after training from the matching PyTorch architecture and checkpoint.
 
 ## Current Signatures
 
@@ -26,4 +26,4 @@ The batch dimension is dynamic. Image shape remains `3x180x320`; history shape i
 
 The current live path consumes FP32 ONNX through ONNX Runtime/CUDA. TensorRT conversion is not part of the required current export flow.
 
-See [Deployment Overview](overview.md) and [Jetson Runtime](jetson-runtime.md).
+See [Deployment Overview](overview.md) and [Jetson Orin Nano Runtime](jetson-runtime.md).

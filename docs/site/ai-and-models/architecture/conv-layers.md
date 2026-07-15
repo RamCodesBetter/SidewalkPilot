@@ -47,7 +47,7 @@ Per-layer parameter count follows `out_channels * in_channels * kernel_h * kerne
 - Sidewalk driving has many visual edge cases: grass/sidewalk boundaries, driveway slopes, shadows, curb curves, glare, and low-light frames. The whole shadow-augmentation stack in the Series 3 trainer (mixed lighting, diagonal shadow bands, tree-dapple patterns, road-edge shadow) exists because these are the hard cases.
 - Wider conv layers give the model more capacity to learn those patterns before committing to a control decision.
 - The backbone is only `469,392` params in Series 3 - about 8.5% of the model. The width buys visual capacity cheaply; the parameter cost lives in the head (see `linear-head.md`), not here.
-- Keeping the backbone convolutional keeps inference efficient on Jetson/TensorRT compared with a heavier transformer-style stack.
+- Keeping the backbone convolutional keeps inference efficient on Jetson Orin Nano/TensorRT compared with a heavier transformer-style stack.
 
 ## Planned / not yet captured
 

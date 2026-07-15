@@ -6,7 +6,7 @@ The project separates code implementation, observed field behavior, and pending 
 
 | Criterion | Required evidence | Current status |
 |---|---|---|
-| Responsive manual control | `jstest` plus a running-car input test with no periodic stalls | Observed after moving camera/Jon work off the control-loop path |
+| Responsive manual control | `jstest` plus a running-car input test with no periodic stalls | Observed after moving camera/Jetson Orin Nano work off the control-loop path |
 | Camera capture | Picamera2 startup plus saved/processed frames | Implemented and used for data collection |
 | Dashboard link | Bidirectional USB ping and live, non-stale display updates | Implemented; recovery tooling exists for known link failures |
 | LiDAR reconnect | Disconnect/reconnect log and resumed points | Implemented in the reader; retain a repeatable hardware record |

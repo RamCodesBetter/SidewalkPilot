@@ -5,8 +5,8 @@ is an operating limit.
 
 ## Current Runtime Behavior
 
-The Pi stops autonomy when the camera/model result is unavailable or stale. A
-fresh Pi-local or Jon model prediction currently carries confidence `1.0`; the
+The Raspberry Pi 5 stops autonomy when the camera/model result is unavailable or stale. A
+fresh local Raspberry Pi 5 or Jetson Orin Nano model prediction currently carries confidence `1.0`; the
 `LOW_CAMERA_CONFIDENCE` gate therefore does **not** estimate uncertainty for a
 fresh neural prediction. It is mainly an availability/freshness gate on the
 active model path.

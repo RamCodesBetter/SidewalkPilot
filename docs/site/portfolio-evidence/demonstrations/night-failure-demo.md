@@ -18,7 +18,7 @@ matching data is also a hypothesis, not a proven explanation.
 
 ## Current Limit
 
-The runtime now applies EMA smoothing once per completed Jon inference. That implementation
+The runtime now applies EMA smoothing once per completed Jetson Orin Nano inference. That implementation
 does not establish night robustness or guarantee smooth physical steering. The neural path
 reports confidence `1.0` for a fresh accepted result, so low-camera-confidence logic must not
 be described as a darkness or glare detector.

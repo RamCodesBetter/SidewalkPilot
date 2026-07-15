@@ -1,6 +1,6 @@
 # SidewalkPilot
 
-SidewalkPilot is a solo-built autonomous RC-car research platform for sidewalks. A camera model proposes steering, a separate LiDAR safety layer can slow or stop the car, GPS software provides route context, and a live LED dashboard exposes system state. The project runs on a Raspberry Pi 5, NVIDIA Jetson Orin Nano, and Raspberry Pi Zero 2 W.
+SidewalkPilot is a solo-built autonomous RC-car research platform for sidewalks. A camera model proposes steering, a separate LiDAR safety layer can slow or stop the car, GPS software provides route context, and a live LED dashboard exposes system state. The project runs on an Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W.
 
 <table width="100%">
 <tr>
@@ -9,7 +9,6 @@ SidewalkPilot is a solo-built autonomous RC-car research platform for sidewalks.
 - [Documentation](https://ramcodesbetter.github.io/SidewalkPilot/)
 - [YouTube](https://www.youtube.com/@SidewalkPilot)
 - [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat)
-- [Weights & Biases](https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot)
 - [Parts list](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
 - [Email](mailto:ramsabavat2012@gmail.com)
 
@@ -34,7 +33,7 @@ Series 4 is a parallel temporal-learning experiment on the same 81,237-image Ser
 | Current + future (CF) | v4.0f | v4.0g | image -> current plus three future steering horizons |
 | Previous + current + future (PCF) | v4.0a | v4.0c | image + three prior targets -> current plus three future horizons |
 
-All six Series 4 ONNX models are supported by the live Jetson runtime. None has been field-promoted yet, so v3.4 remains the deployed research reference.
+All six Series 4 ONNX models are supported by the live Jetson Orin Nano runtime. None has been field-promoted yet, so v3.4 remains the deployed research reference.
 
 ## System Architecture
 
@@ -42,20 +41,20 @@ The computers have separate responsibilities:
 
 | Manager | Hardware | Responsibility |
 |---|---|---|
+| AI Model Manager | Jetson Orin Nano | Receives the newest camera frame over dedicated Ethernet and runs ONNX Runtime/CUDA inference |
 | Major System Manager | Raspberry Pi 5 | Controller input, camera capture, LiDAR, GPS, steering, motors, logging, and final safety arbitration |
-| AI Model Manager | NVIDIA Jetson Orin Nano | Receives the newest camera frame over dedicated Ethernet and runs ONNX Runtime/CUDA inference |
-| Display System Manager | Raspberry Pi Zero 2 W | Renders the Waveshare 64x32 HUB75 dashboard from UDP telemetry over a dedicated USB network |
+| Display System Manager | Zero 2 W | Renders the Waveshare 64x32 HUB75 dashboard from UDP telemetry over a dedicated USB network |
 
-The Pi remains authoritative. The Jetson proposes steering but never directly controls the servo. The Zero 2 W only displays telemetry. Manual controller input can cancel autonomy, and the enabled LiDAR policy can constrain or stop forward motion.
+The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano proposes steering but never directly controls the servo. The Zero 2 W only displays telemetry. Manual controller input can cancel autonomy, and the enabled LiDAR policy can constrain or stop forward motion.
 
 ```text
 Xbox controller ----------------------------+
-Pi Camera -> Pi 5 -> Jetson steering model -+--> arbitration -> steering + motors
+Raspberry Pi Camera -> Raspberry Pi 5 -> Jetson Orin Nano steering model -+--> arbitration -> steering + motors
 LiDAR --------------------------------------+         |
 GPS, IMU, hall sensor ----------------------+         +--> logs + dashboard
 ```
 
-Camera inference uses a background latest-frame client. Connection and inference waits occur in that worker rather than in the controller loop. One powered-off-Jetson hardware retest no longer showed the earlier periodic steering pauses, but that observation is not a formal worst-case latency bound. The current LiDAR policy does not steer: it can progressively slow, hold, or emergency-brake inside a center corridor.
+Camera inference uses a background latest-frame client. Connection and inference waits occur in that worker rather than in the controller loop. One powered-off Jetson Orin Nano hardware retest no longer showed the earlier periodic steering pauses, but that observation is not a formal worst-case latency bound. The current LiDAR policy does not steer: it can progressively slow, hold, or emergency-brake inside a center corridor.
 
 ## Model Journey
 
@@ -78,6 +77,9 @@ Training runs on an NVIDIA RTX 6000 Ada GPU. The Series 3/4 trainers support lig
 
 | Function | Component |
 |---|---|
+| AI inference computer | Jetson Orin Nano |
+| Hardware controller | Raspberry Pi 5 |
+| Dashboard computer | Zero 2 W |
 | Chassis | Yahboom Ackermann 520M |
 | Vision | Raspberry Pi Camera Module 3 Wide |
 | Obstacle distance | Youyeetoo FHL-LD19 360-degree LiDAR through CP2102 USB |
@@ -92,7 +94,7 @@ Training runs on an NVIDIA RTX 6000 Ada GPU. The Series 3/4 trainers support lig
 
 | Path | Contents |
 |---|---|
-| `code/controller/current/` | Pi 5 controller, Jetson inference server, and Zero 2 W dashboard runtime |
+| `code/controller/current/` | Jetson Orin Nano inference server, Raspberry Pi 5 controller, and Zero 2 W dashboard runtime |
 | `code/ai_models_datasets/series_1_and_2/` | Series 1/2 trainer and local dataset metadata |
 | `code/ai_models_datasets/series_3_and_4/` | Series 3 trainer plus the three Series 4 trainers |
 | `code/ai_models/` | Local/Hugging Face PTH and ONNX artifacts; binaries are ignored by Git |

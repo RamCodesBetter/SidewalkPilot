@@ -2,7 +2,7 @@
 
 SidewalkPilot is a solo-built autonomous RC-car research platform that uses a camera model to steer along sidewalks while a separate LiDAR layer can slow or stop the vehicle. The project began in early April 2025 after a smaller Raspberry Pi Pico project. It grew from a drivable RC chassis into a complete hardware, data, model, deployment, and safety system.
 
-It is a real, working vehicle rather than a simulation-only demonstration. A Raspberry Pi 5 operates the hardware and safety loop, an NVIDIA Jetson Orin Nano runs neural-network inference, and a Raspberry Pi Zero 2 W drives a live 64x32 dashboard. An Xbox controller remains the manual takeover and shutdown interface.
+It is a real, working vehicle rather than a simulation-only demonstration. An Jetson Orin Nano runs neural-network inference, a Raspberry Pi 5 operates the hardware and safety loop, and a Zero 2 W drives a live 64x32 dashboard. An Xbox controller remains the manual takeover and shutdown interface.
 
 > SidewalkPilot is a supervised research and learning project. It is not presented as certified or approved for unattended or public-road operation, and it is not a finished autonomous vehicle.
 
@@ -19,10 +19,10 @@ Offline scores did not choose the winner by themselves. v3.4b had a slightly low
 
 ## What the Car Does
 
-1. The Pi Camera captures a forward sidewalk view.
-2. The Raspberry Pi 5 submits the newest frame to a background Jetson client so connection and inference waits do not run in the controller loop.
-3. The Jetson runs the selected ONNX model and returns a steering prediction.
-4. The Raspberry Pi applies steering, throttle policy, manual takeover, and LiDAR emergency braking.
+1. The Raspberry Pi Camera captures a forward sidewalk view.
+2. The Raspberry Pi 5 submits the newest frame to a background Jetson Orin Nano client so connection and inference waits do not run in the controller loop.
+3. The Jetson Orin Nano runs the selected ONNX model and returns a steering prediction.
+4. The Raspberry Pi 5 applies steering, throttle policy, manual takeover, and LiDAR emergency braking.
 5. The Zero 2 W displays steering, model, navigation, camera, temperature, and LiDAR telemetry over a dedicated USB network.
 6. Camera frames and absolute steering/throttle labels are saved for the next training iteration.
 
@@ -52,5 +52,4 @@ The full sequence is in the [Build Timeline](start-here/build-timeline.md) and [
 - [GitHub](https://github.com/RamCodesBetter/SidewalkPilot)
 - [Hugging Face models and datasets](https://huggingface.co/ram-shreyas-naik-sabavat)
 - [YouTube](https://www.youtube.com/@SidewalkPilot)
-- [Weights & Biases](https://wandb.ai/Sidewalk-Pilot/SidewalkPilot/table?nw=nwusersidewalkpilot)
 - [Project status](start-here/current-status.md)

@@ -38,7 +38,7 @@ Small errors accumulate across layers and can change the winning steering class 
 
 - Representative calibration data;
 - Exact FP32/INT8 artifact hashes;
-- Latency distribution and power measurement on Jon;
+- Latency distribution and power measurement on Jetson Orin Nano;
 - Full common-subset metric comparison;
 - Field test against the FP32 baseline.
 
