@@ -50,7 +50,7 @@ STEERING_MODEL_VERSIONS = (
     "2.3b",
     "2.4",
     "2.4b",
-    # Series 3 (heavy, Jetson-only): the Pi cannot run these locally — they are
+    # Series 3/4 (heavy, Jetson-only): the Pi cannot run these locally — they are
     # selectable so the model page can tell the Jetson ("Jon") to run them.
     # 3.0/3.0b = 2-output regression; 3.1+ = 19-output hybrid (9 class logits +
     # 9 within-bucket offsets + 1 throttle), decoded on Jon by output length.
@@ -64,6 +64,17 @@ STEERING_MODEL_VERSIONS = (
     "3.3b",
     "3.4",
     "3.4b",
+    # Series 4 experimental temporal contracts, all steering-only hybrid models:
+    #   p/r = PC  (image + previous 3 targets -> current target)
+    #   f/g = CF  (image -> current + next 3 targets)
+    #   a/c = PCF (image + previous 3 targets -> current + next 3 targets)
+    # Final checkpoints are p/f/a; best-validation checkpoints are r/g/c.
+    "4.0p",
+    "4.0r",
+    "4.0f",
+    "4.0g",
+    "4.0a",
+    "4.0c",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 # v3.4 won the 2026-07-13 shadow/turn field comparison. Keep newer and b checkpoints

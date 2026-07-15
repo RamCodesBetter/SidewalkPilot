@@ -81,15 +81,25 @@ def _softmax(z):
 
 
 def _raw_forward(model, frame_bgr):
-    """Same math as jis.SteeringModel.infer() but return the RAW output vector
-    (the 19-wide hybrid head) instead of the decoded (steer, throttle)."""
+    """Run the live model contract and return its current-horizon raw vector."""
     x = jis.preprocess(frame_bgr, model.width, model.height, model.use_clahe)
     if model.backend == "onnx":
-        out = model.session.run(None, {model.input_name: x})[0]
+        feeds = {model.input_name: x}
+        if model.history_input_name is not None:
+            feeds[model.history_input_name] = np.asarray(
+                [model.target_history], dtype=np.float32
+            )
+        out = model.session.run(None, feeds)[0]
     else:
         import torch
         with torch.no_grad():
             out = model.model(torch.from_numpy(x).to(model.device)).detach().cpu().numpy()
+    steering, _throttle = jis.decode_output(out)
+    if model.history_steps:
+        model.target_history = (model.target_history + [float(steering)])[-model.history_steps:]
+    series4_raw = jis._series4_current_raw(out)
+    if series4_raw is not None:
+        return series4_raw
     return np.asarray(out, dtype=np.float32).reshape(-1)
 
 
@@ -159,7 +169,7 @@ def analyze(clip_path, model_spec, use_clahe, every, max_frames, close_thresh, a
         if max_frames and n >= max_frames:
             break
         flat = _raw_forward(model, frame)
-        if flat.size != 2 * k + 1:
+        if flat.size not in (2 * k, 2 * k + 1):
             # not a 3.1+ hybrid head -> bucket view doesn't apply; show decoded only
             steer, thr = jis.decode_output(flat)
             print(f"{idx:>6}{idx / src_fps if src_fps else 0:>7.2f}   "

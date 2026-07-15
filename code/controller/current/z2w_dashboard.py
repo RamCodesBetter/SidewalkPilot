@@ -567,7 +567,8 @@ class DashboardRenderer:
         match = re.search(r"(\d+)\.(\d+)", model_choice)
         if not match:
             return ["0.", "0", ""]
-        suffix = "b" if model_choice.strip().lower().endswith("b") else ""
+        suffix_match = re.search(r"[a-z]$", model_choice.strip().lower())
+        suffix = suffix_match.group(0) if suffix_match else ""
         return [f"{match.group(1)[-1]}.", match.group(2)[0], suffix]
 
     def _draw_page_four(self, payload: Dict[str, object], y_offset_px: int = 0):

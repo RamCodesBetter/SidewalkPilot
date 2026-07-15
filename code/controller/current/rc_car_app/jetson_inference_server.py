@@ -4,7 +4,7 @@ jetson_inference_server.py  —  "Jon" (Jetson Orin Nano) steering inference ser
 
 Runs a SidewalkPilot model on the Jetson and answers steering requests from the Pi 5
 over TCP. Accepts .onnx, .pt (TorchScript), or .pth (state-dict) — and is generic
-across Series 1/2/3:
+across Series 1/2/3/4:
 
   * Series 1/2 (SteeringAutonomyV2): 1 output, already in DEGREES (90 + scale*tanh).
   * Series 3.0/3.0b (regression):    2 outputs in UNIT controls (steer,throttle in
@@ -12,8 +12,13 @@ across Series 1/2/3:
   * Series 3.1+ (hybrid head):       19 outputs = 9 steering-class logits + 9 within-
                                      bucket offsets + 1 throttle; decoded via argmax
                                      bucket + sigmoid(offset) -> degrees.
-  The output is auto-decoded by its length (1 -> degrees, 2 -> unit controls,
-  19 -> hybrid), so the same code handles every model/format.
+  * Series 4 PC/CF/PCF:              [batch,horizon,18] outputs. Horizon 0 is the live
+                                     steering target; each horizon has 9 class logits
+                                     + 9 offsets and no throttle. PC/PCF ONNX models
+                                     also take target_history=[previous 3 targets].
+  Output shape and ONNX input metadata select the contract automatically. Series 4
+  target history is autoregressive on Jon and resets to [90,90,90] on model switches,
+  reconnects, and status-only/manual periods.
 
 Preprocessing MATCHES rc_car_app/vision.py exactly:
   BGR -> [optional CLAHE] -> resize(W,H, INTER_AREA) -> /255 -> (x-0.5)/0.5
@@ -22,11 +27,14 @@ Input size W,H comes from the ONNX itself, or from the detected arch for torch
 (S1/2 = 200x66, S3 = 320x180), or --width/--height.
 
 Wire protocol (TCP, persistent connection, one round-trip per frame):
-    Pi  -> Jon : [4-byte big-endian length N][N bytes JPEG]
-    Jon -> Pi  : 8 bytes = struct '>ff' (steering_deg 0..180, throttle 0..1)
+    Pi  -> Jon : [1-byte version length V][V bytes UTF-8 model version]
+                 [4-byte big-endian JPEG length N][N bytes JPEG]
+    Jon -> Pi  : 60 bytes = struct '>15f' (steering, throttle, temperatures,
+                 inference timing, and 9 current-horizon bucket probabilities)
 
 Run on the Jetson:
     python3 jetson_inference_server.py --model SidewalkPilot-v3.0b.onnx
+    python3 jetson_inference_server.py --model SidewalkPilot-v4.0p.onnx
     python3 jetson_inference_server.py --model SidewalkPilot-v2.4b.pth          # S1/2 state-dict
     python3 jetson_inference_server.py --model model.pt                          # TorchScript
 
@@ -35,6 +43,7 @@ Deps on the Jetson: numpy, opencv-python, and onnxruntime(-gpu) and/or torch
 """
 
 import argparse
+import re
 import socket
 import struct
 import time
@@ -48,15 +57,12 @@ _DEFAULT_MODEL_DIRS = [_CODE_DIR / "ai_models", _CODE_DIR / "ai_models_datasets"
 
 
 def _version_key(version):
-    """Sort key for a version string like '3.0b' -> (3.0, 1). 'b' alternates rank above
-    the plain version of the same number."""
+    """Sort numeric versions first, then a release suffix (3.4 < 3.4b < 4.0a...)."""
     v = str(version).strip().lower()
-    is_b = 1 if v.endswith("b") else 0
-    num = v[:-1] if is_b else v
-    try:
-        return (float(num), is_b)
-    except ValueError:
-        return (-1.0, is_b)
+    match = re.fullmatch(r"(\d+)\.(\d+)([a-z]*)", v)
+    if match is None:
+        return (-1, -1, "")
+    return (int(match.group(1)), int(match.group(2)), match.group(3))
 
 
 def resolve_model_path(spec, extra_dir=None):
@@ -200,14 +206,35 @@ _S3_HYBRID_LO = np.array([0, 45, 60, 75, 85, 95, 105, 120, 135], dtype=np.float3
 _S3_HYBRID_HI = np.array([45, 60, 75, 85, 95, 105, 120, 135, 180], dtype=np.float32)
 
 
-def decode_output(flat):
-    """flat = 1-D model output -> (steering_deg 0..180, throttle 0..1), auto-detected
-    by length:
+def _series4_current_raw(values):
+    """Return the current-horizon 18-vector, or None for a non-Series-4 output."""
+    values = np.asarray(values, dtype=np.float32)
+    if values.size >= 18 and values.size % 18 == 0:
+        return values.reshape(-1, 18)[0]
+    return None
+
+
+def _decode_hybrid18(raw):
+    logits = raw[:9]
+    offset_raw = raw[9:18]
+    cls = int(np.argmax(logits))
+    offset = float(1.0 / (1.0 + np.exp(-offset_raw[cls])))
+    lo = float(_S3_HYBRID_LO[cls])
+    hi = float(_S3_HYBRID_HI[cls])
+    return float(np.clip(lo + offset * (hi - lo), 0.0, 180.0))
+
+
+def decode_output(values):
+    """Model output -> (steering_deg 0..180, throttle 0..1), auto-detected:
+      * [...,18] -> Series 4: decode horizon 0; steering only, throttle=0.
       * 19 -> Series 3.1+ hybrid: 9 class logits + 9 within-bucket offsets + 1 throttle.
               argmax the logits, sigmoid that bucket's offset, steer = lo + off*(hi-lo).
       * 2  -> Series 3.0 unit controls (steer,throttle in [-1,1]).
       * 1  -> Series 1/2, already in degrees."""
-    flat = np.asarray(flat, dtype=np.float32).reshape(-1)
+    series4_raw = _series4_current_raw(values)
+    if series4_raw is not None:
+        return _decode_hybrid18(series4_raw), 0.0
+    flat = np.asarray(values, dtype=np.float32).reshape(-1)
     n = flat.size
     k = _S3_HYBRID_LO.size                                   # 9 steering classes
     if n == 2 * k + 1:                                       # 19 -> hybrid head
@@ -225,9 +252,15 @@ def decode_output(flat):
     return float(flat[0]), 0.0                               # 1 -> Series 1/2 degrees
 
 
-def decode_probs9(flat):
-    """9 softmax bucket probabilities for the hybrid head; zeros for non-hybrid outputs."""
-    flat = np.asarray(flat, dtype=np.float32).reshape(-1)
+def decode_probs9(values):
+    """Current-horizon 9-bucket probabilities; zeros for non-hybrid outputs."""
+    series4_raw = _series4_current_raw(values)
+    if series4_raw is not None:
+        logits = series4_raw[:9]
+        z = logits - np.max(logits)
+        e = np.exp(z)
+        return (e / float(np.sum(e))).astype(np.float32)
+    flat = np.asarray(values, dtype=np.float32).reshape(-1)
     k = _S3_HYBRID_LO.size
     if flat.size == 2 * k + 1:                               # hybrid: first k are class logits
         z = flat[0:k] - np.max(flat[0:k])
@@ -248,7 +281,14 @@ class SteeringModel:
         self.pinned = False          # True = ignore the Pi's per-frame model choice
         self.backend = None          # "onnx" or "torch"
         self.width = self.height = None
+        self.history_input_name = None
+        self.history_steps = 0
+        self.target_history = []
         self.load(spec)
+
+    def reset_temporal_state(self):
+        """Start a causal Series 4 sequence from centered target commands."""
+        self.target_history = [90.0] * int(self.history_steps)
 
     def ensure_version(self, spec):
         """Hot-swap the model if the Pi requested a different version."""
@@ -280,15 +320,34 @@ class SteeringModel:
             # CUDA first: fast, predictable GPU startup. (TensorRT EP is faster but
             # rebuilds its engine every start without a cache -> save it for the
             # explicit INT8/TensorRT step later.)
-            preferred = ("CUDAExecutionProvider", "TensorrtExecutionProvider", "CPUExecutionProvider")
-            providers = [p for p in preferred if p in available] or ["CPUExecutionProvider"]
+            if "CUDAExecutionProvider" in available:
+                # Do not also register TensorRT here. A partially installed TensorRT EP
+                # can make ORT reject the complete provider list and silently retry on
+                # CPU even when CUDA itself is healthy.
+                providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+            elif "TensorrtExecutionProvider" in available:
+                providers = ["TensorrtExecutionProvider", "CPUExecutionProvider"]
+            else:
+                providers = ["CPUExecutionProvider"]
             if providers == ["CPUExecutionProvider"]:
                 print("[jon] WARNING: no GPU execution provider available -> running on CPU (slow). "
                       "Install the JetPack-matched onnxruntime-gpu wheel to get CUDA/TensorRT. "
                       f"(available: {available})", flush=True)
             self.session = ort.InferenceSession(model_path, providers=providers)
-            self.input_name = self.session.get_inputs()[0].name
-            shape = self.session.get_inputs()[0].shape   # [N,3,H,W]
+            inputs = self.session.get_inputs()
+            image_input = next((item for item in inputs if len(item.shape) == 4), inputs[0])
+            history_input = next(
+                (item for item in inputs if item.name == "target_history" or len(item.shape) == 2),
+                None,
+            )
+            self.input_name = image_input.name
+            self.history_input_name = history_input.name if history_input is not None else None
+            self.history_steps = (
+                int(history_input.shape[1])
+                if history_input is not None and isinstance(history_input.shape[1], int)
+                else (3 if history_input is not None else 0)
+            )
+            shape = image_input.shape   # [N,3,H,W]
             self.height = shape[2] if isinstance(shape[2], int) else None
             self.width = shape[3] if isinstance(shape[3], int) else None
             self.backend = "onnx"
@@ -313,6 +372,8 @@ class SteeringModel:
             elif isinstance(model, SteeringAutonomyV2):
                 self.width, self.height = 200, 66
             self.backend = "torch"
+            self.history_input_name = None
+            self.history_steps = 0
             providers_used = self.device
 
         if self.force_size:
@@ -320,17 +381,27 @@ class SteeringModel:
         if not self.width or not self.height:
             raise RuntimeError("Could not determine model input size; pass --width/--height.")
         self.current_version = str(spec)
+        self.reset_temporal_state()
+        contract = f" history={self.history_steps}" if self.history_steps else ""
         print(f"[jon] model={model_path} (v{self.current_version}) backend={self.backend} "
-              f"input={self.width}x{self.height} clahe={self.use_clahe} on={providers_used}", flush=True)
+              f"input={self.width}x{self.height}{contract} clahe={self.use_clahe} "
+              f"on={providers_used}", flush=True)
 
     def infer(self, frame_bgr):
         x = preprocess(frame_bgr, self.width, self.height, self.use_clahe)
         if self.backend == "onnx":
-            out = self.session.run(None, {self.input_name: x})[0]
+            feeds = {self.input_name: x}
+            if self.history_input_name is not None:
+                feeds[self.history_input_name] = np.asarray(
+                    [self.target_history], dtype=np.float32
+                )
+            out = self.session.run(None, feeds)[0]
         else:
             with torch.no_grad():
                 out = self.model(torch.from_numpy(x).to(self.device)).detach().cpu().numpy()
         steer, throttle = decode_output(out)
+        if self.history_steps:
+            self.target_history = (self.target_history + [float(steer)])[-self.history_steps:]
         return steer, throttle, decode_probs9(out)
 
 
@@ -381,6 +452,7 @@ def serve(model, host, port):
     while True:
         conn, addr = srv.accept()
         conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        model.reset_temporal_state()
         print(f"[jon] connected: {addr}", flush=True)
         frames, t0, ifps, last_frame_ts = 0, time.time(), 0.0, 0.0
         try:
@@ -404,6 +476,7 @@ def serve(model, host, port):
                 n = struct.unpack(">I", hdr)[0]
                 if n == 0:
                     # status ping (no frame): report temps + current ifps, run no inference
+                    model.reset_temporal_state()
                     jcpu, jgpu = _read_tegra_temps()
                     conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
                     continue
