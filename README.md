@@ -48,7 +48,7 @@ The three computers have separate responsibilities:
 
 The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano outputs steering but never directly controls the servo. The Zero 2 W only displays telemetry. Manual controller input can stop self-driving, and the LiDAR can constrain or stop forward motion.
 
-<img src="docs/media/System_Architecture.png" alt="System architecture diagram" width="800">
+<img src="docs/media/System_Architecture.jpg" alt="System architecture diagram" width="800">
 
 The Jetson Orin Nano analyzes camera images in a background thread so the Raspberry Pi 5 can continue reading the controller and operating the car. LiDAR works as a separate braking system: it can slow or stop the car when an obstacle is directly ahead, but it does not swerve around the obstacle.
 
