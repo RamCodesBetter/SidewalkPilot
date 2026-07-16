@@ -1,6 +1,6 @@
 # SidewalkPilot
 
-SidewalkPilot is a solo-built autonomous RC-car research platform for sidewalks. A camera model proposes steering, a separate LiDAR safety layer can slow or stop the car, GPS software provides route context, and a live LED dashboard exposes system state. The project runs on an Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W.
+SidewalkPilot is my RC car that can self drive on sidewalks. A image model outputs a steering value, a separate LiDAR safety layer can slow or stop the car, GPS software provides route context, and a live LED dashboard displays debug information. The project runs on an Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W.
 
 <table width="100%">
 <tr>
@@ -10,6 +10,7 @@ SidewalkPilot is a solo-built autonomous RC-car research platform for sidewalks.
 - [YouTube](https://www.youtube.com/@SidewalkPilot)
 - [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat)
 - [Parts list](https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB)
+- [Twitter](https://x.com/SidewalkPilot)
 - [Email](mailto:ramsabavat2012@gmail.com)
 
 </td>
@@ -19,13 +20,13 @@ SidewalkPilot is a solo-built autonomous RC-car research platform for sidewalks.
 </tr>
 </table>
 
-> SidewalkPilot is a supervised research and learning project used on controlled test routes with the operator present. It is not presented as certified or approved for unattended or public-road operation.
+> SidewalkPilot is a supervised research and learning project used on controlled test routes with the operator present. It is not certified or approved for unattended or public-road operation.
 
 ## Current Result
 
-**SidewalkPilot v3.4** is the current field-selected steering model. During the July 13, 2026 comparison, v3.4 handled every shadow case presented and the tested normal left/right turns. v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was much worse than v3.2b. The observation is valuable but qualitative because route, clip, weather, and takeover metadata were not preserved.
+**SidewalkPilot v3.4** is the current field-selected steering model. During the July 13th, 2026 comparison, v3.4 handled every shadow case presented and the tested normal left/right turns. v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was much worse than v3.2b. The observation is valuable but qualitative because route, clip, weather, and takeover metadata were not preserved.
 
-Series 4 is a parallel temporal-learning experiment on the same 81,237-image Series 3/4 dataset. Six artifacts have been trained and offline-evaluated:
+I have currently been working on Series 3 and Series 4 in parallel on the same 81,237-image Series 3/4 dataset. v4.0 is an experimental version where I test different inputs and ways to train my model. After field-testing these models, 4.1 onwards will be built with one of the three architectures below (I will continue to work on Series 3 in parallel):
 
 | Experiment | Final epoch | Best steering-MAE epoch | Runtime contract |
 |---|---|---|---|
@@ -33,11 +34,11 @@ Series 4 is a parallel temporal-learning experiment on the same 81,237-image Ser
 | Current + future (CF) | v4.0f | v4.0g | image -> current plus three future steering horizons |
 | Previous + current + future (PCF) | v4.0a | v4.0c | image + three prior targets -> current plus three future horizons |
 
-All six Series 4 ONNX models are supported by the live Jetson Orin Nano runtime. None has been field-promoted yet, so v3.4 remains the deployed research reference.
+All six Series 4 ONNX models are supported by the live Jetson Orin Nano runtime. None has been field-tested yet, so v3.4 remains the best tested model.
 
 ## System Architecture
 
-The computers have separate responsibilities:
+The three computers have separate responsibilities:
 
 | Manager | Hardware | Responsibility |
 |---|---|---|
@@ -45,16 +46,11 @@ The computers have separate responsibilities:
 | Major System Manager | Raspberry Pi 5 | Controller input, camera capture, LiDAR, GPS, steering, motors, logging, and final safety arbitration |
 | Display System Manager | Zero 2 W | Renders the Waveshare 64x32 HUB75 dashboard from UDP telemetry over a dedicated USB network |
 
-The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano proposes steering but never directly controls the servo. The Zero 2 W only displays telemetry. Manual controller input can cancel autonomy, and the enabled LiDAR policy can constrain or stop forward motion.
+The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano outputs steering but never directly controls the servo. The Zero 2 W only displays telemetry. Manual controller input can stop self-driving, and the LiDAR can constrain or stop forward motion.
 
-```text
-Xbox controller ----------------------------+
-Raspberry Pi Camera -> Raspberry Pi 5 -> Jetson Orin Nano steering model -+--> arbitration -> steering + motors
-LiDAR --------------------------------------+         |
-GPS, IMU, hall sensor ----------------------+         +--> logs + dashboard
-```
+<img src="docs/media/System_Architecture.png" alt="System architecture diagram" width="300">
 
-The Jetson Orin Nano analyzes camera images in the background so the Raspberry Pi 5 can continue reading the controller and operating the car. In one test with the Jetson Orin Nano powered off, manual steering remained smooth; more testing is still needed. LiDAR works as a separate braking system: it can slow or stop the car when an obstacle is directly ahead, but it does not steer around the obstacle.
+The Jetson Orin Nano analyzes camera images in a background thread so the Raspberry Pi 5 can continue reading the controller and operating the car. LiDAR works as a separate braking system: it can slow or stop the car when an obstacle is directly ahead, but it does not swerve around the obstacle.
 
 ## Model Journey
 
@@ -69,9 +65,9 @@ The generated [steering-model report](docs/steering_model_report.pdf) evaluates 
 
 ## Data and Training
 
-Field runs record camera images paired with logical steering degrees (`0..180`) and absolute physical throttle fractions. Series 3 and 4 share a published 81,237-image real-world dataset. The trainer sorts images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets.
+Field runs record camera images paired with logical steering degrees (`0..180`) and absolute physical throttle (`0..1`). Series 3 and 4 share a 81,237-image real-world dataset. The trainer sorts images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets.
 
-Training runs on an NVIDIA RTX 6000 Ada GPU. The Series 3/4 trainers support lighting, color, flip, and synthetic-shadow augmentation, save final-epoch and best-steering-MAE artifacts, export ONNX, and log to Weights & Biases. Physical field testing remains the promotion gate after offline evaluation.
+Training runs on an NVIDIA RTX 6000 Ada-Generation GPU. The Series 3/4 trainers support lighting, color, flip, and synthetic-shadow augmentation. The trainer saves and exports the final-epoch and the best-steering-MAE artifacts as ONNX, and logs to Weights & Biases. Physical field testing remains the deciding factor after offline evaluation.
 
 ## Hardware
 
@@ -81,7 +77,7 @@ Training runs on an NVIDIA RTX 6000 Ada GPU. The Series 3/4 trainers support lig
 | Hardware controller | Raspberry Pi 5 |
 | Dashboard controller | Zero 2 W |
 | Chassis | Yahboom Ackermann 520M |
-| Vision | Raspberry Pi Camera Module 3 Wide |
+| Camera | Raspberry Pi Camera Module 3 Wide |
 | Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through CP2102 USB |
 | Steering | PCA9685 PWM driver and 25KG steering servo |
 | Drive | Yahboom AT8236 motor controller and DC motors |
