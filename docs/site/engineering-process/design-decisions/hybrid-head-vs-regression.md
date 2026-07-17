@@ -56,5 +56,5 @@ training settings, and weights also changed across versions.
 ## Related pages
 
 - [Series 3 Hybrid Head](../../ai-and-models/architecture/series-3-hybrid-head.md)
-- [Steering Class Bins](../../ai-and-models/architecture/steering-class-bins.md)
-- [MAE Versus Turn Capability](../../model-evaluation/comparisons/mae-vs-turn-capability.md)
+- [Model Framing and Loss](../../research-and-math/machine-learning/loss-function.md)
+- [Offline and Field Comparison](../../model-evaluation/comparisons/offline-vs-field.md)

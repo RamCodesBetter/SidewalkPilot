@@ -59,8 +59,21 @@ Series 3 moves steering inference to the Jetson Orin Nano, but override still li
 the Raspberry Pi 5 in the same loop and is unchanged: the Raspberry Pi 5 owns the controller and the motors,
 so operator override does not depend on the model host being reachable.
 
+## Fault Responses
+
+| Fault | Current behavior | Remaining limitation |
+|---|---|---|
+| Enabled AEB emergency threshold | Forward throttle is removed and brake requested | Configured threshold is not measured stopping-distance proof |
+| Stale camera/Jetson result | Autonomous path requests a stop instead of replaying indefinitely | Process-wide faults can still affect response timing |
+| Stale or empty LiDAR scan | Reader retries; intervention becomes unavailable | This is fail-open for obstacle intervention and must be visible to operator |
+| Dashboard telemetry loss | Driving continues; display shows stale/no link or exits by policy | Dashboard is observability, not a motion interlock |
+| GPS loss | Route guidance cannot update reliably | Manual control remains; GPS loss is not a camera-steering stop by itself |
+| Controller/process failure | Software override may be unavailable | Operator requires independent physical power cutoff |
+
+Fault handling must be tested with wheels unloaded before intentional disconnect tests on the ground.
+
 ## Related pages
 
-- `safety-case/safety-overview.md`
-- `testing/field-testing/preflight-checklist.md`
-- `autonomy-stack/architecture/decision-priority.md`
+- [Safety Overview](../safety-overview.md)
+- [Field Testing](../../testing/field-testing/overview.md)
+- [Decision Priority](../../autonomy-stack/architecture/decision-priority.md)

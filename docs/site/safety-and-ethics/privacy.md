@@ -27,6 +27,6 @@ Series 3 and Series 4 send frames from the Raspberry Pi 5 to the Jetson Orin Nan
 
 ## Related pages
 
-- `safety-case/safety-overview.md`
-- `testing/field-testing/preflight-checklist.md`
-- `autonomy-stack/architecture/decision-priority.md`
+- [Safety Overview](../safety-case/safety-overview.md)
+- [Field Testing](../testing/field-testing/overview.md)
+- [Decision Priority](../autonomy-stack/architecture/decision-priority.md)

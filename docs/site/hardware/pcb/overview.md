@@ -30,8 +30,29 @@ The trade-off is commitment: a PCB freezes the pinout. That is exactly why the b
 
 Until the board exists, the [Pin Map](../wiring/pin-map.md) and the runtime config remain the authoritative wiring reference.
 
+## Required Electrical Blocks
+
+The next schematic must cover:
+
+- shared and separated power/ground paths with reviewed voltage levels and current limits;
+- I2C to the PCA9685 at `0x40`;
+- four AT8236 direction/PWM lines on BCM 19, 20, 25, and 13;
+- Hall input on BCM 24;
+- connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement actually selected for the final harness.
+
+LiDAR currently uses a CP2102 USB serial adapter. A prior build used `/dev/ttyAMA2`; Rev B must not preserve that historical choice accidentally.
+
+## Revision Record
+
+| Revision | State | Runtime-pin match | Fabricated |
+|---|---|---|---|
+| Rev A | Designed draft | No; outdated | No |
+| Rev B | Planned | Must match current runtime before release | No |
+
+Before ordering Rev B, the runtime pinout must be frozen, the schematic and layout must be cross-checked against it, connector polarity and voltage must be reviewed, and continuity/power-up tests must be defined. A fabricated board will still require inspection and bench validation before controlling the car.
+
 ## Related pages
 
-- `hardware/wiring/pin-map.md`
-- `hardware/build-overview.md`
-- `hardware/pcb/gpio-mapping.md`
+- [Wiring and Pin Map](../wiring/pin-map.md)
+- [Build Overview](../build-overview.md)
+- [Next Steps](../../roadmap/next-steps.md)

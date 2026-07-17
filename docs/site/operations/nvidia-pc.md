@@ -1,4 +1,4 @@
-# NVIDIA PC
+# Computer Operations
 
 The NVIDIA PC is the training and simulation workstation. It is where the Series 1/2 and Series 3 trainers run, where datasets are assembled, and where GPU-heavy experiments happen before a model is exported for the field. It is not part of the live driving loop.
 
@@ -41,6 +41,33 @@ python3 -m py_compile code/ai_models_datasets/series_3_and_4/series_3_sidewalkpi
 
 Field-test verdicts are tracked with model evaluation, not inferred from a training run. The July 13 comparison rejected v3.3/v3.3b and selected v3.4. Series 4 still awaits field testing.
 
+## Raspberry Pi 5 Controller
+
+The Raspberry Pi 5 owns camera capture, controller input, sensors, final arbitration, actuators, logs, and dashboard telemetry. With the car restrained and controller connected:
+
+```bash
+cd ~/rc_car_code/code/controller/current
+car
+```
+
+The default model is v3.4; select another model on the dashboard or through `RC_CAR_STEERING_MODEL`. Verify joystick, PCA9685, LiDAR, camera, Jetson Orin Nano link, and dashboard status in logs. A degraded optional sensor state must be recorded before testing.
+
+## Jetson Orin Nano
+
+The Jetson Orin Nano runs the ONNX inference server over direct Ethernet at `10.42.0.2:8770`. Confirm the intended artifact and CUDA provider in its startup log. The Raspberry Pi 5 rejects stale or wrong-version responses and retains manual control if the Jetson Orin Nano is unavailable.
+
+## Zero 2 W Dashboard
+
+The live dashboard route is USB Ethernet: Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, UDP 8765. Install or verify recovery profiles with:
+
+```bash
+sudo code/test_files/setup/install_usb_dashboard_link.sh z2w
+code/test_files/setup/install_usb_dashboard_link.sh verify-z2w
+sudo systemctl restart sidewalkpilot-z2w-dashboard.service
+```
+
+Use the `rpi` role on the Raspberry Pi 5. Check `usb0`, carrier, neighbors, ping, UDP listener, and services on both ends. Descriptor errors such as `-110` or `-62` are below Python; use a known-good data cable/port and verify enumeration before changing application code.
+
 ## Evidence to attach
 
 - Training run config / log
@@ -49,6 +76,6 @@ Field-test verdicts are tracked with model evaluation, not inferred from a train
 
 ## Related pages
 
-- `operations/mac-pc-sync.md`
-- `runbooks/sync-day/sync-verification.md`
-- `publishing/mkdocs-site.md`
+- [Mac and Computer Sync](mac-pc-sync.md)
+- [Sync Day](../runbooks/sync-day/mac-to-pc.md)
+- [Troubleshooting](troubleshooting.md)

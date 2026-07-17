@@ -49,8 +49,18 @@ counts. A correction run should show both the expected overridden base count and
 the expected correction count. Re-run the common evaluator after changing a
 published comparison set.
 
+## Merge and Cleanup Rules
+
+- Match records by a stable image identity; do not rely only on a basename when multiple runs can contain it.
+- A reviewed correction wins over the matching base row, but conflicting correction rows stop the merge for review.
+- Preserve any temporary JSON until its rows are present in the intended snapshot and counts/hashes are recorded.
+- Never use a cleanup script that deletes source images as a side effect of resolving labels.
+- The first large relabeling effort is historical evidence of improving curb hugging, turn coverage, and shadow cases; it should not be treated as proof that every edited target was perfect.
+
+After a merge, compare image count, label count, duplicates, missing paths, class distribution, source distribution, and a sample of changed rows. Then run a trainer dry-run and the common evaluator before promoting a model trained from it.
+
 ## Related Pages
 
 - [Dataset Overview](../dataset-overview.md)
-- [Merge Rules](merge-rules.md)
-- [Correction Schema](../../data-governance/labeling/correction-schema.md)
+- [Labeling Standard](../../data-governance/labeling/label-schema.md)
+- [Data Quality](../../data-governance/data-quality/image-quality-checks.md)

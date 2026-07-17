@@ -20,6 +20,12 @@ Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson
 4. **Public data must pass privacy review** before it goes to Hugging Face (faces, plates, identifiable private property).
 5. **Do not infer CARLA use from support code.** A checkpoint is CARLA-assisted only when its saved roots, run configuration, or source-count log demonstrates that CARLA data was loaded.
 
+## Snapshot Naming and Active Labels
+
+Working run folders use date/run identities; published dataset repositories use stable series identities. The active label set is the exact base snapshot plus any explicitly named correction file used by a command. A local file's presence does not make it active.
+
+Removed labels should be recorded as exclusions with a reason rather than erased from project history. Historical metrics remain attached to the dataset, trainer, split, and artifact that produced them. They are never silently recalculated and presented under the old name.
+
 ## Why this choice
 
 Offline metrics are only comparable when architecture adapters, dataset snapshot,
@@ -66,5 +72,5 @@ Never delete images or label files to "fix" a rule violation without Ram's sign-
 ## Related pages
 
 - `data/dataset-overview.md`
-- `data-governance/dataset-versioning/active-label-set.md`
-- `publishing/huggingface.md`
+- [Hugging Face Publishing](../../publishing/huggingface.md)
+- [Data Quality](../data-quality/image-quality-checks.md)

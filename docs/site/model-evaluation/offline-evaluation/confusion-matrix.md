@@ -43,6 +43,6 @@ test before calling one better on the car.
 
 ## Related pages
 
-- `model-evaluation/comparisons/mae-vs-turn-capability.md`
-- `ai-and-models/architecture/steering-class-bins.md`
-- `model-evaluation/offline-evaluation/within-degree-buckets.md`
+- `model-evaluation/comparisons/offline-vs-field.md`
+- `ai-and-models/architecture/series-3-hybrid-head.md`
+- `model-evaluation/offline-evaluation/overview.md`

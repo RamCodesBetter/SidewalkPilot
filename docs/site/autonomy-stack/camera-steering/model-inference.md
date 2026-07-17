@@ -80,4 +80,4 @@ Regression test:
 python3 code/test_files/controller/test_async_jetson_client.py
 ```
 
-The current field-selected baseline is regular v3.4. See [Steering Model Series](series-differences.md) and [Shadow Robustness](../../model-evaluation/field-evaluation/shadow-robustness.md).
+The current field-selected baseline is regular v3.4. See [Steering Model Series](series-differences.md) and [Field Evaluation](../../model-evaluation/field-evaluation/overview.md).

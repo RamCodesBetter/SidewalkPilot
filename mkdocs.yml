@@ -20,87 +20,41 @@ nav:
     - 5 Minute Technical Tour: portfolio-evidence/reader-paths/5-minute-technical-tour.md
     - Evidence Map: portfolio-evidence/reader-paths/evidence-map.md
   - Autonomy Stack:
-    - Architecture:
-      - Control Architecture and Data Flow: autonomy-stack/architecture/data-flow.md
-      - Decision Priority: autonomy-stack/architecture/decision-priority.md
-    - Camera Steering:
-      - Overview: autonomy-stack/camera-steering/overview.md
-      - Model Inference: autonomy-stack/camera-steering/model-inference.md
-      - Series Differences: autonomy-stack/camera-steering/series-differences.md
-      - Jetson Orin Nano Inference Link: autonomy-stack/camera-steering/jetson-inference-link.md
-    - LiDAR Safety:
-      - Overview: autonomy-stack/lidar-safety/overview.md
-      - AEB: autonomy-stack/lidar-safety/aeb.md
-    - Navigation:
-      - Overview: autonomy-stack/navigation/overview.md
-      - Crosswalk Handoff: autonomy-stack/navigation/crosswalk-handoff.md
+    - Control Architecture and Data Flow: autonomy-stack/architecture/data-flow.md
+    - Decision Priority: autonomy-stack/architecture/decision-priority.md
+    - Camera Steering Overview: autonomy-stack/camera-steering/overview.md
+    - Model Inference: autonomy-stack/camera-steering/model-inference.md
+    - Series Differences: autonomy-stack/camera-steering/series-differences.md
+    - Jetson Orin Nano Inference Link: autonomy-stack/camera-steering/jetson-inference-link.md
+    - LiDAR Safety Overview: autonomy-stack/lidar-safety/overview.md
+    - Autonomous Emergency Braking: autonomy-stack/lidar-safety/aeb.md
+    - Navigation Overview: autonomy-stack/navigation/overview.md
+    - Crosswalk Handoff: autonomy-stack/navigation/crosswalk-handoff.md
   - Engineering Process:
     - Requirements and Success Criteria: engineering-process/requirements.md
-    - Design Decisions:
-      - Augmentation vs Fixed Preprocessing: engineering-process/design-decisions/augmentation-vs-fixed-preprocessing.md
-      - LiDAR Priority: engineering-process/design-decisions/lidar-priority.md
-      - PCA9685 Servo Control: engineering-process/design-decisions/pca9685-servo-control.md
-      - Dashboard UDP Telemetry: engineering-process/design-decisions/dashboard-udp-telemetry.md
-      - Jetson Orin Nano + Raspberry Pi 5 Compute Split: engineering-process/design-decisions/pi-plus-jetson-compute-split.md
-      - Hybrid Head vs Regression: engineering-process/design-decisions/hybrid-head-vs-regression.md
-    - Iteration Records:
-      - Model Iteration Method: engineering-process/iteration-records/model-iteration-method.md
-      - Field Failure to Dataset: engineering-process/iteration-records/field-failure-to-dataset.md
-      - Turn vs Shadow Tradeoff: engineering-process/iteration-records/turn-vs-shadow-tradeoff.md
+    - Augmentation vs Fixed Preprocessing: engineering-process/design-decisions/augmentation-vs-fixed-preprocessing.md
+    - LiDAR Priority: engineering-process/design-decisions/lidar-priority.md
+    - PCA9685 Servo Control: engineering-process/design-decisions/pca9685-servo-control.md
+    - Dashboard UDP Telemetry: engineering-process/design-decisions/dashboard-udp-telemetry.md
+    - Jetson Orin Nano and Raspberry Pi 5 Compute Split: engineering-process/design-decisions/pi-plus-jetson-compute-split.md
+    - Hybrid Head vs Regression: engineering-process/design-decisions/hybrid-head-vs-regression.md
+    - Model Iteration Method: engineering-process/iteration-records/model-iteration-method.md
+    - Field Failure to Dataset: engineering-process/iteration-records/field-failure-to-dataset.md
+    - Turn vs Shadow Tradeoff: engineering-process/iteration-records/turn-vs-shadow-tradeoff.md
   - Research and Math:
-    - Geometry:
-      - Haversine Distance: research-and-math/geometry/haversine-distance.md
-      - Bearing: research-and-math/geometry/bearing.md
-      - Turn Angle: research-and-math/geometry/turn-angle.md
-      - LiDAR Polar Coordinates: research-and-math/geometry/lidar-polar-coordinates.md
-      - Camera Resize Geometry: research-and-math/geometry/camera-resize-geometry.md
-    - Algorithms:
-      - A* Search: research-and-math/algorithms/a-star-search.md
-      - Turn Penalty State: research-and-math/algorithms/turn-penalty-state.md
-      - Weighted Sampling: research-and-math/algorithms/weighted-sampling.md
-      - PID Cruise Control: research-and-math/algorithms/pid-cruise-control.md
-      - Speed from Hall Pulses: research-and-math/algorithms/speed-from-hall-pulses.md
-    - Machine Learning:
-      - Regression Framing: research-and-math/machine-learning/regression-framing.md
-      - Loss Function: research-and-math/machine-learning/loss-function.md
-      - Validation Split: research-and-math/machine-learning/validation-split.md
-      - Overfitting Risk: research-and-math/machine-learning/overfitting-risk.md
-      - Sim to Real Gap: research-and-math/machine-learning/sim-to-real-gap.md
-      - Quantization Math: research-and-math/machine-learning/quantization-math.md
-  - Research Context:
-    - Related Work / Prior Art: research-context/related-work.md
-    - Novelty & Contributions: research-context/novelty-and-contributions.md
+    - Navigation Geometry and Routing: research-and-math/geometry/haversine-distance.md
+    - Speed Measurement and Control: research-and-math/algorithms/speed-from-hall-pulses.md
+    - Training Split and Sampling: research-and-math/algorithms/weighted-sampling.md
+    - Model Framing and Loss: research-and-math/machine-learning/loss-function.md
+    - Sim-to-Real Gap: research-and-math/machine-learning/sim-to-real-gap.md
+  - Research Context and Contributions: research-context/novelty-and-contributions.md
   - Runtime Code:
-    - Controller Entrypoint: runtime-code/controller-entrypoint.md
-    - Runtime Loop: runtime-code/runtime-loop.md
-    - Controller Mapping: runtime-code/controller-mapping.md
-    - Photo Capture: runtime-code/photo-capture.md
-    - PRND Gears: runtime-code/prnd-gears.md
-    - Config:
-      - Build Flags: runtime-code/config/build-flags.md
-      - GPIO Pins: runtime-code/config/gpio-pins.md
-      - Servo Settings: runtime-code/config/servo-settings.md
-      - Dashboard Settings: runtime-code/config/dashboard-settings.md
-      - Logging Settings: runtime-code/config/logging-settings.md
-    - Hardware:
-      - Hardware Class: runtime-code/hardware/hardware-class.md
-      - PCA9685 Servo: runtime-code/hardware/pca9685-servo.md
-      - Motor PWM: runtime-code/hardware/motor-pwm.md
-      - Hall Sensor: runtime-code/hardware/hall-sensor.md
-      - Cleanup: runtime-code/hardware/cleanup.md
-    - Vision:
-      - Model Choices: runtime-code/vision/model-choices.md
-      - Camera Capture: runtime-code/vision/camera-capture.md
-      - Raw BGR Path: runtime-code/vision/raw-bgr-path.md
-      - CLAHE Path: runtime-code/vision/clahe-path.md
-      - Output Scale: runtime-code/vision/output-scale.md
-      - Model Switching: runtime-code/vision/model-switching.md
-    - Dashboard:
-      - Sender: runtime-code/dashboard/sender.md
-      - Receiver: runtime-code/dashboard/receiver.md
-      - Payload Format: runtime-code/dashboard/payload-format.md
-      - Pages: runtime-code/dashboard/pages.md
-      - Idle Exit: runtime-code/dashboard/idle-exit.md
+    - Runtime Loop and Entrypoint: runtime-code/runtime-loop.md
+    - Controller Mapping and Driving Modes: runtime-code/controller-mapping.md
+    - Runtime Configuration: runtime-code/config/servo-settings.md
+    - Hardware Integration: runtime-code/hardware/hardware-class.md
+    - Vision Runtime: runtime-code/vision/camera-capture.md
+    - Dashboard Runtime: runtime-code/dashboard/sender.md
   - Hardware:
     - Build Overview: hardware/build-overview.md
     - Chassis: hardware/chassis.md
@@ -110,231 +64,70 @@ nav:
     - Motors: hardware/motors.md
     - Camera: hardware/camera.md
     - LiDAR: hardware/lidar.md
-    - GPS Compass: hardware/gps-compass.md
-    - IMU (Yaw Rate): hardware/imu.md
+    - GPS and Compass: hardware/gps-compass.md
+    - IMU: hardware/imu.md
     - Dashboard Display: hardware/dashboard-display.md
-    - Wiring:
-      - Power Wiring: hardware/wiring/power-wiring.md
-      - Signal Wiring: hardware/wiring/signal-wiring.md
-      - I2C: hardware/wiring/i2c.md
-      - UART: hardware/wiring/uart.md
-      - USB: hardware/wiring/usb.md
-      - Pin Map: hardware/wiring/pin-map.md
-    - PCB:
-      - Overview: hardware/pcb/overview.md
-      - Schematic: hardware/pcb/schematic.md
-      - GPIO Mapping: hardware/pcb/gpio-mapping.md
-      - Revisions: hardware/pcb/revisions.md
+    - Wiring and Pin Map: hardware/wiring/pin-map.md
+    - PCB Development: hardware/pcb/overview.md
   - AI and Models:
-    - Training Pipeline:
-      - Overview: ai-and-models/training-pipeline/overview.md
-      - Training Script: ai-and-models/training-pipeline/training-script.md
-      - Input Labels: ai-and-models/training-pipeline/input-labels.md
-      - Corrections: ai-and-models/training-pipeline/corrections.md
-      - Augmentation: ai-and-models/training-pipeline/augmentation.md
-      - Source Weights: ai-and-models/training-pipeline/source-weights.md
-      - Sampler: ai-and-models/training-pipeline/sampler.md
-      - Metrics: ai-and-models/training-pipeline/metrics.md
-    - Architecture:
-      - CNN: ai-and-models/architecture/cnn.md
-      - Series 4 Temporal Experiments: ai-and-models/architecture/series-4-plan.md
-      - Tensor Shape: ai-and-models/architecture/tensor-shape.md
-      - Conv Layers: ai-and-models/architecture/conv-layers.md
-      - BatchNorm: ai-and-models/architecture/batchnorm.md
-      - ELU: ai-and-models/architecture/elu.md
-      - Linear Head: ai-and-models/architecture/linear-head.md
-      - Tanh Output: ai-and-models/architecture/tanh-output.md
-      - Series 3 Hybrid Head: ai-and-models/architecture/series-3-hybrid-head.md
-      - Steering Class Bins: ai-and-models/architecture/steering-class-bins.md
-    - Model Zoo:
-      - Overview: ai-and-models/model-zoo/overview.md
-      - Series 3: ai-and-models/model-zoo/series-3.md
-      - Series 4: ai-and-models/model-zoo/series-4.md
-    - Deployment:
-      - Overview: ai-and-models/deployment/overview.md
-      - ONNX Export: ai-and-models/deployment/onnx-export.md
-      - FP16 Half Precision: ai-and-models/deployment/fp16.md
-      - INT8 PTQ: ai-and-models/deployment/int8-ptq.md
-      - QAT: ai-and-models/deployment/qat.md
-      - TensorRT: ai-and-models/deployment/tensorrt.md
-      - Jetson Orin Nano Runtime: ai-and-models/deployment/jetson-runtime.md
+    - Training Pipeline: ai-and-models/training-pipeline/overview.md
+    - CNN Architecture: ai-and-models/architecture/cnn.md
+    - Series 3 Hybrid Head: ai-and-models/architecture/series-3-hybrid-head.md
+    - Series 4 Temporal Experiments: ai-and-models/architecture/series-4-plan.md
+    - Model Zoo: ai-and-models/model-zoo/overview.md
+    - Series 3 Models: ai-and-models/model-zoo/series-3.md
+    - Series 4 Models: ai-and-models/model-zoo/series-4.md
+    - Model Deployment: ai-and-models/deployment/overview.md
+    - Jetson Orin Nano Runtime: ai-and-models/deployment/jetson-runtime.md
   - Model Evaluation:
-    - Offline Evaluation:
-      - Overview: model-evaluation/offline-evaluation/overview.md
-      - Bal9: model-evaluation/offline-evaluation/bal9.md
-      - MAE: model-evaluation/offline-evaluation/mae.md
-      - Median AE: model-evaluation/offline-evaluation/median-ae.md
-      - Max AE: model-evaluation/offline-evaluation/max-ae.md
-      - Signed Error: model-evaluation/offline-evaluation/signed-error.md
-      - Within Degree Buckets: model-evaluation/offline-evaluation/within-degree-buckets.md
-      - Per Dataset Breakdown: model-evaluation/offline-evaluation/per-dataset-breakdown.md
-      - Confusion Matrix: model-evaluation/offline-evaluation/confusion-matrix.md
-    - Field Evaluation:
-      - Overview: model-evaluation/field-evaluation/overview.md
-      - Test Route: model-evaluation/field-evaluation/test-route.md
-      - Manual Takeover Count: model-evaluation/field-evaluation/manual-takeover-count.md
-      - Road Entry Risk: model-evaluation/field-evaluation/road-entry-risk.md
-      - Smoothness: model-evaluation/field-evaluation/smoothness.md
-      - Curb Hugging: model-evaluation/field-evaluation/curb-hugging.md
-      - Shadow Robustness: model-evaluation/field-evaluation/shadow-robustness.md
-      - Evening Robustness: model-evaluation/field-evaluation/evening-robustness.md
-      - Interruption Clips: model-evaluation/field-evaluation/interruption-clips.md
-    - Comparisons:
-      - B Versions: model-evaluation/comparisons/b-versions.md
-      - Raw BGR vs CLAHE: model-evaluation/comparisons/raw-bgr-vs-clahe.md
-      - Offline vs Field: model-evaluation/comparisons/offline-vs-field.md
-      - Model Selection Rubric: model-evaluation/comparisons/model-selection-rubric.md
-      - MAE vs Turn Capability: model-evaluation/comparisons/mae-vs-turn-capability.md
+    - Offline Evaluation and Metrics: model-evaluation/offline-evaluation/overview.md
+    - Balanced Nine-Class Accuracy: model-evaluation/offline-evaluation/bal9.md
+    - Confusion Matrix: model-evaluation/offline-evaluation/confusion-matrix.md
+    - Per-Dataset Breakdown: model-evaluation/offline-evaluation/per-dataset-breakdown.md
+    - Field Evaluation: model-evaluation/field-evaluation/overview.md
+    - Offline and Field Comparison: model-evaluation/comparisons/offline-vs-field.md
+    - Model Selection Rubric: model-evaluation/comparisons/model-selection-rubric.md
   - Data:
-    - Dataset Overview: data/dataset-overview.md
-    - Corrections JSON: data/corrections-json.md
-    - Manual Image Folder: data/manual-image-folder.md
-    - Relabeling:
-      - Workflow: data/relabeling/workflow.md
-      - Merge Rules: data/relabeling/merge-rules.md
-      - Temporary JSON Cleanup: data/relabeling/temp-json-cleanup.md
-      - First Dataset Relabel: data/relabeling/first-dataset-relabel.md
+    - Dataset and Labels: data/dataset-overview.md
+    - Relabeling Workflow: data/relabeling/workflow.md
   - Data Governance:
-    - Labeling:
-      - Label Schema: data-governance/labeling/label-schema.md
-      - Correction Schema: data-governance/labeling/correction-schema.md
-      - Relabel Review: data-governance/labeling/relabel-review.md
-      - Duplicate Handling: data-governance/labeling/duplicate-handling.md
-      - Bad Label Examples: data-governance/labeling/bad-label-examples.md
-    - Dataset Versioning:
-      - Version Rules: data-governance/dataset-versioning/version-rules.md
-      - Dmmdd Naming: data-governance/dataset-versioning/dmmdd-naming.md
-      - Historical Metrics: data-governance/dataset-versioning/historical-metrics.md
-      - Active Label Set: data-governance/dataset-versioning/active-label-set.md
-      - Removed Labels: data-governance/dataset-versioning/removed-labels.md
-    - Data Quality:
-      - Image Quality Checks: data-governance/data-quality/image-quality-checks.md
-      - Lighting Coverage: data-governance/data-quality/lighting-coverage.md
-      - Turn Coverage: data-governance/data-quality/turn-coverage.md
-      - Collection Countdown: data-governance/data-quality/collection-countdown.md
-      - Train Val Leakage: data-governance/data-quality/train-val-leakage.md
-      - Sync Audit: data-governance/data-quality/sync-audit.md
+    - Labeling Standard: data-governance/labeling/label-schema.md
+    - Dataset Versioning: data-governance/dataset-versioning/version-rules.md
+    - Data Quality: data-governance/data-quality/image-quality-checks.md
   - Testing:
-    - Field Testing:
-      - Overview: testing/field-testing/overview.md
-      - Preflight Checklist: testing/field-testing/preflight-checklist.md
-      - Model Retest Plan: testing/field-testing/model-retest-plan.md
-      - Manual Takeovers: testing/field-testing/manual-takeovers.md
-      - Field Logs: testing/field-testing/field-logs.md
-    - Failures:
-      - Overview: testing/failures/overview.md
-      - Shadow Failures: testing/failures/shadow-failures.md
-      - Harsh Sidewalk: testing/failures/harsh-sidewalk.md
-      - Evening Failures: testing/failures/evening-failures.md
-      - Driveway Confusion: testing/failures/driveway-confusion.md
-      - Road Entry Risk: testing/failures/road-entry-risk.md
-      - LiDAR Disconnects: testing/failures/lidar-disconnects.md
-    - Bench Tests:
-      - Overview: testing/bench-tests/overview.md
-      - Camera Preview: testing/bench-tests/camera-preview.md
-      - Model Steering: testing/bench-tests/model-steering.md
-      - Servo: testing/bench-tests/servo.md
-      - LiDAR Viewer: testing/bench-tests/lidar-viewer.md
-      - GPS Compass: testing/bench-tests/gps-compass.md
-      - Dashboard: testing/bench-tests/dashboard.md
-      - A* CLI: testing/bench-tests/a-star-cli.md
-      - GeoJSON Graph: testing/bench-tests/geojson-graph.md
-      - Steering Trim Tuner: testing/bench-tests/steering-trim-tuner.md
-      - Servo Calibration: testing/bench-tests/servo-calibration.md
-      - IMU Verifier: testing/bench-tests/imu-verifier.md
+    - Field Testing: testing/field-testing/overview.md
+    - Failure Records: testing/failures/overview.md
+    - Bench Tests: testing/bench-tests/overview.md
   - Safety Case:
     - Safety Overview: safety-case/safety-overview.md
-    - Hazard Analysis:
-      - Road Entry: safety-case/hazard-analysis/road-entry.md
-      - Pedestrian Risk: safety-case/hazard-analysis/pedestrian-risk.md
-      - Crosswalk Risk: safety-case/hazard-analysis/crosswalk-risk.md
-      - Night Driving Risk: safety-case/hazard-analysis/night-driving-risk.md
-      - Sensor Disconnect Risk: safety-case/hazard-analysis/sensor-disconnect-risk.md
-    - Fault Handling:
-      - Manual Override: safety-case/fault-handling/manual-override.md
-      - Hard Brake: safety-case/fault-handling/hard-brake.md
-      - Stale Camera Frame: safety-case/fault-handling/stale-camera-frame.md
-      - Stale LiDAR Scan: safety-case/fault-handling/stale-lidar-scan.md
-      - Dashboard Telemetry Loss: safety-case/fault-handling/dashboard-telemetry-loss.md
-      - GPS Loss: safety-case/fault-handling/gps-loss.md
-    - Operating Limits:
-      - Where It Can Run: safety-case/operating-limits/where-it-can-run.md
-      - Where It Cannot Run: safety-case/operating-limits/where-it-cannot-run.md
-      - Speed Limits: safety-case/operating-limits/speed-limits.md
-      - Lighting Limits: safety-case/operating-limits/lighting-limits.md
-      - Weather Limits: safety-case/operating-limits/weather-limits.md
+    - Hazard Analysis: safety-case/hazard-analysis/road-entry.md
+    - Fault Handling: safety-case/fault-handling/manual-override.md
+    - Operating Limits: safety-case/operating-limits/where-it-can-run.md
   - Operations:
     - Environment Setup: operations/environment-setup.md
-    - Mac PC Sync: operations/mac-pc-sync.md
-    - NVIDIA PC: operations/nvidia-pc.md
-    - Raspberry Pi: operations/raspberry-pi.md
-    - Zero 2 W Dashboard: operations/zero-2w-dashboard.md
+    - Computer Operations: operations/nvidia-pc.md
+    - Mac and Computer Sync: operations/mac-pc-sync.md
     - Command Cookbook: operations/command-cookbook.md
     - Troubleshooting: operations/troubleshooting.md
     - Telemetry: operations/telemetry.md
   - Runbooks:
-    - Field Test Day:
-      - Before Leaving: runbooks/field-test-day/before-leaving.md
-      - Battery Check: runbooks/field-test-day/battery-check.md
-      - Sensor Check: runbooks/field-test-day/sensor-check.md
-      - Model Selection: runbooks/field-test-day/model-selection.md
-      - Start Procedure: runbooks/field-test-day/start-procedure.md
-      - Stop Procedure: runbooks/field-test-day/stop-procedure.md
-      - After Run Notes: runbooks/field-test-day/after-run-notes.md
-    - Training Day:
-      - Before Training: runbooks/training-day/before-training.md
-      - Data Audit: runbooks/training-day/data-audit.md
-      - Command Setup: runbooks/training-day/command-setup.md
-      - During Training: runbooks/training-day/during-training.md
-      - After Training: runbooks/training-day/after-training.md
-      - Model Export: runbooks/training-day/model-export.md
-    - Sync Day:
-      - Mac to PC: runbooks/sync-day/mac-to-pc.md
-      - PC to Mac: runbooks/sync-day/pc-to-mac.md
-      - Delete Risk: runbooks/sync-day/delete-risk.md
-      - Sync Verification: runbooks/sync-day/sync-verification.md
+    - Field Test Day: runbooks/field-test-day/before-leaving.md
+    - Training Day: runbooks/training-day/before-training.md
+    - Sync Day: runbooks/sync-day/mac-to-pc.md
   - Publishing:
-    - Reports: publishing/reports.md
-    - PDF Report: publishing/pdf-report.md
-    - Hugging Face (Models & Datasets): publishing/huggingface.md
-    - Hugging Face Model Cards: publishing/huggingface-model-cards.md
+    - Reports and PDF: publishing/reports.md
+    - Hugging Face: publishing/huggingface.md
     - MkDocs Site: publishing/mkdocs-site.md
   - Exhibits:
-    - Media:
-      - Video Index: exhibits/media/video-index.md
-      - Photo Index: exhibits/media/photo-index.md
-      - Failure Clips: exhibits/media/failure-clips.md
-      - Success Clips: exhibits/media/success-clips.md
-      - Dashboard Screenshots: exhibits/media/dashboard-screenshots.md
-    - Diagrams:
-      - System Diagram: exhibits/diagrams/system-diagram.md
-      - Runtime Flow Diagram: exhibits/diagrams/runtime-flow-diagram.md
-      - Training Flow Diagram: exhibits/diagrams/training-flow-diagram.md
-      - Safety Arbitration Diagram: exhibits/diagrams/safety-arbitration-diagram.md
-      - Navigation Graph Diagram: exhibits/diagrams/navigation-graph-diagram.md
-    - Tables:
-      - Model Metrics Table: exhibits/tables/model-metrics-table.md
-      - Dataset Table: exhibits/tables/dataset-table.md
-      - Failure Table: exhibits/tables/failure-table.md
-      - Hardware BOM Table: exhibits/tables/hardware-bom-table.md
-      - Test Matrix Table: exhibits/tables/test-matrix-table.md
+    - Media Index: exhibits/media/video-index.md
+    - System Diagrams: exhibits/diagrams/system-diagram.md
+    - Evidence Tables: exhibits/tables/model-metrics-table.md
   - Code Reference:
-    - File Index: code-reference/file-index.md
-    - Flags Index: code-reference/flags-index.md
-    - Functions Index: code-reference/functions-index.md
-    - Variables Index: code-reference/variables-index.md
-    - Runtime Modules: code-reference/runtime-modules.md
-    - Training Modules: code-reference/training-modules.md
+    - Repository Reference: code-reference/file-index.md
     - Test Files: code-reference/test-files.md
   - Safety and Ethics:
-    - Research Scope: safety-and-ethics/research-scope.md
-    - Limits: safety-and-ethics/limits.md
+    - Research Scope and Limits: safety-and-ethics/research-scope.md
     - Privacy: safety-and-ethics/privacy.md
-    - Public Roads: safety-and-ethics/public-roads.md
   - Roadmap:
     - Next Steps: roadmap/next-steps.md
-    - Retraining: roadmap/retraining.md
-    - Sensor Fusion: roadmap/sensor-fusion.md
     - Reproducibility: roadmap/reproducibility.md
-    - Jetson Orin Nano Quantization: roadmap/jetson-quantization.md
-    - Turn-In-Shadow Collection: roadmap/turn-in-shadow-collection.md

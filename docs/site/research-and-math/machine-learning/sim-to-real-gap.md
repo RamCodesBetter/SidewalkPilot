@@ -70,5 +70,5 @@ auditable facts.
 ## Related Pages
 
 - `ai-and-models/training-pipeline/overview.md`
-- `ai-and-models/training-pipeline/source-weights.md`
-- `model-evaluation/field-evaluation/shadow-robustness.md`
+- `research-and-math/algorithms/weighted-sampling.md`
+- `model-evaluation/field-evaluation/overview.md`

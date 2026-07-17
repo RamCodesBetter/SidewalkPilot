@@ -50,6 +50,6 @@ Never run a whole-repo reverse sync with `--delete`.
 
 ## Related pages
 
-- `operations/mac-pc-sync.md`
-- `runbooks/sync-day/sync-verification.md`
-- `publishing/mkdocs-site.md`
+- [Sync Day](../runbooks/sync-day/mac-to-pc.md)
+- [MkDocs Site](../publishing/mkdocs-site.md)
+- [Data Quality](../data-governance/data-quality/image-quality-checks.md)

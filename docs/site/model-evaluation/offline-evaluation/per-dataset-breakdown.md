@@ -40,5 +40,5 @@ and writes the full breakdown to `docs/steering_eval_current_labels.json`.
 ## Related Pages
 
 - `model-evaluation/offline-evaluation/overview.md`
-- `model-evaluation/offline-evaluation/signed-error.md`
-- `testing/field-testing/field-logs.md`
+- `model-evaluation/comparisons/offline-vs-field.md`
+- `testing/field-testing/overview.md`

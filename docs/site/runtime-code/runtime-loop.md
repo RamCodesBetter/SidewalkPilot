@@ -1,6 +1,8 @@
-# Runtime Loop
+# Runtime Loop and Entrypoint
 
 The Raspberry Pi 5 controller is a 60 Hz arbitration loop owned by `run()` in `code/controller/current/rc_car_app/runtime.py`. The loop reads already-available state, applies control priority, writes hardware commands, and publishes telemetry. Slow device and network work must not execute synchronously in this loop.
+
+`code/controller/current/rc_car.py` is the minimal executable entrypoint. It calls `runtime.run()`; model selection happens on the dashboard or through `RC_CAR_STEERING_MODEL`, with v3.4 as the checked-in default. Startup initializes controller input, hardware, sensors, camera, Jetson Orin Nano inference, logging, and dashboard telemetry. If no joystick is detected, startup exits rather than enabling a car without its manual-control interface.
 
 ## One Iteration
 
@@ -65,4 +67,6 @@ python3 code/test_files/controller/test_async_jetson_client.py
 python3 code/test_files/lidar/test_lidar_center_aeb.py
 ```
 
-See [Model Inference](../autonomy-stack/camera-steering/model-inference.md) and [Dashboard Sender](dashboard/sender.md).
+Cleanup requests zero motor output, centers or releases owned devices as implemented, stops workers, closes sensors and files, and sends the linked dashboard shutdown packet. A second interrupt can still cut across cleanup, so field shutdown should be observed rather than assumed.
+
+See [Model Inference](../autonomy-stack/camera-steering/model-inference.md) and [Dashboard Runtime](dashboard/sender.md).

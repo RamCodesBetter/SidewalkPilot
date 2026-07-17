@@ -35,6 +35,19 @@ The challenge set has 4,741 ST frames and 2,211 non-ST frames. Overall exact acc
 | Confusion matrix | exact failure pattern |
 | Per-source metrics | sensitivity to capture run/condition |
 
+## Metric Definitions
+
+- **MAE:** mean of `abs(predicted - target)` in degrees. It is easy to compare but can reward a center-biased model on a straight-heavy set.
+- **Median AE:** the 50th percentile absolute error. It is less sensitive to a few extreme misses but can hide rare dangerous errors.
+- **Max AE:** largest observed absolute error. It identifies an extreme sample but is unstable and should be investigated at the frame level.
+- **Signed error:** mean of `predicted - target`. Positive means predictions trend toward larger/rightward values; negative means smaller/leftward values. Opposite errors can cancel.
+- **Within-degree rates:** fraction of frames inside fixed numeric thresholds. These describe precision but not class balance.
+- **Turn exact / +/-1:** exact steering-class agreement for non-straight targets, or agreement within one neighboring class.
+- **ST exact:** exact class agreement for straight targets.
+- **Bal9:** macro recall across the nine steering classes, giving every target class equal weight.
+
+The confusion matrix supplies the evidence behind these summaries. A strong model should not concentrate all predictions in the straight column or systematically shift one direction.
+
 ## Offline and Field Evidence
 
 Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. v3.4 remains the field-selected baseline because it won the recorded field comparison even though newer Series 4 models lead offline.

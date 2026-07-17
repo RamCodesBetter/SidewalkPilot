@@ -1,4 +1,4 @@
-# Model Metrics Table
+# Evidence Tables
 
 The canonical generated comparison is [steering_model_report.pdf](../../steering_model_report.pdf). It contains all 46 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.
 
@@ -58,5 +58,27 @@ The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.
 | v4.0p/r/f/g/a/c | Not yet field-tested |
 
 The July 13 result is qualitative because exact route, conditions, clips, and takeover counts were not preserved.
+
+## Dataset Summary
+
+| Dataset | Published size/status | Main use |
+|---|---:|---|
+| Series 1/2 field set | 2,224 labeled images | Historical direct-regression training/evaluation |
+| CARLA set | 50,000 generated images used in early work | Synthetic assistance for Series 1/2 history |
+| Series 3/4 set | 81,237 real images | Current Series 3 and experimental Series 4 training |
+| Common challenge subset | 6,952 anchors | Cross-generation offline comparison |
+
+## Evidence Matrix
+
+| Claim area | Strongest artifact | Remaining gap |
+|---|---|---|
+| Model architecture | Trainers, ONNX contracts, parameter counts | Independent reproduction |
+| Offline capability | Evaluator JSON/PDF and confusion matrices | Distribution/field transfer |
+| v3.4 field selection | July 13 operator comparison | Complete route, clips, and takeover record |
+| Series 4 | Training runs, artifacts, evaluator, runtime smoke tests | Physical field comparison |
+| LiDAR AEB | Source and deterministic tests | Preserved stopping-distance/false-trigger field test |
+| Hardware | Wiring/config, photos, bench utilities | Finished matching PCB revision |
+
+Hardware BOM, failure details, and test procedures are maintained in [Build Overview](../../hardware/build-overview.md), [Failure Records](../../testing/failures/overview.md), and [Field Testing](../../testing/field-testing/overview.md) instead of duplicated tables here.
 
 See [Bal9](../../model-evaluation/offline-evaluation/bal9.md), [Model Selection Rubric](../../model-evaluation/comparisons/model-selection-rubric.md), and [Series 4 Models](../../ai-and-models/model-zoo/series-4.md).

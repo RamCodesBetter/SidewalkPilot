@@ -62,5 +62,5 @@ Repeatable, machine-labelled checks reduce accidental branch leaks, sync damage,
 ## Related pages
 
 - `operations/mac-pc-sync.md`
-- `runbooks/sync-day/sync-verification.md`
+- `runbooks/sync-day/mac-to-pc.md`
 - `publishing/mkdocs-site.md`

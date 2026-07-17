@@ -60,6 +60,6 @@ regression.
 
 ## Related pages
 
-- [Turn Coverage](../../data-governance/data-quality/turn-coverage.md)
-- [Training Augmentation](../../ai-and-models/training-pipeline/augmentation.md)
-- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
+- [Data Quality](../../data-governance/data-quality/image-quality-checks.md)
+- [Training Pipeline](../../ai-and-models/training-pipeline/overview.md)
+- [Field Testing](../../testing/field-testing/overview.md)

@@ -1,4 +1,4 @@
-# Before Training
+# Training Day
 
 Before Training is the gate runbook: the last set of checks that must pass before the trainer is actually launched. It ties together Command Setup and Data Audit into a single go / no-go decision so a run is never started on a broken environment or a bad dataset.
 
@@ -46,8 +46,20 @@ Before Training is the gate runbook: the last set of checks that must pass befor
 - This runbook does not change data or code — it only decides whether to launch. If any check fails, go back to Command Setup or Data Audit; do not "fix it in the trainer command" on the fly.
 - Keep logical steering thinking here: labels are servo degrees (0=left, 90=center, 180=right). Do not smuggle physical trim compensation into training labels.
 
+## Data Audit and Command Record
+
+Before launch, record dataset repository/revision, image/label counts, decoder failures, missing paths, duplicate/conflict counts, steering/source distributions, split method, corrections and hashes, trainer commit, seed, epochs, and every non-default flag. Use a dry-run or dataset scan before consuming GPU time.
+
+## During Training
+
+Monitor train/validation loss, Bal9/class or bucket behavior, steering MAE, gradient norm, learning rate, GPU use, epoch time, and W&B state. Stop for nonfinite loss, broken logging, wrong data counts, an obvious output-version collision, or a CPU run when CUDA was required. Do not choose a model from one favorable graph while the run is incomplete.
+
+## Export and After-Training
+
+Preserve final and best-validation artifacts separately. Validate the ONNX input names, shapes, output shape, finite inference, and matching decoder. Series 4 PC/PCF require history input; CF does not. Run the common evaluator, review confusion/turn metrics, and deploy only selected candidates. Record hashes and leave field status as untested until the car is driven.
+
 ## Related pages
 
-- `runbooks/sync-day/sync-verification.md`
-- `testing/field-testing/preflight-checklist.md`
-- `runbooks/training-day/model-export.md`
+- [Training Pipeline](../../ai-and-models/training-pipeline/overview.md)
+- [Data Quality](../../data-governance/data-quality/image-quality-checks.md)
+- [Model Selection Rubric](../../model-evaluation/comparisons/model-selection-rubric.md)

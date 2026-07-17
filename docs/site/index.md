@@ -44,8 +44,8 @@ The full sequence is in the [Build Timeline](start-here/build-timeline.md) and [
 
 - **Media and public readers:** [5 Minute Technical Tour](portfolio-evidence/reader-paths/5-minute-technical-tour.md), then [Build Timeline](start-here/build-timeline.md).
 - **Technical reviewers:** [5 Minute Technical Tour](portfolio-evidence/reader-paths/5-minute-technical-tour.md), then [Evidence Map](portfolio-evidence/reader-paths/evidence-map.md).
-- **Builders:** [Project Overview](start-here/project-overview.md), [Runtime Loop](runtime-code/runtime-loop.md), and [Zero 2 W Dashboard](operations/zero-2w-dashboard.md).
-- **Safety reviewers:** [Safety Overview](safety-case/safety-overview.md), [LiDAR AEB](autonomy-stack/lidar-safety/aeb.md), and [Project Limits](safety-and-ethics/limits.md).
+- **Builders:** [Project Overview](start-here/project-overview.md), [Runtime Loop](runtime-code/runtime-loop.md), and [Computer Operations](operations/nvidia-pc.md).
+- **Safety reviewers:** [Safety Overview](safety-case/safety-overview.md), [LiDAR AEB](autonomy-stack/lidar-safety/aeb.md), and [Research Scope and Limits](safety-and-ethics/research-scope.md).
 
 ## Public Project Links
 

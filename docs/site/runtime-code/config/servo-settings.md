@@ -1,6 +1,8 @@
-# Servo Settings
+# Runtime Configuration
 
 This page documents the steering-servo constants in `code/controller/current/rc_car_app/config.py` and how `code/controller/current/rc_car_app/hardware.py` turns a logical steering command into a real PCA9685 pulse. Logical steering is `0 = left`, `90 = center`, `180 = right`; the servo is on the PCA9685 at I2C `0x40`, channel `0`, running at 50 Hz.
+
+`config.py` is also the central source for subsystem flags, GPIO assignments, LiDAR thresholds, dashboard transport, controller indices, model defaults, and CSV settings. Values below describe the checked-in branch; environment variables and local tuning files can override selected settings.
 
 ## How it works
 
@@ -35,8 +37,31 @@ Steering-trim constants and yaw-controller gains are hardware calibration values
 
 If the PCA9685 or its I2C/servo dependencies are missing, `PCA9685SteeringServo.__init__` raises `PCA9685 servo dependencies are unavailable` (or an I2C error). `hardware.py` retries up to four times, then falls back to a `DummyServo` and prints `Error initializing GPIO: ... Running in simulation mode.` — the wheels then never move even though steering values still update on the dashboard. On a clean boot the expected line is `Using PCA9685 steering servo at 0x40, channel 0.`
 
+## GPIO and Hardware Addresses
+
+| Device | Checked-in assignment |
+|---|---|
+| Right motor forward/backward | BCM 19 / 20 |
+| Left motor forward/backward | BCM 25 / 13 |
+| Hall-effect wheel sensor | BCM 24 |
+| PCA9685 steering | I2C `0x40`, channel 0 |
+
+Motor outputs use 1 kHz PWM. Both motor scale factors are currently `1.0`.
+
+## Camera and Safety Flags
+
+The Raspberry Pi Camera Module is enabled at camera index 0 with a 180-degree mounting transform. The active LiDAR center corridor has a `0.254 m` half-width. Governor boundaries are `1.65 m` for full reference throttle, `1.25 m` for minimum moving reference throttle, and `1.05 m` for emergency stop. The minimum moving reference command is 60%, mapped onto the physical motor range beginning at 55% PWM. LiDAR does not steer.
+
+Constants that remain in the file are not automatically active. In particular, old autonomous cruise/turn PWM and camera blend values are legacy unless a current runtime call site uses them.
+
+## Dashboard and Logging
+
+Dashboard telemetry uses UDP over USB Ethernet to `192.168.10.2:8765` at a nominal 10 Hz. The fixed USB address is the live route; Wi-Fi/mDNS is not a fallback. Linked shutdown is enabled.
+
+Runtime CSV files are timestamped per process and written at a nominal `0.1 s` interval. Rows are flushed immediately. Steering labels/logs remain logical degrees, while throttle labels use absolute physical PWM. The exact header in `config.py` is authoritative because columns evolve with the runtime.
+
 ## Related pages
 
-- `runtime-code/runtime-loop.md`
-- `code-reference/runtime-modules.md`
-- `testing/bench-tests/overview.md`
+- [Runtime Loop](../runtime-loop.md)
+- [Wiring and Pin Map](../../hardware/wiring/pin-map.md)
+- [Bench Tests](../../testing/bench-tests/overview.md)

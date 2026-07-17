@@ -33,6 +33,19 @@ Each page tries to answer four questions in order:
 - **Road entry risk** — the highest-consequence class: the car heading toward a road/crosswalk boundary instead of stopping for the manual handoff.
 - **LiDAR disconnects** — the AEB sensor dropping its USB link mid-run and how the runtime is expected to tolerate it.
 
+## Consolidated Failure Record
+
+| Failure class | Observed lesson | Current response |
+|---|---|---|
+| Hard shadows | A diagonal dark boundary can resemble a sidewalk edge | Targeted collection/augmentation, class-aware evaluation, v3.4 field baseline |
+| Evening/point lighting | Daylight success does not transfer automatically | Night remains outside ordinary claims; collect and test separately |
+| Harsh concrete | Texture and contrast can overwhelm corridor cues | Add representative surfaces and preserve failure clips |
+| Driveway confusion | A driveway can look like continuing pavement | Treat as a model/navigation failure; supervise near road access |
+| Road approach | LiDAR cannot identify pavement ownership | Manual crosswalk/road handoff and conservative supervised routes |
+| LiDAR disconnect | A USB serial device can disappear mid-run | Background reconnect; loss currently removes intervention rather than forcing a stop |
+
+The most important field comparison found v3.3/v3.3b worse than earlier baselines under the tested conditions, while v3.4 handled all shadow cases presented and became the baseline. This remains a bounded qualitative record because complete route/clip/takeover evidence was not preserved.
+
 ## Related pages
 
 - `testing/field-testing/overview.md`

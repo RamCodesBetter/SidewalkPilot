@@ -27,6 +27,6 @@ CSV is the primary local run record, but it still depends on successful process 
 
 ## Related pages
 
-- `ai-and-models/training-pipeline/metrics.md`
+- `model-evaluation/offline-evaluation/overview.md`
 - `operations/troubleshooting.md`
-- `runtime-code/dashboard/payload-format.md`
+- `runtime-code/dashboard/sender.md`

@@ -1,4 +1,4 @@
-# File Index
+# Repository Reference
 
 This index maps current repository areas to their responsibilities. Generated data and public artifact cards are intentionally separated from source code.
 
@@ -41,4 +41,10 @@ python3 -m py_compile code/controller/current/rc_car.py code/controller/current/
 python3 -m compileall code/controller/current/rc_car_app
 ```
 
-See [Runtime Modules](runtime-modules.md), [Training Modules](training-modules.md), and [Test Files](test-files.md).
+## Configuration, Functions, and Flags
+
+`config.py` is the source of truth for pins, thresholds, controller indices, model defaults, telemetry, and logging. `runtime.py` owns state and arbitration; `hardware.py` owns physical writes; `vision.py` owns camera/model selection and Raspberry Pi 5 preprocessing; `lidar.py` parses scans; `lidar_avoidance.py` computes longitudinal policy; `navigation.py` owns GPS/graph routing.
+
+Do not treat a named constant as active without finding its current call site. Do not change a hardware mapping in a model, trainer, or dashboard layer. Public code-reference claims should name the owning file/function and be rechecked after refactors.
+
+See [Runtime Code](../runtime-code/runtime-loop.md), [Training Pipeline](../ai-and-models/training-pipeline/overview.md), and [Test Files](test-files.md).

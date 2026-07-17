@@ -1,58 +1,32 @@
-# Weighted Sampling
+# Training Split and Sampling
 
-The trainers use `torch.utils.data.WeightedRandomSampler` to control how often
-each training sample appears in an epoch. Validation is never weighted.
+SidewalkPilot separates validation from training and adjusts how often training examples are drawn. These are distinct operations: validation remains unweighted and unaugmented.
 
-## Current Series 3 Formula
+## Validation Splits
 
-The sampler first counts the seven coarse steering buckets and takes the median
-non-empty count as `target_count`. For a sample in bucket `b`:
+Series 1/2 historically uses a seeded 90/10 random split with seed 42. Because neighboring driving frames are visually similar, this can place near-duplicates on both sides and makes those historical validation numbers optimistic.
+
+Series 3/4 sorts paths, groups adjacent samples into 100-frame windows, and assigns approximately every tenth window to validation. For 81,237 frames this produces 813 windows and approximately 81 validation windows. This reduces adjacent-frame leakage but does not provide full capture-run isolation.
+
+Training uses an augmented dataset copy. Validation uses the clean base copy. Any metric must retain its dataset, trainer, split method, and checkpoint context.
+
+## Weighted Sampling
+
+Series 3 uses `WeightedRandomSampler` with replacement. For steering bucket `b`:
 
 ```text
-bucket_weight = (target_count / count[b]) ** sampler_balance_power
+bucket_weight = (median_nonempty_count / count[b]) ^ sampler_balance_power
 sample_weight = bucket_weight * source_weight
 ```
 
-The Series 3 default `sampler_balance_power` is `0.3`, so rebalancing is gentle.
-`0.0` preserves the natural bucket distribution; `1.0` applies full inverse
-frequency. Source defaults are real `2.0`, CARLA-tagged `0.6`, and correction
-`3.0`. The sampler draws 50,000 examples per epoch by default, with replacement.
+The default Series 3 balance power is `0.3`, with 50,000 draws per epoch. Source weights are correction `3.0`, real `2.0`, and CARLA-tagged `0.6`. These are relative sampling multipliers, not dataset percentages.
 
-The fixed Series 4 experiments used `sampler_balance_power=0.0`, after
-deterministic left/right balance flipping, and moved more class-balancing
-pressure into the loss with `class_weight_power=0.5`. That is an experiment
-configuration difference, not a change to the Series 3 trainer's defaults.
+The fixed Series 4 experiments use `sampler_balance_power = 0.0`, deterministic left/right balance flipping, and class weighting in the loss. Historical commands and W&B configuration remain the source of truth for a particular run.
 
-The function `steering_magnitude_weight()` still exists in the trainer, and a
-legacy CLI value is logged for compatibility, but the current Series 3 sampler
-does **not** multiply by it. The source code comment explicitly leaves magnitude
-weighting out because the hybrid focal/class loss already addresses steering
-imbalance.
+## Overfitting and Straight Collapse
 
-## Worked Example
+Most sidewalk frames are near straight. A model that predicts center for every image can obtain a deceptively low aggregate error while failing turns. The project counters this with augmentation, dropout, weight decay, balanced sampling or class weighting, clean validation, confusion matrices, Bal9, turn recall, and field testing.
 
-If the median non-empty count is 800, one bucket contains 400 samples, and another
-contains 20,000:
+Sampling cannot invent missing scene diversity. Excessive rebalancing can repeatedly expose a small set of rare frames, and aggressive augmentation can erase useful turn cues. Promotion therefore never relies on training loss or MAE alone.
 
-```text
-rare bucket:     (800 / 400) ** 0.3   = 1.231
-straight bucket: (800 / 20000) ** 0.3 = 0.381
-```
-
-For two real samples, the shared `2.0` source multiplier cancels in their relative
-probability, so the rare-bucket sample is about `1.231 / 0.381 = 3.23` times as
-likely to be drawn. This is much gentler than full inverse-frequency balancing.
-
-## Why It Is Not a Quality Metric
-
-Sampling pressure can expose the model to rare turns more often, but it cannot
-create missing scene diversity. Excessive rebalancing can also over-repeat a
-small set of frames and distort the natural straight prior. Preserve the exact
-command and W&B configuration for each run instead of assuming current defaults
-describe historical checkpoints.
-
-## Related Pages
-
-- [Sampler](../../ai-and-models/training-pipeline/sampler.md)
-- [Source Weights](../../ai-and-models/training-pipeline/source-weights.md)
-- [Turn Coverage](../../data-governance/data-quality/turn-coverage.md)
+See [Training Pipeline](../../ai-and-models/training-pipeline/overview.md), [Offline Evaluation](../../model-evaluation/offline-evaluation/overview.md), and [Data Quality](../../data-governance/data-quality/image-quality-checks.md).

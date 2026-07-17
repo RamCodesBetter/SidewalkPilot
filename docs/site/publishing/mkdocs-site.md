@@ -64,7 +64,6 @@ the hosting configuration itself is external to this source tree.
 
 ## Related pages
 
-- `publishing/reports.md`
-- `publishing/pdf-report.md`
-- `publishing/huggingface.md`
-- `operations/mac-pc-sync.md`
+- [Reports and PDF](reports.md)
+- [Hugging Face](huggingface.md)
+- [Mac and Computer Sync](../operations/mac-pc-sync.md)

@@ -44,6 +44,6 @@ and an independent way to cut power.
 
 ## Related pages
 
-- [Runtime Modules](runtime-modules.md)
-- [Training Modules](training-modules.md)
+- [Repository Reference](file-index.md)
+- [Training Pipeline](../ai-and-models/training-pipeline/overview.md)
 - [Bench Tests](../testing/bench-tests/overview.md)

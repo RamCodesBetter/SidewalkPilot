@@ -39,4 +39,4 @@ python3 -m compileall code/controller/current/rc_car_app
 - A source edit does not affect a running process until the owning process restarts.
 - Do not start a second dashboard receiver while the systemd receiver already owns UDP 8765.
 
-See [Troubleshooting](troubleshooting.md), [Model Selection](../runbooks/field-test-day/model-selection.md), and [USB Link](../hardware/wiring/usb.md).
+See [Troubleshooting](troubleshooting.md), [Field Test Day](../runbooks/field-test-day/before-leaving.md), and [Wiring and Pin Map](../hardware/wiring/pin-map.md).

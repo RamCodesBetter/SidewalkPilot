@@ -1,4 +1,4 @@
-# Camera Capture
+# Vision Runtime
 
 Camera Capture covers how the runtime opens the Raspberry Pi Camera Module 3 Wide, pulls
 frames, and hands them to the steering estimator. All of this lives in
@@ -62,8 +62,20 @@ hard stop. A camera that opens but never produces frames leaves
 at the empty default (`heading_bias = 0`, `confidence = 0`), and the CSV log's
 camera columns read as centered/zero.
 
+## Preprocessing Contracts
+
+Series 1/2 images resize to `200x66`; Series 3/4 images resize to `320x180`. Frames remain BGR to match training, convert to `float32`, normalize to `[-1, 1]`, transpose HWC to CHW, and add a batch dimension. Only v2.0 and v2.0b opt into the historical CLAHE preprocessing path; every other registered model uses raw BGR preprocessing.
+
+Series 1 direct-regression output uses approximately `90 +/- 86` degrees and Series 2 uses `90 +/- 85`, followed by a `0..180` clamp. Series 3/4 decoding chooses a steering class and local offset. Physical steering trim is applied later by the hardware mapping and is not baked into model output.
+
+## Model Selection and Jetson Orin Nano
+
+The registered list contains Series 1/2 PyTorch checkpoints and Series 3/4 ONNX names. In camera-only mode, the Raspberry Pi 5 records the requested name and sends it with frames; the Jetson Orin Nano must confirm loading and return a fresh matching result. Series 4 PC/PCF history resets on model changes. A dashboard name alone does not prove the artifact loaded successfully.
+
+Inference uses latest-frame semantics. Old pending frames are replaced, and Raspberry Pi 5 autonomy rejects Jetson Orin Nano results older than the configured freshness limit.
+
 ## Related pages
 
-- `runtime-code/runtime-loop.md`
-- `code-reference/runtime-modules.md`
-- `testing/bench-tests/overview.md`
+- [Runtime Loop](../runtime-loop.md)
+- [Model Inference](../../autonomy-stack/camera-steering/model-inference.md)
+- [Bench Tests](../../testing/bench-tests/overview.md)

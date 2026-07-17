@@ -1,53 +1,59 @@
-# Haversine Distance
+# Navigation Geometry and Routing
 
-The haversine formula gives the great-circle distance between two points on a sphere from their latitude and longitude. SidewalkPilot uses it as the single source of truth for "how far apart are two places" throughout navigation: edge lengths, remaining route distance, A* heuristic, nearest-node snapping, and crosswalk handoff/resume radii are all measured with it.
+SidewalkPilot converts a start and destination into an ordered path through a geographic sidewalk graph. The navigation implementation lives in `code/controller/current/rc_car_app/navigation.py`; the graph is `trossachs_nav_graph.json`.
 
-## How it works
+## Distance and Bearing
 
-In `navigation.py` (`haversine(a, b)`), with Earth radius `R = 6,371,000 m`:
+`haversine(a, b)` computes great-circle distance using an Earth radius of `6,371,000 m`:
 
-```python
-x = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-d = 2 * R * asin(sqrt(x))
+```text
+x = sin(dlat/2)^2 + cos(lat1) cos(lat2) sin(dlon/2)^2
+distance = 2 R asin(sqrt(x))
 ```
 
-- **Input:** two node dicts with `lat` / `lon` in decimal degrees. Both latitudes, and the deltas `dlat` and `dlon`, are converted to radians first.
-- **Output:** distance in **meters** along the Earth's surface.
+The same meter-valued function supplies graph edge lengths, remaining route distance, nearest-node snapping, the A* heuristic, and navigation radii. The initial bearing from point `a` to `b` is:
 
-The intermediate `x` is the squared half-chord (the "haversine" of the central angle); `2R·asin(√x)` turns that back into arc length. Using `asin(sqrt(...))` instead of the naive spherical law of cosines keeps the result numerically stable for the very short distances between adjacent sidewalk nodes, where a cosine-based formula loses precision.
+```text
+x = sin(dlon) cos(lat2)
+y = cos(lat1) sin(lat2) - sin(lat1) cos(lat2) cos(dlon)
+bearing = (degrees(atan2(x, y)) + 360) % 360
+```
 
-### Runtime use
+This graph-derived bearing is used for route planning. It is not the live BN880 compass heading.
 
-`haversine` lives in `code/controller/current/rc_car_app/navigation.py` and is called all over that file:
+## Turn Angle and Penalty
 
-- `path_distance` / `segment_distance` sum it over consecutive nodes to get total and per-segment route length in meters.
-- `astar` uses `haversine(node, goal)` as its admissible heuristic (straight-line distance never overestimates the real path), which is what makes the A* search both correct and fast.
-- `nearest_node`, `nearest_sidewalk_node`, and `closest_path_index` use it to snap the live GPS fix to the closest graph node/route point.
-- Handoff and resume logic compares it against fixed radii (`HANDOFF_ALERT_M = 3.0`, `RESUME_RADIUS_M = 2.5`, `ARRIVED_RADIUS_M = 3.0`) to decide when to hand control to manual at a crosswalk and when to resume AI driving.
+For three consecutive nodes, the unsigned route bend is:
 
-## Why this choice
+```text
+turn = abs((bearing_out - bearing_in + 540) % 360 - 180)
+```
 
-- Straight-line meters is exactly what A* needs for an admissible heuristic and what the dashboard needs for "distance remaining." One formula covers all of it, so distance is defined once and consistently.
-- Haversine is accurate and cheap over the short hops in the route graph, and it degrades gracefully — no trig blow-ups — at the meter scale where the car actually operates.
+The wrap converts a difference across north, such as `350` to `10` degrees, into a 20-degree turn rather than 340 degrees. A stepwise penalty discourages paths that are difficult for an Ackermann-steering car:
 
-## Worked example
+| Turn | Added path cost |
+|---|---:|
+| Below 25 degrees | 0 |
+| 25-45 degrees | 3 |
+| 45-90 degrees | 10 |
+| 90-135 degrees | 24 |
+| 135 degrees or more | 44 |
 
-Two points 0.0010° apart in latitude at ~55° N, same longitude:
+Left and right bends receive equal cost because the planner uses turn magnitude, not direction.
 
-- `dlat = radians(0.0010) ≈ 1.745e-5`, `dlon = 0`
-- `x = sin(dlat/2)**2 ≈ (8.727e-6)**2 ≈ 7.62e-11`
-- `d = 2 * 6,371,000 * asin(sqrt(7.62e-11)) ≈ 2 * 6,371,000 * 8.727e-6 ≈ 111.2 m`
+## A* Search
 
-So 0.001° of latitude is about 111 m, which matches the textbook value of ~111 m per 0.001° of latitude anywhere on Earth.
+A* expands the state with the lowest `f = g + h`:
 
-## What could go wrong
+- `g` is accumulated edge distance, edge-kind penalties, and turn penalties;
+- `h` is the haversine distance to the goal;
+- the state is `(previous_node, current_node)`, allowing the next expansion to price the turn;
+- the result is an ordered list of graph node IDs.
 
-- **Bad coordinates:** `_safe_float` defaults missing/invalid `lat`/`lon` to `0.0`, so a node with no fix would compute a huge (thousands-of-km) distance to the equator/prime-meridian. Graph nodes must carry real coordinates; the live loop only feeds GPS when `fix` is true.
-- **Spherical Earth assumption:** haversine treats Earth as a perfect sphere with a fixed radius, so it carries a sub-percent error versus the true ellipsoid. At sidewalk scale (meters) that error is far below GPS noise and irrelevant to routing decisions.
-- **Units:** the constant is in meters, so every downstream threshold (`*_M` radii, `ARRIVED_RADIUS_M`) is also in meters. Mixing in a value that was actually degrees would silently break the handoff logic.
+Less-preferred edge kinds receive fixed costs: `+220 m` for `crosswalk_transfer`, `+48 m` for `intersection` or `osm_gap`, and `+36 m` for `inferred_crosswalk`. Intermediate house nodes are excluded so a route does not cut through an unrelated driveway.
 
-## Related pages
+## Runtime Boundaries
 
-- `research-and-math/geometry/bearing.md`
-- `research-and-math/geometry/turn-angle.md`
-- `autonomy-stack/navigation/overview.md`
+Handoff, resume, and arrival checks use meter-valued radii. Current constants include a `3.0 m` handoff alert, `2.5 m` resume radius, and `3.0 m` arrival radius. GPS noise, malformed graph coordinates, disconnected graph components, and duplicate zero-length edges can still produce bad snapping or no-route results. Navigation therefore remains supervised and crosswalk traversal remains manual.
+
+See [Navigation Overview](../../autonomy-stack/navigation/overview.md) and [Crosswalk Handoff](../../autonomy-stack/navigation/crosswalk-handoff.md).

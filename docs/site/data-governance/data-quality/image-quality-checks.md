@@ -101,9 +101,17 @@ The first becomes missing if the file is absent, the second is skipped as bad, a
 - Dataset snapshot name, image count, label count, command, and code revision
 - Any reviewed rows before and after correction
 
+## Coverage and Leakage Review
+
+Image integrity is only the first gate. Before training, compare steering-class counts, left/right balance, ordinary turns, turns in shadow, lighting periods, surfaces, routes, and source runs. A collection countdown may guide field work, but filling numeric buckets does not prove visual diversity.
+
+Consecutive frames create leakage risk. Series 3/4 window splitting reduces adjacency across train/validation, while Series 1/2's historical random split can place near-neighbors on both sides. Neither result should be described as capture-run-independent unless the split is actually grouped by run.
+
+After any computer-to-computer sync, verify image and label counts, representative hashes, missing files, and unexpected deletions before accepting the destination as a new source of truth. Reverse sync with `--delete` is especially dangerous when large datasets are excluded on one side.
+
 ## Related pages
 
-- [Photo Capture](../../runtime-code/photo-capture.md)
+- [Controller Mapping and Driving Modes](../../runtime-code/controller-mapping.md)
 - [Dataset Overview](../../data/dataset-overview.md)
-- [Active Label Set](../dataset-versioning/active-label-set.md)
+- [Dataset Versioning](../dataset-versioning/version-rules.md)
 - [Hugging Face Publishing](../../publishing/huggingface.md)

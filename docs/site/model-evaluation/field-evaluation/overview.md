@@ -45,8 +45,18 @@ A reproducible field comparison should retain:
 The operator keeps the Xbox controller ready. Steering, gas, or brake input
 cancels autonomy through `cancel_autonomous_mode()`.
 
+## What the Run Must Observe
+
+- **Manual takeovers:** count each autonomy cancellation and record its cause, location/node, previous autonomous duration, and whether it prevented a curb, grass, road, obstacle, or control-quality failure.
+- **Steering smoothness:** distinguish stable corrections from oscillation, delayed response, or abrupt class-boundary movement.
+- **Curb and road risk:** record approach direction and whether recovery occurred before the operator intervened.
+- **Shadow behavior:** test ordinary turns and turns under distinct shadow geometry; do not generalize one successful route to every lighting condition.
+- **Evening/night behavior:** remains a separate, higher-risk condition and is not approved by daylight results.
+- **LiDAR:** record governor, hold, and emergency actions separately from model errors. LiDAR no longer steers.
+
+The historical 0.5-mile/five-intervention run is journey context, not a formal current-model benchmark because its complete date, route, and run record were not preserved.
+
 ## Related Pages
 
-- [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
-- [Manual Takeover Count](manual-takeover-count.md)
+- [Field Testing](../../testing/field-testing/overview.md)
 - [Bal9](../offline-evaluation/bal9.md)

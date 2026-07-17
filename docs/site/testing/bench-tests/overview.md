@@ -19,15 +19,28 @@ A bench test exists to answer one question with proof: does this sensor stream r
 - Tests make progress measurable: a steering-trim number, a filtered yaw-rate, a LiDAR distance in millimeters, a route distance in meters.
 - The debugging discipline for this repo is prove, don't assume. These utilities are how I instrument and observe a value end to end instead of asserting from the armchair.
 
-## Pages in this section
+## Utilities in this section
 
-- Steering/servo: `servo.md`, `servo-calibration.md`, `steering-trim-tuner.md`, `model-steering.md`
-- Sensors: `gps-compass.md`, `lidar-viewer.md`, `imu-verifier.md`
-- Display/telemetry: `dashboard.md`, `camera-preview.md`
-- Navigation tooling: `geojson-graph.md`, `a-star-cli.md`
+The checked-in tools are grouped under `code/test_files/steering`, `sensors`, `lidar`, `display`, `camera`, `navigation`, `controller`, `models`, `data`, and `setup`. Use the inventory below rather than relying on an old documentation filename.
+
+## Bench-Test Matrix
+
+| Area | Utility or check | Pass evidence |
+|---|---|---|
+| Camera | camera preview utility | Correct orientation, color, frame updates, no repeated stalls |
+| Model steering | model steering tester / live dashboard | Matching artifact, finite outputs, expected directional response |
+| Servo | servo step/controller utilities | Known commands move predictably with wheels unloaded |
+| Steering calibration | trim tuner and stepped-angle test | Recorded center/endpoints and repeatability from both directions |
+| LiDAR | viewer and center-AEB tests | Stable packet stream, correct corridor/rungs, expected policy actions |
+| GPS/compass | BN880 bench utilities | Valid NMEA fix; compass result labeled bench-only |
+| IMU | IMU verifier | Fresh finite yaw-rate stream and safe stale fallback |
+| Dashboard | receiver/layout/link tests | Correct pages, colors, `NO LINK`/`STALE`, linked shutdown |
+| Navigation | GeoJSON graph and A* CLI | Graph loads, route exists, endpoints/penalties are plausible |
+
+Run hardware-moving tools with motors disabled or wheels clear. Record the exact command and output because filenames and flags can change. The authoritative inventory is [Test Files](../../code-reference/test-files.md).
 
 ## Related pages
 
-- `testing/field-testing/overview.md`
-- `model-evaluation/field-evaluation/overview.md`
-- `safety-case/safety-overview.md`
+- [Field Testing](../field-testing/overview.md)
+- [Field Evaluation](../../model-evaluation/field-evaluation/overview.md)
+- [Safety Overview](../../safety-case/safety-overview.md)

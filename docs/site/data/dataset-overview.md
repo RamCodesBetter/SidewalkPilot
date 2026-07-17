@@ -59,6 +59,8 @@ resolved counts, and sampler configuration. Corrections always describe the desi
 logical steering target; they never encode hardware trim. The current Series 4 temporal
 trainers use the ordered base labels directly.
 
+Manual capture folders remain source evidence until review and promotion. They contain timestamped JPEGs, run-level CSV/JSON labels, and the original ordering needed by temporal models. A dataset snapshot should reference the source runs rather than silently flattening or renaming them without a mapping.
+
 ## Evaluation Use
 
 Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 46 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.
@@ -67,7 +69,7 @@ That common challenge set exposes the weakness of early models on later lighting
 
 ## Related Pages
 
-- [Input Labels](../ai-and-models/training-pipeline/input-labels.md)
-- [Validation Split](../research-and-math/machine-learning/validation-split.md)
+- [Training Pipeline](../ai-and-models/training-pipeline/overview.md)
+- [Training Split and Sampling](../research-and-math/algorithms/weighted-sampling.md)
 - [Series 4 Temporal Experiments](../ai-and-models/architecture/series-4-plan.md)
 - [Offline Evaluation](../model-evaluation/offline-evaluation/overview.md)

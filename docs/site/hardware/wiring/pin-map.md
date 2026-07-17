@@ -1,6 +1,6 @@
-# Pin Map
+# Wiring and Pin Map
 
-A consolidated table of the runtime's primary sensors, actuators, and inter-computer links. The other wiring pages break the same connections down by bus type.
+A consolidated reference for power domains, primary sensors, actuators, and inter-computer links.
 
 ## How it works
 
@@ -33,8 +33,29 @@ Notes:
 
 A consolidated pin map is a safety and debugging tool. Because motor pins move real wheels, an accidental mix-up between a motor line and a sensor line is not harmless. This table was checked against `config.py`, `lidar.py`, and `navigation.py`, but it is still maintained documentation and must be re-audited when wiring or constants change.
 
+## Power Domains
+
+| Domain | Source | Main load |
+|---|---|---|
+| Drive | OVONIC 3S 11.1 V, 5200 mAh LiPo | AT8236 and drive motors |
+| Jetson Orin Nano | INIU 27,000 mAh, 140 W bank | AI compute |
+| Raspberry Pi 5 and Zero 2 W | INIU 10,000 mAh, 45 W bank | Control and dashboard computers |
+| HUB75 display | OVONIC 2S 7.4 V, 5200 mAh LiPo through fused buck converter | LED matrix |
+
+The steering servo uses the PCA9685 servo rail rather than a Raspberry Pi 5 GPIO pin. A 10,000 uF bulk capacitor is part of the power design. Separate supplies reduce shared voltage sag but do not eliminate grounding, converter, connector, or electromagnetic-coupling faults. Voltage must be checked under load.
+
+## Bus Checks
+
+```bash
+i2cdetect -y 1
+ip -br addr show usb0
+ss -lunp | grep 8765
+```
+
+Expect the PCA9685 at `0x40`, the fixed USB-network addresses on the two dashboard computers, and the receiver listening on UDP 8765. UART device permissions and stable `/dev/serial/by-id` naming should be checked before field use.
+
 ## Related pages
 
-- `hardware/wiring/i2c.md`
-- `hardware/wiring/uart.md`
-- `runtime-code/config/gpio-pins.md`
+- [Runtime Configuration](../../runtime-code/config/servo-settings.md)
+- [Power](../power.md)
+- [PCB Development](../pcb/overview.md)

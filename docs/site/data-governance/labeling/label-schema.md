@@ -24,4 +24,12 @@ Series 4 future targets are supervision only. They are not runtime inputs.
 
 Reject missing images, non-numeric/out-of-range values, duplicate conflicts without an explicit correction rule, and temporal windows that cross a run/split/gap boundary. Corrections override matching base labels and should retain provenance.
 
-See [Dataset Overview](../../data/dataset-overview.md) and [Input Labels](../../ai-and-models/training-pipeline/input-labels.md).
+## Corrections and Review
+
+A correction record must identify the image, provide the reviewed logical steering target, and retain enough source context to explain why it overrides the base row. Optional repeat weighting is a training decision and must not be confused with label confidence.
+
+Duplicate filenames from different runs require path/run disambiguation. Exact duplicate rows may be deduplicated during snapshot construction only when the retained record and count are documented. Conflicting labels require visual/run review; averaging them hides the disagreement.
+
+Examples requiring review include unreadable images, missing throttle in a Series 3 record, nonnumeric values, out-of-range steering, a correction with no matching image, and a temporal window that crosses a capture gap. Tools may report or clamp a value, but automated acceptance is not evidence that the label is behaviorally correct.
+
+See [Dataset Overview](../../data/dataset-overview.md), [Relabeling Workflow](../../data/relabeling/workflow.md), and [Training Pipeline](../../ai-and-models/training-pipeline/overview.md).

@@ -1,4 +1,4 @@
-# Research Scope
+# Research Scope and Limits
 
 SidewalkPilot is a solo-built research and learning platform. It is not a product, a road-legal vehicle, or a certified autonomous system. This boundary applies to every model, demonstration, and result in the documentation.
 
@@ -44,6 +44,8 @@ The value is the integration and iteration, not a claim that one neural-network 
 - LiDAR does not steer around obstacles. It slows, holds, or emergency-brakes in the center corridor.
 - New models remain experimental until a documented field comparison promotes them.
 
+The platform is not authorized for public-road autonomy, unattended use, uncontrolled pedestrian operation, all-weather driving, or safety-critical service. A selected sidewalk test route does not become a closed course merely because it is familiar. Testing stops when people, traffic, weather, visibility, hardware, or system freshness violate the planned setup.
+
 ## Reporting Rules
 
 1. Label a result as offline, bench, or field evidence.
@@ -53,4 +55,4 @@ The value is the integration and iteration, not a claim that one neural-network 
 5. Keep planned work separate from implemented work.
 6. Preserve the model hash, route, conditions, clips, logs, and takeovers for future field claims.
 
-See [Safety Overview](../safety-case/safety-overview.md), [Project Limits](limits.md), and [Evidence Map](../portfolio-evidence/reader-paths/evidence-map.md).
+See [Safety Overview](../safety-case/safety-overview.md), [Operating Limits](../safety-case/operating-limits/where-it-can-run.md), and [Evidence Map](../portfolio-evidence/reader-paths/evidence-map.md).

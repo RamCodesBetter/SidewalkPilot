@@ -1,4 +1,4 @@
-# System Diagram
+# System Diagrams
 
 This page is the top-level block diagram of SidewalkPilot: the three-device compute split, the sensors and actuators wired to each device, and the links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.
 
@@ -41,8 +41,44 @@ Camera + controller + LiDAR + GPS + IMU + hall sensor
 
 Source anchors: `code/controller/current/rc_car_app/runtime.py`, `config.py`, `vision.py`, `jetson_inference_server.py`, `hub75_dashboard.py`, and `z2w_dashboard.py`.
 
+## Runtime and Safety Flow
+
+```text
+controller + cached sensors + fresh model result
+                    |
+                    v
+           Raspberry Pi 5 arbitration
+        manual / gear / autonomy / AEB
+                    |
+                    v
+             steering + motor output
+                    |
+                    +--> CSV and dashboard telemetry
+```
+
+Manual input cancels autonomy when processed. A fresh model proposal is required for autonomous steering. Enabled/fresh LiDAR can reduce forward throttle or request emergency braking, but it does not steer.
+
+## Training and Evaluation Flow
+
+```text
+field runs -> images + logical steering/absolute throttle labels
+           -> audit/split/augmentation -> GPU training
+           -> final + best artifacts -> ONNX
+           -> common evaluator -> supervised field comparison
+```
+
+## Navigation Flow
+
+```text
+GPS fix -> nearest graph node -> A* route -> route progress
+                                      |
+                                      +--> manual crosswalk handoff/resume
+```
+
+High-resolution draw.io exports are planned for these views. The text diagrams remain the inspectable fallback and must match runtime ownership.
+
 ## Related pages
 
-- `portfolio-evidence/reader-paths/evidence-map.md`
-- `publishing/reports.md`
-- `exhibits/tables/test-matrix-table.md`
+- [Evidence Map](../../portfolio-evidence/reader-paths/evidence-map.md)
+- [Reports and PDF](../../publishing/reports.md)
+- [Evidence Tables](../tables/model-metrics-table.md)

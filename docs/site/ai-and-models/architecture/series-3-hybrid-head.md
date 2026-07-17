@@ -38,4 +38,4 @@ Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 l
 
 Series 4 removes throttle and uses 18 values per horizon: the same nine logits plus nine offsets. PC emits one horizon; CF/PCF emit four. This reuses the successful steering representation while testing temporal information separately.
 
-See [Steering Class Bins](steering-class-bins.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Bal9](../../model-evaluation/offline-evaluation/bal9.md).
+See [CNN Architecture](cnn.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Bal9](../../model-evaluation/offline-evaluation/bal9.md).

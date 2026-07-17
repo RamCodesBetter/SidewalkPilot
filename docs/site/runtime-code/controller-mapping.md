@@ -1,4 +1,4 @@
-# Controller Mapping
+# Controller Mapping and Driving Modes
 
 The car is driven and fully operated from an **Xbox Wireless Controller** over `pygame`.
 This page is the single source of truth for every button, trigger, stick, and D-pad action.
@@ -62,8 +62,18 @@ observed on this controller.
 - Physical labels (A/B/X/Y) reflect how this Xbox controller enumerates under pygame on
   the Raspberry Pi 5; the code keys off the numeric index, not the label.
 
+## PRND Behavior
+
+The gear state begins in Park and steps through `P`, `R`, `N`, and `D` with LB/RB. Park forces zero PWM and braking; Reverse applies negative motor PWM; Neutral coasts with zero PWM; Drive permits forward manual throttle, cruise, or autonomy. A shift cancels cruise. Enabling autonomy forces Drive. Forward AEB logic is intentionally skipped in Reverse so the driver can back away from a detected obstacle.
+
+## Photo Capture
+
+B queues one image. Menu toggles continuous capture at a configured 10 fps while the car is moving or commanded to move. A dated run directory receives timestamped JPEGs and a labels CSV containing logical steering (`0..180`) and absolute physical forward PWM (`0..1`). JPEG encoding and writing run outside the control loop. Finalization converts the CSV to the JSON format accepted by training.
+
+The label is a software command sampled near the frame request, not measured wheel-angle or motor-torque feedback. Every run must be audited for decodable images, complete labels, and accidental stationary repetition before training.
+
 ## Related pages
 
 - `runtime-code/runtime-loop.md`
-- `runtime-code/prnd-gears.md`
-- `runtime-code/config/build-flags.md`
+- [Runtime Configuration](config/servo-settings.md)
+- [Dataset and Labels](../data/dataset-overview.md)

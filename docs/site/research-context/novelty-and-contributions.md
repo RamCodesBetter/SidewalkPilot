@@ -4,6 +4,15 @@ This page separates project-specific work from established machine-learning and 
 patterns. It does not claim that a familiar technique becomes a new invention because it
 was implemented on SidewalkPilot.
 
+## Related Work
+
+The direct historical reference is NVIDIA's 2016 *End to End Learning for Self-Driving Cars*, which trains a convolutional network from road images paired with human steering commands. SidewalkPilot adopts that supervised camera-to-steering framing but does not reproduce the paper's vehicle, routes, dataset, compute, or validation protocol. Its results are therefore not compared numerically with PilotNet.
+
+- [Bojarski et al., NVIDIA paper](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf)
+- [arXiv record](https://arxiv.org/abs/1604.07316)
+
+Commercial sidewalk robots provide problem-setting context, not a benchmark. This repository does not contain controlled sensor, cost, speed, or safety comparisons against commercial platforms and makes no claim of matching them.
+
 ## 1. Failure-driven sidewalk dataset and test loop
 
 **Status: implemented, with bounded field evidence.** The project collects its own
@@ -60,6 +69,5 @@ straight collapse that one aggregate error number can conceal.
 
 ## Related pages
 
-- `research-context/related-work.md`
-- `engineering-process/iteration-records/turn-vs-shadow-tradeoff.md`
-- `model-evaluation/comparisons/mae-vs-turn-capability.md`
+- [Turn vs Shadow Tradeoff](../engineering-process/iteration-records/turn-vs-shadow-tradeoff.md)
+- [Offline and Field Comparison](../model-evaluation/comparisons/offline-vs-field.md)

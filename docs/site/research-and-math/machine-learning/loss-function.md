@@ -1,68 +1,35 @@
-# Loss Function
+# Model Framing and Loss
 
-The model families do not share one loss. Series 1/2 use direct control
-regression; Series 3/4 use the hybrid class-plus-offset steering objective.
+All model families use the same physical steering convention: `0` degrees is left, `90` is center, and `180` is right. Their output heads and losses differ.
 
-## Series 1/2
+## Direct Regression
 
-The early trainer predicts steering directly in normalized control space and uses
-Smooth L1 loss with its Series 1/2 weighting logic. Those historical models must
-be evaluated with their matching architecture and decoder.
+Series 1/2 and v3.0 predict continuous controls directly and use Smooth L1-based regression. Direct regression is compact, but common near-straight labels can dominate its aggregate objective.
 
-## Series 3 Hybrid Loss
+## Class Plus Local Regression
 
-For a target steering angle, the trainer derives:
-
-- One of nine steering classes;
-- A `0..1` offset within that class;
-- The stored throttle target.
-
-The 19-value head contains nine class logits, nine raw offsets, and one raw
-throttle value. The current loss is:
+Most Series 3 models predict 19 values: nine steering-class logits, nine local offsets, and throttle. The decoded result remains a continuous steering angle. Its training objective combines focal-weighted class loss, Smooth L1 loss for the true class's offset, and an optional throttle loss:
 
 ```text
-total = focal_weighted_cross_entropy(class)
-      + offset_loss_weight * SmoothL1(selected_true_class_offset)
-      + throttle_loss_weight * SmoothL1(sigmoid(throttle), target_throttle)
+total = focal_cross_entropy(class)
+      + offset_weight * smooth_l1(selected_offset)
+      + throttle_weight * smooth_l1(throttle, target_throttle)
 ```
 
-Only the offset for the true class receives offset supervision. Class weights
-come from the Series 3 training split:
+Series 3 defaults include class-weight power `0.3`, focal gamma `1.5`, and offset weight `1.0`. Steering-focused runs explicitly set throttle weight to zero; current defaults are not evidence of an older checkpoint's command.
 
-```text
-class_weight[c] = (mean_nonempty_count / count[c]) ** class_weight_power
-```
+## Series 4 Temporal Framing
 
-Series 3 defaults are `class_weight_power=0.3`, `focal_gamma=1.5`,
-`offset_loss_weight=1.0`, and `throttle_loss_weight=0.5`. The steering-focused
-v3 training pattern explicitly sets throttle weight to `0.0`; current defaults
-must not be presented as proof of flags used by an older checkpoint.
+Series 4 removes throttle and uses an 18-value class-plus-offset steering head per horizon:
 
-## Series 4
+- PC (`4.0p/r`) supplies the image plus causal previous steering targets and predicts the current target;
+- CF (`4.0f/g`) supplies the image and predicts current plus future targets;
+- PCF (`4.0a/c`) combines causal previous-target inputs with current and future supervision.
 
-Series 4 removes throttle output. Each steering horizon uses the same 18-value
-class-plus-offset contract. PC supervises the current horizon; CF and PCF add
-three future supervision horizons. The trainer's aggregate loss combines those
-horizon losses according to the fixed experiment contract. The three fixed
-Series 4 runs used `class_weight_power=0.5`, `focal_gamma=1.5`,
-`offset_loss_weight=1.0`, `sampler_balance_power=0.0`, and a future-horizon
-decay of `0.70` where future heads exist.
+Future steering values are labels during training. They are never future inputs at deployment. Fixed Series 4 runs use class-weight power `0.5`, focal gamma `1.5`, no sampler balancing, and future-horizon decay `0.70` where applicable.
 
-## Gradient Norm
+## Gradient Norm and Limits
 
-The trainer logs the gradient norm before clipping and clips updates to a maximum
-norm of `1.0`. `grad_norm` is a stability diagnostic, not a model-quality score:
-a finite varying value shows updates are flowing, while sustained near-zero or
-repeated extreme spikes deserve investigation.
+The trainers log gradient norm before clipping and clip to a maximum norm of `1.0`. Gradient norm diagnoses update stability; it is not a quality score. The losses also do not encode stopping distance, sidewalk boundaries, or physical smoothness. Offline class-balanced evaluation and supervised driving remain required.
 
-## Limits
-
-The loss optimizes an offline objective. It does not encode physical stopping
-distance, sidewalk boundaries, or a guarantee of smooth steering. Promotion still
-requires class-balanced evaluation and a supervised field test.
-
-## Related Pages
-
-- [Series 3 Hybrid Head](../../ai-and-models/architecture/series-3-hybrid-head.md)
-- [Series 4 Temporal Experiments](../../ai-and-models/architecture/series-4-plan.md)
-- [Training Metrics](../../ai-and-models/training-pipeline/metrics.md)
+See [CNN Architecture](../../ai-and-models/architecture/cnn.md), [Series 3 Hybrid Head](../../ai-and-models/architecture/series-3-hybrid-head.md), and [Series 4 Temporal Experiments](../../ai-and-models/architecture/series-4-plan.md).

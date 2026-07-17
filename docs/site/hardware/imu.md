@@ -44,4 +44,4 @@ attributed to the controller.
 ## Related pages
 
 - `hardware/steering-servo.md`
-- `hardware/wiring/uart.md`
+- `hardware/wiring/pin-map.md`

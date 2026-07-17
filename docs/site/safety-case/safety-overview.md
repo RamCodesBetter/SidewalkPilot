@@ -41,7 +41,7 @@ was not a safety certification or complete route benchmark.
 
 ## Related pages
 
-- [Limits](../safety-and-ethics/limits.md)
+- [Research Scope and Limits](../safety-and-ethics/research-scope.md)
 - [Manual Override](fault-handling/manual-override.md)
-- [Sensor Disconnect Risk](hazard-analysis/sensor-disconnect-risk.md)
-- [Preflight Checklist](../testing/field-testing/preflight-checklist.md)
+- [Hazard Analysis](hazard-analysis/road-entry.md)
+- [Field Testing](../testing/field-testing/overview.md)

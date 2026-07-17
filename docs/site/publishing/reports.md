@@ -1,4 +1,4 @@
-# Reports
+# Reports and PDF
 
 SidewalkPilot keeps generated reports in the repository so a reader can inspect the exact
 evidence associated with a commit rather than relying on a manually copied metric.
@@ -65,8 +65,14 @@ Before publishing:
    command or source-count log proves it;
 6. Keep field verdicts separate from offline rankings.
 
+## PDF Generation Contract
+
+The evaluator owns both the JSON and PDF so table values are not manually recopied. A publishable report is generated from the full version list on the frozen challenge set, with GPU execution requested where available. Review page count, model count, gradient coloring, confusion matrices, Series 1/2 historical separation, and the field-status wording before committing the outputs.
+
+If the evaluator or dataset changes, regenerate JSON and PDF together. Never update one artifact while leaving the other from a different run.
+
 ## Related Pages
 
-- `publishing/pdf-report.md`
-- `model-evaluation/offline-evaluation/overview.md`
-- `model-evaluation/offline-evaluation/bal9.md`
+- [Offline Evaluation](../model-evaluation/offline-evaluation/overview.md)
+- [Bal9](../model-evaluation/offline-evaluation/bal9.md)
+- [Model Selection Rubric](../model-evaluation/comparisons/model-selection-rubric.md)
