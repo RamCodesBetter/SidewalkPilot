@@ -1,12 +1,12 @@
 # Steering Servo
 
-Steering is done by a single servo that turns the Ackermann linkage. The Raspberry Pi 5 does not
-drive the servo directly; it sends the servo's PWM through a PCA9685 16-channel PWM
-driver over I2C. This is the actuator the steering model ultimately commands.
+Steering is done by a single servo that turns the Ackermann linkage. The Raspberry Pi 5
+does not drive the servo directly; it sends the servo's PWM through a PCA9685 Servo
+Controller over I2C. This is the actuator the steering model ultimately commands.
 
 ## Parts (Amazon)
 
-- [HiLetGo PCA9685 16 Channel 12-Bit PWM Driver](https://www.amazon.com/dp/B01D1D0CX2?psc=1&ref=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&ref_=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&social_share=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1) — $8.99
+- [HiLetGo PCA9685 Servo Controller](https://www.amazon.com/dp/B01D1D0CX2?psc=1&ref=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&ref_=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&social_share=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1) — $8.99
 
 ## Wiring and settings
 
@@ -56,7 +56,7 @@ history may affect how the linkage returns even when the final command is 90.
 
 ## Why this choice
 
-- The PCA9685 generates the 50 Hz servo pulse in dedicated hardware and offloads pulse
+- The PCA9685 Servo Controller generates the 50 Hz servo pulse in dedicated hardware and offloads pulse
   timing from the Raspberry Pi 5. This reduces dependence on control-loop timing, but does not remove
   power, I2C, calibration, servo, or linkage sources of jitter.
 - Keeping all servo-specific compensation in the mapping layer keeps the logical steering

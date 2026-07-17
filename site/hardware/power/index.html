@@ -344,7 +344,7 @@
               
                 <h1 id="power">Power</h1>
 <p>The car carries its own power. Its JGB37-520 DC drive motors (12 V, 550 RPM) are fed from
-a 3S LiPo through the AT8236, while the compute boards (Jetson Orin Nano, Raspberry Pi 5,
+a 3S LiPo through the AT8236 Motor Controller, while the compute boards (Jetson Orin Nano, Raspberry Pi 5,
 Zero 2 W) run from high-output USB power banks. Separating the noisy motor rail from the
 clean logic rail is the main goal of the power design.</p>
 <h2 id="parts-amazon">Parts (Amazon)</h2>
@@ -360,7 +360,7 @@ clean logic rail is the main goal of the power design.</p>
 </ul>
 <h2 id="power-domains">Power domains</h2>
 <ul>
-<li><strong>Motor rail:</strong> a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 H-bridge
+<li><strong>Motor rail:</strong> a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 Motor Controller
   and JGB37-520 DC drive motors. A DROK DC buck converter steps voltage down where a rail needs it,
   large 10000 uF electrolytic capacitors buffer the motor rail against current spikes, and
   ATC/ATO fuses protect against shorts.</li>

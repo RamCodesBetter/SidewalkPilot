@@ -1,6 +1,6 @@
 # Runtime Configuration
 
-This page documents the steering-servo constants in `code/controller/current/rc_car_app/config.py` and how `code/controller/current/rc_car_app/hardware.py` turns a logical steering command into a real PCA9685 pulse. Logical steering is `0 = left`, `90 = center`, `180 = right`; the servo is on the PCA9685 at I2C `0x40`, channel `0`, running at 50 Hz.
+This page documents the steering-servo constants in `code/controller/current/rc_car_app/config.py` and how `code/controller/current/rc_car_app/hardware.py` turns a logical steering command into a real PCA9685 Servo Controller pulse. Logical steering is `0 = left`, `90 = center`, `180 = right`; the servo is on the PCA9685 Servo Controller at I2C `0x40`, channel `0`, running at 50 Hz.
 
 `config.py` is also the central source for subsystem flags, GPIO assignments, LiDAR thresholds, dashboard transport, controller indices, model defaults, and CSV settings. Values below describe the checked-in branch; environment variables and local tuning files can override selected settings.
 
@@ -44,7 +44,7 @@ If the PCA9685 or its I2C/servo dependencies are missing, `PCA9685SteeringServo.
 | Right motor forward/backward | BCM 19 / 20 |
 | Left motor forward/backward | BCM 25 / 13 |
 | Hall-effect wheel sensor | BCM 24 |
-| PCA9685 steering | I2C `0x40`, channel 0 |
+| PCA9685 Servo Controller | I2C `0x40`, channel 0 |
 
 Motor outputs use 1 kHz PWM. Both motor scale factors are currently `1.0`.
 

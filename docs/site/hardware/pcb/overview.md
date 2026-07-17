@@ -4,12 +4,12 @@ The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadbo
 
 ## How it works
 
-Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 servo driver over I2C, to a Yahboom AT8236 H-bridge over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.
+Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 Servo Controller over I2C, to a Yahboom AT8236 Motor Controller over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.
 
 The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:
 
-- The **PCA9685** servo driver breaks out on the I2C bus (`0x40`, channel 0).
-- The **AT8236 motor driver** takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
+- The **PCA9685 Servo Controller** breaks out on the I2C bus (`0x40`, channel 0).
+- The **AT8236 Motor Controller** takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
   and controls the JGB37-520 DC motors rated for 12 V and 550 RPM.
 - The **hall sensor**, **LiDAR**, **GPS/compass**, and **IMU** each get a labeled connector.
 - Power and ground rails are shared instead of daisy-chained through the breadboard.
@@ -37,7 +37,7 @@ The next schematic must cover:
 
 - shared and separated power/ground paths with reviewed voltage levels and current limits;
 - I2C to the PCA9685 at `0x40`;
-- four AT8236 direction/PWM lines on BCM 19, 20, 25, and 13;
+- four AT8236 Motor Controller direction/PWM lines on BCM 19, 20, 25, and 13;
 - Hall input on BCM 24;
 - connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement actually selected for the final harness.
 

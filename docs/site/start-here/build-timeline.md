@@ -12,7 +12,7 @@ I started SidewalkPilot at the beginning of April 2025. I considered roads, curb
 
 The first platform was much smaller and simpler than the current car. It used a Raspberry Pi 5, LiDAR, one motor controller, one small MAX7219 display, lights, indicators, a horn, and basic controls. The early software used a graphical interface before I replaced it with an Xbox controller. The first challenge was simply making the car drive reliably while preserving manual control as a fallback.
 
-Without a dedicated servo controller, steering jittered and did not return reliably to straight. Adding the PCA9685 gave the steering servo a stable PWM source. LiDAR wall-following then became the first autonomous behavior and worked over approximately 2-3 meters. I removed it because the actual goal was camera-based self-driving, not following a wall.
+Without a dedicated Servo Controller, steering jittered and did not return reliably to straight. Adding the PCA9685 Servo Controller gave the steering servo a stable PWM source. LiDAR wall-following then became the first autonomous behavior and worked over approximately 2-3 meters. I removed it because the actual goal was camera-based self-driving, not following a wall.
 
 By July 2025, the basic drivable car and its early autonomous-control foundation existed.
 

@@ -79,8 +79,8 @@ Training runs on an NVIDIA RTX 6000 Ada-Generation GPU. The Series 3/4 trainers 
 | Chassis | Yahboom Ackermann 520M |
 | Camera | Raspberry Pi Camera Module 3 Wide |
 | Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through CP2102 USB |
-| Steering | PCA9685 PWM driver and 25KG steering servo |
-| Drive | Yahboom AT8236 motor controller and JGB37-520 DC motors (12 V, 550 RPM) |
+| Steering | PCA9685 Servo Controller and 25KG steering servo |
+| Drive | Yahboom AT8236 Motor Controller and JGB37-520 DC motors (12 V, 550 RPM) |
 | Navigation | BN880 GPS; onboard HMC5883L compass is bench-only (not used during runtime) |
 | Motion feedback | Hall-effect wheel-speed sensor and external IMU |
 | Manual control | Xbox Wireless Controller |

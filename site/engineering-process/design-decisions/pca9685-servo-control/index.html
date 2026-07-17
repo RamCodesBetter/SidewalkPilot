@@ -342,22 +342,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="pca9685-servo-control">PCA9685 Servo Control</h1>
+                <h1 id="pca9685-servo-controller">PCA9685 Servo Controller</h1>
 <p>This page records the decision to drive the Ackermann steering servo through a
-<strong>PCA9685 16-channel PWM board over I2C</strong> instead of generating the servo pulse
+<strong>PCA9685 Servo Controller over I2C</strong> instead of generating the servo pulse
 directly from a Raspberry Pi GPIO pin.</p>
 <h2 id="decision">Decision</h2>
-<p>The steering servo is wired to a PCA9685 at I2C address <code>0x40</code>, channel <code>0</code>,
+<p>The steering servo is wired to a PCA9685 Servo Controller at I2C address <code>0x40</code>, channel <code>0</code>,
 running at 50 Hz, and is driven through the Adafruit <code>ServoKit</code> abstraction. The
 Raspberry Pi 5 never toggles the servo signal line itself; it writes an angle to the
-PCA9685, which owns the pulse-width generation in dedicated hardware. The exact
+PCA9685 Servo Controller, which owns the pulse-width generation in dedicated hardware. The exact
 configuration lives in <code>code/controller/current/rc_car_app/config.py</code>:</p>
 <ul>
 <li><code>PCA9685_I2C_ADDRESS = 0x40</code>, <code>PCA9685_SERVO_CHANNEL = 0</code>, <code>PCA9685_FREQUENCY_HZ = 50</code></li>
 <li>Pulse range <code>STEERING_SERVO_MIN_PULSE_US = 1000</code> to <code>STEERING_SERVO_MAX_PULSE_US = 2000</code></li>
 <li><code>STEERING_SERVO_ACTUATION_RANGE_DEG = 180</code></li>
 </ul>
-<p>The driver class <code>PCA9685SteeringServo</code> in
+<p>The wrapper class <code>PCA9685SteeringServo</code> in
 <code>code/controller/current/rc_car_app/hardware.py</code> wraps the board and exposes a
 simple <code>value</code> setter in the logical <code>0..180</code> degree space (<code>0</code> = left,
 <code>90</code> = center, <code>180</code> = right). Any real-hardware center/trim compensation is
@@ -380,7 +380,7 @@ degrees.</p>
 <td>the Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch; competes with the many other GPIO/PWM users already on the Raspberry Pi 5 (four motor pins, hall sensor)</td>
 </tr>
 <tr>
-<td><strong>PCA9685 over I2C (chosen)</strong></td>
+<td><strong>PCA9685 Servo Controller over I2C (chosen)</strong></td>
 <td>dedicated 50 Hz pulse generation reduces dependence on Raspberry Pi 5 loop timing; frees Raspberry Pi 5 GPIO; reuses the Adafruit <code>ServoKit</code> library</td>
 <td>one extra board + I2C, power, calibration, and servo dependencies</td>
 </tr>

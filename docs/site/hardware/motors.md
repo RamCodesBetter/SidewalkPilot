@@ -1,7 +1,7 @@
 # Motors
 
 The car uses JGB37-520 DC drive motors rated for 12 V and 550 RPM. They are driven by a
-Yahboom AT8236 dual H-bridge, which the Raspberry Pi 5 controls with PWM on four GPIO
+Yahboom AT8236 Motor Controller, which the Raspberry Pi 5 controls with PWM on four GPIO
 pins. Steering is separate (a servo on the PCA9685); these motors only provide thrust.
 
 ## Parts (Amazon)
@@ -34,7 +34,7 @@ the forward pins get a PWM duty and the backward pins stay at 0; reverse swaps t
 ## How it works
 
 - The control loop computes a motor PWM value (0..1) from throttle, cruise/PID, or autonomy,
-  clamped by acceleration/brake rates, and writes it to the AT8236 through the four GPIO
+  clamped by acceleration/brake rates, and writes it to the AT8236 Motor Controller through the four GPIO
   channels.
 - Per-side scaling constants `LEFT_MOTOR_PWM_SCALE` and `RIGHT_MOTOR_PWM_SCALE` (both `1.0`
   currently) can trim a measured drive-force mismatch. A pull can also come from steering
@@ -42,11 +42,11 @@ the forward pins get a PWM duty and the backward pins stay at 0; reverse swaps t
   after a restrained/straight-line test isolates motor thrust as the cause.
 - Partial braking ramps PWM toward zero using the configured brake rates. A full brake
   force (including an AEB emergency stop) bypasses that ramp, forces motor PWM to zero,
-  and drives both AT8236 inputs high on each side for active brake mode.
+  and drives both AT8236 Motor Controller inputs high on each side for active brake mode.
 
 ## Why this choice
 
-- The AT8236 is an inexpensive dual H-bridge sized for this chassis, and it exposes simple
+- The AT8236 Motor Controller is sized for this chassis and exposes simple
   PWM/direction control that maps cleanly onto four GPIO pins.
 - Keeping optional left/right motor scaling separate from steering calibration makes the two
   effects measurable instead of hiding one inside the other.

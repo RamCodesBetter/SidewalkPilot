@@ -11,7 +11,7 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 |---|---|---|
 | Chassis and steering | Yahboom Ackermann 520M, JGB37-520 DC motors (12 V, 550 RPM), high-torque steering servo, steering rods/linkage | Physical vehicle, drive power, and car-like front-wheel geometry |
 | AI compute | Jetson Orin Nano | ONNX camera-steering inference |
-| Main controller | Raspberry Pi 5, PCA9685, AT8236 interface wiring | Sensors, controller, servo, motors, safety, logs |
+| Main controller | Raspberry Pi 5, PCA9685 Servo Controller, AT8236 Motor Controller | Sensors, controller, servo, motors, safety, logs |
 | Display computer | Zero 2 W, Waveshare 64x32 HUB75 panel | Independent live telemetry display |
 | Vision | Raspberry Pi Camera Module 3 Wide | Forward sidewalk image stream and training photos |
 | Obstacle sensing | Youyeetoo FHL-LD19 360-degree LiDAR, CP2102 USB adapter | Center-corridor slowdown and emergency braking |
@@ -48,7 +48,7 @@ Current software assignments include:
 
 | Function | Assignment |
 |---|---|
-| PCA9685 | I2C address `0x40`, channel 0, 50 Hz |
+| PCA9685 Servo Controller | I2C address `0x40`, channel 0, 50 Hz |
 | Steering pulse range | 1000 to 2000 microseconds |
 | Right motor forward/backward | GPIO 19 / GPIO 20 |
 | Left motor forward/backward | GPIO 25 / GPIO 13 |

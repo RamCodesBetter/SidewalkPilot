@@ -1,7 +1,7 @@
 # Power
 
 The car carries its own power. Its JGB37-520 DC drive motors (12 V, 550 RPM) are fed from
-a 3S LiPo through the AT8236, while the compute boards (Jetson Orin Nano, Raspberry Pi 5,
+a 3S LiPo through the AT8236 Motor Controller, while the compute boards (Jetson Orin Nano, Raspberry Pi 5,
 Zero 2 W) run from high-output USB power banks. Separating the noisy motor rail from the
 clean logic rail is the main goal of the power design.
 
@@ -17,7 +17,7 @@ clean logic rail is the main goal of the power design.
 - [OVONIC 2S (7.4V) 5200mAh 50C](https://www.amazon.com/OVONIC-5200mAh-Connector-Airplane-Helicopter/dp/B07JJ4Q65Z/ref=sr_1_8?crid=2NY4T275TZZDB&dib=eyJ2IjoiMSJ9.Rx8egGP6AfIhC3F36F5hy8xQM1pkK1UUD4O91eWDFWOL-Fw_cr1d5doCeeuUT0vxny-_y3O_y6AvLNoltS2AIQGWh2vtm95tvG8lWMBekmPIH12AGF8m8L9jMd0PL185T55rPshJNzElpkimOm41_aKg9BzsrzMo2SwYsfhdHiOs76vWOg0-0VAyHhjtpP_DZLezpPq5ng148Zxdwn0YhipqGVkLzsBOTkzVveF1asJP3y7wRCdIfSB99gM3_zZT0jaL8XqqjPpJpKtFuqUgeO5Y3tqUu8EIWLsFjBN5xiU.lwZBeg8mwdMMPBLFXqVR_ZQzgn0Lq4VTwuzRRhEU7AE&dib_tag=se&keywords=ovonic+2s+lipo+battery+5200mah+t+plug&qid=1779576913&sprefix=ovonic+2s+lipo+battery+5200mah+t+plu%2Caps%2C177&sr=8-8) — $13.29
 ## Power domains
 
-- **Motor rail:** a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 H-bridge
+- **Motor rail:** a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 Motor Controller
   and JGB37-520 DC drive motors. A DROK DC buck converter steps voltage down where a rail needs it,
   large 10000 uF electrolytic capacitors buffer the motor rail against current spikes, and
   ATC/ATO fuses protect against shorts.

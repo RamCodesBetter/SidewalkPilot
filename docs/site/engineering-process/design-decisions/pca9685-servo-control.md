@@ -1,22 +1,22 @@
-# PCA9685 Servo Control
+# PCA9685 Servo Controller
 
 This page records the decision to drive the Ackermann steering servo through a
-**PCA9685 16-channel PWM board over I2C** instead of generating the servo pulse
+**PCA9685 Servo Controller over I2C** instead of generating the servo pulse
 directly from a Raspberry Pi GPIO pin.
 
 ## Decision
 
-The steering servo is wired to a PCA9685 at I2C address `0x40`, channel `0`,
+The steering servo is wired to a PCA9685 Servo Controller at I2C address `0x40`, channel `0`,
 running at 50 Hz, and is driven through the Adafruit `ServoKit` abstraction. The
 Raspberry Pi 5 never toggles the servo signal line itself; it writes an angle to the
-PCA9685, which owns the pulse-width generation in dedicated hardware. The exact
+PCA9685 Servo Controller, which owns the pulse-width generation in dedicated hardware. The exact
 configuration lives in `code/controller/current/rc_car_app/config.py`:
 
 - `PCA9685_I2C_ADDRESS = 0x40`, `PCA9685_SERVO_CHANNEL = 0`, `PCA9685_FREQUENCY_HZ = 50`
 - Pulse range `STEERING_SERVO_MIN_PULSE_US = 1000` to `STEERING_SERVO_MAX_PULSE_US = 2000`
 - `STEERING_SERVO_ACTUATION_RANGE_DEG = 180`
 
-The driver class `PCA9685SteeringServo` in
+The wrapper class `PCA9685SteeringServo` in
 `code/controller/current/rc_car_app/hardware.py` wraps the board and exposes a
 simple `value` setter in the logical `0..180` degree space (`0` = left,
 `90` = center, `180` = right). Any real-hardware center/trim compensation is
@@ -29,7 +29,7 @@ degrees.
 | Option | Pros | Cons |
 |---|---|---|
 | Direct Raspberry Pi 5 GPIO PWM (software or hardware PWM pin) | one fewer board; no I2C dependency | the Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch; competes with the many other GPIO/PWM users already on the Raspberry Pi 5 (four motor pins, hall sensor) |
-| **PCA9685 over I2C (chosen)** | dedicated 50 Hz pulse generation reduces dependence on Raspberry Pi 5 loop timing; frees Raspberry Pi 5 GPIO; reuses the Adafruit `ServoKit` library | one extra board + I2C, power, calibration, and servo dependencies |
+| **PCA9685 Servo Controller over I2C (chosen)** | dedicated 50 Hz pulse generation reduces dependence on Raspberry Pi 5 loop timing; frees Raspberry Pi 5 GPIO; reuses the Adafruit `ServoKit` library | one extra board + I2C, power, calibration, and servo dependencies |
 
 ## Reason
 

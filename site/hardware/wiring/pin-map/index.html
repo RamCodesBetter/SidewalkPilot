@@ -347,7 +347,7 @@
                 <h1 id="wiring-and-pin-map">Wiring and Pin Map</h1>
 <p>A consolidated reference for power domains, primary sensors, actuators, and inter-computer links.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (servo driver via PCA9685), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
+<p>The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (PCA9685 Servo Controller), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
 <h2 id="master-pin-port-table">Master pin / port table</h2>
 <table>
 <thead>
@@ -362,35 +362,35 @@
 <tbody>
 <tr>
 <td>Steering servo</td>
-<td>PCA9685 16-ch PWM driver → chassis servo</td>
+<td>PCA9685 Servo Controller -&gt; chassis servo</td>
 <td>I2C bus 1</td>
 <td>address <code>0x40</code>, servo channel <code>0</code>, 50 Hz</td>
 <td><code>PCA9685_I2C_ADDRESS</code>, <code>PCA9685_SERVO_CHANNEL</code>, <code>PCA9685_FREQUENCY_HZ</code></td>
 </tr>
 <tr>
 <td>Right drive control (forward)</td>
-<td>AT8236 H-bridge -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
+<td>AT8236 Motor Controller -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
 <td>GPIO (BCM)</td>
 <td><code>GPIO 19</code></td>
 <td><code>MOTOR_RIGHT_FWD_PIN</code></td>
 </tr>
 <tr>
 <td>Right drive control (backward)</td>
-<td>AT8236 H-bridge -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
+<td>AT8236 Motor Controller -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
 <td>GPIO (BCM)</td>
 <td><code>GPIO 20</code></td>
 <td><code>MOTOR_RIGHT_BWD_PIN</code></td>
 </tr>
 <tr>
 <td>Left drive control (forward)</td>
-<td>AT8236 H-bridge -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
+<td>AT8236 Motor Controller -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
 <td>GPIO (BCM)</td>
 <td><code>GPIO 25</code></td>
 <td><code>MOTOR_LEFT_FWD_PIN</code></td>
 </tr>
 <tr>
 <td>Left drive control (backward)</td>
-<td>AT8236 H-bridge -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
+<td>AT8236 Motor Controller -&gt; JGB37-520 DC motors (12 V, 550 RPM)</td>
 <td>GPIO (BCM)</td>
 <td><code>GPIO 13</code></td>
 <td><code>MOTOR_LEFT_BWD_PIN</code></td>
@@ -467,7 +467,7 @@
 <tr>
 <td>Drive</td>
 <td>OVONIC 3S 11.1 V, 5200 mAh LiPo</td>
-<td>AT8236 and JGB37-520 DC motors (12 V, 550 RPM)</td>
+<td>AT8236 Motor Controller and JGB37-520 DC motors (12 V, 550 RPM)</td>
 </tr>
 <tr>
 <td>Jetson Orin Nano</td>
@@ -486,13 +486,13 @@
 </tr>
 </tbody>
 </table>
-<p>The steering servo uses the PCA9685 servo rail rather than a Raspberry Pi 5 GPIO pin. A 10,000 uF bulk capacitor is part of the power design. Separate supplies reduce shared voltage sag but do not eliminate grounding, converter, connector, or electromagnetic-coupling faults. Voltage must be checked under load.</p>
+<p>The steering servo uses the PCA9685 Servo Controller's servo rail rather than a Raspberry Pi 5 GPIO pin. A 10,000 uF bulk capacitor is part of the power design. Separate supplies reduce shared voltage sag but do not eliminate grounding, converter, connector, or electromagnetic-coupling faults. Voltage must be checked under load.</p>
 <h2 id="bus-checks">Bus Checks</h2>
 <pre><code class="language-bash">i2cdetect -y 1
 ip -br addr show usb0
 ss -lunp | grep 8765
 </code></pre>
-<p>Expect the PCA9685 at <code>0x40</code>, the fixed USB-network addresses on the two dashboard computers, and the receiver listening on UDP 8765. UART device permissions and stable <code>/dev/serial/by-id</code> naming should be checked before field use.</p>
+<p>Expect the PCA9685 Servo Controller at <code>0x40</code>, the fixed USB-network addresses on the two dashboard computers, and the receiver listening on UDP 8765. UART device permissions and stable <code>/dev/serial/by-id</code> naming should be checked before field use.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><a href="../../../runtime-code/config/servo-settings/">Runtime Configuration</a></li>

@@ -7,7 +7,7 @@ This page is the top-level block diagram of SidewalkPilot: the three-device comp
 SidewalkPilot runs across three boards, each doing the job it is best at:
 
 - **Jetson Orin Nano at `10.42.0.2:8770` — the heavy model host.** Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Series 1/2 models (`SteeringAutonomyV2`, ~0.67M parameters, 200x66 input) still load directly on the Raspberry Pi 5 inside `vision.py`.
-- **Raspberry Pi 5 (`raspberrypi5`) — the controller.** Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through a PCA9685, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 H-bridge, writes CSV logs, and sends dashboard telemetry. The main loop lives in `code/controller/current/rc_car_app/runtime.py` and ticks at up to 60 Hz (`clock.tick(60)`).
+- **Raspberry Pi 5 (`raspberrypi5`) — the controller.** Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in `code/controller/current/rc_car_app/runtime.py` and ticks at up to 60 Hz (`clock.tick(60)`).
 - **Zero 2 W (`zero2w`) - the dashboard.** Receives telemetry over USB Ethernet and renders it on one HUB75 LED panel. Rendering code is `z2w_dashboard.py`.
 
 ## Links between devices
@@ -35,7 +35,7 @@ Camera + controller + LiDAR + GPS + IMU + hall sensor
       private Ethernet   I/O     USB Ethernet
              /            |             \
             v             v              v
-    Jetson Orin Nano   JGB37-520/servo   Zero 2 W -> HUB75
+    Jetson Orin Nano   motor/servo controllers   Zero 2 W -> HUB75
        FP32 ONNX       final control     dashboard
 ```
 

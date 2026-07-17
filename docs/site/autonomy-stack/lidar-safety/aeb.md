@@ -21,7 +21,7 @@ inside 1.05 m in the center corridor, the policy sets that state and zero thrott
 When AEB is active the runtime forces `brake_force = 1.0`, sets the target PWM to `0.0`,
 selects `AEB_BRAKE_RATE = 10.0`, sets `metrics.aeb_triggered = True`, and cancels cruise
 control. Because the force is full scale, the hard-brake branch snaps motor PWM straight
-to zero and commands H-bridge brake mode instead of using the ramp. The LiDAR policy has
+to zero and commands AT8236 Motor Controller brake mode instead of using the ramp. The LiDAR policy has
 already recorded `stop_reason = "lidar_emergency"`; the fallback `"aeb_stop"` value is
 used only if the reason was empty. When the stop condition clears, `aeb_triggered` returns
 to false.

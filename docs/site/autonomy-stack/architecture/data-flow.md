@@ -6,7 +6,7 @@ SidewalkPilot separates hardware ownership, inference, display, and safety so a 
 Xbox controller ─┐
 Raspberry Pi Camera ───────┤
 LiDAR USB serial ┤
-GPS fixes ───────┤→ Raspberry Pi 5 arbitration → PCA9685 steering + AT8236/JGB37-520 drive
+GPS fixes ───────┤→ Raspberry Pi 5 arbitration → PCA9685 Servo Controller + AT8236 Motor Controller
 Hall sensor ─────┤             │
 USB IMU ─────────┘             ├→ UDP/USB Ethernet → Zero 2 W → HUB75 display
                                └→ JPEG/TCP/Ethernet → Jetson Orin Nano ONNX → cached steering

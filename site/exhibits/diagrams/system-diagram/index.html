@@ -356,7 +356,7 @@
 <p>SidewalkPilot runs across three boards, each doing the job it is best at:</p>
 <ul>
 <li><strong>Jetson Orin Nano at <code>10.42.0.2:8770</code> — the heavy model host.</strong> Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Series 1/2 models (<code>SteeringAutonomyV2</code>, ~0.67M parameters, 200x66 input) still load directly on the Raspberry Pi 5 inside <code>vision.py</code>.</li>
-<li><strong>Raspberry Pi 5 (<code>raspberrypi5</code>) — the controller.</strong> Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through a PCA9685, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 H-bridge, writes CSV logs, and sends dashboard telemetry. The main loop lives in <code>code/controller/current/rc_car_app/runtime.py</code> and ticks at up to 60 Hz (<code>clock.tick(60)</code>).</li>
+<li><strong>Raspberry Pi 5 (<code>raspberrypi5</code>) — the controller.</strong> Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in <code>code/controller/current/rc_car_app/runtime.py</code> and ticks at up to 60 Hz (<code>clock.tick(60)</code>).</li>
 <li><strong>Zero 2 W (<code>zero2w</code>) - the dashboard.</strong> Receives telemetry over USB Ethernet and renders it on one HUB75 LED panel. Rendering code is <code>z2w_dashboard.py</code>.</li>
 </ul>
 <h2 id="links-between-devices">Links between devices</h2>
@@ -378,7 +378,7 @@
       private Ethernet   I/O     USB Ethernet
              /            |             \
             v             v              v
-    Jetson Orin Nano   JGB37-520/servo   Zero 2 W -&gt; HUB75
+    Jetson Orin Nano   motor/servo controllers   Zero 2 W -&gt; HUB75
        FP32 ONNX       final control     dashboard
 </code></pre>
 <p>Source anchors: <code>code/controller/current/rc_car_app/runtime.py</code>, <code>config.py</code>, <code>vision.py</code>, <code>jetson_inference_server.py</code>, <code>hub75_dashboard.py</code>, and <code>z2w_dashboard.py</code>.</p>

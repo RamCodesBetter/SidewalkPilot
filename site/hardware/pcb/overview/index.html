@@ -347,11 +347,11 @@
                 <h1 id="custom-pcb-overview">Custom PCB Overview</h1>
 <p>The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects every sensor and actuator to the Raspberry Pi 5. It is <strong>DESIGNED ONLY</strong> right now: the board has been laid out but it has <strong>not been ordered and not been fabricated</strong>, so nothing on the car runs on it yet. On top of that, the current layout is already outdated. I moved several pins around in the runtime after the board was drawn, so the design's GPIO map no longer matches <code>config.py</code>. A new revision with the corrected GPIO is planned before I ever send anything to a fab house.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 servo driver over I2C, to a Yahboom AT8236 H-bridge over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.</p>
+<p>Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 Servo Controller over I2C, to a Yahboom AT8236 Motor Controller over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.</p>
 <p>The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:</p>
 <ul>
-<li>The <strong>PCA9685</strong> servo driver breaks out on the I2C bus (<code>0x40</code>, channel 0).</li>
-<li>The <strong>AT8236 motor driver</strong> takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
+<li>The <strong>PCA9685 Servo Controller</strong> breaks out on the I2C bus (<code>0x40</code>, channel 0).</li>
+<li>The <strong>AT8236 Motor Controller</strong> takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
   and controls the JGB37-520 DC motors rated for 12 V and 550 RPM.</li>
 <li>The <strong>hall sensor</strong>, <strong>LiDAR</strong>, <strong>GPS/compass</strong>, and <strong>IMU</strong> each get a labeled connector.</li>
 <li>Power and ground rails are shared instead of daisy-chained through the breadboard.</li>
@@ -373,7 +373,7 @@
 <ul>
 <li>shared and separated power/ground paths with reviewed voltage levels and current limits;</li>
 <li>I2C to the PCA9685 at <code>0x40</code>;</li>
-<li>four AT8236 direction/PWM lines on BCM 19, 20, 25, and 13;</li>
+<li>four AT8236 Motor Controller direction/PWM lines on BCM 19, 20, 25, and 13;</li>
 <li>Hall input on BCM 24;</li>
 <li>connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement actually selected for the final harness.</li>
 </ul>

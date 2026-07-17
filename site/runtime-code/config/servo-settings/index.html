@@ -347,7 +347,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="runtime-configuration">Runtime Configuration</h1>
-<p>This page documents the steering-servo constants in <code>code/controller/current/rc_car_app/config.py</code> and how <code>code/controller/current/rc_car_app/hardware.py</code> turns a logical steering command into a real PCA9685 pulse. Logical steering is <code>0 = left</code>, <code>90 = center</code>, <code>180 = right</code>; the servo is on the PCA9685 at I2C <code>0x40</code>, channel <code>0</code>, running at 50 Hz.</p>
+<p>This page documents the steering-servo constants in <code>code/controller/current/rc_car_app/config.py</code> and how <code>code/controller/current/rc_car_app/hardware.py</code> turns a logical steering command into a real PCA9685 Servo Controller pulse. Logical steering is <code>0 = left</code>, <code>90 = center</code>, <code>180 = right</code>; the servo is on the PCA9685 Servo Controller at I2C <code>0x40</code>, channel <code>0</code>, running at 50 Hz.</p>
 <p><code>config.py</code> is also the central source for subsystem flags, GPIO assignments, LiDAR thresholds, dashboard transport, controller indices, model defaults, and CSV settings. Values below describe the checked-in branch; environment variables and local tuning files can override selected settings.</p>
 <h2 id="how-it-works">How it works</h2>
 <p>The servo is driven through the Adafruit <code>ServoKit</code> on the PCA9685. <code>config.py</code> sets the electrical envelope and the center trim, and <code>hardware.py</code>'s <code>PCA9685SteeringServo</code> applies them.</p>
@@ -444,7 +444,7 @@
 <td>BCM 24</td>
 </tr>
 <tr>
-<td>PCA9685 steering</td>
+<td>PCA9685 Servo Controller</td>
 <td>I2C <code>0x40</code>, channel 0</td>
 </tr>
 </tbody>
