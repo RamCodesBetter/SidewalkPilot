@@ -42,7 +42,7 @@ A consolidated pin map is a safety and debugging tool. Because motor pins move r
 | Raspberry Pi 5 and Zero 2 W | INIU 10,000 mAh, 45 W bank | Control and dashboard computers |
 | HUB75 display | OVONIC 2S 7.4 V, 5200 mAh LiPo through fused buck converter | LED matrix |
 
-The steering servo uses the PCA9685 Servo Controller's servo rail rather than a Raspberry Pi 5 GPIO pin. A 10,000 uF bulk capacitor is part of the power design. Separate supplies reduce shared voltage sag but do not eliminate grounding, converter, connector, or electromagnetic-coupling faults. Voltage must be checked under load.
+The steering servo uses the PCA9685 Servo Controller's servo rail rather than a Raspberry Pi 5 GPIO pin. Separate supplies reduce shared voltage sag but do not eliminate grounding, converter, connector, or electromagnetic-coupling faults. Voltage must be checked under load.
 
 ## Bus Checks
 
