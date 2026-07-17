@@ -53,6 +53,6 @@ steering model on the **Jetson Orin Nano**, instead of using a single computer.
 
 ## Related pages
 
-- `start-here/system-at-a-glance.md`
-- `autonomy-stack/architecture/layered-autonomy.md`
+- `start-here/project-overview.md`
+- `autonomy-stack/architecture/data-flow.md`
 - `hardware/compute.md`

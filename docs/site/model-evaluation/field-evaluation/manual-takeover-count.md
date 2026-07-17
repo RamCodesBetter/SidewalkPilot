@@ -44,4 +44,4 @@ checkpoint is promoted over v3.4.
 
 - `ai-and-models/training-pipeline/metrics.md`
 - `testing/field-testing/model-retest-plan.md`
-- `portfolio-evidence/claims-and-proof/model-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`

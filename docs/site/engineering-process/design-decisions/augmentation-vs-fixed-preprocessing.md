@@ -6,8 +6,7 @@ inference-time preprocessing transform (like always running CLAHE on the car).
 
 ## Decision
 
-Inference preprocessing stays minimal and fixed — raw BGR, resize, normalize (see
-the raw-BGR-vs-CLAHE decision). All the robustness work happens at **training
+Inference preprocessing stays minimal and fixed — raw BGR, resize, normalize. All the robustness work happens at **training
 time**, in `augment_image(...)` and the dataset loader in
 `code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py`. Each training frame
 is randomly perturbed, so the network sees multiple lighting/viewpoint
@@ -49,6 +48,14 @@ Care point: aggressive augmentation can obscure useful image signal. The histori
 records do not isolate one augmentation parameter as the cause of a field regression, so
 strength and probability remain experimental settings rather than settled facts.
 
+## Runtime Preprocessing Contract
+
+The camera captures OpenCV `BGR888`; current Series 3/4 inference keeps BGR, resizes, and
+normalizes with `(x/255 - 0.5)/0.5`. Only legacy models 2.0 and 2.0b enable HSV-value
+CLAHE. This version-specific exception preserves train/runtime parity. Applying CLAHE to a
+checkpoint that was trained on raw BGR would silently change its input distribution, while
+applying it universally could amplify hard shadow boundaries and add per-frame CPU work.
+
 ## Alternatives considered
 
 | Option | Pros | Cons |
@@ -67,6 +74,6 @@ strength and probability remain experimental settings rather than settled facts.
 
 ## Related pages
 
-- `engineering-process/design-decisions/raw-bgr-vs-clahe.md`
+- `autonomy-stack/camera-steering/model-inference.md`
 - `testing/failures/overview.md`
 - `roadmap/next-steps.md`

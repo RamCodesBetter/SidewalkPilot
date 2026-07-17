@@ -35,5 +35,5 @@ python3 code/test_files/sensors/imu_yaw_test.py --port /dev/ttyAMA3 --axis 2 --m
 ## Related pages
 
 - `hardware/imu.md`
-- `autonomy-stack/camera-steering/yaw-rate-pid.md`
+- `hardware/imu.md`
 - `testing/bench-tests/overview.md`

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>Jetson Inference Link - SidewalkPilot RC Car</title>
+    <title>Jetson Orin Nano Inference Link - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Jetson Inference Link";
+        var mkdocs_page_name = "Jetson Orin Nano Inference Link";
         var mkdocs_page_input_path = "autonomy-stack/camera-steering/jetson-inference-link.md";
         var mkdocs_page_url = null;
       </script>
@@ -50,8 +50,6 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/mission/">Mission</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../start-here/system-at-a-glance/">System at a Glance</a>
-                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/current-status/">Current Status</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../start-here/build-timeline/">Build Timeline</a>
@@ -59,66 +57,18 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" >Reader Paths</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/30-second-overview/">30 Second Overview</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/deep-engineering-tour/">Deep Engineering Tour</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
-                </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >Demonstrations</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/demonstrations/hero-run/">Hero Run</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/demonstrations/successful-autonomous-runs/">Successful Autonomous Runs</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/demonstrations/safety-override-demo/">Safety Override Demo</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/demonstrations/navigation-demo/">Navigation Demo</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/demonstrations/dashboard-demo/">Dashboard Demo</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/demonstrations/night-failure-demo/">Night Failure Demo</a>
-                </li>
-    </ul>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" >Claims and Proof</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/autonomy-claim/">Autonomy Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/safety-claim/">Safety Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/data-claim/">Data Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/model-claim/">Model Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/navigation-claim/">Navigation Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/hardware-claim/">Hardware Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../portfolio-evidence/claims-and-proof/reproducibility-claim/">Reproducibility Claim</a>
-                </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Autonomy Stack</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" >Architecture</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../architecture/layered-autonomy/">Layered Autonomy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../architecture/data-flow/">Data Flow</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../architecture/data-flow/">Control Architecture and Data Flow</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../architecture/decision-priority/">Decision Priority</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../architecture/runtime-states/">Runtime States</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../architecture/failure-boundaries/">Failure Boundaries</a>
                 </li>
     </ul>
                   </li>
@@ -126,17 +76,11 @@
     <ul class="current">
                 <li class="toctree-l2"><a class="reference internal" href="../overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../frame-capture/">Frame Capture</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../preprocessing/">Preprocessing</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../model-inference/">Model Inference</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../servo-output/">Servo Output</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Inference Link</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Jetson Orin Nano Inference Link</a>
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#frame-path">Frame Path</a>
     </li>
@@ -148,33 +92,13 @@
     </li>
     </ul>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../yaw-rate-pid/">Yaw-Rate PID Steering</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../temporal-smoothing/">Temporal Smoothing</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../steering-hysteresis/">Steering Hysteresis</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../throttle-control/">Throttle Control</a>
-                </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >LiDAR Safety</a>
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/packet-parsing/">Packet Parsing</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/distance-regions/">Distance Regions</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/aeb/">AEB</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/override-steering/">Why LiDAR Does Not Steer</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/reconnect-behavior/">Reconnect Behavior</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/clearance-and-heading-scoring/">Clearance & Heading Scoring</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../lidar-safety/object-clustering/">Object Clustering</a>
                 </li>
     </ul>
                   </li>
@@ -182,66 +106,26 @@
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../navigation/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/gps-reader/">GPS Reader</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/graph-format/">Graph Format</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/a-star/">A*</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/turn-penalties/">Turn Penalties</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/ai-manual-segments/">AI Manual Segments</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../navigation/crosswalk-handoff/">Crosswalk Handoff</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/resume-radius/">Resume Radius</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/house-snapping/">House Snapping</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../navigation/compass-heading/">Compass Heading</a>
                 </li>
     </ul>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Engineering Process</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" >Requirements</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/requirements/goals/">Goals</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/requirements/non-goals/">Non Goals</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/requirements/constraints/">Constraints</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/requirements/success-criteria/">Success Criteria</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/requirements/test-gates/">Test Gates</a>
-                </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Design Decisions</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/raw-bgr-vs-clahe/">Raw BGR vs CLAHE</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/manual-crosswalk-handoff/">Manual Crosswalk Handoff</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pca9685-servo-control/">PCA9685 Servo Control</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/dashboard-udp-telemetry/">Dashboard UDP Telemetry</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/correction-json-as-label-source/">Correction JSON As Label Source</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/carla-weighting/">CARLA Weighting</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/design-decisions/hybrid-head-vs-regression/">Hybrid Head vs Regression</a>
                 </li>
@@ -252,16 +136,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure to Dataset</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/retest-policy/">Retest Policy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/rollback-policy/">Rollback Policy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/historical-metrics-policy/">Historical Metrics Policy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/bang-bang-collapse/">Bang-Bang Collapse</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/shadow-aug-and-flip/">Shadow Aug and Turn Flip</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../engineering-process/iteration-records/turn-vs-shadow-tradeoff/">Turn vs Shadow Tradeoff</a>
                 </li>
@@ -516,7 +390,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -926,7 +800,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Quantization</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/jetson-quantization/">Jetson Orin Nano Quantization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../roadmap/turn-in-shadow-collection/">Turn-In-Shadow Collection</a>
                   </li>
@@ -947,7 +821,7 @@
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Autonomy Stack</li>
           <li class="breadcrumb-item">Camera Steering</li>
-      <li class="breadcrumb-item active">Jetson Inference Link</li>
+      <li class="breadcrumb-item active">Jetson Orin Nano Inference Link</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -956,18 +830,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="jetson-inference-link">Jetson Inference Link</h1>
-<p>The Raspberry Pi 5 and NVIDIA Jetson Orin Nano communicate over a private point-to-point Ethernet network. The Pi is <code>10.42.0.1</code>; Jon is <code>10.42.0.2:8770</code>. The link does not depend on Wi-Fi or internet access.</p>
+                <h1 id="jetson-orin-nano-inference-link">Jetson Orin Nano Inference Link</h1>
+<p>The Raspberry Pi 5 and Jetson Orin Nano communicate over a private point-to-point Ethernet network. The Raspberry Pi 5 is <code>10.42.0.1</code>; Jetson Orin Nano is <code>10.42.0.2:8770</code>. The link does not depend on Wi-Fi or internet access.</p>
 <h2 id="frame-path">Frame Path</h2>
 <ol>
-<li>The Pi camera thread captures the latest OpenCV BGR frame.</li>
+<li>The Raspberry Pi 5 camera thread captures the latest OpenCV BGR frame.</li>
 <li>The asynchronous client keeps only the newest pending frame, preventing a backlog.</li>
 <li>The client JPEG-encodes the frame and sends the selected model version plus JPEG bytes over persistent TCP.</li>
-<li>Jon resolves/hot-swaps the requested artifact.</li>
-<li>Jon decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.</li>
-<li>Jon decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.</li>
-<li>The Pi accepts only a result for the active model that is no more than 0.25 seconds old.</li>
-<li>The Pi applies steering EMA, LiDAR/AEB arbitration, yaw/hardware mapping, and actuator commands.</li>
+<li>Jetson Orin Nano resolves/hot-swaps the requested artifact.</li>
+<li>Jetson Orin Nano decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.</li>
+<li>Jetson Orin Nano decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.</li>
+<li>The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.25 seconds old.</li>
+<li>The Raspberry Pi 5 applies steering EMA, LiDAR/AEB arbitration, yaw/hardware mapping, and actuator commands.</li>
 </ol>
 <p>JPEG encoding, connection attempts, sends, receives, and status polls run in <code>AsyncJetsonSteeringClient</code>, not the 60 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.</p>
 <h2 id="model-contracts">Model Contracts</h2>
@@ -1019,19 +893,19 @@
 </tr>
 </tbody>
 </table>
-<p>For PC/PCF, Jon owns the causal history because it serializes inference. The history initializes to <code>[90,90,90]</code>, appends each decoded current target, and resets on model load/switch, reconnect, or status-only/manual periods.</p>
+<p>For PC/PCF, Jetson Orin Nano owns the causal history because it serializes inference. The history initializes to <code>[90,90,90]</code>, appends each decoded current target, and resets on model load/switch, reconnect, or status-only/manual periods.</p>
 <h2 id="gpu-selection">GPU Selection</h2>
-<p>Jon prefers <code>CUDAExecutionProvider</code> with CPU fallback. TensorRT is selected only when CUDA is unavailable. Registering both CUDA and a partially installed TensorRT provider can make ONNX Runtime reject the complete provider list and silently fall back to CPU; the runtime avoids that failure mode.</p>
+<p>Jetson Orin Nano prefers <code>CUDAExecutionProvider</code> with CPU fallback. TensorRT is selected only when CUDA is unavailable. Registering both CUDA and a partially installed TensorRT provider can make ONNX Runtime reject the complete provider list and silently fall back to CPU; the runtime avoids that failure mode.</p>
 <p>Series 4 was verified against all six real ONNX exports with CUDA active. The output shapes and probability sums matched their contracts.</p>
 <h2 id="failure-boundary">Failure Boundary</h2>
-<p>Jetson network and inference work runs outside the main controller loop, so the Pi does not intentionally wait on Jon before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Pi remains final software authority over motors, steering mapping, AEB, and cleanup.</p>
-<p>See <a href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi + Jetson Compute Split</a> and <a href="../../../runtime-code/runtime-loop/">Runtime Loop</a>.</p>
+<p>Jetson Orin Nano network and inference work runs outside the main controller loop, so the Raspberry Pi 5 does not intentionally wait on Jetson Orin Nano before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Raspberry Pi 5 remains final software authority over motors, steering mapping, AEB, and cleanup.</p>
+<p>See <a href="../../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Raspberry Pi 5 + Jetson Orin Nano Compute Split</a> and <a href="../../../runtime-code/runtime-loop/">Runtime Loop</a>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../series-differences/" class="btn btn-neutral float-left" title="Series Differences"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../yaw-rate-pid/" class="btn btn-neutral float-right" title="Yaw-Rate PID Steering">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../lidar-safety/overview/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -1057,7 +931,7 @@
       <span><a href="../series-differences/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../yaw-rate-pid/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../../lidar-safety/overview/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

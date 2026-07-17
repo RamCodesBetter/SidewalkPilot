@@ -1,26 +1,44 @@
 # Build Timeline
 
-This timeline is organized by engineering phase because many early experiments were iterative rather than formal releases. The project began in early April 2025 after a smaller Raspberry Pi Pico project. Exact dates are included only where the project record supports them.
+This timeline is organized by engineering phase because many early experiments were iterative rather than formal releases. Exact dates are included only where the project record supports them.
 
-## Phase 1: Build a Drivable Research Car
+## February-March 2025: Raspberry Pi Pico Alarm Clock
 
-The project began by turning an Ackermann-steering RC chassis into a software-controlled platform. The Raspberry Pi 5 took ownership of motor direction, PWM throttle, PCA9685 servo control, camera capture, controller input, and cleanup.
+Before SidewalkPilot, I built an alarm clock around a Raspberry Pi Pico, bright RGB LEDs, a buzzer, and an RFID reader. The RFID card stayed in the bathroom, so silencing the 6:00 a.m. alarm required getting out of bed and scanning the card. Finding an Orange Pi in my dad's desk had first made me curious about single-board computers, and the Pico project gave me a smaller place to begin.
 
-This phase established the non-negotiable baseline: manual driving had to remain available while every later autonomy feature was added.
+## April-July 2025: SidewalkPilot Begins
 
-## Phase 2: Learn Steering from Images
+I started SidewalkPilot at the beginning of April 2025. I considered roads, curbs, and indoor robots before choosing sidewalks. Roads were unsafe for an RC-scale vehicle around full-size traffic. Curbs were narrow, visually ambiguous autonomy corridors. An indoor robot did not match the road-like "mini Tesla" project I wanted to build. Sidewalks offered repeated structure and a practical road-like autonomy problem at RC-car scale.
 
-Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. Field photos and their steering corrections became the training source, and regular plus `b` checkpoints began to preserve final-epoch and best-validation behavior separately.
+The first platform was much smaller and simpler than the current car. It used a Raspberry Pi 5, LiDAR, one motor controller, one small MAX7219 display, lights, indicators, a horn, and basic controls. The early software used a graphical interface before I replaced it with an Xbox controller. The first challenge was simply making the car drive reliably while preserving manual control as a fallback.
+
+Without a dedicated servo controller, steering jittered and did not return reliably to straight. Adding the PCA9685 gave the steering servo a stable PWM source. LiDAR wall-following then became the first autonomous behavior and worked over approximately 2-3 meters. I removed it because the actual goal was camera-based self-driving, not following a wall.
+
+By July 2025, the basic drivable car and its early autonomous-control foundation existed.
+
+## August 2025-January 2026: Project Break
+
+Development paused after the first platform. Work resumed in February 2026.
+
+## February-March 2026: Hardware and Software Expansion
+
+The project expanded to include camera capture, labeling, motor control, steering calibration, LiDAR processing, GPS and navigation work, telemetry, and safety behavior. The design also began growing from one small computer toward separate inference, control, and display roles.
+
+Mechanical steering alignment and linkage slop became persistent problems. A physically misaligned steering mechanism delayed serious photo collection by roughly 2.5 weeks. During this broader development period, the car also completed an early approximately 0.5-mile physical autonomy run with five interventions, or roughly 0.1 miles per intervention. The exact date and complete run record were not preserved, so that result is historical context rather than a formal benchmark.
+
+## April 2026: Learn Steering from Images
+
+Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. The Series 1/2 training corpus combined approximately 2,000-3,000 real field images with 50,000 CARLA-generated images from several randomized maps. Steering corrections supplied revised labels, while regular plus `b` checkpoints preserved final-epoch and best-validation behavior separately.
 
 The achievement was not a perfect model. It was proving the complete loop from human driving, to labels, to GPU training, to a physical autonomous run.
 
-## Phase 3: Refine Data and Preprocessing
+## Late April-May 2026: Refine Data and Preprocessing
 
-Series 2 retained direct steering regression while exploring cleaner data, corrections, steering ranges, and lighting preprocessing. HSV/CLAHE variants tested whether fixed contrast enhancement could protect the model from difficult exposure.
+Later Series 1 models and Series 2 retained direct steering regression while exploring cleaner data, corrections, steering ranges, and lighting preprocessing. HSV/CLAHE variants tested whether fixed contrast enhancement could protect the model from difficult exposure.
 
 The lesson was that preprocessing can help one condition while changing useful visual cues elsewhere. Raw imagery plus training-time augmentation remained important.
 
-## Phase 4: Split the Work Across Three Computers
+## 2026: Split the Work Across Three Computers
 
 The system grew into three managers:
 
@@ -30,25 +48,25 @@ The system grew into three managers:
 
 Dedicated Ethernet kept Jetson Orin Nano inference offline. A USB network carried dashboard telemetry. This split made the architecture more capable, but it also introduced real transport, boot-order, service, and stale-data problems that had to be engineered rather than assumed away.
 
-## Phase 5: Series 3 and the Shadow Problem
+## 2026: Series 3 and the Shadow Problem
 
 Series 3 increased input resolution to 320x180 and roughly doubled model capacity. v3.0 retained a simpler output contract. v3.1 and later introduced the 19-value hybrid head so the model could choose a coarse steering class before predicting a class-local offset.
 
 Harsh diagonal tree shadows became the defining failure. Earlier models sometimes followed a dark shadow edge as if it were the edge of the sidewalk. The training pipeline added stronger lighting and synthetic-shadow augmentation, while evaluation expanded beyond mean error to balanced nine-class and turn metrics.
 
-## Phase 6: Steering Mechanics and Calibration
+## 2026: Steering Mechanics and Calibration
 
 Physical steering did not behave like an ideal 0-to-180-degree mechanism. The chassis showed asymmetric return behavior, load effects, and hysteresis. Bench tools stepped the servo through known commands; controller-driven trim tools exposed center offsets; wheel geometry was plotted and fitted to compare left and right behavior.
 
 The project separated **absolute servo commands**, which describe what hardware receives, from **reference steering values**, which preserve a clean 0-to-180 model and display convention. Current runtime calibration uses a `+12D` center trim.
 
-## Phase 7: LiDAR from Detection to Bounded Braking
+## 2026: LiDAR from Detection to Bounded Braking
 
 LiDAR integration went through USB disconnects, UART experiments, motor-enable wiring, packet parsing, and dashboard visualization. A multi-lane swerve-through design was implemented and then removed.
 
 The removal was a safety decision. Obstacle points alone do not reveal the safe sidewalk boundary, so choosing left or right could steer into grass, a curb, or an unseen object. The current system uses one center corridor and only changes longitudinal motion: clear, slow, hold, or emergency brake.
 
-## Phase 8: Make the Dashboard Link Recoverable
+## 2026: Make the Dashboard Link Recoverable
 
 The Zero 2 W dashboard experienced boot-order problems, `NO LINK` states, damaged-port enumeration failures, and intermittent USB networking. Permanent NetworkManager profiles and a USB link-keeper service were added on both computers. The current design uses USB-only telemetry at fixed `192.168.10.1/24` and `192.168.10.2/24` addresses, with no Wi-Fi fallback.
 

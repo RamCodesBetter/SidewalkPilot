@@ -41,5 +41,5 @@ diagnostic trace and state hypotheses separately from observations.
 ## Related pages
 
 - [Field Testing](../../testing/field-testing/overview.md)
-- [Temporal Smoothing](../../autonomy-stack/camera-steering/temporal-smoothing.md)
+- [Model Inference](../../autonomy-stack/camera-steering/model-inference.md)
 - [Failure Clips](../../exhibits/media/failure-clips.md)

@@ -53,6 +53,6 @@ reinvent servo timing.
 
 ## Related pages
 
-- `engineering-process/design-decisions/motor-imbalance-vs-steering-trim.md`
+- `hardware/steering-servo.md`
 - `testing/failures/overview.md`
 - `roadmap/next-steps.md`

@@ -19,7 +19,8 @@ The pipeline is a straight line from bytes to a throttle or braking decision:
 
 1. **Parse.** `LidarParser` reads the LD19's 47-byte packets, extracts 12 measurement
    points each (angle, distance in mm, confidence), and accumulates them into a rolling
-   full scan. See `lidar-safety/packet-parsing.md`.
+   full scan. Parsing, stale-scan handling, and reconnect behavior are documented on the
+   [Hardware LiDAR](../../hardware/lidar.md) page.
 2. **Measure the center corridor.** `lidar_avoidance.center_forward_distance()` filters
    invalid or low-confidence points and returns the nearest positive-forward point within
    the center safety corridor.
@@ -27,7 +28,7 @@ The pipeline is a straight line from bytes to a throttle or braking decision:
    60% reference throttle at 1.25 m and holds that target to 1.05 m.
 4. **Brake.** At or inside 1.05 m, AEB requests zero throttle and full braking. This
    applies in manual and autonomous forward driving when AEB is enabled; reverse is
-   excluded. See `lidar-safety/aeb.md`.
+   excluded. See [AEB](aeb.md).
 
 The same computed policy is reused within a control iteration, so autonomous command
 generation and final hardware arbitration do not intentionally interpret two different
@@ -39,6 +40,19 @@ Keeping close-range throttle and braking outside the neural network makes those 
 explicit and auditable. The model handles visual path choice; LiDAR handles measured
 center clearance. This is a bounded design decision, not a claim that LiDAR detects every
 hazard or that the configured threshold guarantees a particular stopping distance.
+
+## Why LiDAR Does Not Steer
+
+SidewalkPilot previously implemented fixed left/right LiDAR steering and later a
+left/center/right lane concept. Both were removed. Obstacle points can identify occupied
+range but cannot prove where the sidewalk ends or whether apparently empty space is grass,
+a curb, sparse sensing, or another unseen hazard. The current policy therefore always
+returns no steering command. One autonomous steering owner is easier to reason about: the
+camera model chooses the path, while LiDAR constrains only longitudinal motion.
+
+The runtime also does not cluster or classify LiDAR points. It uses the nearest valid return
+inside one center corridor. This intentionally simple rule cannot distinguish a person from
+a wall, estimate object width, or establish that adjacent space is traversable.
 
 ## Layer priority
 
@@ -58,6 +72,8 @@ and obstacle-coverage evidence is still to be collected.
 
 ## Related pages
 
-- `autonomy-stack/architecture/layered-autonomy.md`
+- `autonomy-stack/architecture/data-flow.md`
+- `autonomy-stack/lidar-safety/aeb.md`
+- `hardware/lidar.md`
 - `runtime-code/runtime-loop.md`
 - `safety-case/safety-overview.md`

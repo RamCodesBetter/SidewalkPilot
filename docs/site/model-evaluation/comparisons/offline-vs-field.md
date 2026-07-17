@@ -31,4 +31,4 @@ safety or universal robustness.
 
 - [Offline Evaluation](../offline-evaluation/overview.md)
 - [Field Testing](../../testing/field-testing/overview.md)
-- [Model Claim](../../portfolio-evidence/claims-and-proof/model-claim.md)
+- [Evidence Map](../../portfolio-evidence/reader-paths/evidence-map.md)

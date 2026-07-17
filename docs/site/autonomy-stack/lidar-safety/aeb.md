@@ -29,6 +29,33 @@ to false.
 AEB is suppressed in reverse (`gear_mode == "R"`) because the center-forward corridor does
 not describe what is behind the car. There is no LiDAR steering override.
 
+## Center-Corridor Distance Regions
+
+Only points with positive forward distance and lateral position within 0.254 m of center
+can change motion. The nearest qualifying point selects one action:
+
+| Nearest center point | Action | Maximum forward command |
+|---:|---|---:|
+| No point or at least 1.65 m | Normal | 100% reference |
+| 1.65 m down to 1.25 m | Slow | Linear 100% to 60% reference |
+| 1.25 m down to 1.05 m | Hold | 60% reference |
+| At or inside 1.05 m | Emergency brake | Zero throttle and hard brake |
+
+The car begins moving near 55% physical PWM. Policy reference throttle maps the useful
+moving range onto physical 55-100% while preserving physical zero as stopped:
+
+```text
+physical = 0.55 + reference * (1.00 - 0.55)
+```
+
+Therefore 60% reference is 82% physical PWM. Dashboard policy values use the reference
+scale, while captured training labels retain the absolute physical command. Manual Xbox
+trigger input remains physical and must cross the measured dead zone before the car moves.
+
+The dashboard draws four colored distance rungs and two center-corridor guides. Side points
+remain visible as context but cannot change the center action. Empty or stale scans cannot
+prove clearance, so sensor freshness must be checked independently before motion testing.
+
 ## Enabling / disabling
 
 AEB defaults to enabled (`Metrics.aeb_enabled = True`). The driver toggles it with
@@ -59,6 +86,7 @@ Field-test logs and video demonstrating an AEB stop are planned to be attached.
 
 ## Related pages
 
-- `autonomy-stack/architecture/layered-autonomy.md`
+- `autonomy-stack/architecture/data-flow.md`
+- `autonomy-stack/lidar-safety/overview.md`
 - `runtime-code/runtime-loop.md`
 - `safety-case/safety-overview.md`

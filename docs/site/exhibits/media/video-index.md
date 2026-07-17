@@ -44,6 +44,6 @@ the failures would weaken the argument, not strengthen it.
 - `exhibits/media/success-clips.md`
 - `exhibits/media/failure-clips.md`
 - `exhibits/media/dashboard-screenshots.md`
-- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`
 - `publishing/reports.md`
 - `exhibits/tables/test-matrix-table.md`

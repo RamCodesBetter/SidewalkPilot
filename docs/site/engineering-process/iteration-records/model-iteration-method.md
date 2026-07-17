@@ -70,3 +70,36 @@ Each promoted model should have:
 - Final keep/rollback decision.
 
 Current missing metadata is tracked in the [Evidence Map](../../portfolio-evidence/reader-paths/evidence-map.md).
+
+## Retest Policy
+
+Verification uses two gates in order. First, the offline evaluator checks Bal9, turn exact,
+turn within one class, straight recall, error magnitude, signed bias, and confusion. Passing
+means a candidate is worth hardware time, not that it is good. Second, the freshly restarted
+deployment must re-drive the exact situation the change was intended to improve. Editing a
+file while the owning Raspberry Pi 5, Jetson Orin Nano, or Zero 2 W process remains running
+does not verify the new code.
+
+The field record should attach evaluator output, the target-case clip/log, and the services
+restarted on each device. Offline-only sign-off misses closed-loop failures; field-only
+selection wastes time on candidates that a common replay would reject.
+
+## Rollback Policy
+
+Rollback means selecting a previously field-accepted, versioned artifact after a newer
+candidate regresses. Before motion, confirm the intended ONNX exists on the Jetson Orin
+Nano, loads with the expected provider and signature, returns fresh results tagged with the
+selected version, and passes a restrained direction check. A dashboard name alone does not
+prove which bytes loaded.
+
+v3.4 remains the rollback baseline until another model wins a controlled field comparison.
+Rollback of the model does not undo simultaneous code, configuration, calibration, or
+hardware changes, so those revisions must be preserved separately.
+
+## Historical Metrics Policy
+
+Every metric remains attached to its dataset, subset, decoder, evaluator revision, and
+artifact. The common report scores all 46 checkpoints on one frozen 6,952-frame challenge
+set; the 2,224-image Series 1/2 historical results remain separately labeled. Values from
+different evaluation distributions are not silently mixed. Final and best-validation roles
+are provenance, and no single metric overrides the physical promotion gate.

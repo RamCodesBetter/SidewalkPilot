@@ -8,7 +8,7 @@ The Jetson Orin Nano runs the neural network over private Ethernet. The Raspberr
 
 This is a responsibility split, not three boards doing the same job. The display has no motion-command path. Jetson Orin Nano connection and inference work use a background latest-frame worker, so the controller loop does not intentionally wait for each request; this is not a worst-case real-time guarantee.
 
-Read: [System at a Glance](../../start-here/system-at-a-glance.md) and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
+Read: [Project Overview](../../start-here/project-overview.md), [Data Flow](../../autonomy-stack/architecture/data-flow.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
 
 ## 2. The Model Journey
 
@@ -30,11 +30,11 @@ Read: [Bal9](../../model-evaluation/offline-evaluation/bal9.md), [Offline Evalua
 
 The learned model controls autonomous steering. LiDAR does not choose a left/right path. It watches one center corridor and can reduce throttle or hard-brake. Earlier LiDAR swerve logic was removed because obstacle points cannot prove that adjacent ground is safe sidewalk rather than grass, curb, or another hazard.
 
-Read: [LiDAR Overview](../../autonomy-stack/lidar-safety/overview.md) and [Why LiDAR Does Not Steer](../../autonomy-stack/lidar-safety/override-steering.md).
+Read: [LiDAR Overview](../../autonomy-stack/lidar-safety/overview.md) and [AEB](../../autonomy-stack/lidar-safety/aeb.md).
 
 ## 5. A Failure That Changed the Architecture
 
-Manual steering once ran smoothly for several seconds, paused, then resumed. `jstest` showed instant controller input, so Bluetooth was not the root cause. The application was blocking on network and recurring system work. Jetson Orin Nano I/O moved to a latest-frame worker; file scans and temperature subprocesses left the control path. The physical car was then retested with Jetson Orin Nano powered off and the delay disappeared.
+Manual steering once ran smoothly for several seconds, paused, then resumed. `jstest` showed instant controller input, so Bluetooth was not the root cause. The application was blocking on network and recurring system work. Jetson Orin Nano I/O moved to a latest-frame worker; file scans and temperature subprocesses left the control path. In one physical retest with the Jetson Orin Nano powered off, the previously observed delay was absent. This was a bounded retest, not a long-duration latency benchmark.
 
 This is representative of the project: measure the boundary, identify the actual bottleneck, change ownership, and verify on hardware.
 

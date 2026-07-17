@@ -39,7 +39,7 @@ The model family has evolved in four stages:
 
 The current physical-car selection is **v3.4**, not the checkpoint with the lowest raw mean error. The project uses balanced steering metrics and field behavior because a dataset dominated by straight frames can reward a model that avoids turning.
 
-Read the [Series 3 Model Zoo](../ai-and-models/model-zoo/series-3.md), [Series 4 Model Zoo](../ai-and-models/model-zoo/series-4.md), and the [Model Claim](../portfolio-evidence/claims-and-proof/model-claim.md).
+Read the [Series 3 Model Zoo](../ai-and-models/model-zoo/series-3.md), [Series 4 Model Zoo](../ai-and-models/model-zoo/series-4.md), and [Evidence Map](../portfolio-evidence/reader-paths/evidence-map.md).
 
 ## Safety Architecture
 
@@ -62,19 +62,49 @@ Series 3 and 4 use the same **81,237 real labeled images** and split procedure. 
 
 ## Physical Hardware
 
-Major hardware includes:
+| Function | Hardware and connection | Current role |
+|---|---|---|
+| Forward vision | Raspberry Pi Camera Module 3 Wide through Picamera2 | Captures 1280x720 BGR frames before model-specific preprocessing |
+| Obstacle distance | FHL-LD19 through CP2102 USB serial | Supplies center-corridor clearance for slowdown and emergency braking |
+| Position | BN880 GPS through Raspberry Pi 5 UART | Supplies route and position updates |
+| Compass heading | HMC5883L-compatible magnetometer through I2C | Bench-tested; not fused into the live navigation controller |
+| Motion sensing | XIAO MG24 Sense through UART | Experimental yaw-control input |
+| Wheel speed | Hall-effect sensor through Raspberry Pi 5 GPIO | Supplies pulse-based speed and distance |
+| Steering | High-torque servo through PCA9685 I2C PWM | Receives the final Raspberry Pi 5 steering command |
+| Drive | Yahboom AT8236 motor controller | Receives final throttle, direction, and brake outputs |
+| Human control | Xbox Wireless Controller through Bluetooth | Manual driving, takeover, braking, and shutdown |
+| Telemetry | Waveshare 64x32 HUB75 panel on the Zero 2 W | Displays state received over the dedicated USB network |
 
-- Raspberry Pi Camera Module 3 Wide.
-- Youyeetoo FHL-LD19 360-degree LiDAR through a CP2102 USB adapter.
-- BN880 GPS and HMC5883L compass.
-- PCA9685 steering-servo driver.
-- Yahboom AT8236 motor controller.
-- Hall-effect wheel-speed sensor.
-- Xbox Wireless Controller.
-- Waveshare 64x32 RGB LED matrix.
-- Separate compute, motor, and display power systems with conversion and protection hardware.
+The car uses separate compute, motor, and display power systems with conversion and protection hardware. Component specifications, wiring, and calibration are documented under [Hardware](../hardware/build-overview.md).
 
-The detailed component map is in [System at a Glance](system-at-a-glance.md).
+## Control Priority
+
+The system does not average competing commands. Shutdown and braking take priority over enabled LiDAR intervention, which takes priority over the selected manual or autonomous motion command. Dashboard updates and logging do not control motion. The complete ordering is documented in [Decision Priority](../autonomy-stack/architecture/decision-priority.md).
+
+## Fast Health Check
+
+On the Raspberry Pi 5, verify the controller service and recent log:
+
+```bash
+sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager
+journalctl -u sidewalkpilot-rpi-car.service -n 100 -l --no-pager
+ping -c 3 10.42.0.2
+```
+
+On the Jetson Orin Nano, verify the inference service and GPU:
+
+```bash
+ss -ltnp | grep 8770
+pgrep -af jetson_inference_server.py
+nvidia-smi
+```
+
+On the Zero 2 W, verify the dashboard service:
+
+```bash
+sudo systemctl status sidewalkpilot-z2w-dashboard.service -l --no-pager
+journalctl -u sidewalkpilot-z2w-dashboard.service -n 100 -l --no-pager
+```
 
 ## Repository Map
 

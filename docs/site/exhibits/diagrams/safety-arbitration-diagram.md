@@ -39,6 +39,6 @@ Source anchors: `runtime.py` (`apply_autonomous_controls`, `update_gpio`, `is_st
 
 ## Related pages
 
-- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`
 - `publishing/reports.md`
 - `exhibits/tables/test-matrix-table.md`

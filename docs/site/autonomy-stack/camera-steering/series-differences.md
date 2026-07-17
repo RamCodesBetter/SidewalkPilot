@@ -49,6 +49,6 @@ a field baseline.
 
 ## Related pages
 
-- `autonomy-stack/architecture/layered-autonomy.md`
+- `autonomy-stack/architecture/data-flow.md`
 - `runtime-code/runtime-loop.md`
 - `safety-case/safety-overview.md`

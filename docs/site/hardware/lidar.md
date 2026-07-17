@@ -25,6 +25,20 @@ safety corridor. It does not override steering.
   reader reconnects on its own if the LiDAR drops, so a disconnect does not block driving
   or photo collection.
 
+## Packet and Reconnect Details
+
+The parser searches its byte buffer for header `0x54` and marker `0x2C`, then decodes the
+little-endian start/end angles and twelve distance/confidence triples. Angles are interpolated
+across the packet, including wraparound at 360 degrees. More than 500 accumulated points are
+published as the latest full scan. A scan older than one second is returned as empty; that
+prevents use of old points but does not prove the corridor is clear.
+
+Serial ownership stays in a daemon thread. On a fault, the reader closes the device, clears
+its buffer, and re-resolves the port. Retry delay starts at 1.5 seconds, increases by 1.5x to
+a 10-second ceiling, and resets after a successful connection. Repeated status messages are
+limited to once every 15 seconds. This recovery keeps serial waits outside the driving loop,
+but AEB coverage is absent while valid scans are missing.
+
 ## Why this choice
 
 - A 360-degree scanner gives cheap, all-around distance sensing that the camera model cannot

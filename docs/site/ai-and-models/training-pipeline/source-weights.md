@@ -37,4 +37,4 @@ The exact defaults must be read from the trainer version used for a run and pres
 
 - `ai-and-models/training-pipeline/sampler.md`
 - `research-and-math/machine-learning/sim-to-real-gap.md`
-- `engineering-process/design-decisions/carla-weighting.md`
+- `ai-and-models/training-pipeline/overview.md`

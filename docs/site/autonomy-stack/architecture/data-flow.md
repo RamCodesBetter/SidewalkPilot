@@ -1,4 +1,4 @@
-# Runtime Data Flow
+# Control Architecture and Runtime Data Flow
 
 SidewalkPilot separates hardware ownership, inference, display, and safety so a slow secondary computer cannot directly stall actuator control.
 
@@ -38,3 +38,30 @@ LiDAR does not select a path or output steering. Side returns are telemetry beca
 ## Timing Boundary
 
 Camera, LiDAR, GPS, IMU, Jetson Orin Nano transport, dashboard transport, photo writes, and telemetry use workers or cached snapshots. The 60 Hz runtime loop consumes those snapshots. See [Runtime Loop](../../runtime-code/runtime-loop.md) for ownership and stall diagnostics.
+
+## Runtime States
+
+The final command depends on several independent states:
+
+| State | Values and behavior |
+|---|---|
+| Gear | `P` applies brake, `R` allows manual reverse without the forward LiDAR rule, `N` commands no motor output, and `D` permits forward manual, cruise, or autonomous control |
+| Drive mode | `MAN` for manual, `CC` for cruise control, and `ATO` for camera autonomy |
+| Model | The selected version can change at runtime; autonomous control requires a fresh result from that same version |
+| LiDAR/AEB | Independent toggle that can cap or stop forward motion in manual or autonomous Drive |
+| Navigation | Route segments request `AUTO` on sidewalks and `MNUL` at crossings, while the operator remains responsible for takeover |
+
+The former LiDAR steering mode is gone. LiDAR state is represented by center clearance, throttle cap, emergency state, AEB state, and dashboard alerts rather than a second steering command. Series 4 history resets on model changes, reconnects, and other discontinuities.
+
+## Failure Boundaries
+
+| Failure | Current response | Important limit |
+|---|---|---|
+| Jetson Orin Nano unavailable, stale, or wrong model | Reject autonomous result and request a stop | Manual control still depends on a healthy Raspberry Pi 5 process and controller path |
+| LiDAR serial disconnect or stale scan | Retry in a background thread and expose missing telemetry | Missing returns are not proof of a clear path; LiDAR loss is not fail-closed |
+| Center obstacle at or inside 1.05 m with AEB enabled | Zero throttle and request full braking in forward drive | Stopping distance depends on speed, payload, surface, power, and sensor coverage |
+| Servo write fault | Force braking and zero throttle | Requires the write path to detect the fault |
+| Dashboard link failure | Keep the driving loop running and show link failure when the receiver is alive | The operator loses dashboard observability |
+| Human takeover or quit | Cancel autonomy or begin shutdown | No worst-case end-to-end takeover latency is claimed |
+
+Sensor health is therefore an operating gate. In particular, a reconnecting LiDAR reader keeps the control loop responsive but does not preserve obstacle coverage while scans are absent.

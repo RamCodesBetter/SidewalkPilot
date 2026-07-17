@@ -33,5 +33,5 @@ that it resolved night lighting because a controlled retest is not recorded.
 ## Related Pages
 
 - [Lighting Limits](../operating-limits/lighting-limits.md)
-- [Night Failure Demo](../../portfolio-evidence/demonstrations/night-failure-demo.md)
+- [Evidence Map](../../portfolio-evidence/reader-paths/evidence-map.md)
 - [Safety Limits](../../safety-and-ethics/limits.md)

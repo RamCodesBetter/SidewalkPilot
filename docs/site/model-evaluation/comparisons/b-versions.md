@@ -16,4 +16,4 @@ themselves (a v3.1 card must not show v3.1b).
 
 - `ai-and-models/training-pipeline/metrics.md`
 - `testing/field-testing/model-retest-plan.md`
-- `portfolio-evidence/claims-and-proof/model-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`

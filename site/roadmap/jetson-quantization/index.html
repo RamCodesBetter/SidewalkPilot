@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Jetson Quantization - SidewalkPilot RC Car</title>
+    <title>Jetson Orin Nano Quantization - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Jetson Quantization";
+        var mkdocs_page_name = "Jetson Orin Nano Quantization";
         var mkdocs_page_input_path = "roadmap/jetson-quantization.md";
         var mkdocs_page_url = null;
       </script>
@@ -50,8 +50,6 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../start-here/mission/">Mission</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../start-here/system-at-a-glance/">System at a Glance</a>
-                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../start-here/current-status/">Current Status</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../start-here/build-timeline/">Build Timeline</a>
@@ -59,66 +57,18 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" >Reader Paths</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/reader-paths/30-second-overview/">30 Second Overview</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/reader-paths/deep-engineering-tour/">Deep Engineering Tour</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
-                </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >Demonstrations</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/demonstrations/hero-run/">Hero Run</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/demonstrations/successful-autonomous-runs/">Successful Autonomous Runs</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/demonstrations/safety-override-demo/">Safety Override Demo</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/demonstrations/navigation-demo/">Navigation Demo</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/demonstrations/dashboard-demo/">Dashboard Demo</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/demonstrations/night-failure-demo/">Night Failure Demo</a>
-                </li>
-    </ul>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" >Claims and Proof</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/autonomy-claim/">Autonomy Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/safety-claim/">Safety Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/data-claim/">Data Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/model-claim/">Model Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/navigation-claim/">Navigation Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/hardware-claim/">Hardware Claim</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../portfolio-evidence/claims-and-proof/reproducibility-claim/">Reproducibility Claim</a>
-                </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Autonomy Stack</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" >Architecture</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/architecture/layered-autonomy/">Layered Autonomy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/architecture/data-flow/">Data Flow</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/architecture/data-flow/">Control Architecture and Data Flow</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/architecture/decision-priority/">Decision Priority</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/architecture/runtime-states/">Runtime States</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/architecture/failure-boundaries/">Failure Boundaries</a>
                 </li>
     </ul>
                   </li>
@@ -126,25 +76,11 @@
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/frame-capture/">Frame Capture</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/preprocessing/">Preprocessing</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/model-inference/">Model Inference</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/servo-output/">Servo Output</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Inference Link</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/yaw-rate-pid/">Yaw-Rate PID Steering</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/temporal-smoothing/">Temporal Smoothing</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/steering-hysteresis/">Steering Hysteresis</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/throttle-control/">Throttle Control</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
                 </li>
     </ul>
                   </li>
@@ -152,19 +88,7 @@
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/packet-parsing/">Packet Parsing</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/distance-regions/">Distance Regions</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/aeb/">AEB</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/override-steering/">Why LiDAR Does Not Steer</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/reconnect-behavior/">Reconnect Behavior</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/clearance-and-heading-scoring/">Clearance & Heading Scoring</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/lidar-safety/object-clustering/">Object Clustering</a>
                 </li>
     </ul>
                   </li>
@@ -172,66 +96,26 @@
     <ul>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/overview/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/gps-reader/">GPS Reader</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/graph-format/">Graph Format</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/a-star/">A*</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/turn-penalties/">Turn Penalties</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/ai-manual-segments/">AI Manual Segments</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/crosswalk-handoff/">Crosswalk Handoff</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/resume-radius/">Resume Radius</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/house-snapping/">House Snapping</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../autonomy-stack/navigation/compass-heading/">Compass Heading</a>
                 </li>
     </ul>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Engineering Process</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" >Requirements</a>
-    <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/requirements/goals/">Goals</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/requirements/non-goals/">Non Goals</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/requirements/constraints/">Constraints</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/requirements/success-criteria/">Success Criteria</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/requirements/test-gates/">Test Gates</a>
-                </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Design Decisions</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/raw-bgr-vs-clahe/">Raw BGR vs CLAHE</a>
-                </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/manual-crosswalk-handoff/">Manual Crosswalk Handoff</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pca9685-servo-control/">PCA9685 Servo Control</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/dashboard-udp-telemetry/">Dashboard UDP Telemetry</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/correction-json-as-label-source/">Correction JSON As Label Source</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/carla-weighting/">CARLA Weighting</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/b-checkpoints/">B Checkpoints</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Pi 5 + Jetson Compute Split</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/motor-imbalance-vs-steering-trim/">Motor Imbalance vs Steering Trim</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano + Raspberry Pi 5 Compute Split</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/design-decisions/hybrid-head-vs-regression/">Hybrid Head vs Regression</a>
                 </li>
@@ -242,16 +126,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure to Dataset</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/retest-policy/">Retest Policy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/rollback-policy/">Rollback Policy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/historical-metrics-policy/">Historical Metrics Policy</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/bang-bang-collapse/">Bang-Bang Collapse</a>
-                </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/shadow-aug-and-flip/">Shadow Aug and Turn Flip</a>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../engineering-process/iteration-records/turn-vs-shadow-tradeoff/">Turn vs Shadow Tradeoff</a>
                 </li>
@@ -506,7 +380,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/tensorrt/">TensorRT</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Runtime</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
                 </li>
     </ul>
                   </li>
@@ -916,7 +790,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../reproducibility/">Reproducibility</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Jetson Quantization</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Jetson Orin Nano Quantization</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#current-status">Current Status</a>
     </li>
@@ -946,7 +820,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Roadmap</li>
-      <li class="breadcrumb-item active">Jetson Quantization</li>
+      <li class="breadcrumb-item active">Jetson Orin Nano Quantization</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -955,12 +829,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="jetson-quantization">Jetson Quantization</h1>
-<p>Quantization is an optional future experiment, not part of the current vehicle deployment. The live Jetson path runs FP32 ONNX models through ONNX Runtime with CUDA.</p>
+                <h1 id="jetson-orin-nano-quantization">Jetson Orin Nano Quantization</h1>
+<p>Quantization is an optional future experiment, not part of the current vehicle deployment. The live Jetson Orin Nano path runs FP32 ONNX models through ONNX Runtime with CUDA.</p>
 <h2 id="current-status">Current Status</h2>
 <ul>
 <li>Series 3 and Series 4 trainers export FP32 ONNX artifacts.</li>
-<li>Jon currently uses <code>CUDAExecutionProvider</code>, with CPU as a compatibility fallback.</li>
+<li>Jetson Orin Nano currently uses <code>CUDAExecutionProvider</code>, with CPU as a compatibility fallback.</li>
 <li>No FP16 or INT8 engine has been accepted through offline evaluation and a field retest.</li>
 <li>The former calibrated TensorRT builder described by older notes is not in the current repository.</li>
 <li>The Series 3 trainer still has an optional <code>--build-tensorrt</code> wrapper around <code>trtexec</code>, but that flag is not the live deployment recipe and does not supply a calibration dataset by itself.</li>
@@ -968,8 +842,8 @@
 <h2 id="required-experiment">Required Experiment</h2>
 <p>If ONNX Runtime later becomes a measured bottleneck, test precision in this order:</p>
 <ol>
-<li>Record the FP32 ONNX baseline on Jon: model, provider, latency distribution, memory, power mode, and offline metrics.</li>
-<li>Build an FP16 TensorRT engine on the target Jetson.</li>
+<li>Record the FP32 ONNX baseline on Jetson Orin Nano: model, provider, latency distribution, memory, power mode, and offline metrics.</li>
+<li>Build an FP16 TensorRT engine on the target Jetson Orin Nano.</li>
 <li>Re-run the same evaluator and a controlled field test.</li>
 <li>Consider calibrated INT8 only if FP16 is still insufficient.</li>
 </ol>

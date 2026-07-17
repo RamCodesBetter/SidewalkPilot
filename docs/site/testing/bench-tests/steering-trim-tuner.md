@@ -29,6 +29,6 @@ D-pad to jog the wheels straight, button `0` to print the trim, button `1` to re
 
 ## Related pages
 
-- `engineering-process/design-decisions/motor-imbalance-vs-steering-trim.md`
-- `autonomy-stack/camera-steering/steering-hysteresis.md`
+- `hardware/steering-servo.md`
+- `hardware/imu.md`
 - `hardware/steering-servo.md`

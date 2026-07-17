@@ -52,6 +52,6 @@ Representative things a success clip should show:
 
 - `exhibits/media/video-index.md`
 - `exhibits/media/failure-clips.md`
-- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`
 - `publishing/reports.md`
 - `exhibits/tables/test-matrix-table.md`

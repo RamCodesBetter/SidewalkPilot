@@ -15,4 +15,4 @@ Normal Jetson Orin Nano connection and inference waits occur in the worker rathe
 
 v3.4 is the field-selected baseline. All six Series 4 models are runtime-supported but await physical comparison.
 
-See [Jetson Orin Nano Inference Link](jetson-inference-link.md), [Servo Output](servo-output.md), and [Model Choices](../../runtime-code/vision/model-choices.md).
+See [Jetson Orin Nano Inference Link](jetson-inference-link.md), [Steering Servo](../../hardware/steering-servo.md), and [Model Choices](../../runtime-code/vision/model-choices.md).

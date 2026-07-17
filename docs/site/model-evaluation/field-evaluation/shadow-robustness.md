@@ -39,4 +39,4 @@ experiments should change one factor at a time and repeat the same preserved fie
 
 - [Interruption Clips](interruption-clips.md)
 - [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)
-- [Model Claim](../../portfolio-evidence/claims-and-proof/model-claim.md)
+- [Evidence Map](../../portfolio-evidence/reader-paths/evidence-map.md)

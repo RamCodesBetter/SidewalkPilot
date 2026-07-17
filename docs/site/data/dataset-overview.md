@@ -52,6 +52,13 @@ The Series 3 trainer can merge base `labels.json` data with optional reviewed co
 
 Large image folders, dataset cards, and generated archives are intentionally not tracked in GitHub. GitHub carries source code and documentation; Hugging Face carries the published model/dataset artifacts.
 
+Optional Series 3 correction files can be a list of sample objects, a `samples` object, or
+an image-to-label mapping. A matching correction overrides the base row and can carry a
+repeat factor, so every correction experiment must preserve the file and hash, command,
+resolved counts, and sampler configuration. Corrections always describe the desired
+logical steering target; they never encode hardware trim. The current Series 4 temporal
+trainers use the ordered base labels directly.
+
 ## Evaluation Use
 
 Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 46 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.

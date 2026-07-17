@@ -55,6 +55,6 @@ operator notes so they can be interpreted rather than presented as isolated clip
 
 - `exhibits/media/video-index.md`
 - `exhibits/media/success-clips.md`
-- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`
 - `publishing/reports.md`
 - `exhibits/tables/test-matrix-table.md`

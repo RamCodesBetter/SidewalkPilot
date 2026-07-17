@@ -43,6 +43,6 @@ Source anchors: `code/controller/current/rc_car_app/runtime.py`, `config.py`, `v
 
 ## Related pages
 
-- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`
 - `publishing/reports.md`
 - `exhibits/tables/test-matrix-table.md`

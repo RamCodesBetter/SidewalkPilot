@@ -23,6 +23,15 @@ tells the human to drive, just before a road crossing. It is computed by
   `handoff_distance_m`, so the dashboard can warn the driver that a manual crossing is
   coming up.
 
+## Returning to Automatic Control
+
+The crosswalk segment remains `MNUL` while the operator crosses. Its far-side node carries
+`RESUME_RADIUS_M = 2.5 m`. Once GPS places the car within that radius and another segment
+exists, `operator_for_index()` returns the next segment's operator, normally `AUTO` for the
+far sidewalk. The runtime also publishes the resume node, distance, and readiness state to
+the dashboard. This keeps the human in control through the crossing while tolerating normal
+GPS error near the far curb.
+
 ## Why this choice
 
 - A crossing is the highest-risk part of any route and the camera model was never
@@ -34,14 +43,22 @@ tells the human to drive, just before a road crossing. It is computed by
   means the alert fires at a consistent physical distance regardless of how the
   sidewalk nodes happen to be spaced.
 
+Driving crossings autonomously was rejected because the model is trained for sidewalks,
+not traffic, right-of-way, or pedestrian negotiation. Stopping permanently at every curb
+would avoid that unsupported behavior but would not complete a route. The selected design
+keeps a human present for the crossing and makes unknown segment types manual by default.
+
+A valid test must show the dashboard warning before the crossing, the operator changing to
+`MNUL`, human control through the road segment, and `AUTO` returning only near the far-side
+resume node. Code presence alone does not prove that GPS triggers each transition at the
+correct physical point.
+
 ## Key constants
 
 - `HANDOFF_ALERT_M = 3.0` (meters before the crosswalk to hand off).
-- Set on the sidewalk segment that precedes a crosswalk segment; the reverse
-  transition (back to AI) is governed by the resume radius.
+- `RESUME_RADIUS_M = 2.5` (meters from the far-side node before the next segment resumes).
 
 ## Related pages
 
-- `autonomy-stack/navigation/ai-manual-segments.md`
-- `autonomy-stack/navigation/resume-radius.md`
+- `autonomy-stack/navigation/overview.md`
 - `safety-case/safety-overview.md`

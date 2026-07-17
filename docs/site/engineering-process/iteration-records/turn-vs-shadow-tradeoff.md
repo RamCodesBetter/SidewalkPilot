@@ -15,6 +15,10 @@ important, but the project has not proved that they are controlled by one scalar
 - v3.4 handled every shadow case presented in the July 2026 field test and also
   completed the tested left and right turns. That is a field result, not proof of
   robustness to every lighting condition.
+- Some weak checkpoints also produced endpoint-heavy or visibly stepped steering. This
+  "bang-bang" symptom can be measured through predicted-class distributions, confusion
+  matrices, command telemetry, and synchronized video, but those observations do not
+  identify one root cause by themselves.
 
 ## Plausible explanation
 
@@ -39,6 +43,13 @@ The 81,237-frame Series 3/4 dataset and the v3.4 training configuration produced
 the current field-selected result. Future collection should remain
 failure-driven, especially for weak turn classes under difficult lighting.
 
+Implemented augmentation includes synthetic diagonal, tree, edge, mixed-lighting, glare,
+color, texture, and label-aware horizontal-flip paths. A flip mirrors the image and maps
+steering to `180 - steering`. The exact v3.3 command and resolved probabilities were not
+preserved, so current trainer defaults cannot be presented as the historical v3.3 setup.
+No controlled ablation proved that one augmentation or sampler parameter caused its field
+regression.
+
 ## How to test the hypothesis
 
 1. Keep the dataset membership, split, seed, and evaluation subset fixed.
@@ -50,5 +61,5 @@ failure-driven, especially for weak turn classes under difficult lighting.
 ## Related pages
 
 - [Turn Coverage](../../data-governance/data-quality/turn-coverage.md)
-- [Shadow Augmentation and Flip](shadow-aug-and-flip.md)
+- [Training Augmentation](../../ai-and-models/training-pipeline/augmentation.md)
 - [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)

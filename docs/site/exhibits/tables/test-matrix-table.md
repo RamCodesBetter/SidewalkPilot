@@ -50,6 +50,6 @@ Each utility isolates one subsystem, prints observable output, and touches only 
 
 ## Related pages
 
-- `portfolio-evidence/claims-and-proof/reproducibility-claim.md`
+- `portfolio-evidence/reader-paths/evidence-map.md`
 - `publishing/reports.md`
 - `exhibits/tables/test-matrix-table.md`

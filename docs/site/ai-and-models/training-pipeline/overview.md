@@ -75,6 +75,18 @@ The trainer can apply:
 
 More augmentation is not automatically better. v3.3/v3.3b increased shadow-hardening pressure but regressed on the physical car. v3.4 is evidence that augmentation must preserve the features needed for ordinary turns.
 
+When pre-generated CARLA data is explicitly included, source weighting defaults to
+correction `3.0`, real `2.0`, and CARLA `0.6`, multiplied by class/bucket balancing. These
+numbers are relative sample factors, not percentages. Synthetic data is down-weighted
+because simulator texture, lighting, camera geometry, and object appearance differ from
+the physical car. The current Series 3/4 and Series 4 runs use the 81,237 real images; older
+checkpoint source mixes must be taken from their saved command or source-count log rather
+than inferred from trainer capability.
+
+A reproducible run saves the printed source counts and resolved sampler settings. A run
+described as CARLA-assisted must name the synthetic root; a real-only run must show no
+CARLA samples.
+
 ## Series 3 Hybrid Loss
 
 For v3.1 and later, the 19-value output is decoded into:

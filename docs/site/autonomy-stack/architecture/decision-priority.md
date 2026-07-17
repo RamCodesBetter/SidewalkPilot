@@ -63,8 +63,8 @@ detection coverage still require controlled tests.
 
 ## Related pages
 
-- `autonomy-stack/architecture/layered-autonomy.md`
-- `autonomy-stack/architecture/failure-boundaries.md`
-- `autonomy-stack/lidar-safety/override-steering.md`
+- `autonomy-stack/architecture/data-flow.md`
+- `autonomy-stack/lidar-safety/overview.md`
+- `autonomy-stack/lidar-safety/aeb.md`
 - `runtime-code/runtime-loop.md`
 - `safety-case/safety-overview.md`

@@ -103,4 +103,4 @@ Run only one program that owns a device at a time. Stop the live car service bef
 | LiDAR shows no points | Serial ownership, CP2102/device path, LiDAR power, packet stream |
 | Controls pause rhythmically | Blocking work inside the runtime loop or repeated network timeouts |
 
-Continue with [System at a Glance](../start-here/system-at-a-glance.md) for software ownership and [Safety Overview](../safety-case/safety-overview.md) before field operation.
+Continue with [Project Overview](../start-here/project-overview.md) for software ownership and [Safety Overview](../safety-case/safety-overview.md) before field operation.

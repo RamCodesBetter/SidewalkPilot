@@ -33,6 +33,6 @@ changes from servo linkage, yaw correction, control-loop timing, and vehicle mot
 
 ## Related Pages
 
-- [Temporal Smoothing](../../autonomy-stack/camera-steering/temporal-smoothing.md)
+- [Model Inference](../../autonomy-stack/camera-steering/model-inference.md)
 - [Interruption Clips](interruption-clips.md)
 - [Model Retest Plan](../../testing/field-testing/model-retest-plan.md)

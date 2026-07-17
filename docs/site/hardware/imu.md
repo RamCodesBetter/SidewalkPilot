@@ -23,6 +23,12 @@ attributed to the controller.
 - In default `straight` mode, commands within 5 degrees of logical center target zero yaw;
   the PID trims around direction-dependent feed-forward values. `full` mode can also track
   turn-rate targets, but it is not the checked-in default.
+- The controller supports `off` for exact open-loop passthrough, `straight` for center-only
+  correction, and `full` for experimental turn-rate targets. PID correction is bounded to
+  30 degrees and disengages below 0.05 m/s, in reverse, during LiDAR intervention, or when
+  IMU data is stale.
+- Kp, Ki, and Kd can be adjusted in memory from the dashboard tuning page. A field record
+  must preserve those values rather than assuming the checked-in defaults were active.
 - Bench calibration utilities are tracked in `code/test_files`. A local run may produce files such as `code/test_files/sensors/imu_calib.csv`, but that output is not a tracked publication artifact in this branch.
 
 ## Why it matters
@@ -37,6 +43,5 @@ attributed to the controller.
 
 ## Related pages
 
-- `autonomy-stack/camera-steering/yaw-rate-pid.md`
 - `hardware/steering-servo.md`
 - `hardware/wiring/uart.md`

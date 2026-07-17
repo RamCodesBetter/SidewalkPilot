@@ -28,4 +28,4 @@ by source for all checkpoints. The current report evaluates steering only.
 
 - `model-evaluation/offline-evaluation/mae.md`
 - `model-evaluation/offline-evaluation/per-dataset-breakdown.md`
-- `engineering-process/design-decisions/motor-imbalance-vs-steering-trim.md`
+- `hardware/steering-servo.md`

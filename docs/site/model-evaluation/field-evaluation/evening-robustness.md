@@ -27,5 +27,5 @@ Until that record exists, SidewalkPilot should not claim reliable night operatio
 ## Related Pages
 
 - [Lighting Limits](../../safety-case/operating-limits/lighting-limits.md)
-- [Night Failure Note](../../portfolio-evidence/demonstrations/night-failure-demo.md)
+- [Evidence Map](../../portfolio-evidence/reader-paths/evidence-map.md)
 - [Field Evaluation Overview](overview.md)
