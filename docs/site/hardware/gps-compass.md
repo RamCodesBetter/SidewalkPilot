@@ -32,7 +32,7 @@ do not claim live compass-based heading control.
   compass data.
 - Failure symptoms: **permission denied on `/dev/ttyAMA0`** can mean the serial console,
   device permissions, or another process owns the port. Do not confuse this port with the
-  LiDAR: GPS is `/dev/ttyAMA0`; the LiDAR is on a USB CP2102 adapter.
+  LiDAR: GPS is `/dev/ttyAMA0`; the LiDAR uses a CP2102 UART-to-USB Adapter.
 
 ## Related pages
 

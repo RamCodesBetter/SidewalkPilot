@@ -14,7 +14,7 @@ Per-machine setup:
 
 | Machine | Role | Setup essentials |
 |---|---|---|
-| Jetson Orin Nano | Series 3/4 ONNX inference host | ONNX Runtime, model `.onnx` files copied over, headless inference service; reachable at `10.42.0.2:8770` over direct Ethernet |
+| Jetson Orin Nano | AI Model Manager for Series 3/4 ONNX inference | ONNX Runtime, model `.onnx` files copied over, headless inference service; reachable at `10.42.0.2:8770` over direct Ethernet |
 | Raspberry Pi 5 | Controller: Xbox controller, camera, LiDAR, GPS, hall sensor, servo, motors, logging, telemetry | Repo cloned, Python deps (`gpiozero`, `adafruit-servokit`, `picamera2`, `pyserial`, `opencv`, `torch`), USB `usb0` at `192.168.10.1/24`, I2C enabled for the PCA9685 at `0x40` |
 | Zero 2 W | Dashboard receiver over USB Ethernet | Repo synced (not a git checkout — populated by rsync/scp), `rpi-rgb-led-matrix` bindings built, USB `usb0` at `192.168.10.2/24`, valid `/etc/machine-id` |
 | Mac / NVIDIA PC | Git, sync, photo pull, training | Git access, rsync, training deps for the trainers under `code/ai_models_datasets/` |

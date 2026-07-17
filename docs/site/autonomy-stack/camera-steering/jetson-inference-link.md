@@ -36,6 +36,6 @@ Series 4 was verified against all six real ONNX exports with CUDA active. The ou
 
 ## Failure Boundary
 
-Jetson Orin Nano network and inference work runs outside the main controller loop, so the Raspberry Pi 5 does not intentionally wait on Jetson Orin Nano before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Raspberry Pi 5 remains final software authority over motors, steering mapping, AEB, and cleanup.
+Jetson Orin Nano network and inference work runs outside the main controller loop, so the Raspberry Pi 5 does not intentionally wait on Jetson Orin Nano before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Raspberry Pi 5 applies the accepted prediction, steering mapping, enabled AEB policy, actuator outputs, and shutdown cleanup.
 
 See [Raspberry Pi 5 + Jetson Orin Nano Compute Split](../../engineering-process/design-decisions/pi-plus-jetson-compute-split.md) and [Runtime Loop](../../runtime-code/runtime-loop.md).

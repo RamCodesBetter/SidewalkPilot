@@ -34,9 +34,9 @@ or bit-identical training across unrelated GPU/software environments.
 |---|---|
 | Camera | Camera Module 3 Wide capture and physical orientation must match the dataset path |
 | Steering | Logical labels remain 0-180; PCA9685 mapping and trim remain hardware concerns |
-| LiDAR | FHL-LD19 uses CP2102 USB serial at 230400 baud; missing scans are not proof of clearance |
+| LiDAR | FHL-LD19 uses a CP2102 UART-to-USB Adapter at 230400 baud; missing scans are not proof of clearance |
 | GPS/IMU | GPS uses `/dev/ttyAMA0`; experimental yaw feedback uses the XIAO MG24 path |
-| Compute | Raspberry Pi 5 owns final control; Jetson Orin Nano supplies asynchronous ONNX inference |
+| Compute | Jetson Orin Nano is the AI Model Manager for asynchronous Series 3/4 ONNX inference; Raspberry Pi 5 applies hardware and safety control |
 | Dashboard | Zero 2 W telemetry uses the dedicated USB network with no current Wi-Fi fallback |
 | Data | Series 3/4 use the published 81,237-image real dataset; historical source-mix claims require run evidence |
 | Promotion | Offline metrics select candidates; only physical testing changes the field baseline |

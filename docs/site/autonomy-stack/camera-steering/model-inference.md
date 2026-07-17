@@ -1,6 +1,9 @@
 # Model Inference
 
-Live inference is split across the Raspberry Pi 5 and Jetson Orin Nano. The Raspberry Pi 5 owns camera capture and safety arbitration; Jetson Orin Nano owns preprocessing, model execution, and output decoding.
+The Jetson Orin Nano is the AI brain for current live inference: it owns Series 3/4
+preprocessing, GPU model execution, and output decoding. The Raspberry Pi 5 owns camera
+capture and final safety arbitration. Current autonomy stops if a fresh, matching Jetson Orin Nano
+result is unavailable.
 
 ## Data Path
 

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
+<title id="title">SidewalkPilot System Architecture</title>
+<desc id="desc">Compute roles, physical I/O, and the two dedicated device links.</desc>
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475467"/></marker>
+<marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#B42318"/></marker>
+<filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#101828" flood-opacity="0.10"/></filter>
+</defs>
+<rect width="1600" height="1040" fill="#FFFFFF"/>
+<text x="40" y="46" font-size="30" font-weight="700" fill="#101828">SidewalkPilot System Architecture</text>
+<text x="40" y="76" font-size="15" fill="#667085">Compute roles, physical I/O, and the two dedicated device links.</text>
+<rect x="30" y="105" width="305" height="650" rx="8" fill="#FAFBFC" stroke="#D0D5DD" stroke-width="1.5"/>
+<text x="48" y="133" font-size="16" font-weight="700" fill="#344054">Operator and Sensors</text>
+<rect x="400" y="710" width="955" height="305" rx="8" fill="#FAFBFC" stroke="#D0D5DD" stroke-width="1.5"/>
+<text x="418" y="738" font-size="16" font-weight="700" fill="#344054">Hardware Outputs and Local Records</text>
+<polyline points="300.0,190.0 405.0,190.0 405.0,440.0 510.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,285.0 405.0,285.0 405.0,440.0 510.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,380.0 405.0,380.0 405.0,440.0 510.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,475.0 405.0,475.0 405.0,440.0 510.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,570.0 405.0,570.0 405.0,440.0 510.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,665.0 405.0,665.0 405.0,440.0 510.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="880.0,440.0 940.0,440.0 940.0,220.0 1010.0,220.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1010.0,220.0 930.0,220.0 930.0,440.0 880.0,440.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="880.0,440.0 965.0,440.0 965.0,572.5 1050.0,572.5" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1340.0,572.5 1370.0,572.5 1370.0,572.5 1400.0,572.5" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="695.0,530.0 635.0,660.0 572.5,770.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="572.5,855.0 572.5,880.0 572.5,880.0 572.5,905.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="695.0,530.0 820.0,660.0 882.5,770.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="882.5,855.0 882.5,880.0 882.5,880.0 882.5,905.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="695.0,530.0 820.0,680.0 1198.0,680.0 1197.5,770.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="867.2" y="207.0" width="145.6" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="940.0" y="223.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">JPEG frame + model</text>
+<rect x="850.0" y="427.0" width="160.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="930.0" y="443.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">steering + telemetry</text>
+<rect x="856.2" y="559.5" width="217.6" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="965.0" y="575.5" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">UDP telemetry / USB Ethernet</text>
+<rect x="1330.0" y="559.5" width="80.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1370.0" y="575.5" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">render</text>
+<rect x="587.4" y="647.0" width="95.2" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="635.0" y="663.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">I2C command</text>
+<rect x="528.5" y="867.0" width="88.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="572.5" y="883.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">PWM signal</text>
+<rect x="776.0" y="647.0" width="88.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="820.0" y="663.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">GPIO + PWM</text>
+<rect x="834.9" y="867.0" width="95.2" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="882.5" y="883.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">drive power</text>
+<rect x="1143.2" y="667.0" width="109.6" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1198.0" y="683.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">runtime state</text>
+<rect x="65" y="155" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="182.5" y="190.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="180.0">Raspberry Pi Camera</tspan><tspan x="182.5" y="200.0">Module 3 Wide</tspan></text>
+<rect x="65" y="250" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="182.5" y="285.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="285.0">Xbox Controller</tspan></text>
+<rect x="65" y="345" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="182.5" y="380.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="380.0">FHL-LD19 LiDAR</tspan></text>
+<rect x="65" y="440" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="182.5" y="475.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="475.0">BN880 GPS</tspan></text>
+<rect x="65" y="535" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="182.5" y="570.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="570.0">XIAO MG24 Sense IMU</tspan></text>
+<rect x="65" y="630" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="182.5" y="665.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="655.0">Hall-Effect Wheel-Speed</tspan><tspan x="182.5" y="675.0">Sensor</tspan></text>
+<rect x="510" y="350" width="370" height="180" rx="7" fill="#FFF0F4" stroke="#C51A4A" stroke-width="2" filter="url(#shadow)"/>
+<text x="695.0" y="431.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A1030"><tspan x="695.0" y="431.0">Raspberry Pi 5</tspan></text>
+<text x="695.0" y="512.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="695.0" y="512.0">Hardware and Safety Controller</tspan></text>
+<rect x="1010" y="145" width="390" height="150" rx="7" fill="#F0F7E8" stroke="#5F9400" stroke-width="2" filter="url(#shadow)"/>
+<text x="1205.0" y="211.0" text-anchor="middle" font-size="16" font-weight="600" fill="#2F4B00"><tspan x="1205.0" y="211.0">Jetson Orin Nano</tspan></text>
+<text x="1205.0" y="270.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1205.0" y="263.0">AI Model Manager - Series 3/4 ONNX CUDA</tspan><tspan x="1205.0" y="277.0">inference</tspan></text>
+<rect x="1050" y="515" width="290" height="115" rx="7" fill="#EDF4FF" stroke="#246BCE" stroke-width="2" filter="url(#shadow)"/>
+<text x="1195.0" y="563.5" text-anchor="middle" font-size="16" font-weight="600" fill="#153E75"><tspan x="1195.0" y="563.5">Zero 2 W</tspan></text>
+<text x="1195.0" y="612.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1195.0" y="612.0">Display Controller</tspan></text>
+<rect x="1400" y="530" width="170" height="85" rx="7" fill="#EDF4FF" stroke="#246BCE" stroke-width="2" filter="url(#shadow)"/>
+<text x="1485.0" y="572.5" text-anchor="middle" font-size="16" font-weight="600" fill="#153E75"><tspan x="1485.0" y="562.5">HUB75 RGB</tspan><tspan x="1485.0" y="582.5">LED Matrix</tspan></text>
+<rect x="450" y="770" width="245" height="85" rx="7" fill="#FFF4E8" stroke="#B85C00" stroke-width="2" filter="url(#shadow)"/>
+<text x="572.5" y="812.5" text-anchor="middle" font-size="16" font-weight="600" fill="#713B12"><tspan x="572.5" y="802.5">PCA9685 Servo</tspan><tspan x="572.5" y="822.5">Controller</tspan></text>
+<rect x="450" y="905" width="245" height="75" rx="7" fill="#FFF4E8" stroke="#B85C00" stroke-width="2" filter="url(#shadow)"/>
+<text x="572.5" y="942.5" text-anchor="middle" font-size="16" font-weight="600" fill="#713B12"><tspan x="572.5" y="942.5">Steering Servo</tspan></text>
+<rect x="760" y="770" width="245" height="85" rx="7" fill="#FFF4E8" stroke="#B85C00" stroke-width="2" filter="url(#shadow)"/>
+<text x="882.5" y="812.5" text-anchor="middle" font-size="16" font-weight="600" fill="#713B12"><tspan x="882.5" y="802.5">AT8236 Motor</tspan><tspan x="882.5" y="822.5">Controller</tspan></text>
+<rect x="760" y="905" width="245" height="75" rx="7" fill="#FFF4E8" stroke="#B85C00" stroke-width="2" filter="url(#shadow)"/>
+<text x="882.5" y="933.5" text-anchor="middle" font-size="16" font-weight="600" fill="#713B12"><tspan x="882.5" y="933.5">JGB37-520 DC Motors</tspan></text>
+<text x="882.5" y="962.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="882.5" y="962.0">12 V, 550 RPM</tspan></text>
+<rect x="1080" y="770" width="235" height="85" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="2" filter="url(#shadow)"/>
+<text x="1197.5" y="812.5" text-anchor="middle" font-size="16" font-weight="600" fill="#14532D"><tspan x="1197.5" y="812.5">CSV Runtime Logs</tspan></text>
+</svg>

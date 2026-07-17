@@ -6,7 +6,7 @@ while LiDAR can reduce forward throttle or request a stop when AEB is enabled. I
 not select a swerve direction.
 
 The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
-connects over USB through a CP2102 UART bridge (auto-resolved from
+connects over USB through a CP2102 UART-to-USB Adapter (auto-resolved from
 `/dev/serial/by-id/*CP2102*`, falling back to `/dev/ttyUSB*`); an earlier wiring used the
 Raspberry Pi 5's GPIO UART at `/dev/ttyAMA2`. A background reader thread
 (`rc_car_app/lidar.py`, `LidarParser`) parses the raw packet stream into a full 360-degree

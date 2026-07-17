@@ -9,24 +9,26 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 
 | Assembly | Main parts | Purpose |
 |---|---|---|
+| AI Model Manager | Jetson Orin Nano | GPU-accelerated Series 3/4 ONNX camera-steering inference |
 | Chassis and steering | Yahboom Ackermann 520M, JGB37-520 DC motors (12 V, 550 RPM), high-torque steering servo, steering rods/linkage | Physical vehicle, drive power, and car-like front-wheel geometry |
-| AI compute | Jetson Orin Nano | ONNX camera-steering inference |
-| Main controller | Raspberry Pi 5, PCA9685 Servo Controller, AT8236 Motor Controller | Sensors, controller, servo, motors, safety, logs |
+| Hardware and safety controller | Raspberry Pi 5, PCA9685 Servo Controller, AT8236 Motor Controller | Sensors, controller, servo, motors, safety, logs |
 | Display computer | Zero 2 W, Waveshare 64x32 HUB75 panel | Independent live telemetry display |
 | Vision | Raspberry Pi Camera Module 3 Wide | Forward sidewalk image stream and training photos |
-| Obstacle sensing | Youyeetoo FHL-LD19 360-degree LiDAR, CP2102 USB adapter | Center-corridor slowdown and emergency braking |
+| Obstacle sensing | Youyeetoo FHL-LD19 360-degree LiDAR, CP2102 UART-to-USB Adapter | Center-corridor slowdown and emergency braking |
 | Navigation | BN880 GPS and HMC5883L-compatible compass | GPS fixes feed the route manager; compass is currently bench-only |
 | Motion sensing | Hall-effect sensor | Wheel speed estimate |
 | Manual control | Xbox Series X controller | Steering, throttle, brake, model/page controls, takeover, quit |
 
 ## Compute and Network Layout
 
-The Raspberry Pi 5 is the hub.
+The Jetson Orin Nano is the AI brain. The Raspberry Pi 5 is the wired hardware and network
+hub that carries camera frames to it and applies returned steering predictions through the
+safety-controlled actuator path.
 
 - **Raspberry Pi 5 to Jetson Orin Nano:** dedicated Ethernet, Raspberry Pi 5 `10.42.0.1`, Jetson Orin Nano `10.42.0.2`, inference TCP port `8770`.
 - **Raspberry Pi 5 to Zero 2 W:** USB Ethernet gadget, Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, telemetry UDP port `8765`.
 - **Xbox controller:** Bluetooth HID directly to the Raspberry Pi 5.
-- **LiDAR:** USB 3.0 through CP2102, current serial device `/dev/ttyUSB0`.
+- **LiDAR:** USB 3.0 through a CP2102 UART-to-USB Adapter, current serial device `/dev/ttyUSB0`.
 
 The two wired links are separate. Dashboard recovery must not rewrite the Jetson Orin Nano Ethernet configuration, and Jetson Orin Nano availability must not determine whether the dashboard works.
 
@@ -35,7 +37,7 @@ The two wired links are separate. Dashboard recovery must not rewrite the Jetson
 The project uses separate sources because compute, motors, and the display have different load behavior:
 
 - INIU 140 W power bank for Jetson Orin Nano compute;
-- INIU 45 W power bank for Raspberry Pi/auxiliary compute;
+- INIU 45 W power bank for Raspberry Pi 5/auxiliary compute;
 - OVONIC 3S LiPo for drive motors;
 - OVONIC 2S LiPo for the display domain;
 - Buck conversion and fusing where the load requires regulated voltage.
@@ -53,7 +55,7 @@ Current software assignments include:
 | Right motor forward/backward | GPIO 19 / GPIO 20 |
 | Left motor forward/backward | GPIO 25 / GPIO 13 |
 | Hall sensor | GPIO 24 |
-| LiDAR | CP2102 USB serial; no current GPIO motor-enable line |
+| LiDAR | CP2102 UART-to-USB Adapter; no current GPIO motor-enable line |
 
 The live runtime source of truth is `code/controller/current/rc_car_app/config.py`. Pin changes must update the wiring document, bench test, and config together.
 
@@ -74,9 +76,9 @@ The current center trim is `+12D`. Reference steering limits are intentionally n
 
 1. Raise the car so wheels cannot drive it unexpectedly.
 2. Inspect power polarity, fuse state, loose connectors, and steering linkage.
-3. Power the Zero 2 W/display and verify the dashboard receiver service.
-4. Power the Raspberry Pi 5 and verify controller, camera, LiDAR, and USB dashboard link.
-5. Power the Jetson Orin Nano and verify `10.42.0.2:8770` only when autonomous inference is needed.
+3. Power the Jetson Orin Nano and verify `10.42.0.2:8770` when autonomous inference is needed.
+4. Power the Raspberry Pi 5 and verify controller, camera, LiDAR, and both dedicated links.
+5. Power the Zero 2 W/display and verify the dashboard receiver service.
 6. Confirm manual steering, brake, and quit before placing the car on the ground.
 7. Run low-speed sensor and AEB checks before autonomy.
 
@@ -103,7 +105,7 @@ Run only one program that owns a device at a time. Stop the live car service bef
 | Steering returns differently from left and right | Linkage hysteresis, servo load, calibration, rod geometry |
 | Car pulls more as throttle rises | Left/right motor-force imbalance, not only steering trim |
 | Dashboard shows `NO LINK` | Controller not sending, dashboard service stopped, or USB network unavailable |
-| LiDAR shows no points | Serial ownership, CP2102/device path, LiDAR power, packet stream |
+| LiDAR shows no points | Serial ownership, CP2102 UART-to-USB Adapter/device path, LiDAR power, packet stream |
 | Controls pause rhythmically | Blocking work inside the runtime loop or repeated network timeouts |
 
 Continue with [Project Overview](../start-here/project-overview.md) for software ownership and [Safety Overview](../safety-case/safety-overview.md) before field operation.

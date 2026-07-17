@@ -345,7 +345,7 @@
                 <h1 id="pca9685-servo-controller">PCA9685 Servo Controller</h1>
 <p>This page records the decision to drive the Ackermann steering servo through a
 <strong>PCA9685 Servo Controller over I2C</strong> instead of generating the servo pulse
-directly from a Raspberry Pi GPIO pin.</p>
+directly from a Raspberry Pi 5 GPIO pin.</p>
 <h2 id="decision">Decision</h2>
 <p>The steering servo is wired to a PCA9685 Servo Controller at I2C address <code>0x40</code>, channel <code>0</code>,
 running at 50 Hz, and is driven through the Adafruit <code>ServoKit</code> abstraction. The

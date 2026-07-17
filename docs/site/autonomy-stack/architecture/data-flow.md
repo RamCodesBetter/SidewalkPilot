@@ -1,24 +1,34 @@
 # Control Architecture and Runtime Data Flow
 
-SidewalkPilot separates hardware ownership, inference, display, and safety so a slow secondary computer cannot directly stall actuator control.
+SidewalkPilot separates AI inference, hardware ownership, display, and safety so network or
+inference waits cannot directly stall actuator control. The Jetson Orin Nano is the AI brain;
+the Raspberry Pi 5 turns its fresh predictions into safety-checked physical commands.
 
-```text
-Xbox controller ─┐
-Raspberry Pi Camera ───────┤
-LiDAR USB serial ┤
-GPS fixes ───────┤→ Raspberry Pi 5 arbitration → PCA9685 Servo Controller + AT8236 Motor Controller
-Hall sensor ─────┤             │
-USB IMU ─────────┘             ├→ UDP/USB Ethernet → Zero 2 W → HUB75 display
-                               └→ JPEG/TCP/Ethernet → Jetson Orin Nano ONNX → cached steering
-```
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/runtime-control.svg">
+      <img src="../../../assets/diagrams/runtime-control.svg" alt="SidewalkPilot runtime and control flow, showing parallel inputs, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry outputs">
+    </a>
+  </div>
+  <figcaption>
+    Runtime and control flow. Open the <a href="../../../assets/diagrams/runtime-control.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/runtime-control.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
 
-## Raspberry Pi 5
+## Jetson Orin Nano: AI Brain
 
-The Raspberry Pi 5 is the only computer that writes steering, motor, and brake hardware. It reads the Xbox controller, sensors, and latest Jetson Orin Nano result, then applies gear, manual takeover, AEB, model freshness, yaw correction, and servo limits.
+Jetson Orin Nano receives the newest camera frame and requested model version over the private
+Ethernet link at `10.42.0.2:8770`. It runs the current Series 3/4 model on the GPU and returns
+steering, unused model throttle, temperatures, inference timing, and nine hybrid-bucket
+probabilities. Current v3.4 and Series 4 autonomous steering require a fresh result from this
+path. The Jetson Orin Nano does not command GPIO directly.
 
-## Jetson Orin Nano
+## Raspberry Pi 5: Hardware and Safety Controller
 
-Jetson Orin Nano receives the newest camera frame and requested model version over the private Ethernet link at `10.42.0.2:8770`. It returns steering, unused model throttle, temperatures, inference timing, and nine hybrid-bucket probabilities. It does not command GPIO directly.
+The Raspberry Pi 5 is the only computer that writes steering, motor, and brake hardware. It
+reads the Xbox controller, sensors, and latest Jetson Orin Nano result, then applies gear, manual
+takeover, AEB, model freshness, yaw correction, and servo limits.
 
 ## Zero 2 W
 
@@ -37,7 +47,10 @@ LiDAR does not select a path or output steering. Side returns are telemetry beca
 
 ## Timing Boundary
 
-Camera, LiDAR, GPS, IMU, Jetson Orin Nano transport, dashboard transport, photo writes, and telemetry use workers or cached snapshots. The 60 Hz runtime loop consumes those snapshots. See [Runtime Loop](../../runtime-code/runtime-loop.md) for ownership and stall diagnostics.
+Camera, LiDAR, GPS, IMU, Jetson Orin Nano transport, dashboard transport, photo writes, and
+telemetry use background workers. Each worker keeps its latest available result in memory,
+and the 60 Hz runtime loop reads those values without waiting for the device or network.
+See [Runtime Loop](../../runtime-code/runtime-loop.md) for ownership and stall diagnostics.
 
 ## Runtime States
 

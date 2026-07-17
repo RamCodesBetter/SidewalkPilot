@@ -1,6 +1,9 @@
 # SidewalkPilot
 
-SidewalkPilot is my RC car that can self drive on sidewalks. A image model outputs a steering value, a separate LiDAR safety layer can slow or stop the car, GPS software provides route context, and a live LED dashboard displays debug information. The project runs on an Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W.
+SidewalkPilot is my RC car that can self-drive on sidewalks. The Jetson Orin Nano is the
+AI brain for the current Series 3/4 autonomy system: it runs the camera-steering model and
+returns the steering prediction. A Raspberry Pi 5 captures the camera and sensors, applies
+safety rules, and controls the hardware, while a Zero 2 W renders the live LED dashboard.
 
 <table width="100%">
 <tr>
@@ -42,11 +45,16 @@ The three computers have separate responsibilities:
 
 | Manager | Hardware | Responsibility |
 |---|---|---|
-| AI Model Manager | Jetson Orin Nano | Receives the newest camera frame over dedicated Ethernet and runs ONNX Runtime/CUDA inference |
-| Major System Manager | Raspberry Pi 5 | Controller input, camera capture, LiDAR, GPS, steering, motors, logging, and final safety arbitration |
-| Display System Manager | Zero 2 W | Renders the Waveshare 64x32 HUB75 dashboard from UDP telemetry over a dedicated USB network |
+| AI Model Manager | Jetson Orin Nano | Receives the newest camera frame over dedicated Ethernet and runs Series 3/4 ONNX Runtime/CUDA inference |
+| Hardware and Safety Controller | Raspberry Pi 5 | Controller input, camera capture, LiDAR, GPS, steering, motors, logging, and final safety arbitration |
+| Display Controller | Zero 2 W | Renders the Waveshare 64x32 HUB75 dashboard from UDP telemetry over a dedicated USB network |
 
-The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano outputs steering but never directly controls the servo. The Zero 2 W only displays telemetry. Manual controller input can stop self-driving, and the LiDAR can constrain or stop forward motion.
+The Jetson Orin Nano is essential to the current v3.4 and Series 4 self-driving path. Those
+larger 320x180 models run too slowly on the Raspberry Pi 5 CPU for the selected live
+deployment, while the Jetson Orin Nano GPU runs them near the camera rate. If no fresh
+Jetson Orin Nano prediction is available, current autonomy stops. The Raspberry Pi 5 remains
+the hardware and safety controller, so the Jetson Orin Nano never writes the servo or motors directly.
+Manual driving and the legacy Series 1/2 local-model path can still operate without it.
 
 <img src="docs/media/System_Architecture.jpg" alt="System architecture diagram" width="800">
 
@@ -73,12 +81,12 @@ Training runs on an NVIDIA RTX 6000 Ada-Generation GPU. The Series 3/4 trainers 
 
 | Function | Component |
 |---|---|
-| AI inference computer | Jetson Orin Nano |
-| Hardware controller | Raspberry Pi 5 |
-| Dashboard controller | Zero 2 W |
+| AI Model Manager | Jetson Orin Nano |
+| Hardware and safety controller | Raspberry Pi 5 |
+| Display controller | Zero 2 W |
 | Chassis | Yahboom Ackermann 520M |
 | Camera | Raspberry Pi Camera Module 3 Wide |
-| Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through CP2102 USB |
+| Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through a CP2102 UART-to-USB Adapter |
 | Steering | PCA9685 Servo Controller and 25KG steering servo |
 | Drive | Yahboom AT8236 Motor Controller and JGB37-520 DC motors (12 V, 550 RPM) |
 | Navigation | BN880 GPS; onboard HMC5883L compass is bench-only (not used during runtime) |

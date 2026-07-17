@@ -343,25 +343,32 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="jetson-orin-nano-raspberry-pi-5-compute-split">Jetson Orin Nano + Raspberry Pi 5 Compute Split</h1>
-<p>This page records the decision to run the controller on the <strong>Raspberry Pi 5</strong> <em>and</em> the
-steering model on the <strong>Jetson Orin Nano</strong>, instead of using a single computer.</p>
+<p>This page records the decision to use the <strong>Jetson Orin Nano as the AI brain</strong> and the
+<strong>Raspberry Pi 5 as the hardware and safety controller</strong>, instead of forcing both jobs onto
+one computer.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
-<li>The <strong>Raspberry Pi 5</strong> owns all real-time I/O and control: joystick, camera capture, LiDAR, GPS,
-  hall sensor, PCA9685 steering, motor PWM, safety arbitration, logging, and the dashboard
-  link.</li>
-<li>The <strong>Jetson Orin Nano</strong> runs only the steering neural network (ONNX) and returns a steering angle</li>
-<li>throttle over the network (Jetson Orin Nano at <code>10.42.0.2:8770</code>).</li>
-<li>The Raspberry Pi 5 fuses the Jetson Orin Nano's command with LiDAR safety and GPS navigation before moving
-  any wheel.</li>
+<li>The <strong>Jetson Orin Nano</strong> runs the current Series 3/4 steering neural network through ONNX
+  Runtime/CUDA and returns decoded steering plus runtime telemetry over private Ethernet at
+  <code>10.42.0.2:8770</code>.</li>
+<li>The <strong>Raspberry Pi 5</strong> captures the camera frame and owns joystick input, LiDAR, GPS, hall
+  sensing, PCA9685 steering, motor PWM, safety arbitration, logging, and the dashboard link.</li>
+<li>The Raspberry Pi 5 accepts only a fresh result for the selected model, combines it with
+  LiDAR and operator safety rules, and then writes the physical outputs.</li>
 </ul>
 <h2 id="why-this-choice">Why this choice</h2>
 <ul>
-<li><strong>Raspberry Pi 5 owns real-time I/O.</strong> The Raspberry Pi 5 already runs all GPIO, sensors, motors, steering,
-  LiDAR, and GPS reliably; the Jetson Orin Nano isn't as clean for that hardware wiring.</li>
-<li><strong>Reuse the established platform.</strong> The Raspberry Pi 5 was already the working, fully-wired base — faster
-  and cheaper to add a Jetson Orin Nano than to re-wire the whole car onto the Jetson Orin Nano.</li>
-<li><strong>Jetson Orin Nano = GPU for the heavy model.</strong> Series 3/4 ONNX inference uses the Jetson Orin Nano GPU through ONNX Runtime/CUDA, leaving the Raspberry Pi 5 focused on hardware control.</li>
+<li><strong>Current autonomy needs the Jetson Orin Nano GPU.</strong> The larger 320x180 Series 3/4 networks
+  ran much more slowly on the Raspberry Pi 5 CPU. The Jetson Orin Nano GPU runs the selected
+  model near the camera rate in the current deployment, making it the practical AI brain for
+  v3.4 and Series 4.</li>
+<li><strong>Keep hardware and safety deterministic.</strong> The Raspberry Pi 5 retains GPIO, sensors,
+  motors, steering, LiDAR, GPS, logging, and final safety arbitration. A missing Jetson Orin Nano result
+  therefore stops current autonomy instead of blocking manual control or writing hardware
+  from the network process.</li>
+<li><strong>Reuse the established physical platform.</strong> The Raspberry Pi 5 was already the working,
+  fully wired camera and I/O base. Adding the Jetson Orin Nano preserved that integration while adding
+  the GPU performance needed by the newer models.</li>
 <li><strong>Camera lock-in.</strong> The camera (Raspberry Pi Camera Module 3 Wide) is not compatible with
   the Jetson Orin Nano, and the entire 81,237-image Series 3/4 dataset was captured with it. No good
   alternative wide camera existed (the options were narrow or ultra-wide, wrong quality), so
@@ -381,32 +388,33 @@ steering model on the <strong>Jetson Orin Nano</strong>, instead of using a sing
 <tr>
 <td>Jetson Orin Nano only</td>
 <td>one board; GPU sits with compute</td>
-<td>Requires replacing the established Raspberry Pi 5 camera/GPIO/sensor integration and moving final actuator authority</td>
+<td>Requires replacing the established Raspberry Pi 5 camera/GPIO/sensor integration and moving hardware I/O and safety control</td>
 </tr>
 <tr>
 <td>Raspberry Pi 5 only</td>
 <td>established GPIO/sensor integration; simple</td>
-<td>Does not provide the selected GPU inference path for Series 3/4</td>
+<td>Series 3/4 inference is too slow on its CPU for the selected live deployment</td>
 </tr>
 <tr>
 <td><strong>Jetson Orin Nano + Raspberry Pi 5 (chosen)</strong></td>
-<td>Raspberry Pi 5 keeps current I/O + the wide camera; Jetson Orin Nano adds GPU for the heavy model</td>
+<td>Jetson Orin Nano provides the AI performance; Raspberry Pi 5 keeps the wide camera, I/O, and safety control</td>
 <td>two boards to manage + a network hop for inference</td>
 </tr>
 </tbody>
 </table>
 <h2 id="capture-and-inference-path">Capture and inference path</h2>
 <ul>
-<li>The Raspberry Pi 5 captures the frame via <strong>Picamera2</strong> in OpenCV BGR (<code>_PiCameraCapture</code>,
-  <code>code/controller/current/rc_car_app/vision.py</code>), resizes/normalizes it, and
-  sends it to <strong>Jetson Orin Nano at <code>10.42.0.2:8770</code></strong>. Jetson Orin Nano runs <code>SidewalkPilotV3</code> (ONNX) and
-  returns the 19-number hybrid vector, which the Raspberry Pi 5 decodes to a steering
-  angle + throttle and then fuses with LiDAR safety and GPS navigation before
-  writing to the servo/motors.</li>
-<li><strong>Speed motivation:</strong> Series 1/2 (<code>SteeringAutonomyV2</code>, ~0.67M params, 200x66)
-  ran locally on the Raspberry Pi 5. Series 3 (<code>SidewalkPilotV3</code>,
-  ~5.53M params, 320x180) is ~8x the parameters at higher resolution and is far
-  is substantially larger and uses the dedicated Jetson Orin Nano path, leaving the Raspberry Pi 5's CPU free for I/O. Exact throughput should be reported from the runtime telemetry for the tested model and software build rather than treated as a fixed architecture constant.</li>
+<li>The Raspberry Pi 5 captures the frame through <strong>Picamera2</strong> in OpenCV BGR
+  (<code>_PiCameraCapture</code>, <code>code/controller/current/rc_car_app/vision.py</code>) and the background
+  client sends its newest JPEG request to <strong>Jetson Orin Nano at <code>10.42.0.2:8770</code></strong>. The
+  Jetson Orin Nano performs model-specific resize/normalization, runs ONNX inference, decodes the
+  output, and returns steering plus telemetry. The Raspberry Pi 5 then applies safety and
+  writes the Servo Controller and Motor Controller.</li>
+<li><strong>Speed motivation:</strong> Series 1/2 (<code>SteeringAutonomyV2</code>, ~0.67M parameters, 200x66)
+  can run locally on the Raspberry Pi 5. Series 3/4 use substantially larger ~5.5M-parameter
+  networks at 320x180. The dedicated Jetson Orin Nano path leaves the Raspberry Pi 5 CPU available for
+  physical I/O while the GPU handles inference. Exact throughput should still be reported
+  from runtime telemetry for the tested model, provider, software build, and power mode.</li>
 <li><strong>Failure behavior:</strong> the model is one input to a safety-arbitrated loop, not
   the loop itself. LiDAR/AEB and manual override sit above it, and a stale or
   low-confidence model result triggers a safety stop rather than a blind command

@@ -41,7 +41,7 @@ and stop reason remain visible in telemetry instead of being hidden in a blended
 steering command.
 
 The current LiDAR is a Youyeetoo FHL-LD19 on USB (`/dev/ttyUSB0` via a CP2102
-adapter, 230400 baud). The reader auto-discovers the port and retries in a worker
+UART-to-USB Adapter, 230400 baud). The reader auto-discovers the port and retries in a worker
 after disconnects, so serial reconnect work is not intentionally performed in the
 main control loop. Missing scans remain fail-open with respect to AEB.
 

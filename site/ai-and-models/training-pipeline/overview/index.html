@@ -355,18 +355,18 @@
                 <h1 id="training-pipeline-overview">Training Pipeline Overview</h1>
 <p>SidewalkPilot training begins with a supervised field drive and ends only after an exported ONNX model passes offline and physical-car review.</p>
 <h2 id="pipeline">Pipeline</h2>
-<pre><code class="language-text">manual/supervised drive
-  -&gt; JPEG frames + absolute steering/throttle labels
-  -&gt; integrity and class-balance audit
-  -&gt; family-specific train/validation split
-  -&gt; weighted sampling + image augmentation
-  -&gt; CUDA training on RTX 6000 Ada
-  -&gt; final and best-validation checkpoints
-  -&gt; ONNX export
-  -&gt; common challenge-set evaluation and PDF report
-  -&gt; Jetson Orin Nano deployment
-  -&gt; supervised field comparison
-</code></pre>
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/training-evaluation.svg">
+      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow from field data and CARLA-assisted Series 1 and 2 data through family-specific trainers, GPU training, ONNX export, offline evaluation, and supervised field comparison">
+    </a>
+  </div>
+  <figcaption>
+    Training and evaluation flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
+
 <h2 id="series-specific-trainers">Series-Specific Trainers</h2>
 <table>
 <thead>

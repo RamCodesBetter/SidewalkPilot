@@ -356,7 +356,7 @@ safety corridor. It does not override steering.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li><code>lidar.py</code> reads the scanner over a serial port at <code>230400</code> baud. The current wiring is
-  <strong>USB via a CP2102 USB-to-UART adapter</strong> (<code>/dev/ttyUSB0</code>); an earlier setup ran it on the
+  <strong>USB via a CP2102 UART-to-USB Adapter</strong> (<code>/dev/ttyUSB0</code>); an earlier setup ran it on the
   Raspberry Pi 5 GPIO UART at <code>/dev/ttyAMA2</code>. The port is auto-resolved, preferring the CP2102
   <code>by-id</code> path and falling back to <code>ttyUSB*</code>/<code>ttyACM*</code>.</li>
 <li>The parser decodes the LD19 packet format (47-byte packets, 12 measurement points each)

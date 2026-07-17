@@ -64,7 +64,7 @@ so operator override does not depend on the model host being reachable.
 | Fault | Current behavior | Remaining limitation |
 |---|---|---|
 | Enabled AEB emergency threshold | Forward throttle is removed and brake requested | Configured threshold is not measured stopping-distance proof |
-| Stale camera/Jetson result | Autonomous path requests a stop instead of replaying indefinitely | Process-wide faults can still affect response timing |
+| Stale camera/Jetson Orin Nano result | Autonomous path requests a stop instead of replaying indefinitely | Process-wide faults can still affect response timing |
 | Stale or empty LiDAR scan | Reader retries; intervention becomes unavailable | This is fail-open for obstacle intervention and must be visible to operator |
 | Dashboard telemetry loss | Driving continues; display shows stale/no link or exits by policy | Dashboard is observability, not a motion interlock |
 | GPS loss | Route guidance cannot update reliably | Manual control remains; GPS loss is not a camera-steering stop by itself |

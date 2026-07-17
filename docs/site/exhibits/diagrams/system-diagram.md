@@ -6,8 +6,8 @@ This page is the top-level block diagram of SidewalkPilot: the three-device comp
 
 SidewalkPilot runs across three boards, each doing the job it is best at:
 
-- **Jetson Orin Nano at `10.42.0.2:8770` — the heavy model host.** Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Series 1/2 models (`SteeringAutonomyV2`, ~0.67M parameters, 200x66 input) still load directly on the Raspberry Pi 5 inside `vision.py`.
-- **Raspberry Pi 5 (`raspberrypi5`) — the controller.** Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in `code/controller/current/rc_car_app/runtime.py` and ticks at up to 60 Hz (`clock.tick(60)`).
+- **Jetson Orin Nano at `10.42.0.2:8770` — the AI brain.** Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Current v3.4 and Series 4 autonomy require a fresh result from this path. Series 1/2 models (`SteeringAutonomyV2`, ~0.67M parameters, 200x66 input) can still load directly on the Raspberry Pi 5 inside `vision.py`.
+- **Raspberry Pi 5 (`raspberrypi5`) — the hardware and safety controller.** Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in `code/controller/current/rc_car_app/runtime.py` and ticks at up to 60 Hz (`clock.tick(60)`).
 - **Zero 2 W (`zero2w`) - the dashboard.** Receives telemetry over USB Ethernet and renders it on one HUB75 LED panel. Rendering code is `z2w_dashboard.py`.
 
 ## Links between devices
@@ -18,64 +18,76 @@ SidewalkPilot runs across three boards, each doing the job it is best at:
 
 ## Why this split
 
-The Raspberry Pi Camera Module 3 Wide is connected to the Raspberry Pi 5, and the current 81,237-image Series 3/4 dataset was captured through the Raspberry Pi 5 camera path. Jetson Orin Nano supplies GPU inference without taking actuator authority. Final actuator and AEB decisions remain on the Raspberry Pi 5.
+The Jetson Orin Nano supplies the GPU inference that makes the current Series 3/4 self-driving
+path practical near the camera rate. The Raspberry Pi Camera Module 3 Wide remains connected
+to the Raspberry Pi 5 because the current 81,237-image dataset was captured through that
+camera path. Final actuator and AEB decisions remain on the Raspberry Pi 5.
 
 ## What this exhibit documents
 
-The checked-in separation of responsibilities: controller and actuator ownership on the Raspberry Pi 5, GPU inference on Jetson Orin Nano, and observability on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance for every link.
+The checked-in separation of responsibilities: AI and current autonomous steering inference
+on the Jetson Orin Nano, hardware and safety control on the Raspberry Pi 5, and observability
+on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance for every link.
 
-## System block view
+## System Architecture
 
-```text
-Camera + controller + LiDAR + GPS + IMU + hall sensor
-                         |
-                         v
-                  Raspberry Pi 5
-               /         |          \
-      private Ethernet   I/O     USB Ethernet
-             /            |             \
-            v             v              v
-    Jetson Orin Nano   motor/servo controllers   Zero 2 W -> HUB75
-       FP32 ONNX       final control     dashboard
-```
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/system-architecture.svg">
+      <img src="../../../assets/diagrams/system-architecture.svg" alt="SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, actuators, and logs">
+    </a>
+  </div>
+  <figcaption>
+    Compute, I/O, and device-link architecture. Open the <a href="../../../assets/diagrams/system-architecture.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/system-architecture.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
 
 Source anchors: `code/controller/current/rc_car_app/runtime.py`, `config.py`, `vision.py`, `jetson_inference_server.py`, `hub75_dashboard.py`, and `z2w_dashboard.py`.
 
-## Runtime and Safety Flow
+## Runtime and Control Flow
 
-```text
-controller + cached sensors + fresh model result
-                    |
-                    v
-           Raspberry Pi 5 arbitration
-        manual / gear / autonomy / AEB
-                    |
-                    v
-             steering + motor output
-                    |
-                    +--> CSV and dashboard telemetry
-```
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/runtime-control.svg">
+      <img src="../../../assets/diagrams/runtime-control.svg" alt="SidewalkPilot runtime and control flow showing latest sensor values, Jetson Orin Nano inference, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry">
+    </a>
+  </div>
+  <figcaption>
+    Runtime command and safety flow. Open the <a href="../../../assets/diagrams/runtime-control.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/runtime-control.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
 
 Manual input cancels autonomy when processed. A fresh model proposal is required for autonomous steering. Enabled/fresh LiDAR can reduce forward throttle or request emergency braking, but it does not steer.
 
 ## Training and Evaluation Flow
 
-```text
-field runs -> images + logical steering/absolute throttle labels
-           -> audit/split/augmentation -> GPU training
-           -> final + best artifacts -> ONNX
-           -> common evaluator -> supervised field comparison
-```
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/training-evaluation.svg">
+      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, model artifacts, offline evaluation, and supervised field testing">
+    </a>
+  </div>
+  <figcaption>
+    Training, export, and model-selection flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
 
 ## Navigation Flow
 
-```text
-GPS fix -> nearest graph node -> A* route -> route progress
-                                      |
-                                      +--> manual crosswalk handoff/resume
-```
-
-High-resolution draw.io exports are planned for these views. The text diagrams remain the inspectable fallback and must match runtime ownership.
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/navigation-flow.svg">
+      <img src="../../../assets/diagrams/navigation-flow.svg" alt="SidewalkPilot navigation and crosswalk handoff flow showing the offline graph, GPS localization, A-star route, automatic sidewalk segments, and manual crossing segments">
+    </a>
+  </div>
+  <figcaption>
+    Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
 
 ## Related pages
 

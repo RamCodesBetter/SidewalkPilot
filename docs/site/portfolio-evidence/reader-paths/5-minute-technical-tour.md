@@ -4,9 +4,16 @@ This path gives a technical or media reviewer enough context to describe Sidewal
 
 ## 1. One Vehicle, Three Computers
 
-The Jetson Orin Nano runs the neural network over private Ethernet. The Raspberry Pi 5 owns controller input, sensors, safety decisions, steering hardware, motors, and logging. The Zero 2 W renders the external dashboard over a dedicated USB network.
+The Jetson Orin Nano is the AI brain: it runs the current Series 3/4 steering network over
+the GPU and returns the prediction that makes camera-based self-driving possible. The
+Raspberry Pi 5 is the hardware and safety controller for input, sensors, actuators, and
+logging. The Zero 2 W renders the external dashboard over a dedicated USB network.
 
-This is a responsibility split, not three boards doing the same job. The display has no motion-command path. Jetson Orin Nano connection and inference work use a background latest-frame worker, so the controller loop does not intentionally wait for each request; this is not a worst-case real-time guarantee.
+This is a responsibility split, not three boards doing the same job. Current v3.4 and Series
+4 autonomy depend on a fresh Jetson Orin Nano result; without one, autonomy stops. The display has no
+motion-command path. Jetson Orin Nano connection and inference work use a background latest-frame
+worker, so the hardware loop does not intentionally wait for each request; this is not a
+worst-case real-time guarantee.
 
 Read: [Project Overview](../../start-here/project-overview.md), [Data Flow](../../autonomy-stack/architecture/data-flow.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
 

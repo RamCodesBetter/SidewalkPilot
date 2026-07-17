@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-17T00:00:00.000Z" agent="SidewalkPilot diagram generator" version="24.7.17">
+  <diagram id="system-architecture" name="SidewalkPilot System Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1040" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="panel-1" parent="1" vertex="1" value="Operator and Sensors" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="30" y="105" width="305" height="650" as="geometry" />
+        </mxCell>
+        <mxCell id="panel-2" parent="1" vertex="1" value="Hardware Outputs and Local Records" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="400" y="710" width="955" height="305" as="geometry" />
+        </mxCell>
+        <mxCell id="camera" parent="1" vertex="1" value="Raspberry Pi Camera&lt;br&gt;Module 3 Wide" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="65" y="155" width="235" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="xbox" parent="1" vertex="1" value="Xbox Controller" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="65" y="250" width="235" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lidar" parent="1" vertex="1" value="FHL-LD19 LiDAR" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="65" y="345" width="235" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="gps" parent="1" vertex="1" value="BN880 GPS" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="65" y="440" width="235" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="imu" parent="1" vertex="1" value="XIAO MG24 Sense IMU" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="65" y="535" width="235" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="hall" parent="1" vertex="1" value="Hall-Effect Wheel-Speed&lt;br&gt;Sensor" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="65" y="630" width="235" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="pi" parent="1" vertex="1" value="Raspberry Pi 5&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Hardware and Safety Controller&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF0F4;strokeColor=#C51A4A;fontColor=#7A1030;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="510" y="350" width="370" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="jetson" parent="1" vertex="1" value="Jetson Orin Nano&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;AI Model Manager - Series 3/4 ONNX CUDA inference&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1010" y="145" width="390" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="zero" parent="1" vertex="1" value="Zero 2 W&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Display Controller&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#EDF4FF;strokeColor=#246BCE;fontColor=#153E75;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1050" y="515" width="290" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="hub75" parent="1" vertex="1" value="HUB75 RGB&lt;br&gt;LED Matrix" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#EDF4FF;strokeColor=#246BCE;fontColor=#153E75;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1400" y="530" width="170" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="pca" parent="1" vertex="1" value="PCA9685 Servo&lt;br&gt;Controller" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="450" y="770" width="245" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="servo" parent="1" vertex="1" value="Steering Servo" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="450" y="905" width="245" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="at8236" parent="1" vertex="1" value="AT8236 Motor&lt;br&gt;Controller" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="760" y="770" width="245" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="motors" parent="1" vertex="1" value="JGB37-520 DC Motors&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;12 V, 550 RPM&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="760" y="905" width="245" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="logs" parent="1" vertex="1" value="CSV Runtime Logs" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1080" y="770" width="235" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" parent="1" edge="1" source="camera" target="pi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" parent="1" edge="1" source="xbox" target="pi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3" parent="1" edge="1" source="lidar" target="pi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" parent="1" edge="1" source="gps" target="pi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" parent="1" edge="1" source="imu" target="pi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" parent="1" edge="1" source="hall" target="pi" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7" parent="1" edge="1" source="pi" target="jetson" value="JPEG frame + model" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="440" />
+              <mxPoint x="940" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8" parent="1" edge="1" source="jetson" target="pi" value="steering + telemetry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="930" y="220" />
+              <mxPoint x="930" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-9" parent="1" edge="1" source="pi" target="zero" value="UDP telemetry / USB Ethernet" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-10" parent="1" edge="1" source="zero" target="hub75" value="render" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-11" parent="1" edge="1" source="pi" target="pca" value="I2C command" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="635" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-12" parent="1" edge="1" source="pca" target="servo" value="PWM signal" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-13" parent="1" edge="1" source="pi" target="at8236" value="GPIO + PWM" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-14" parent="1" edge="1" source="at8236" target="motors" value="drive power" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-15" parent="1" edge="1" source="pi" target="logs" value="runtime state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="680" />
+              <mxPoint x="1198" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

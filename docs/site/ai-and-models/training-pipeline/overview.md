@@ -4,19 +4,17 @@ SidewalkPilot training begins with a supervised field drive and ends only after 
 
 ## Pipeline
 
-```text
-manual/supervised drive
-  -> JPEG frames + absolute steering/throttle labels
-  -> integrity and class-balance audit
-  -> family-specific train/validation split
-  -> weighted sampling + image augmentation
-  -> CUDA training on RTX 6000 Ada
-  -> final and best-validation checkpoints
-  -> ONNX export
-  -> common challenge-set evaluation and PDF report
-  -> Jetson Orin Nano deployment
-  -> supervised field comparison
-```
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/training-evaluation.svg">
+      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow from field data and CARLA-assisted Series 1 and 2 data through family-specific trainers, GPU training, ONNX export, offline evaluation, and supervised field comparison">
+    </a>
+  </div>
+  <figcaption>
+    Training and evaluation flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
 
 ## Series-Specific Trainers
 

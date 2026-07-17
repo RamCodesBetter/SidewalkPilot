@@ -1,16 +1,22 @@
 # Project Overview
 
-SidewalkPilot is a full-stack autonomy project built around a Yahboom Ackermann 520M RC chassis. It combines a learned camera-steering model, deterministic safety controls, GPS route logic, physical motor and servo control, data collection, offline evaluation, and a separate telemetry display.
+SidewalkPilot is a full-stack autonomy project built around a Yahboom Ackermann 520M RC
+chassis. Its Jetson Orin Nano AI brain runs the current camera-steering models, while separate
+hardware, safety, navigation, data, evaluation, and telemetry systems turn those predictions
+into a supervised physical-car experiment.
 
 The project is deliberately split into three computers so each has a clear responsibility.
 
 | Manager | Hardware | Responsibility |
 |---|---|---|
-| AI Model Manager | Jetson Orin Nano | Receives the newest camera frame, runs ONNX inference, returns a steering result |
-| Major System Manager | Raspberry Pi 5 | Controller input, camera, LiDAR, GPS, motor PWM, steering servo, logs, safety arbitration |
-| Display System Manager | Zero 2 W | Receives USB-network telemetry and renders the Waveshare 64x32 HUB75 dashboard |
+| AI Model Manager | Jetson Orin Nano | Receives the newest camera frame, runs Series 3/4 ONNX inference on the GPU, and returns a steering result |
+| Hardware and Safety Controller | Raspberry Pi 5 | Controller input, camera, LiDAR, GPS, motor PWM, steering servo, logs, and safety arbitration |
+| Display Controller | Zero 2 W | Receives USB-network telemetry and renders the Waveshare 64x32 HUB75 dashboard |
 
-The Raspberry Pi 5 remains authoritative. The Jetson Orin Nano proposes steering; it does not directly operate the servo. The Zero 2 W observes the system; it does not control motion.
+The Jetson Orin Nano is required for the current v3.4 and Series 4 self-driving path. The
+Raspberry Pi 5 rejects missing or stale Jetson Orin Nano results and remains the final hardware and
+safety controller; the Zero 2 W observes the system and does not control motion. Legacy
+Series 1/2 models can run locally, but they are not the current autonomy baseline.
 
 ## Runtime Architecture
 
@@ -18,7 +24,7 @@ The control path is:
 
 ```text
 Xbox controller ----------------------------+
-Raspberry Pi Camera -> Raspberry Pi -> Jetson Orin Nano model --+--> arbitration -> servo and motors
+Raspberry Pi Camera -> Raspberry Pi 5 -> Jetson Orin Nano model --+--> arbitration -> servo and motors
 LiDAR --------------------------------------+         |
 GPS and hall sensor ------------------------+         +--> logs and photos
                                                       +--> Zero 2 W dashboard
@@ -65,7 +71,7 @@ Series 3 and 4 use the same **81,237 real labeled images** and split procedure. 
 | Function | Hardware and connection | Current role |
 |---|---|---|
 | Forward vision | Raspberry Pi Camera Module 3 Wide through Picamera2 | Captures 1280x720 BGR frames before model-specific preprocessing |
-| Obstacle distance | FHL-LD19 through CP2102 USB serial | Supplies center-corridor clearance for slowdown and emergency braking |
+| Obstacle distance | FHL-LD19 through a CP2102 UART-to-USB Adapter | Supplies center-corridor clearance for slowdown and emergency braking |
 | Position | BN880 GPS through Raspberry Pi 5 UART | Supplies route and position updates |
 | Compass heading | HMC5883L-compatible magnetometer through I2C | Bench-tested; not fused into the live navigation controller |
 | Motion sensing | XIAO MG24 Sense through UART | Experimental yaw-control input |
@@ -83,20 +89,20 @@ The system does not average competing commands. Shutdown and braking take priori
 
 ## Fast Health Check
 
-On the Raspberry Pi 5, verify the controller service and recent log:
-
-```bash
-sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager
-journalctl -u sidewalkpilot-rpi-car.service -n 100 -l --no-pager
-ping -c 3 10.42.0.2
-```
-
 On the Jetson Orin Nano, verify the inference service and GPU:
 
 ```bash
 ss -ltnp | grep 8770
 pgrep -af jetson_inference_server.py
 nvidia-smi
+```
+
+On the Raspberry Pi 5, verify the controller service, recent log, and direct Jetson Orin Nano link:
+
+```bash
+sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager
+journalctl -u sidewalkpilot-rpi-car.service -n 100 -l --no-pager
+ping -c 3 10.42.0.2
 ```
 
 On the Zero 2 W, verify the dashboard service:

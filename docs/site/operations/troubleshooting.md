@@ -19,7 +19,7 @@ The consolidated failure playbook for SidewalkPilot: the dashboard link, the con
 
 ## LiDAR reads none / zero
 
-- Confirm the LiDAR is present: the FHL-LD19 is currently on USB `/dev/ttyUSB0` via a CP2102 adapter at `230400` baud (it was previously GPIO UART `/dev/ttyAMA2`).
+- Confirm the LiDAR is present: the FHL-LD19 is currently on USB `/dev/ttyUSB0` via a CP2102 UART-to-USB Adapter at `230400` baud (it was previously GPIO UART `/dev/ttyAMA2`).
 - Confirm the LiDAR motor is spinning.
 - Stop any second reader before a raw serial test — two readers on one port is a common cause.
 

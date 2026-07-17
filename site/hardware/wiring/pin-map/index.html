@@ -347,7 +347,7 @@
                 <h1 id="wiring-and-pin-map">Wiring and Pin Map</h1>
 <p>A consolidated reference for power domains, primary sensors, actuators, and inter-computer links.</p>
 <h2 id="how-it-works">How it works</h2>
-<p>The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (PCA9685 Servo Controller), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
+<p>The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (PCA9685 Servo Controller), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR through its current CP2102 UART-to-USB Adapter, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
 <h2 id="master-pin-port-table">Master pin / port table</h2>
 <table>
 <thead>
@@ -425,7 +425,7 @@
 </tr>
 <tr>
 <td>LiDAR (current)</td>
-<td>Youyeetoo FHL-LD19 via CP2102 adapter</td>
+<td>Youyeetoo FHL-LD19 via CP2102 UART-to-USB Adapter</td>
 <td>USB serial</td>
 <td><code>/dev/ttyUSB0</code> @ <code>230400</code> (auto-resolved)</td>
 <td><code>lidar.py</code> <code>resolve_lidar_serial_port</code></td>
@@ -450,7 +450,7 @@
 <ul>
 <li>Motor pins are driven as software PWM through <code>gpiozero.PWMOutputDevice</code> at 1 kHz (<code>hardware.py</code>).</li>
 <li>The IMU reader and yaw controller are implemented. The default <code>straight</code> mode only corrects near center and falls back to open loop if IMU data is unavailable.</li>
-<li>LiDAR now resolves its port automatically at startup, preferring a CP2102 <code>/dev/serial/by-id/*</code> symlink and falling back to <code>/dev/ttyUSB*</code>; the older GPIO-UART <code>/dev/ttyAMA2</code> path is documented for history.</li>
+<li>LiDAR now resolves its port automatically at startup, preferring the CP2102 UART-to-USB Adapter's <code>/dev/serial/by-id/*</code> symlink and falling back to <code>/dev/ttyUSB*</code>; the older GPIO-UART <code>/dev/ttyAMA2</code> path is documented for history.</li>
 </ul>
 <h2 id="why-it-matters">Why it matters</h2>
 <p>A consolidated pin map is a safety and debugging tool. Because motor pins move real wheels, an accidental mix-up between a motor line and a sensor line is not harmless. This table was checked against <code>config.py</code>, <code>lidar.py</code>, and <code>navigation.py</code>, but it is still maintained documentation and must be re-audited when wiring or constants change.</p>
@@ -472,7 +472,7 @@
 <tr>
 <td>Jetson Orin Nano</td>
 <td>INIU 27,000 mAh, 140 W bank</td>
-<td>AI compute</td>
+<td>AI Model Manager</td>
 </tr>
 <tr>
 <td>Raspberry Pi 5 and Zero 2 W</td>

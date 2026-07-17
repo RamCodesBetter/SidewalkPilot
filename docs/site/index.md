@@ -2,7 +2,12 @@
 
 SidewalkPilot is a solo-built autonomous RC-car research platform that uses a camera model to steer along sidewalks while a separate LiDAR layer can slow or stop the vehicle. The project began in early April 2025 after a smaller Raspberry Pi Pico project. It grew from a drivable RC chassis into a complete hardware, data, model, deployment, and safety system.
 
-It is a real, working vehicle rather than a simulation-only demonstration. A Jetson Orin Nano runs neural-network inference, a Raspberry Pi 5 operates the hardware and safety loop, and a Zero 2 W drives a live 64x32 dashboard. An Xbox controller remains the manual takeover and shutdown interface.
+It is a real, working vehicle rather than a simulation-only demonstration. The Jetson Orin
+Nano is the AI brain for current Series 3/4 autonomy, running the neural network that turns
+camera frames into steering predictions. The Raspberry Pi 5 is the hardware and safety
+controller, and the Zero 2 W drives a live 64x32 dashboard. Without a fresh Jetson Orin Nano result,
+current autonomy stops rather than driving on a stale prediction. An Xbox controller remains
+the manual takeover and shutdown interface.
 
 > SidewalkPilot is a supervised research and learning project. It is not presented as certified or approved for unattended or public-road operation, and it is not a finished autonomous vehicle.
 

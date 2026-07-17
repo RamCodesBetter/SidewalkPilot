@@ -365,6 +365,18 @@ segments. On every control-loop tick, <code>NavigationManager.update()</code> re
 car to the nearest path node, computes remaining distance and ETA, and decides whether
 the current segment should be driven by the model (<code>AUTO</code>) or handed to the human
 (<code>MNUL</code>).</p>
+<figure class="project-diagram">
+  <div class="project-diagram__viewport">
+    <a href="../../../assets/diagrams/navigation-flow.svg">
+      <img src="../../../assets/diagrams/navigation-flow.svg" alt="SidewalkPilot navigation flow from an offline map graph and GPS position through A-star routing, sidewalk and crossing segments, manual handoff, automatic resume, and runtime safety">
+    </a>
+  </div>
+  <figcaption>
+    Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a>
+    or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.
+  </figcaption>
+</figure>
+
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li><code>NavigationManager</code> loads the graph on startup: <code>6183</code> nodes and <code>10072</code> edges of

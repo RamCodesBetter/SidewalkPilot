@@ -398,7 +398,7 @@ or bit-identical training across unrelated GPU/software environments.</p>
 </tr>
 <tr>
 <td>LiDAR</td>
-<td>FHL-LD19 uses CP2102 USB serial at 230400 baud; missing scans are not proof of clearance</td>
+<td>FHL-LD19 uses a CP2102 UART-to-USB Adapter at 230400 baud; missing scans are not proof of clearance</td>
 </tr>
 <tr>
 <td>GPS/IMU</td>
@@ -406,7 +406,7 @@ or bit-identical training across unrelated GPU/software environments.</p>
 </tr>
 <tr>
 <td>Compute</td>
-<td>Raspberry Pi 5 owns final control; Jetson Orin Nano supplies asynchronous ONNX inference</td>
+<td>Jetson Orin Nano is the AI Model Manager for asynchronous Series 3/4 ONNX inference; Raspberry Pi 5 applies hardware and safety control</td>
 </tr>
 <tr>
 <td>Dashboard</td>

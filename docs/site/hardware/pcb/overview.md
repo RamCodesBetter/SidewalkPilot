@@ -41,7 +41,7 @@ The next schematic must cover:
 - Hall input on BCM 24;
 - connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement actually selected for the final harness.
 
-LiDAR currently uses a CP2102 USB serial adapter. A prior build used `/dev/ttyAMA2`; Rev B must not preserve that historical choice accidentally.
+LiDAR currently uses a CP2102 UART-to-USB Adapter. A prior build used `/dev/ttyAMA2`; Rev B must not preserve that historical choice accidentally.
 
 ## Revision Record
 

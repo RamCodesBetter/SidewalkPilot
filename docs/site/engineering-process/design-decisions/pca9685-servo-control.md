@@ -2,7 +2,7 @@
 
 This page records the decision to drive the Ackermann steering servo through a
 **PCA9685 Servo Controller over I2C** instead of generating the servo pulse
-directly from a Raspberry Pi GPIO pin.
+directly from a Raspberry Pi 5 GPIO pin.
 
 ## Decision
 

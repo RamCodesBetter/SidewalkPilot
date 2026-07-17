@@ -16,3 +16,27 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+
+/* Keep wide technical diagrams readable on narrow screens. */
+.project-diagram {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.project-diagram__viewport {
+  overflow-x: auto;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+}
+
+.project-diagram img {
+  display: block;
+  width: 100%;
+  min-width: 900px;
+  height: auto;
+}
+
+.project-diagram figcaption {
+  margin-top: 0.45rem;
+  color: #667085;
+  font-size: 0.9rem;
+}

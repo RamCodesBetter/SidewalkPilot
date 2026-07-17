@@ -12,7 +12,7 @@ Before Leaving is the packing-and-readiness runbook run at home, before the car 
 
 1. Charge and inspect the 3S LiPo that powers the drive motors, plus the Raspberry Pi 5/electronics power. Check pack voltage, swelling, connectors, and physical damage before loading anything. Evidence: measured pack voltage.
 2. Pack the Xbox controller and confirm it is charged/paired. The runtime hard-exits at startup with `!!! WARNING: No joystick detected` if pygame sees zero joysticks (`rc_car_app/runtime.py`, `pygame.joystick.get_count() == 0`), so a dead controller means no run.
-3. Confirm the sensor harness is intact: LiDAR (Youyeetoo FHL-LD19, USB `/dev/ttyUSB0` via CP2102, 230400 baud), GPS (BN880 on `/dev/ttyAMA0`, 9600), hall sensor (GPIO24), servo ribbon to the PCA9685 Servo Controller (I2C `0x40`, channel 0), and the JGB37-520 DC motor leads through the AT8236 Motor Controller (GPIO 19/20 right, 25/13 left). Evidence: visual/tug check of each connector.
+3. Confirm the sensor harness is intact: LiDAR (Youyeetoo FHL-LD19, USB `/dev/ttyUSB0` via a CP2102 UART-to-USB Adapter, 230400 baud), GPS (BN880 on `/dev/ttyAMA0`, 9600), hall sensor (GPIO24), servo ribbon to the PCA9685 Servo Controller (I2C `0x40`, channel 0), and the JGB37-520 DC motor leads through the AT8236 Motor Controller (GPIO 19/20 right, 25/13 left). Evidence: visual/tug check of each connector.
 4. Confirm the Raspberry Pi Camera Module 3 Wide is seated and its ribbon is locked. The current camera integration and all 81,237 Series 3/4 images use this Raspberry Pi 5 camera path; a loose ribbon breaks capture and model input.
 5. Pack the Zero 2 W dashboard and the USB Ethernet cable. The dashboard is USB-only: Raspberry Pi 5 `usb0` is `192.168.10.1`, Zero 2 W `usb0` is `192.168.10.2`, telemetry is UDP to `192.168.10.2:8765`. Use the known working port and power arrangement; `-110`/`-62` enumeration errors indicate a failed USB transaction but do not by themselves prove whether the cause is power, cable, port, or gadget state.
 6. Clear space on the Raspberry Pi 5 for the run's output. Each run writes a CSV to `~/logs/log_YYYYMMDD_HHMMSS.csv` by default (or under `RC_CAR_LOG_DIR`) and photos to `media/photos/YYYY_MM_DD_run_N/` with a per-run JSON label file. Confirm free disk in both locations.
@@ -24,7 +24,7 @@ Abort the trip if the LiPo will not reach a safe field voltage, the controller w
 
 ## At the Route
 
-1. Restrain or lift the wheels and start the Zero 2 W receiver, Raspberry Pi 5 controller, and Jetson Orin Nano server as required.
+1. Restrain or lift the wheels and start the Jetson Orin Nano server, Raspberry Pi 5 controller, and Zero 2 W receiver as required.
 2. Verify manual steering, throttle direction, brake, PRND, physical power cut, dashboard freshness, camera orientation, model identity, LiDAR stream/AEB state, and sensor freshness.
 3. Select the model while stationary. Confirm a fresh matching inference result before arming autonomy.
 4. Start video and identify the run aloud or in notes. Define pass/warn/fail criteria.
