@@ -343,10 +343,10 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="power">Power</h1>
-<p>The car carries its own power. The drive motors are fed from a 3S LiPo through the
-AT8236, while the compute boards (Jetson Orin Nano, Raspberry Pi 5, Zero 2 W) run from high-output USB power
-banks. Separating the noisy motor rail from the clean logic rail is the main goal of the
-power design.</p>
+<p>The car carries its own power. Its JGB37-520 DC drive motors (12 V, 550 RPM) are fed from
+a 3S LiPo through the AT8236, while the compute boards (Jetson Orin Nano, Raspberry Pi 5,
+Zero 2 W) run from high-output USB power banks. Separating the noisy motor rail from the
+clean logic rail is the main goal of the power design.</p>
 <h2 id="parts-amazon">Parts (Amazon)</h2>
 <ul>
 <li><a href="https://www.amazon.com/INIU-27000mAh-Capacity-Powerbank-Compatible/dp/B0CB1FWNMK/ref=sr_1_3_mod_primary_new?crid=22FOBL7945FZM&amp;dib=eyJ2IjoiMSJ9.meZepEu5vSz4vwHLYuqoo3Wk8qnZzXWmECTNX4Fy-hwokHJfR_rLAERXNYRFtflcpxZiXtyQoNX8zHQK-jS2xYdaUkUVVJN5nILgx954U5yQSRI_FGsMB-eooQbnzdHXm471o1A6WEBL9nH3LBbE3_j6cfYBtf4SxlXue5KzZ0L8OL4CNj23hupNeq0SVmsAxeG7KKm3b2lNio0926YPKOgj015yjHNnkRG3eSe8ECw.ibBDjkUT7hHlWrPVS5tOXojkxmcJoJ-ppJOM8oeBads&amp;dib_tag=se&amp;keywords=27000mah+140w&amp;qid=1779577022&amp;sbo=RZvfv%2F%2FHxDF%2BO5021pAnSA%3D%3D&amp;sprefix=27000mah+140%2Caps%2C196&amp;sr=8-3">INIU 27000mAh 140W Power Bank</a> — $79.99</li>
@@ -361,7 +361,7 @@ power design.</p>
 <h2 id="power-domains">Power domains</h2>
 <ul>
 <li><strong>Motor rail:</strong> a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 H-bridge
-  and the drive motors. A DROK DC buck converter steps voltage down where a rail needs it,
+  and JGB37-520 DC drive motors. A DROK DC buck converter steps voltage down where a rail needs it,
   large 10000 uF electrolytic capacitors buffer the motor rail against current spikes, and
   ATC/ATO fuses protect against shorts.</li>
 <li><strong>Logic rail:</strong> the compute boards run from USB power banks (a 27000 mAh 140W bank and a

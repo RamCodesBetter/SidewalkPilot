@@ -352,8 +352,9 @@ dashboard - is mounted on this chassis.</p>
 <h2 id="how-it-works">How it works</h2>
 <ul>
 <li>The chassis uses <strong>Ackermann steering</strong>: the front wheels pivot on a linkage driven by a
-  single steering servo, while the drive comes from the wheel motors through the AT8236
-  H-bridge. This matches how a real car steers, not skid/tank steering.</li>
+  single steering servo, while the drive comes from JGB37-520 DC motors rated for 12 V and
+  550 RPM through the AT8236 H-bridge. This matches how a real car steers, not skid/tank
+  steering.</li>
 <li>Logical steering commands (<code>0</code> = left, <code>90</code> = center, <code>180</code> = right) are turned into
   servo angles in <code>hardware.py</code>; the linkage geometry translates that into the actual
   wheel angle.</li>

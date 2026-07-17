@@ -1,12 +1,15 @@
 # Build Overview
 
-SidewalkPilot is built on a Yahboom Ackermann 520M chassis and carries three computers, a camera, LiDAR, GPS/compass, wheel-speed sensing, steering and motor electronics, a dashboard, and several separate power sources. It is closer to a mobile systems-integration bench than a stock RC car.
+SidewalkPilot is built on a Yahboom Ackermann 520M chassis with JGB37-520 DC drive motors
+rated for 12 V and 550 RPM. It carries three computers, a camera, LiDAR, GPS/compass,
+wheel-speed sensing, steering and motor electronics, a dashboard, and several separate
+power sources. It is closer to a mobile systems-integration bench than a stock RC car.
 
 ## Major Assemblies
 
 | Assembly | Main parts | Purpose |
 |---|---|---|
-| Chassis and steering | Yahboom Ackermann 520M, high-torque steering servo, steering rods/linkage | Physical vehicle and car-like front-wheel geometry |
+| Chassis and steering | Yahboom Ackermann 520M, JGB37-520 DC motors (12 V, 550 RPM), high-torque steering servo, steering rods/linkage | Physical vehicle, drive power, and car-like front-wheel geometry |
 | AI compute | Jetson Orin Nano | ONNX camera-steering inference |
 | Main controller | Raspberry Pi 5, PCA9685, AT8236 interface wiring | Sensors, controller, servo, motors, safety, logs |
 | Display computer | Zero 2 W, Waveshare 64x32 HUB75 panel | Independent live telemetry display |

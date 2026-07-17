@@ -156,6 +156,8 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#parts-amazon">Parts (Amazon)</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#motor-specification">Motor specification</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#wiring">Wiring</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
@@ -345,13 +347,40 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="motors">Motors</h1>
-<p>The drive motors move the car forward and backward. They are driven by a Yahboom
-AT8236 dual H-bridge, which the Raspberry Pi 5 controls with PWM on four GPIO pins. Steering is
-separate (a servo on the PCA9685); these motors only provide thrust.</p>
+<p>The car uses JGB37-520 DC drive motors rated for 12 V and 550 RPM. They are driven by a
+Yahboom AT8236 dual H-bridge, which the Raspberry Pi 5 controls with PWM on four GPIO
+pins. Steering is separate (a servo on the PCA9685); these motors only provide thrust.</p>
 <h2 id="parts-amazon">Parts (Amazon)</h2>
 <ul>
 <li><a href="https://www.amazon.com/Yahboom-Controller-AT8236-H-Bridge-Raspberry/dp/B0BVW7PBYW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.uPNafB0Kecl7MEifvky-Os4jq9LSVLKfYZ7ng7QQyCusNhtxa5eWjFZ0gjil7eLqQtz6A-GbYKyZXwdw432rlWBHtOqQWKJaU9NIKS05CPcQ9cay-cspsfSoXnukBXOGOoMaqYK5hOnGgK2L1PYDXVb9lNHt7H6HH1stR_3gc1O4vMcXviPEp4CKCcOh8c2F_DAkKhYTZGDTjyLmKcLu__rs3sfnahMZBBAGsrQoyvHIROsZDXMkPHNpqFdAV74yTVv22c8zVqZE3uDRF7uhoXd5wNsgoVEj5WDY3Y9kkkk.cDRzL8BTvFn8RCop3P581cf5S1qfAQCxjEKbVSsehe0&amp;dib_tag=se&amp;keywords=Yahboom%2BDual%2BMotor%2BDrive%2BController%2BBoard%2BModule%2BAT8236%2BDual%2BH-Bridge%2BDC%2BStepper%2Bfor%2BArduino%2BRaspberry%2BPi%2BSTM32%2B(Motor%2BDrive%2BModule%2B%2BPower%2BCable)&amp;nsdOptOutParam=true&amp;qid=1779578440&amp;sr=8-1&amp;th=1">Yahboom AT8236 Motor Controller</a> — $12.99</li>
 </ul>
+<h2 id="motor-specification">Motor specification</h2>
+<table>
+<thead>
+<tr>
+<th>Specification</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>JGB37-520</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>DC geared motor</td>
+</tr>
+<tr>
+<td>Rated voltage</td>
+<td>12 V DC</td>
+</tr>
+<tr>
+<td>Rated speed</td>
+<td>550 RPM</td>
+</tr>
+</tbody>
+</table>
 <h2 id="wiring">Wiring</h2>
 <p>Left and right sides each have a forward and a backward PWM channel (from <code>config.py</code>):</p>
 <table>

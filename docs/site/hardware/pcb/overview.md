@@ -9,7 +9,8 @@ Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberr
 The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:
 
 - The **PCA9685** servo driver breaks out on the I2C bus (`0x40`, channel 0).
-- The **AT8236 motor driver** takes the four motor GPIOs (right fwd/bwd, left fwd/bwd).
+- The **AT8236 motor driver** takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
+  and controls the JGB37-520 DC motors rated for 12 V and 550 RPM.
 - The **hall sensor**, **LiDAR**, **GPS/compass**, and **IMU** each get a labeled connector.
 - Power and ground rails are shared instead of daisy-chained through the breadboard.
 

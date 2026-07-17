@@ -11,10 +11,10 @@ The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor co
 | Subsystem | Part | Connection | Pin / address / port | Source constant |
 |---|---|---|---|---|
 | Steering servo | PCA9685 16-ch PWM driver → chassis servo | I2C bus 1 | address `0x40`, servo channel `0`, 50 Hz | `PCA9685_I2C_ADDRESS`, `PCA9685_SERVO_CHANNEL`, `PCA9685_FREQUENCY_HZ` |
-| Drive motor (right fwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 19` | `MOTOR_RIGHT_FWD_PIN` |
-| Drive motor (right bwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 20` | `MOTOR_RIGHT_BWD_PIN` |
-| Drive motor (left fwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 25` | `MOTOR_LEFT_FWD_PIN` |
-| Drive motor (left bwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 13` | `MOTOR_LEFT_BWD_PIN` |
+| Right drive control (forward) | AT8236 H-bridge -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 19` | `MOTOR_RIGHT_FWD_PIN` |
+| Right drive control (backward) | AT8236 H-bridge -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 20` | `MOTOR_RIGHT_BWD_PIN` |
+| Left drive control (forward) | AT8236 H-bridge -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 25` | `MOTOR_LEFT_FWD_PIN` |
+| Left drive control (backward) | AT8236 H-bridge -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 13` | `MOTOR_LEFT_BWD_PIN` |
 | Hall / speed sensor | Wheel hall sensor | GPIO (BCM), pull-up | `GPIO 24` | `HALL_SENSOR_GPIO_PIN` |
 | GPS | BN880 GPS receiver | UART | `/dev/ttyAMA0` @ `9600` | `GPS_PORT`, `GPS_BAUD` (`navigation.py`) |
 | Compass (bench only) | BN880 HMC5883L-compatible magnetometer | I2C | Detected by `bn880_test.py`; not consumed by live navigation | bench utility only |
@@ -37,7 +37,7 @@ A consolidated pin map is a safety and debugging tool. Because motor pins move r
 
 | Domain | Source | Main load |
 |---|---|---|
-| Drive | OVONIC 3S 11.1 V, 5200 mAh LiPo | AT8236 and drive motors |
+| Drive | OVONIC 3S 11.1 V, 5200 mAh LiPo | AT8236 and JGB37-520 DC motors (12 V, 550 RPM) |
 | Jetson Orin Nano | INIU 27,000 mAh, 140 W bank | AI compute |
 | Raspberry Pi 5 and Zero 2 W | INIU 10,000 mAh, 45 W bank | Control and dashboard computers |
 | HUB75 display | OVONIC 2S 7.4 V, 5200 mAh LiPo through fused buck converter | LED matrix |

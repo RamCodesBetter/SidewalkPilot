@@ -1,12 +1,21 @@
 # Motors
 
-The drive motors move the car forward and backward. They are driven by a Yahboom
-AT8236 dual H-bridge, which the Raspberry Pi 5 controls with PWM on four GPIO pins. Steering is
-separate (a servo on the PCA9685); these motors only provide thrust.
+The car uses JGB37-520 DC drive motors rated for 12 V and 550 RPM. They are driven by a
+Yahboom AT8236 dual H-bridge, which the Raspberry Pi 5 controls with PWM on four GPIO
+pins. Steering is separate (a servo on the PCA9685); these motors only provide thrust.
 
 ## Parts (Amazon)
 
 - [Yahboom AT8236 Motor Controller](https://www.amazon.com/Yahboom-Controller-AT8236-H-Bridge-Raspberry/dp/B0BVW7PBYW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.uPNafB0Kecl7MEifvky-Os4jq9LSVLKfYZ7ng7QQyCusNhtxa5eWjFZ0gjil7eLqQtz6A-GbYKyZXwdw432rlWBHtOqQWKJaU9NIKS05CPcQ9cay-cspsfSoXnukBXOGOoMaqYK5hOnGgK2L1PYDXVb9lNHt7H6HH1stR_3gc1O4vMcXviPEp4CKCcOh8c2F_DAkKhYTZGDTjyLmKcLu__rs3sfnahMZBBAGsrQoyvHIROsZDXMkPHNpqFdAV74yTVv22c8zVqZE3uDRF7uhoXd5wNsgoVEj5WDY3Y9kkkk.cDRzL8BTvFn8RCop3P581cf5S1qfAQCxjEKbVSsehe0&dib_tag=se&keywords=Yahboom%2BDual%2BMotor%2BDrive%2BController%2BBoard%2BModule%2BAT8236%2BDual%2BH-Bridge%2BDC%2BStepper%2Bfor%2BArduino%2BRaspberry%2BPi%2BSTM32%2B(Motor%2BDrive%2BModule%2B%2BPower%2BCable)&nsdOptOutParam=true&qid=1779578440&sr=8-1&th=1) — $12.99
+
+## Motor specification
+
+| Specification | Value |
+|---|---|
+| Model | JGB37-520 |
+| Type | DC geared motor |
+| Rated voltage | 12 V DC |
+| Rated speed | 550 RPM |
 
 ## Wiring
 

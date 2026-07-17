@@ -351,7 +351,8 @@
 <p>The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:</p>
 <ul>
 <li>The <strong>PCA9685</strong> servo driver breaks out on the I2C bus (<code>0x40</code>, channel 0).</li>
-<li>The <strong>AT8236 motor driver</strong> takes the four motor GPIOs (right fwd/bwd, left fwd/bwd).</li>
+<li>The <strong>AT8236 motor driver</strong> takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
+  and controls the JGB37-520 DC motors rated for 12 V and 550 RPM.</li>
 <li>The <strong>hall sensor</strong>, <strong>LiDAR</strong>, <strong>GPS/compass</strong>, and <strong>IMU</strong> each get a labeled connector.</li>
 <li>Power and ground rails are shared instead of daisy-chained through the breadboard.</li>
 </ul>

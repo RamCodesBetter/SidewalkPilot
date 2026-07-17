@@ -71,7 +71,7 @@ Series 3 and 4 use the same **81,237 real labeled images** and split procedure. 
 | Motion sensing | XIAO MG24 Sense through UART | Experimental yaw-control input |
 | Wheel speed | Hall-effect sensor through Raspberry Pi 5 GPIO | Supplies pulse-based speed and distance |
 | Steering | High-torque servo through PCA9685 I2C PWM | Receives the final Raspberry Pi 5 steering command |
-| Drive | Yahboom AT8236 motor controller | Receives final throttle, direction, and brake outputs |
+| Drive | Yahboom AT8236 motor controller and JGB37-520 DC motors (12 V, 550 RPM) | Receives final throttle, direction, and brake outputs and produces wheel thrust |
 | Human control | Xbox Wireless Controller through Bluetooth | Manual driving, takeover, braking, and shutdown |
 | Telemetry | Waveshare 64x32 HUB75 panel on the Zero 2 W | Displays state received over the dedicated USB network |
 
