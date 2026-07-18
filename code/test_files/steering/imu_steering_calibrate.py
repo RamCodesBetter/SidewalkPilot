@@ -85,7 +85,7 @@ def parse_args():
     p.add_argument("--seat", type=float, default=2.0, help="s to seat at the extreme AND to reach the target")
     p.add_argument("--median", type=int, default=5)
     p.add_argument("--ema", type=float, default=0.3)
-    p.add_argument("--trim", type=float, default=12.0, help="+D center trim baked into the servo mapping")
+    p.add_argument("--trim", type=float, default=17.0, help="+D center trim baked into the servo mapping")
     p.add_argument("--out", default="imu_calib.csv")
     p.add_argument("--resume", action="store_true", help="load --out CSV and only run hops not already in it")
     p.add_argument("--dry-run", action="store_true", help="NO motors — just sweep servo + read yaw")

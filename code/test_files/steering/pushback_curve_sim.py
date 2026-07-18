@@ -6,7 +6,7 @@ Three modes in one file:
   CALIBRATE (Pi only, moves the steering servo)
       For each release angle r in [0,15,30,45,60,75,90]:
         sweep a candidate pushback target 180 -> 90 (step 5). Each candidate:
-        center -> go to release angle r -> kick to candidate for 0.3s (+12D
+        center -> go to release angle r -> kick to candidate for 0.3s (+17D
         trim) -> return to 90 -> hold ~3s so you can SEE if the wheel ended up
         straight. Press A to lock that candidate as the pushback for r and move
         on; if it reaches 90 with no press, it records (r, 90). Gives you the
@@ -40,7 +40,7 @@ os.environ.setdefault("SDL_VIDEODRIVER", "dummy")  # headless pygame (no window)
 CENTER = 90.0
 SERVO_MIN = 0.0
 SERVO_MAX = 180.0
-TRIM_DELTA_DEG = 12.0          # the "+12D" Ram asked for (applied as center trim)
+TRIM_DELTA_DEG = 17.0          # active DELT center trim (applied as center trim)
 
 RELEASE_ANGLES = [0, 15, 30, 45, 60, 75, 90]
 CANDIDATE_START = 180.0

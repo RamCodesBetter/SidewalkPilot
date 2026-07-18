@@ -1707,7 +1707,7 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
             imu_reader.note_stationary()   # stopped -> true yaw is 0, learn out the residual bias
         measured_yaw = imu_reader.get_yaw() if imu_fresh else 0.0
         # No IMU correction in REVERSE -- yaw-rate feedback inverts driving backward,
-        # so just keep plain open-loop steering (+12D trim) there.
+        # so just keep plain open-loop steering (+17D trim) there.
         allow = (
             imu_fresh
             and not state.get("lidar_override_active", False)
