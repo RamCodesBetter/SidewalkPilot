@@ -27,7 +27,8 @@ Input size W,H comes from the ONNX itself, or from the detected arch for torch
 (S1/2 = 200x66, S3 = 320x180), or --width/--height.
 
 Wire protocol (TCP, persistent connection, one round-trip per frame):
-    Pi  -> Jon : [1-byte version length V][V bytes UTF-8 model version]
+    Pi  -> Jon : [1-byte 0x80|version length V][V bytes UTF-8 model version]
+                 [1-byte history count H][H big-endian float32 steering targets]
                  [4-byte big-endian JPEG length N][N bytes JPEG]
     Jon -> Pi  : 60 bytes = struct '>15f' (steering, throttle, temperatures,
                  inference timing, and 9 current-horizon bucket probabilities)
@@ -324,6 +325,17 @@ class SteeringModel:
         """Start a causal Series 4 sequence from centered target commands."""
         self.target_history = [90.0] * int(self.history_steps)
 
+    def set_target_history(self, values):
+        """Seed a causal model from steering targets supplied by the controller."""
+        if not self.history_steps:
+            return
+        history = [max(0.0, min(180.0, float(value))) for value in values]
+        if len(history) != self.history_steps:
+            raise ValueError(
+                f"expected {self.history_steps} steering-history values, got {len(history)}"
+            )
+        self.target_history = history
+
     def ensure_version(self, spec):
         """Hot-swap the model if the Pi requested a different version."""
         if spec and str(spec) != str(self.current_version):
@@ -454,6 +466,44 @@ def _recv_exact(conn, n):
     return buf
 
 
+def _recv_request(conn):
+    """Read one legacy or v2 request; return (version, history, JPEG bytes)."""
+    vhdr = _recv_exact(conn, 1)
+    if not vhdr:
+        return None
+    extended = bool(vhdr[0] & 0x80)
+    vlen = (vhdr[0] & 0x7F) if extended else vhdr[0]
+    version = ""
+    if vlen:
+        vbytes = _recv_exact(conn, vlen)
+        if vbytes is None:
+            return None
+        version = vbytes.decode("utf-8", "replace")
+
+    target_history = None
+    if extended:
+        hcount_raw = _recv_exact(conn, 1)
+        if hcount_raw is None:
+            return None
+        hcount = hcount_raw[0]
+        if hcount:
+            hpayload = _recv_exact(conn, hcount * 4)
+            if hpayload is None:
+                return None
+            target_history = struct.unpack(f">{hcount}f", hpayload)
+
+    hdr = _recv_exact(conn, 4)
+    if not hdr:
+        return None
+    size = struct.unpack(">I", hdr)[0]
+    if size == 0:
+        return version, target_history, b""
+    data = _recv_exact(conn, size)
+    if not data:
+        return None
+    return version, target_history, data
+
+
 _TEMP_CACHE = {"t": 0.0, "cpu": 0.0, "gpu": 0.0}
 
 
@@ -496,32 +546,20 @@ def serve(model, host, port):
         frames, t0, ifps, last_frame_ts = 0, time.time(), 0.0, 0.0
         try:
             while True:
-                # Frame: [1B version-len][version utf8][4B jpeg-len][jpeg bytes].
-                # version-len 0 means "keep current model". The Pi sends its active
-                # model choice every frame, so Jon hot-swaps when it changes.
-                vhdr = _recv_exact(conn, 1)
-                if not vhdr:
+                # v2 sets the high bit on version-len and carries steering history.
+                # Legacy packets remain readable for standalone/older clients.
+                request = _recv_request(conn)
+                if request is None:
                     break
-                vlen = vhdr[0]
-                if vlen:
-                    vbytes = _recv_exact(conn, vlen)
-                    if vbytes is None:
-                        break
-                    if not getattr(model, "pinned", False):
-                        model.ensure_version(vbytes.decode("utf-8", "replace"))
-                hdr = _recv_exact(conn, 4)
-                if not hdr:
-                    break
-                n = struct.unpack(">I", hdr)[0]
-                if n == 0:
+                requested_version, target_history, data = request
+                if requested_version and not getattr(model, "pinned", False):
+                    model.ensure_version(requested_version)
+                if not data:
                     # status ping (no frame): report temps + current ifps, run no inference
                     model.reset_temporal_state()
                     jcpu, jgpu = _read_tegra_temps()
                     conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
                     continue
-                data = _recv_exact(conn, n)
-                if not data:
-                    break
                 # inference rate (EMA) + Jetson temps, reported back to the Pi dashboard
                 now = time.time()
                 if last_frame_ts:
@@ -534,6 +572,13 @@ def serve(model, host, port):
                 if frame is None:
                     conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
                     continue
+                if target_history is not None:
+                    try:
+                        model.set_target_history(target_history)
+                    except ValueError as exc:
+                        print(f"[jon] rejected steering history: {exc}", flush=True)
+                        conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
+                        continue
                 t_inf = time.time()
                 steering, throttle, probs9 = model.infer(frame)   # preprocess + session.run
                 infer_ms = (time.time() - t_inf) * 1000.0

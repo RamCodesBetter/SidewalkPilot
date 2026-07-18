@@ -14,6 +14,7 @@ if str(CONTROLLER_DIR) not in sys.path:
     sys.path.insert(0, str(CONTROLLER_DIR))
 
 from rc_car_app import jetson_inference_server as jis  # noqa: E402
+from rc_car_app.jetson_client import JetsonSteeringClient  # noqa: E402
 from rc_car_app.vision import STEERING_MODEL_VERSIONS  # noqa: E402
 
 
@@ -105,6 +106,56 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
 
         model.reset_temporal_state()
         self.assertEqual(model.target_history, [90.0, 90.0, 90.0])
+
+        model.set_target_history([62.0, 71.0, 83.0])
+        self.assertEqual(model.target_history, [62.0, 71.0, 83.0])
+
+    def test_history_seed_requires_exact_contract_length(self):
+        model = jis.SteeringModel.__new__(jis.SteeringModel)
+        model.history_steps = 3
+        model.target_history = [90.0, 90.0, 90.0]
+        with self.assertRaisesRegex(ValueError, "expected 3"):
+            model.set_target_history([80.0, 90.0])
+
+    def test_v2_socket_round_trip_delivers_manual_history(self):
+        class CaptureSocket:
+            def __init__(self):
+                self.sent = bytearray()
+                self.reply = bytearray(jis.struct.pack(">15f", *([0.0] * 15)))
+
+            def sendall(self, payload):
+                self.sent.extend(payload)
+
+            def recv(self, size):
+                chunk = bytes(self.reply[:size])
+                del self.reply[:size]
+                return chunk
+
+            def close(self):
+                pass
+
+        class MemoryConnection:
+            def __init__(self, payload):
+                self.payload = bytearray(payload)
+
+            def recv(self, size):
+                chunk = bytes(self.payload[:size])
+                del self.payload[:size]
+                return chunk
+
+        wire = CaptureSocket()
+        client = JetsonSteeringClient("unused")
+        client.sock = wire
+        client.infer(
+            np.zeros((32, 32, 3), dtype=np.uint8),
+            model_version="4.0p",
+            target_history=(62.0, 71.0, 83.0),
+        )
+
+        version, history, jpeg = jis._recv_request(MemoryConnection(wire.sent))
+        self.assertEqual(version, "4.0p")
+        np.testing.assert_allclose(history, (62.0, 71.0, 83.0))
+        self.assertGreater(len(jpeg), 0)
 
     def test_existing_series_decoders_are_unchanged(self):
         steering, throttle = jis.decode_output(np.asarray([[0.5, -0.5]], dtype=np.float32))

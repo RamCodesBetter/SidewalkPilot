@@ -25,6 +25,7 @@ class BlockingFakeClient:
         self.release_status = threading.Event()
         self.inference_finished = threading.Event()
         self.infer_calls = []
+        self.infer_histories = []
         self.jon_cpu_temp_c = 47.0
         self.jon_gpu_temp_c = 51.0
         self.infer_fps = 29.5
@@ -37,8 +38,9 @@ class BlockingFakeClient:
         self.release_status.wait(timeout=self.timeout)
         return False
 
-    def infer(self, frame, model_version=None):
+    def infer(self, frame, model_version=None, target_history=None):
         self.infer_calls.append((frame, model_version))
+        self.infer_histories.append(tuple(target_history or ()))
         self.last_jpeg = b"test-jpeg"
         self.inference_finished.set()
         return 123.0, 0.75
@@ -53,11 +55,13 @@ class RecordingFakeClient:
     def __init__(self):
         self.infer_calls = []
         self.status_calls = 0
+        self.infer_histories = []
         self._condition = threading.Condition()
 
-    def infer(self, frame, model_version=None):
+    def infer(self, frame, model_version=None, target_history=None):
         with self._condition:
             self.infer_calls.append((frame, model_version))
+            self.infer_histories.append(tuple(target_history or ()))
             self._condition.notify_all()
         return 90.0, 0.0
 
@@ -147,6 +151,27 @@ class AsyncJetsonClientTest(unittest.TestCase):
 
             self.assertEqual(fake.status_calls, 0)
             self.assertTrue(fake.wait_for_status(timeout=0.3))
+        finally:
+            client.close()
+
+    def test_manual_targets_seed_auto_then_predictions_advance_history(self):
+        fake = RecordingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            client=fake,
+        )
+        try:
+            for steering in (62.0, 71.0, 83.0):
+                client.observe_manual_steering(steering)
+
+            client.submit("first-auto-frame", model_version="4.0p")
+            self.assertTrue(fake.wait_for_inferences(1))
+            self.assertEqual(fake.infer_histories[0], (62.0, 71.0, 83.0))
+
+            client.submit("second-auto-frame", model_version="4.0p")
+            self.assertTrue(fake.wait_for_inferences(2))
+            self.assertEqual(fake.infer_histories[1], (71.0, 83.0, 90.0))
         finally:
             client.close()
 

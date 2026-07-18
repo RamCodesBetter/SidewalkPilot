@@ -5,8 +5,10 @@ The low-level client is synchronous. Production runtime wraps it in
 ``AsyncJetsonSteeringClient`` so connect, JPEG encode, send, receive, and status polls
 never block controller events or hardware writes.
 
-Protocol (TCP):
-    Pi  -> Jon : [1B version-len V][V bytes version utf8][4B big-endian len N][N bytes JPEG]
+Protocol (TCP, v2):
+    Pi  -> Jon : [1B 0x80|version-len V][V bytes version utf8]
+                 [1B history count H][H big-endian float32 steering targets]
+                 [4B big-endian JPEG length N][N bytes JPEG]
     Jon -> Pi  : 60 bytes = struct '>15f' (steering_deg, throttle, telemetry,
                  and nine steering-bucket probabilities)
 
@@ -81,7 +83,7 @@ class JetsonSteeringClient:
             buf += chunk
         return buf
 
-    def infer(self, frame_bgr, model_version=None):
+    def infer(self, frame_bgr, model_version=None, target_history=None):
         """Send one BGR frame (+ desired model version), return (steering_deg, throttle) or None."""
         if cv2 is None:
             return None
@@ -91,9 +93,19 @@ class JetsonSteeringClient:
         if not ok:
             return None
         data = jpg.tobytes()
-        vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:255]
+        vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:127]
+        history_values = () if target_history is None else target_history
+        history = [float(value) for value in history_values][:255]
+        history_payload = struct.pack(f">{len(history)}f", *history) if history else b""
         try:
-            self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
+            self.sock.sendall(
+                bytes([0x80 | len(vbytes)])
+                + vbytes
+                + bytes([len(history)])
+                + history_payload
+                + struct.pack(">I", len(data))
+                + data
+            )
             self.last_jpeg = data           # exact bytes sent to Jon -> interruption recorder buffers these
             # reply: steering, throttle, jcpu, jgpu, infer_fps, infer_ms + 9 bucket probs (15x f32)
             reply = self._recv_exact(60)
@@ -118,7 +130,8 @@ class JetsonSteeringClient:
         if self.sock is None and not self.connect():
             return False
         try:
-            self.sock.sendall(bytes([0]) + struct.pack(">I", 0))  # version-len 0, jpeg-len 0
+            # v2, version-len 0, history-count 0, jpeg-len 0
+            self.sock.sendall(bytes([0x80, 0]) + struct.pack(">I", 0))
             reply = self._recv_exact(60)
             if reply is None:
                 raise OSError("short reply")
@@ -174,6 +187,7 @@ class AsyncJetsonSteeringClient:
         self.infer_ms = 0.0
         self.last_jpeg = None
         self.bucket_probs = [0.0] * 9
+        self._target_history = [90.0, 90.0, 90.0]
         self._thread = threading.Thread(
             target=self._run,
             name="sidewalkpilot-jetson-client",
@@ -193,6 +207,12 @@ class AsyncJetsonSteeringClient:
             self._latest_request = (sequence, frame_bgr, str(model_version or ""))
             self._condition.notify()
             return sequence
+
+    def observe_manual_steering(self, steering_deg) -> None:
+        """Record a manual target so the first autonomous inference starts in motion."""
+        value = max(0.0, min(180.0, float(steering_deg)))
+        with self._condition:
+            self._target_history = (self._target_history + [value])[-3:]
 
     def get_latest_sample(self, model_version=None, max_age_sec=0.25):
         """Return a fresh cached result dict, or ``None`` without doing network I/O."""
@@ -243,7 +263,13 @@ class AsyncJetsonSteeringClient:
 
             if request is not None:
                 sequence, frame_bgr, model_version = request
-                result = self.client.infer(frame_bgr, model_version=model_version)
+                with self._condition:
+                    target_history = tuple(self._target_history)
+                result = self.client.infer(
+                    frame_bgr,
+                    model_version=model_version,
+                    target_history=target_history,
+                )
                 completed_at = time.monotonic()
                 self._copy_client_state()
                 with self._condition:
@@ -252,6 +278,9 @@ class AsyncJetsonSteeringClient:
                     self._latest_result_sequence = sequence
                     self._latest_result_model = model_version
                     self._latest_result_time = completed_at
+                    if result is not None:
+                        steering = max(0.0, min(180.0, float(result[0])))
+                        self._target_history = (self._target_history + [steering])[-3:]
                 # A status-only request resets Series 4 temporal history on the
                 # Jetson. Keep postponing it while inference frames are active;
                 # manual/idle mode still gets a poll after one full idle interval.

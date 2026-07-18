@@ -2023,6 +2023,11 @@ def run(model_choice=None):
 
             update_auto_photo(state, metrics, webcam_vision, dashboard_sender)
 
+            if jetson_client is not None and not state["autonomous_mode"]:
+                # Series 4 PC/PCF starts from the operator's actual last three
+                # steering targets instead of an artificial centered history.
+                jetson_client.observe_manual_steering(state["steering_servo_deg"])
+
             latest_scan = []
             if lidar_parser:
                 try:
