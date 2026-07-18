@@ -16,9 +16,9 @@ across Series 1/2/3/4:
                                      steering target; each horizon has 9 class logits
                                      + 9 offsets and no throttle. PC/PCF ONNX models
                                      also take target_history=[previous 3 targets].
-  Output shape and ONNX input metadata select the contract automatically. Series 4
-  target history is autoregressive on Jon and resets to [90,90,90] on model switches,
-  reconnects, and status-only/manual periods.
+  Output shape and ONNX input metadata select the contract automatically. Production
+  requests carry the Raspberry Pi's latest three manual or predicted steering targets;
+  the server validates and feeds them to PC/PCF before each inference.
 
 Preprocessing MATCHES rc_car_app/vision.py exactly:
   BGR -> [optional CLAHE] -> resize(W,H, INTER_AREA) -> /255 -> (x-0.5)/0.5
