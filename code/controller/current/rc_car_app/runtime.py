@@ -595,12 +595,23 @@ def handle_dpad_y_action(
     return active_model_choice
 
 
-def cancel_navigation_route(state, metrics, navigation, reason: str) -> None:
+def cancel_navigation_route(
+    state,
+    metrics,
+    navigation,
+    reason: str,
+    preserve_manual_brake: bool = False,
+) -> None:
     if not navigation.active:
         return
     navigation.active = False
     navigation.reset_entry()
-    cancel_autonomous_mode(state, metrics, reason)
+    cancel_autonomous_mode(
+        state,
+        metrics,
+        reason,
+        preserve_manual_brake=preserve_manual_brake,
+    )
 
 
 def navigation_manual_input_should_cancel(navigation, latest_nav, last_operator: str = "") -> bool:
@@ -695,8 +706,29 @@ def _cause_code(cause_word: str) -> str:
     return _CAUSE_CODES.get((cause_word or "").strip().lower(), "OTH")
 
 
-def cancel_autonomous_mode(state, metrics, reason: str, center: bool = True, cause: str = ""):
+def cancel_autonomous_mode(
+    state,
+    metrics,
+    reason: str,
+    center: bool = True,
+    cause: str = "",
+    preserve_manual_brake: bool = False,
+):
     was_autonomous = state["autonomous_mode"]
+    retained_brake_force = 0.0
+    if preserve_manual_brake:
+        retained_brake_force = max(
+            0.0,
+            min(
+                1.0,
+                float(
+                    state.get(
+                        "manual_brake_force",
+                        state.get("brake_force", 0.0),
+                    )
+                ),
+            ),
+        )
     if reason:
         print(reason)
     if was_autonomous:                       # only a real disengagement counts as an intervention
@@ -704,9 +736,9 @@ def cancel_autonomous_mode(state, metrics, reason: str, center: bool = True, cau
         state["intervention_cause"] = (cause or _disengagement_cause(reason))[:12]
     state["autonomous_mode"] = False
     state["throttle"] = 0.0
-    state["brake"] = False
-    state["brake_force"] = 0.0
-    state["manual_brake_force"] = 0.0
+    state["brake"] = retained_brake_force > 0.1
+    state["brake_force"] = retained_brake_force
+    state["manual_brake_force"] = retained_brake_force
     state["current_motor_pwm"] = 0.0
     state["dashboard_throttle_percent"] = 0
     state["dashboard_brake_percent"] = 0
@@ -1853,9 +1885,20 @@ def run(model_choice=None):
                             navigation_manual_input_should_cancel(navigation, latest_nav, navigation_operator_last)
                             and state["brake"]
                         ):
-                            cancel_navigation_route(state, metrics, navigation, "Navigation cancelled by brake.")
+                            cancel_navigation_route(
+                                state,
+                                metrics,
+                                navigation,
+                                "Navigation cancelled by brake.",
+                                preserve_manual_brake=True,
+                            )
                         if state["brake"] and state["autonomous_mode"]:
-                            cancel_autonomous_mode(state, metrics, "Autonomous driving cancelled by brake.")
+                            cancel_autonomous_mode(
+                                state,
+                                metrics,
+                                "Autonomous driving cancelled by brake.",
+                                preserve_manual_brake=True,
+                            )
                     elif event.axis == THROTTLE_AXIS:
                         state["throttle"] = normalize_trigger_axis(event.value)
                         if (
@@ -1874,9 +1917,20 @@ def run(model_choice=None):
                             navigation_manual_input_should_cancel(navigation, latest_nav, navigation_operator_last)
                             and state["brake"]
                         ):
-                            cancel_navigation_route(state, metrics, navigation, "Navigation cancelled by brake.")
+                            cancel_navigation_route(
+                                state,
+                                metrics,
+                                navigation,
+                                "Navigation cancelled by brake.",
+                                preserve_manual_brake=True,
+                            )
                         if state["brake"] and state["autonomous_mode"]:
-                            cancel_autonomous_mode(state, metrics, "Autonomous driving cancelled by brake.")
+                            cancel_autonomous_mode(
+                                state,
+                                metrics,
+                                "Autonomous driving cancelled by brake.",
+                                preserve_manual_brake=True,
+                            )
                     elif event.axis == DASHBOARD_PAGE_AXIS:
                         state["dashboard_page_axis_value"] = event.value
                     elif event.axis == DASHBOARD_PAGE_HORIZONTAL_AXIS:
