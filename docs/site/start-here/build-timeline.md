@@ -97,7 +97,7 @@ The first Series 4 implementation compares three temporal contracts on the uncha
 - CF uses the image to predict current and future targets;
 - PCF combines previous-target inputs with current/future supervision.
 
-The three 25-epoch W&B runs completed and produced six final/best artifacts: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live Jetson Orin Nano server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Raspberry Pi 5–Jetson Orin Nano wire protocol.
+The three 25-epoch W&B runs completed and produced six final/best artifacts: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live runtime was then extended to validate each model's signature, carry three causal steering targets in a versioned Raspberry Pi 5–Jetson Orin Nano request, and decode the current 18-value steering horizon.
 
 All 46 Series 1 through Series 4 checkpoints were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test makes the offline comparison more informative than comparing each family on a different image distribution. Series 4 remains experimental until physical-car testing; v3.4 remains the field-selected baseline.
 

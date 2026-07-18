@@ -70,7 +70,7 @@ Series 1 direct-regression output uses approximately `90 +/- 86` degrees and Ser
 
 ## Model Selection and Jetson Orin Nano
 
-The registered list contains Series 1/2 PyTorch checkpoints and Series 3/4 ONNX names. In camera-only mode, the Raspberry Pi 5 records the requested name and sends it with frames; the Jetson Orin Nano must confirm loading and return a fresh matching result. Series 4 PC/PCF history resets on model changes. A dashboard name alone does not prove the artifact loaded successfully.
+The registered list contains Series 1/2 PyTorch checkpoints and Series 3/4 ONNX names. In camera-only mode, the Raspberry Pi 5 records the requested name and sends it with frames; the Jetson Orin Nano must confirm loading and return a fresh matching result. Series 4 PC/PCF requests also carry the latest three manual or predicted steering targets. A dashboard name alone does not prove the artifact loaded successfully.
 
 Inference uses latest-frame semantics. Old pending frames are replaced, and Raspberry Pi 5 autonomy rejects Jetson Orin Nano results older than the configured freshness limit.
 

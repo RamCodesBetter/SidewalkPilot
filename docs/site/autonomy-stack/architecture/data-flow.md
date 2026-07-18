@@ -56,7 +56,7 @@ The final command depends on several independent states:
 | LiDAR/AEB | Independent toggle that can cap or stop forward motion in manual or autonomous Drive |
 | Navigation | Route segments request `AUTO` on sidewalks and `MNUL` at crossings, while the operator remains responsible for takeover |
 
-The former LiDAR steering mode is gone. LiDAR state is represented by center clearance, throttle cap, emergency state, AEB state, and dashboard alerts rather than a second steering command. Series 4 history resets on model changes, reconnects, and other discontinuities.
+The former LiDAR steering mode is gone. LiDAR state is represented by center clearance, throttle cap, emergency state, AEB state, and dashboard alerts rather than a second steering command. For Series 4 PC/PCF, the Raspberry Pi 5 carries the most recent three manual or predicted steering targets and sends them with each inference request.
 
 ## Failure Boundaries
 

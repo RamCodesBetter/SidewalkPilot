@@ -86,9 +86,9 @@ PC is the strongest first field candidate because `4.0p` leads the class-balance
 The Raspberry Pi 5 still sends only the JPEG and selected model version over the private Ethernet link. Jetson Orin Nano reads the ONNX input metadata:
 
 - Image-only graph: run CF directly;
-- Graph with `target_history`: initialize `[90,90,90]`, feed it, decode horizon 0, then append that decoded target for the next inference.
+- Graph with `target_history`: feed the Raspberry Pi 5's latest three steering targets, decode horizon 0, then append that decoded target for the next inference. The first autonomous request is seeded by the last three manual targets.
 
-History resets on model load/switch, reconnect, and status-only/manual periods. This keeps history ordered in the single inference process and avoids changing the TCP packet format. CUDA is selected without registering a partially installed TensorRT provider that could force an accidental CPU fallback.
+The versioned TCP request carries three big-endian float32 history values alongside the selected model and JPEG. The Jetson Orin Nano validates the model signature and history length before inference. CUDA is selected without registering a partially installed TensorRT provider that could force an accidental CPU fallback.
 
 ## Promotion Gate
 

@@ -26,7 +26,7 @@ JPEG encoding, connection attempts, sends, receives, and status polls run in `As
 | S4 CF | image | `[batch,4,18]` | horizon 0; no throttle |
 | S4 PCF | image + 3-target history | `[batch,4,18]` | horizon 0; no throttle |
 
-For PC/PCF, Jetson Orin Nano owns the causal history because it serializes inference. The history initializes to `[90,90,90]`, appends each decoded current target, and resets on model load/switch, reconnect, or status-only/manual periods.
+For PC/PCF, the Raspberry Pi 5 sends three causal steering targets with every inference request. While the operator is driving, those are the last three manual steering targets. During autonomy, each completed model prediction advances the sequence. This lets the first autonomous frame begin from the car's actual steering motion instead of an artificial `[90,90,90]` history. The Jetson Orin Nano validates the received history length before using it.
 
 ## GPU Selection
 
