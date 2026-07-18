@@ -58,6 +58,23 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
         self.assertEqual(int(np.argmax(probabilities)), 1)
         self.assertAlmostEqual(float(np.sum(probabilities)), 1.0, places=5)
 
+    def test_all_six_versions_require_their_exact_onnx_contract(self):
+        expected = {
+            "4.0p": (3, ["batch", 1, 18]),
+            "4.0r": (3, ["batch", 1, 18]),
+            "4.0f": (0, ["batch", 4, 18]),
+            "4.0g": (0, ["batch", 4, 18]),
+            "4.0a": (3, ["batch", 4, 18]),
+            "4.0c": (3, ["batch", 4, 18]),
+        }
+        for version, (history_steps, output_shape) in expected.items():
+            with self.subTest(version=version):
+                jis._validate_series4_contract(version, history_steps, output_shape)
+
+    def test_mislabeled_series4_contract_fails_closed(self):
+        with self.assertRaisesRegex(RuntimeError, "contract mismatch"):
+            jis._validate_series4_contract("4.0f", 3, ["batch", 1, 18])
+
     def test_pc_history_is_fed_then_updated_with_decoded_target(self):
         session = FakeSession(hybrid18(6)[None, None, :])
         model = jis.SteeringModel.__new__(jis.SteeringModel)

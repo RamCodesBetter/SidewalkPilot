@@ -223,7 +223,7 @@ class AsyncJetsonSteeringClient:
             self.bucket_probs = probs[:9] + [0.0] * max(0, 9 - len(probs))
 
     def _run(self):
-        next_status_poll = 0.0
+        next_status_poll = time.monotonic() + self.status_interval_sec
         while True:
             request = None
             with self._condition:
@@ -252,6 +252,10 @@ class AsyncJetsonSteeringClient:
                     self._latest_result_sequence = sequence
                     self._latest_result_model = model_version
                     self._latest_result_time = completed_at
+                # A status-only request resets Series 4 temporal history on the
+                # Jetson. Keep postponing it while inference frames are active;
+                # manual/idle mode still gets a poll after one full idle interval.
+                next_status_poll = completed_at + self.status_interval_sec
                 continue
 
             self.client.poll_status()

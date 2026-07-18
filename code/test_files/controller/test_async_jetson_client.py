@@ -47,12 +47,50 @@ class BlockingFakeClient:
         self.release_status.set()
 
 
+class RecordingFakeClient:
+    timeout = 0.1
+
+    def __init__(self):
+        self.infer_calls = []
+        self.status_calls = 0
+        self._condition = threading.Condition()
+
+    def infer(self, frame, model_version=None):
+        with self._condition:
+            self.infer_calls.append((frame, model_version))
+            self._condition.notify_all()
+        return 90.0, 0.0
+
+    def poll_status(self):
+        with self._condition:
+            self.status_calls += 1
+            self._condition.notify_all()
+        return True
+
+    def wait_for_inferences(self, count, timeout=0.5):
+        deadline = time.monotonic() + timeout
+        with self._condition:
+            while len(self.infer_calls) < count and time.monotonic() < deadline:
+                self._condition.wait(timeout=max(0.0, deadline - time.monotonic()))
+            return len(self.infer_calls) >= count
+
+    def wait_for_status(self, timeout=0.5):
+        deadline = time.monotonic() + timeout
+        with self._condition:
+            while self.status_calls == 0 and time.monotonic() < deadline:
+                self._condition.wait(timeout=max(0.0, deadline - time.monotonic()))
+            return self.status_calls > 0
+
+    def close(self):
+        pass
+
+
 class AsyncJetsonClientTest(unittest.TestCase):
     def test_powered_off_status_timeout_never_blocks_control_calls(self):
         fake = BlockingFakeClient()
         client = AsyncJetsonSteeringClient(
             "10.42.0.2",
-            status_interval_sec=10.0,
+            status_interval_sec=0.05,
             client=fake,
         )
         try:
@@ -92,6 +130,24 @@ class AsyncJetsonClientTest(unittest.TestCase):
             self.assertEqual(client.infer_fps, 29.5)
         finally:
             fake.release_status.set()
+            client.close()
+
+    def test_active_inference_postpones_history_resetting_status_poll(self):
+        fake = RecordingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=0.10,
+            client=fake,
+        )
+        try:
+            for index in range(4):
+                client.submit(f"frame-{index}", model_version="4.0p")
+                self.assertTrue(fake.wait_for_inferences(index + 1))
+                time.sleep(0.04)
+
+            self.assertEqual(fake.status_calls, 0)
+            self.assertTrue(fake.wait_for_status(timeout=0.3))
+        finally:
             client.close()
 
 

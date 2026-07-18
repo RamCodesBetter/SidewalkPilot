@@ -103,6 +103,18 @@ def resolve_model_path(spec, extra_dir=None):
 # apply the SAME CLAHE + output-scale the model was trained with, not a fixed startup flag.
 _CLAHE_VERSIONS = {"2.0", "2.0b"}          # the only HSV-CLAHE-trained models (see vision.py)
 
+# The filename is part of the deployed model contract. Validate it against the
+# ONNX graph so an accidentally renamed or incorrectly exported model cannot
+# silently drive with the wrong temporal inputs.
+_SERIES4_CONTRACTS = {
+    "4.0p": (3, 1),
+    "4.0r": (3, 1),
+    "4.0f": (0, 4),
+    "4.0g": (0, 4),
+    "4.0a": (3, 4),
+    "4.0c": (3, 4),
+}
+
 
 def _version_from_path(model_path):
     """'.../SidewalkPilot-v2.0b.onnx' -> '2.0b'. None if the filename isn't a versioned model."""
@@ -119,6 +131,28 @@ def _preproc_policy_for_version(version):
     use_clahe = v in _CLAHE_VERSIONS
     steer_scale = 85.0 if v.startswith("2.") else 86.0
     return use_clahe, steer_scale
+
+
+def _validate_series4_contract(version, history_steps, output_shape):
+    """Reject a Series 4 ONNX graph that does not match its version contract."""
+    expected = _SERIES4_CONTRACTS.get(str(version).strip().lower())
+    if expected is None:
+        return
+
+    expected_history, expected_horizons = expected
+    shape = list(output_shape or ())
+    actual_horizons = shape[1] if len(shape) == 3 and isinstance(shape[1], int) else None
+    output_width = shape[2] if len(shape) == 3 and isinstance(shape[2], int) else None
+    if (
+        int(history_steps) != expected_history
+        or actual_horizons != expected_horizons
+        or output_width != 18
+    ):
+        raise RuntimeError(
+            f"Series 4 v{version} contract mismatch: expected history={expected_history}, "
+            f"output=[batch,{expected_horizons},18]; got history={history_steps}, "
+            f"output={shape}"
+        )
 
 
 try:
@@ -347,6 +381,11 @@ class SteeringModel:
                 if history_input is not None and isinstance(history_input.shape[1], int)
                 else (3 if history_input is not None else 0)
             )
+            _validate_series4_contract(
+                version,
+                self.history_steps,
+                self.session.get_outputs()[0].shape,
+            )
             shape = image_input.shape   # [N,3,H,W]
             self.height = shape[2] if isinstance(shape[2], int) else None
             self.width = shape[3] if isinstance(shape[3], int) else None
@@ -380,7 +419,7 @@ class SteeringModel:
             self.width, self.height = self.force_size
         if not self.width or not self.height:
             raise RuntimeError("Could not determine model input size; pass --width/--height.")
-        self.current_version = str(spec)
+        self.current_version = str(version or spec)
         self.reset_temporal_state()
         contract = f" history={self.history_steps}" if self.history_steps else ""
         print(f"[jon] model={model_path} (v{self.current_version}) backend={self.backend} "
