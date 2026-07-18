@@ -1,12 +1,12 @@
 # System Diagrams
 
-This page is the top-level block diagram of SidewalkPilot: the three-device compute split, the sensors and actuators wired to each device, and the links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.
+This page is the top-level block diagram of SidewalkPilot: the three-device compute split, sensors, steering/motor hardware, and links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.
 
 ## What the diagram shows
 
 SidewalkPilot runs across three boards, each doing the job it is best at:
 
-- **Jetson Orin Nano at `10.42.0.2:8770` — the AI brain.** Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Current v3.4 and Series 4 autonomy require a fresh result from this path. Series 1/2 models (`SteeringAutonomyV2`, ~0.67M parameters, 200x66 input) can still load directly on the Raspberry Pi 5 inside `vision.py`.
+- **Jetson Orin Nano at `10.42.0.2:8770` - the AI brain.** Runs every current steering-model family on the GPU: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Autonomous driving requires a recent result from this path.
 - **Raspberry Pi 5 (`raspberrypi5`) — the hardware and safety controller.** Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in `code/controller/current/rc_car_app/runtime.py` and ticks at up to 60 Hz (`clock.tick(60)`).
 - **Zero 2 W (`zero2w`) - the dashboard.** Receives telemetry over USB Ethernet and renders it on one HUB75 LED panel. Rendering code is `z2w_dashboard.py`.
 
@@ -21,7 +21,7 @@ SidewalkPilot runs across three boards, each doing the job it is best at:
 The Jetson Orin Nano supplies the GPU inference that makes the current Series 3/4 self-driving
 path practical near the camera rate. The Raspberry Pi Camera Module 3 Wide remains connected
 to the Raspberry Pi 5 because the current 81,237-image dataset was captured through that
-camera path. Final actuator and AEB decisions remain on the Raspberry Pi 5.
+camera path. Final steering, motor, and AEB decisions remain on the Raspberry Pi 5.
 
 ## What this exhibit documents
 
@@ -31,7 +31,7 @@ on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance 
 
 ## System Architecture
 
-[![SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, actuators, and logs](../../assets/diagrams/system-architecture.svg)](../../assets/diagrams/system-architecture.svg)
+[![SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, steering servo, motors, and logs](../../assets/diagrams/system-architecture.svg)](../../assets/diagrams/system-architecture.svg)
 
 *Compute, I/O, and device-link architecture. Open the [full-size SVG](../../assets/diagrams/system-architecture.svg) or the [editable draw.io source](../../assets/diagrams/system-architecture.drawio).*
 
@@ -47,7 +47,7 @@ Manual input cancels autonomy when processed. A fresh model proposal is required
 
 ## Training and Evaluation Flow
 
-[![SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, model artifacts, offline evaluation, and supervised field testing](../../assets/diagrams/training-evaluation.svg)](../../assets/diagrams/training-evaluation.svg)
+[![SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, trained models, offline evaluation, and supervised field testing](../../assets/diagrams/training-evaluation.svg)](../../assets/diagrams/training-evaluation.svg)
 
 *Training, export, and model-selection flow. Open the [full-size SVG](../../assets/diagrams/training-evaluation.svg) or the [editable draw.io source](../../assets/diagrams/training-evaluation.drawio).*
 

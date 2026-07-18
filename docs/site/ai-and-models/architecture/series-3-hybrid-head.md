@@ -17,12 +17,13 @@ The nine classes are `HL, L, L+, SL, ST, SR, R, R+, HR` over the absolute 0-to-1
 ## Decode
 
 ```text
-class = argmax(logits)
+probabilities = softmax(logits)
+class = argmax(probabilities)
 fraction = sigmoid(offset_for_selected_class)
 steering = class_lower_edge + fraction * class_width
 ```
 
-Only the selected class's offset affects steering. This provides a coarse turn decision and a continuous position inside that class.
+Only the selected class's offset affects steering. This provides a coarse turn decision and a continuous position inside that class. The code may take `argmax` directly over the logits because softmax does not change which value is largest.
 
 ## Why It Replaced Pure Regression
 
@@ -32,7 +33,7 @@ The design still has a discontinuity when the selected class changes. Smoothing,
 
 ## Loss
 
-Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The weighted sampler rebalances steering buckets and source types; it does not apply a separate steering-magnitude multiplier in the active Series 3 path. Steering-focused runs can set throttle loss to zero while preserving the 19-value artifact contract.
+Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The v3.4 run used class weighting and deterministic left/right balance flipping. Its sampler drew 50,000 examples per epoch, but did not apply steering-bucket or source reweighting. Steering-focused runs can set throttle loss to zero while preserving the 19-value model output.
 
 ## Series 4 Relationship
 

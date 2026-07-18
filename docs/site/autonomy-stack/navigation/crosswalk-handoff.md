@@ -60,5 +60,5 @@ correct physical point.
 
 ## Related pages
 
-- `autonomy-stack/navigation/overview.md`
-- `safety-case/safety-overview.md`
+- [Navigation Overview](overview.md)
+- [Safety Overview](../../safety-case/safety-overview.md)

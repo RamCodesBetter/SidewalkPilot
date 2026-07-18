@@ -23,7 +23,7 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 
 The Jetson Orin Nano is the AI brain. The Raspberry Pi 5 is the wired hardware and network
 hub that carries camera frames to it and applies returned steering predictions through the
-safety-controlled actuator path.
+safety-controlled steering and motor path.
 
 - **Raspberry Pi 5 to Jetson Orin Nano:** dedicated Ethernet, Raspberry Pi 5 `10.42.0.1`, Jetson Orin Nano `10.42.0.2`, inference TCP port `8770`.
 - **Raspberry Pi 5 to Zero 2 W:** USB Ethernet gadget, Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, telemetry UDP port `8765`.
@@ -54,7 +54,7 @@ Current software assignments include:
 | Steering pulse range | 1000 to 2000 microseconds |
 | Right motor forward/backward | GPIO 19 / GPIO 20 |
 | Left motor forward/backward | GPIO 25 / GPIO 13 |
-| Hall sensor | GPIO 24 |
+| Hall-effect wheel-speed sensor | GPIO 24 |
 | LiDAR | CP2102 UART-to-USB Adapter; no current GPIO motor-enable line |
 
 The live runtime source of truth is `code/controller/current/rc_car_app/config.py`. Pin changes must update the wiring document, bench test, and config together.

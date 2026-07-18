@@ -43,7 +43,7 @@ Field-test verdicts are tracked with model evaluation, not inferred from a train
 
 ## Raspberry Pi 5 Controller
 
-The Raspberry Pi 5 owns camera capture, controller input, sensors, final arbitration, actuators, logs, and dashboard telemetry. With the car restrained and controller connected:
+The Raspberry Pi 5 owns camera capture, controller input, sensors, final safety decisions, steering/motor commands, logs, and dashboard telemetry. With the car restrained and controller connected:
 
 ```bash
 cd ~/rc_car_code/code/controller/current

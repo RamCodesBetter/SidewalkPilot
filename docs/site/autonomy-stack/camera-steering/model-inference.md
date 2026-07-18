@@ -1,8 +1,8 @@
 # Model Inference
 
-The Jetson Orin Nano is the AI brain for current live inference: it owns Series 3/4
+The Jetson Orin Nano is the AI brain for current live inference: it owns Series 1-4
 preprocessing, GPU model execution, and output decoding. The Raspberry Pi 5 owns camera
-capture and final safety arbitration. Current autonomy stops if a fresh, matching Jetson Orin Nano
+capture and final safety rules. Current autonomy stops if a fresh, matching Jetson Orin Nano
 result is unavailable.
 
 ## Data Path
@@ -10,7 +10,7 @@ result is unavailable.
 1. `WebcamVisionProcessor` captures `1280×720` `BGR888` frames from the Raspberry Pi Camera. The code declares a nominal 30 FPS target and measures the actual rate at runtime.
 2. `AsyncJetsonSteeringClient.submit()` replaces any unsent frame with the newest frame and selected model version.
 3. Its worker JPEG-encodes and sends the request to Jetson Orin Nano at `10.42.0.2:8770`.
-4. `jetson_inference_server.py` hot-switches to the requested `SidewalkPilot-v<version>` artifact when needed.
+4. `jetson_inference_server.py` hot-switches to the requested `SidewalkPilot-v<version>` model when needed.
 5. Jetson Orin Nano resizes and normalizes the BGR frame, runs ONNX Runtime, decodes steering, and returns control plus telemetry.
 6. The Raspberry Pi 5 consumes only a result for the selected version that is no more than `0.25 s` old.
 
@@ -43,10 +43,13 @@ All recognized models normalize pixels with `(x / 255 - 0.5) / 0.5`. Versions `2
 For the hybrid head:
 
 ```text
-class = argmax(logits[0:9])
+probabilities = softmax(logits[0:9])
+class = argmax(probabilities)
 fraction = sigmoid(offset[class])
 steering = bucket_low[class] + fraction * bucket_width[class]
 ```
+
+The implementation can take `argmax` directly over the logits because softmax preserves their ordering and selects the same class.
 
 The model throttle output is returned for protocol compatibility but is not used for current driving. The Raspberry Pi 5 combines model steering with its own throttle policy and center-corridor LiDAR governor.
 
@@ -64,7 +67,7 @@ Current models do not control live throttle. Series 3 retains a learned throttle
 
 ## GPU Selection
 
-Jetson Orin Nano selects CUDA plus CPU fallback when CUDA is available. It selects TensorRT plus CPU only when CUDA is unavailable but the TensorRT provider is available. This avoids a partially installed TensorRT provider causing the complete provider list to fail and retry on CPU.
+The Jetson Orin Nano runs Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. CPU execution is retained for diagnosis, but field startup should confirm that the GPU provider loaded. TensorRT is not part of the current field path.
 
 ## Non-Blocking and Freshness Rules
 
@@ -73,7 +76,7 @@ All TCP connect/send/receive and JPEG work stays in `AsyncJetsonSteeringClient`.
 If Jetson Orin Nano is off:
 
 - Manual driving remains responsive;
-- Temperature/IPS telemetry remains at its last cached value;
+- Temperature/IPS telemetry remains at its last reported value;
 - Autonomous mode hard-stops because no fresh model command exists; and
 - Connection retries continue in the worker.
 

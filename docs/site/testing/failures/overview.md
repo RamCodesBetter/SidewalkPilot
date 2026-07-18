@@ -48,6 +48,6 @@ The most important field comparison found v3.3/v3.3b worse than earlier baseline
 
 ## Related pages
 
-- `testing/field-testing/overview.md`
-- `model-evaluation/field-evaluation/overview.md`
-- `safety-case/safety-overview.md`
+- [Field Testing](../field-testing/overview.md)
+- [Field Evaluation](../../model-evaluation/field-evaluation/overview.md)
+- [Safety Overview](../../safety-case/safety-overview.md)

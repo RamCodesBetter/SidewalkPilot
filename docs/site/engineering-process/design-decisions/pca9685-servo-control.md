@@ -53,6 +53,6 @@ reinvent servo timing.
 
 ## Related pages
 
-- `hardware/steering-servo.md`
-- `testing/failures/overview.md`
-- `roadmap/next-steps.md`
+- [Steering Servo](../../hardware/steering-servo.md)
+- [Failures and Lessons](../../testing/failures/overview.md)
+- [Next Steps](../../roadmap/next-steps.md)

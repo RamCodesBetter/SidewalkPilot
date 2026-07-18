@@ -62,6 +62,6 @@ fallback was deliberately removed and must not be re-added unless Ram explicitly
 
 ## Related pages
 
-- `engineering-process/design-decisions/pi-plus-jetson-compute-split.md`
-- `testing/failures/overview.md`
-- `roadmap/next-steps.md`
+- [Raspberry Pi 5 and Jetson Orin Nano Compute Split](pi-plus-jetson-compute-split.md)
+- [Failures and Lessons](../../testing/failures/overview.md)
+- [Next Steps](../../roadmap/next-steps.md)

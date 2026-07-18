@@ -1,7 +1,7 @@
 # Control Architecture and Runtime Data Flow
 
 SidewalkPilot separates AI inference, hardware ownership, display, and safety so network or
-inference waits cannot directly stall actuator control. The Jetson Orin Nano is the AI brain;
+inference waits cannot directly stall steering or motor control. The Jetson Orin Nano is the AI brain;
 the Raspberry Pi 5 turns its fresh predictions into safety-checked physical commands.
 
 [![SidewalkPilot runtime and control flow, showing parallel inputs, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry outputs](../../assets/diagrams/runtime-control.svg)](../../assets/diagrams/runtime-control.svg)
@@ -56,7 +56,7 @@ The final command depends on several independent states:
 | LiDAR/AEB | Independent toggle that can cap or stop forward motion in manual or autonomous Drive |
 | Navigation | Route segments request `AUTO` on sidewalks and `MNUL` at crossings, while the operator remains responsible for takeover |
 
-The former LiDAR steering mode is gone. LiDAR state is represented by center clearance, throttle cap, emergency state, AEB state, and dashboard alerts rather than a second steering command. For Series 4 PC/PCF, the Raspberry Pi 5 carries the most recent three manual or predicted steering targets and sends them with each inference request.
+LiDAR state is represented by center clearance, throttle cap, emergency state, AEB state, and dashboard alerts. LiDAR does not provide a steering command. For Series 4 PC/PCF, the Raspberry Pi 5 carries the most recent three manual or predicted steering targets and sends them with each inference request.
 
 ## Failure Boundaries
 

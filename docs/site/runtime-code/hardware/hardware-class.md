@@ -1,6 +1,6 @@
 # Hardware Integration
 
-The `Hardware` class in `code/controller/current/rc_car_app/hardware.py` is the single hardware abstraction layer for the Raspberry Pi 5 controller. It owns every physical actuator and sensor the runtime touches directly on the Raspberry Pi 5: the steering servo through the PCA9685 Servo Controller, the four PWM control channels for the JGB37-520 DC motors (12 V, 550 RPM) through the Yahboom AT8236 Motor Controller, and the wheel hall sensor. The main loop in `runtime.py` never talks to GPIO or I2C directly — it reads and writes attributes on a single `Hardware` instance, which keeps model changes, safety logic, and dashboard code from silently changing pin behavior.
+The `Hardware` class in `code/controller/current/rc_car_app/hardware.py` is the single hardware interface for the Raspberry Pi 5 controller. It owns the steering servo through the PCA9685 Servo Controller, the four PWM control channels for the JGB37-520 DC motors (12 V, 550 RPM) through the Yahboom AT8236 Motor Controller, and the Hall-effect wheel-speed sensor. The main loop in `runtime.py` never talks to GPIO or I2C directly; it reads and writes attributes on one `Hardware` instance, which keeps model changes, safety logic, and dashboard code from silently changing pin behavior.
 
 ## How it works
 

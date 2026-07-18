@@ -61,6 +61,6 @@ the forward pins get a PWM duty and the backward pins stay at 0; reverse swaps t
 
 ## Related pages
 
-- `hardware/build-overview.md`
-- `testing/bench-tests/overview.md`
-- `runtime-code/hardware/hardware-class.md`
+- [Hardware Build Overview](build-overview.md)
+- [Bench Tests](../testing/bench-tests/overview.md)
+- [Hardware Class](../runtime-code/hardware/hardware-class.md)

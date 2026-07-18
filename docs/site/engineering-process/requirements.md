@@ -80,7 +80,7 @@ restarted and imported it.
 
 ### Hardware
 
-- Start actuator tests with the car restrained or wheels unloaded and the controller ready.
+- Start steering and motor tests with the car restrained or wheels unloaded and the controller ready.
 - Verify USB dashboard addresses, carrier, neighbors, and ping in both directions.
 - Stop competing services before opening raw LiDAR serial.
 - Confirm the selected model and enabled safety state before autonomous motion.

@@ -15,7 +15,7 @@ car and its display.
 The Jetson Orin Nano supplies the GPU performance that makes the current 320x180 Series 3/4
 models practical at the selected live rate. If its result is missing, stale, or for the wrong
 model, current autonomy requests a stop. The Raspberry Pi 5 keeps the established Camera
-Module 3 Wide, actuator, sensor, and safety integration, while the Zero 2 W isolates panel
+Module 3 Wide, steering/motor, sensor, and safety integration, while the Zero 2 W isolates panel
 rendering from the control loop.
 
 Series 1/2 can run locally on the Raspberry Pi 5. Series 3/4 use the Jetson Orin Nano because
@@ -24,4 +24,4 @@ Jetson Orin Nano GPU can run the selected models near the camera rate in the cur
 Exact inference rate remains runtime telemetry and should be reported with the model,
 provider, software build, and power mode used for the measurement.
 
-The Zero 2 W does not issue actuator commands. Losing the display removes observability but does not transfer control authority.
+The Zero 2 W does not command the steering servo or motors. Losing the display removes observability but does not transfer control authority.

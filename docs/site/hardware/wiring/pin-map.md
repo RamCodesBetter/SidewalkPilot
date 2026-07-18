@@ -1,10 +1,10 @@
 # Wiring and Pin Map
 
-A consolidated reference for power domains, primary sensors, actuators, and inter-computer links.
+A consolidated reference for power domains, primary sensors, steering/motor hardware, and inter-computer links.
 
 ## How it works
 
-The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (PCA9685 Servo Controller), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR through its current CP2102 UART-to-USB Adapter, dashboard USB Ethernet). The exact pin and port assignments live in `rc_car_app/config.py`, `rc_car_app/lidar.py`, and `rc_car_app/navigation.py`, so the table below is copied directly from those source files rather than from memory.
+The Raspberry Pi 5 is the real-time I/O controller. Its sensors, Servo Controller, and Motor Controller connect through one of four transport types: raw GPIO lines (motors and Hall-effect wheel-speed sensor), I2C (PCA9685 Servo Controller), UART (GPS and IMU), or USB (LiDAR through its current CP2102 UART-to-USB Adapter and dashboard USB Ethernet). The exact pin and port assignments live in `rc_car_app/config.py`, `rc_car_app/lidar.py`, and `rc_car_app/navigation.py`, so the table below is copied directly from those source files rather than from memory.
 
 ## Master pin / port table
 
@@ -15,7 +15,7 @@ The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor co
 | Right drive control (backward) | AT8236 Motor Controller -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 20` | `MOTOR_RIGHT_BWD_PIN` |
 | Left drive control (forward) | AT8236 Motor Controller -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 25` | `MOTOR_LEFT_FWD_PIN` |
 | Left drive control (backward) | AT8236 Motor Controller -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 13` | `MOTOR_LEFT_BWD_PIN` |
-| Hall / speed sensor | Wheel hall sensor | GPIO (BCM), pull-up | `GPIO 24` | `HALL_SENSOR_GPIO_PIN` |
+| Hall-effect wheel-speed sensor | Wheel-speed input | GPIO (BCM), pull-up | `GPIO 24` | `HALL_SENSOR_GPIO_PIN` |
 | GPS | BN880 GPS receiver | UART | `/dev/ttyAMA0` @ `9600` | `GPS_PORT`, `GPS_BAUD` (`navigation.py`) |
 | Compass (bench only) | BN880 HMC5883L-compatible magnetometer | I2C | Detected by `bn880_test.py`; not consumed by live navigation | bench utility only |
 | IMU | Seeed XIAO MG24 Sense (6-axis) | UART, Raspberry Pi 5 GPIO8/9 | `/dev/ttyAMA3` @ `115200` | `STEERING_YAW_PID_PORT`, `STEERING_YAW_PID_BAUD` |

@@ -1,6 +1,6 @@
 # Convolutional Steering Networks
 
-SidewalkPilot uses custom convolutional networks to map a forward camera frame to a steering command. The model does not contain LiDAR braking, GPS routing, or actuator arbitration; those remain explicit runtime layers around the learned steering proposal.
+SidewalkPilot uses custom convolutional networks to map a forward camera frame to a steering command. The model does not contain LiDAR braking or GPS routing. The Raspberry Pi 5 applies those rules separately before commanding the steering servo and motors.
 
 ## Architecture Families
 
@@ -23,7 +23,7 @@ The early network uses five convolution stages with channels `3 -> 24 -> 36 -> 4
 steering = 90 + output_scale * tanh(raw)
 ```
 
-Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. The model is small enough for local Raspberry Pi 5 inference and established the first complete image-to-servo pipeline.
+Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. These compact models established the first complete image-to-steering pipeline. The current unified runtime loads them on the Jetson Orin Nano, just like Series 3 and 4.
 
 ## Series 3 Visual Network
 
@@ -32,12 +32,13 @@ Series 3 uses channels `3 -> 32 -> 48 -> 64 -> 96 -> 128 -> 160`, adaptive pooli
 v3.0 uses the early two-output contract. v3.1 and later use the hybrid steering head:
 
 ```text
-class = argmax(9 logits)
+probabilities = softmax(9 logits)
+class = argmax(probabilities)
 fraction = sigmoid(offset_for_selected_class)
 steering = class_low + fraction * (class_high - class_low)
 ```
 
-The class term encourages commitment to turns; the local offset preserves a continuous servo command instead of limiting output to nine fixed angles.
+The class term encourages commitment to turns; the local offset preserves a continuous servo command instead of limiting output to nine fixed angles. The implementation can select `argmax(logits)` directly because softmax preserves their ordering and therefore selects the same class.
 
 ## Series 4 Visual and Temporal Network
 
@@ -58,6 +59,6 @@ Preprocessing is part of the model contract. A checkpoint evaluated with the wro
 
 ## Deployment
 
-Series 3/4 ONNX inference runs on Jetson Orin Nano through ONNX Runtime with CUDA when available. The server inspects input names and output shapes to choose the decoder. TensorRT is not required for the current models and should not be claimed as the active path unless a TensorRT engine is actually built and measured.
+All current model families run on the Jetson Orin Nano GPU. Series 1/2 use PyTorch with CUDA; Series 3/4 use ONNX Runtime with CUDA. CPU execution is retained only as a diagnostic fallback. TensorRT is not part of the current field runtime.
 
 See [Series 3 Hybrid Head](series-3-hybrid-head.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

@@ -43,6 +43,6 @@ test before calling one better on the car.
 
 ## Related pages
 
-- `model-evaluation/comparisons/offline-vs-field.md`
-- `ai-and-models/architecture/series-3-hybrid-head.md`
-- `model-evaluation/offline-evaluation/overview.md`
+- [Offline vs Field](../comparisons/offline-vs-field.md)
+- [Series 3 Hybrid Head](../../ai-and-models/architecture/series-3-hybrid-head.md)
+- [Offline Evaluation](overview.md)

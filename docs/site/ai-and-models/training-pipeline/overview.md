@@ -32,7 +32,7 @@ The model names form three final/best pairs:
 | `4.0fg` | `4.0f` | `4.0g` |
 | `4.0ac` | `4.0a` | `4.0c` |
 
-All three completed 25 epochs and logged into the same W&B project as v3.4. This creates three comparable runs, while the six model names identify the final and best artifact from each run.
+All three completed 25 epochs and logged into the same W&B project as v3.4. This creates three comparable runs, while the six model names identify the final and best model from each run.
 
 ## Labels
 
@@ -49,33 +49,15 @@ Series 3 requires both a steering and throttle field in each accepted label, eve
 
 Consecutive driving frames are near-duplicates. Randomly distributing individual images would leak almost the same scene into both training and validation.
 
-The Series 3/4 trainer instead assigns path-sorted 100-sample windows to training or validation, reserving approximately 10% by default. This reduces adjacent-frame leakage. It is not a run-group split and should not be described as complete isolation between capture runs.
+The trainer sorts images by path and groups them into 100-frame windows. Each complete window goes to training or validation, with approximately 10% reserved for validation by default. This keeps most neighboring frames together, although one capture run can still contribute different windows to both sets.
 
 ## Sampling and Augmentation
 
-The trainer can apply:
+The v3.4 and Series 4 runs used class-weighted focal loss, deterministic left/right balance flipping, lighting and color augmentation, and synthetic diagonal shadow bands.
 
-- Steering-bucket weighted sampling;
-- Focal/class weighting for the hybrid classes;
-- Horizontal flip augmentation or deterministic balance flipping;
-- Brightness, HSV, and CLAHE variants;
-- Synthetic diagonal shadow bands;
-- CARLA-domain randomization for samples explicitly tagged as CARLA;
-- Separate real, CARLA, and correction sample weights.
+More augmentation is not automatically better. v3.3/v3.3b increased shadow-hardening pressure but performed worse on the physical car. v3.4 shows why augmentation changes must still be tested on ordinary turns.
 
-More augmentation is not automatically better. v3.3/v3.3b increased shadow-hardening pressure but regressed on the physical car. v3.4 is evidence that augmentation must preserve the features needed for ordinary turns.
-
-When pre-generated CARLA data is explicitly included, source weighting defaults to
-correction `3.0`, real `2.0`, and CARLA `0.6`, multiplied by class/bucket balancing. These
-numbers are relative sample factors, not percentages. Synthetic data is down-weighted
-because simulator texture, lighting, camera geometry, and object appearance differ from
-the physical car. The current Series 3/4 and Series 4 runs use the 81,237 real images; older
-checkpoint source mixes must be taken from their saved command or source-count log rather
-than inferred from trainer capability.
-
-A reproducible run saves the printed source counts and resolved sampler settings. A run
-described as CARLA-assisted must name the synthetic root; a real-only run must show no
-CARLA samples.
+The 81,237-image dataset used for the current Series 3 and Series 4 runs contains real field images only. These runs did not use CARLA images or source weighting. Their samplers selected 50,000 examples per epoch without steering-bucket reweighting.
 
 ## Series 3 Hybrid Loss
 
@@ -85,7 +67,7 @@ For v3.1 and later, the 19-value output is decoded into:
 - An offset within the selected class;
 - Optional throttle.
 
-Training combines focal-weighted classification loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. Bucket/source weighting happens in the sampler rather than through an active steering-magnitude loss multiplier. The current steering-focused runs use throttle weight zero because the collected throttle distribution does not support a useful learned-throttle claim.
+Training combines focal-weighted classification loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. Current steering-focused runs set throttle loss to zero because 95.51% of the 81,237 throttle labels are full throttle. That distribution cannot teach useful variable-speed control.
 
 ## Typical Steering-Focused Command
 
@@ -101,18 +83,18 @@ python3 series_3_sidewalkpilot_trainer.py \
   --keep-pth
 ```
 
-This is a documented training pattern, not a claim that every Series 3 release used identical flags. A release is exactly reproducible only when its W&B configuration, dataset snapshot, and artifact hash are preserved together.
+This is a documented training pattern, not a claim that every Series 3 release used identical flags. Reproducing a release requires its W&B configuration, dataset version, and exact model file.
 
-Important defaults in the current trainer include batch size 256, learning rate `3e-4`, weight decay `3e-4`, 320x180 input, 50,000 weighted samples per epoch, 10% validation, and ONNX opset 17.
+The trainer uses AdamW. Important defaults include batch size 256, learning rate `3e-4`, weight decay `3e-4`, 320x180 input, 50,000 sampler draws per epoch, 10% validation, and ONNX opset 17.
 
 ## Checkpoints and Export
 
-Training produces two paired artifacts:
+Training produces two paired models:
 
 - Regular: final epoch;
 - `b`: best validation checkpoint.
 
-Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specified. TensorRT build flags remain available, but current Jetson Orin Nano throughput is sufficient to run the ONNX models directly; quantization is not required for the present operating target.
+Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specified. The Jetson Orin Nano runs current ONNX models at approximately 30 results per second, matching the 30 FPS camera target. The active field runtime does not require TensorRT or quantization.
 
 ## Evaluation and Promotion
 

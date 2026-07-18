@@ -33,7 +33,7 @@ The priority chain is enforced in two functions in
 5. **LiDAR throttle cap.** With AEB enabled, center clearance governs the forward
    target: 100% at 1.65 m, linearly down to 60% reference at 1.25 m, held to
    1.05 m. The model's throttle output is not used.
-6. **AEB re-check + hardware write.** Back in `update_gpio`, if AEB is armed and
+6. **AEB re-check + servo/motor command.** Back in `update_gpio`, if AEB is armed and
    `is_stop_brake_condition(...)` is true, it forces brake with `AEB_BRAKE_RATE`
    and overrides the throttle to zero. Then the rate-limited PWM and servo values
    are written to hardware — the last, lowest-priority step.
@@ -59,12 +59,12 @@ detection coverage still require controlled tests.
 | 3 | Model gate | fresh matching result + conf >= 0.25 | 0.75 s local frame guard; `JETSON_RESULT_MAX_AGE_SEC = 0.25` |
 | 4 | Model steering | mapped heading | `MAX_TARGET_HEADING_DEG` 60° |
 | 5 | LiDAR throttle cap | enabled AEB and center clearance < 1.65 m | `LIDAR_GOV_*` |
-| 6 | AEB + hardware | armed AEB, then final write | `AEB_BRAKE_RATE` 10.0 |
+| 6 | AEB + servo/motor command | armed AEB, then final command | `AEB_BRAKE_RATE` 10.0 |
 
 ## Related pages
 
-- `autonomy-stack/architecture/data-flow.md`
-- `autonomy-stack/lidar-safety/overview.md`
-- `autonomy-stack/lidar-safety/aeb.md`
-- `runtime-code/runtime-loop.md`
-- `safety-case/safety-overview.md`
+- [Control Architecture and Runtime Data Flow](data-flow.md)
+- [LiDAR Safety Overview](../lidar-safety/overview.md)
+- [Autonomous Emergency Braking](../lidar-safety/aeb.md)
+- [Runtime Loop](../../runtime-code/runtime-loop.md)
+- [Safety Overview](../../safety-case/safety-overview.md)

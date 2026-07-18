@@ -72,8 +72,8 @@ and obstacle-coverage evidence is still to be collected.
 
 ## Related pages
 
-- `autonomy-stack/architecture/data-flow.md`
-- `autonomy-stack/lidar-safety/aeb.md`
-- `hardware/lidar.md`
-- `runtime-code/runtime-loop.md`
-- `safety-case/safety-overview.md`
+- [Control Architecture and Runtime Data Flow](../architecture/data-flow.md)
+- [Autonomous Emergency Braking](aeb.md)
+- [LiDAR Hardware](../../hardware/lidar.md)
+- [Runtime Loop](../../runtime-code/runtime-loop.md)
+- [Safety Overview](../../safety-case/safety-overview.md)

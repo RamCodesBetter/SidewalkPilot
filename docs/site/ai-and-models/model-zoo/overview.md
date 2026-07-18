@@ -32,11 +32,11 @@ Series 1-3 use a numeric model and a `b` checkpoint. Series 4 uses contract-spec
 
 For current Series 3/4 runs, “best validation” means lowest steering/current-target MAE during that run. Series 1/2 used validation loss. Neither rule means field-best. Regular v3.4 beat v3.4b on the car, and `4.0p` has stronger turn metrics than its lower-MAE partner `4.0r`.
 
-Regular artifacts preserve the final requested epoch. Their paired `b/r/g/c` artifacts
+Regular model files preserve the final requested epoch. Their paired `b/r/g/c` models
 preserve the epoch selected by that trainer's validation objective. Both are retained so
 validation behavior can be compared with field behavior. The suffix records provenance,
 not superiority. A release must keep version, filename, model card, architecture contract,
-and artifact hash aligned; the field-selected default changes only after a recorded drive.
+and model hash aligned; the field-selected default changes only after a recorded drive.
 
 ## Selection Evidence
 

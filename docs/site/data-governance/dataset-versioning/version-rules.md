@@ -71,6 +71,6 @@ Never delete images or label files to "fix" a rule violation without Ram's sign-
 
 ## Related pages
 
-- `data/dataset-overview.md`
+- [Dataset Overview](../../data/dataset-overview.md)
 - [Hugging Face Publishing](../../publishing/huggingface.md)
 - [Data Quality](../data-quality/image-quality-checks.md)

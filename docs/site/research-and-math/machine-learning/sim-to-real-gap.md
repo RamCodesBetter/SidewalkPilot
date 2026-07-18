@@ -69,6 +69,6 @@ auditable facts.
 
 ## Related Pages
 
-- `ai-and-models/training-pipeline/overview.md`
-- `research-and-math/algorithms/weighted-sampling.md`
-- `model-evaluation/field-evaluation/overview.md`
+- [Training Pipeline](../../ai-and-models/training-pipeline/overview.md)
+- [Weighted Sampling](../algorithms/weighted-sampling.md)
+- [Field Evaluation](../../model-evaluation/field-evaluation/overview.md)

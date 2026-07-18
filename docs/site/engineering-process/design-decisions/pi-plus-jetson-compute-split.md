@@ -61,6 +61,6 @@ one computer.
 
 ## Related pages
 
-- `start-here/project-overview.md`
-- `autonomy-stack/architecture/data-flow.md`
-- `hardware/compute.md`
+- [Project Overview](../../start-here/project-overview.md)
+- [Control Architecture and Runtime Data Flow](../../autonomy-stack/architecture/data-flow.md)
+- [Compute Hardware](../../hardware/compute.md)

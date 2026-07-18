@@ -10,9 +10,9 @@ PyTorch training checkpoint
   -> decoded steering returned to Raspberry Pi 5
 ```
 
-The Raspberry Pi 5 remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is an inference service only.
+The Raspberry Pi 5 remains responsible for the camera, steering-servo and motor control, result freshness, manual override, and LiDAR safety. The Jetson Orin Nano runs the steering models and returns their predictions.
 
-## Artifact Contracts
+## Model Contracts
 
 | Family | ONNX input | ONNX output |
 |---|---|---|
@@ -24,27 +24,12 @@ The Raspberry Pi 5 remains responsible for the camera, actuator control, result 
 
 The server inspects input names and output shapes rather than assigning a contract from the filename alone.
 
-## Provider Selection
+## GPU Selection
 
-CUDA is preferred when ONNX Runtime reports `CUDAExecutionProvider`; CPU remains a fallback for compatibility/testing. A partially installed TensorRT provider is not registered ahead of CUDA because provider initialization failure can cause an accidental CPU retry.
-
-## TensorRT Status
-
-TensorRT, FP16, and INT8 remain valid future optimization topics, but they are not the current live path. The old checked-in TensorRT builder described by earlier docs is no longer in the repository. No current field claim depends on a TensorRT engine or quantized model.
+Series 1/2 run through PyTorch CUDA. Series 3/4 run through ONNX Runtime's CUDA provider. CPU execution remains available only for diagnosis; a field launch should confirm that the Jetson Orin Nano GPU path loaded.
 
 ## Export and Verification
 
-Each model must export with the input names and output shape shown above, load in ONNX Runtime, and produce finite steering on a representative frame before deployment. Artifact hashes and the exact model/version pairing should be recorded. A successful export does not prove that the Raspberry Pi 5 and Jetson Orin Nano are using the same preprocessing or decoder, so an end-to-end fresh-response test is still required.
-
-## Precision Experiments
-
-FP32 stores each parameter in four bytes. FP16 can approximately halve weight storage and may improve GPU throughput; INT8 maps floating values to integer codes using a scale and zero point:
-
-```text
-q = clamp(round(x / scale) + zero_point)
-x_approx = scale * (q - zero_point)
-```
-
-Quantization can change a winning steering class near a boundary. Any FP16, INT8 PTQ, QAT, or TensorRT experiment therefore needs representative calibration data, artifact hashes, on-device latency/power measurements, common-set evaluation, and a supervised field comparison. File size alone is not approval.
+Before field use, each model must load with the expected input names and output shape, return finite steering values, and pass a complete Raspberry Pi 5-to-Jetson Orin Nano response test. The deployed filename and version must match. The current field path uses FP32 models; TensorRT, FP16, and INT8 are not active.
 
 See [Jetson Orin Nano Runtime](jetson-runtime.md) and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

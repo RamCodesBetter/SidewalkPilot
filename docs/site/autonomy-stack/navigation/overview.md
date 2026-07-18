@@ -100,8 +100,8 @@ indices so the transition is inspectable.
 
 ## Related pages
 
-- `autonomy-stack/architecture/data-flow.md`
-- `autonomy-stack/navigation/crosswalk-handoff.md`
-- `hardware/gps-compass.md`
-- `runtime-code/runtime-loop.md`
-- `safety-case/safety-overview.md`
+- [Control Architecture and Runtime Data Flow](../architecture/data-flow.md)
+- [Crosswalk Handoff](crosswalk-handoff.md)
+- [GPS and Compass](../../hardware/gps-compass.md)
+- [Runtime Loop](../../runtime-code/runtime-loop.md)
+- [Safety Overview](../../safety-case/safety-overview.md)

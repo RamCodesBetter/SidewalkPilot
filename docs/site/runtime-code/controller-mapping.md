@@ -74,6 +74,6 @@ The label is a software command sampled near the frame request, not measured whe
 
 ## Related pages
 
-- `runtime-code/runtime-loop.md`
+- [Runtime Loop](runtime-loop.md)
 - [Runtime Configuration](config/servo-settings.md)
 - [Dataset and Labels](../data/dataset-overview.md)

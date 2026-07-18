@@ -27,6 +27,6 @@ CSV is the primary local run record, but it still depends on successful process 
 
 ## Related pages
 
-- `model-evaluation/offline-evaluation/overview.md`
-- `operations/troubleshooting.md`
-- `runtime-code/dashboard/sender.md`
+- [Offline Evaluation](../model-evaluation/offline-evaluation/overview.md)
+- [Troubleshooting](troubleshooting.md)
+- [Dashboard Sender](../runtime-code/dashboard/sender.md)

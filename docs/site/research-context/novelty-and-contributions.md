@@ -47,7 +47,7 @@ but that is an offline screening result. It does not replace the ordered physica
 
 ## 4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard
 
-**Status: implemented engineering.** The Raspberry Pi 5 owns controller input, sensors, actuator output,
+**Status: implemented engineering.** The Raspberry Pi 5 owns controller input, sensors, steering/motor output,
 logging, and dashboard telemetry. Jetson Orin Nano performs Series 3/4 ONNX inference over direct
 Ethernet. The Zero 2 W renders the USB-linked dashboard. Splitting real-time I/O from heavier
 inference is an established systems pattern; the contribution is the working integration

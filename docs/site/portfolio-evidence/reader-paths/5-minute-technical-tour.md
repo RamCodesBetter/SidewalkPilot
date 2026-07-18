@@ -6,7 +6,7 @@ This path gives a technical or media reviewer enough context to describe Sidewal
 
 The Jetson Orin Nano is the AI brain: it runs the current Series 3/4 steering network over
 the GPU and returns the prediction that makes camera-based self-driving possible. The
-Raspberry Pi 5 is the hardware and safety controller for input, sensors, actuators, and
+Raspberry Pi 5 is the hardware and safety controller for input, sensors, steering/motor control, and
 logging. The Zero 2 W renders the external dashboard over a dedicated USB network.
 
 This is a responsibility split, not three boards doing the same job. Current v3.4 and Series

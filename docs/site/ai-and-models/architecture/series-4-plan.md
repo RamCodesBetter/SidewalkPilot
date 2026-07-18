@@ -43,7 +43,7 @@ Each horizon has its own `64 -> 18` head:
 - Values 9-17: one raw local offset for each class;
 - Decoded steering: lower bucket edge plus `sigmoid(selected_offset) * bucket_width`.
 
-PC emits shape `[batch,1,18]`. CF and PCF emit `[batch,4,18]`. Only horizon 0 commands live steering. Series 4 intentionally removes learned throttle.
+PC emits shape `[batch,1,18]`. CF and PCF emit `[batch,4,18]`. Only horizon 0 commands live steering. The later CF/PCF horizons are training targets approximately 0.1, 0.2, and 0.3 seconds ahead. Averaging them into the live command could steer early or mix targets from different moments, so horizon fusion is not part of the controlled v4.0 comparison. The existing steering filter already smooths the selected horizon-0 command. Series 4 intentionally removes learned throttle.
 
 ## Size
 
@@ -56,7 +56,7 @@ PC emits shape `[batch,1,18]`. CF and PCF emit `[batch,4,18]`. Only horizon 0 co
 
 The file size is approximately four bytes per FP32 weight plus graph metadata. “5.5 million parameters” and “about 22 MB” therefore describe the same model, not conflicting counts.
 
-## Runs and Artifacts
+## Training Runs and Models
 
 | W&B run | Final epoch | Best current-target MAE | ONNX outputs |
 |---|---|---|---|
@@ -83,15 +83,19 @@ PC is the strongest first field candidate because `4.0p` leads the class-balance
 
 ## Live Runtime Contract
 
-The Raspberry Pi 5 still sends only the JPEG and selected model version over the private Ethernet link. Jetson Orin Nano reads the ONNX input metadata:
+The Raspberry Pi 5 sends a JPEG and selected model version over the private Ethernet link. For PC and PCF, it also sends the three previous steering targets. The Jetson Orin Nano reads the ONNX input metadata:
 
 - Image-only graph: run CF directly;
 - Graph with `target_history`: feed the Raspberry Pi 5's latest three steering targets, decode horizon 0, then append that decoded target for the next inference. The first autonomous request is seeded by the last three manual targets.
 
-The versioned TCP request carries three big-endian float32 history values alongside the selected model and JPEG. The Jetson Orin Nano validates the model signature and history length before inference. CUDA is selected without registering a partially installed TensorRT provider that could force an accidental CPU fallback.
+The versioned TCP request carries three big-endian float32 history values alongside the selected model and JPEG. The Jetson Orin Nano validates the model input names, output shape, and history length before CUDA inference.
 
 ## Promotion Gate
 
 Series 4 is **trained and runtime-supported**, but **not field-selected**. It must beat v3.4 on the same physical shadow/turn route, remain smooth under autoregressive history, satisfy inference-freshness checks, and preserve AEB behavior before the live default changes.
+
+## Possible v4.1 Throttle Experiment
+
+The current 81,237-image dataset is not suitable for learning useful variable throttle: 77,590 labels, or 95.51%, are full throttle. A new throttle head would therefore be strongly encouraged to predict full throttle almost everywhere. v4.0 remains steering-only. Learned throttle should be reconsidered for v4.1, and for any v3.5 experiment, only after collecting deliberate examples of normal speed, reduced speed, and stopping in varied turns and obstacle contexts.
 
 See [Series 4 Models](../model-zoo/series-4.md), [Bal9](../../model-evaluation/offline-evaluation/bal9.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

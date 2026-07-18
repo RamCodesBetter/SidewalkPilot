@@ -43,5 +43,5 @@ attributed to the controller.
 
 ## Related pages
 
-- `hardware/steering-servo.md`
-- `hardware/wiring/pin-map.md`
+- [Steering Servo](steering-servo.md)
+- [Pin Map](wiring/pin-map.md)

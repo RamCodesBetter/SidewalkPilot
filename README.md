@@ -54,7 +54,7 @@ larger 320x180 models run too slowly on the Raspberry Pi 5 CPU for the selected 
 deployment, while the Jetson Orin Nano GPU runs them near the camera rate. If no fresh
 Jetson Orin Nano prediction is available, current autonomy stops. The Raspberry Pi 5 remains
 the hardware and safety controller, so the Jetson Orin Nano never writes the servo or motors directly.
-Manual driving and the legacy Series 1/2 local-model path can still operate without it.
+Manual driving can still operate without it, but camera-based autonomous steering requires a recent Jetson Orin Nano result for every model family.
 
 <img src="docs/media/System_Architecture.jpg" alt="System architecture diagram" width="800">
 
@@ -75,7 +75,7 @@ The generated [steering-model report](docs/steering_model_report.pdf) evaluates 
 
 Field runs record camera images paired with logical steering degrees (`0..180`) and absolute physical throttle (`0..1`). Series 3 and 4 share a 81,237-image real-world dataset. The trainer sorts images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets.
 
-Training runs on an NVIDIA RTX 6000 Ada-Generation GPU. The Series 3/4 trainers support lighting, color, flip, and synthetic-shadow augmentation. The trainer saves and exports the final-epoch and the best-steering-MAE artifacts as ONNX, and logs to Weights & Biases. Physical field testing remains the deciding factor after offline evaluation.
+Training runs on an NVIDIA RTX 6000 Ada-Generation GPU. The Series 3/4 trainers support lighting, color, flip, and synthetic-shadow augmentation. The trainer saves and exports the final-epoch and best-steering-MAE models as ONNX, and logs the run for comparison. Physical field testing remains the deciding factor after offline evaluation.
 
 ## Hardware
 
@@ -101,7 +101,7 @@ Training runs on an NVIDIA RTX 6000 Ada-Generation GPU. The Series 3/4 trainers 
 | `code/controller/current/` | Jetson Orin Nano inference server, Raspberry Pi 5 controller, and Zero 2 W dashboard runtime |
 | `code/ai_models_datasets/series_1_and_2/` | Series 1/2 trainer and local dataset metadata |
 | `code/ai_models_datasets/series_3_and_4/` | Series 3 trainer plus the three Series 4 trainers |
-| `code/ai_models/` | Local/Hugging Face PTH and ONNX artifacts; binaries are ignored by Git |
+| `code/ai_models/` | Local/Hugging Face PTH and ONNX models; binaries are ignored by Git |
 | `code/test_files/` | Model evaluation, hardware tests, and calibration tools |
 | `docs/site/` | MkDocs documentation source |
 | `docs/steering_model_report.pdf` | Generated 46-model evaluation report |

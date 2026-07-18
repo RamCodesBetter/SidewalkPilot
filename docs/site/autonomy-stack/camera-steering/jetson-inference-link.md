@@ -7,11 +7,11 @@ The Raspberry Pi 5 and Jetson Orin Nano communicate over a private point-to-poin
 1. The Raspberry Pi 5 camera thread captures the latest OpenCV BGR frame.
 2. The asynchronous client keeps only the newest pending frame, preventing a backlog.
 3. The client JPEG-encodes the frame and sends the selected model version plus JPEG bytes over persistent TCP.
-4. Jetson Orin Nano resolves/hot-swaps the requested artifact.
+4. Jetson Orin Nano loads or switches to the requested model.
 5. Jetson Orin Nano decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.
 6. Jetson Orin Nano decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.
 7. The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.25 seconds old.
-8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB arbitration, yaw/hardware mapping, and actuator commands.
+8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB rules, yaw/hardware mapping, and the final steering-servo and motor commands.
 
 JPEG encoding, connection attempts, sends, receives, and status polls run in `AsyncJetsonSteeringClient`, not the 60 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.
 
@@ -36,6 +36,6 @@ Series 4 was verified against all six real ONNX exports with CUDA active. The ou
 
 ## Failure Boundary
 
-Jetson Orin Nano network and inference work runs outside the main controller loop, so the Raspberry Pi 5 does not intentionally wait on Jetson Orin Nano before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Raspberry Pi 5 applies the accepted prediction, steering mapping, enabled AEB policy, actuator outputs, and shutdown cleanup.
+Jetson Orin Nano network and inference work runs outside the main controller loop, so the Raspberry Pi 5 does not intentionally wait on Jetson Orin Nano before processing controller/GPIO work. In autonomy, no accepted fresh result produces confidence zero and a hard-stop request. This is a conservative software response, not proof of a complete fail-safe system. The Raspberry Pi 5 applies the accepted prediction, steering mapping, enabled AEB policy, steering/motor outputs, and shutdown cleanup.
 
 See [Raspberry Pi 5 + Jetson Orin Nano Compute Split](../../engineering-process/design-decisions/pi-plus-jetson-compute-split.md) and [Runtime Loop](../../runtime-code/runtime-loop.md).

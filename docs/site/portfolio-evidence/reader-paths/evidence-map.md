@@ -20,7 +20,7 @@ This page maps important SidewalkPilot claims to the strongest available proof a
 
 ### Autonomy
 
-SidewalkPilot has demonstrated supervised camera-based steering on a physical RC car. The Jetson Orin Nano predicts steering from the newest camera frame; the Raspberry Pi 5 accepts only fresh results, applies the enabled safety policy, and writes the resulting actuator commands. The operator can brake, take over, or shut down the run. This is not a claim of SAE automation, unattended operation, public-road readiness, or safe operation around arbitrary pedestrians.
+SidewalkPilot has demonstrated supervised camera-based steering on a physical RC car. The Jetson Orin Nano predicts steering from the newest camera frame; the Raspberry Pi 5 accepts only fresh results, applies the enabled safety policy, and commands the steering servo and motors. The operator can brake, take over, or shut down the run. This is not a claim of SAE automation, unattended operation, public-road readiness, or safe operation around arbitrary pedestrians.
 
 ### Data and Models
 

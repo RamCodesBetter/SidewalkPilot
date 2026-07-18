@@ -74,6 +74,6 @@ applying it universally could amplify hard shadow boundaries and add per-frame C
 
 ## Related pages
 
-- `autonomy-stack/camera-steering/model-inference.md`
-- `testing/failures/overview.md`
-- `roadmap/next-steps.md`
+- [Model Inference](../../autonomy-stack/camera-steering/model-inference.md)
+- [Failures and Lessons](../../testing/failures/overview.md)
+- [Next Steps](../../roadmap/next-steps.md)

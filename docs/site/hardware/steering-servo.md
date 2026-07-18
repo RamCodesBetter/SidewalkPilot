@@ -2,7 +2,7 @@
 
 Steering is done by a single servo that turns the Ackermann linkage. The Raspberry Pi 5
 does not drive the servo directly; it sends the servo's PWM through a PCA9685 Servo
-Controller over I2C. This is the actuator the steering model ultimately commands.
+Controller over I2C. This is how the steering model's selected angle reaches the steering servo.
 
 ## Parts (Amazon)
 
@@ -74,7 +74,7 @@ history may affect how the linkage returns even when the final command is 90.
 
 ## Related pages
 
-- `hardware/build-overview.md`
-- `testing/bench-tests/overview.md`
-- `runtime-code/hardware/hardware-class.md`
-- `hardware/imu.md`
+- [Hardware Build Overview](build-overview.md)
+- [Bench Tests](../testing/bench-tests/overview.md)
+- [Hardware Class](../runtime-code/hardware/hardware-class.md)
+- [IMU](imu.md)

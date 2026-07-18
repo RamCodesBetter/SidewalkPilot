@@ -58,6 +58,6 @@ main control loop. Missing scans remain fail-open with respect to AEB.
 
 ## Related pages
 
-- `autonomy-stack/navigation/crosswalk-handoff.md`
-- `testing/failures/overview.md`
-- `roadmap/next-steps.md`
+- [Crosswalk Handoff](../../autonomy-stack/navigation/crosswalk-handoff.md)
+- [Failures and Lessons](../../testing/failures/overview.md)
+- [Next Steps](../../roadmap/next-steps.md)
