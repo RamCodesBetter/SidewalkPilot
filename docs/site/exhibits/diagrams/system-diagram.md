@@ -31,63 +31,31 @@ on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance 
 
 ## System Architecture
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/system-architecture.svg">
-      <img src="../../../assets/diagrams/system-architecture.svg" alt="SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, actuators, and logs">
-    </a>
-  </div>
-  <figcaption>
-    Compute, I/O, and device-link architecture. Open the <a href="../../../assets/diagrams/system-architecture.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/system-architecture.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, actuators, and logs](../../assets/diagrams/system-architecture.svg)](../../assets/diagrams/system-architecture.svg)
+
+*Compute, I/O, and device-link architecture. Open the [full-size SVG](../../assets/diagrams/system-architecture.svg) or the [editable draw.io source](../../assets/diagrams/system-architecture.drawio).*
 
 Source anchors: `code/controller/current/rc_car_app/runtime.py`, `config.py`, `vision.py`, `jetson_inference_server.py`, `hub75_dashboard.py`, and `z2w_dashboard.py`.
 
 ## Runtime and Control Flow
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/runtime-control.svg">
-      <img src="../../../assets/diagrams/runtime-control.svg" alt="SidewalkPilot runtime and control flow showing latest sensor values, Jetson Orin Nano inference, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry">
-    </a>
-  </div>
-  <figcaption>
-    Runtime command and safety flow. Open the <a href="../../../assets/diagrams/runtime-control.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/runtime-control.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot runtime and control flow showing latest sensor values, Jetson Orin Nano inference, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry](../../assets/diagrams/runtime-control.svg)](../../assets/diagrams/runtime-control.svg)
+
+*Runtime command and safety flow. Open the [full-size SVG](../../assets/diagrams/runtime-control.svg) or the [editable draw.io source](../../assets/diagrams/runtime-control.drawio).*
 
 Manual input cancels autonomy when processed. A fresh model proposal is required for autonomous steering. Enabled/fresh LiDAR can reduce forward throttle or request emergency braking, but it does not steer.
 
 ## Training and Evaluation Flow
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/training-evaluation.svg">
-      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, model artifacts, offline evaluation, and supervised field testing">
-    </a>
-  </div>
-  <figcaption>
-    Training, export, and model-selection flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, model artifacts, offline evaluation, and supervised field testing](../../assets/diagrams/training-evaluation.svg)](../../assets/diagrams/training-evaluation.svg)
+
+*Training, export, and model-selection flow. Open the [full-size SVG](../../assets/diagrams/training-evaluation.svg) or the [editable draw.io source](../../assets/diagrams/training-evaluation.drawio).*
 
 ## Navigation Flow
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/navigation-flow.svg">
-      <img src="../../../assets/diagrams/navigation-flow.svg" alt="SidewalkPilot navigation and crosswalk handoff flow showing the offline graph, GPS localization, A-star route, automatic sidewalk segments, and manual crossing segments">
-    </a>
-  </div>
-  <figcaption>
-    Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot navigation and crosswalk handoff flow showing the offline graph, GPS localization, A-star route, automatic sidewalk segments, and manual crossing segments](../../assets/diagrams/navigation-flow.svg)](../../assets/diagrams/navigation-flow.svg)
+
+*Navigation and crosswalk handoff flow. Open the [full-size SVG](../../assets/diagrams/navigation-flow.svg) or the [editable draw.io source](../../assets/diagrams/navigation-flow.drawio).*
 
 ## Related pages
 

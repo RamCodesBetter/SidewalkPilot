@@ -18,17 +18,9 @@ car to the nearest path node, computes remaining distance and ETA, and decides w
 the current segment should be driven by the model (`AUTO`) or handed to the human
 (`MNUL`).
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/navigation-flow.svg">
-      <img src="../../../assets/diagrams/navigation-flow.svg" alt="SidewalkPilot navigation flow from an offline map graph and GPS position through A-star routing, sidewalk and crossing segments, manual handoff, automatic resume, and runtime safety">
-    </a>
-  </div>
-  <figcaption>
-    Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot navigation flow from an offline map graph and GPS position through A-star routing, sidewalk and crossing segments, manual handoff, automatic resume, and runtime safety](../../assets/diagrams/navigation-flow.svg)](../../assets/diagrams/navigation-flow.svg)
+
+*Navigation and crosswalk handoff flow. Open the [full-size SVG](../../assets/diagrams/navigation-flow.svg) or the [editable draw.io source](../../assets/diagrams/navigation-flow.drawio).*
 
 ## How it works
 

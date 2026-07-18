@@ -4,17 +4,9 @@ SidewalkPilot separates AI inference, hardware ownership, display, and safety so
 inference waits cannot directly stall actuator control. The Jetson Orin Nano is the AI brain;
 the Raspberry Pi 5 turns its fresh predictions into safety-checked physical commands.
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/runtime-control.svg">
-      <img src="../../../assets/diagrams/runtime-control.svg" alt="SidewalkPilot runtime and control flow, showing parallel inputs, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry outputs">
-    </a>
-  </div>
-  <figcaption>
-    Runtime and control flow. Open the <a href="../../../assets/diagrams/runtime-control.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/runtime-control.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot runtime and control flow, showing parallel inputs, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry outputs](../../assets/diagrams/runtime-control.svg)](../../assets/diagrams/runtime-control.svg)
+
+*Runtime and control flow. Open the [full-size SVG](../../assets/diagrams/runtime-control.svg) or the [editable draw.io source](../../assets/diagrams/runtime-control.drawio).*
 
 ## Jetson Orin Nano: AI Brain
 

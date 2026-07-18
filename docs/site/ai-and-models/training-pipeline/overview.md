@@ -4,17 +4,9 @@ SidewalkPilot training begins with a supervised field drive and ends only after 
 
 ## Pipeline
 
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/training-evaluation.svg">
-      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow from field data and CARLA-assisted Series 1 and 2 data through family-specific trainers, GPU training, ONNX export, offline evaluation, and supervised field comparison">
-    </a>
-  </div>
-  <figcaption>
-    Training and evaluation flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
+[![SidewalkPilot training and evaluation flow from field data and CARLA-assisted Series 1 and 2 data through family-specific trainers, GPU training, ONNX export, offline evaluation, and supervised field comparison](../../assets/diagrams/training-evaluation.svg)](../../assets/diagrams/training-evaluation.svg)
+
+*Training and evaluation flow. Open the [full-size SVG](../../assets/diagrams/training-evaluation.svg) or the [editable draw.io source](../../assets/diagrams/training-evaluation.drawio).*
 
 ## Series-Specific Trainers
 
