@@ -116,6 +116,57 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
         model.target_history = [90.0, 90.0, 90.0]
         with self.assertRaisesRegex(ValueError, "expected 3"):
             model.set_target_history([80.0, 90.0])
+        with self.assertRaisesRegex(ValueError, "finite values"):
+            model.set_target_history([80.0, float("nan"), 90.0])
+
+    def test_failed_hot_swap_restores_the_previous_model_state(self):
+        model = jis.SteeringModel.__new__(jis.SteeringModel)
+        model.current_version = "3.4"
+        model.use_clahe = False
+        model.session = "working-session"
+
+        def failed_load(_spec):
+            model.use_clahe = True
+            model.session = "partial-session"
+            raise RuntimeError("bad model")
+
+        model.load = failed_load
+        self.assertFalse(model.ensure_version("4.0p"))
+        self.assertEqual(model.current_version, "3.4")
+        self.assertFalse(model.use_clahe)
+        self.assertEqual(model.session, "working-session")
+
+    def test_failed_or_pinned_model_switch_is_rejected(self):
+        failed = mock.Mock(current_version="3.4", pinned=False)
+        failed.ensure_version.return_value = False
+        self.assertFalse(jis._activate_requested_model(failed, "4.0p"))
+
+        pinned = mock.Mock(current_version="3.4", pinned=True)
+        self.assertTrue(jis._activate_requested_model(pinned, "3.4"))
+        self.assertFalse(jis._activate_requested_model(pinned, "4.0p"))
+        pinned.ensure_version.assert_not_called()
+
+    def test_nonfinite_model_output_is_rejected(self):
+        output = hybrid18(4)[None, None, :]
+        output[0, 0, 4] = np.nan
+        session = FakeSession(output)
+        model = jis.SteeringModel.__new__(jis.SteeringModel)
+        model.backend = "onnx"
+        model.session = session
+        model.input_name = "image"
+        model.history_input_name = None
+        model.history_steps = 0
+        model.target_history = []
+        model.width = 320
+        model.height = 180
+        model.use_clahe = False
+        with mock.patch.object(
+            jis,
+            "preprocess",
+            return_value=np.zeros((1, 3, 180, 320), dtype=np.float32),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "non-finite"):
+                model.infer(np.zeros((2, 2, 3)))
 
     def test_v2_socket_round_trip_delivers_manual_history(self):
         class CaptureSocket:
@@ -156,6 +207,28 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
         self.assertEqual(version, "4.0p")
         np.testing.assert_allclose(history, (62.0, 71.0, 83.0))
         self.assertGreater(len(jpeg), 0)
+
+    def test_client_rejects_nonfinite_history_without_sending(self):
+        class NoSendSocket:
+            def __init__(self):
+                self.sent = False
+
+            def sendall(self, _payload):
+                self.sent = True
+
+            def close(self):
+                pass
+
+        wire = NoSendSocket()
+        client = JetsonSteeringClient("unused")
+        client.sock = wire
+        result = client.infer(
+            np.zeros((32, 32, 3), dtype=np.uint8),
+            model_version="4.0p",
+            target_history=(62.0, float("nan"), 83.0),
+        )
+        self.assertIsNone(result)
+        self.assertFalse(wire.sent)
 
     def test_existing_series_decoders_are_unchanged(self):
         steering, throttle = jis.decode_output(np.asarray([[0.5, -0.5]], dtype=np.float32))

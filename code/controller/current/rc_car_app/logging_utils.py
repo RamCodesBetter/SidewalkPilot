@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import csv
 import datetime
-import time
 
 
 def init_csv_logger(csv_filename, csv_headers):

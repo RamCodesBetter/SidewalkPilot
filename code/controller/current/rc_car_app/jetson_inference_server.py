@@ -34,6 +34,10 @@ Wire protocol (TCP, persistent connection, one round-trip per frame):
                  inference timing, and 9 current-horizon bucket probabilities)
 
 Run on the Jetson:
+    # Dashboard model switching enabled (recommended production command):
+    python3 jetson_inference_server.py --model highest
+
+    # Pin one model for a controlled single-model test:
     python3 jetson_inference_server.py --model SidewalkPilot-v3.0b.onnx
     python3 jetson_inference_server.py --model SidewalkPilot-v4.0p.onnx
     python3 jetson_inference_server.py --model SidewalkPilot-v2.4b.pth          # S1/2 state-dict
@@ -55,6 +59,7 @@ import numpy as np
 # code/ai_models (released) + series_3_and_4 (fresh training output) — searched by version
 _CODE_DIR = Path(__file__).resolve().parents[3]
 _DEFAULT_MODEL_DIRS = [_CODE_DIR / "ai_models", _CODE_DIR / "ai_models_datasets" / "series_3_and_4"]
+_MAX_JPEG_BYTES = 16 * 1024 * 1024
 
 
 def _version_key(version):
@@ -329,20 +334,31 @@ class SteeringModel:
         """Seed a causal model from steering targets supplied by the controller."""
         if not self.history_steps:
             return
-        history = [max(0.0, min(180.0, float(value))) for value in values]
+        history = [float(value) for value in values]
         if len(history) != self.history_steps:
             raise ValueError(
                 f"expected {self.history_steps} steering-history values, got {len(history)}"
             )
+        if not all(np.isfinite(value) and 0.0 <= value <= 180.0 for value in history):
+            raise ValueError("steering history must contain finite values in 0..180 degrees")
         self.target_history = history
 
     def ensure_version(self, spec):
-        """Hot-swap the model if the Pi requested a different version."""
-        if spec and str(spec) != str(self.current_version):
-            try:
-                self.load(spec)
-            except SystemExit as exc:
-                print(f"[jon] model switch to '{spec}' failed: {exc}", flush=True)
+        """Hot-swap the model and report whether the requested version is active."""
+        requested = str(spec or "").strip()
+        if not requested:
+            return True
+        if requested == str(self.current_version):
+            return True
+        previous_state = dict(self.__dict__)
+        try:
+            self.load(requested)
+        except (Exception, SystemExit) as exc:
+            self.__dict__.clear()
+            self.__dict__.update(previous_state)
+            print(f"[jon] model switch to '{requested}' failed: {exc}", flush=True)
+            return False
+        return requested == str(self.current_version)
 
     def load(self, spec):
         model_path = resolve_model_path(spec, self.models_dir)
@@ -451,9 +467,16 @@ class SteeringModel:
             with torch.no_grad():
                 out = self.model(torch.from_numpy(x).to(self.device)).detach().cpu().numpy()
         steer, throttle = decode_output(out)
+        if not np.isfinite(steer) or not np.isfinite(throttle):
+            raise RuntimeError("model produced a non-finite steering/throttle value")
+        if not 0.0 <= float(steer) <= 180.0:
+            raise RuntimeError(f"model produced steering outside 0..180 degrees: {steer}")
+        probabilities = decode_probs9(out)
+        if not np.all(np.isfinite(probabilities)):
+            raise RuntimeError("model produced non-finite steering probabilities")
         if self.history_steps:
             self.target_history = (self.target_history + [float(steer)])[-self.history_steps:]
-        return steer, throttle, decode_probs9(out)
+        return steer, throttle, probabilities
 
 
 def _recv_exact(conn, n):
@@ -498,10 +521,28 @@ def _recv_request(conn):
     size = struct.unpack(">I", hdr)[0]
     if size == 0:
         return version, target_history, b""
+    if size > _MAX_JPEG_BYTES:
+        raise ValueError(f"JPEG payload exceeds {_MAX_JPEG_BYTES} bytes")
     data = _recv_exact(conn, size)
     if not data:
         return None
     return version, target_history, data
+
+
+def _activate_requested_model(model, requested_version) -> bool:
+    """Return false unless the exact model requested by the Raspberry Pi is active."""
+    requested = str(requested_version or "").strip()
+    if not requested:
+        return True
+    if getattr(model, "pinned", False):
+        if requested == str(model.current_version):
+            return True
+        print(
+            f"[jon] rejected v{requested}: server is pinned to v{model.current_version}",
+            flush=True,
+        )
+        return False
+    return bool(model.ensure_version(requested))
 
 
 _TEMP_CACHE = {"t": 0.0, "cpu": 0.0, "gpu": 0.0}
@@ -540,10 +581,11 @@ def serve(model, host, port):
     print(f"[jon] listening on {host}:{port} — waiting for the Pi ...", flush=True)
     while True:
         conn, addr = srv.accept()
+        conn.settimeout(2.0)
         conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         model.reset_temporal_state()
         print(f"[jon] connected: {addr}", flush=True)
-        frames, t0, ifps, last_frame_ts = 0, time.time(), 0.0, 0.0
+        frames, ifps, last_frame_ts = 0, 0.0, 0.0
         try:
             while True:
                 # v2 sets the high bit on version-len and carries steering history.
@@ -552,8 +594,10 @@ def serve(model, host, port):
                 if request is None:
                     break
                 requested_version, target_history, data = request
-                if requested_version and not getattr(model, "pinned", False):
-                    model.ensure_version(requested_version)
+                if not _activate_requested_model(model, requested_version):
+                    # Close without a reply. The Pi treats the short reply as no result
+                    # and holds instead of silently driving the previously loaded model.
+                    break
                 if not data:
                     # status ping (no frame): report temps + current ifps, run no inference
                     model.reset_temporal_state()
@@ -570,24 +614,28 @@ def serve(model, host, port):
                 jcpu, jgpu = _read_tegra_temps()
                 frame = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)  # BGR
                 if frame is None:
-                    conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
-                    continue
+                    print("[jon] rejected invalid JPEG frame", flush=True)
+                    break
                 if target_history is not None:
                     try:
                         model.set_target_history(target_history)
                     except ValueError as exc:
                         print(f"[jon] rejected steering history: {exc}", flush=True)
-                        conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
-                        continue
+                        break
                 t_inf = time.time()
-                steering, throttle, probs9 = model.infer(frame)   # preprocess + session.run
+                try:
+                    steering, throttle, probs9 = model.infer(frame)   # preprocess + session.run
+                except Exception as exc:
+                    print(f"[jon] inference rejected: {exc}", flush=True)
+                    break
                 infer_ms = (time.time() - t_inf) * 1000.0
                 # reply: steering, throttle, jcpu, jgpu, infer_fps, infer_ms + 9 bucket probs (15x f32)
                 conn.sendall(struct.pack(">15f", steering, throttle, jcpu, jgpu, ifps, infer_ms,
                                          *[float(p) for p in probs9]))
                 frames += 1
-        except (ConnectionResetError, BrokenPipeError):
-            pass
+        except (OSError, ValueError) as exc:
+            if isinstance(exc, ValueError):
+                print(f"[jon] rejected request: {exc}", flush=True)
         finally:
             conn.close()
             print(f"[jon] disconnected: {addr}", flush=True)
@@ -598,7 +646,7 @@ def main():
     ap.add_argument("--model", default="highest",
                     help="version (3.0b, 2.4 ...), a path to .onnx/.pt/.pth, or 'highest' "
                          "(default). A concrete version PINS it (the Pi's per-frame model "
-                         "choice is ignored); 'highest' follows whatever the Pi requests.")
+                         "choice must match); 'highest' follows whatever the Pi requests.")
     ap.add_argument("--models-dir", default=None, help="extra dir to search for SidewalkPilot-v*.*")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=8770)
@@ -616,10 +664,10 @@ def main():
     model = SteeringModel(args.model, models_dir=args.models_dir, use_clahe=args.clahe,
                           steer_scale=args.steer_scale, force_size=force)
 
-    # An explicit concrete version (or path) PINS the model: ignore the Pi's per-frame
-    # choice. 'highest'/'latest' (the default) FOLLOWS whatever the Pi requests.
+    # An explicit concrete version (or path) pins the model and rejects mismatched Pi
+    # requests. 'highest'/'latest' (the default) follows whatever the Pi requests.
     model.pinned = str(args.model).strip().lower() not in ("highest", "latest", "newest", "max")
-    print(f"[jon] model {'PINNED to v' + str(model.current_version) + ' (ignoring Pi choice)' if model.pinned else 'FOLLOWS the Pi per-frame choice'}.",
+    print(f"[jon] model {'PINNED to v' + str(model.current_version) + ' (rejecting mismatched Pi choices)' if model.pinned else 'FOLLOWS the Pi per-frame choice'}.",
           flush=True)
 
     serve(model, args.host, args.port)

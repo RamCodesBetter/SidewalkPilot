@@ -384,6 +384,7 @@ class GpsReader:
         self.lock = threading.Lock()
         self.running = False
         self.thread: Optional[threading.Thread] = None
+        self.serial_handle = None
 
     def start(self) -> bool:
         if serial is None:
@@ -396,8 +397,14 @@ class GpsReader:
 
     def stop(self) -> None:
         self.running = False
+        if self.serial_handle is not None:
+            try:
+                self.serial_handle.close()
+            except Exception:
+                pass
         if self.thread:
             self.thread.join(timeout=1.0)
+            self.thread = None
 
     def get_state(self) -> Dict[str, object]:
         with self.lock:
@@ -406,21 +413,30 @@ class GpsReader:
     def _run(self) -> None:
         try:
             gps_serial = serial.Serial(self.port, self.baud, timeout=1)
+            self.serial_handle = gps_serial
             print(f"GPS connected on {self.port} @ {self.baud}.")
         except Exception as exc:
             print(f"GPS disabled: failed to open {self.port}: {exc}")
             self.running = False
             return
-        while self.running:
+        try:
+            while self.running:
+                try:
+                    line = gps_serial.readline().decode("ascii", errors="ignore")
+                    if line.startswith(("$GPGGA", "$GNGGA")):
+                        parsed = parse_nmea_gga(line)
+                        if parsed:
+                            with self.lock:
+                                self.state.update(parsed)
+                except Exception:
+                    if self.running:
+                        time.sleep(0.1)
+        finally:
             try:
-                line = gps_serial.readline().decode("ascii", errors="ignore")
-                if line.startswith(("$GPGGA", "$GNGGA")):
-                    parsed = parse_nmea_gga(line)
-                    if parsed:
-                        with self.lock:
-                            self.state.update(parsed)
+                gps_serial.close()
             except Exception:
-                time.sleep(0.1)
+                pass
+            self.serial_handle = None
 
 
 class NavigationManager:

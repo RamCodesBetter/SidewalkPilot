@@ -16,6 +16,7 @@ if str(CONTROLLER_DIR) not in sys.path:
 
 from rc_car_app import config as C  # noqa: E402
 from rc_car_app import lidar_avoidance  # noqa: E402
+from rc_car_app.lidar import LidarParser, SCAN_STALE_SEC  # noqa: E402
 
 try:  # Runtime imports the real GPIO classes on the Pi; CI/desktop tests use inert stubs.
     import gpiozero  # noqa: F401
@@ -39,6 +40,31 @@ def point(lateral_m, forward_m, confidence=200):
 
 
 class LidarCenterAebTest(unittest.TestCase):
+    def test_scan_points_and_freshness_share_one_snapshot(self):
+        parser = LidarParser("unused", 230400)
+        sample = point(0.0, 2.0)
+        parser.last_full_scan_points = [sample]
+        parser.last_scan_time = time.monotonic()
+
+        scan, fresh = parser.get_latest_scan_state()
+        self.assertTrue(fresh)
+        self.assertEqual(scan, [sample])
+
+        parser.last_scan_time = time.monotonic() - SCAN_STALE_SEC - 0.01
+        scan, fresh = parser.get_latest_scan_state()
+        self.assertFalse(fresh)
+        self.assertEqual(scan, [])
+
+    def test_enabled_aeb_holds_on_stale_lidar_but_disabled_aeb_does_not(self):
+        stale = lidar_avoidance.evaluate([], enabled=True, scan_fresh=False)
+        self.assertTrue(stale["stop"])
+        self.assertEqual(stale["reason"], "lidar_unavailable")
+        self.assertEqual(stale["throttle"], 0.0)
+
+        disabled = lidar_avoidance.evaluate([], enabled=False, scan_fresh=False)
+        self.assertFalse(disabled["stop"])
+        self.assertEqual(disabled["throttle"], C.AUTONOMOUS_CRUISE_PWM)
+
     def test_empty_scan_leaves_throttle_and_steering_untouched(self):
         result = lidar_avoidance.evaluate([])
         self.assertFalse(result["stop"])
@@ -282,6 +308,7 @@ class LidarCenterAebTest(unittest.TestCase):
         )
 
     def test_reference_throttle_does_not_change_absolute_training_labels(self):
+        self.assertEqual(C.reference_throttle_to_absolute(0.0), 0.0)
         self.assertEqual(C.absolute_throttle_to_reference(0.30), 0.0)
         self.assertEqual(
             C.absolute_throttle_to_reference(C.LIDAR_MIN_MOVE_PWM), 0.0
@@ -290,6 +317,9 @@ class LidarCenterAebTest(unittest.TestCase):
         self.assertAlmostEqual(C.absolute_throttle_to_reference(midpoint), 0.5)
         self.assertEqual(C.absolute_throttle_to_reference(1.0), 1.0)
         self.assertAlmostEqual(C.reference_throttle_to_absolute(0.60), 0.82)
+        self.assertEqual(runtime.manual_throttle_pwm(-1.0), 0.0)
+        self.assertEqual(runtime.manual_throttle_pwm(-0.95), 0.0)
+        self.assertAlmostEqual(runtime.manual_throttle_pwm(0.0), 0.775)
         self.assertEqual(
             runtime.current_forward_throttle_label({"current_motor_pwm": 0.55}),
             0.55,

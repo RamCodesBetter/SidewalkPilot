@@ -20,6 +20,7 @@ a negative error -> steer left. Negative feedback: the correction always OPPOSES
 """
 
 import collections
+import math
 import threading
 import time
 
@@ -92,6 +93,8 @@ class ImuReader:
                 try:
                     raw = float(parts[self.axis]) * self.sign
                 except (ValueError, IndexError):
+                    continue
+                if not math.isfinite(raw):
                     continue
                 self._med.append(raw)
                 s = sorted(self._med)

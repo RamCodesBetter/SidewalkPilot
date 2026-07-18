@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import datetime
 import json
+import math
 import os
-import random
 import socket
 import subprocess
 import sys
@@ -17,12 +17,8 @@ from .config import (
     ACCEL_RATE,
     AEB_BRAKE_RATE,
     AUTONOMOUS_CRUISE_PWM,
-    AUTONOMOUS_LIDAR_OVERRIDE_PWM,
-    AUTONOMOUS_TURN_PWM,
     AUTONOMY_MIN_SEGMENT_S,
     AUTO_PHOTO_BUTTON,
-    AUTO_PHOTO_MAX_INTERVAL_SEC,
-    AUTO_PHOTO_MIN_INTERVAL_SEC,
     PHOTO_RUN_CAPTURE_FPS,
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
@@ -111,6 +107,7 @@ from .config import (
     HUB75_DASHBOARD_IDLE_EXIT_SEC,
     HUB75_DASHBOARD_SHUTDOWN_ON_EXIT,
     absolute_throttle_to_reference,
+    reference_throttle_to_absolute,
 )
 from .hardware import Hardware
 from .lidar import (
@@ -135,6 +132,12 @@ from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, Webca
 shutdown_flag = threading.Event()
 current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
+MANUAL_THROTTLE_DEADZONE = 0.05
+NAVIGATION_UPDATE_INTERVAL_SEC = 0.10
+DASHBOARD_CAMERA_UPDATE_INTERVAL_SEC = 0.10
+DASHBOARD_LIDAR_UPDATE_INTERVAL_SEC = 0.10
+
+
 class AsyncDashboardSender:
     def __init__(self, sender: Hub75DashboardSender):
         self.sender = sender
@@ -184,9 +187,14 @@ class AsyncDashboardSender:
             if args is None:
                 sent = False
             else:
-                with self.sender_lock:
-                    sent = self.sender.send(*args, **kwargs)
-                    payload_json = self.sender.last_payload_json
+                try:
+                    with self.sender_lock:
+                        sent = self.sender.send(*args, **kwargs)
+                        payload_json = self.sender.last_payload_json
+                except Exception as exc:
+                    print(f"Dashboard sender worker error ignored: {exc}", flush=True)
+                    sent = False
+                    payload_json = ""
             with self.lock:
                 if args is not None:
                     self.last_send_ok = bool(sent)
@@ -235,32 +243,57 @@ def print_controls():
 
 
 def normalize_trigger_axis(raw_value):
-    if raw_value < -0.95:
+    raw = float(raw_value)
+    if not math.isfinite(raw):
         return 0.0
-    if raw_value <= 1.0:
-        return max(0.0, min(1.0, (raw_value + 1.0) / 2.0))
-    return max(0.0, min(1.0, raw_value))
+    if raw < -0.95:
+        return 0.0
+    if raw <= 1.0:
+        return max(0.0, min(1.0, (raw + 1.0) / 2.0))
+    return max(0.0, min(1.0, raw))
 
 
 def split_shared_trigger_axis(raw_value):
-    throttle = max(0.0, raw_value)
-    brake_force = max(0.0, -raw_value)
+    raw = float(raw_value)
+    if not math.isfinite(raw):
+        return 0.0, 0.0
+    throttle = reference_throttle_to_absolute(
+        max(0.0, raw)
+    ) if raw > MANUAL_THROTTLE_DEADZONE else 0.0
+    brake_force = max(0.0, -raw)
     return throttle, brake_force
 
 
+def manual_throttle_pwm(raw_value) -> float:
+    """Map the useful trigger range to physical PWM while keeping zero truly off."""
+    reference = normalize_trigger_axis(raw_value)
+    if reference <= MANUAL_THROTTLE_DEADZONE:
+        return 0.0
+    return reference_throttle_to_absolute(reference)
+
+
 def clamp_servo_degrees(value: float) -> float:
-    return max(0.0, min(float(STEERING_SERVO_ACTUATION_RANGE_DEG), float(value)))
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        return float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+    return max(0.0, min(float(STEERING_SERVO_ACTUATION_RANGE_DEG), numeric))
 
 
 def steering_degrees_to_normalized(servo_degrees: float) -> float:
     center_degrees = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
     if center_degrees <= 0.0:
         return 0.0
-    return max(-1.0, min(1.0, (float(servo_degrees) - center_degrees) / center_degrees))
+    numeric = float(servo_degrees)
+    if not math.isfinite(numeric):
+        return 0.0
+    return max(-1.0, min(1.0, (numeric - center_degrees) / center_degrees))
 
 
 def apply_steering_deadzone(raw_value: float) -> float:
-    clamped = max(-1.0, min(1.0, float(raw_value)))
+    numeric = float(raw_value)
+    if not math.isfinite(numeric):
+        return 0.0
+    clamped = max(-1.0, min(1.0, numeric))
     deadzone = max(0.0, min(0.95, float(STEERING_DEADZONE)))
     magnitude = abs(clamped)
     if magnitude <= deadzone:
@@ -270,13 +303,26 @@ def apply_steering_deadzone(raw_value: float) -> float:
 
 
 def joystick_steer_to_servo_degrees(normalized_value: float) -> float:
-    clamped = max(-1.0, min(1.0, float(normalized_value)))
+    numeric = float(normalized_value)
+    if not math.isfinite(numeric):
+        numeric = 0.0
+    clamped = max(-1.0, min(1.0, numeric))
     return ((clamped + 1.0) / 2.0) * float(STEERING_SERVO_ACTUATION_RANGE_DEG)
 
 
 def center_steering(state):
     state["steer"] = 0.0
     state["steering_servo_deg"] = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
+
+
+def reset_model_steering_state(state) -> None:
+    """Start model smoothing from the steering target physically active right now."""
+    current = clamp_servo_degrees(
+        state.get("steering_servo_deg", float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0)
+    )
+    state["steer_smoothed_deg"] = current
+    state["_jon_result_sequence"] = 0
+    state["_jon_submitted_frame_sequence"] = 0
 
 
 def model_is_series_3(model_choice) -> bool:
@@ -579,7 +625,21 @@ def handle_dpad_y_action(
             return active_model_choice
         navigation.adjust_current(-1 if direction == 1 else 1)
     elif current_page == 3:
-        active_model_choice = cycle_steering_model(webcam_vision, active_model_choice, 1 if direction == 1 else -1)
+        previous_choice = active_model_choice
+        active_model_choice = cycle_steering_model(
+            webcam_vision,
+            active_model_choice,
+            1 if direction == 1 else -1,
+        )
+        if active_model_choice != previous_choice:
+            if state["autonomous_mode"]:
+                cancel_autonomous_mode(
+                    state,
+                    metrics,
+                    "Autonomous driving cancelled by model change.",
+                    cause="model",
+                )
+            reset_model_steering_state(state)
     elif direction == 1 and state["cc_active"]:
         state["cc_target_speed"] = round(state["cc_target_speed"] + 0.1, 1)
         state["event_cc_increase"] = True
@@ -601,6 +661,7 @@ def cancel_navigation_route(
     navigation,
     reason: str,
     preserve_manual_brake: bool = False,
+    preserve_manual_throttle: bool = False,
 ) -> None:
     if not navigation.active:
         return
@@ -611,7 +672,33 @@ def cancel_navigation_route(
         metrics,
         reason,
         preserve_manual_brake=preserve_manual_brake,
+        preserve_manual_throttle=preserve_manual_throttle,
     )
+
+
+def shift_gear(state, metrics, direction: int, navigation=None, dashboard_sender=None) -> None:
+    """Apply one PRND step as a manual takeover without releasing a held brake."""
+    if navigation is not None and navigation.active:
+        cancel_navigation_route(
+            state,
+            metrics,
+            navigation,
+            "Navigation cancelled by gear shift.",
+            preserve_manual_brake=True,
+        )
+    elif state["autonomous_mode"]:
+        cancel_autonomous_mode(
+            state,
+            metrics,
+            "Autonomous driving cancelled by gear shift.",
+            preserve_manual_brake=True,
+        )
+    current_index = GEARS.index(state["gear_mode"])
+    next_index = max(0, min(len(GEARS) - 1, current_index + int(direction)))
+    state["gear_mode"] = GEARS[next_index]
+    state["event_shift_up"] = direction > 0
+    state["event_shift_down"] = direction < 0
+    cancel_cruise_control(state, metrics, dashboard_sender)
 
 
 def navigation_manual_input_should_cancel(navigation, latest_nav, last_operator: str = "") -> bool:
@@ -679,6 +766,29 @@ def apply_hard_stop_state(state, reason: str):
     state["stop_reason"] = reason
 
 
+def write_hardware_hard_stop(hardware) -> None:
+    """Command AT8236 brake mode immediately without waiting for service shutdown."""
+    outputs = (
+        hardware.motor_left_fwd,
+        hardware.motor_left_bwd,
+        hardware.motor_right_fwd,
+        hardware.motor_right_bwd,
+    )
+    errors = []
+    for value in (0.0, 1.0):
+        for output in outputs:
+            try:
+                output.value = value
+            except Exception as exc:
+                errors.append(exc)
+    if errors:
+        print(
+            f"Immediate motor hard-brake write had {len(errors)} failed output(s): "
+            f"{errors[-1]}",
+            flush=True,
+        )
+
+
 def _disengagement_cause(reason: str) -> str:
     """Map a cancel reason string to a short cause word for the intervention log."""
     r = (reason or "").lower()
@@ -713,6 +823,7 @@ def cancel_autonomous_mode(
     center: bool = True,
     cause: str = "",
     preserve_manual_brake: bool = False,
+    preserve_manual_throttle: bool = False,
 ):
     was_autonomous = state["autonomous_mode"]
     retained_brake_force = 0.0
@@ -729,17 +840,26 @@ def cancel_autonomous_mode(
                 ),
             ),
         )
+    retained_throttle = 0.0
+    retained_motor_pwm = 0.0
+    if preserve_manual_throttle:
+        requested_throttle = float(state.get("throttle", 0.0))
+        current_motor_pwm = float(state.get("current_motor_pwm", 0.0))
+        if math.isfinite(requested_throttle):
+            retained_throttle = max(0.0, min(1.0, requested_throttle))
+        if math.isfinite(current_motor_pwm):
+            retained_motor_pwm = max(-1.0, min(1.0, current_motor_pwm))
     if reason:
         print(reason)
     if was_autonomous:                       # only a real disengagement counts as an intervention
         state["event_intervention"] = True
         state["intervention_cause"] = (cause or _disengagement_cause(reason))[:12]
     state["autonomous_mode"] = False
-    state["throttle"] = 0.0
+    state["throttle"] = retained_throttle
     state["brake"] = retained_brake_force > 0.1
     state["brake_force"] = retained_brake_force
     state["manual_brake_force"] = retained_brake_force
-    state["current_motor_pwm"] = 0.0
+    state["current_motor_pwm"] = retained_motor_pwm
     state["dashboard_throttle_percent"] = 0
     state["dashboard_brake_percent"] = 0
     if center:
@@ -748,6 +868,25 @@ def cancel_autonomous_mode(
     metrics.pid_integral_error = 0.0
     metrics.pid_previous_error = 0.0
     metrics.pid_output = 0.0
+    reset_model_steering_state(state)
+
+
+def engage_autonomous_mode(state, metrics, dashboard_sender=None, jetson_client=None) -> bool:
+    """Safely begin a fresh model sequence from the current manual steering target."""
+    if float(state.get("manual_brake_force", 0.0)) > 0.1:
+        print("Autonomous Driving not enabled: release the brake first.")
+        return False
+    if jetson_client is not None:
+        jetson_client.begin_autonomous_sequence(state["steering_servo_deg"])
+    reset_model_steering_state(state)
+    state["autonomous_mode"] = True
+    state["gear_mode"] = "D"
+    cancel_cruise_control(state, metrics, dashboard_sender)
+    state["brake"] = False
+    state["brake_force"] = 0.0
+    state["manual_brake_force"] = 0.0
+    metrics.driveway_cut_candidate_since = 0.0
+    return True
 
 
 def move_toward(current: float, target: float, rate: float, dt: float) -> float:
@@ -938,7 +1077,7 @@ def get_dashboard_alert(state) -> str:
     if state["direction_arrow"] == "WARN_WARNING":
         return "WARN"
     stop_reason = state["stop_reason"]
-    if stop_reason in ("blocked_path", "driveway_cut"):
+    if stop_reason in ("blocked_path", "driveway_cut", "lidar_unavailable"):
         return "STOP"
     if stop_reason == "recovering_warn":
         return "WARN"
@@ -1291,7 +1430,11 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
                               lidar_policy=None):
     # Apply an already-computed emergency decision before waiting on camera/Jetson work.
     # The same policy object is reused below so one control loop cannot interpret two scans.
-    av = lidar_policy or lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+    av = lidar_policy or lidar_avoidance.evaluate(
+        lidar_scan,
+        enabled=metrics.aeb_enabled,
+        scan_fresh=bool(state.get("lidar_scan_fresh", True)),
+    )
     state["lidar_forward_clearance_m"] = av["front_m"]
     state["lidar_lane_occupancy"] = av["lane_occupancy"]
     state["lidar_emergency_lane_occupancy"] = av["emergency_lane_occupancy"]
@@ -1328,9 +1471,19 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
     # JPEG, and model latency therefore never block controller events or GPIO writes.
     # If Jon is unreachable or stale, confidence stays 0 -> safe hard stop below.
     if jetson_client is not None:
-        frame = webcam_vision.grab_latest_frame() if webcam_vision else None
-        if frame is not None:
+        frame_sample = None
+        if webcam_vision is not None and hasattr(webcam_vision, "grab_latest_frame_sample"):
+            frame_sample = webcam_vision.grab_latest_frame_sample(
+                after_sequence=int(state.get("_jon_submitted_frame_sequence", 0))
+            )
+        elif webcam_vision is not None:
+            frame = webcam_vision.grab_latest_frame()
+            if frame is not None:
+                frame_sample = (int(state.get("_jon_submitted_frame_sequence", 0)) + 1, frame)
+        if frame_sample is not None:
+            frame_sequence, frame = frame_sample
             jetson_client.submit(frame, model_version=active_model_choice)
+            state["_jon_submitted_frame_sequence"] = int(frame_sequence)
         jon_sample = jetson_client.get_latest_sample(
             model_version=active_model_choice,
             max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
@@ -1432,9 +1585,17 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
                 yaw_controller=None, imu_reader=None, jetson_client=None, active_model_choice=None):
     current_time = time.time()
     desired_pwm_from_input = 0.0
-    effective_brake_from_input = state["brake"]
-    effective_brake_force = max(0.0, min(1.0, float(state.get("brake_force", 0.0))))
-    lidar_policy = lidar_avoidance.evaluate(lidar_scan, enabled=metrics.aeb_enabled)
+    manual_brake_force = max(
+        0.0,
+        min(1.0, float(state.get("manual_brake_force", 0.0))),
+    )
+    effective_brake_from_input = manual_brake_force > 0.1
+    effective_brake_force = manual_brake_force
+    lidar_policy = lidar_avoidance.evaluate(
+        lidar_scan,
+        enabled=metrics.aeb_enabled,
+        scan_fresh=bool(state.get("lidar_scan_fresh", True)),
+    )
     state["lidar_lane_occupancy"] = lidar_policy["lane_occupancy"]
     state["lidar_emergency_lane_occupancy"] = lidar_policy["emergency_lane_occupancy"]
     state["lidar_lane_action"] = lidar_policy["lane_action"]
@@ -1547,7 +1708,11 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
         measured_yaw = imu_reader.get_yaw() if imu_fresh else 0.0
         # No IMU correction in REVERSE -- yaw-rate feedback inverts driving backward,
         # so just keep plain open-loop steering (+12D trim) there.
-        allow = not state.get("lidar_override_active", False) and state.get("gear_mode") != "R"
+        allow = (
+            imu_fresh
+            and not state.get("lidar_override_active", False)
+            and state.get("gear_mode") != "R"
+        )
         pid_servo = yaw_controller.compute(raw_command, measured_yaw, speed_mps, dt, allow=allow)
         if yaw_controller.engaged:
             servo_degrees = clamp_servo_degrees(pid_servo)
@@ -1672,8 +1837,14 @@ def _ship_logs_to_jon():
 
 def run(model_choice=None):
     global photo_status
+    shutdown_flag.clear()
     print("RC Car Controller Starting...")
-    active_model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
+    active_model_choice = str(model_choice or DEFAULT_STEERING_MODEL_CHOICE).strip()
+    if active_model_choice not in STEERING_MODEL_CHOICES:
+        valid = ", ".join(STEERING_MODEL_CHOICES)
+        raise ValueError(
+            f"Unknown steering model '{active_model_choice}'. Valid choices: {valid}"
+        )
     state = create_state()
     metrics = Metrics()
     csv_file = None
@@ -1686,6 +1857,11 @@ def run(model_choice=None):
     navigation = NavigationManager()
     latest_nav = navigation.update({"fix": False, "sats": 0}, 0.0, 0.0)
     navigation_operator_last = ""
+    last_navigation_update = 0.0
+    last_dashboard_camera_update = 0.0
+    cached_dashboard_camera_pixels = []
+    last_dashboard_lidar_update = 0.0
+    cached_dashboard_lidar_points = []
 
     def pulse_detected():
         metrics.pulse_count += 1
@@ -1697,6 +1873,8 @@ def run(model_choice=None):
     pygame.joystick.init()
     if pygame.joystick.get_count() == 0:
         print("!!! WARNING: No joystick detected. Please connect a controller. !!!")
+        hardware.cleanup()
+        pygame.quit()
         sys.exit(1)
 
     joystick = pygame.joystick.Joystick(0)
@@ -1748,7 +1926,11 @@ def run(model_choice=None):
     jetson_host = (JETSON_STEERING_HOST or "").strip()
     jetson_client = None
     if jetson_host:
-        jetson_client = AsyncJetsonSteeringClient(jetson_host, JETSON_STEERING_PORT)
+        jetson_client = AsyncJetsonSteeringClient(
+            jetson_host,
+            JETSON_STEERING_PORT,
+            history_result_max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
+        )
         print(f"Autonomy inference on Jetson (Jon) at {jetson_host}:{JETSON_STEERING_PORT}. "
               f"Pi will NOT run a local steering model.")
 
@@ -1814,6 +1996,16 @@ def run(model_choice=None):
     try:
         while not shutdown_flag.is_set():
             current_loop_time = time.time()
+            try:
+                controller_attached = bool(joystick.get_attached())
+            except (AttributeError, pygame.error):
+                controller_attached = pygame.joystick.get_count() > 0
+            if not controller_attached:
+                print("Controller disconnected; stopping the car and exiting.", flush=True)
+                apply_hard_stop_state(state, "controller_disconnected")
+                write_hardware_hard_stop(hardware)
+                shutdown_flag.set()
+                continue
             dt = current_loop_time - last_update_time
             last_update_time = current_loop_time
             if (
@@ -1855,12 +2047,6 @@ def run(model_choice=None):
                                 center=False,
                             )
                         if not state["autonomous_mode"]:
-                            previous_servo_degrees = float(
-                                state.get(
-                                    "steering_servo_deg",
-                                    float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0,
-                                )
-                            )
                             scaled_steer_val = apply_steering_deadzone(raw_steer_val)
                             center_servo_deg = float(STEERING_SERVO_ACTUATION_RANGE_DEG) / 2.0
                             if scaled_steer_val == 0.0:
@@ -1877,9 +2063,20 @@ def run(model_choice=None):
                             navigation_manual_input_should_cancel(navigation, latest_nav, navigation_operator_last)
                             and state["throttle"] > 0.05
                         ):
-                            cancel_navigation_route(state, metrics, navigation, "Navigation cancelled by gas pedal.")
+                            cancel_navigation_route(
+                                state,
+                                metrics,
+                                navigation,
+                                "Navigation cancelled by gas pedal.",
+                                preserve_manual_throttle=True,
+                            )
                         if state["throttle"] > 0.05 and state["autonomous_mode"]:
-                            cancel_autonomous_mode(state, metrics, "Autonomous driving cancelled by gas pedal.")
+                            cancel_autonomous_mode(
+                                state,
+                                metrics,
+                                "Autonomous driving cancelled by gas pedal.",
+                                preserve_manual_throttle=True,
+                            )
                         handle_manual_throttle_override(state, metrics, dashboard_sender)
                         if (
                             navigation_manual_input_should_cancel(navigation, latest_nav, navigation_operator_last)
@@ -1900,14 +2097,25 @@ def run(model_choice=None):
                                 preserve_manual_brake=True,
                             )
                     elif event.axis == THROTTLE_AXIS:
-                        state["throttle"] = normalize_trigger_axis(event.value)
+                        state["throttle"] = manual_throttle_pwm(event.value)
                         if (
                             navigation_manual_input_should_cancel(navigation, latest_nav, navigation_operator_last)
                             and state["throttle"] > 0.05
                         ):
-                            cancel_navigation_route(state, metrics, navigation, "Navigation cancelled by gas pedal.")
+                            cancel_navigation_route(
+                                state,
+                                metrics,
+                                navigation,
+                                "Navigation cancelled by gas pedal.",
+                                preserve_manual_throttle=True,
+                            )
                         if state["throttle"] > 0.05 and state["autonomous_mode"]:
-                            cancel_autonomous_mode(state, metrics, "Autonomous driving cancelled by gas pedal.")
+                            cancel_autonomous_mode(
+                                state,
+                                metrics,
+                                "Autonomous driving cancelled by gas pedal.",
+                                preserve_manual_throttle=True,
+                            )
                         handle_manual_throttle_override(state, metrics, dashboard_sender)
                     elif not SHARED_TRIGGER_AXIS and event.axis == BRAKE_AXIS:
                         state["brake_force"] = normalize_trigger_axis(event.value)
@@ -1941,44 +2149,40 @@ def run(model_choice=None):
                     elif event.button == HAZARD_BUTTON:
                         toggle_turn_signal(state, metrics, "hazard")
                     elif event.button == SHIFT_DOWN_BUTTON:
-                        current_index = GEARS.index(state["gear_mode"])
-                        state["gear_mode"] = GEARS[max(current_index - 1, 0)]
-                        state["event_shift_down"] = True
-                        state["brake"] = False
-                        state["brake_force"] = 0.0
-                        state["manual_brake_force"] = 0.0
-                        cancel_cruise_control(state, metrics, dashboard_sender)
+                        shift_gear(
+                            state,
+                            metrics,
+                            -1,
+                            navigation=navigation,
+                            dashboard_sender=dashboard_sender,
+                        )
                     elif event.button == SHIFT_UP_BUTTON:
-                        current_index = GEARS.index(state["gear_mode"])
-                        state["gear_mode"] = GEARS[min(current_index + 1, len(GEARS) - 1)]
-                        state["event_shift_up"] = True
-                        state["brake"] = False
-                        state["brake_force"] = 0.0
-                        state["manual_brake_force"] = 0.0
-                        cancel_cruise_control(state, metrics, dashboard_sender)
+                        shift_gear(
+                            state,
+                            metrics,
+                            1,
+                            navigation=navigation,
+                            dashboard_sender=dashboard_sender,
+                        )
                     elif event.button == AUTONOMY_TOGGLE_BUTTON:
                         if not state["autonomous_mode"] and webcam_vision is None:
                             print("Autonomous Driving not enabled: steering autonomy model is unavailable.")
                             continue
-                        state["autonomous_mode"] = not state["autonomous_mode"]
-                        if state["autonomous_mode"]:
-                            print("Autonomous Driving ENABLED.")
-                            state["gear_mode"] = "D"
-                            cancel_cruise_control(state, metrics, dashboard_sender)
-                            state["brake"] = False
-                            state["brake_force"] = 0.0
-                            state["manual_brake_force"] = 0.0
-                            metrics.driveway_cut_candidate_since = 0.0
+                        if not state["autonomous_mode"]:
+                            if engage_autonomous_mode(
+                                state,
+                                metrics,
+                                dashboard_sender,
+                                jetson_client,
+                            ):
+                                print("Autonomous Driving ENABLED.")
                         else:
-                            print("Autonomous Driving DISABLED.")
-                            state["event_intervention"] = True
-                            state["intervention_cause"] = "A"
-                            state["throttle"] = 0.0
-                            center_steering(state)
-                            state["current_motor_pwm"] = 0.0
-                            state["brake_force"] = 0.0
-                            state["manual_brake_force"] = 0.0
-                            metrics.driveway_cut_candidate_since = 0.0
+                            cancel_autonomous_mode(
+                                state,
+                                metrics,
+                                "Autonomous Driving DISABLED.",
+                                cause="a",
+                            )
                     elif event.button == AEB_TOGGLE_BUTTON:
                         metrics.aeb_enabled = not metrics.aeb_enabled
                         print(f"Automatic Emergency Braking (AEB): {'ENABLED' if metrics.aeb_enabled else 'DISABLED'}")
@@ -2000,10 +2204,15 @@ def run(model_choice=None):
                             if operator:
                                 navigation_operator_last = str(operator).upper()
                             if operator == "AUTO" and webcam_vision is not None:
-                                state["autonomous_mode"] = True
-                                state["gear_mode"] = "D"
-                                cancel_cruise_control(state, metrics, dashboard_sender)
-                                print("Navigation route started: model/autonomous segment.")
+                                if engage_autonomous_mode(
+                                    state,
+                                    metrics,
+                                    dashboard_sender,
+                                    jetson_client,
+                                ):
+                                    print("Navigation route started: model/autonomous segment.")
+                                else:
+                                    navigation.active = False
                             elif operator == "AUTO":
                                 cancel_autonomous_mode(state, metrics, "Navigation route requested AI segment, but camera model is unavailable.")
                             elif operator == "MNUL":
@@ -2042,6 +2251,11 @@ def run(model_choice=None):
                             dashboard_sender,
                             repeated=False,
                         )
+
+            if shutdown_flag.is_set():
+                apply_hard_stop_state(state, "operator_quit")
+                write_hardware_hard_stop(hardware)
+                continue
 
             # Hold d-pad left/right on the TUNE page -> keep adjusting the value.
             if int(state.get("dashboard_page", 1)) == STEERING_TRIM_DASHBOARD_PAGE:
@@ -2085,10 +2299,17 @@ def run(model_choice=None):
             latest_scan = []
             if lidar_parser:
                 try:
-                    latest_scan = lidar_parser.get_latest_scan()
+                    if hasattr(lidar_parser, "get_latest_scan_state"):
+                        latest_scan, state["lidar_scan_fresh"] = (
+                            lidar_parser.get_latest_scan_state()
+                        )
+                    else:
+                        latest_scan = lidar_parser.get_latest_scan()
+                        state["lidar_scan_fresh"] = lidar_parser.is_scan_fresh()
                 except Exception as exc:
                     print(f"LiDAR latest scan unavailable; ignoring LiDAR this loop: {exc}")
                     latest_scan = []
+                    state["lidar_scan_fresh"] = False
                 obstacle_stop_threshold_m, obstacle_warn_threshold_m, hard_stop_threshold_m = (
                     get_speed_scaled_lidar_thresholds(metrics.smoothed_speed_mph)
                 )
@@ -2110,6 +2331,7 @@ def run(model_choice=None):
                 state["lidar_warn_threshold_m"] = obstacle_warn_threshold_m
                 state["num_lidar_points"] = len(latest_scan)
             else:
+                state["lidar_scan_fresh"] = False
                 state["direction_arrow"] = " "
                 state["lidar_front_dist"] = MAX_LIDAR_RANGE_M
                 state["lidar_left_dist"] = MAX_LIDAR_RANGE_M
@@ -2140,30 +2362,37 @@ def run(model_choice=None):
                     state["jon_cpu_temp_c"] = jetson_client.jon_cpu_temp_c
                     state["jon_gpu_temp_c"] = jetson_client.jon_gpu_temp_c
                     state["infer_fps"] = jetson_client.infer_fps
-            gps_state = gps_reader.get_state() if gps_reader is not None else {"fix": False, "sats": 0}
-            latest_nav = navigation.update(
-                gps_state,
-                metrics.total_distance_cm / 100.0,
-                metrics.smoothed_speed_mph * 0.44704,
-            )
-            navigation.set_start_from_gps(latest_nav.get("nearest_node", ""))
-            if not latest_nav.get("active"):
-                if navigation_operator_last == "AUTO" and latest_nav.get("arrived_visible"):
-                    cancel_autonomous_mode(state, metrics, "Navigation arrived at destination.")
-                navigation_operator_last = ""
-            else:
-                nav_operator = str(latest_nav.get("operator", "MNUL")).upper()
-                if nav_operator != navigation_operator_last:
-                    if nav_operator == "AUTO" and webcam_vision is not None:
-                        state["autonomous_mode"] = True
-                        state["gear_mode"] = "D"
-                        cancel_cruise_control(state, metrics, dashboard_sender)
-                        print("Navigation operator: AI/model segment.")
-                    elif nav_operator == "AUTO":
-                        cancel_autonomous_mode(state, metrics, "Navigation operator requested AI, but camera model is unavailable.")
-                    elif nav_operator == "MNUL":
-                        cancel_autonomous_mode(state, metrics, "Navigation operator: human/manual segment.")
-                    navigation_operator_last = nav_operator
+            if current_loop_time - last_navigation_update >= NAVIGATION_UPDATE_INTERVAL_SEC:
+                last_navigation_update = current_loop_time
+                gps_state = gps_reader.get_state() if gps_reader is not None else {"fix": False, "sats": 0}
+                latest_nav = navigation.update(
+                    gps_state,
+                    metrics.total_distance_cm / 100.0,
+                    metrics.smoothed_speed_mph * 0.44704,
+                )
+                navigation.set_start_from_gps(latest_nav.get("nearest_node", ""))
+                if not latest_nav.get("active"):
+                    if navigation_operator_last == "AUTO" and latest_nav.get("arrived_visible"):
+                        cancel_autonomous_mode(state, metrics, "Navigation arrived at destination.")
+                    navigation_operator_last = ""
+                else:
+                    nav_operator = str(latest_nav.get("operator", "MNUL")).upper()
+                    if nav_operator != navigation_operator_last:
+                        if nav_operator == "AUTO" and webcam_vision is not None:
+                            if engage_autonomous_mode(
+                                state,
+                                metrics,
+                                dashboard_sender,
+                                jetson_client,
+                            ):
+                                print("Navigation operator: AI/model segment.")
+                            else:
+                                navigation.active = False
+                        elif nav_operator == "AUTO":
+                            cancel_autonomous_mode(state, metrics, "Navigation operator requested AI, but camera model is unavailable.")
+                        elif nav_operator == "MNUL":
+                            cancel_autonomous_mode(state, metrics, "Navigation operator: human/manual segment.")
+                        navigation_operator_last = nav_operator
             # Motion-based page swap: tune on v1h3 (TUNE) while stopped, show v1h4
             # (YAW telemetry) while driving. Only toggles between these two pages,
             # so it never yanks you off any other page.
@@ -2178,10 +2407,20 @@ def run(model_choice=None):
 
             camera_pixels = []
             if state["dashboard_page"] == 11 and webcam_vision is not None:
-                camera_pixels = webcam_vision.get_dashboard_camera_pixels()
+                if current_loop_time - last_dashboard_camera_update >= DASHBOARD_CAMERA_UPDATE_INTERVAL_SEC:
+                    last_dashboard_camera_update = current_loop_time
+                    cached_dashboard_camera_pixels = webcam_vision.get_dashboard_camera_pixels()
+                camera_pixels = cached_dashboard_camera_pixels
+            else:
+                cached_dashboard_camera_pixels = []
             lidar_dashboard_points = []
             if state["dashboard_page"] == LIDAR_DASHBOARD_PAGE:
-                lidar_dashboard_points = format_lidar_dashboard_points(latest_scan)
+                if current_loop_time - last_dashboard_lidar_update >= DASHBOARD_LIDAR_UPDATE_INTERVAL_SEC:
+                    last_dashboard_lidar_update = current_loop_time
+                    cached_dashboard_lidar_points = format_lidar_dashboard_points(latest_scan)
+                lidar_dashboard_points = cached_dashboard_lidar_points
+            else:
+                cached_dashboard_lidar_points = []
             if dashboard_sender is not None:
                 dashboard_sent = dashboard_sender.send(
                     metrics.smoothed_speed_mph,
@@ -2256,6 +2495,8 @@ def run(model_choice=None):
         state["event_quit_pressed"] = True
     finally:
         shutdown_flag.set()
+        apply_hard_stop_state(state, state.get("stop_reason") or "runtime_shutdown")
+        write_hardware_hard_stop(hardware)
         if dashboard_sender is not None:
             state["dashboard_payload_json"] = dashboard_sender.get_last_payload_json()
         if state["event_quit_pressed"] and csv_writer:

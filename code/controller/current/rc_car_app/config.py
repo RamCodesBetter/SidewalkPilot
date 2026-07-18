@@ -3,7 +3,7 @@ import datetime
 import math
 import os
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # --- SELF-DRIVING BUILD FLAGS ---
 ENABLE_HALL_SENSOR = True
@@ -57,7 +57,10 @@ LIDAR_GOV_MIN_REFERENCE = 0.60       # closest non-EMR governor target on the us
 
 def absolute_throttle_to_reference(absolute_pwm: float) -> float:
     """Map physical motor PWM to the useful 0..1 range without changing saved labels."""
-    absolute = max(0.0, min(1.0, abs(float(absolute_pwm))))
+    absolute = float(absolute_pwm)
+    if not math.isfinite(absolute):
+        return 0.0
+    absolute = max(0.0, min(1.0, abs(absolute)))
     if absolute <= LIDAR_MIN_MOVE_PWM:
         return 0.0
     usable_span = 1.0 - LIDAR_MIN_MOVE_PWM
@@ -66,7 +69,12 @@ def absolute_throttle_to_reference(absolute_pwm: float) -> float:
 
 def reference_throttle_to_absolute(reference_throttle: float) -> float:
     """Map useful-range throttle to physical PWM without changing saved labels."""
-    reference = max(0.0, min(1.0, abs(float(reference_throttle))))
+    reference = float(reference_throttle)
+    if not math.isfinite(reference):
+        return 0.0
+    reference = max(0.0, min(1.0, reference))
+    if reference <= 0.0:
+        return 0.0
     return LIDAR_MIN_MOVE_PWM + reference * (1.0 - LIDAR_MIN_MOVE_PWM)
 
 
@@ -360,6 +368,8 @@ def create_state():
         "yaw_kd": float(STEERING_YAW_PID_KD),
         "yaw_pid_reset": False,
         "steering_effective_servo_deg": STEERING_SERVO_ACTUATION_RANGE_DEG / 2.0,
+        "_jon_result_sequence": 0,
+        "_jon_submitted_frame_sequence": 0,
         "throttle": 0.0,
         "brake": False,
         "brake_force": 0.0,
@@ -394,6 +404,7 @@ def create_state():
         "lidar_lane_action": "normal",
         "lidar_throttle_cap": 1.0,
         "lidar_emergency_stop": False,
+        "lidar_scan_fresh": False,
         "num_lidar_points": 0,
         "autonomous_mode": False,
         "camera_steering_bias": 0.0,
@@ -422,9 +433,9 @@ def create_state():
 @dataclass
 class Metrics:
     pulse_count: int = 0
-    last_pulse_time: float = time.time()
+    last_pulse_time: float = field(default_factory=time.time)
     previous_pulse_count: int = 0
-    previous_speed_calculation_time: float = time.time()
+    previous_speed_calculation_time: float = field(default_factory=time.time)
     current_raw_mph: float = 0.0
     smoothed_speed_mph: float = 0.0
     max_speed_recall: float = 0.0
@@ -439,7 +450,7 @@ class Metrics:
     auto_segment_s: float = 0.0        # duration of the CURRENT autonomous segment (in progress)
     auto_prev_engaged: bool = False    # edge-detect autonomous_mode
     auto_last_cause_code: str = ""     # ICSE: last disengagement cause code (ALL segments)
-    start_time: float = time.time()
+    start_time: float = field(default_factory=time.time)
     pid_integral_error: float = 0.0
     pid_previous_error: float = 0.0
     pid_output: float = 0.0
@@ -449,7 +460,7 @@ class Metrics:
     last_confident_heading_deg: float = 0.0
     driveway_cut_candidate_since: float = 0.0
     cruise_ignore_throttle_until_release: bool = False
-    turn_signal_last_toggle_time: float = time.time()
+    turn_signal_last_toggle_time: float = field(default_factory=time.time)
     turn_signal_blink_on: bool = False
     dashboard_page_axis_direction: int = 0
     dashboard_page_axis_hold_since: float = 0.0

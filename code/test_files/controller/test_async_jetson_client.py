@@ -6,13 +6,17 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 CONTROLLER_DIR = Path(__file__).resolve().parents[2] / "controller" / "current"
 if str(CONTROLLER_DIR) not in sys.path:
     sys.path.insert(0, str(CONTROLLER_DIR))
 
-from rc_car_app.jetson_client import AsyncJetsonSteeringClient  # noqa: E402
+from rc_car_app.jetson_client import (  # noqa: E402
+    AsyncJetsonSteeringClient,
+    JetsonSteeringClient,
+)
 
 
 class BlockingFakeClient:
@@ -90,6 +94,17 @@ class RecordingFakeClient:
 
 
 class AsyncJetsonClientTest(unittest.TestCase):
+    def test_failed_connection_closes_the_new_socket(self):
+        failed_socket = mock.Mock()
+        failed_socket.connect.side_effect = OSError("Jetson offline")
+        client = JetsonSteeringClient("10.42.0.2")
+
+        with mock.patch("rc_car_app.jetson_client.socket.socket", return_value=failed_socket):
+            self.assertFalse(client.connect())
+
+        failed_socket.close.assert_called_once()
+        self.assertIsNone(client.sock)
+
     def test_powered_off_status_timeout_never_blocks_control_calls(self):
         fake = BlockingFakeClient()
         client = AsyncJetsonSteeringClient(
@@ -154,11 +169,40 @@ class AsyncJetsonClientTest(unittest.TestCase):
         finally:
             client.close()
 
+    def test_slow_result_is_stale_from_submission_not_completion(self):
+        class SlowClient(RecordingFakeClient):
+            def infer(self, frame, model_version=None, target_history=None):
+                time.sleep(0.06)
+                return super().infer(frame, model_version, target_history)
+
+        fake = SlowClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            history_result_max_age_sec=0.03,
+            client=fake,
+        )
+        try:
+            client.begin_autonomous_sequence(90.0)
+            client.submit("delayed-frame", model_version="4.0p")
+            self.assertTrue(fake.wait_for_inferences(1))
+            deadline = time.monotonic() + 0.2
+            while client._latest_result is None and time.monotonic() < deadline:
+                time.sleep(0.002)
+            self.assertIsNotNone(client._latest_result)
+            self.assertIsNone(
+                client.get_latest_sample(model_version="4.0p", max_age_sec=0.03)
+            )
+            self.assertEqual(client._target_history, [90.0, 90.0, 90.0])
+        finally:
+            client.close()
+
     def test_manual_targets_seed_auto_then_predictions_advance_history(self):
         fake = RecordingFakeClient()
         client = AsyncJetsonSteeringClient(
             "10.42.0.2",
             status_interval_sec=10.0,
+            history_sample_interval_sec=0.0,
             client=fake,
         )
         try:
@@ -172,6 +216,117 @@ class AsyncJetsonClientTest(unittest.TestCase):
             client.submit("second-auto-frame", model_version="4.0p")
             self.assertTrue(fake.wait_for_inferences(2))
             self.assertEqual(fake.infer_histories[1], (71.0, 83.0, 90.0))
+        finally:
+            client.close()
+
+    def test_history_matches_ten_hz_training_cadence_and_latest_manual_target(self):
+        fake = RecordingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            history_sample_interval_sec=0.1,
+            client=fake,
+        )
+        try:
+            client.observe_manual_steering(62.0, sampled_at=1.00)
+            client.observe_manual_steering(70.0, sampled_at=1.04)  # too soon: ignored
+            client.observe_manual_steering(71.0, sampled_at=1.10)
+            client.observe_manual_steering(83.0, sampled_at=1.20)
+            client.begin_autonomous_sequence(88.0, sampled_at=1.25)
+
+            client.submit("first-auto-frame", model_version="4.0a")
+            self.assertTrue(fake.wait_for_inferences(1))
+            self.assertEqual(fake.infer_histories[0], (71.0, 83.0, 88.0))
+        finally:
+            client.close()
+
+    def test_new_autonomy_sequence_discards_an_older_inflight_result(self):
+        class SequencedBlockingClient(RecordingFakeClient):
+            def __init__(self):
+                super().__init__()
+                self.first_started = threading.Event()
+                self.release_first = threading.Event()
+
+            def infer(self, frame, model_version=None, target_history=None):
+                if frame == "old-frame":
+                    self.first_started.set()
+                    self.release_first.wait(timeout=0.5)
+                    return 140.0, 0.0
+                return super().infer(frame, model_version, target_history)
+
+        fake = SequencedBlockingClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            history_sample_interval_sec=0.0,
+            client=fake,
+        )
+        try:
+            client.submit("old-frame", model_version="3.4")
+            self.assertTrue(fake.first_started.wait(timeout=0.2))
+            client.begin_autonomous_sequence(77.0)
+            fake.release_first.set()
+            client.submit("new-frame", model_version="4.0p")
+            self.assertTrue(fake.wait_for_inferences(1))
+
+            deadline = time.monotonic() + 0.5
+            sample = None
+            while sample is None and time.monotonic() < deadline:
+                sample = client.get_latest_sample("4.0p", max_age_sec=1.0)
+                time.sleep(0.005)
+            self.assertIsNotNone(sample)
+            self.assertEqual(sample["result"], (90.0, 0.0))
+            self.assertIsNone(client.get_latest_sample("3.4", max_age_sec=1.0))
+        finally:
+            fake.release_first.set()
+            client.close()
+
+    def test_manual_takeover_discards_an_inflight_autonomous_result(self):
+        class BlockingInferenceClient(RecordingFakeClient):
+            def __init__(self):
+                super().__init__()
+                self.started = threading.Event()
+                self.release = threading.Event()
+
+            def infer(self, frame, model_version=None, target_history=None):
+                self.started.set()
+                self.release.wait(timeout=0.5)
+                return 140.0, 0.0
+
+        fake = BlockingInferenceClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            history_sample_interval_sec=0.0,
+            client=fake,
+        )
+        try:
+            client.begin_autonomous_sequence(83.0)
+            client.submit("auto-frame", model_version="4.0p")
+            self.assertTrue(fake.started.wait(timeout=0.2))
+
+            client.observe_manual_steering(62.0)
+            fake.release.set()
+            time.sleep(0.03)
+
+            self.assertIsNone(client.get_latest_sample("4.0p", max_age_sec=1.0))
+            self.assertEqual(client._target_history[-1], 62.0)
+        finally:
+            fake.release.set()
+            client.close()
+
+    def test_nonfinite_manual_history_is_ignored(self):
+        fake = RecordingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            history_sample_interval_sec=0.0,
+            client=fake,
+        )
+        try:
+            before = tuple(client._target_history)
+            client.observe_manual_steering(float("nan"))
+            self.assertEqual(tuple(client._target_history), before)
         finally:
             client.close()
 
