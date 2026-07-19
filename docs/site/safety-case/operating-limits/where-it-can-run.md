@@ -1,8 +1,6 @@
 # Where It Can Run
 
-This page defines the environments where SidewalkPilot is designed and authorized
-to drive autonomously. It is the positive half of the operating design domain
-(ODD); the negative half — the exclusions — lives in `where-it-cannot-run.md`.
+This page defines both the intended operating environment and its exclusions.
 Everything here is scoped by what the hardware, the model, and the safety layer
 were actually built and tested for, not by what the car might survive.
 
@@ -23,18 +21,18 @@ built for is:
   code.
 - **Operator-selected low speed.** `MAX_AUTONOMOUS_SPEED_MPH = 3.2` is declared but is
   not enforced as a closed-loop speed cap. The current LiDAR governor constrains a
-  reference throttle command, not mph. See `speed-limits.md`.
+  reference throttle command, not mph.
 - **Routes that exist in the nav graph.** GPS navigation (`navigation.py`) does A*
   over `trossachs_nav_graph.json`. The car can only self-navigate along segments
   that are actually in that graph; anywhere off-graph is manual-only driving.
 
-## Preconditions before any autonomous run
+## Preconditions Before Any Autonomous Run
 
 Autonomy is never the default state. Before the car moves under the model, all of
 the following must hold:
 
 - A human operator is present with the Xbox controller. Manual override is the
-  top software decision layer (`decision-priority.md`): qualifying steering,
+  top software decision layer: qualifying steering,
   throttle, or brake input cancels autonomy when processed by the Raspberry Pi 5 loop.
 - Autonomy is explicitly armed by the operator (`AUTONOMY_TOGGLE_BUTTON = 0`); it
   does not self-enable.
@@ -48,18 +46,29 @@ the following must hold:
   dropouts are tolerated (the reader auto-reconnects) but a run should not start
   in a place where obstacle detection is expected to be unusable.
 
-## Where it runs today vs. planned
+## Where It Runs Today Versus Planned
 
-- **Runs today (tested):** selected supervised sidewalk/driveway sections in
-  daylight with the operator in the loop. This is where the real driving
-  photos were captured and where the field verdicts (e.g. the v3.1b night test)
-  were recorded.
+- **Runs today (tested):** selected supervised sidewalk/driveway sections,
+  primarily in daylight, with the operator in the loop. A separate v3.1b night
+  test is historical evidence for a more difficult condition, not approval for
+  ordinary night operation.
 - **Planned / not-yet-authorized:** unsupervised operation, public shared
-  sidewalks with pedestrian traffic, or any route without a hand on the kill
-  switch. None of that is claimed as tested and it is out of the current ODD.
+  sidewalks with pedestrian traffic, or any route without the controller ready
+  and an independent power-cut method available. None of that is claimed as
+  tested, and it is outside the current operating domain.
 
-## Related pages
+## Explicit Exclusions
 
-- `safety-case/safety-overview.md`
-- `testing/field-testing/preflight-checklist.md`
-- `autonomy-stack/architecture/decision-priority.md`
+Do not run autonomously on public roads, at unsupervised crossings, around uncontrolled pedestrian traffic, on stairs/steep ramps, in rain or wet electronics conditions, in snow/ice, outside the verified route geometry, or when camera/model/LiDAR/controller health is uncertain. Night and severe glare remain separate experimental conditions rather than ordinary operation.
+
+## Speed, Lighting, and Weather
+
+The declared `MAX_AUTONOMOUS_SPEED_MPH` is not an enforced measured-speed cap. Actual motion depends on throttle mapping, battery, load, and surface. The operator therefore selects low test speed and verifies physical stopping behavior.
+
+The camera model has bounded daylight/shadow field evidence, not all-lighting robustness. The chassis and exposed electronics are not weather-certified. Dry daylight on a selected, empty, supervised route is the default operating condition.
+
+## Related Pages
+
+- [Safety Overview](../safety-overview.md)
+- [Field Testing](../../testing/field-testing/overview.md)
+- [Decision Priority](../../autonomy-stack/architecture/decision-priority.md)

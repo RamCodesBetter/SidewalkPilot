@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1420" viewBox="0 0 1800 1420" role="img" aria-labelledby="title desc">
+<title id="title">Navigation and Crosswalk Handoff Flow</title>
+<desc id="desc">Inspectable graph routing selects sidewalk AUTO segments and human-controlled road-crossing segments.</desc>
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#475467"/></marker>
+<marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#B42318"/></marker>
+<filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#101828" flood-opacity="0.10"/></filter>
+</defs>
+<rect width="1800" height="1420" fill="#FFFFFF"/>
+<text x="40" y="46" font-size="30" font-weight="700" fill="#101828">Navigation and Crosswalk Handoff Flow</text>
+<text x="40" y="76" font-size="15" fill="#667085">Inspectable graph routing selects sidewalk AUTO segments and human-controlled road-crossing segments.</text>
+<rect x="25" y="105" width="680" height="175" rx="8" fill="#FAFBFC" stroke="#D0D5DD" stroke-width="1.5"/>
+<text x="43" y="133" font-size="16" font-weight="700" fill="#344054">Offline Map Preparation</text>
+<rect x="25" y="300" width="1750" height="750" rx="8" fill="#FAFBFC" stroke="#D0D5DD" stroke-width="1.5"/>
+<text x="43" y="328" font-size="16" font-weight="700" fill="#344054">Route Planning and Runtime Handoff</text>
+<rect x="25" y="1060" width="1750" height="330" rx="8" fill="#FAFBFC" stroke="#D0D5DD" stroke-width="1.5"/>
+<text x="43" y="1088" font-size="16" font-weight="700" fill="#344054">Runtime Safety and Observability</text>
+<polyline points="315.0,197.5 340.0,197.5 340.0,197.5 365.0,197.5" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="315.0,370.0 340.0,370.0 340.0,410.0 365.0,410.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="315.0,495.0 340.0,495.0 340.0,410.0 365.0,410.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="515.0,250.0 515.0,305.0 515.0,305.0 515.0,360.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="665.0,410.0 700.0,410.0 700.0,410.0 735.0,410.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1025.0,410.0 1060.0,410.0 1060.0,410.0 1095.0,410.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1345.0,410.0 1380.0,410.0 1380.0,410.0 1415.0,410.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="315.0,495.0 340.0,495.0 340.0,625.0 365.0,625.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1565.0,470.0 1565.0,520.0 700.0,520.0 700.0,625.0 665.0,625.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="665.0,625.0 700.0,625.0 700.0,625.0 735.0,625.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1025.0,625.0 1060.0,625.0 1060.0,625.0 1095.0,625.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1345.0,625.0 1380.0,625.0 1380.0,610.0 1415.0,610.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1220.0,675.0 1220.0,717.5 1220.0,717.5 1220.0,760.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1345.0,810.0 1380.0,810.0 1380.0,810.0 1415.0,810.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1565.0,860.0 1565.0,900.0 1380.0,900.0 1380.0,980.0 1345.0,980.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1345.0,980.0 1565.0,980.0 1565.0,700.0 1565.0,665.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="1095.0,625.0 1045.0,625.0 1045.0,1060.0 860.0,1060.0 860.0,1100.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<polyline points="305.0,1150.0 477.5,1150.0 477.5,1155.0 650.0,1155.0" fill="none" stroke="#B42318" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-red)"/>
+<polyline points="1330.0,1150.0 1200.0,1150.0 1200.0,1155.0 1070.0,1155.0" fill="none" stroke="#B42318" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-red)"/>
+<polyline points="860.0,1210.0 860.0,1242.5 860.0,1242.5 860.0,1275.0" fill="none" stroke="#475467" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1340.0" y="597.0" width="80.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1380.0" y="613.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">sidewalk</text>
+<rect x="1161.6" y="704.5" width="116.8" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1220.0" y="720.5" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">crossing ahead</text>
+<rect x="1314.4" y="887.0" width="131.2" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1380.0" y="903.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">far side reached</text>
+<rect x="1517.4" y="687.0" width="95.2" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1565.0" y="703.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">resume AUTO</text>
+<rect x="965.0" y="1047.0" width="160.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1045.0" y="1063.0" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">AUTO or MNUL request</text>
+<rect x="437.5" y="1142.0" width="80.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="477.5" y="1158.0" text-anchor="middle" font-size="12" font-weight="600" fill="#B42318">takeover</text>
+<rect x="1138.0" y="1142.0" width="124.0" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="1200.0" y="1158.0" text-anchor="middle" font-size="12" font-weight="600" fill="#B42318">safety override</text>
+<rect x="812.4" y="1229.5" width="95.2" height="22" rx="4" fill="#FFFFFF" opacity="0.96"/>
+<text x="860.0" y="1245.5" text-anchor="middle" font-size="12" font-weight="600" fill="#475467">route state</text>
+<rect x="55" y="155" width="260" height="85" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="2" filter="url(#shadow)"/>
+<text x="185.0" y="197.5" text-anchor="middle" font-size="16" font-weight="600" fill="#14532D"><tspan x="185.0" y="187.5">OpenStreetMap-Derived</tspan><tspan x="185.0" y="207.5">Data</tspan></text>
+<rect x="365" y="145" width="300" height="105" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="2" filter="url(#shadow)"/>
+<text x="515.0" y="188.5" text-anchor="middle" font-size="16" font-weight="600" fill="#14532D"><tspan x="515.0" y="188.5">Prebuilt Navigation Graph</tspan></text>
+<text x="515.0" y="225.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="515.0" y="218.0">6,183 nodes, 10,072 edges; no live</tspan><tspan x="515.0" y="232.0">map service</tspan></text>
+<rect x="55" y="330" width="260" height="80" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="185.0" y="370.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="185.0" y="370.0">Selected Destination</tspan></text>
+<rect x="55" y="455" width="260" height="80" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
+<text x="185.0" y="495.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="185.0" y="495.0">Latest Valid GPS Position</tspan></text>
+<rect x="365" y="360" width="300" height="100" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="2" filter="url(#shadow)"/>
+<text x="515.0" y="410.0" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="515.0" y="400.0">Map Start and Destination</tspan><tspan x="515.0" y="420.0">to Graph Nodes</tspan></text>
+<rect x="735" y="360" width="290" height="100" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="2" filter="url(#shadow)"/>
+<text x="880.0" y="401.0" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="880.0" y="401.0">A* Route Search</tspan></text>
+<text x="880.0" y="442.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="880.0" y="442.0">Haversine heuristic + turn penalties</tspan></text>
+<rect x="1095" y="360" width="250" height="100" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="2" filter="url(#shadow)"/>
+<text x="1220.0" y="410.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14532D"><tspan x="1220.0" y="410.0">Planned Graph Path</tspan></text>
+<rect x="1415" y="350" width="300" height="120" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="2" filter="url(#shadow)"/>
+<text x="1565.0" y="401.0" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="1565.0" y="401.0">Build Route Segments</tspan></text>
+<text x="1565.0" y="445.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1565.0" y="438.0">Sidewalk = AUTO; crossing/unknown =</tspan><tspan x="1565.0" y="452.0">MNUL</tspan></text>
+<rect x="365" y="575" width="300" height="100" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="2" filter="url(#shadow)"/>
+<text x="515.0" y="625.0" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="515.0" y="615.0">Relocalize to Nearest</tspan><tspan x="515.0" y="635.0">Route Node</tspan></text>
+<rect x="735" y="575" width="290" height="100" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="2" filter="url(#shadow)"/>
+<text x="880.0" y="625.0" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="880.0" y="615.0">Route Progress, Distance,</tspan><tspan x="880.0" y="635.0">and ETA</tspan></text>
+<rect x="1095" y="575" width="250" height="100" rx="7" fill="#FFF4E8" stroke="#B85C00" stroke-width="2" filter="url(#shadow)"/>
+<text x="1220.0" y="625.0" text-anchor="middle" font-size="16" font-weight="600" fill="#713B12"><tspan x="1220.0" y="625.0">Select Segment Operator</tspan></text>
+<rect x="1415" y="555" width="300" height="110" rx="7" fill="#F0F7E8" stroke="#5F9400" stroke-width="2" filter="url(#shadow)"/>
+<text x="1565.0" y="601.0" text-anchor="middle" font-size="16" font-weight="600" fill="#2F4B00"><tspan x="1565.0" y="601.0">AUTO Sidewalk Segment</tspan></text>
+<text x="1565.0" y="640.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1565.0" y="633.0">Jetson model follows the visible</tspan><tspan x="1565.0" y="647.0">sidewalk</tspan></text>
+<rect x="1095" y="760" width="250" height="100" rx="7" fill="#FFF1F0" stroke="#B42318" stroke-width="2" filter="url(#shadow)"/>
+<text x="1220.0" y="801.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A271A"><tspan x="1220.0" y="801.0">Manual Handoff Alert</tspan></text>
+<text x="1220.0" y="842.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1220.0" y="842.0">3.0 m before crossing</tspan></text>
+<rect x="1415" y="760" width="300" height="100" rx="7" fill="#FFF4E8" stroke="#B85C00" stroke-width="2" filter="url(#shadow)"/>
+<text x="1565.0" y="801.0" text-anchor="middle" font-size="16" font-weight="600" fill="#713B12"><tspan x="1565.0" y="801.0">MNUL Crossing Segment</tspan></text>
+<text x="1565.0" y="835.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1565.0" y="828.0">Human drives through the road</tspan><tspan x="1565.0" y="842.0">crossing</tspan></text>
+<rect x="1095" y="930" width="250" height="100" rx="7" fill="#FFF1F0" stroke="#B42318" stroke-width="2" filter="url(#shadow)"/>
+<text x="1220.0" y="971.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A271A"><tspan x="1220.0" y="971.0">Far-Side Resume Check</tspan></text>
+<text x="1220.0" y="1012.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1220.0" y="1012.0">2.5 m radius</tspan></text>
+<rect x="650" y="1100" width="420" height="110" rx="7" fill="#FFF0F4" stroke="#C51A4A" stroke-width="2" filter="url(#shadow)"/>
+<text x="860.0" y="1146.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A1030"><tspan x="860.0" y="1146.0">Raspberry Pi 5 Runtime State</tspan></text>
+<text x="860.0" y="1185.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="860.0" y="1178.0">Navigation request remains subject to takeover,</tspan><tspan x="860.0" y="1192.0">model validation, and AEB</tspan></text>
+<rect x="55" y="1105" width="250" height="90" rx="7" fill="#FFF1F0" stroke="#B42318" stroke-width="2" filter="url(#shadow)"/>
+<text x="180.0" y="1150.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A271A"><tspan x="180.0" y="1150.0">Xbox Manual Override</tspan></text>
+<rect x="1330" y="1105" width="300" height="90" rx="7" fill="#FFF1F0" stroke="#B42318" stroke-width="2" filter="url(#shadow)"/>
+<text x="1480.0" y="1150.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A271A"><tspan x="1480.0" y="1150.0">LiDAR Slowdown / Stop</tspan></text>
+<rect x="650" y="1275" width="420" height="90" rx="7" fill="#EDF4FF" stroke="#246BCE" stroke-width="2" filter="url(#shadow)"/>
+<text x="860.0" y="1320.0" text-anchor="middle" font-size="16" font-weight="600" fill="#153E75"><tspan x="860.0" y="1320.0">Dashboard Route and Handoff Telemetry</tspan></text>
+</svg>

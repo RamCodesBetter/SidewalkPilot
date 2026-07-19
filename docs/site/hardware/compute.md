@@ -1,17 +1,26 @@
 # Compute
 
-SidewalkPilot splits work across three computers.
+SidewalkPilot splits work across three computers. The Jetson Orin Nano is the AI brain for
+the current camera-based self-driving system; the other computers connect that intelligence to the physical
+car and its display.
 
 | Board | Current responsibility | Link |
 |---|---|---|
-| Jetson Orin Nano | Series 3/4 ONNX inference through ONNX Runtime, normally with CUDA | Direct Ethernet at `10.42.0.2:8770` |
+| Jetson Orin Nano | AI Model Manager: Series 1/2 PyTorch inference and Series 3/4 ONNX Runtime inference on the GPU | Direct Ethernet at `10.42.0.2:8770` |
 | Raspberry Pi 5 | Camera capture, Xbox input, sensors, final safety arbitration, motors, steering, logs, and dashboard sender | Hardware buses, USB, Ethernet |
 | Zero 2 W | Receives telemetry and renders the 64x32 HUB75 dashboard | USB Ethernet at `192.168.10.2:8765` |
 
 ## Why It Is Split
 
-The Raspberry Pi 5 already owns the Camera Module 3 Wide and the complete actuator/sensor integration. Jetson Orin Nano adds GPU inference without moving final control authority away from the Raspberry Pi 5. The Zero 2 W isolates panel rendering from the control loop.
+The Jetson Orin Nano supplies the GPU performance that makes the current 320x180 Series 3/4
+models practical at the selected live rate. If its result is missing, stale, or for the wrong
+model, current autonomy requests a stop. The Raspberry Pi 5 keeps the established Camera
+Module 3 Wide, steering/motor, sensor, and safety integration, while the Zero 2 W isolates panel
+rendering from the control loop.
 
-Series 1/2 can run locally on the Raspberry Pi 5. Series 3/4 use Jetson Orin Nano because they have larger `320x180` networks and the project has selected the Jetson Orin Nano GPU path for them. Inference rate is runtime telemetry, not a fixed claim; report it with the model, provider, software build, and power mode used for the measurement.
+The unified field runtime sends every steering-model family to the Jetson Orin Nano. Series 1/2 use PyTorch CUDA; Series 3/4 use ONNX Runtime CUDA. The larger 320x180 Series 3/4 networks ran much more slowly on the Raspberry Pi 5 CPU, while the
+Jetson Orin Nano GPU can run the selected models near the camera rate in the current deployment.
+Exact inference rate remains runtime telemetry and should be reported with the model,
+provider, software build, and power mode used for the measurement.
 
-The Zero 2 W does not issue actuator commands. Losing the display removes observability but does not transfer control authority.
+The Zero 2 W does not command the steering servo or motors. Losing the display removes observability but does not transfer control authority.

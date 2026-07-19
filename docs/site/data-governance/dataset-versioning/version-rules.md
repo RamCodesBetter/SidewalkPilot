@@ -8,7 +8,8 @@ Version rules keep model, preprocessing, labels, and dataset identity together. 
 |---|---|---|---|---|---|
 | 1 / 2 | `SteeringAutonomyV2`, ~0.67M params | 200x66 | steering only (single tanh regression) | `image`, `steering`, `repeat`, `source` | Frozen (2,224 images) |
 | 3 | `SidewalkPilotV3`, 5.53M params | 320x180 | v3.1+ hybrid steering + optional throttle loss | image key, `steering`, `throttle` | shared 81,237-frame dataset |
-| 4 | PC / CF / PCF, 5.54-5.57M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | experimental, trained; field test pending |
+| 4.0 | PC / CF / PCF, 5.54-5.57M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | all six models field-tested; CF model v4.0f remained viable |
+| 4.1 | PC / CF / PCF, 5.54-5.55M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | trained and evaluated offline; not integrated into the live selector or field-tested |
 
 Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson Orin Nano and the larger 320x180 visual backbone. Series 4 shares the 81,237-frame dataset but removes throttle prediction and adds temporal-target experiments.
 
@@ -20,13 +21,19 @@ Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson
 4. **Public data must pass privacy review** before it goes to Hugging Face (faces, plates, identifiable private property).
 5. **Do not infer CARLA use from support code.** A checkpoint is CARLA-assisted only when its saved roots, run configuration, or source-count log demonstrates that CARLA data was loaded.
 
-## Why this choice
+## Snapshot Naming and Active Labels
+
+Working run folders use date/run identities; published dataset repositories use stable series identities. The active label set is the exact base snapshot plus any explicitly named correction file used by a command. A local file's presence does not make it active.
+
+Removed labels should be recorded as exclusions with a reason rather than erased from project history. Historical metrics remain attached to the dataset, trainer, split, and model that produced them. They are never silently recalculated and presented under the old name.
+
+## Why This Choice
 
 Offline metrics are only comparable when architecture adapters, dataset snapshot,
 split, and command are known. These rules prevent later documentation from
-inventing provenance that the artifacts do not contain.
+inventing provenance that the saved files do not contain.
 
-## Good vs bad example
+## Valid and Invalid Examples
 
 Good — a Series 3 entry with matching schema:
 
@@ -56,15 +63,15 @@ PY
 
 An empty list was valid when a new dataset was first initialized. It is not the current state: the Series 3/4 dataset now contains 81,237 labeled frames.
 
-## Recovery when a rule is broken
+## Recovery When a Rule Is Broken
 
 - Missing throttle in Series 3: re-derive it from that run's CSV log for the affected frames and re-write the label file; do not backfill a constant.
 - Unknown provenance: quarantine the row from a claimed reproducible snapshot until the capture source is established.
 
 Never delete images or label files to "fix" a rule violation without Ram's sign-off — count and report the bad rows first.
 
-## Related pages
+## Related Pages
 
-- `data/dataset-overview.md`
-- `data-governance/dataset-versioning/active-label-set.md`
-- `publishing/huggingface.md`
+- [Dataset Overview](../../data/dataset-overview.md)
+- [Hugging Face Publishing](../../publishing/huggingface.md)
+- [Data Quality](../data-quality/image-quality-checks.md)

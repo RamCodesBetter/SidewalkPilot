@@ -1,11 +1,11 @@
 {
   "1.0": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.0.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.0.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 25.93851661682129,
@@ -357,12 +357,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.0.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.0.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 25.554166793823242,
@@ -466,7 +466,7 @@
           "pred_p25": 67.35789489746094,
           "pred_p75": 106.08827209472656,
           "pred_p95": 135.05374145507812,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 74.2715941535102
         },
         "D0427_18": {
@@ -741,7 +741,7 @@
           "pred_p25": 67.35789489746094,
           "pred_p75": 106.08827209472656,
           "pred_p95": 135.05374145507812,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 74.2715941535102
         },
         "D0427_curved_curb": {
@@ -1136,12 +1136,12 @@
     }
   },
   "1.0b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.0b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.0b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 25.702770233154297,
@@ -1493,12 +1493,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.0b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.0b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 25.071210861206055,
@@ -1602,7 +1602,7 @@
           "pred_p25": 71.56248474121094,
           "pred_p75": 108.07760620117188,
           "pred_p95": 137.47181701660156,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 74.78020985921223
         },
         "D0427_18": {
@@ -1877,7 +1877,7 @@
           "pred_p25": 71.56248474121094,
           "pred_p75": 108.07760620117188,
           "pred_p95": 137.47181701660156,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 74.78020985921223
         },
         "D0427_curved_curb": {
@@ -2272,12 +2272,12 @@
     }
   },
   "1.1": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.1.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.1.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 17.54286766052246,
@@ -2629,12 +2629,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.1.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.1.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 20.851625442504883,
@@ -2738,7 +2738,7 @@
           "pred_p25": 73.08132934570312,
           "pred_p75": 92.84661865234375,
           "pred_p95": 119.03569030761719,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 76.91769917805989
         },
         "D0427_18": {
@@ -3013,7 +3013,7 @@
           "pred_p25": 73.08132934570312,
           "pred_p75": 92.84661865234375,
           "pred_p95": 119.03569030761719,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 76.91769917805989
         },
         "D0427_curved_curb": {
@@ -3408,12 +3408,12 @@
     }
   },
   "1.1b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.1b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.1b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 17.54286766052246,
@@ -3765,12 +3765,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.1b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.1b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 20.851625442504883,
@@ -3874,7 +3874,7 @@
           "pred_p25": 73.08132934570312,
           "pred_p75": 92.84661865234375,
           "pred_p95": 119.03569030761719,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 76.91769917805989
         },
         "D0427_18": {
@@ -4149,7 +4149,7 @@
           "pred_p25": 73.08132934570312,
           "pred_p75": 92.84661865234375,
           "pred_p95": 119.03569030761719,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 76.91769917805989
         },
         "D0427_curved_curb": {
@@ -4544,12 +4544,12 @@
     }
   },
   "1.2": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.2.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.2.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 16.46872901916504,
@@ -4901,12 +4901,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.2.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.2.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 18.644264221191406,
@@ -4917,8 +4917,8 @@
         "within_5": 582,
         "within_10": 997,
         "within_20": 1519,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 92.77430725097656,
         "pred_median": 93.44248962402344,
         "pred_p05": 47.800437927246094,
@@ -4981,8 +4981,8 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.49676513671875,
           "pred_median": 90.14077758789062,
           "pred_p05": 5.195930480957031,
@@ -5010,7 +5010,7 @@
           "pred_p25": 73.44463348388672,
           "pred_p75": 96.18309020996094,
           "pred_p95": 116.73980712890625,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 78.31440183851454
         },
         "D0427_18": {
@@ -5256,8 +5256,8 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.49676513671875,
           "pred_median": 90.14077758789062,
           "pred_p05": 5.195930480957031,
@@ -5285,7 +5285,7 @@
           "pred_p25": 73.44463348388672,
           "pred_p75": 96.18309020996094,
           "pred_p95": 116.73980712890625,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 78.31440183851454
         },
         "D0427_curved_curb": {
@@ -5680,12 +5680,12 @@
     }
   },
   "1.2b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.2b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.2b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 16.69224739074707,
@@ -6037,12 +6037,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.2b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.2b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 18.634084701538086,
@@ -6053,8 +6053,8 @@
         "within_5": 584,
         "within_10": 1003,
         "within_20": 1547,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 92.5890884399414,
         "pred_median": 93.350830078125,
         "pred_p05": 47.73497772216797,
@@ -6117,8 +6117,8 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.41995239257812,
           "pred_median": 90.07270812988281,
           "pred_p05": 5.189326763153076,
@@ -6146,7 +6146,7 @@
           "pred_p25": 73.50840759277344,
           "pred_p75": 99.93832397460938,
           "pred_p95": 120.21284484863281,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 78.6546007792155
         },
         "D0427_18": {
@@ -6392,8 +6392,8 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.41995239257812,
           "pred_median": 90.07270812988281,
           "pred_p05": 5.189326763153076,
@@ -6421,7 +6421,7 @@
           "pred_p25": 73.50840759277344,
           "pred_p75": 99.93832397460938,
           "pred_p95": 120.21284484863281,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 78.6546007792155
         },
         "D0427_curved_curb": {
@@ -6816,12 +6816,12 @@
     }
   },
   "1.3": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.3.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.3.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 15.73111629486084,
@@ -7173,12 +7173,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.3.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.3.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 18.547847747802734,
@@ -7189,8 +7189,8 @@
         "within_5": 557,
         "within_10": 982,
         "within_20": 1545,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 92.89244842529297,
         "pred_median": 93.18550109863281,
         "pred_p05": 47.719661712646484,
@@ -7232,8 +7232,8 @@
           "within_5": 76,
           "within_10": 142,
           "within_20": 256,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 99.14322662353516,
           "pred_median": 97.79901885986328,
           "pred_p05": 33.004249572753906,
@@ -7253,14 +7253,14 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.45794677734375,
           "pred_median": 90.21195983886719,
           "pred_p05": 5.205530166625977,
           "pred_p25": 65.10758972167969,
           "pred_p75": 139.90237426757812,
-          "pred_p95": 176.0,
+          "pred_p95": 176,
           "target_mean": 97.69230651855469,
           "score": 99.51721813943651
         },
@@ -7282,7 +7282,7 @@
           "pred_p25": 81.09048461914062,
           "pred_p75": 97.7610092163086,
           "pred_p95": 113.30621337890625,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 79.13375854492188
         },
         "D0427_18": {
@@ -7507,8 +7507,8 @@
           "within_5": 76,
           "within_10": 142,
           "within_20": 256,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 99.14322662353516,
           "pred_median": 97.79901885986328,
           "pred_p05": 33.004249572753906,
@@ -7528,14 +7528,14 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.45794677734375,
           "pred_median": 90.21195983886719,
           "pred_p05": 5.205530166625977,
           "pred_p25": 65.10758972167969,
           "pred_p75": 139.90237426757812,
-          "pred_p95": 176.0,
+          "pred_p95": 176,
           "target_mean": 97.69230651855469,
           "score": 99.51721813943651
         },
@@ -7557,7 +7557,7 @@
           "pred_p25": 81.09048461914062,
           "pred_p75": 97.7610092163086,
           "pred_p95": 113.30621337890625,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 79.13375854492188
         },
         "D0427_curved_curb": {
@@ -7952,12 +7952,12 @@
     }
   },
   "1.3b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.3b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.3b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 15.458393096923828,
@@ -8309,12 +8309,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.3b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.3b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 18.481027603149414,
@@ -8325,8 +8325,8 @@
         "within_5": 578,
         "within_10": 1024,
         "within_20": 1553,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 92.6739501953125,
         "pred_median": 92.95956420898438,
         "pred_p05": 47.968475341796875,
@@ -8368,8 +8368,8 @@
           "within_5": 69,
           "within_10": 138,
           "within_20": 249,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 100.38813018798828,
           "pred_median": 99.30335998535156,
           "pred_p05": 34.46059799194336,
@@ -8389,14 +8389,14 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.51024627685547,
           "pred_median": 90.97305297851562,
           "pred_p05": 5.169354438781738,
           "pred_p25": 65.18920135498047,
           "pred_p75": 139.90235900878906,
-          "pred_p95": 176.0,
+          "pred_p95": 176,
           "target_mean": 97.69230651855469,
           "score": 99.43423602316115
         },
@@ -8418,7 +8418,7 @@
           "pred_p25": 78.73265075683594,
           "pred_p75": 96.70299530029297,
           "pred_p95": 111.38032531738281,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 79.58236694335938
         },
         "D0427_18": {
@@ -8643,8 +8643,8 @@
           "within_5": 69,
           "within_10": 138,
           "within_20": 249,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 100.38813018798828,
           "pred_median": 99.30335998535156,
           "pred_p05": 34.46059799194336,
@@ -8664,14 +8664,14 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 97.51024627685547,
           "pred_median": 90.97305297851562,
           "pred_p05": 5.169354438781738,
           "pred_p25": 65.18920135498047,
           "pred_p75": 139.90235900878906,
-          "pred_p95": 176.0,
+          "pred_p95": 176,
           "target_mean": 97.69230651855469,
           "score": 99.43423602316115
         },
@@ -8693,7 +8693,7 @@
           "pred_p25": 78.73265075683594,
           "pred_p75": 96.70299530029297,
           "pred_p95": 111.38032531738281,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 79.58236694335938
         },
         "D0427_curved_curb": {
@@ -9088,12 +9088,12 @@
     }
   },
   "1.4": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.4.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.4.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 15.888898849487305,
@@ -9445,12 +9445,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.4.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.4.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 16.811220169067383,
@@ -9461,8 +9461,8 @@
         "within_5": 676,
         "within_10": 1100,
         "within_20": 1620,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 92.33190155029297,
         "pred_median": 92.54679870605469,
         "pred_p05": 48.351531982421875,
@@ -9526,7 +9526,7 @@
           "within_10": 65,
           "within_20": 65,
           "pred_min": 4.000007629394531,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 97.52690124511719,
           "pred_median": 90.32093811035156,
           "pred_p05": 5.1930694580078125,
@@ -9540,21 +9540,21 @@
           "count": 53,
           "mae": 0.5631624460220337,
           "median_ae": 0.1952667236328125,
-          "max_ae": 4.0,
+          "max_ae": 4,
           "signed_error": -0.020741300657391548,
           "within_2": 48,
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.9792709350586,
           "pred_median": 99.89251708984375,
           "pred_p05": 31.2447509765625,
           "pred_p25": 75.431640625,
           "pred_p75": 139.8087921142578,
           "pred_p95": 175.5653533935547,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.6871319744322
         },
         "D0427_18": {
@@ -9801,7 +9801,7 @@
           "within_10": 65,
           "within_20": 65,
           "pred_min": 4.000007629394531,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 97.52690124511719,
           "pred_median": 90.32093811035156,
           "pred_p05": 5.1930694580078125,
@@ -9815,21 +9815,21 @@
           "count": 53,
           "mae": 0.5631624460220337,
           "median_ae": 0.1952667236328125,
-          "max_ae": 4.0,
+          "max_ae": 4,
           "signed_error": -0.020741300657391548,
           "within_2": 48,
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.9792709350586,
           "pred_median": 99.89251708984375,
           "pred_p05": 31.2447509765625,
           "pred_p25": 75.431640625,
           "pred_p75": 139.8087921142578,
           "pred_p95": 175.5653533935547,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.6871319744322
         },
         "D0427_curved_curb": {
@@ -10224,12 +10224,12 @@
     }
   },
   "1.4b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.4b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.4b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 15.982561111450195,
@@ -10581,12 +10581,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.4b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.4b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 17.042537689208984,
@@ -10597,8 +10597,8 @@
         "within_5": 685,
         "within_10": 1106,
         "within_20": 1598,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 92.17289733886719,
         "pred_median": 92.29917907714844,
         "pred_p05": 48.101707458496094,
@@ -10662,7 +10662,7 @@
           "within_10": 65,
           "within_20": 65,
           "pred_min": 4.000007629394531,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 97.36632537841797,
           "pred_median": 90.35919189453125,
           "pred_p05": 5.126893997192383,
@@ -10682,15 +10682,15 @@
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.96492004394531,
           "pred_median": 99.72174072265625,
           "pred_p05": 31.560039520263672,
           "pred_p25": 75.11102294921875,
           "pred_p75": 140.449462890625,
           "pred_p95": 175.62139892578125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.59830628501044
         },
         "D0427_18": {
@@ -10937,7 +10937,7 @@
           "within_10": 65,
           "within_20": 65,
           "pred_min": 4.000007629394531,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 97.36632537841797,
           "pred_median": 90.35919189453125,
           "pred_p05": 5.126893997192383,
@@ -10957,15 +10957,15 @@
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.96492004394531,
           "pred_median": 99.72174072265625,
           "pred_p05": 31.560039520263672,
           "pred_p25": 75.11102294921875,
           "pred_p75": 140.449462890625,
           "pred_p95": 175.62139892578125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.59830628501044
         },
         "D0427_curved_curb": {
@@ -11360,12 +11360,12 @@
     }
   },
   "1.5": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.5.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.5.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 16.10662269592285,
@@ -11717,12 +11717,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.5.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.5.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 16.823284149169922,
@@ -11733,8 +11733,8 @@
         "within_5": 666,
         "within_10": 1060,
         "within_20": 1572,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 95.43267059326172,
         "pred_median": 93.98800659179688,
         "pred_p05": 47.33079147338867,
@@ -11797,7 +11797,7 @@
           "within_5": 64,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.99998474121094,
           "pred_mean": 97.48420715332031,
           "pred_median": 90.72311401367188,
@@ -11826,7 +11826,7 @@
           "pred_p25": 75.26433563232422,
           "pred_p75": 139.64990234375,
           "pred_p95": 175.9516143798828,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.50839016172621
         },
         "D0427_18": {
@@ -11840,7 +11840,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.65652465820312,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 126.50458526611328,
           "pred_median": 117.21064758300781,
           "pred_p05": 79.75203704833984,
@@ -12072,7 +12072,7 @@
           "within_5": 64,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.99998474121094,
           "pred_mean": 97.48420715332031,
           "pred_median": 90.72311401367188,
@@ -12101,7 +12101,7 @@
           "pred_p25": 75.26433563232422,
           "pred_p75": 139.64990234375,
           "pred_p95": 175.9516143798828,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.50839016172621
         },
         "D0427_curved_curb": {
@@ -12115,7 +12115,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.65652465820312,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 126.50458526611328,
           "pred_median": 117.21064758300781,
           "pred_p05": 79.75203704833984,
@@ -12496,12 +12496,12 @@
     }
   },
   "1.5b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.5b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.5b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 16.10662269592285,
@@ -12853,12 +12853,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.5b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.5b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 16.823284149169922,
@@ -12869,8 +12869,8 @@
         "within_5": 666,
         "within_10": 1060,
         "within_20": 1572,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 95.43267059326172,
         "pred_median": 93.98800659179688,
         "pred_p05": 47.33079147338867,
@@ -12933,7 +12933,7 @@
           "within_5": 64,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.99998474121094,
           "pred_mean": 97.48420715332031,
           "pred_median": 90.72311401367188,
@@ -12962,7 +12962,7 @@
           "pred_p25": 75.26433563232422,
           "pred_p75": 139.64990234375,
           "pred_p95": 175.9516143798828,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.50839016172621
         },
         "D0427_18": {
@@ -12976,7 +12976,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.65652465820312,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 126.50458526611328,
           "pred_median": 117.21064758300781,
           "pred_p05": 79.75203704833984,
@@ -13208,7 +13208,7 @@
           "within_5": 64,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.99998474121094,
           "pred_mean": 97.48420715332031,
           "pred_median": 90.72311401367188,
@@ -13237,7 +13237,7 @@
           "pred_p25": 75.26433563232422,
           "pred_p75": 139.64990234375,
           "pred_p95": 175.9516143798828,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.50839016172621
         },
         "D0427_curved_curb": {
@@ -13251,7 +13251,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.65652465820312,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 126.50458526611328,
           "pred_median": 117.21064758300781,
           "pred_p05": 79.75203704833984,
@@ -13632,12 +13632,12 @@
     }
   },
   "1.6": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.6.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.6.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 16.5397891998291,
@@ -13989,12 +13989,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.6.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.6.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 17.527206420898438,
@@ -14005,8 +14005,8 @@
         "within_5": 630,
         "within_10": 1029,
         "within_20": 1556,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 96.52801513671875,
         "pred_median": 94.64961242675781,
         "pred_p05": 48.567996978759766,
@@ -14069,7 +14069,7 @@
           "within_5": 64,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.9999237060547,
           "pred_mean": 97.52777862548828,
           "pred_median": 91.58236694335938,
@@ -14090,15 +14090,15 @@
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.93693542480469,
           "pred_median": 100.02937316894531,
           "pred_p05": 30.890796661376953,
           "pred_p25": 75.17996215820312,
           "pred_p75": 138.1483154296875,
           "pred_p95": 175.9833984375,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.53583690855238
         },
         "D0427_18": {
@@ -14344,7 +14344,7 @@
           "within_5": 64,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.9999237060547,
           "pred_mean": 97.52777862548828,
           "pred_median": 91.58236694335938,
@@ -14365,15 +14365,15 @@
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.93693542480469,
           "pred_median": 100.02937316894531,
           "pred_p05": 30.890796661376953,
           "pred_p25": 75.17996215820312,
           "pred_p75": 138.1483154296875,
           "pred_p95": 175.9833984375,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.53583690855238
         },
         "D0427_curved_curb": {
@@ -14768,12 +14768,12 @@
     }
   },
   "1.6b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.6b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.6b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 16.54348373413086,
@@ -15125,12 +15125,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.6b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.6b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 17.41362762451172,
@@ -15141,8 +15141,8 @@
         "within_5": 629,
         "within_10": 1041,
         "within_20": 1562,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 96.31118774414062,
         "pred_median": 94.61807250976562,
         "pred_p05": 48.23344039916992,
@@ -15205,7 +15205,7 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.9998779296875,
           "pred_mean": 97.54747772216797,
           "pred_median": 91.84798431396484,
@@ -15226,15 +15226,15 @@
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.97198486328125,
           "pred_median": 100.08806610107422,
           "pred_p05": 30.723981857299805,
           "pred_p25": 75.75164031982422,
           "pred_p75": 137.47402954101562,
           "pred_p95": 175.97947692871094,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.49960264894698
         },
         "D0427_18": {
@@ -15480,7 +15480,7 @@
           "within_5": 65,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.9998779296875,
           "pred_mean": 97.54747772216797,
           "pred_median": 91.84798431396484,
@@ -15501,15 +15501,15 @@
           "within_5": 53,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 4.0,
-          "pred_max": 176.0,
+          "pred_min": 4,
+          "pred_max": 176,
           "pred_mean": 104.97198486328125,
           "pred_median": 100.08806610107422,
           "pred_p05": 30.723981857299805,
           "pred_p25": 75.75164031982422,
           "pred_p75": 137.47402954101562,
           "pred_p95": 175.97947692871094,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.49960264894698
         },
         "D0427_curved_curb": {
@@ -15904,12 +15904,12 @@
     }
   },
   "1.7": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.7.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.7.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 15.616753578186035,
@@ -16261,12 +16261,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.7.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.7.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 15.818426132202148,
@@ -16370,7 +16370,7 @@
           "pred_p25": 75.74210357666016,
           "pred_p75": 140.90118408203125,
           "pred_p95": 175.93075561523438,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.37546445263757
         },
         "D0427_18": {
@@ -16645,7 +16645,7 @@
           "pred_p25": 75.74210357666016,
           "pred_p75": 140.90118408203125,
           "pred_p95": 175.93075561523438,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.37546445263757
         },
         "D0427_curved_curb": {
@@ -17040,12 +17040,12 @@
     }
   },
   "1.7b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.7b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.7b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 15.607264518737793,
@@ -17397,12 +17397,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.7b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.7b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 15.541245460510254,
@@ -17506,7 +17506,7 @@
           "pred_p25": 75.96294403076172,
           "pred_p75": 140.7502899169922,
           "pred_p95": 175.88539123535156,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.42561990684933
         },
         "D0427_18": {
@@ -17781,7 +17781,7 @@
           "pred_p25": 75.96294403076172,
           "pred_p75": 140.7502899169922,
           "pred_p95": 175.88539123535156,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.42561990684933
         },
         "D0427_curved_curb": {
@@ -18176,12 +18176,12 @@
     }
   },
   "1.8": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.8.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.8.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 14.567036628723145,
@@ -18533,12 +18533,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.8.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.8.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 15.471460342407227,
@@ -18642,7 +18642,7 @@
           "pred_p25": 76.30966186523438,
           "pred_p75": 140.1072998046875,
           "pred_p95": 175.98338317871094,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.34554583496518
         },
         "D0427_18": {
@@ -18917,7 +18917,7 @@
           "pred_p25": 76.30966186523438,
           "pred_p75": 140.1072998046875,
           "pred_p95": 175.98338317871094,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.34554583496518
         },
         "D0427_curved_curb": {
@@ -19312,12 +19312,12 @@
     }
   },
   "1.8b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.8b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.8b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 14.544144630432129,
@@ -19669,12 +19669,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.8b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.8b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 15.408991813659668,
@@ -19778,7 +19778,7 @@
           "pred_p25": 76.54051208496094,
           "pred_p75": 140.31903076171875,
           "pred_p95": 175.98321533203125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.33851725525327
         },
         "D0427_18": {
@@ -20053,7 +20053,7 @@
           "pred_p25": 76.54051208496094,
           "pred_p75": 140.31903076171875,
           "pred_p95": 175.98321533203125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.33851725525327
         },
         "D0427_curved_curb": {
@@ -20448,12 +20448,12 @@
     }
   },
   "1.9": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.9.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.9.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 14.77161693572998,
@@ -20805,12 +20805,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.9.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.9.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 12.983625411987305,
@@ -20821,8 +20821,8 @@
         "within_5": 966,
         "within_10": 1332,
         "within_20": 1728,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 94.25716400146484,
         "pred_median": 92.52080535888672,
         "pred_p05": 46.16776657104492,
@@ -20885,7 +20885,7 @@
           "within_5": 61,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.9986114501953,
           "pred_mean": 97.60713195800781,
           "pred_median": 93.49223327636719,
@@ -20914,7 +20914,7 @@
           "pred_p25": 75.05899810791016,
           "pred_p75": 140.61962890625,
           "pred_p95": 175.85235595703125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.15712429417505
         },
         "D0427_18": {
@@ -20991,7 +20991,7 @@
           "within_10": 156,
           "within_20": 156,
           "pred_min": 4.0000457763671875,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 109.04370880126953,
           "pred_median": 94.44926452636719,
           "pred_p05": 79.37620544433594,
@@ -21160,7 +21160,7 @@
           "within_5": 61,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.9986114501953,
           "pred_mean": 97.60713195800781,
           "pred_median": 93.49223327636719,
@@ -21189,7 +21189,7 @@
           "pred_p25": 75.05899810791016,
           "pred_p75": 140.61962890625,
           "pred_p95": 175.85235595703125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.15712429417505
         },
         "D0427_curved_curb": {
@@ -21245,7 +21245,7 @@
           "within_10": 156,
           "within_20": 156,
           "pred_min": 4.0000457763671875,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 109.04370880126953,
           "pred_median": 94.44926452636719,
           "pred_p05": 79.37620544433594,
@@ -21584,12 +21584,12 @@
     }
   },
   "1.9b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.9b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v1.9b.pth",
     "series": 1,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 86.0,
+    "output_scale_deg": 86,
     "overall": {
       "count": 6952,
       "mae": 14.760854721069336,
@@ -21941,12 +21941,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v1.9b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v1.9b.pth",
       "series": 1,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 86.0,
+      "output_scale_deg": 86,
       "overall": {
         "count": 2224,
         "mae": 12.938035011291504,
@@ -21957,8 +21957,8 @@
         "within_5": 979,
         "within_10": 1334,
         "within_20": 1734,
-        "pred_min": 4.0,
-        "pred_max": 176.0,
+        "pred_min": 4,
+        "pred_max": 176,
         "pred_mean": 94.26404571533203,
         "pred_median": 92.66891479492188,
         "pred_p05": 46.673858642578125,
@@ -22021,7 +22021,7 @@
           "within_5": 62,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.99887084960938,
           "pred_mean": 97.56312561035156,
           "pred_median": 93.32266235351562,
@@ -22050,7 +22050,7 @@
           "pred_p25": 74.99456787109375,
           "pred_p75": 140.12374877929688,
           "pred_p95": 175.86166381835938,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.17478568024106
         },
         "D0427_18": {
@@ -22127,7 +22127,7 @@
           "within_10": 156,
           "within_20": 156,
           "pred_min": 4.000038146972656,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 108.98502349853516,
           "pred_median": 94.63040161132812,
           "pred_p05": 79.3551025390625,
@@ -22296,7 +22296,7 @@
           "within_5": 62,
           "within_10": 65,
           "within_20": 65,
-          "pred_min": 4.0,
+          "pred_min": 4,
           "pred_max": 175.99887084960938,
           "pred_mean": 97.56312561035156,
           "pred_median": 93.32266235351562,
@@ -22325,7 +22325,7 @@
           "pred_p25": 74.99456787109375,
           "pred_p75": 140.12374877929688,
           "pred_p95": 175.86166381835938,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 99.17478568024106
         },
         "D0427_curved_curb": {
@@ -22381,7 +22381,7 @@
           "within_10": 156,
           "within_20": 156,
           "pred_min": 4.000038146972656,
-          "pred_max": 176.0,
+          "pred_max": 176,
           "pred_mean": 108.98502349853516,
           "pred_median": 94.63040161132812,
           "pred_p05": 79.3551025390625,
@@ -22720,12 +22720,12 @@
     }
   },
   "2.0": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.0.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.0.pth",
     "series": 2,
     "preprocessing": "HSV/CLAHE -> BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 15.332742691040039,
@@ -23077,12 +23077,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.0.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.0.pth",
       "series": 2,
       "preprocessing": "HSV/CLAHE -> BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 11.124250411987305,
@@ -23093,8 +23093,8 @@
         "within_5": 1068,
         "within_10": 1441,
         "within_20": 1839,
-        "pred_min": 5.0,
-        "pred_max": 175.0,
+        "pred_min": 5,
+        "pred_max": 175,
         "pred_mean": 93.69554138183594,
         "pred_median": 92.45051574707031,
         "pred_p05": 41.35430145263672,
@@ -23186,7 +23186,7 @@
           "pred_p25": 76.60578918457031,
           "pred_p75": 137.0845947265625,
           "pred_p95": 174.8484649658203,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.87360321150885
         },
         "D0427_18": {
@@ -23200,7 +23200,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.75870513916016,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 126.50733947753906,
           "pred_median": 118.09211730957031,
           "pred_p05": 79.7863998413086,
@@ -23283,7 +23283,7 @@
           "within_5": 148,
           "within_10": 159,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.99951171875,
           "pred_mean": 88.51220703125,
           "pred_median": 84.81686401367188,
@@ -23461,7 +23461,7 @@
           "pred_p25": 76.60578918457031,
           "pred_p75": 137.0845947265625,
           "pred_p95": 174.8484649658203,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.87360321150885
         },
         "D0427_curved_curb": {
@@ -23475,7 +23475,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.75870513916016,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 126.50733947753906,
           "pred_median": 118.09211730957031,
           "pred_p05": 79.7863998413086,
@@ -23558,7 +23558,7 @@
           "within_5": 148,
           "within_10": 159,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.99951171875,
           "pred_mean": 88.51220703125,
           "pred_median": 84.81686401367188,
@@ -23856,12 +23856,12 @@
     }
   },
   "2.0b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.0b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.0b.pth",
     "series": 2,
     "preprocessing": "HSV/CLAHE -> BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 15.300965309143066,
@@ -24213,12 +24213,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.0b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.0b.pth",
       "series": 2,
       "preprocessing": "HSV/CLAHE -> BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 11.13021469116211,
@@ -24229,8 +24229,8 @@
         "within_5": 1064,
         "within_10": 1436,
         "within_20": 1838,
-        "pred_min": 5.0,
-        "pred_max": 175.0,
+        "pred_min": 5,
+        "pred_max": 175,
         "pred_mean": 93.70210266113281,
         "pred_median": 92.4449691772461,
         "pred_p05": 41.26089096069336,
@@ -24322,7 +24322,7 @@
           "pred_p25": 76.74198913574219,
           "pred_p75": 137.36239624023438,
           "pred_p95": 174.83607482910156,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.87569440735712
         },
         "D0427_18": {
@@ -24336,7 +24336,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.77095794677734,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 126.46826171875,
           "pred_median": 118.03994750976562,
           "pred_p05": 79.6855239868164,
@@ -24419,7 +24419,7 @@
           "within_5": 149,
           "within_10": 159,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.99948120117188,
           "pred_mean": 88.5218505859375,
           "pred_median": 84.97311401367188,
@@ -24597,7 +24597,7 @@
           "pred_p25": 76.74198913574219,
           "pred_p75": 137.36239624023438,
           "pred_p95": 174.83607482910156,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.87569440735712
         },
         "D0427_curved_curb": {
@@ -24611,7 +24611,7 @@
           "within_10": 72,
           "within_20": 72,
           "pred_min": 69.77095794677734,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 126.46826171875,
           "pred_median": 118.03994750976562,
           "pred_p05": 79.6855239868164,
@@ -24694,7 +24694,7 @@
           "within_5": 149,
           "within_10": 159,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.99948120117188,
           "pred_mean": 88.5218505859375,
           "pred_median": 84.97311401367188,
@@ -24983,7 +24983,7 @@
       "selection_metrics": {
         "balanced_9_bucket_exact_percent": 54.16526236215237,
         "turn_detection_recall_percent": 89.13324708926261,
-        "turn_exact_bucket_recall_percent": 50.0,
+        "turn_exact_bucket_recall_percent": 50,
         "turn_within_one_bucket_recall_percent": 78.84864165588615,
         "straight_exact_bucket_recall_percent": 38.93805309734513,
         "turn_count": 1546,
@@ -24992,12 +24992,12 @@
     }
   },
   "2.1": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.1.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.1.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 16.699676513671875,
@@ -25349,12 +25349,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.1.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.1.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 10.803460121154785,
@@ -25366,7 +25366,7 @@
         "within_10": 1481,
         "within_20": 1867,
         "pred_min": 5.000007629394531,
-        "pred_max": 175.0,
+        "pred_max": 175,
         "pred_mean": 95.17507934570312,
         "pred_median": 93.55535125732422,
         "pred_p05": 46.920955657958984,
@@ -25458,7 +25458,7 @@
           "pred_p25": 77.16738891601562,
           "pred_p75": 140.22189331054688,
           "pred_p95": 174.8164825439453,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.19095942709181
         },
         "D0427_18": {
@@ -25535,7 +25535,7 @@
           "within_10": 153,
           "within_20": 156,
           "pred_min": 5.0016937255859375,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 110.26531219482422,
           "pred_median": 97.99722290039062,
           "pred_p05": 77.45774841308594,
@@ -25733,7 +25733,7 @@
           "pred_p25": 77.16738891601562,
           "pred_p75": 140.22189331054688,
           "pred_p95": 174.8164825439453,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.19095942709181
         },
         "D0427_curved_curb": {
@@ -25789,7 +25789,7 @@
           "within_10": 153,
           "within_20": 156,
           "pred_min": 5.0016937255859375,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 110.26531219482422,
           "pred_median": 97.99722290039062,
           "pred_p05": 77.45774841308594,
@@ -26128,12 +26128,12 @@
     }
   },
   "2.1b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.1b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.1b.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 16.58094024658203,
@@ -26485,12 +26485,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.1b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.1b.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 10.74748706817627,
@@ -26502,7 +26502,7 @@
         "within_10": 1489,
         "within_20": 1867,
         "pred_min": 5.000007629394531,
-        "pred_max": 175.0,
+        "pred_max": 175,
         "pred_mean": 95.19771575927734,
         "pred_median": 93.49456787109375,
         "pred_p05": 47.17346954345703,
@@ -26594,7 +26594,7 @@
           "pred_p25": 77.30921936035156,
           "pred_p75": 139.98443603515625,
           "pred_p95": 174.80906677246094,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.22897579934862
         },
         "D0427_18": {
@@ -26671,7 +26671,7 @@
           "within_10": 153,
           "within_20": 156,
           "pred_min": 5.001991271972656,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 110.3075942993164,
           "pred_median": 98.03939819335938,
           "pred_p05": 77.81288146972656,
@@ -26869,7 +26869,7 @@
           "pred_p25": 77.30921936035156,
           "pred_p75": 139.98443603515625,
           "pred_p95": 174.80906677246094,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.22897579934862
         },
         "D0427_curved_curb": {
@@ -26925,7 +26925,7 @@
           "within_10": 153,
           "within_20": 156,
           "pred_min": 5.001991271972656,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 110.3075942993164,
           "pred_median": 98.03939819335938,
           "pred_p05": 77.81288146972656,
@@ -27264,12 +27264,12 @@
     }
   },
   "2.2": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.2.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.2.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 17.850311279296875,
@@ -27621,12 +27621,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.2.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.2.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 6.67950963973999,
@@ -27637,7 +27637,7 @@
         "within_5": 1238,
         "within_10": 1802,
         "within_20": 2094,
-        "pred_min": 5.0,
+        "pred_min": 5,
         "pred_max": 174.99998474121094,
         "pred_mean": 96.09806060791016,
         "pred_median": 93.65000915527344,
@@ -27730,7 +27730,7 @@
           "pred_p25": 75.8172607421875,
           "pred_p75": 142.91473388671875,
           "pred_p95": 174.57431030273438,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.3890142970615
         },
         "D0427_18": {
@@ -27827,7 +27827,7 @@
           "within_5": 123,
           "within_10": 152,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.9875030517578,
           "pred_mean": 87.96635437011719,
           "pred_median": 86.68993377685547,
@@ -28005,7 +28005,7 @@
           "pred_p25": 75.8172607421875,
           "pred_p75": 142.91473388671875,
           "pred_p95": 174.57431030273438,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.3890142970615
         },
         "D0427_curved_curb": {
@@ -28102,7 +28102,7 @@
           "within_5": 123,
           "within_10": 152,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.9875030517578,
           "pred_mean": 87.96635437011719,
           "pred_median": 86.68993377685547,
@@ -28400,12 +28400,12 @@
     }
   },
   "2.2b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.2b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.2b.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 17.923612594604492,
@@ -28757,12 +28757,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.2b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.2b.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 6.679928779602051,
@@ -28773,7 +28773,7 @@
         "within_5": 1255,
         "within_10": 1783,
         "within_20": 2094,
-        "pred_min": 5.0,
+        "pred_min": 5,
         "pred_max": 174.99998474121094,
         "pred_mean": 95.8612289428711,
         "pred_median": 93.35478210449219,
@@ -28866,7 +28866,7 @@
           "pred_p25": 75.793212890625,
           "pred_p75": 143.1626434326172,
           "pred_p95": 174.62680053710938,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.24138630761041
         },
         "D0427_18": {
@@ -28963,7 +28963,7 @@
           "within_5": 123,
           "within_10": 150,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.98785400390625,
           "pred_mean": 87.99226379394531,
           "pred_median": 86.44499969482422,
@@ -29141,7 +29141,7 @@
           "pred_p25": 75.793212890625,
           "pred_p75": 143.1626434326172,
           "pred_p95": 174.62680053710938,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.24138630761041
         },
         "D0427_curved_curb": {
@@ -29238,7 +29238,7 @@
           "within_5": 123,
           "within_10": 150,
           "within_20": 159,
-          "pred_min": 5.0,
+          "pred_min": 5,
           "pred_max": 174.98785400390625,
           "pred_mean": 87.99226379394531,
           "pred_median": 86.44499969482422,
@@ -29536,12 +29536,12 @@
     }
   },
   "2.3": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.3.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.3.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 17.442110061645508,
@@ -29893,12 +29893,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.3.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.3.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 3.3046116828918457,
@@ -29910,7 +29910,7 @@
         "within_10": 2102,
         "within_20": 2194,
         "pred_min": 5.000282287597656,
-        "pred_max": 175.0,
+        "pred_max": 175,
         "pred_mean": 96.3300552368164,
         "pred_median": 93.63912963867188,
         "pred_p05": 58.416175842285156,
@@ -30002,7 +30002,7 @@
           "pred_p25": 74.29043579101562,
           "pred_p75": 140.33766174316406,
           "pred_p95": 174.8726348876953,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.30856031841702
         },
         "D0427_18": {
@@ -30079,7 +30079,7 @@
           "within_10": 153,
           "within_20": 155,
           "pred_min": 5.0108642578125,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 109.15226745605469,
           "pred_median": 97.07701873779297,
           "pred_p05": 75.63478088378906,
@@ -30277,7 +30277,7 @@
           "pred_p25": 74.29043579101562,
           "pred_p75": 140.33766174316406,
           "pred_p95": 174.8726348876953,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.30856031841702
         },
         "D0427_curved_curb": {
@@ -30333,7 +30333,7 @@
           "within_10": 153,
           "within_20": 155,
           "pred_min": 5.0108642578125,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 109.15226745605469,
           "pred_median": 97.07701873779297,
           "pred_p05": 75.63478088378906,
@@ -30672,12 +30672,12 @@
     }
   },
   "2.3b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.3b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.3b.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 17.644615173339844,
@@ -31029,12 +31029,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.3b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.3b.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 3.4122250080108643,
@@ -31046,7 +31046,7 @@
         "within_10": 2106,
         "within_20": 2195,
         "pred_min": 5.000404357910156,
-        "pred_max": 175.0,
+        "pred_max": 175,
         "pred_mean": 96.73046875,
         "pred_median": 93.98268127441406,
         "pred_p05": 58.64470672607422,
@@ -31138,7 +31138,7 @@
           "pred_p25": 74.42141723632812,
           "pred_p75": 140.27874755859375,
           "pred_p95": 174.88819885253906,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.2502994272444
         },
         "D0427_18": {
@@ -31215,7 +31215,7 @@
           "within_10": 153,
           "within_20": 155,
           "pred_min": 5.011848449707031,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 109.52201080322266,
           "pred_median": 97.90165710449219,
           "pred_p05": 75.14794158935547,
@@ -31413,7 +31413,7 @@
           "pred_p25": 74.42141723632812,
           "pred_p75": 140.27874755859375,
           "pred_p95": 174.88819885253906,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 98.2502994272444
         },
         "D0427_curved_curb": {
@@ -31469,7 +31469,7 @@
           "within_10": 153,
           "within_20": 155,
           "pred_min": 5.011848449707031,
-          "pred_max": 175.0,
+          "pred_max": 175,
           "pred_mean": 109.52201080322266,
           "pred_median": 97.90165710449219,
           "pred_p05": 75.14794158935547,
@@ -31808,12 +31808,12 @@
     }
   },
   "2.4": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.4.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.4.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 17.090682983398438,
@@ -32165,12 +32165,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.4.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.4.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 3.2839903831481934,
@@ -32274,7 +32274,7 @@
           "pred_p25": 73.834716796875,
           "pred_p75": 139.5965576171875,
           "pred_p95": 174.87432861328125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.79457635349698
         },
         "D0427_18": {
@@ -32549,7 +32549,7 @@
           "pred_p25": 73.834716796875,
           "pred_p75": 139.5965576171875,
           "pred_p95": 174.87432861328125,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.79457635349698
         },
         "D0427_curved_curb": {
@@ -32944,12 +32944,12 @@
     }
   },
   "2.4b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.4b.pth",
+    "checkpoint": "code/ai_models/SidewalkPilot-v2.4b.pth",
     "series": 2,
     "preprocessing": "raw BGR",
     "output_head": "1 continuous steering output",
     "evaluation_dataset": "Series 3/4 frozen temporal validation subset (200x66 input)",
-    "output_scale_deg": 85.0,
+    "output_scale_deg": 85,
     "overall": {
       "count": 6952,
       "mae": 17.05253028869629,
@@ -33301,12 +33301,12 @@
       "straight_count": 4741
     },
     "historical_evaluation": {
-      "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v2.4b.pth",
+      "checkpoint": "code/ai_models/SidewalkPilot-v2.4b.pth",
       "series": 2,
       "preprocessing": "raw BGR",
       "output_head": "1 continuous steering output",
       "evaluation_dataset": "Series 1/2 corrected real images (historical)",
-      "output_scale_deg": 85.0,
+      "output_scale_deg": 85,
       "overall": {
         "count": 2224,
         "mae": 3.2653517723083496,
@@ -33410,7 +33410,7 @@
           "pred_p25": 73.89387512207031,
           "pred_p75": 139.68637084960938,
           "pred_p95": 174.87026977539062,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.75324397616916
         },
         "D0427_18": {
@@ -33444,7 +33444,7 @@
           "within_5": 47,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 13.0,
+          "pred_min": 13,
           "pred_max": 173.61875915527344,
           "pred_mean": 90.18880462646484,
           "pred_median": 84.51835632324219,
@@ -33685,7 +33685,7 @@
           "pred_p25": 73.89387512207031,
           "pred_p75": 139.68637084960938,
           "pred_p95": 174.87026977539062,
-          "target_mean": 105.0,
+          "target_mean": 105,
           "score": 97.75324397616916
         },
         "D0427_curved_curb": {
@@ -33719,7 +33719,7 @@
           "within_5": 47,
           "within_10": 53,
           "within_20": 53,
-          "pred_min": 13.0,
+          "pred_min": 13,
           "pred_max": 173.61875915527344,
           "pred_mean": 90.18880462646484,
           "pred_median": 84.51835632324219,
@@ -34080,7 +34080,7 @@
     }
   },
   "3.0": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.0.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.0.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "2 continuous controls (steering + throttle)",
@@ -34439,7 +34439,7 @@
     }
   },
   "3.0b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.0b.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.0b.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "2 continuous controls (steering + throttle)",
@@ -34798,7 +34798,7 @@
     }
   },
   "3.1": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.1.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.1.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -35157,7 +35157,7 @@
     }
   },
   "3.1b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.1b.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.1b.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -35516,7 +35516,7 @@
     }
   },
   "3.2": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.2.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.2.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -35875,7 +35875,7 @@
     }
   },
   "3.2b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.2b.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.2b.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -36234,7 +36234,7 @@
     }
   },
   "3.3": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.3.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.3.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -36593,7 +36593,7 @@
     }
   },
   "3.3b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.3b.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.3b.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -36952,7 +36952,7 @@
     }
   },
   "3.4": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.4.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.4.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -37311,7 +37311,7 @@
     }
   },
   "3.4b": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v3.4b.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v3.4b.onnx",
     "series": 3,
     "preprocessing": "raw BGR 320x180",
     "output_head": "19 hybrid outputs (9 classes + 9 offsets + throttle)",
@@ -37670,7 +37670,7 @@
     }
   },
   "4.0p": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v4.0p.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.0p.onnx",
     "series": 4,
     "preprocessing": "raw BGR 320x180",
     "output_head": "PC: 1 x 18 hybrid steering outputs",
@@ -38029,7 +38029,7 @@
     }
   },
   "4.0r": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v4.0r.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.0r.onnx",
     "series": 4,
     "preprocessing": "raw BGR 320x180",
     "output_head": "PC: 1 x 18 hybrid steering outputs",
@@ -38388,7 +38388,7 @@
     }
   },
   "4.0f": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v4.0f.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.0f.onnx",
     "series": 4,
     "preprocessing": "raw BGR 320x180",
     "output_head": "CF: 4 x 18 hybrid steering outputs",
@@ -38747,7 +38747,7 @@
     }
   },
   "4.0g": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v4.0g.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.0g.onnx",
     "series": 4,
     "preprocessing": "raw BGR 320x180",
     "output_head": "CF: 4 x 18 hybrid steering outputs",
@@ -39106,7 +39106,7 @@
     }
   },
   "4.0a": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v4.0a.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.0a.onnx",
     "series": 4,
     "preprocessing": "raw BGR 320x180",
     "output_head": "PCF: 4 x 18 hybrid steering outputs",
@@ -39465,7 +39465,7 @@
     }
   },
   "4.0c": {
-    "checkpoint": "/home/rsabavat/rc_car_code/code/ai_models/SidewalkPilot-v4.0c.onnx",
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.0c.onnx",
     "series": 4,
     "preprocessing": "raw BGR 320x180",
     "output_head": "PCF: 4 x 18 hybrid steering outputs",
@@ -39819,6 +39819,2160 @@
       "turn_exact_bucket_recall_percent": 29.35323383084577,
       "turn_within_one_bucket_recall_percent": 62.9127091813659,
       "straight_exact_bucket_recall_percent": 75.49040286859312,
+      "turn_count": 2211,
+      "straight_count": 4741
+    }
+  },
+  "4.1p": {
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.1p.onnx",
+    "series": 4,
+    "preprocessing": "raw BGR 320x180",
+    "output_head": "PC: 1 x 18 hybrid steering outputs",
+    "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+    "output_scale_deg": null,
+    "hold_last_mae_deg": 11.199079513549805,
+    "overall": {
+      "count": 6952,
+      "mae": 14.58527660369873,
+      "median_ae": 5.0480499267578125,
+      "max_ae": 169.047607421875,
+      "signed_error": -0.14361663162708282,
+      "within_2": 3008,
+      "within_5": 3470,
+      "within_10": 4266,
+      "within_20": 5063,
+      "pred_min": 1.9886142015457153,
+      "pred_max": 175.64358520507812,
+      "pred_mean": 96.13285064697266,
+      "pred_median": 90.02867126464844,
+      "pred_p05": 68.709716796875,
+      "pred_p25": 88.69837188720703,
+      "pred_p75": 92.0465087890625,
+      "pred_p95": 149.26434326171875,
+      "target_mean": 96.2764663696289,
+      "score": 91.8970685535007
+    },
+    "by_dataset": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 11.451562881469727,
+        "median_ae": 1.5128250122070312,
+        "max_ae": 169.047607421875,
+        "signed_error": -4.549596309661865,
+        "within_2": 2296,
+        "within_5": 2533,
+        "within_10": 2967,
+        "within_20": 3331,
+        "pred_min": 1.9886142015457153,
+        "pred_max": 175.64358520507812,
+        "pred_mean": 91.9000473022461,
+        "pred_median": 90.02867126464844,
+        "pred_p05": 79.7780990600586,
+        "pred_p25": 89.08991241455078,
+        "pred_p75": 91.17170715332031,
+        "pred_p95": 112.26941680908203,
+        "target_mean": 96.44964599609375,
+        "score": 93.6380206214057
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 16.945985794067383,
+        "median_ae": 10.333641052246094,
+        "max_ae": 122.13922119140625,
+        "signed_error": -3.304450750350952,
+        "within_2": 95,
+        "within_5": 167,
+        "within_10": 278,
+        "within_20": 449,
+        "pred_min": 2.026536226272583,
+        "pred_max": 167.39694213867188,
+        "pred_mean": 78.40567779541016,
+        "pred_median": 79.5928955078125,
+        "pred_p05": 66.21337890625,
+        "pred_p25": 68.18516540527344,
+        "pred_p75": 80.74059295654297,
+        "pred_p95": 127.292724609375,
+        "target_mean": 81.71012115478516,
+        "score": 90.58556344774034
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 20.245389938354492,
+        "median_ae": 10.078304290771484,
+        "max_ae": 90.66988372802734,
+        "signed_error": 9.85549545288086,
+        "within_2": 617,
+        "within_5": 770,
+        "within_10": 1021,
+        "within_20": 1283,
+        "pred_min": 13.978891372680664,
+        "pred_max": 164.6700897216797,
+        "pred_mean": 110.36611938476562,
+        "pred_median": 90.84739685058594,
+        "pred_p05": 79.73419952392578,
+        "pred_p25": 89.06123352050781,
+        "pred_p75": 144.9583740234375,
+        "pred_p95": 153.4062957763672,
+        "target_mean": 100.51062774658203,
+        "score": 88.75256114535861
+      }
+    },
+    "by_source": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 11.451562881469727,
+        "median_ae": 1.5128250122070312,
+        "max_ae": 169.047607421875,
+        "signed_error": -4.549596309661865,
+        "within_2": 2296,
+        "within_5": 2533,
+        "within_10": 2967,
+        "within_20": 3331,
+        "pred_min": 1.9886142015457153,
+        "pred_max": 175.64358520507812,
+        "pred_mean": 91.9000473022461,
+        "pred_median": 90.02867126464844,
+        "pred_p05": 79.7780990600586,
+        "pred_p25": 89.08991241455078,
+        "pred_p75": 91.17170715332031,
+        "pred_p95": 112.26941680908203,
+        "target_mean": 96.44964599609375,
+        "score": 93.6380206214057
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 16.945985794067383,
+        "median_ae": 10.333641052246094,
+        "max_ae": 122.13922119140625,
+        "signed_error": -3.304450750350952,
+        "within_2": 95,
+        "within_5": 167,
+        "within_10": 278,
+        "within_20": 449,
+        "pred_min": 2.026536226272583,
+        "pred_max": 167.39694213867188,
+        "pred_mean": 78.40567779541016,
+        "pred_median": 79.5928955078125,
+        "pred_p05": 66.21337890625,
+        "pred_p25": 68.18516540527344,
+        "pred_p75": 80.74059295654297,
+        "pred_p95": 127.292724609375,
+        "target_mean": 81.71012115478516,
+        "score": 90.58556344774034
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 20.245389938354492,
+        "median_ae": 10.078304290771484,
+        "max_ae": 90.66988372802734,
+        "signed_error": 9.85549545288086,
+        "within_2": 617,
+        "within_5": 770,
+        "within_10": 1021,
+        "within_20": 1283,
+        "pred_min": 13.978891372680664,
+        "pred_max": 164.6700897216797,
+        "pred_mean": 110.36611938476562,
+        "pred_median": 90.84739685058594,
+        "pred_p05": 79.73419952392578,
+        "pred_p25": 89.06123352050781,
+        "pred_p75": 144.9583740234375,
+        "pred_p95": 153.4062957763672,
+        "target_mean": 100.51062774658203,
+        "score": 88.75256114535861
+      }
+    },
+    "prediction_bucket_counts": {
+      "HL 0-45": 77,
+      "L 45-75": 359,
+      "SL 75-85": 925,
+      "ST 85-95": 3945,
+      "SR 95-105": 147,
+      "R 105-135": 749,
+      "HR 135-180": 750
+    },
+    "ground_bucket_counts": {
+      "HL 0-45": 50,
+      "L 45-75": 311,
+      "SL 75-85": 357,
+      "ST 85-95": 4741,
+      "SR 95-105": 239,
+      "R 105-135": 677,
+      "HR 135-180": 577
+    },
+    "bucket_agreement": {
+      "exact_bucket_count": 3777,
+      "exact_bucket_percent": 54.329689298043725,
+      "off_by_one_bucket_count": 5316,
+      "off_by_one_bucket_percent": 76.46720368239356
+    },
+    "bucket_confusion_ground_rows_pred_cols": {
+      "HL 0-45": {
+        "HL 0-45": 12,
+        "L 45-75": 21,
+        "SL 75-85": 4,
+        "ST 85-95": 11,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 2
+      },
+      "L 45-75": {
+        "HL 0-45": 11,
+        "L 45-75": 106,
+        "SL 75-85": 106,
+        "ST 85-95": 80,
+        "SR 95-105": 1,
+        "R 105-135": 0,
+        "HR 135-180": 7
+      },
+      "SL 75-85": {
+        "HL 0-45": 5,
+        "L 45-75": 71,
+        "SL 75-85": 155,
+        "ST 85-95": 115,
+        "SR 95-105": 0,
+        "R 105-135": 8,
+        "HR 135-180": 3
+      },
+      "ST 85-95": {
+        "HL 0-45": 43,
+        "L 45-75": 153,
+        "SL 75-85": 633,
+        "ST 85-95": 3113,
+        "SR 95-105": 63,
+        "R 105-135": 377,
+        "HR 135-180": 359
+      },
+      "SR 95-105": {
+        "HL 0-45": 1,
+        "L 45-75": 3,
+        "SL 75-85": 5,
+        "ST 85-95": 145,
+        "SR 95-105": 9,
+        "R 105-135": 42,
+        "HR 135-180": 34
+      },
+      "R 105-135": {
+        "HL 0-45": 1,
+        "L 45-75": 3,
+        "SL 75-85": 12,
+        "ST 85-95": 253,
+        "SR 95-105": 47,
+        "R 105-135": 199,
+        "HR 135-180": 162
+      },
+      "HR 135-180": {
+        "HL 0-45": 4,
+        "L 45-75": 2,
+        "SL 75-85": 10,
+        "ST 85-95": 228,
+        "SR 95-105": 27,
+        "R 105-135": 123,
+        "HR 135-180": 183
+      }
+    },
+    "bucket9_confusion_ground_rows_pred_cols": {
+      "HL": {
+        "HL": 12,
+        "L": 2,
+        "L+": 19,
+        "SL": 4,
+        "ST": 11,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 2
+      },
+      "L": {
+        "HL": 6,
+        "L": 1,
+        "L+": 28,
+        "SL": 30,
+        "ST": 18,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 5
+      },
+      "L+": {
+        "HL": 5,
+        "L": 2,
+        "L+": 75,
+        "SL": 76,
+        "ST": 62,
+        "SR": 1,
+        "R": 0,
+        "R+": 0,
+        "HR": 2
+      },
+      "SL": {
+        "HL": 5,
+        "L": 1,
+        "L+": 70,
+        "SL": 155,
+        "ST": 115,
+        "SR": 0,
+        "R": 5,
+        "R+": 3,
+        "HR": 3
+      },
+      "ST": {
+        "HL": 43,
+        "L": 8,
+        "L+": 145,
+        "SL": 633,
+        "ST": 3113,
+        "SR": 63,
+        "R": 290,
+        "R+": 87,
+        "HR": 359
+      },
+      "SR": {
+        "HL": 1,
+        "L": 1,
+        "L+": 2,
+        "SL": 5,
+        "ST": 145,
+        "SR": 9,
+        "R": 26,
+        "R+": 16,
+        "HR": 34
+      },
+      "R": {
+        "HL": 0,
+        "L": 0,
+        "L+": 1,
+        "SL": 8,
+        "ST": 139,
+        "SR": 21,
+        "R": 37,
+        "R+": 35,
+        "HR": 74
+      },
+      "R+": {
+        "HL": 1,
+        "L": 0,
+        "L+": 2,
+        "SL": 4,
+        "ST": 114,
+        "SR": 26,
+        "R": 88,
+        "R+": 39,
+        "HR": 88
+      },
+      "HR": {
+        "HL": 4,
+        "L": 0,
+        "L+": 2,
+        "SL": 10,
+        "ST": 228,
+        "SR": 27,
+        "R": 87,
+        "R+": 36,
+        "HR": 183
+      }
+    },
+    "selection_metrics": {
+      "balanced_9_bucket_exact_percent": 25.094249388330763,
+      "turn_detection_recall_percent": 62.369968340117595,
+      "turn_exact_bucket_recall_percent": 23.111714156490276,
+      "turn_within_one_bucket_recall_percent": 56.49027589326097,
+      "straight_exact_bucket_recall_percent": 65.66125290023201,
+      "turn_count": 2211,
+      "straight_count": 4741
+    }
+  },
+  "4.1r": {
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.1r.onnx",
+    "series": 4,
+    "preprocessing": "raw BGR 320x180",
+    "output_head": "PC: 1 x 18 hybrid steering outputs",
+    "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+    "output_scale_deg": null,
+    "hold_last_mae_deg": 11.199079513549805,
+    "overall": {
+      "count": 6952,
+      "mae": 13.38247013092041,
+      "median_ae": 1.4310569763183594,
+      "max_ae": 155.774658203125,
+      "signed_error": -5.765278339385986,
+      "within_2": 3994,
+      "within_5": 4311,
+      "within_10": 4800,
+      "within_20": 5330,
+      "pred_min": 21.162599563598633,
+      "pred_max": 159.03176879882812,
+      "pred_mean": 90.51118469238281,
+      "pred_median": 89.54763793945312,
+      "pred_p05": 79.58050537109375,
+      "pred_p25": 88.82718658447266,
+      "pred_p75": 90.49701690673828,
+      "pred_p95": 126.97965240478516,
+      "target_mean": 96.2764663696289,
+      "score": 92.56529437171088
+    },
+    "by_dataset": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 10.784472465515137,
+        "median_ae": 1.1386566162109375,
+        "max_ae": 155.774658203125,
+        "signed_error": -7.491824150085449,
+        "within_2": 2774,
+        "within_5": 2953,
+        "within_10": 3219,
+        "within_20": 3469,
+        "pred_min": 21.162599563598633,
+        "pred_max": 155.41067504882812,
+        "pred_mean": 88.95782470703125,
+        "pred_median": 89.6768798828125,
+        "pred_p05": 80.27644348144531,
+        "pred_p25": 89.00453186035156,
+        "pred_p75": 90.54125213623047,
+        "pred_p95": 91.72339630126953,
+        "target_mean": 96.44964599609375,
+        "score": 94.00862640804715
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 14.987956047058105,
+        "median_ae": 5.725353240966797,
+        "max_ae": 116.53082275390625,
+        "signed_error": 2.517010450363159,
+        "within_2": 275,
+        "within_5": 314,
+        "within_10": 385,
+        "within_20": 492,
+        "pred_min": 22.152053833007812,
+        "pred_max": 159.03176879882812,
+        "pred_mean": 84.22713470458984,
+        "pred_median": 88.71205139160156,
+        "pred_p05": 28.317462921142578,
+        "pred_p25": 79.69095611572266,
+        "pred_p75": 89.52679443359375,
+        "pred_p95": 91.58527374267578,
+        "target_mean": 81.71012115478516,
+        "score": 91.67335775163438
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 18.18572998046875,
+        "median_ae": 4.805206298828125,
+        "max_ae": 119.09244537353516,
+        "signed_error": -4.845840930938721,
+        "within_2": 945,
+        "within_5": 1044,
+        "within_10": 1196,
+        "within_20": 1369,
+        "pred_min": 23.542776107788086,
+        "pred_max": 157.9871368408203,
+        "pred_mean": 95.66478729248047,
+        "pred_median": 89.54441833496094,
+        "pred_p05": 68.85787200927734,
+        "pred_p25": 88.75933074951172,
+        "pred_p75": 90.71540832519531,
+        "pred_p95": 149.5443572998047,
+        "target_mean": 100.51062774658203,
+        "score": 89.89681667751736
+      }
+    },
+    "by_source": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 10.784472465515137,
+        "median_ae": 1.1386566162109375,
+        "max_ae": 155.774658203125,
+        "signed_error": -7.491824150085449,
+        "within_2": 2774,
+        "within_5": 2953,
+        "within_10": 3219,
+        "within_20": 3469,
+        "pred_min": 21.162599563598633,
+        "pred_max": 155.41067504882812,
+        "pred_mean": 88.95782470703125,
+        "pred_median": 89.6768798828125,
+        "pred_p05": 80.27644348144531,
+        "pred_p25": 89.00453186035156,
+        "pred_p75": 90.54125213623047,
+        "pred_p95": 91.72339630126953,
+        "target_mean": 96.44964599609375,
+        "score": 94.00862640804715
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 14.987956047058105,
+        "median_ae": 5.725353240966797,
+        "max_ae": 116.53082275390625,
+        "signed_error": 2.517010450363159,
+        "within_2": 275,
+        "within_5": 314,
+        "within_10": 385,
+        "within_20": 492,
+        "pred_min": 22.152053833007812,
+        "pred_max": 159.03176879882812,
+        "pred_mean": 84.22713470458984,
+        "pred_median": 88.71205139160156,
+        "pred_p05": 28.317462921142578,
+        "pred_p25": 79.69095611572266,
+        "pred_p75": 89.52679443359375,
+        "pred_p95": 91.58527374267578,
+        "target_mean": 81.71012115478516,
+        "score": 91.67335775163438
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 18.18572998046875,
+        "median_ae": 4.805206298828125,
+        "max_ae": 119.09244537353516,
+        "signed_error": -4.845840930938721,
+        "within_2": 945,
+        "within_5": 1044,
+        "within_10": 1196,
+        "within_20": 1369,
+        "pred_min": 23.542776107788086,
+        "pred_max": 157.9871368408203,
+        "pred_mean": 95.66478729248047,
+        "pred_median": 89.54441833496094,
+        "pred_p05": 68.85787200927734,
+        "pred_p25": 88.75933074951172,
+        "pred_p75": 90.71540832519531,
+        "pred_p95": 149.5443572998047,
+        "target_mean": 100.51062774658203,
+        "score": 89.89681667751736
+      }
+    },
+    "prediction_bucket_counts": {
+      "HL 0-45": 164,
+      "L 45-75": 156,
+      "SL 75-85": 335,
+      "ST 85-95": 5809,
+      "SR 95-105": 87,
+      "R 105-135": 102,
+      "HR 135-180": 299
+    },
+    "ground_bucket_counts": {
+      "HL 0-45": 50,
+      "L 45-75": 311,
+      "SL 75-85": 357,
+      "ST 85-95": 4741,
+      "SR 95-105": 239,
+      "R 105-135": 677,
+      "HR 135-180": 577
+    },
+    "bucket_agreement": {
+      "exact_bucket_count": 4382,
+      "exact_bucket_percent": 63.032220943613346,
+      "off_by_one_bucket_count": 5305,
+      "off_by_one_bucket_percent": 76.30897583429228
+    },
+    "bucket_confusion_ground_rows_pred_cols": {
+      "HL 0-45": {
+        "HL 0-45": 7,
+        "L 45-75": 11,
+        "SL 75-85": 2,
+        "ST 85-95": 29,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 1
+      },
+      "L 45-75": {
+        "HL 0-45": 24,
+        "L 45-75": 62,
+        "SL 75-85": 56,
+        "ST 85-95": 155,
+        "SR 95-105": 1,
+        "R 105-135": 1,
+        "HR 135-180": 12
+      },
+      "SL 75-85": {
+        "HL 0-45": 21,
+        "L 45-75": 21,
+        "SL 75-85": 68,
+        "ST 85-95": 240,
+        "SR 95-105": 1,
+        "R 105-135": 0,
+        "HR 135-180": 6
+      },
+      "ST 85-95": {
+        "HL 0-45": 101,
+        "L 45-75": 55,
+        "SL 75-85": 207,
+        "ST 85-95": 4146,
+        "SR 95-105": 51,
+        "R 105-135": 55,
+        "HR 135-180": 126
+      },
+      "SR 95-105": {
+        "HL 0-45": 1,
+        "L 45-75": 1,
+        "SL 75-85": 0,
+        "ST 85-95": 212,
+        "SR 95-105": 5,
+        "R 105-135": 5,
+        "HR 135-180": 15
+      },
+      "R 105-135": {
+        "HL 0-45": 4,
+        "L 45-75": 2,
+        "SL 75-85": 1,
+        "ST 85-95": 567,
+        "SR 95-105": 10,
+        "R 105-135": 24,
+        "HR 135-180": 69
+      },
+      "HR 135-180": {
+        "HL 0-45": 6,
+        "L 45-75": 4,
+        "SL 75-85": 1,
+        "ST 85-95": 460,
+        "SR 95-105": 19,
+        "R 105-135": 17,
+        "HR 135-180": 70
+      }
+    },
+    "bucket9_confusion_ground_rows_pred_cols": {
+      "HL": {
+        "HL": 7,
+        "L": 3,
+        "L+": 8,
+        "SL": 2,
+        "ST": 29,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 1
+      },
+      "L": {
+        "HL": 9,
+        "L": 4,
+        "L+": 14,
+        "SL": 13,
+        "ST": 40,
+        "SR": 1,
+        "R": 0,
+        "R+": 1,
+        "HR": 6
+      },
+      "L+": {
+        "HL": 15,
+        "L": 3,
+        "L+": 41,
+        "SL": 43,
+        "ST": 115,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 6
+      },
+      "SL": {
+        "HL": 21,
+        "L": 6,
+        "L+": 15,
+        "SL": 68,
+        "ST": 240,
+        "SR": 1,
+        "R": 0,
+        "R+": 0,
+        "HR": 6
+      },
+      "ST": {
+        "HL": 101,
+        "L": 6,
+        "L+": 49,
+        "SL": 207,
+        "ST": 4146,
+        "SR": 51,
+        "R": 0,
+        "R+": 55,
+        "HR": 126
+      },
+      "SR": {
+        "HL": 1,
+        "L": 0,
+        "L+": 1,
+        "SL": 0,
+        "ST": 212,
+        "SR": 5,
+        "R": 0,
+        "R+": 5,
+        "HR": 15
+      },
+      "R": {
+        "HL": 1,
+        "L": 0,
+        "L+": 0,
+        "SL": 0,
+        "ST": 265,
+        "SR": 6,
+        "R": 0,
+        "R+": 15,
+        "HR": 28
+      },
+      "R+": {
+        "HL": 3,
+        "L": 2,
+        "L+": 0,
+        "SL": 1,
+        "ST": 302,
+        "SR": 4,
+        "R": 1,
+        "R+": 8,
+        "HR": 41
+      },
+      "HR": {
+        "HL": 6,
+        "L": 2,
+        "L+": 2,
+        "SL": 1,
+        "ST": 460,
+        "SR": 19,
+        "R": 0,
+        "R+": 17,
+        "HR": 70
+      }
+    },
+    "selection_metrics": {
+      "balanced_9_bucket_exact_percent": 17.76248218138015,
+      "turn_detection_recall_percent": 24.785165083672545,
+      "turn_exact_bucket_recall_percent": 9.181365897783808,
+      "turn_within_one_bucket_recall_percent": 37.17774762550882,
+      "straight_exact_bucket_recall_percent": 87.44990508331576,
+      "turn_count": 2211,
+      "straight_count": 4741
+    }
+  },
+  "4.1f": {
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.1f.onnx",
+    "series": 4,
+    "preprocessing": "raw BGR 320x180",
+    "output_head": "CF: 4 x 18 hybrid steering outputs",
+    "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+    "output_scale_deg": null,
+    "hold_last_mae_deg": 11.199079513549805,
+    "overall": {
+      "count": 6952,
+      "mae": 15.46633243560791,
+      "median_ae": 7.218494415283203,
+      "max_ae": 171.96836853027344,
+      "signed_error": 1.1831756830215454,
+      "within_2": 2861,
+      "within_5": 3245,
+      "within_10": 4034,
+      "within_20": 4869,
+      "pred_min": 4.096612453460693,
+      "pred_max": 174.4873046875,
+      "pred_mean": 97.45964050292969,
+      "pred_median": 90.1401596069336,
+      "pred_p05": 68.32646179199219,
+      "pred_p25": 88.79717254638672,
+      "pred_p75": 100.26168060302734,
+      "pred_p95": 151.27940368652344,
+      "target_mean": 96.2764663696289,
+      "score": 91.40759309132893
+    },
+    "by_dataset": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 12.125081062316895,
+        "median_ae": 1.7317924499511719,
+        "max_ae": 171.96836853027344,
+        "signed_error": -3.17706036567688,
+        "within_2": 2190,
+        "within_5": 2394,
+        "within_10": 2800,
+        "within_20": 3222,
+        "pred_min": 7.411293983459473,
+        "pred_max": 174.4873046875,
+        "pred_mean": 93.2725830078125,
+        "pred_median": 90.12249755859375,
+        "pred_p05": 79.67349243164062,
+        "pred_p25": 89.20854949951172,
+        "pred_p75": 91.26211547851562,
+        "pred_p95": 114.66554260253906,
+        "target_mean": 96.44964599609375,
+        "score": 93.26384385426839
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 17.171775817871094,
+        "median_ae": 11.068439483642578,
+        "max_ae": 150.34036254882812,
+        "signed_error": -4.962937355041504,
+        "within_2": 86,
+        "within_5": 139,
+        "within_10": 266,
+        "within_20": 421,
+        "pred_min": 4.096612453460693,
+        "pred_max": 170.1447296142578,
+        "pred_mean": 76.74718475341797,
+        "pred_median": 69.45697021484375,
+        "pred_p05": 60.35041427612305,
+        "pred_p25": 67.55005645751953,
+        "pred_p75": 80.26294708251953,
+        "pred_p95": 127.14605712890625,
+        "target_mean": 81.71012115478516,
+        "score": 90.46012454562717
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 21.756929397583008,
+        "median_ae": 10.385669708251953,
+        "max_ae": 90.28189086914062,
+        "signed_error": 12.02910041809082,
+        "within_2": 585,
+        "within_5": 712,
+        "within_10": 968,
+        "within_20": 1226,
+        "pred_min": 18.272497177124023,
+        "pred_max": 165.79550170898438,
+        "pred_mean": 112.53972625732422,
+        "pred_median": 91.42231750488281,
+        "pred_p05": 79.8868179321289,
+        "pred_p25": 89.33277893066406,
+        "pred_p75": 148.22198486328125,
+        "pred_p95": 153.8756103515625,
+        "target_mean": 100.51062774658203,
+        "score": 87.91281700134277
+      }
+    },
+    "by_source": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 12.125081062316895,
+        "median_ae": 1.7317924499511719,
+        "max_ae": 171.96836853027344,
+        "signed_error": -3.17706036567688,
+        "within_2": 2190,
+        "within_5": 2394,
+        "within_10": 2800,
+        "within_20": 3222,
+        "pred_min": 7.411293983459473,
+        "pred_max": 174.4873046875,
+        "pred_mean": 93.2725830078125,
+        "pred_median": 90.12249755859375,
+        "pred_p05": 79.67349243164062,
+        "pred_p25": 89.20854949951172,
+        "pred_p75": 91.26211547851562,
+        "pred_p95": 114.66554260253906,
+        "target_mean": 96.44964599609375,
+        "score": 93.26384385426839
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 17.171775817871094,
+        "median_ae": 11.068439483642578,
+        "max_ae": 150.34036254882812,
+        "signed_error": -4.962937355041504,
+        "within_2": 86,
+        "within_5": 139,
+        "within_10": 266,
+        "within_20": 421,
+        "pred_min": 4.096612453460693,
+        "pred_max": 170.1447296142578,
+        "pred_mean": 76.74718475341797,
+        "pred_median": 69.45697021484375,
+        "pred_p05": 60.35041427612305,
+        "pred_p25": 67.55005645751953,
+        "pred_p75": 80.26294708251953,
+        "pred_p95": 127.14605712890625,
+        "target_mean": 81.71012115478516,
+        "score": 90.46012454562717
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 21.756929397583008,
+        "median_ae": 10.385669708251953,
+        "max_ae": 90.28189086914062,
+        "signed_error": 12.02910041809082,
+        "within_2": 585,
+        "within_5": 712,
+        "within_10": 968,
+        "within_20": 1226,
+        "pred_min": 18.272497177124023,
+        "pred_max": 165.79550170898438,
+        "pred_mean": 112.53972625732422,
+        "pred_median": 91.42231750488281,
+        "pred_p05": 79.8868179321289,
+        "pred_p25": 89.33277893066406,
+        "pred_p75": 148.22198486328125,
+        "pred_p95": 153.8756103515625,
+        "target_mean": 100.51062774658203,
+        "score": 87.91281700134277
+      }
+    },
+    "prediction_bucket_counts": {
+      "HL 0-45": 66,
+      "L 45-75": 459,
+      "SL 75-85": 862,
+      "ST 85-95": 3686,
+      "SR 95-105": 177,
+      "R 105-135": 900,
+      "HR 135-180": 802
+    },
+    "ground_bucket_counts": {
+      "HL 0-45": 50,
+      "L 45-75": 311,
+      "SL 75-85": 357,
+      "ST 85-95": 4741,
+      "SR 95-105": 239,
+      "R 105-135": 677,
+      "HR 135-180": 577
+    },
+    "bucket_agreement": {
+      "exact_bucket_count": 3584,
+      "exact_bucket_percent": 51.55350978135788,
+      "off_by_one_bucket_count": 5143,
+      "off_by_one_bucket_percent": 73.97871116225546
+    },
+    "bucket_confusion_ground_rows_pred_cols": {
+      "HL 0-45": {
+        "HL 0-45": 14,
+        "L 45-75": 15,
+        "SL 75-85": 6,
+        "ST 85-95": 9,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 6
+      },
+      "L 45-75": {
+        "HL 0-45": 7,
+        "L 45-75": 123,
+        "SL 75-85": 99,
+        "ST 85-95": 73,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 9
+      },
+      "SL 75-85": {
+        "HL 0-45": 4,
+        "L 45-75": 94,
+        "SL 75-85": 136,
+        "ST 85-95": 112,
+        "SR 95-105": 2,
+        "R 105-135": 6,
+        "HR 135-180": 3
+      },
+      "ST 85-95": {
+        "HL 0-45": 35,
+        "L 45-75": 220,
+        "SL 75-85": 598,
+        "ST 85-95": 2916,
+        "SR 95-105": 80,
+        "R 105-135": 499,
+        "HR 135-180": 393
+      },
+      "SR 95-105": {
+        "HL 0-45": 0,
+        "L 45-75": 2,
+        "SL 75-85": 4,
+        "ST 85-95": 130,
+        "SR 95-105": 9,
+        "R 105-135": 52,
+        "HR 135-180": 42
+      },
+      "R 105-135": {
+        "HL 0-45": 0,
+        "L 45-75": 4,
+        "SL 75-85": 6,
+        "ST 85-95": 248,
+        "SR 95-105": 66,
+        "R 105-135": 195,
+        "HR 135-180": 158
+      },
+      "HR 135-180": {
+        "HL 0-45": 6,
+        "L 45-75": 1,
+        "SL 75-85": 13,
+        "ST 85-95": 198,
+        "SR 95-105": 20,
+        "R 105-135": 148,
+        "HR 135-180": 191
+      }
+    },
+    "bucket9_confusion_ground_rows_pred_cols": {
+      "HL": {
+        "HL": 14,
+        "L": 4,
+        "L+": 11,
+        "SL": 6,
+        "ST": 9,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 6
+      },
+      "L": {
+        "HL": 3,
+        "L": 4,
+        "L+": 36,
+        "SL": 23,
+        "ST": 16,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 6
+      },
+      "L+": {
+        "HL": 4,
+        "L": 8,
+        "L+": 75,
+        "SL": 76,
+        "ST": 57,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 3
+      },
+      "SL": {
+        "HL": 4,
+        "L": 4,
+        "L+": 90,
+        "SL": 136,
+        "ST": 112,
+        "SR": 2,
+        "R": 5,
+        "R+": 1,
+        "HR": 3
+      },
+      "ST": {
+        "HL": 35,
+        "L": 10,
+        "L+": 210,
+        "SL": 598,
+        "ST": 2916,
+        "SR": 80,
+        "R": 371,
+        "R+": 128,
+        "HR": 393
+      },
+      "SR": {
+        "HL": 0,
+        "L": 0,
+        "L+": 2,
+        "SL": 4,
+        "ST": 130,
+        "SR": 9,
+        "R": 36,
+        "R+": 16,
+        "HR": 42
+      },
+      "R": {
+        "HL": 0,
+        "L": 0,
+        "L+": 2,
+        "SL": 4,
+        "ST": 138,
+        "SR": 27,
+        "R": 39,
+        "R+": 37,
+        "HR": 68
+      },
+      "R+": {
+        "HL": 0,
+        "L": 0,
+        "L+": 2,
+        "SL": 2,
+        "ST": 110,
+        "SR": 39,
+        "R": 80,
+        "R+": 39,
+        "HR": 90
+      },
+      "HR": {
+        "HL": 6,
+        "L": 0,
+        "L+": 1,
+        "SL": 13,
+        "ST": 198,
+        "SR": 20,
+        "R": 105,
+        "R+": 43,
+        "HR": 191
+      }
+    },
+    "selection_metrics": {
+      "balanced_9_bucket_exact_percent": 25.08904083107158,
+      "turn_detection_recall_percent": 65.17412935323384,
+      "turn_exact_bucket_recall_percent": 22.93080054274084,
+      "turn_within_one_bucket_recall_percent": 57.84712799638173,
+      "straight_exact_bucket_recall_percent": 61.50601139000211,
+      "turn_count": 2211,
+      "straight_count": 4741
+    }
+  },
+  "4.1g": {
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.1g.onnx",
+    "series": 4,
+    "preprocessing": "raw BGR 320x180",
+    "output_head": "CF: 4 x 18 hybrid steering outputs",
+    "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+    "output_scale_deg": null,
+    "hold_last_mae_deg": 11.199079513549805,
+    "overall": {
+      "count": 6952,
+      "mae": 14.65183162689209,
+      "median_ae": 4.658573150634766,
+      "max_ae": 172.38189697265625,
+      "signed_error": 0.5552169680595398,
+      "within_2": 3102,
+      "within_5": 3515,
+      "within_10": 4219,
+      "within_20": 5025,
+      "pred_min": 6.1980814933776855,
+      "pred_max": 173.3710174560547,
+      "pred_mean": 96.8316879272461,
+      "pred_median": 89.91819763183594,
+      "pred_p05": 68.9125747680664,
+      "pred_p25": 88.71976470947266,
+      "pred_p75": 91.74159240722656,
+      "pred_p95": 151.02601623535156,
+      "target_mean": 96.2764663696289,
+      "score": 91.86009354061551
+    },
+    "by_dataset": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 11.558834075927734,
+        "median_ae": 1.4112701416015625,
+        "max_ae": 172.38189697265625,
+        "signed_error": -3.6175262928009033,
+        "within_2": 2354,
+        "within_5": 2587,
+        "within_10": 2948,
+        "within_20": 3296,
+        "pred_min": 7.618110656738281,
+        "pred_max": 173.3710174560547,
+        "pred_mean": 92.83212280273438,
+        "pred_median": 89.91738891601562,
+        "pred_p05": 79.90238189697266,
+        "pred_p25": 89.03258514404297,
+        "pred_p75": 90.90093994140625,
+        "pred_p95": 114.4123306274414,
+        "target_mean": 96.44964599609375,
+        "score": 93.57842551337347
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 15.481582641601562,
+        "median_ae": 10.267017364501953,
+        "max_ae": 115.28469848632812,
+        "signed_error": -4.611820220947266,
+        "within_2": 101,
+        "within_5": 146,
+        "within_10": 282,
+        "within_20": 462,
+        "pred_min": 6.1980814933776855,
+        "pred_max": 168.14659118652344,
+        "pred_mean": 77.09830474853516,
+        "pred_median": 79.41724395751953,
+        "pred_p05": 66.24960327148438,
+        "pred_p25": 67.9811782836914,
+        "pred_p75": 80.10368347167969,
+        "pred_p95": 91.67107391357422,
+        "target_mean": 81.71012115478516,
+        "score": 91.3991207546658
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 20.710954666137695,
+        "median_ae": 10.21270751953125,
+        "max_ae": 91.86624908447266,
+        "signed_error": 10.70961856842041,
+        "within_2": 647,
+        "within_5": 782,
+        "within_10": 989,
+        "within_20": 1267,
+        "pred_min": 21.200376510620117,
+        "pred_max": 163.0689239501953,
+        "pred_mean": 111.22024536132812,
+        "pred_median": 90.81336975097656,
+        "pred_p05": 79.70077514648438,
+        "pred_p25": 89.13188171386719,
+        "pred_p75": 147.85585021972656,
+        "pred_p95": 154.1160888671875,
+        "target_mean": 100.51062774658203,
+        "score": 88.49391407436795
+      }
+    },
+    "by_source": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 11.558834075927734,
+        "median_ae": 1.4112701416015625,
+        "max_ae": 172.38189697265625,
+        "signed_error": -3.6175262928009033,
+        "within_2": 2354,
+        "within_5": 2587,
+        "within_10": 2948,
+        "within_20": 3296,
+        "pred_min": 7.618110656738281,
+        "pred_max": 173.3710174560547,
+        "pred_mean": 92.83212280273438,
+        "pred_median": 89.91738891601562,
+        "pred_p05": 79.90238189697266,
+        "pred_p25": 89.03258514404297,
+        "pred_p75": 90.90093994140625,
+        "pred_p95": 114.4123306274414,
+        "target_mean": 96.44964599609375,
+        "score": 93.57842551337347
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 15.481582641601562,
+        "median_ae": 10.267017364501953,
+        "max_ae": 115.28469848632812,
+        "signed_error": -4.611820220947266,
+        "within_2": 101,
+        "within_5": 146,
+        "within_10": 282,
+        "within_20": 462,
+        "pred_min": 6.1980814933776855,
+        "pred_max": 168.14659118652344,
+        "pred_mean": 77.09830474853516,
+        "pred_median": 79.41724395751953,
+        "pred_p05": 66.24960327148438,
+        "pred_p25": 67.9811782836914,
+        "pred_p75": 80.10368347167969,
+        "pred_p95": 91.67107391357422,
+        "target_mean": 81.71012115478516,
+        "score": 91.3991207546658
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 20.710954666137695,
+        "median_ae": 10.21270751953125,
+        "max_ae": 91.86624908447266,
+        "signed_error": 10.70961856842041,
+        "within_2": 647,
+        "within_5": 782,
+        "within_10": 989,
+        "within_20": 1267,
+        "pred_min": 21.200376510620117,
+        "pred_max": 163.0689239501953,
+        "pred_mean": 111.22024536132812,
+        "pred_median": 90.81336975097656,
+        "pred_p05": 79.70077514648438,
+        "pred_p25": 89.13188171386719,
+        "pred_p75": 147.85585021972656,
+        "pred_p95": 154.1160888671875,
+        "target_mean": 100.51062774658203,
+        "score": 88.49391407436795
+      }
+    },
+    "prediction_bucket_counts": {
+      "HL 0-45": 69,
+      "L 45-75": 349,
+      "SL 75-85": 822,
+      "ST 85-95": 4076,
+      "SR 95-105": 110,
+      "R 105-135": 804,
+      "HR 135-180": 722
+    },
+    "ground_bucket_counts": {
+      "HL 0-45": 50,
+      "L 45-75": 311,
+      "SL 75-85": 357,
+      "ST 85-95": 4741,
+      "SR 95-105": 239,
+      "R 105-135": 677,
+      "HR 135-180": 577
+    },
+    "bucket_agreement": {
+      "exact_bucket_count": 3822,
+      "exact_bucket_percent": 54.976985040276176,
+      "off_by_one_bucket_count": 5290,
+      "off_by_one_bucket_percent": 76.09321058688147
+    },
+    "bucket_confusion_ground_rows_pred_cols": {
+      "HL 0-45": {
+        "HL 0-45": 13,
+        "L 45-75": 18,
+        "SL 75-85": 6,
+        "ST 85-95": 11,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 2
+      },
+      "L 45-75": {
+        "HL 0-45": 5,
+        "L 45-75": 107,
+        "SL 75-85": 104,
+        "ST 85-95": 86,
+        "SR 95-105": 1,
+        "R 105-135": 1,
+        "HR 135-180": 7
+      },
+      "SL 75-85": {
+        "HL 0-45": 5,
+        "L 45-75": 69,
+        "SL 75-85": 134,
+        "ST 85-95": 137,
+        "SR 95-105": 0,
+        "R 105-135": 8,
+        "HR 135-180": 4
+      },
+      "ST 85-95": {
+        "HL 0-45": 39,
+        "L 45-75": 150,
+        "SL 75-85": 551,
+        "ST 85-95": 3197,
+        "SR 95-105": 50,
+        "R 105-135": 406,
+        "HR 135-180": 348
+      },
+      "SR 95-105": {
+        "HL 0-45": 0,
+        "L 45-75": 1,
+        "SL 75-85": 5,
+        "ST 85-95": 141,
+        "SR 95-105": 4,
+        "R 105-135": 50,
+        "HR 135-180": 38
+      },
+      "R 105-135": {
+        "HL 0-45": 0,
+        "L 45-75": 3,
+        "SL 75-85": 10,
+        "ST 85-95": 276,
+        "SR 95-105": 48,
+        "R 105-135": 192,
+        "HR 135-180": 148
+      },
+      "HR 135-180": {
+        "HL 0-45": 7,
+        "L 45-75": 1,
+        "SL 75-85": 12,
+        "ST 85-95": 228,
+        "SR 95-105": 7,
+        "R 105-135": 147,
+        "HR 135-180": 175
+      }
+    },
+    "bucket9_confusion_ground_rows_pred_cols": {
+      "HL": {
+        "HL": 13,
+        "L": 4,
+        "L+": 14,
+        "SL": 6,
+        "ST": 11,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 2
+      },
+      "L": {
+        "HL": 2,
+        "L": 1,
+        "L+": 32,
+        "SL": 27,
+        "ST": 19,
+        "SR": 1,
+        "R": 0,
+        "R+": 0,
+        "HR": 6
+      },
+      "L+": {
+        "HL": 3,
+        "L": 6,
+        "L+": 68,
+        "SL": 77,
+        "ST": 67,
+        "SR": 0,
+        "R": 0,
+        "R+": 1,
+        "HR": 1
+      },
+      "SL": {
+        "HL": 5,
+        "L": 2,
+        "L+": 67,
+        "SL": 134,
+        "ST": 137,
+        "SR": 0,
+        "R": 8,
+        "R+": 0,
+        "HR": 4
+      },
+      "ST": {
+        "HL": 39,
+        "L": 4,
+        "L+": 146,
+        "SL": 551,
+        "ST": 3197,
+        "SR": 50,
+        "R": 254,
+        "R+": 152,
+        "HR": 348
+      },
+      "SR": {
+        "HL": 0,
+        "L": 0,
+        "L+": 1,
+        "SL": 5,
+        "ST": 141,
+        "SR": 4,
+        "R": 30,
+        "R+": 20,
+        "HR": 38
+      },
+      "R": {
+        "HL": 0,
+        "L": 0,
+        "L+": 2,
+        "SL": 6,
+        "ST": 155,
+        "SR": 15,
+        "R": 23,
+        "R+": 51,
+        "HR": 63
+      },
+      "R+": {
+        "HL": 0,
+        "L": 0,
+        "L+": 1,
+        "SL": 4,
+        "ST": 121,
+        "SR": 33,
+        "R": 67,
+        "R+": 51,
+        "HR": 85
+      },
+      "HR": {
+        "HL": 7,
+        "L": 0,
+        "L+": 1,
+        "SL": 12,
+        "ST": 228,
+        "SR": 7,
+        "R": 75,
+        "R+": 72,
+        "HR": 175
+      }
+    },
+    "selection_metrics": {
+      "balanced_9_bucket_exact_percent": 23.998955208640716,
+      "turn_detection_recall_percent": 60.24423337856174,
+      "turn_exact_bucket_recall_percent": 21.21212121212121,
+      "turn_within_one_bucket_recall_percent": 56.76164631388512,
+      "straight_exact_bucket_recall_percent": 67.43303100611685,
+      "turn_count": 2211,
+      "straight_count": 4741
+    }
+  },
+  "4.1a": {
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.1a.onnx",
+    "series": 4,
+    "preprocessing": "raw BGR 320x180",
+    "output_head": "PCF: 4 x 18 hybrid steering outputs",
+    "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+    "output_scale_deg": null,
+    "hold_last_mae_deg": 11.199079513549805,
+    "overall": {
+      "count": 6952,
+      "mae": 14.804972648620605,
+      "median_ae": 6.352069854736328,
+      "max_ae": 167.53639221191406,
+      "signed_error": 0.1301877796649933,
+      "within_2": 2926,
+      "within_5": 3327,
+      "within_10": 4244,
+      "within_20": 4994,
+      "pred_min": 7.182936191558838,
+      "pred_max": 172.76585388183594,
+      "pred_mean": 96.40665435791016,
+      "pred_median": 90.09231567382812,
+      "pred_p05": 68.40156555175781,
+      "pred_p25": 88.7301025390625,
+      "pred_p75": 99.60184478759766,
+      "pred_p95": 150.54603576660156,
+      "target_mean": 96.2764663696289,
+      "score": 91.77501519521077
+    },
+    "by_dataset": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 11.476211547851562,
+        "median_ae": 1.589080810546875,
+        "max_ae": 167.53639221191406,
+        "signed_error": -4.217967987060547,
+        "within_2": 2251,
+        "within_5": 2460,
+        "within_10": 2949,
+        "within_20": 3321,
+        "pred_min": 7.693654537200928,
+        "pred_max": 172.76585388183594,
+        "pred_mean": 92.23168182373047,
+        "pred_median": 90.05810546875,
+        "pred_p05": 79.91020202636719,
+        "pred_p25": 89.1280288696289,
+        "pred_p75": 91.18881225585938,
+        "pred_p95": 113.78916931152344,
+        "target_mean": 96.44964599609375,
+        "score": 93.62432691786024
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 18.37335777282715,
+        "median_ae": 10.618526458740234,
+        "max_ae": 144.17677307128906,
+        "signed_error": -4.628215789794922,
+        "within_2": 97,
+        "within_5": 146,
+        "within_10": 282,
+        "within_20": 411,
+        "pred_min": 7.182936191558838,
+        "pred_max": 168.68389892578125,
+        "pred_mean": 77.0819091796875,
+        "pred_median": 69.11308288574219,
+        "pred_p05": 52.70082092285156,
+        "pred_p25": 67.92123413085938,
+        "pred_p75": 80.61898803710938,
+        "pred_p95": 127.1594467163086,
+        "target_mean": 81.71012115478516,
+        "score": 89.79257901509602
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 20.483266830444336,
+        "median_ae": 10.125675201416016,
+        "max_ae": 88.95446014404297,
+        "signed_error": 10.514331817626953,
+        "within_2": 578,
+        "within_5": 721,
+        "within_10": 1013,
+        "within_20": 1262,
+        "pred_min": 15.856427192687988,
+        "pred_max": 163.87680053710938,
+        "pred_mean": 111.02495574951172,
+        "pred_median": 91.25425720214844,
+        "pred_p05": 79.97735595703125,
+        "pred_p25": 89.25390625,
+        "pred_p75": 146.9626007080078,
+        "pred_p95": 154.08885192871094,
+        "target_mean": 100.51062774658203,
+        "score": 88.62040731641981
+      }
+    },
+    "by_source": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 11.476211547851562,
+        "median_ae": 1.589080810546875,
+        "max_ae": 167.53639221191406,
+        "signed_error": -4.217967987060547,
+        "within_2": 2251,
+        "within_5": 2460,
+        "within_10": 2949,
+        "within_20": 3321,
+        "pred_min": 7.693654537200928,
+        "pred_max": 172.76585388183594,
+        "pred_mean": 92.23168182373047,
+        "pred_median": 90.05810546875,
+        "pred_p05": 79.91020202636719,
+        "pred_p25": 89.1280288696289,
+        "pred_p75": 91.18881225585938,
+        "pred_p95": 113.78916931152344,
+        "target_mean": 96.44964599609375,
+        "score": 93.62432691786024
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 18.37335777282715,
+        "median_ae": 10.618526458740234,
+        "max_ae": 144.17677307128906,
+        "signed_error": -4.628215789794922,
+        "within_2": 97,
+        "within_5": 146,
+        "within_10": 282,
+        "within_20": 411,
+        "pred_min": 7.182936191558838,
+        "pred_max": 168.68389892578125,
+        "pred_mean": 77.0819091796875,
+        "pred_median": 69.11308288574219,
+        "pred_p05": 52.70082092285156,
+        "pred_p25": 67.92123413085938,
+        "pred_p75": 80.61898803710938,
+        "pred_p95": 127.1594467163086,
+        "target_mean": 81.71012115478516,
+        "score": 89.79257901509602
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 20.483266830444336,
+        "median_ae": 10.125675201416016,
+        "max_ae": 88.95446014404297,
+        "signed_error": 10.514331817626953,
+        "within_2": 578,
+        "within_5": 721,
+        "within_10": 1013,
+        "within_20": 1262,
+        "pred_min": 15.856427192687988,
+        "pred_max": 163.87680053710938,
+        "pred_mean": 111.02495574951172,
+        "pred_median": 91.25425720214844,
+        "pred_p05": 79.97735595703125,
+        "pred_p25": 89.25390625,
+        "pred_p75": 146.9626007080078,
+        "pred_p95": 154.08885192871094,
+        "target_mean": 100.51062774658203,
+        "score": 88.62040731641981
+      }
+    },
+    "prediction_bucket_counts": {
+      "HL 0-45": 71,
+      "L 45-75": 440,
+      "SL 75-85": 890,
+      "ST 85-95": 3761,
+      "SR 95-105": 224,
+      "R 105-135": 843,
+      "HR 135-180": 723
+    },
+    "ground_bucket_counts": {
+      "HL 0-45": 50,
+      "L 45-75": 311,
+      "SL 75-85": 357,
+      "ST 85-95": 4741,
+      "SR 95-105": 239,
+      "R 105-135": 677,
+      "HR 135-180": 577
+    },
+    "bucket_agreement": {
+      "exact_bucket_count": 3661,
+      "exact_bucket_percent": 52.661104718066746,
+      "off_by_one_bucket_count": 5279,
+      "off_by_one_bucket_percent": 75.9349827387802
+    },
+    "bucket_confusion_ground_rows_pred_cols": {
+      "HL 0-45": {
+        "HL 0-45": 12,
+        "L 45-75": 16,
+        "SL 75-85": 6,
+        "ST 85-95": 11,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 5
+      },
+      "L 45-75": {
+        "HL 0-45": 7,
+        "L 45-75": 115,
+        "SL 75-85": 108,
+        "ST 85-95": 69,
+        "SR 95-105": 1,
+        "R 105-135": 1,
+        "HR 135-180": 10
+      },
+      "SL 75-85": {
+        "HL 0-45": 5,
+        "L 45-75": 90,
+        "SL 75-85": 137,
+        "ST 85-95": 115,
+        "SR 95-105": 1,
+        "R 105-135": 6,
+        "HR 135-180": 3
+      },
+      "ST 85-95": {
+        "HL 0-45": 43,
+        "L 45-75": 215,
+        "SL 75-85": 612,
+        "ST 85-95": 2998,
+        "SR 95-105": 117,
+        "R 105-135": 427,
+        "HR 135-180": 329
+      },
+      "SR 95-105": {
+        "HL 0-45": 1,
+        "L 45-75": 0,
+        "SL 75-85": 7,
+        "ST 85-95": 120,
+        "SR 95-105": 16,
+        "R 105-135": 57,
+        "HR 135-180": 38
+      },
+      "R 105-135": {
+        "HL 0-45": 0,
+        "L 45-75": 4,
+        "SL 75-85": 7,
+        "ST 85-95": 238,
+        "SR 95-105": 69,
+        "R 105-135": 202,
+        "HR 135-180": 157
+      },
+      "HR 135-180": {
+        "HL 0-45": 3,
+        "L 45-75": 0,
+        "SL 75-85": 13,
+        "ST 85-95": 210,
+        "SR 95-105": 20,
+        "R 105-135": 150,
+        "HR 135-180": 181
+      }
+    },
+    "bucket9_confusion_ground_rows_pred_cols": {
+      "HL": {
+        "HL": 12,
+        "L": 3,
+        "L+": 13,
+        "SL": 6,
+        "ST": 11,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 5
+      },
+      "L": {
+        "HL": 5,
+        "L": 6,
+        "L+": 24,
+        "SL": 29,
+        "ST": 16,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 8
+      },
+      "L+": {
+        "HL": 2,
+        "L": 9,
+        "L+": 76,
+        "SL": 79,
+        "ST": 53,
+        "SR": 1,
+        "R": 0,
+        "R+": 1,
+        "HR": 2
+      },
+      "SL": {
+        "HL": 5,
+        "L": 7,
+        "L+": 83,
+        "SL": 137,
+        "ST": 115,
+        "SR": 1,
+        "R": 3,
+        "R+": 3,
+        "HR": 3
+      },
+      "ST": {
+        "HL": 43,
+        "L": 22,
+        "L+": 193,
+        "SL": 612,
+        "ST": 2998,
+        "SR": 117,
+        "R": 329,
+        "R+": 98,
+        "HR": 329
+      },
+      "SR": {
+        "HL": 1,
+        "L": 0,
+        "L+": 0,
+        "SL": 7,
+        "ST": 120,
+        "SR": 16,
+        "R": 34,
+        "R+": 23,
+        "HR": 38
+      },
+      "R": {
+        "HL": 0,
+        "L": 0,
+        "L+": 1,
+        "SL": 5,
+        "ST": 132,
+        "SR": 27,
+        "R": 48,
+        "R+": 34,
+        "HR": 68
+      },
+      "R+": {
+        "HL": 0,
+        "L": 0,
+        "L+": 3,
+        "SL": 2,
+        "ST": 106,
+        "SR": 42,
+        "R": 90,
+        "R+": 30,
+        "HR": 89
+      },
+      "HR": {
+        "HL": 3,
+        "L": 0,
+        "L+": 0,
+        "SL": 13,
+        "ST": 210,
+        "SR": 20,
+        "R": 107,
+        "R+": 43,
+        "HR": 181
+      }
+    },
+    "selection_metrics": {
+      "balanced_9_bucket_exact_percent": 25.344328139449296,
+      "turn_detection_recall_percent": 65.49072817729534,
+      "turn_exact_bucket_recall_percent": 22.885572139303484,
+      "turn_within_one_bucket_recall_percent": 57.033016734509275,
+      "straight_exact_bucket_recall_percent": 63.23560430288968,
+      "turn_count": 2211,
+      "straight_count": 4741
+    }
+  },
+  "4.1c": {
+    "checkpoint": "code/ai_models/SidewalkPilot-v4.1c.onnx",
+    "series": 4,
+    "preprocessing": "raw BGR 320x180",
+    "output_head": "PCF: 4 x 18 hybrid steering outputs",
+    "evaluation_dataset": "Series 3/4 frozen temporal validation subset",
+    "output_scale_deg": null,
+    "hold_last_mae_deg": 11.199079513549805,
+    "overall": {
+      "count": 6952,
+      "mae": 13.566129684448242,
+      "median_ae": 2.2697677612304688,
+      "max_ae": 163.63111877441406,
+      "signed_error": -0.9840027689933777,
+      "within_2": 3378,
+      "within_5": 3840,
+      "within_10": 4637,
+      "within_20": 5239,
+      "pred_min": 5.340207099914551,
+      "pred_max": 172.66339111328125,
+      "pred_mean": 95.29247283935547,
+      "pred_median": 90.11857604980469,
+      "pred_p05": 69.1012191772461,
+      "pred_p25": 88.95249938964844,
+      "pred_p75": 91.4196548461914,
+      "pred_p95": 149.83348083496094,
+      "target_mean": 96.2764663696289,
+      "score": 92.46326128641765
+    },
+    "by_dataset": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 10.835556983947754,
+        "median_ae": 1.3135490417480469,
+        "max_ae": 163.63111877441406,
+        "signed_error": -4.718454360961914,
+        "within_2": 2466,
+        "within_5": 2738,
+        "within_10": 3161,
+        "within_20": 3417,
+        "pred_min": 5.340207099914551,
+        "pred_max": 172.66339111328125,
+        "pred_mean": 91.73119354248047,
+        "pred_median": 90.14278411865234,
+        "pred_p05": 80.38821411132812,
+        "pred_p25": 89.21320343017578,
+        "pred_p75": 91.07640075683594,
+        "pred_p95": 112.92750549316406,
+        "target_mean": 96.44964599609375,
+        "score": 93.98024612002902
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 16.388450622558594,
+        "median_ae": 9.855514526367188,
+        "max_ae": 122.96022033691406,
+        "signed_error": -2.588797092437744,
+        "within_2": 143,
+        "within_5": 195,
+        "within_10": 335,
+        "within_20": 462,
+        "pred_min": 7.772513389587402,
+        "pred_max": 168.3738555908203,
+        "pred_mean": 79.12133026123047,
+        "pred_median": 80.0301513671875,
+        "pred_p05": 66.67082977294922,
+        "pred_p25": 68.51319122314453,
+        "pred_p75": 89.3825912475586,
+        "pred_p95": 118.4078598022461,
+        "target_mean": 81.71012115478516,
+        "score": 90.89530520968967
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 18.257034301757812,
+        "median_ae": 8.792427062988281,
+        "max_ae": 90.30935668945312,
+        "signed_error": 7.152740001678467,
+        "within_2": 769,
+        "within_5": 907,
+        "within_10": 1141,
+        "within_20": 1360,
+        "pred_min": 16.17293357849121,
+        "pred_max": 161.78973388671875,
+        "pred_mean": 107.66337585449219,
+        "pred_median": 90.54608154296875,
+        "pred_p05": 80.1978759765625,
+        "pred_p25": 89.29156494140625,
+        "pred_p75": 144.4907684326172,
+        "pred_p95": 152.69969177246094,
+        "target_mean": 100.51062774658203,
+        "score": 89.85720316569011
+      }
+    },
+    "by_source": {
+      "D0702_16": {
+        "count": 4230,
+        "mae": 10.835556983947754,
+        "median_ae": 1.3135490417480469,
+        "max_ae": 163.63111877441406,
+        "signed_error": -4.718454360961914,
+        "within_2": 2466,
+        "within_5": 2738,
+        "within_10": 3161,
+        "within_20": 3417,
+        "pred_min": 5.340207099914551,
+        "pred_max": 172.66339111328125,
+        "pred_mean": 91.73119354248047,
+        "pred_median": 90.14278411865234,
+        "pred_p05": 80.38821411132812,
+        "pred_p25": 89.21320343017578,
+        "pred_p75": 91.07640075683594,
+        "pred_p95": 112.92750549316406,
+        "target_mean": 96.44964599609375,
+        "score": 93.98024612002902
+      },
+      "D0707_16": {
+        "count": 652,
+        "mae": 16.388450622558594,
+        "median_ae": 9.855514526367188,
+        "max_ae": 122.96022033691406,
+        "signed_error": -2.588797092437744,
+        "within_2": 143,
+        "within_5": 195,
+        "within_10": 335,
+        "within_20": 462,
+        "pred_min": 7.772513389587402,
+        "pred_max": 168.3738555908203,
+        "pred_mean": 79.12133026123047,
+        "pred_median": 80.0301513671875,
+        "pred_p05": 66.67082977294922,
+        "pred_p25": 68.51319122314453,
+        "pred_p75": 89.3825912475586,
+        "pred_p95": 118.4078598022461,
+        "target_mean": 81.71012115478516,
+        "score": 90.89530520968967
+      },
+      "D0712_16": {
+        "count": 2070,
+        "mae": 18.257034301757812,
+        "median_ae": 8.792427062988281,
+        "max_ae": 90.30935668945312,
+        "signed_error": 7.152740001678467,
+        "within_2": 769,
+        "within_5": 907,
+        "within_10": 1141,
+        "within_20": 1360,
+        "pred_min": 16.17293357849121,
+        "pred_max": 161.78973388671875,
+        "pred_mean": 107.66337585449219,
+        "pred_median": 90.54608154296875,
+        "pred_p05": 80.1978759765625,
+        "pred_p25": 89.29156494140625,
+        "pred_p75": 144.4907684326172,
+        "pred_p95": 152.69969177246094,
+        "target_mean": 100.51062774658203,
+        "score": 89.85720316569011
+      }
+    },
+    "prediction_bucket_counts": {
+      "HL 0-45": 62,
+      "L 45-75": 328,
+      "SL 75-85": 693,
+      "ST 85-95": 4596,
+      "SR 95-105": 76,
+      "R 105-135": 568,
+      "HR 135-180": 629
+    },
+    "ground_bucket_counts": {
+      "HL 0-45": 50,
+      "L 45-75": 311,
+      "SL 75-85": 357,
+      "ST 85-95": 4741,
+      "SR 95-105": 239,
+      "R 105-135": 677,
+      "HR 135-180": 577
+    },
+    "bucket_agreement": {
+      "exact_bucket_count": 4112,
+      "exact_bucket_percent": 59.14844649021864,
+      "off_by_one_bucket_count": 5420,
+      "off_by_one_bucket_percent": 77.96317606444188
+    },
+    "bucket_confusion_ground_rows_pred_cols": {
+      "HL 0-45": {
+        "HL 0-45": 8,
+        "L 45-75": 19,
+        "SL 75-85": 4,
+        "ST 85-95": 15,
+        "SR 95-105": 2,
+        "R 105-135": 0,
+        "HR 135-180": 2
+      },
+      "L 45-75": {
+        "HL 0-45": 11,
+        "L 45-75": 110,
+        "SL 75-85": 88,
+        "ST 85-95": 92,
+        "SR 95-105": 0,
+        "R 105-135": 0,
+        "HR 135-180": 10
+      },
+      "SL 75-85": {
+        "HL 0-45": 11,
+        "L 45-75": 68,
+        "SL 75-85": 123,
+        "ST 85-95": 144,
+        "SR 95-105": 0,
+        "R 105-135": 5,
+        "HR 135-180": 6
+      },
+      "ST 85-95": {
+        "HL 0-45": 26,
+        "L 45-75": 127,
+        "SL 75-85": 464,
+        "ST 85-95": 3557,
+        "SR 95-105": 29,
+        "R 105-135": 247,
+        "HR 135-180": 291
+      },
+      "SR 95-105": {
+        "HL 0-45": 1,
+        "L 45-75": 1,
+        "SL 75-85": 3,
+        "ST 85-95": 163,
+        "SR 95-105": 4,
+        "R 105-135": 31,
+        "HR 135-180": 36
+      },
+      "R 105-135": {
+        "HL 0-45": 0,
+        "L 45-75": 2,
+        "SL 75-85": 4,
+        "ST 85-95": 347,
+        "SR 95-105": 32,
+        "R 105-135": 159,
+        "HR 135-180": 133
+      },
+      "HR 135-180": {
+        "HL 0-45": 5,
+        "L 45-75": 1,
+        "SL 75-85": 7,
+        "ST 85-95": 278,
+        "SR 95-105": 9,
+        "R 105-135": 126,
+        "HR 135-180": 151
+      }
+    },
+    "bucket9_confusion_ground_rows_pred_cols": {
+      "HL": {
+        "HL": 8,
+        "L": 1,
+        "L+": 18,
+        "SL": 4,
+        "ST": 15,
+        "SR": 2,
+        "R": 0,
+        "R+": 0,
+        "HR": 2
+      },
+      "L": {
+        "HL": 3,
+        "L": 0,
+        "L+": 33,
+        "SL": 22,
+        "ST": 20,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 10
+      },
+      "L+": {
+        "HL": 8,
+        "L": 0,
+        "L+": 77,
+        "SL": 66,
+        "ST": 72,
+        "SR": 0,
+        "R": 0,
+        "R+": 0,
+        "HR": 0
+      },
+      "SL": {
+        "HL": 11,
+        "L": 0,
+        "L+": 68,
+        "SL": 123,
+        "ST": 144,
+        "SR": 0,
+        "R": 3,
+        "R+": 2,
+        "HR": 6
+      },
+      "ST": {
+        "HL": 26,
+        "L": 0,
+        "L+": 127,
+        "SL": 464,
+        "ST": 3557,
+        "SR": 29,
+        "R": 170,
+        "R+": 77,
+        "HR": 291
+      },
+      "SR": {
+        "HL": 1,
+        "L": 0,
+        "L+": 1,
+        "SL": 3,
+        "ST": 163,
+        "SR": 4,
+        "R": 22,
+        "R+": 9,
+        "HR": 36
+      },
+      "R": {
+        "HL": 0,
+        "L": 0,
+        "L+": 0,
+        "SL": 4,
+        "ST": 186,
+        "SR": 9,
+        "R": 34,
+        "R+": 21,
+        "HR": 61
+      },
+      "R+": {
+        "HL": 0,
+        "L": 0,
+        "L+": 2,
+        "SL": 0,
+        "ST": 161,
+        "SR": 23,
+        "R": 69,
+        "R+": 35,
+        "HR": 72
+      },
+      "HR": {
+        "HL": 5,
+        "L": 0,
+        "L+": 1,
+        "SL": 7,
+        "ST": 278,
+        "SR": 9,
+        "R": 73,
+        "R+": 53,
+        "HR": 151
+      }
+    },
+    "selection_metrics": {
+      "balanced_9_bucket_exact_percent": 23.146104278821777,
+      "turn_detection_recall_percent": 53.00768882858435,
+      "turn_exact_bucket_recall_percent": 19.53867028493894,
+      "turn_within_one_bucket_recall_percent": 52.284034373586614,
+      "straight_exact_bucket_recall_percent": 75.02636574562328,
       "turn_count": 2211,
       "straight_count": 4741
     }

@@ -12,10 +12,10 @@ the operator judges unsafe (a bad steering angle, driving toward a person, enter
 a road). The software override reduces this risk only while the controller is connected
 and the Raspberry Pi 5 event loop remains responsive; it is not a substitute for physical power control.
 
-## Detection and trigger
+## Detection and Trigger
 
 The main loop watches the Xbox controller (pygame) every iteration. Autonomous mode
-is cancelled by `cancel_autonomous_mode()` when the loop processes any of these:
+is canceled by `cancel_autonomous_mode()` when the loop processes any of these:
 
 - **Steering input** with `abs(value) > 0.1` (`STEERING_AXIS`).
 - **Gas** with `throttle > 0.05` (`THROTTLE_AXIS`).
@@ -23,7 +23,7 @@ is cancelled by `cancel_autonomous_mode()` when the loop processes any of these:
 
 Pressing the autonomy toggle (`AUTONOMY_TOGGLE_BUTTON = 0`) turns autonomous mode
 off directly. Any of these also cancels cruise control. Navigation "AUTO" segments
-are cancelled by the same operator inputs via `navigation_manual_input_should_cancel`.
+are canceled by the same operator inputs via `navigation_manual_input_should_cancel`.
 
 ## Response
 
@@ -37,7 +37,7 @@ sets `shutdown_flag`, which breaks the main loop and runs the ordered teardown a
 exit, sending a dashboard shutdown, stopping sensors/camera, and cleaning up GPIO
 (`dashboard_sender.send_shutdown()`, `hardware.cleanup()`).
 
-## Stop condition and who triggers it
+## Stop Condition and Who Triggers It
 
 The operator triggers override. In the implemented arbitration order, manual
 input takes priority over model steering but not over enabled AEB; an AEB
@@ -53,14 +53,27 @@ ordering does not cover a disconnected controller or failed control process.
 - Field evidence: the operator uses manual takeover during supervised runs; a
   labeled, timed override-latency test has not yet been preserved.
 
-## Series 3 note
+## Jetson Orin Nano Inference Note
 
-Series 3 moves steering inference to the Jetson Orin Nano, but override still lives on
+Steering inference runs on the Jetson Orin Nano, but override still lives on
 the Raspberry Pi 5 in the same loop and is unchanged: the Raspberry Pi 5 owns the controller and the motors,
 so operator override does not depend on the model host being reachable.
 
-## Related pages
+## Fault Responses
 
-- `safety-case/safety-overview.md`
-- `testing/field-testing/preflight-checklist.md`
-- `autonomy-stack/architecture/decision-priority.md`
+| Fault | Current behavior | Remaining limitation |
+|---|---|---|
+| Enabled AEB emergency threshold | Forward throttle is removed and brake requested | Configured threshold is not measured stopping-distance proof |
+| Stale camera/Jetson Orin Nano result | Autonomous path requests a stop instead of replaying indefinitely | Process-wide faults can still affect response timing |
+| Stale or empty LiDAR scan | Reader retries; intervention becomes unavailable | This is fail-open for obstacle intervention and must be visible to operator |
+| Dashboard telemetry loss | Driving continues; display shows stale/no link or exits by policy | Dashboard is observability, not a motion interlock |
+| GPS loss | Route guidance cannot update reliably | Manual control remains; GPS loss is not a camera-steering stop by itself |
+| Controller/process failure | Software override may be unavailable | Operator requires independent physical power cutoff |
+
+Fault handling must be tested with wheels unloaded before intentional disconnect tests on the ground.
+
+## Related Pages
+
+- [Safety Overview](../safety-overview.md)
+- [Field Testing](../../testing/field-testing/overview.md)
+- [Decision Priority](../../autonomy-stack/architecture/decision-priority.md)
