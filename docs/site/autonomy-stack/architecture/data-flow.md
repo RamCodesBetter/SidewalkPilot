@@ -1,6 +1,6 @@
 # Runtime Data Flow
 
-SidewalkPilot separates hardware ownership, inference, display, and safety so a slow secondary computer cannot directly stall steering or motor control.
+SidewalkPilot separates hardware ownership, inference, display, and safety so a slow secondary computer cannot directly stall actuator control.
 
 ```text
 Xbox controller ─┐

@@ -65,7 +65,7 @@ The steering mechanism is not treated as a perfect mathematical servo. Vehicle l
 - Direction-dependent feed-forward calibration;
 - IMU yaw-rate experiments.
 
-The current center trim is `+17D`. Reference steering limits are intentionally narrower than absolute hardware commands during normal driving. Tight absolute commands remain a separate future maneuver decision, not a default training range.
+The current center trim is `+12D`. Reference steering limits are intentionally narrower than absolute hardware commands during normal driving. Tight absolute commands remain a separate future maneuver decision, not a default training range.
 
 ## Bring-Up Order
 

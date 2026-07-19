@@ -37,16 +37,6 @@ python3 series_4_0fg_sidewalkpilot_trainer.py --roots sidewalkpilot_dataset --ep
 python3 series_4_0ac_sidewalkpilot_trainer.py --roots sidewalkpilot_dataset --epochs 25 --keep-pth
 ```
 
-The Series 4.1 correction runs use the matching wrappers:
-
-```bash
-python3 series_4_1pr_sidewalkpilot_trainer.py --roots sidewalkpilot_dataset --epochs 25 --keep-pth
-python3 series_4_1fg_sidewalkpilot_trainer.py --roots sidewalkpilot_dataset --epochs 25 --keep-pth
-python3 series_4_1ac_sidewalkpilot_trainer.py --roots sidewalkpilot_dataset --epochs 25 --keep-pth
-```
-
-The 4.1 wrappers enable their correction profiles in code. They are not aliases for the 4.0 loss configuration.
-
 ## Record Before Launch
 
 - Command line;

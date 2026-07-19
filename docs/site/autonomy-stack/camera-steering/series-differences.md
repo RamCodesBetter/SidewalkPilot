@@ -13,7 +13,7 @@ output horizon, deployment target, and evaluation criteria.
 | Temporal input | none | none | none for CF; three previous targets for PC/PCF |
 | Head | single `tanh` regression | 9 logits + 9 offsets + throttle | 18 values per steering horizon, no throttle |
 | Horizons | current steering | current steering/throttle | current only for PC; current + three future for CF/PCF |
-| Runs on | Raspberry Pi 5 | Jetson Orin Nano | Jetson Orin Nano; v4.0 runtime-supported, v4.1 pending integration |
+| Runs on | Raspberry Pi 5 | Jetson Orin Nano | Jetson Orin Nano runtime-supported; not field-promoted |
 | Throttle | fixed runtime value | present in contract, disabled in steering-focused training | runtime-owned; removed from learned output |
 
 The nine Series-3 buckets are HL, L, L+, SL, ST, SR, R, R+, HR. Series 1 uses an output
@@ -42,11 +42,10 @@ the project has not published a Raspberry Pi 5-versus-Jetson Orin Nano latency b
 
 v3.4 is the current field-selected baseline. In the July 13 comparison it handled every
 presented shadow case; v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was
-much worse than v3.2b. The six v4.0 models later completed physical testing. v4.0f was
-viable and produced complementary successes and failures versus v3.4, while v4.0g was
-worse. The PC and PCF models repeatedly echoed prior predictions and were rejected.
-Series 4.1 contains six corrective models that are trained and evaluated offline but not
-yet integrated into the live selector or tested on the car.
+much worse than v3.2b. All three Series 4 runs completed. Their six ONNX artifacts passed
+signature and CUDA inference checks, and the Jetson Orin Nano runtime supports all three contracts.
+No Series 4 field test has occurred, so offline results order candidates but do not select
+a field baseline.
 
 ## Related pages
 

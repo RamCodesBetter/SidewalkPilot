@@ -4,7 +4,7 @@ The servo bench test is the lowest-level steering check: does the PCA9685 actual
 
 ## How it works
 
-- It opens the PCA9685 through Adafruit `ServoKit` on I2C address `0x40` at `50 Hz`, sets the pulse-width range to `1000-2000 us`, and sets an actuation range of `180` degrees. These electrical constants match the runtime, but the sweep writes raw angles and does not apply the runtime's reference limits, +17-degree trim, or IMU correction.
+- It opens the PCA9685 through Adafruit `ServoKit` on I2C address `0x40` at `50 Hz`, sets the pulse-width range to `1000-2000 us`, and sets an actuation range of `180` degrees. These electrical constants match the runtime, but the sweep writes raw angles and does not apply the runtime's reference limits, +12-degree trim, or IMU correction.
 - It sweeps the servo from `--min-angle` (default `0`) up to `--max-angle` (default `180`) by `--step` degrees (default `1.0`) with a `--delay` (default `0.03 s`) between steps, then sweeps back down, looping forever. Each angle it commands is printed.
 - On Ctrl-C it sets the servo angle to `None` (releases the channel) and prints `done`.
 

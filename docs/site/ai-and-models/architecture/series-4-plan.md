@@ -1,101 +1,97 @@
 # Series 4 Temporal Experiments
 
-Series 4 asks whether steering targets near an image improve the current steering prediction. It reuses the v3.4 visual backbone and the same 81,237 real labeled images. It is an experiment alongside Series 3, not an automatic replacement.
+Series 4 asks whether steering targets from nearby moments add useful information beyond one camera frame. It is a parallel research track built from the v3.4 visual backbone, not a replacement declared in advance.
 
-## Three Contracts
+## Experimental Question
 
-At time `t`, the dataset pairs image `I_t` with the operator's steering target `s_t`.
+The existing capture stream pairs an image at time `t` with the operator's target steering command `s_t`. Series 4 compares three ways to use that sequence:
 
-| Contract | Runtime input | Training supervision |
-|---|---|---|
-| PC | `I_t` and `[s_(t-3), s_(t-2), s_(t-1)]` | `s_t` |
-| CF | `I_t` | `[s_t, s_(t+1), s_(t+2), s_(t+3)]` |
-| PCF | `I_t` and `[s_(t-3), s_(t-2), s_(t-1)]` | `[s_t, s_(t+1), s_(t+2), s_(t+3)]` |
+| Name | Contract | Runtime input | Training supervision |
+|---|---|---|---|
+| PC | past + current | image `I_t` and `[s_t-3, s_t-2, s_t-1]` | `s_t` |
+| CF | current + future | image `I_t` only | `[s_t, s_t+1, s_t+2, s_t+3]` |
+| PCF | past + current + future | image `I_t` and `[s_t-3, s_t-2, s_t-1]` | `[s_t, s_t+1, s_t+2, s_t+3]` |
 
-Future targets are supervision only. The deployed model never receives future steering values. The intended prediction from every contract is horizon 0, which estimates `s_t` from the information available at time `t`.
+“Future” is supervision, not a future input. At deployment the car never receives labels from the future. CF and PCF use future targets only to shape a visual representation that must explain the direction the operator takes over the next samples.
 
-## Shared Data Contract
+## Controlled Design
 
-All six 4.0 and six 4.1 checkpoints use:
+All three runs used:
 
-- 81,237 real field images;
-- 320x180 normalized OpenCV BGR input;
-- the Series 3 six-layer convolutional backbone;
-- nine steering classes plus a local offset inside each class;
-- 25 training epochs and batch size 256;
-- three previous targets for PC/PCF and three future targets for CF/PCF; and
-- temporal windows that stay inside one capture run, one train/validation split, and a 0.25-second maximum timestamp gap.
+- The same 81,237-image real Series 3/4 dataset;
+- The same frozen base split derived from contiguous 100-sample windows before temporal-window filtering;
+- 320x180 normalized OpenCV BGR images;
+- The same six-layer Series 3 convolutional backbone;
+- The same nine steering buckets and within-bucket offset representation;
+- 25 epochs, batch size 256, and 50,000 weighted samples per epoch;
+- The same shadow augmentation and deterministic left/right balancing policy;
+- Three previous targets and, where applicable, three future targets.
 
-The captured labels are approximately 10 Hz, so three steps represent roughly 0.3 seconds of labeled steering history. They are not three 30 FPS camera frames.
+Temporal windows never cross a capture run, a train/validation boundary, or a timestamp gap greater than 0.25 seconds. The existing labeled captures are approximately 10 Hz, so three steps mean roughly 0.3 seconds of context, not three 30 FPS camera frames.
 
-## Shared Visual Network
+## Architecture
 
-The image backbone produces 160 feature maps. Adaptive pooling to `6x10`, flattening, and dense layers create a 256-value visual feature. Each output horizon contains 18 values:
+The visual backbone produces 160 feature maps. Adaptive pooling to `6x10`, flattening, and two dense layers produce a 256-value image feature.
 
-- values 0-8: logits for `HL, L, L+, SL, ST, SR, R, R+, HR`;
-- values 9-17: one raw local offset for each class; and
-- decoded steering: selected bucket's lower edge plus `sigmoid(selected_offset) * bucket_width`.
+For PC and PCF, the three steering targets are normalized as `(s - 90) / 90`, then encoded by `3 -> 32 -> 64` dense layers. The 256 image features and 64 history features are concatenated into 320 values and fused through `320 -> 128 -> 64`.
 
-PC emits `[batch,1,18]`. CF and PCF emit `[batch,4,18]`. Series 4 does not learn throttle.
+CF has no history branch. Its image feature goes through `256 -> 64`.
 
-## Series 4.0 Architecture
+Each horizon has its own `64 -> 18` head:
 
-For 4.0 PC/PCF, the three absolute steering targets are normalized as `(s - 90) / 90`, encoded through `3 -> 32 -> 64`, concatenated with the 256-value visual feature, and fused through `320 -> 128 -> 64`. CF uses image features only. One `64 -> 18` head is used per horizon.
+- Values 0-8: logits for `HL, L, L+, SL, ST, SR, R, R+, HR`;
+- Values 9-17: one raw local offset for each class;
+- Decoded steering: lower bucket edge plus `sigmoid(selected_offset) * bucket_width`.
 
-| Contract | Parameters | FP32 ONNX size | Difference from Series 3 |
+PC emits shape `[batch,1,18]`. CF and PCF emit `[batch,4,18]`. Only horizon 0 commands live steering. Series 4 intentionally removes learned throttle.
+
+## Size
+
+| Contract | Parameters | FP32 ONNX size | Why it differs |
 |---|---:|---:|---|
-| Series 3 v3.4 | 5,534,115 | 22,136,200 bytes | visual backbone plus one 19-value head |
-| 4.0 PC | 5,569,186 | 22,278,937 bytes | absolute-history encoder/fusion; one 18-value head |
-| 4.0 CF | 5,537,560 | 22,152,098 bytes | image only; four horizon heads |
-| 4.0 PCF | 5,572,696 | 22,294,349 bytes | absolute-history encoder/fusion; four heads |
+| Series 3 v3.4 | 5,534,115 | 22,136,200 bytes | visual backbone + 19-value head |
+| PC (`4.0p/r`) | 5,569,186 | 22,282,240 bytes | adds history encoder/fusion; one 18-value head |
+| CF (`4.0f/g`) | 5,537,560 | 22,155,264 bytes | no history encoder; four small horizon heads |
+| PCF (`4.0a/c`) | 5,572,696 | 22,294,528 bytes | history encoder/fusion plus four heads |
 
-The ONNX file is about four bytes per FP32 parameter plus graph metadata. A model with about 5.5 million parameters therefore occupies about 22 MB.
+The file size is approximately four bytes per FP32 weight plus graph metadata. “5.5 million parameters” and “about 22 MB” therefore describe the same model, not conflicting counts.
 
-## Why 4.0 History Failed
+## Runs and Artifacts
 
-Offline evaluation favored 4.0 PC/PCF, but `4.0p/r/a/c` repeated prior predictions on the car. Once the model produced a large turn, that prediction entered the next history input and could reinforce itself even when the image changed. The open-loop evaluator feeds ground-truth history, while live driving feeds earlier model predictions. That difference exposed the failure.
+| W&B run | Final epoch | Best current-target MAE | ONNX outputs |
+|---|---|---|---|
+| `4.0pr` | `4.0p` | `4.0r`, epoch 9 | `[batch,1,18]` |
+| `4.0fg` | `4.0f` | `4.0g`, epoch 7 | `[batch,4,18]` |
+| `4.0ac` | `4.0a` | `4.0c`, epoch 7 | `[batch,4,18]` |
 
-The image-only `4.0f` did not have this feedback path. It remained viable and showed complementary wins and failures versus v3.4. `4.0g` was worse than `4.0f`.
+These are three training runs and six checkpoints. The paired letter is the lowest-current-target-MAE checkpoint from the same run; it is not automatically the best field model.
 
-## Series 4.1 Corrections
+## Corrected Shared Evaluation
 
-Series 4.1 keeps the same questions but changes the parts implicated by the failure.
+All six checkpoints and all 40 Series 1-3 checkpoints were scored on the same 6,952-frame frozen Series 3/4 challenge subset.
 
-### PC and PCF History
+| Model | Bal9 | Turn exact | Turn +/-1 | ST exact | MAE | Median | Signed |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `4.0p` | **34.5%** | **32.1%** | **65.9%** | 67.7% | 12.396 | 2.967 | +0.120 |
+| `4.0r` | 32.9% | 27.4% | 62.6% | **77.6%** | 11.636 | 1.846 | -1.136 |
+| `4.0f` | 25.4% | 23.5% | 56.4% | 62.8% | 15.623 | 6.723 | +1.057 |
+| `4.0g` | 20.4% | 17.1% | 46.4% | 76.0% | 14.116 | 2.114 | -1.864 |
+| `4.0a` | 33.5% | 30.9% | 65.3% | 68.1% | 12.379 | 3.115 | +0.290 |
+| `4.0c` | 32.0% | 29.4% | 62.9% | 75.5% | **11.321** | **1.825** | -0.981 |
 
-- Encode bounded steering motion instead of allowing unrestricted fusion of three absolute targets.
-- Use a bounded residual so history can adjust the image prediction but cannot dominate it without limit.
-- Corrupt history during training with noise, dropped elements, sequence dropout, and random-walk noise.
-- Train on counterfactual histories so changing history while keeping the image fixed does not reward blind echo.
-- Include closed-loop rollout error in best-checkpoint selection.
+PC is the strongest first field candidate because `4.0p` leads the class-balanced and turn metrics. PCF is close and has the best raw-error checkpoint. CF did not show the same benefit in this offline comparison. That result does not isolate the temporal contract from checkpoint selection or prove that future-target supervision is generally inferior.
 
-### CF and PCF Future Supervision
+## Live Runtime Contract
 
-- Weight the current horizon most strongly.
-- Decay the contribution of later horizons.
-- Penalize incorrect changes between adjacent predicted horizons with a trajectory-delta loss.
+The Raspberry Pi 5 still sends only the JPEG and selected model version over the private Ethernet link. Jetson Orin Nano reads the ONNX input metadata:
 
-| Contract | 4.1 parameters | Output |
-|---|---:|---|
-| PC (`4.1p/r`) | 5,537,460 | `[batch,1,18]` |
-| CF (`4.1f/g`) | 5,537,560 | `[batch,4,18]` |
-| PCF (`4.1a/c`) | 5,544,480 | `[batch,4,18]` |
+- Image-only graph: run CF directly;
+- Graph with `target_history`: initialize `[90,90,90]`, feed it, decode horizon 0, then append that decoded target for the next inference.
 
-## Runs
+History resets on model load/switch, reconnect, and status-only/manual periods. This keeps history ordered in the single inference process and avoids changing the TCP packet format. CUDA is selected without registering a partially installed TensorRT provider that could force an accidental CPU fallback.
 
-| Run | Final checkpoint | Best checkpoint | Best epoch | Training status |
-|---|---|---|---:|---|
-| `4.0pr` | `4.0p` | `4.0r` | 9 | field-tested; history echo |
-| `4.0fg` | `4.0f` | `4.0g` | 7 | field-tested; `4.0f` viable |
-| `4.0ac` | `4.0a` | `4.0c` | 7 | field-tested; history echo |
-| `4.1pr` | `4.1p` | `4.1r` | 1 | trained/exported; field pending |
-| `4.1fg` | `4.1f` | `4.1g` | 15 | trained/exported; field pending |
-| `4.1ac` | `4.1a` | `4.1c` | 10 | trained/exported; field pending |
+## Promotion Gate
 
-## Runtime Status
-
-The live selector supports 4.0. At autonomy start, PC/PCF history is seeded from the latest three manual steering targets rather than fixed straight values. After each prediction, horizon 0 becomes the newest history value.
-
-The six 4.1 models are trained and exported but are not yet registered in the live selector. Before a 4.1 field test, the server must support their signatures and the history models must pass a closed-loop bench replay that specifically checks for the 4.0 steering-echo failure.
+Series 4 is **trained and runtime-supported**, but **not field-selected**. It must beat v3.4 on the same physical shadow/turn route, remain smooth under autoregressive history, satisfy inference-freshness checks, and preserve AEB behavior before the live default changes.
 
 See [Series 4 Models](../model-zoo/series-4.md), [Bal9](../../model-evaluation/offline-evaluation/bal9.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

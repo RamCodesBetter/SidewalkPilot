@@ -13,9 +13,9 @@ This page documents how power is distributed on the car: the separate power doma
 
 ## How it works
 
-The drive motors use a dedicated 3S LiPo through the AT8236 Motor Controller rather than drawing their load from a compute supply. The Jetson Orin Nano has a separate bank. The Raspberry Pi 5 and Zero 2 W use another USB power bank; the Zero 2 W is also connected to the Raspberry Pi 5 by the dashboard's USB data link. The LED display uses a 2S LiPo through a DROK buck converter and 10 A fuse. These separate supply paths reduce shared-load voltage sag, but grounds, cables, converters, and electromagnetic coupling still need measurement.
+The drive motors use a dedicated 3S LiPo through the AT8236 driver rather than drawing their load from a compute supply. The Jetson Orin Nano has a separate bank. The Raspberry Pi 5 and Zero 2 W use another USB power bank; the Zero 2 W is also connected to the Raspberry Pi 5 by the dashboard's USB data link. The LED display uses a 2S LiPo through a DROK buck converter and 10 A fuse. These separate supply paths reduce shared-load voltage sag, but grounds, cables, converters, and electromagnetic coupling still need measurement.
 
-The steering servo is powered from the PCA9685's servo rail, not from a Raspberry Pi 5 GPIO pin. That wiring avoids sourcing servo current from GPIO, but only an under-load voltage measurement can establish how much servo current still couples into another rail. Exact listed parts, capacities, and prices are in the hardware BOM table.
+The steering servo is powered from the PCA9685's servo rail, not from a Raspberry Pi 5 GPIO pin. That wiring avoids sourcing servo current from GPIO, but only an under-load voltage measurement can establish how much servo current still couples into another rail. The power design includes a 10000 uF electrolytic capacitor for bulk buffering. Exact listed parts, capacities, and prices are in the hardware BOM table.
 
 ## Why this choice
 

@@ -10,13 +10,13 @@ The live `rc_car.py` intentionally has no command-line model flag. Run `car`, th
 | `RC_CAR_STEERING_MODEL_PATH` | Explicit local early-model checkpoint | unset |
 | `RC_CAR_STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG` | Hardware reference left limit | current config value |
 | `RC_CAR_STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG` | Hardware reference right limit | current config value |
-| `RC_CAR_STEERING_SERVO_CENTER_OFFSET` | Hardware center calibration | current `+17D` mapping |
+| `RC_CAR_STEERING_SERVO_CENTER_OFFSET` | Hardware center calibration | current `+12D` mapping |
 
 Jetson Orin Nano host/port, dashboard transport, sensor ports, AEB thresholds, and controller mappings are defined in `rc_car_app/config.py`. Treat the source as authoritative because deployment units can override environment values.
 
 ## Trainer Flags
 
-The Series 3 trainer and six Series 4 wrappers expose their current arguments through `--help`. Common controls include dataset roots, epochs, batch size, learning rate, augmentation probabilities, throttle-loss weight for Series 3, temporal history/future steps for Series 4, output names, Weights & Biases mode, and `--keep-pth`.
+The Series 3 trainer and three Series 4 wrappers expose their current arguments through `--help`. Common controls include dataset roots, epochs, batch size, learning rate, augmentation probabilities, throttle-loss weight for Series 3, temporal history/future steps for Series 4, output names, W&B mode, and `--keep-pth`.
 
 Do not copy an old command without recording:
 

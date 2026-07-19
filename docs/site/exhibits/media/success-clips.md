@@ -44,8 +44,7 @@ Representative things a success clip should show:
 - First hybrid Series 3 field footage is `v3.1b`: it **drove well at night** in
   testing, which is a genuine success worth showing.
 - v3.4 is the current field selection after the July 13 shadow/turn comparison. That result should not receive a public clip claim until the exact footage is identified and privacy-reviewed.
-- `4.0f` produced viable comparison footage, including cases it passed that v3.4 failed, but the clips remain private and unindexed.
-- Series 4.1 has no field result.
+- Series 4 has no success clip or field verdict yet.
 - Every raw clip is internal until a privacy pass (faces, plates, house numbers) is
   done. Do not publish externally before that.
 

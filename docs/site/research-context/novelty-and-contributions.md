@@ -28,19 +28,17 @@ as a new class-plus-offset algorithm.
 
 ## 3. Series 4 temporal experiments
 
-**Status: v4.0 field-tested; v4.1 evaluated offline.** Series 4 compares causal history,
-future supervision, and combined past/current/future targets while keeping the image
-backbone and 18-value steering head comparable. Future targets are training supervision,
-not unavailable future inputs at deployment.
+**Status: trained and evaluated offline; not field-tested yet.** Series 4 compares causal
+history (`4.0p/r`), future supervision (`4.0f/g`), and combined past/current/future targets
+(`4.0a/c`) while keeping the image backbone and 18-value steering head comparable. The
+future targets are training supervision, not unavailable future inputs at deployment.
 
-The v4.0 comparison demonstrated why closed-loop testing matters: PC/PCF ranked strongly
-offline but echoed earlier predictions on the car. Image-only v4.0f was viable and mixed
-against v3.4. The six v4.1 models test corrections to that failure and remain pending live
-integration and field testing.
+The current common-set report ranks `4.0p` highest by Bal9 among the Series 3/4 candidates,
+but that is an offline screening result. It does not replace the ordered physical test.
 
 ## 4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard
 
-**Status: implemented engineering.** The Raspberry Pi 5 owns controller input, sensors, steering/motor output,
+**Status: implemented engineering.** The Raspberry Pi 5 owns controller input, sensors, actuator output,
 logging, and dashboard telemetry. Jetson Orin Nano performs Series 3/4 ONNX inference over direct
 Ethernet. The Zero 2 W renders the USB-linked dashboard. Splitting real-time I/O from heavier
 inference is an established systems pattern; the contribution is the working integration

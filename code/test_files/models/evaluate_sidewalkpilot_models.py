@@ -60,6 +60,15 @@ S3_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.pth$")
 S4_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>4\.(?:0|1)[acfgpr])\.(?P<ext>onnx|pt|pth)$")
 S4_SUFFIX_ORDER = {"p": 0, "r": 1, "f": 2, "g": 3, "a": 4, "c": 5}
 
+
+def report_checkpoint_path(path):
+    """Return a portable checkpoint path without exposing a workstation home path."""
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(REPO_ROOT.resolve()))
+    except ValueError:
+        return resolved.name
+
 BUCKETS = [
     ("HL 0-45", 0.0, 45.0),
     ("L 45-75", 45.0, 75.0),
@@ -507,7 +516,7 @@ def evaluate_models(
 
         bucket_data = bucket_summary(preds, targets)
         results[version] = {
-            "checkpoint": str(path.resolve()),
+            "checkpoint": report_checkpoint_path(path),
             "series": series_for_version(version),
             "preprocessing": preprocessing_for_version(version),
             "output_head": "1 continuous steering output",
@@ -716,7 +725,7 @@ def evaluate_series3(models_dir, device, batch_size, versions=None):
             by_source[name] = metric_block(preds[idx], targets[idx])
 
         results[version] = {
-            "checkpoint": str(path.resolve()),
+            "checkpoint": report_checkpoint_path(path),
             "series": 3,
             "preprocessing": "raw BGR 320x180",
             "output_head": ("2 continuous controls (steering + throttle)"
@@ -879,7 +888,7 @@ def _series34_result(path, version, series, preds, data, output_head):
         indices = [index for index, value in enumerate(sources) if value == name]
         by_source[name] = metric_block(preds[indices], targets[indices])
     return {
-        "checkpoint": str(path.resolve()),
+        "checkpoint": report_checkpoint_path(path),
         "series": series,
         "preprocessing": "raw BGR 320x180",
         "output_head": output_head,

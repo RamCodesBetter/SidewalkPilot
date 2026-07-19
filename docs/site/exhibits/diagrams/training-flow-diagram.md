@@ -53,7 +53,7 @@ The checked-in path from operator-labeled field data through dataset constructio
 
 ## Evidence
 
-- Source anchors: `code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py`, the six Series 4 wrappers plus `series_4_common.py`, `series_1_and_2/sidewalkpilot_trainer.py`, and `runtime.py` (`append_photo_run_row`, `finalize_photo_run`).
+- Source anchors: `code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py`, the three Series 4 wrappers plus `series_4_common.py`, `series_1_and_2/sidewalkpilot_trainer.py`, and `runtime.py` (`append_photo_run_row`, `finalize_photo_run`).
 
 ## Related pages
 

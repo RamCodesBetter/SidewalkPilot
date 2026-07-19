@@ -21,16 +21,15 @@ The value is the integration and iteration, not a claim that one neural-network 
 - Physical camera-to-steering runs under operator supervision.
 - v3.4 handled every shadow case presented in one July 13 comparison and was selected over v3.4b/v3.3/v3.3b for current use.
 - A published 81,237-image real Series 3/4 dataset supports reproducible training work.
-- Fifty-two checkpoints can be decoded and compared on one frozen challenge subset.
+- Forty-six checkpoints can be decoded and compared on one frozen challenge subset.
 - LiDAR software can govern throttle and command emergency braking without choosing steering direction.
 - Manual steering remained responsive in a hardware retest with Jetson Orin Nano powered off after network work moved outside the control loop.
-- Six v4.0 models completed training, ONNX export, offline evaluation, runtime compatibility checks, and supervised field testing.
-- Six v4.1 correction models completed training, ONNX export, and offline evaluation.
+- Six Series 4 artifacts completed training, ONNX export, offline evaluation, and runtime compatibility checks.
 
 ## Evidence Limits
 
 - The July 13 v3.4 result is qualitative. Exact route, weather, takeover count, and clip identifiers were not preserved.
-- The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 has not yet completed live integration or physical testing.
+- No Series 4 model has completed a physical field test.
 - Offline metrics do not prove obstacle avoidance, pedestrian response, recovery from a road-edge error, or operation outside the test distribution.
 - The LiDAR policy has automated software tests, but the latest configuration still needs a preserved physical test record.
 - GPS/navigation code exists, but it does not make the car safe for unattended route execution.

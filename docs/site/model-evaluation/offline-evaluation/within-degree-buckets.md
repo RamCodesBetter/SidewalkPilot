@@ -27,7 +27,7 @@ measure whether the right turn category was chosen.
 
 ## Why it matters
 
-The consequence of an angle error depends on speed, geometry, steering response,
+The consequence of an angle error depends on speed, geometry, actuator response,
 and closed-loop history. The within-degree ladder answers a narrower offline
 question: what fraction of independent evaluated frames falls within each numeric
 tolerance? It can distinguish two models that share an MAE, but it does not by

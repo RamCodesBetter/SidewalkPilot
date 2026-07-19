@@ -19,7 +19,7 @@ After Training is the runbook that turns a finished run into a judged, recorded 
 2. Read the metrics as a set, not one number: Bal9, turn exact, turn +/-1, straight exact, steering MAE, median absolute error, signed steering error, and the confusion matrix. A collapsed model usually concentrates predictions near straight and leaves turn rows weak.
 3. Compare final vs paired best. In Series 3/4 the paired checkpoint is lowest steering MAE; in Series 1/2 it is lowest validation loss. Either can still be straight-biased. Shortlist with turn coverage, confusion balance, Bal9, MAE, signed error, and then field behavior.
 4. Check signed steering error for a left/right prediction bias. Do not equate offline signed error with physical drift. Reproduce a physical pull on a controlled flat test before changing model, servo, motor-scale, or IMU settings.
-5. Record field-test status independently from training status. The July 13 drive selected v3.4; the Series 4.0 comparison later rejected the history models and found `4.0f` viable but not clearly superior. Series 4.1 remains untested on the car.
+5. Record field-test status independently from training status. The July 13 drive rejected v3.3/v3.3b and selected v3.4; Series 4 remains not yet field-tested.
 6. Update artifacts that are factual now. The report PDF (bucket + MAE numbers) is factual and can be updated anytime; a Hugging Face model card's pros/cons wait for a field verdict, and a card lists versions only up to itself.
 
 ## Stop condition

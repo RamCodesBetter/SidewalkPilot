@@ -5,7 +5,7 @@ one dataset is not silently compared with a value produced on another.
 
 ## Current Common Report
 
-`code/test_files/models/evaluate_sidewalkpilot_models.py` adapts all 52 checkpoints to
+`code/test_files/models/evaluate_sidewalkpilot_models.py` adapts all 46 checkpoints to
 their matching input/output contracts and evaluates them on the same frozen
 6,952-frame Series 3/4 challenge subset. It writes:
 

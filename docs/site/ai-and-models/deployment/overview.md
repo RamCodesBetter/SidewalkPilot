@@ -10,7 +10,7 @@ PyTorch training checkpoint
   -> decoded steering returned to Raspberry Pi 5
 ```
 
-The Raspberry Pi 5 remains responsible for the camera, steering/motor control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is the AI Model Manager and inference computer.
+The Raspberry Pi 5 remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is an inference service only.
 
 ## Artifact Contracts
 

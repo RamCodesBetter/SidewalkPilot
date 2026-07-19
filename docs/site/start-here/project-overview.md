@@ -35,7 +35,7 @@ The model family has evolved in four stages:
 - **Series 1:** a compact 200x66 camera model established that image-to-steering learning could control the car.
 - **Series 2:** retained direct steering regression while refining the data and testing HSV/CLAHE preprocessing for difficult lighting.
 - **Series 3:** moved to 320x180 input and a larger network. v3.0 used separate steering and throttle outputs; v3.1 and later use a 19-value hybrid output containing nine steering-class logits, nine class-local regression offsets, and one throttle value.
-- **Series 4:** keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Series 4.0 was field-tested; Series 4.1 retrains the same contracts to address the observed steering-history echo.
+- **Series 4:** keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six PC/CF/PCF artifacts are trained and runtime-supported but not yet field-promoted.
 
 The current physical-car selection is **v3.4**, not the checkpoint with the lowest raw mean error. The project uses balanced steering metrics and field behavior because a dataset dominated by straight frames can reward a model that avoids turning.
 
@@ -58,7 +58,7 @@ The AEB toggle controls all LiDAR slowdown and braking. When AEB is off, LiDAR d
 
 Driving sessions save camera images with logical `0..180` steering labels and absolute physical throttle fractions. The trainer sorts the images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets. Series 3/4 apply lighting, color, flip, and synthetic-shadow augmentation, then evaluate exact steering classes, adjacent classes, error magnitude, and signed bias.
 
-Series 3 and 4 use the same **81,237 real labeled images** and split procedure. The generated report adapts all four architecture families and scores all 52 checkpoints on a common 6,952-frame challenge subset. Model repositories through Series 4.0 and the datasets are published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat). Training runs are recorded in the project's configured experiment tracker.
+Series 3 and 4 use the same **81,237 real labeled images** and split procedure. The generated report adapts all four architecture families and scores all 46 checkpoints on a common 6,952-frame challenge subset. Series 1-3 model repositories and the datasets are published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat); Series 4 publication waits for field results. Training runs are recorded in the project's configured experiment tracker.
 
 ## Physical Hardware
 
@@ -67,7 +67,7 @@ Major hardware includes:
 - Raspberry Pi Camera Module 3 Wide.
 - Youyeetoo FHL-LD19 360-degree LiDAR through a CP2102 USB adapter.
 - BN880 GPS and HMC5883L compass.
-- PCA9685 Servo Controller.
+- PCA9685 steering-servo driver.
 - Yahboom AT8236 motor controller.
 - Hall-effect wheel-speed sensor.
 - Xbox Wireless Controller.

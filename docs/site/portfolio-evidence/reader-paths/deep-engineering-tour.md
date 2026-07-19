@@ -4,7 +4,7 @@ This tour connects the project story to the source files, model contracts, data,
 
 ## 1. Three Computers, One Authority
 
-The Jetson Orin Nano is the AI Model Manager. The Raspberry Pi 5 sends the newest JPEG and selected model version over dedicated Ethernet. Jetson Orin Nano loads the matching ONNX model and returns decoded steering and class probabilities; it does not write directly to the steering servo or motors.
+The Jetson Orin Nano is an inference service. The Raspberry Pi 5 sends the newest JPEG and selected model version over dedicated Ethernet. Jetson Orin Nano loads the matching ONNX, returns decoded steering/probabilities, and never directly controls an actuator.
 
 The Raspberry Pi 5 is the final control authority. It reads the Xbox controller, captures camera frames, reads LiDAR/GPS/IMU/hall telemetry, applies safety policy, drives the PCA9685 steering servo and motor controller, and records logs.
 
@@ -56,15 +56,15 @@ Series 4 keeps the Series 3 visual backbone, removes throttle learning, and comp
 | CF (`4.0f/g`) | image only | `[batch,4,18]` |
 | PCF (`4.0a/c`) | image plus three prior steering targets | `[batch,4,18]` |
 
-Each 18-value horizon contains nine logits and nine local offsets. Only horizon zero commands steering. Future horizons are training supervision, not future inputs. Before autonomy starts, the Raspberry Pi 5 client samples the operator's last three steering targets at the same 10 Hz cadence used by training. During autonomy, each fresh horizon-zero prediction becomes the newest history value and all three values are sent with the next PC/PCF request.
+Each 18-value horizon contains nine logits and nine local offsets. Only horizon zero commands steering. Future horizons are training supervision, not future inputs. The runtime initializes PC/PCF history to `[90,90,90]`, appends one decoded result per inference, and resets history on model changes, reconnects, and manual/status periods.
 
 ## 4. Training Controls
 
 Series 3 and 4 share the same 81,237-image real-world dataset and split procedure. Series 4 therefore changes the learning contract, not the base data membership. The trainer sorts paths into contiguous 100-sample split windows. Series 4 temporal samples are then rejected if they cross a train/validation boundary, a detected capture-run boundary, or a timestamp gap greater than 0.25 seconds.
 
-The completed Series 4 experiments used the RTX 6000 Ada GPU, 50,000 sampled training examples per epoch with steering-balance power set to zero, class-weighted loss, lighting/color transforms, horizontal balancing, and synthetic shadow bands. Each recorded run produced a final model and a best-validation model, exported both to ONNX, and logged comparison metrics to Weights & Biases.
+The completed Series 4 experiments used the RTX 6000 Ada GPU, weighted sampling, lighting/color transforms, horizontal balancing, and synthetic shadow bands. Each of those three recorded runs produced a final artifact and a best-current-target-validation artifact, exported ONNX, and logged its comparison metrics to W&B.
 
-The three v4.0 runs and three v4.1 correction runs each used 25 epochs and produced 12 ONNX models. All 12 passed offline evaluation. The v4.0 models also passed live contract checks and were field-tested; v4.1 remains pending live integration and field testing.
+The three Series 4 runs each used 25 epochs and produced six artifacts. All six passed ONNX signature and CUDA inference checks. They are not field-selected.
 
 ## 5. Why MAE Is Not Enough
 
@@ -77,13 +77,13 @@ The steering distribution contains many straight frames. A model can lower avera
 - Signed error for left/right bias;
 - Confusion matrices and hold-last baselines.
 
-All 52 checkpoints are scored on the same frozen 6,952-frame Series 3/4 challenge subset after architecture-specific preprocessing and decoding. Offline evaluation orders candidates; a physical-car comparison promotes them.
+All 46 checkpoints are scored on the same frozen 6,952-frame Series 3/4 challenge subset after architecture-specific preprocessing and decoding. Offline evaluation orders candidates; a physical-car comparison promotes them.
 
 ## 6. Current Model Evidence
 
 v3.4 is the field-selected baseline. During the July 13 comparison it handled every shadow case presented and the tested ordinary left/right turns. v3.4b was slightly worse; v3.3 and v3.3b regressed relative to their earlier references.
 
-That verdict is qualitative because route, weather, clip identifiers, and takeover count were not preserved. In the later v4.0 test, v4.0f was viable and complementary with v3.4, v4.0g was worse, and the four PC/PCF models echoed previous steering predictions. Those clips motivated the v4.1 correction experiments.
+That verdict is qualitative because route, weather, clip identifiers, and takeover count were not preserved. The next field test uses a stricter record and compares v3.4 against the Series 4 candidates in a fixed order.
 
 ## 7. LiDAR Safety Boundary
 
@@ -95,7 +95,7 @@ When AEB is disabled for a controlled test, its slowdown and hard-brake interven
 
 ## 8. Steering Calibration
 
-Training labels preserve a clean absolute 0-to-180 convention. Hardware mapping separately handles mechanical limits and center calibration. The current configured center trim is `+17D`; that value is a software/hardware setting, not a learned label change.
+Training labels preserve a clean absolute 0-to-180 convention. Hardware mapping separately handles mechanical limits and center calibration. The current configured center trim is `+12D`; that value is a software/hardware setting, not a learned label change.
 
 This separation matters for reproducibility: a photo labeled 90 remains “center target” even if the physical linkage later needs a different PCA9685 command to achieve it.
 
@@ -112,7 +112,7 @@ For each future field claim, the evidence standard adds model hash, route segmen
 
 ## 10. What Remains Open
 
-- Integrate v4.1, replay the v4.0 steering-echo failures on the bench, and field-test only models that pass.
+- Field-test the six Series 4 artifacts against v3.4.
 - Preserve a repeatable physical test for the current LiDAR slowdown/stop policy.
 - Collect long-duration controller-loop latency traces rather than relying only on observed smoothness.
 - Continue collecting difficult turn-in-shadow cases when field failures identify a real gap.

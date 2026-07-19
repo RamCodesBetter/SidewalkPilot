@@ -10,11 +10,8 @@ Training code is split between the early direct-regression family and the shared
 | `series_3_and_4/series_4_0pr_sidewalkpilot_trainer.py` | PC run: v4.0p final and v4.0r best-validation |
 | `series_3_and_4/series_4_0fg_sidewalkpilot_trainer.py` | CF run: v4.0f final and v4.0g best-validation |
 | `series_3_and_4/series_4_0ac_sidewalkpilot_trainer.py` | PCF run: v4.0a final and v4.0c best-validation |
-| `series_3_and_4/series_4_1pr_sidewalkpilot_trainer.py` | Robust-history PC run: v4.1p final and v4.1r selected checkpoint |
-| `series_3_and_4/series_4_1fg_sidewalkpilot_trainer.py` | Future-trajectory CF run: v4.1f final and v4.1g selected checkpoint |
-| `series_3_and_4/series_4_1ac_sidewalkpilot_trainer.py` | Combined robust PCF run: v4.1a final and v4.1c selected checkpoint |
 | `series_3_and_4/wandb_logger.py` | W&B metric definitions and logging helper |
-| `code/test_files/models/evaluate_sidewalkpilot_models.py` | Architecture-aware evaluator for all 52 checkpoints |
+| `code/test_files/models/evaluate_sidewalkpilot_models.py` | Architecture-aware evaluator for all 46 checkpoints |
 | `code/test_files/models/test_series_4_common.py` | Temporal-window and S4 contract regression tests |
 
 ## Contracts
@@ -32,7 +29,7 @@ All current S3/4 training uses the 81,237-image shared dataset. The trainer sort
 
 ## Artifact Roles
 
-Regular model names identify the final epoch. The paired alternate identifies the selected validation checkpoint from the same run. Series 4.0 selection used current-target validation MAE; Series 4.1 PC/PCF also uses closed-loop rollout error. For Series 4 the pairs are `p/r`, `f/g`, and `a/c`; an alternate is not automatically better in the field.
+Regular model names identify the final epoch. The paired alternate identifies the lowest selected validation checkpoint from the same run. For Series 4 those pairs are `p/r`, `f/g`, and `a/c`; an alternate is not automatically better in the field.
 
 TensorRT/INT8 builder files described by older documentation are not present in the current tree. Current live inference uses FP32 ONNX Runtime with CUDA. Quantization remains an optional future optimization, not a completed deployment claim.
 
@@ -42,9 +39,6 @@ TensorRT/INT8 builder files described by older documentation are not present in 
 python3 -m py_compile \
   code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py \
   code/ai_models_datasets/series_3_and_4/series_4_common.py \
-  code/ai_models_datasets/series_3_and_4/series_4_1pr_sidewalkpilot_trainer.py \
-  code/ai_models_datasets/series_3_and_4/series_4_1fg_sidewalkpilot_trainer.py \
-  code/ai_models_datasets/series_3_and_4/series_4_1ac_sidewalkpilot_trainer.py \
   code/test_files/models/evaluate_sidewalkpilot_models.py
 ```
 

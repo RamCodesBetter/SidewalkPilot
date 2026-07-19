@@ -40,7 +40,7 @@ Harsh diagonal tree shadows became the defining failure. Earlier models sometime
 
 Physical steering did not behave like an ideal 0-to-180-degree mechanism. The chassis showed asymmetric return behavior, load effects, and hysteresis. Bench tools stepped the servo through known commands; controller-driven trim tools exposed center offsets; wheel geometry was plotted and fitted to compare left and right behavior.
 
-The project separated **absolute servo commands**, which describe what hardware receives, from **reference steering values**, which preserve a clean 0-to-180 model and display convention. Current runtime calibration uses a `+17D` center trim.
+The project separated **absolute servo commands**, which describe what hardware receives, from **reference steering values**, which preserve a clean 0-to-180 model and display convention. Current runtime calibration uses a `+12D` center trim.
 
 ## Phase 7: LiDAR from Detection to Bounded Braking
 
@@ -79,14 +79,8 @@ The first Series 4 implementation compares three temporal contracts on the uncha
 - CF uses the image to predict current and future targets;
 - PCF combines previous-target inputs with current/future supervision.
 
-The three 25-epoch Weights & Biases runs completed and produced six final/best models: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The Raspberry Pi 5 client was extended to maintain and send causal history for PC/PCF, while the Jetson Orin Nano server inspects each model's signature and decodes its 18-value steering horizons.
+The three 25-epoch W&B runs completed and produced six final/best artifacts: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live Jetson Orin Nano server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Raspberry Pi 5–Jetson Orin Nano wire protocol.
 
-All 46 checkpoints available through Series 4.0 were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test made the offline comparison more informative than comparing each family on a different image distribution.
-
-## July 18, 2026: Series 4 Field Result and 4.1 Corrections
-
-The physical comparison contradicted the first offline Series 4 ranking. `4.0f` remained viable and produced complementary outcomes against v3.4, but the PC and PCF checkpoints repeatedly held their own earlier steering predictions. Those models were not drivable enough for promotion.
-
-Three Series 4.1 runs then targeted the observed failure: bounded steering-motion history, history corruption, counterfactual-history loss, closed-loop checkpoint selection, and current-dominant future-trajectory supervision. All six 4.1 checkpoints trained for 25 epochs, exported to ONNX, and joined the common evaluator. The report now covers 52 checkpoints. Runtime integration and physical testing remain pending.
+All 46 Series 1 through Series 4 checkpoints were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test makes the offline comparison more informative than comparing each family on a different image distribution. Series 4 remains experimental until physical-car testing; v3.4 remains the field-selected baseline.
 
 The current deployed research state is maintained in [Current Status](current-status.md).

@@ -16,7 +16,7 @@ The dashboard can cycle all 46 registered Series 1-4 version names while the con
 
 In `camera_only` mode, the Raspberry Pi 5 does not load a local checkpoint. It records the requested name, clears cached analysis, and sends the name with subsequent frames. A successful Raspberry Pi 5 selection proves only that the name was accepted; Jetson Orin Nano logs and a fresh matching response are required to prove that the ONNX artifact loaded.
 
-For Series 4 PC/PCF models, the Raspberry Pi 5 client samples the latest three manual targets before autonomy and sends history with each request. Model switches invalidate prior results so a response from the old model cannot enter the active control sequence.
+For Series 4 PC/PCF models, Jetson Orin Nano resets causal steering history on load or switch so commands from the previous model do not enter the new model's input history.
 
 ## Local Raspberry Pi 5 path
 

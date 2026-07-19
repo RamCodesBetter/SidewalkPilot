@@ -8,7 +8,7 @@ and transport run in a latest-payload worker rather than directly in the control
 
 The dashboard link (Raspberry Pi 5 `192.168.10.1` to Zero 2 W `192.168.10.2` over USB Ethernet,
 UDP port 8765) can drop because of a cable, power, interface, or neighbor-resolution
-failure. The architecture keeps this observability path outside routine steering/motor arbitration.
+failure. The architecture keeps this observability path outside routine actuator arbitration.
 
 ## Detection
 
@@ -33,7 +33,7 @@ also advertises an idle-exit window (`HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0`).
 ## Stop condition and who triggers it
 
 None. Dashboard telemetry loss has no motion-response rule. The worker boundary prevents
-routine UDP work from running in steering/motor arbitration, but it is not a measured hard-real-time
+routine UDP work from running in actuator arbitration, but it is not a measured hard-real-time
 or process-isolation guarantee.
 
 ## Evidence

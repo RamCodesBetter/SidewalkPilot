@@ -4,45 +4,48 @@
 
 SidewalkPilot v3.4 steered the physical project car through the normal turns and harsh-shadow cases presented in the July 13, 2026 comparison, and it performed better in that run than v3.4b, v3.3, and v3.3b.
 
-A later supervised Series 4 comparison found `4.0f` usable and approximately tied with v3.4 across the cases presented: each passed two cases that the other failed. The four 4.0 models that consumed steering history repeatedly held earlier predictions and were not usable enough for promotion.
-
-These claims are bounded to those comparisons. They do not establish performance on every sidewalk, route, shadow, weather condition, or obstacle.
+This is bounded to that supervised comparison. It is not a claim that v3.4 handles every sidewalk, route, shadow, weather condition, or obstacle.
 
 ## Defensible Offline Claim
 
-The common evaluator measures every checkpoint on one frozen 6,952-frame challenge set. Several 4.0 PC/PCF models score above v3.4 offline, but their physical steering-echo failure shows that high open-loop metrics do not guarantee stable closed-loop driving. The 4.1 experiments were trained specifically to test corrections for that failure and have no field verdict yet.
+On a common 6,952-frame frozen Series 3/4 challenge subset, the first Series 4 PC and PCF models outperform v3.4 on Bal9, turn exact, turn +/-1, and MAE. `4.0p` is the leading class-balanced candidate; `4.0c` has the lowest MAE. These models are trained and runtime-supported but not field-validated.
 
 ## Evidence
 
 | Evidence | Result |
 |---|---|
-| Common evaluator | architecture-specific preprocessing and decoding on the same images and labels |
-| July 13 physical comparison | v3.4 completed every shadow case presented and ranked first among v3.3-v3.4b |
-| 4.0 supervised comparison | `4.0f` viable with complementary outcomes versus v3.4 |
-| 4.0 history-model behavior | `4.0p/r/a/c` repeated earlier steering predictions and were rejected |
-| 4.1 training | six corrected experiment checkpoints trained and exported; runtime and field validation pending |
+| Common evaluator | all 46 checkpoints use the same images and labels |
+| v3.4 | Bal9 24.2%, turn exact 22.6%, turn +/-1 56.2%, MAE 15.083 degrees |
+| v3.4b | lower MAE 13.985, but weaker turn metrics and worse field result |
+| `4.0p` | Bal9 34.5%, turn exact 32.1%, turn +/-1 65.9%, MAE 12.396 |
+| `4.0c` | Bal9 32.0%, turn exact 29.4%, MAE 11.321 |
+| July 13 physical comparison | v3.4 completed every shadow case presented and ranked first |
 
-## Model Contracts
+## Artifact Contracts
 
 v3.4:
 
-- Input `[N,3,180,320]` normalized BGR.
-- Output `[N,19]`: nine steering logits, nine local offsets, and one unused throttle value.
+- Input `[N,3,180,320]` normalized BGR;
+- Output `[N,19]`: nine steering logits, nine local offsets, one unused learned-throttle value;
 - Public model: [SidewalkPilot-v3.4](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.4).
 
 Series 4:
 
-- PC input: image plus `[N,3]` prior steering targets; output `[N,1,18]`.
-- CF input: image only; output `[N,4,18]`.
-- PCF input: image plus prior steering targets; output `[N,4,18]`.
-- Horizon 0 supplies the current steering prediction; future horizons are training outputs, not future inputs.
-- Series 4 does not predict throttle.
+- PC input image + `[N,3]` target history, output `[N,1,18]`;
+- CF input image, output `[N,4,18]`;
+- PCF input image + history, output `[N,4,18]`;
+- Horizon 0 commands steering; no learned throttle;
+- Artifacts exist locally but public v4 model repositories have not been released.
+
+## Why This Is an Engineering Result
+
+The useful result is not “the newest model has the smallest number.” It is that controlled temporal experiments separated two hypotheses: causal prior-target input helped substantially; future supervision by itself helped less. The field test is designed to determine whether that offline difference survives closed-loop driving.
 
 ## Limitations
 
-- The field comparisons were supervised and qualitative rather than formal route-controlled benchmarks.
-- Exact environmental measurements and a complete per-case score sheet were not preserved.
-- 4.1 has not been integrated into the live selector or tested on the car.
+- The July 13 field record is qualitative and operator-reported.
+- Exact route, lighting measurements, weather, duration, takeover count, and clip IDs were not saved.
+- Series 4 has no physical-car result yet.
 - Steering success does not validate LiDAR, GPS, dashboard, or pedestrian behavior.
 - The model is one component in a supervised system, not an independent safety mechanism.
 

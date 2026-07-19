@@ -1,6 +1,6 @@
 # System Diagram
 
-This page is the top-level block diagram of SidewalkPilot: the three-device compute split, the sensors and controlled hardware wired to each device, and the links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.
+This page is the top-level block diagram of SidewalkPilot: the three-device compute split, the sensors and actuators wired to each device, and the links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.
 
 ## What the diagram shows
 
@@ -18,11 +18,11 @@ SidewalkPilot runs across three boards, each doing the job it is best at:
 
 ## Why this split
 
-The Raspberry Pi Camera Module 3 Wide is connected to the Raspberry Pi 5, and the current 81,237-image Series 3/4 dataset was captured through the Raspberry Pi 5 camera path. Jetson Orin Nano supplies GPU inference without taking steering or motor authority. Final steering, motor, and AEB decisions remain on the Raspberry Pi 5.
+The Raspberry Pi Camera Module 3 Wide is connected to the Raspberry Pi 5, and the current 81,237-image Series 3/4 dataset was captured through the Raspberry Pi 5 camera path. Jetson Orin Nano supplies GPU inference without taking actuator authority. Final actuator and AEB decisions remain on the Raspberry Pi 5.
 
 ## What this exhibit documents
 
-The checked-in separation of responsibilities: controller, steering, and motor ownership on the Raspberry Pi 5; GPU inference on Jetson Orin Nano; and observability on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance for every link.
+The checked-in separation of responsibilities: controller and actuator ownership on the Raspberry Pi 5, GPU inference on Jetson Orin Nano, and observability on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance for every link.
 
 ## System block view
 

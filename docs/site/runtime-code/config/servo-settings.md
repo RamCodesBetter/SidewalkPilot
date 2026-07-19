@@ -14,12 +14,12 @@ The servo is driven through the Adafruit `ServoKit` on the PCA9685. `config.py` 
 | `STEERING_SERVO_ACTUATION_RANGE_DEG` | `180` | Full logical/servo travel; center is `90` |
 | `STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG` | `48.812` | Reference full-left angle before center trim |
 | `STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG` | `131.188` | Reference full-right angle before center trim |
-| `STEERING_SERVO_CENTER_OFFSET` | `0.188888...` | Checked-in +17-degree center trim; environment or saved tuning can override it |
+| `STEERING_SERVO_CENTER_OFFSET` | `0.133333...` | Checked-in +12-degree center trim; environment or saved tuning can override it |
 | `STEERING_SERVO_CENTER_PRELOAD` | `0.0` | Near-center preload is disabled |
 | `STEERING_SERVO_CENTER_PRELOAD_WINDOW` | `0.0` | Near-center preload window is disabled |
 | `STEERING_CENTER_SNAP_DEG` | `0.5` | Logical commands less than 0.5 degrees from center snap to `90` |
 
-The trim math lives in `apply_steering_center_trim_degrees()`. It clamps logical input to `0..180`, maps the two halves into the characterized `48.812..131.188` reference range, adds `center_offset * 90`, and clamps the physical result to `0..180`. The generic preload code remains available, but its value and window are both zero. With the checked-in +17-degree trim, logical center `90` writes physical angle `107`; the two logical endpoints write approximately `65.812` and `148.188`. The model and CSV labels remain in logical `0..180` units.
+The trim math lives in `apply_steering_center_trim_degrees()`. It clamps logical input to `0..180`, maps the two halves into the characterized `48.812..131.188` reference range, adds `center_offset * 90`, and clamps the physical result to `0..180`. The generic preload code remains available, but its value and window are both zero. With the checked-in +12-degree trim, logical center `90` writes physical angle `102`; the two logical endpoints write approximately `60.812` and `143.188`. The model and CSV labels remain in logical `0..180` units.
 
 ## Why this choice
 

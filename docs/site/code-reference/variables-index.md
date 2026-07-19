@@ -18,13 +18,13 @@ a threshold, or a default without opening the module.
 
 | Constant | Value | Meaning |
 |---|---:|---|
-| `PCA9685_I2C_ADDRESS` | `0x40` | Servo Controller I2C address. |
+| `PCA9685_I2C_ADDRESS` | `0x40` | Servo driver I2C address. |
 | `PCA9685_SERVO_CHANNEL` | `0` | Steering servo channel. |
 | `PCA9685_FREQUENCY_HZ` | `50` | Servo PWM frequency. |
 | `STEERING_SERVO_MIN_PULSE_US` / `MAX_PULSE_US` | `1000` / `2000` | Pulse-width range. |
 | `STEERING_SERVO_ACTUATION_RANGE_DEG` | `180` | Logical range; `0`=left, `90`=center, `180`=right. |
 | `STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG` / `_RIGHT_LIMIT_DEG` | `48.812` / `131.188` | Reference steering endpoints used by the physical mapping. |
-| `STEERING_SERVO_CENTER_OFFSET` | `17 / 90` by default | +17 degree center trim represented as a normalized offset; persisted tuning can override it. |
+| `STEERING_SERVO_CENTER_OFFSET` | `12 / 90` by default | +12 degree center trim represented as a normalized offset; persisted tuning can override it. |
 | `STEERING_SERVO_CENTER_PRELOAD` / `_WINDOW` | `0.0` / `0.0` | Former preload mechanism, currently disabled. |
 
 `LEFT_MOTOR_PWM_SCALE` and `RIGHT_MOTOR_PWM_SCALE` are both `1.0`, so no motor-balance

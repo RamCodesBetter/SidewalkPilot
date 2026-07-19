@@ -37,7 +37,7 @@ timeout 5s cat /dev/ttyUSB0 | hexdump -C
 ```
 
   Prefer the stable `/dev/serial/by-id/` CP2102 path when available. Stop every competing serial reader first.
-- **Safety motion gate:** restrain or lift the wheels for initial steering/motor checks, keep the controller ready for takeover, and do not enable autonomy until the selected model and safety state are confirmed.
+- **Safety motion gate:** restrain or lift the wheels for initial actuator checks, keep the controller ready for takeover, and do not enable autonomy until the selected model and safety state are confirmed.
 
 ## Data gates
 

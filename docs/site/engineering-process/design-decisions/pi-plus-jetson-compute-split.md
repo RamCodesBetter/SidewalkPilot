@@ -30,7 +30,7 @@ steering model on the **Jetson Orin Nano**, instead of using a single computer.
 
 | Option | Pros | Cons |
 |---|---|---|
-| Jetson Orin Nano only | one board; GPU sits with compute | Requires replacing the established Raspberry Pi 5 camera/GPIO/sensor integration and moving final steering/motor authority |
+| Jetson Orin Nano only | one board; GPU sits with compute | Requires replacing the established Raspberry Pi 5 camera/GPIO/sensor integration and moving final actuator authority |
 | Raspberry Pi 5 only | established GPIO/sensor integration; simple | Does not provide the selected GPU inference path for Series 3/4 |
 | **Jetson Orin Nano + Raspberry Pi 5 (chosen)** | Raspberry Pi 5 keeps current I/O + the wide camera; Jetson Orin Nano adds GPU for the heavy model | two boards to manage + a network hop for inference |
 

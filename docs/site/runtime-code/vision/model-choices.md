@@ -1,6 +1,6 @@
 # Model Choices
 
-The live runtime can select 46 checkpoints from Series 1 through Series 4.0. The offline report contains 52 models because it also evaluates six Series 4.1 checkpoints that are not yet registered. The live registry is `STEERING_MODEL_VERSIONS` in `code/controller/current/rc_car_app/vision.py`.
+The live runtime can select all 46 evaluated checkpoints from Series 1 through Series 4. The registry is `STEERING_MODEL_VERSIONS` in `code/controller/current/rc_car_app/vision.py`.
 
 ## Registry
 
@@ -31,7 +31,7 @@ Jetson Orin Nano inspects ONNX metadata instead of hard-coding six filenames:
 - Image plus `target_history[batch,3]` and `[batch,1,18]` -> PC;
 - Image plus history and `[batch,4,18]` -> PCF.
 
-Only the current horizon commands the car. At autonomy start, PC/PCF history is seeded from the latest three manual steering targets and then updated once per completed inference. Switching models or reconnecting resets the prediction sequence.
+Only the current horizon commands the car. PC/PCF history starts centered and updates once per completed inference. Switching models resets that history.
 
 ## Failure Behavior
 

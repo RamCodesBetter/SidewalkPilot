@@ -10,7 +10,7 @@ Field testing is the final model and safety gate because offline image metrics d
 - Record interventions, oscillation, late turns, edge drift, and model/link freshness.
 - Preserve the matching video and CSV rather than relying on memory.
 
-The next comparison occurs after v4.1 live integration and steering-echo bench replay. Use v3.4 and v4.0f as controls, test the v4.1 models that pass replay, and close with v3.4 when conditions allow.
+The next ordered comparison is v3.4, v4.0p, v4.0r, v4.0a, v4.0c, v3.4b, v4.0f, and v4.0g, with an optional closing v3.4 control.
 
 ## LiDAR Test Method
 
@@ -22,6 +22,5 @@ Record distance, requested throttle, actual speed, brake response, surface, batt
 
 - v3.4 was selected in the July 13 shadow/turn comparison.
 - v3.3 and v3.3b regressed in that field comparison; v3.4b was slightly worse than v3.4.
-- All six v4.0 models were driven. v4.0f was viable but mixed against v3.4; v4.0g was worse; v4.0 PC/PCF models echoed prior predictions.
-- Six v4.1 correction models are trained and evaluated offline but not yet integrated or driven.
+- Series 4 has completed offline evaluation and runtime integration but has not yet been driven.
 - The latest center-corridor LiDAR configuration still needs a preserved physical result.

@@ -52,13 +52,13 @@ Series 4 CF:  4 x (9 logits + 9 offsets), image input only
 Series 4 PCF: 4 x (9 logits + 9 offsets), plus three-target history input
 ```
 
-Only horizon zero commands live steering. Before autonomy, PC/PCF history is filled from the operator's latest three steering targets. During autonomy, each fresh prediction becomes the newest history value. Series 4 does not predict throttle. LiDAR and runtime policy constrain motion separately.
+Only horizon zero commands live steering. PC/PCF history is initialized to `[90,90,90]`, updated after each inference, and reset on model changes, reconnects, and manual/status periods. Series 4 does not predict throttle. LiDAR and runtime policy constrain motion separately.
 
 ## Current Calibration and Limits
 
-- Steering center trim: `+17D`.
-- Normalized center offset: approximately `0.188889`.
-- Physical servo center command: approximately 107 degrees.
+- Steering center trim: `+12D`.
+- Normalized center offset: `0.133333`.
+- Physical servo center command: approximately 102 degrees.
 - Camera and inference cadence target: approximately 30 frames/inferences per second; the runtime reports measured camera FPS and Jetson Orin Nano IPS separately, and neither is guaranteed by the target value.
 - Main control-loop target: 60 Hz.
 - Jetson Orin Nano steering freshness limit: 0.25 seconds.

@@ -11,7 +11,7 @@ Override is built into `runtime.py`. While `autonomous_mode` is true, these qual
 - **Brake:** brake active cancels with `"Autonomous driving cancelled by brake."`
 - **Quit:** button `15` (`QUIT_BUTTON`) sets the shutdown flag and ends the run cleanly (final log row, dashboard shutdown, GPIO cleanup).
 
-`cancel_autonomous_mode()` zeroes requested throttle, clears brake force, resets PID state, and (for gas/brake) re-centers steering rather than intentionally retaining the model's command. If the run was on a GPS `AUTO` navigation segment, the same inputs also cancel the navigation route. Physical response still depends on loop timing, steering/motor health, traction, and power.
+`cancel_autonomous_mode()` zeroes requested throttle, clears brake force, resets PID state, and (for gas/brake) re-centers steering rather than intentionally retaining the model's command. If the run was on a GPS `AUTO` navigation segment, the same inputs also cancel the navigation route. Physical response still depends on loop timing, actuator health, traction, and power.
 
 The preflight checklist tests this path on a stand: qualifying input enters the Raspberry Pi 5 event loop and autonomy cancels on a following control iteration. A timed latency record is still needed before quoting an override time.
 

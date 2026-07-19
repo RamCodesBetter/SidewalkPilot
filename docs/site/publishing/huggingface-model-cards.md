@@ -1,6 +1,6 @@
 # Hugging Face Model Cards
 
-Each published model through Series 4.0 has its own repository:
+Each published Series 1-3 model has its own repository:
 
 ```text
 ram-shreyas-naik-sabavat/SidewalkPilot-v<version>
@@ -34,9 +34,7 @@ The field report lacks exact route/time/weather/video/takeover metadata, and eac
 
 ## Series 4 Release State
 
-All six Series 4.0 repositories are public. Each contains one FP32 ONNX model, `README.md`, `artifact_manifest.json`, and Hugging Face's `.gitattributes`. The cards document the PC/CF/PCF contract, exact ONNX inputs, horizon shape, common 6,952-frame metrics, and the bounded field verdict for that checkpoint.
-
-The public field text remains explicit: `4.0f` was viable and complementary to v3.4, `4.0g` was worse, and `4.0p/r/a/c` were rejected because they repeated prior steering predictions. Series 4.1 is not published because runtime integration and physical testing are still pending.
+The six Series 4 artifacts are trained, exported, included in the common evaluator, and supported by the live Jetson Orin Nano code. They are not yet field-tested and no public `SidewalkPilot-v4.0*` model repository exists. Do not publish a Series 4 card that implies field selection. When release review begins, each card must document its PC/CF/PCF contract, ONNX inputs, horizon shape, causal-history behavior, and the common 6,952-frame metrics.
 
 ## Authentication and Upload
 
@@ -53,7 +51,7 @@ Upload a reviewed card with `HfApi.upload_file()` to `README.md` in the matching
 1. Confirm repo name, artifact filename, and card version match.
 2. Compute and compare artifact SHA-256 with `artifact_manifest.json`.
 3. Inspect ONNX input/output signatures.
-4. Confirm final versus alternate checkpoint role (`b`, `r`, `g`, or `c`).
+4. Confirm regular versus `b` checkpoint role.
 5. Ensure chronological tables stop at the current card.
 6. Search the upload set for `.DS_Store` and unrelated files.
 7. Upload, list remote files, and download the remote README for final comparison.

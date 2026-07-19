@@ -16,8 +16,8 @@ The project separates code implementation, observed field behavior, and pending 
 
 | Criterion | Required evidence | Current status |
 |---|---|---|
-| Shared offline comparison | Frozen subset, exact evaluator revision, JSON and PDF | Complete for 52 checkpoints on 6,952 frames |
-| Shadow/turn behavior | Same supervised field cases for each candidate | v3.4 selected July 13; 4.0 tested; 4.1 pending |
+| Shared offline comparison | Frozen subset, exact evaluator revision, JSON and PDF | Complete for 46 checkpoints on 6,952 frames |
+| Shadow/turn behavior | Same supervised field cases for each candidate | v3.4 selected on July 13; Series 4 pending |
 | Field promotion | Better field behavior without unacceptable lag or instability | v3.4 remains default |
 
 Bal9, turn exact, turn +/-1, straight exact, MAE, median error, and signed error are read together. No single offline column establishes driving quality.
@@ -34,4 +34,4 @@ Bal9, turn exact, turn +/-1, straight exact, MAE, median error, and signed error
 
 ## Publication Rule
 
-Only claim what the evidence supports. Series 4.0 can be described as trained, exported, evaluated, runtime-supported, and physically compared. `4.0f` was viable but did not clearly beat v3.4; the history models failed. Series 4.1 can be described as trained, exported, and offline-evaluated, but not runtime-supported or field-tested.
+Only claim what the evidence supports. Series 4 can be described as trained, exported, evaluated, CUDA-smoke-tested, and runtime-supported. It cannot yet be described as field-proven or better than v3.4 on the car.

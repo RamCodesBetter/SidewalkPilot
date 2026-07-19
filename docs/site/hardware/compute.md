@@ -10,8 +10,8 @@ SidewalkPilot splits work across three computers.
 
 ## Why It Is Split
 
-The Raspberry Pi 5 already owns the Camera Module 3 Wide plus steering, motor, and sensor integration. Jetson Orin Nano adds GPU inference without moving final control authority away from the Raspberry Pi 5. The Zero 2 W isolates panel rendering from the control loop.
+The Raspberry Pi 5 already owns the Camera Module 3 Wide and the complete actuator/sensor integration. Jetson Orin Nano adds GPU inference without moving final control authority away from the Raspberry Pi 5. The Zero 2 W isolates panel rendering from the control loop.
 
 Series 1/2 can run locally on the Raspberry Pi 5. Series 3/4 use Jetson Orin Nano because they have larger `320x180` networks and the project has selected the Jetson Orin Nano GPU path for them. Inference rate is runtime telemetry, not a fixed claim; report it with the model, provider, software build, and power mode used for the measurement.
 
-The Zero 2 W does not issue steering or motor commands. Losing the display removes observability but does not transfer control authority.
+The Zero 2 W does not issue actuator commands. Losing the display removes observability but does not transfer control authority.

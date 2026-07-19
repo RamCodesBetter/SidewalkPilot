@@ -29,7 +29,7 @@ python3 code/test_files/steering/pca9685_servo_test.py --min-angle 0 --max-angle
 ## Why it matters
 
 - Calibration is where I separate mechanical facts (center, endpoints, backlash) from the logical `0=left / 90=center / 180=right` convention the model and logs use. Physical compensation belongs in the runtime mapping layer, not in the model labels — this test just measures the raw servo so I know what that mapping has to correct for.
-- These are calibration utilities, and they write raw servo values rather than replaying the complete runtime reference mapping. `config.py` currently has a checked-in +17-degree trim (`STEERING_SERVO_CENTER_OFFSET = 17/90`) plus reference limits `48.812` and `131.188`; an environment variable or untracked `steering_tune.json` can override the trim on a device.
+- These are calibration utilities, and they write raw servo values rather than replaying the complete runtime reference mapping. `config.py` currently has a checked-in +12-degree trim (`STEERING_SERVO_CENTER_OFFSET = 12/90`) plus reference limits `48.812` and `131.188`; an environment variable or untracked `steering_tune.json` can override the trim on a device.
 
 ## Related pages
 

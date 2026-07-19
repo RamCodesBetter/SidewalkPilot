@@ -19,7 +19,7 @@ A genuinely repeatable training result needs the git commit, dataset revision, s
 
 - Published code cannot reproduce undocumented mechanical alignment or battery/load state.
 - The July 13 v3.4 field verdict lacks a complete route/clip/takeover record.
-- Series 4.0 has a qualitative supervised field verdict; Series 4.1 has no physical result yet.
+- The Series 4 models are offline-evaluated but have no physical field verdict.
 - Current deployment is FP32 ONNX Runtime/CUDA; no reproducibility claim depends on a TensorRT engine.
 
 See [Evidence Map](../reader-paths/evidence-map.md) and [Retest Policy](../../engineering-process/iteration-records/retest-policy.md).

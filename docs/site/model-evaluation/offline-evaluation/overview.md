@@ -4,7 +4,7 @@ Offline evaluation orders the checkpoints eligible for a supervised physical tes
 
 ## Common Challenge Set
 
-The current evaluator runs every model from v1.0 through v4.1c on the same **6,952-frame frozen Series 3/4 temporal validation subset**:
+The current evaluator runs every model from v1.0 through v4.0c on the same **6,952-frame frozen Series 3/4 temporal validation subset**:
 
 - D0702: 4,230 frames;
 - D0707: 652 frames;
@@ -17,9 +17,9 @@ Series 1/2 frames are resized to 200x66 and decoded as direct steering regressio
 `code/test_files/models/evaluate_sidewalkpilot_models.py` discovers all supported checkpoints and writes:
 
 - `docs/steering_eval_current_labels.json`, containing overall, source, bucket, confusion, and selection metrics;
-- `docs/steering_model_report.pdf`, a 23-page report with the class-balanced ranking, all-series MAE bars, per-model sections, and confusion matrices.
+- `docs/steering_model_report.pdf`, a 22-page report with the class-balanced ranking, all-series MAE bars, per-model sections, and confusion matrices.
 
-The JSON retains older Series 1/2 own-dataset scores under `historical_evaluation`. Historical metrics answer how those models were originally reported. Common metrics answer how all 52 behave on today's challenge set. The two contexts are labeled and never silently substituted.
+The JSON retains older Series 1/2 own-dataset scores under `historical_evaluation`. Historical metrics answer how those models were originally reported. Common metrics answer how all 46 behave on today's challenge set. The two contexts are labeled and never silently substituted.
 
 ## Why One Metric Is Not Enough
 
@@ -37,9 +37,9 @@ The challenge set has 4,741 ST frames and 2,211 non-ST frames. Overall exact acc
 
 ## Offline and Field Evidence
 
-Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. That limitation was visible in v4.0: PC and PCF ranked strongly offline but echoed their own earlier steering predictions on the car. v4.0f was viable but mixed against v3.4, so v3.4 remains the default.
+Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. v3.4 remains the field-selected baseline because it won the recorded field comparison even though newer Series 4 models lead offline.
 
-The next model test begins only after v4.1 runtime integration and closed-loop bench replay. It should use v3.4 and v4.0f as controls while testing the six v4.1 correction models under the same route and conditions.
+The next field test starts with v3.4 as a control and tests `4.0p`, `4.0r`, `4.0a`, `4.0c`, v3.4b, `4.0f`, and `4.0g` in that order.
 
 ## Reproduce
 

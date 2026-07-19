@@ -1,12 +1,12 @@
 # I2C
 
-This page documents the I2C bus on the Raspberry Pi 5 and the single device on it: the PCA9685 Servo Controller that positions the steering servo.
+This page documents the I2C bus on the Raspberry Pi 5 and the single device on it: the PCA9685 PWM driver that positions the steering servo.
 
 ## What is on the bus
 
 | Field | Value |
 |---|---|
-| Part | HiLetGo PCA9685 16-channel 12-bit Servo Controller |
+| Part | HiLetGo PCA9685 16-channel 12-bit PWM driver |
 | Role | Generates the 50 Hz servo pulse that drives the Ackermann steering servo |
 | Bus | I2C bus 1 (Raspberry Pi 5 `SDA1` / `SCL1`, the default `board.SDA` / `board.SCL`) |
 | Address | `0x40` |

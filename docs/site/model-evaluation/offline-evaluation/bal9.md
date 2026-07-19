@@ -43,4 +43,4 @@ Bal9 is macro-averaged; turn metrics are micro-averaged over turn samples. Readi
 
 ## Interpretation
 
-`4.0p` currently leads the common report at 34.5%. That does not mean it is 34.5% “accurate at driving.” It means the average exact recall across nine discrete steering buckets is 34.5% on this challenge set. On the car, v4.0p echoed earlier predictions and was rejected. Continuous within-bucket offset error, closed-loop stability, and field behavior remain separate questions.
+`4.0p` currently leads the common report at 34.5%. That does not mean it is 34.5% “accurate at driving.” It means the average exact recall across nine discrete steering buckets is 34.5% on this challenge set. Continuous within-bucket offset error, closed-loop stability, and field behavior remain separate questions.

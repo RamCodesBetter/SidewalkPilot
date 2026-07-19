@@ -34,7 +34,7 @@ This dataset is historically important because it established the complete colle
 
 ## Series 3 and 4 Dataset
 
-Series 3 and Series 4 use the same 81,237 real-world images. The three v4.0 and three v4.1 experiments use the same dataset and split construction, making PC, CF, and PCF architecture comparisons instead of data comparisons.
+Series 3 and Series 4 use the same 81,237 real-world images. The three Series 4 experiments use the same dataset and split construction, making PC, CF, and PCF architecture comparisons instead of data comparisons.
 
 The dataset includes shadow and turn cases collected after earlier field failures. Adjacent frames are highly correlated, so the Series 3/4 trainer sorts by path and assigns contiguous 100-sample windows to one side of the split. This reduces adjacent-frame leakage, but it is not a capture-run-group split and does not prove complete independence between train and validation.
 
@@ -54,7 +54,7 @@ Large image folders, dataset cards, and generated archives are intentionally not
 
 ## Evaluation Use
 
-Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.
+Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 46 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.
 
 That common challenge set exposes the weakness of early models on later lighting and shadow conditions. It does not erase the original Series 1/2 historical results, which remain results on their earlier dataset.
 

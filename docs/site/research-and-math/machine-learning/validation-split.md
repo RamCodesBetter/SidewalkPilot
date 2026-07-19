@@ -58,8 +58,8 @@ val_windows = round(813 * 0.10) = 81
 stride      = 813 // 81 = 10
 ```
 
-Every 10th window is held out. In this example the final 37-frame window is not selected
-because its zero-based index is 812, not a multiple of 10. The
+Every 10th window is held out. In this example the final 37-frame window is also selected
+because its zero-based index is 812, not a multiple of 10; therefore it is not held out. The
 exact frame count therefore follows the code's window/stride arithmetic rather
 than a direct 90/10 frame count.
 

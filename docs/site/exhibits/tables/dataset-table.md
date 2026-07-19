@@ -7,7 +7,7 @@ This exhibit separates the historical Series 1/2 dataset, the current Series 3/4
 | Dataset | Size | Labels | Used by | Status |
 |---|---:|---|---|---|
 | Series 1 and 2 | 2,224 real images, 13 sources | absolute steering | v1.0-v2.4b | finalized and published |
-| Series 3 and 4 | 81,237 real images | logical `0..180` steering and absolute physical throttle capture | v3.0-v4.1c | current shared dataset, published |
+| Series 3 and 4 | 81,237 real images | logical `0..180` steering and absolute physical throttle capture | v3.0-v4.0c | current shared dataset, published |
 | CARLA | separate pre-generated synthetic dataset | simulator-exported labels | historical/optional source | published separately |
 
 Public repositories:
@@ -36,7 +36,7 @@ Series 4 temporal windows also stay inside one capture run and one split and rej
 
 ## Evaluation Subset
 
-The generated 52-model report uses a frozen 6,952-frame challenge subset from the Series 3/4 dataset. Series 1/2 checkpoints receive their correct 200x66 preprocessing and direct-output decoder; Series 3/4 receive 320x180 preprocessing and their matching hybrid decoder.
+The generated 46-model report uses a frozen 6,952-frame challenge subset from the Series 3/4 dataset. Series 1/2 checkpoints receive their correct 200x66 preprocessing and direct-output decoder; Series 3/4 receive 320x180 preprocessing and their matching hybrid decoder.
 
 The common subset answers “how do all generations behave on the later challenge distribution?” Original historical metrics on the Series 1/2 dataset answer a different question and remain valid only for that earlier data snapshot.
 

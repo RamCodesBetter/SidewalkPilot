@@ -2,7 +2,7 @@
 
 Hard brake is how SidewalkPilot removes energy fast: when a stop condition fires, the
 car does not coast, it clamps both motor outputs low. This page documents when the
-hard brake engages and how it is applied through the AT8236 Motor Controller.
+hard brake engages and how it is applied through the AT8236 driver.
 
 ## Hazard
 

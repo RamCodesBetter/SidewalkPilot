@@ -1,6 +1,6 @@
 # Model Export
 
-Series 3 and Series 4 trainers export both final and selected-validation checkpoints to ONNX automatically. The live Jetson Orin Nano runtime consumes registered FP32 ONNX files directly; export alone does not add a model to the live selector.
+Series 3 and Series 4 trainers export both final and best-validation checkpoints to ONNX automatically. The live Jetson Orin Nano runtime consumes those FP32 ONNX files directly.
 
 ## Export Rules
 
@@ -22,6 +22,6 @@ Series 3 and Series 4 trainers export both final and selected-validation checkpo
 
 ## Series 4 Contract Check
 
-Series 4 PC and PCF models require a three-value steering-target history. For registered v4.0 models, the Raspberry Pi 5 client samples the latest three manual targets before autonomy and then appends fresh completed predictions. It sends all three values with each inference request. CF models use only the image. All three contracts return multiple horizon predictions where applicable; live control decodes horizon zero. A v4.1 model must be registered and bench-tested before deployment.
+Series 4 PC and PCF models require a three-value steering-target history. The Jetson Orin Nano runtime owns that history and resets it on model load/switch, reconnect, and manual/status-only periods. CF models use only the image. All three families return multiple horizon predictions where applicable; live control decodes horizon zero.
 
 TensorRT, FP16, and INT8 are optional future experiments. They are not required by this deployment runbook.

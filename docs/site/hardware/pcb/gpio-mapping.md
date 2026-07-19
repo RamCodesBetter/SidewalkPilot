@@ -19,7 +19,7 @@ Read from `config.py`:
 
 ### Steering servo (PCA9685, I2C)
 
-The steering servo is **not** on a bare GPIO; it connects through the PCA9685 Servo Controller, so the board only needs to break out the I2C bus to the controller:
+The steering servo is **not** on a bare GPIO — it hangs off the PCA9685 PWM driver, so the board only needs to break out the I2C bus to the driver:
 
 | Item | Value | Constant |
 |---|---|---|

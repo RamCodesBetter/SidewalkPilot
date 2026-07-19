@@ -19,10 +19,10 @@ range. The `value` setter does **not** write the logical angle straight to the s
 passes through `apply_steering_center_trim_degrees()`, which applies:
 
 - A piecewise-linear logical-to-reference mapping with limits `48.812` and `131.188`, and
-- A checked-in center offset of `17/90 = 0.188888...`, adding 17 physical degrees.
+- A checked-in center offset of `12/90 = 0.133333...`, adding 12 physical degrees.
 
 The generic near-center preload path is disabled because both its value and window are
-`0.0`. With these defaults, logical center `90` produces physical angle `107`.
+`0.0`. With these defaults, logical center `90` produces physical angle `102`.
 
 This is the key design rule made concrete: the model and training labels think in clean
 logical steering (0/90/180), and all servo-specific mechanical compensation lives here in
@@ -41,7 +41,7 @@ assign an observed pull to one cause without a controlled test.
 ## Constants used by this page
 
 - PCA9685: `0x40`, channel `0`, `50 Hz`, pulse `1000–2000 µs`, range `180°` (`config.py`)
-- Reference limits `48.812` and `131.188`; center offset `0.188888...`; preload and window
+- Reference limits `48.812` and `131.188`; center offset `0.133333...`; preload and window
   both `0.0` (`config.py`)
 - Center snap threshold `0.5` degrees (`update_gpio()`, `runtime.py`)
 

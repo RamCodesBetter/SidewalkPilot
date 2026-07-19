@@ -48,8 +48,7 @@ operator notes so they can be interpreted rather than presented as isolated clip
 
 - Most failure footage is from Series 3 field tests (`v3.1b` onward).
 - `v3.3` and `v3.3b` were tested on July 13 and both regressed from their earlier references. The exact failure clips were not indexed in the run record.
-- Series 4.0 interruption clips were captured during the comparison. They show the PC/PCF steering-echo failure and the cases where `4.0f` and v3.4 differed; they still need names, case metadata, and privacy review before publication.
-- Series 4.1 has no field footage because it has not been integrated or driven.
+- Series 4 has no field footage yet.
 - All clips are internal until a privacy pass (faces, plates, house numbers).
 
 ## Related pages

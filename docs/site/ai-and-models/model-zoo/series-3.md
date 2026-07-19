@@ -32,4 +32,4 @@ v3.3 and v3.3b are useful negative results. They were trained to improve shadow 
 - Runtime default: `DEFAULT_STEERING_MODEL_CHOICE = "3.4"`
 - Deployment: ONNX Runtime CUDA on Jetson Orin Nano
 
-See the [Series 4 table](series-4.md) for the temporal experiments and the [full PDF report](../../steering_model_report.pdf) for confusion matrices and all 52 checkpoints.
+See the [Series 4 table](series-4.md) for the temporal experiments and the [full PDF report](../../steering_model_report.pdf) for confusion matrices and all 46 checkpoints.

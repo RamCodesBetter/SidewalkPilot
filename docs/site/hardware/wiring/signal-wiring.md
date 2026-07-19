@@ -1,6 +1,6 @@
 # Signal Wiring
 
-This page documents the control and data signals on the Raspberry Pi 5: the GPIO, I2C, and serial lines that carry commands to steering/motors and readings back from sensors. It is the counterpart to the power wiring page: here the concern is logic-level signals and pin assignments, not current delivery. For the full one-line-per-device list see the pin map.
+This page documents the control and data signals on the Raspberry Pi 5 — the GPIO, I2C, and serial lines that carry commands to actuators and readings back from sensors. It is the counterpart to the power wiring page: here the concern is logic-level signals and pin assignments, not current delivery. For the full one-line-per-device list see the pin map.
 
 ## Signal lines
 
@@ -17,7 +17,7 @@ This page documents the control and data signals on the Raspberry Pi 5: the GPIO
 
 ## How it works
 
-The Raspberry Pi 5 issues steering/motor signals and reads sensor signals over four transports. Steering goes out as an I2C command to the PCA9685 (logical `0=left`, `90=center`, `180=right`, mapped to a pulse in `hardware.py`). The four motor half-bridges are driven as software PWM at 1 kHz through `gpiozero.PWMOutputDevice` on GPIO 19/20 (right) and 25/13 (left); direction and speed are set by which pin gets the duty cycle. The hall sensor returns wheel pulses on GPIO 24 as a pull-up digital input, edge-counted for speed. GPS fixes arrive as NMEA on the UART, the LiDAR scan arrives as a 230400-baud binary stream over USB, and the Raspberry Pi 5 sends dashboard telemetry outward as UDP over the USB Ethernet link. The BN880 magnetometer is bench-tested over I2C but is not consumed by the live route manager.
+The Raspberry Pi 5 issues actuator signals and reads sensor signals over four transports. Steering goes out as an I2C command to the PCA9685 (logical `0=left`, `90=center`, `180=right`, mapped to a pulse in `hardware.py`). The four motor half-bridges are driven as software PWM at 1 kHz through `gpiozero.PWMOutputDevice` on GPIO 19/20 (right) and 25/13 (left); direction and speed are set by which pin gets the duty cycle. The hall sensor returns wheel pulses on GPIO 24 as a pull-up digital input, edge-counted for speed. GPS fixes arrive as NMEA on the UART, the LiDAR scan arrives as a 230400-baud binary stream over USB, and the Raspberry Pi 5 sends dashboard telemetry outward as UDP over the USB Ethernet link. The BN880 magnetometer is bench-tested over I2C but is not consumed by the live route manager.
 
 All pin numbers are BCM and come straight from `rc_car_app/config.py`; the I2C and serial endpoints come from `config.py`, `lidar.py`, and `navigation.py`. The configured motor GPIO does not intentionally overlap the sensor UART/I2C assignments. A physical miswire can still connect unrelated lines, so the pin map must be checked before power is applied.
 
