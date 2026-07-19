@@ -2,7 +2,7 @@
 
 The consolidated failure playbook for SidewalkPilot: the dashboard link, the controller, sensors, and the USB gadget. Each entry names the machine, the check, what it can break, and how to confirm the fix. The guiding rule is prove, do not assume — grep the value across every layer and observe the wire before forming a theory.
 
-## Dashboard shows `NO LINK`
+## Dashboard Shows `NO LINK`
 
 `NO LINK` means the Zero 2 W receiver is alive but has not received a packet recently. Work outward from the sender:
 
@@ -12,36 +12,36 @@ The consolidated failure playbook for SidewalkPilot: the dashboard link, the con
 4. **Ping both ways**: `ping -c 3 192.168.10.2` from the Raspberry Pi 5, `ping -c 3 192.168.10.1` from the Zero 2 W.
 5. **Carrier `1` but ping fails** — the classic ARP/USB stall. Restart the USB keeper, or run the USB hard-reset sequence on both devices.
 
-## Controller exits immediately
+## Controller Exits Immediately
 
-- Almost always "No joystick detected." Connect the Xbox controller before starting the controller.
+- If the log says "No joystick detected," connect the Xbox controller before starting the controller.
 - If it drops to "Running in simulation mode," `hardware.py` caught a GPIO/I2C init error and swapped in dummy devices — check wiring, I2C enablement, and bus contention.
 
-## LiDAR reads none / zero
+## LiDAR Reads None or Zero
 
-- Confirm the LiDAR is present: the FHL-LD19 is currently on USB `/dev/ttyUSB0` via a CP2102 adapter at `230400` baud (it was previously GPIO UART `/dev/ttyAMA2`).
+- Confirm the LiDAR is present: the FHL-LD19 is currently on USB `/dev/ttyUSB0` via a CP2102 UART-to-USB Adapter at `230400` baud (it was previously GPIO UART `/dev/ttyAMA2`).
 - Confirm the LiDAR motor is spinning.
 - Stop any second reader before a raw serial test — two readers on one port is a common cause.
 
-## GPS permission denied
+## GPS Permission Denied
 
 - The error looks like permission denied on `/dev/ttyAMA0`. Confirm the serial console is freed on that UART and check group membership / port ownership.
 - Do not confuse the GPS port (`/dev/ttyAMA0`, `9600`) with the LiDAR port.
 
-## USB enumeration errors on the Zero 2 W
+## USB Enumeration Errors on the Zero 2 W
 
 - `-110`/`-62` or "device descriptor read" errors establish an enumeration failure; they do not identify power, cable, port, host, or device as the cause. Reproduce with the known working power arrangement, data cable, and host port before replacing hardware.
-- If the Zero 2 W is reachable over Wi-Fi but not USB, fix the dedicated USB path before continuing dashboard debugging.
+- If the Zero 2 W is not reachable over the dedicated USB link, repair that link before continuing dashboard debugging; the current dashboard has no Wi-Fi fallback.
 
-## Zero 2 W boots then hangs headless
+## Zero 2 W Boots Then Hangs Headless
 
 - A missing `/etc/machine-id` runs the systemd first-boot wizard, which stalls a headless boot. Regenerate the machine-id.
 
-## Why this discipline
+## Why This Discipline
 
-Repeatable, machine-labelled checks reduce accidental branch leaks, sync damage, and deployment confusion, and they stop the real failure mode: asserting a cause from the armchair. When a value is wrong on the wire, grep that value across **every** file first (config, runtime, serializer, renderer), read the whole file rather than a single grepped line, check which process is actually running (`pgrep -af`, `/proc/PID/cwd`), and instrument the data path end-to-end before declaring it fixed. A remembered case cost ~2.5 hours because a hardcoded literal in the serializer was assumed away instead of grepped.
+Repeatable, machine-labeled checks reduce accidental branch leaks, sync damage, and deployment confusion. They also prevent a common failure: asserting a cause before tracing the data. When a value is wrong on the wire, search for that value across **every** file first (configuration, runtime, serializer, and renderer), read each complete file rather than one matching line, check which process is actually running (`pgrep -af`, `/proc/PID/cwd`), and instrument the complete data path before declaring the issue fixed.
 
-## Failure and recovery quick table
+## Failure and Recovery Quick Table
 
 | Symptom | Machine | First decisive check |
 |---|---|---|
@@ -53,14 +53,14 @@ Repeatable, machine-labelled checks reduce accidental branch leaks, sync damage,
 | GPS denied | Raspberry Pi 5 | `/dev/ttyAMA0` console freed + group |
 | USB `-110`/`-62` | Zero 2 W | Known working power/cable/port, then `dmesg` and `lsusb` |
 
-## Evidence to attach
+## Evidence to Attach
 
 - Command output for the failing check
 - `ss`/`ip`/`ping` results
 - Relevant startup lines from the affected process
 
-## Related pages
+## Related Pages
 
-- `operations/mac-pc-sync.md`
-- `runbooks/sync-day/sync-verification.md`
-- `publishing/mkdocs-site.md`
+- [Mac and PC Sync](mac-pc-sync.md)
+- [Mac-to-PC Sync Runbook](../runbooks/sync-day/mac-to-pc.md)
+- [MkDocs Site Publishing](../publishing/mkdocs-site.md)

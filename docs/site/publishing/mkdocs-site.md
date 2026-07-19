@@ -4,7 +4,7 @@ This documentation is a MkDocs site. It is the public, human-facing front door t
 SidewalkPilot project - the autonomy stack, hardware, models, evaluation, safety case, and
 runbooks are all authored as Markdown and built into a static site by MkDocs.
 
-## How it works
+## How It Works
 
 The site is configured by `mkdocs.yml` at the repo root:
 
@@ -18,7 +18,7 @@ Source Markdown is edited under `docs/site/**`. Running the build turns that int
 HTML site under `site/` at the repo root:
 
 ```bash
-cd /home/rsabavat/rc_car_code
+cd ~/rc_car_code
 mkdocs build          # renders docs/site/** into site/**
 mkdocs serve          # live local preview at http://127.0.0.1:8000
 ```
@@ -27,7 +27,7 @@ The generated `site/**` tree is committed output. **Edit the source under `docs/
 rebuild - do not hand-edit `site/**`**, or the next build
 will overwrite the change.
 
-## Why this choice
+## Why This Choice
 
 - **One source, many readers.** Markdown keeps the docs diffable in git and lets the same
   content render as a browsable site for technical reviewers, mentors, and collaborators.
@@ -36,21 +36,22 @@ will overwrite the change.
 - **Publishing is separated from drafting.** Public pages should never contain private paths,
   home addresses, private hostnames/IPs, stale claims, or unreviewed field media. Keeping the
   source in `docs/site/` and reviewing before build/publish keeps those out of the public
-  artifact.
+  site.
 
-## Review before publishing
+## Review Before Publishing
 
 Before a build is treated as publishable, check:
 
 1. **Accuracy** - facts on the page match the actual source code, config, and current model
-   versions; v3.3/v3.3b are recorded as field regressions, Series 4 is marked as
-   not yet field-tested, and Jetson Orin Nano quantization is documented as future work.
-2. **Privacy** - no private IPs, hostnames, addresses, or unreviewed media leaked into a
-   public page.
+   versions; Series 4.0 has its bounded field verdict, Series 4.1 is labeled as not yet
+   integrated or field-tested, and Jetson Orin Nano quantization remains future work.
+2. **Privacy** - no credentials, personal addresses, private hostnames, workstation
+   usernames/paths, or unreviewed media appear on a public page. The fixed isolated-link
+   addresses documented as part of the car's architecture are intentional.
 3. **Links** - internal links resolve after `mkdocs build`, and external references (models,
    datasets) point at the correct Hugging Face repos rather than local paths.
 
-## What lives where (GitHub vs Read the Docs vs Hugging Face)
+## What Lives Where (GitHub, Read the Docs, and Hugging Face)
 
 - **This MkDocs site** - the narrative: architecture, engineering process, evaluation method,
   safety case, runbooks. It links out to the model/dataset cards; it does not duplicate them.
@@ -62,9 +63,8 @@ No documentation deployment workflow is checked into `.github/workflows/` or a
 `.readthedocs.yml` file. The repository tracks locally generated `site/**` output;
 the hosting configuration itself is external to this source tree.
 
-## Related pages
+## Related Pages
 
-- `publishing/reports.md`
-- `publishing/pdf-report.md`
-- `publishing/huggingface.md`
-- `operations/mac-pc-sync.md`
+- [Reports and PDF](reports.md)
+- [Hugging Face](huggingface.md)
+- [Mac and Computer Sync](../operations/mac-pc-sync.md)

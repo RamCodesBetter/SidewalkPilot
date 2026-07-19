@@ -10,9 +10,9 @@ PyTorch training checkpoint
   -> decoded steering returned to Raspberry Pi 5
 ```
 
-The Raspberry Pi 5 remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is an inference service only.
+The Raspberry Pi 5 remains responsible for the camera, steering servo and motor control, result freshness, manual override, and LiDAR safety. The Jetson Orin Nano runs the steering models and returns their predictions.
 
-## Artifact Contracts
+## Model Contracts
 
 | Family | ONNX input | ONNX output |
 |---|---|---|
@@ -24,12 +24,12 @@ The Raspberry Pi 5 remains responsible for the camera, actuator control, result 
 
 The server inspects input names and output shapes rather than assigning a contract from the filename alone.
 
-## Provider Selection
+## GPU Selection
 
-CUDA is preferred when ONNX Runtime reports `CUDAExecutionProvider`; CPU remains a fallback for compatibility/testing. A partially installed TensorRT provider is not registered ahead of CUDA because provider initialization failure can cause an accidental CPU retry.
+Series 1/2 run through PyTorch CUDA. Series 3/4 run through ONNX Runtime's CUDA provider. CPU execution remains available only for diagnosis; a field launch should confirm that the Jetson Orin Nano GPU path loaded.
 
-## TensorRT Status
+## Export and Verification
 
-TensorRT, FP16, and INT8 remain valid future optimization topics, but they are not the current live path. The old checked-in TensorRT builder described by earlier docs is no longer in the repository. No current field claim depends on a TensorRT engine or quantized model.
+Before field use, each model must load with the expected input names and output shape, return finite steering values, and pass a complete Raspberry Pi 5-to-Jetson Orin Nano response test. The deployed filename and version must match. The current field path uses FP32 models; TensorRT, FP16, and INT8 are not active.
 
-See [ONNX Export](onnx-export.md), [Jetson Orin Nano Runtime](jetson-runtime.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).
+See [Jetson Orin Nano Runtime](jetson-runtime.md) and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

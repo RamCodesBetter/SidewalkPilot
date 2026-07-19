@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-17T00:00:00.000Z" agent="SidewalkPilot diagram generator" version="24.7.17">
+  <diagram id="navigation-flow" name="Navigation and Crosswalk Handoff Flow">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1420" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="panel-1" parent="1" vertex="1" value="Offline Map Preparation" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="25" y="105" width="680" height="175" as="geometry" />
+        </mxCell>
+        <mxCell id="panel-2" parent="1" vertex="1" value="Route Planning and Runtime Handoff" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="25" y="300" width="1750" height="750" as="geometry" />
+        </mxCell>
+        <mxCell id="panel-3" parent="1" vertex="1" value="Runtime Safety and Observability" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="25" y="1060" width="1750" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="osm" parent="1" vertex="1" value="OpenStreetMap-Derived&lt;br&gt;Data" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="155" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="graph" parent="1" vertex="1" value="Prebuilt Navigation Graph&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;6,183 nodes, 10,072 edges; no live map service&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="365" y="145" width="300" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="destination" parent="1" vertex="1" value="Selected Destination" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="330" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="gps" parent="1" vertex="1" value="Latest Valid GPS Position" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="455" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="snap" parent="1" vertex="1" value="Map Start and Destination&lt;br&gt;to Graph Nodes" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="365" y="360" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="astar" parent="1" vertex="1" value="A* Route Search&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Haversine heuristic + turn penalties&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="735" y="360" width="290" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="path" parent="1" vertex="1" value="Planned Graph Path" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1095" y="360" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="segments" parent="1" vertex="1" value="Build Route Segments&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Sidewalk = AUTO; crossing/unknown = MNUL&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1415" y="350" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="localize" parent="1" vertex="1" value="Relocalize to Nearest&lt;br&gt;Route Node" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="365" y="575" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="progress" parent="1" vertex="1" value="Route Progress, Distance,&lt;br&gt;and ETA" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="735" y="575" width="290" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="operator" parent="1" vertex="1" value="Select Segment Operator" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1095" y="575" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="auto" parent="1" vertex="1" value="AUTO Sidewalk Segment&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Jetson model follows the visible sidewalk&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1415" y="555" width="300" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="handoff" parent="1" vertex="1" value="Manual Handoff Alert&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;3.0 m before crossing&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF1F0;strokeColor=#B42318;fontColor=#7A271A;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1095" y="760" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="manual" parent="1" vertex="1" value="MNUL Crossing Segment&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Human drives through the road crossing&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1415" y="760" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="resume" parent="1" vertex="1" value="Far-Side Resume Check&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;2.5 m radius&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF1F0;strokeColor=#B42318;fontColor=#7A271A;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1095" y="930" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="runtime" parent="1" vertex="1" value="Raspberry Pi 5 Runtime State&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Navigation request remains subject to takeover, model validation, and AEB&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF0F4;strokeColor=#C51A4A;fontColor=#7A1030;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="650" y="1100" width="420" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="xbox" parent="1" vertex="1" value="Xbox Manual Override" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF1F0;strokeColor=#B42318;fontColor=#7A271A;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="1105" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lidar" parent="1" vertex="1" value="LiDAR Slowdown / Stop" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF1F0;strokeColor=#B42318;fontColor=#7A271A;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1330" y="1105" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="dashboard" parent="1" vertex="1" value="Dashboard Route and Handoff Telemetry" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#EDF4FF;strokeColor=#246BCE;fontColor=#153E75;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="650" y="1275" width="420" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" parent="1" edge="1" source="osm" target="graph" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" parent="1" edge="1" source="destination" target="snap" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3" parent="1" edge="1" source="gps" target="snap" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" parent="1" edge="1" source="graph" target="snap" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" parent="1" edge="1" source="snap" target="astar" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" parent="1" edge="1" source="astar" target="path" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7" parent="1" edge="1" source="path" target="segments" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8" parent="1" edge="1" source="gps" target="localize" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9" parent="1" edge="1" source="segments" target="localize" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1565" y="520" />
+              <mxPoint x="700" y="520" />
+              <mxPoint x="700" y="625" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10" parent="1" edge="1" source="localize" target="progress" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-11" parent="1" edge="1" source="progress" target="operator" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-12" parent="1" edge="1" source="operator" target="auto" value="sidewalk" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-13" parent="1" edge="1" source="operator" target="handoff" value="crossing ahead" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-14" parent="1" edge="1" source="handoff" target="manual" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-15" parent="1" edge="1" source="manual" target="resume" value="far side reached" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1565" y="900" />
+              <mxPoint x="1380" y="900" />
+              <mxPoint x="1380" y="980" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-16" parent="1" edge="1" source="resume" target="auto" value="resume AUTO" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1565" y="980" />
+              <mxPoint x="1565" y="700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-17" parent="1" edge="1" source="operator" target="runtime" value="AUTO or MNUL request" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1045" y="625" />
+              <mxPoint x="1045" y="1060" />
+              <mxPoint x="860" y="1060" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-18" parent="1" edge="1" source="xbox" target="runtime" value="takeover" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B42318;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-19" parent="1" edge="1" source="lidar" target="runtime" value="safety override" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B42318;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-20" parent="1" edge="1" source="runtime" target="dashboard" value="route state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

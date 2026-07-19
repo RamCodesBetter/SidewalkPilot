@@ -9,7 +9,7 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
 
 - [Raspberry Pi Camera Module 3 Wide](https://www.amazon.com/Raspberry-Pi-Camera-Module-Wide/dp/B0BRY757NX?ref_=ast_sto_dp&th=1) — $69.99
 
-## How it works
+## How It Works
 
 - `vision.py` opens the module with `Picamera2(camera_num=PI_CAMERA_NUM)` and configures a
   `1280x720` (`CAMERA_FRAME_WIDTH` x `CAMERA_FRAME_HEIGHT`) `BGR888` video stream.
@@ -24,7 +24,7 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
 - If Picamera2 is unavailable, the vision processor has no live frame. Manual operation can
   continue, while the autonomous path treats the model result as unavailable.
 
-## Why this choice
+## Why This Choice
 
 - The Module 3 **Wide** was selected to retain more sidewalk context near the image edges
   during turns. This project has not preserved a controlled wide-versus-standard comparison.
@@ -32,7 +32,7 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
   with it. Keeping the same camera avoids one source of sensor-domain shift, although
   lighting, exposure, mounting, route, and weather can still change the image distribution.
 
-## Verify before a run
+## Verify Before a Run
 
 - Bench tests: `code/test_files/camera/test_camera_preview.py` (live preview) and
   `code/test_files/camera/test_camera_flip.py` (confirm the 180 rotation is correct).
@@ -40,8 +40,8 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
   configuration, or driver state. An upside-down image indicates the configured transform
   does not match the physical mount.
 
-## Related pages
+## Related Pages
 
-- `hardware/build-overview.md`
-- `testing/bench-tests/overview.md`
-- `runtime-code/hardware/hardware-class.md`
+- [Hardware Build Overview](build-overview.md)
+- [Bench Tests](../testing/bench-tests/overview.md)
+- [Hardware Class](../runtime-code/hardware/hardware-class.md)

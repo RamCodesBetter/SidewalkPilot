@@ -29,7 +29,7 @@ gear, turn signals, servo angle, throttle/brake percent, drive mode, LiDAR
 points, camera pixels, CPU temp, nav status, and so on. The Zero 2 W renders it in
 `z2w_dashboard.py`.
 
-## Alternatives considered
+## Alternatives Considered
 
 | Option | Pros | Cons |
 |---|---|---|
@@ -39,7 +39,7 @@ points, camera pixels, CPU temp, nav status, and so on. The Zero 2 W renders it 
 
 ## Reason
 
-UDP fits a replaceable display feed because it has no acknowledgement or retransmission
+UDP fits a replaceable display feed because it has no acknowledgment or retransmission
 contract; a lost datagram can be replaced by the next update. `runtime.py` wraps the
 transport in `AsyncDashboardSender`. The controller replaces one pending state snapshot,
 while the worker performs JSON serialization and `sendto()`. This prevents stale state
@@ -50,7 +50,7 @@ Pinning it to the USB Ethernet gadget with static IPs (`.1` / `.2`) removes Wi-F
 fallback and mDNS resolution from the dashboard path. Wi-Fi/`zero2w.local`
 fallback was deliberately removed and must not be re-added unless Ram explicitly asks.
 
-## How to know it worked (test gate)
+## How to Know It Worked (Test Gate)
 
 - The car log should print `Hub75 dashboard telemetry sending UDP to
   192.168.10.2:8765.` (if it says `zero2w.local`, stale code/env is active).
@@ -60,8 +60,8 @@ fallback was deliberately removed and must not be re-added unless Ram explicitly
 - `code/test_files/setup/install_usb_dashboard_link.sh` installs the static IPs
   plus the keeper service used for the project's ARP/USB recovery procedure.
 
-## Related pages
+## Related Pages
 
-- `engineering-process/design-decisions/pi-plus-jetson-compute-split.md`
-- `testing/failures/overview.md`
-- `roadmap/next-steps.md`
+- [Raspberry Pi 5 and Jetson Orin Nano Compute Split](pi-plus-jetson-compute-split.md)
+- [Failures and Lessons](../../testing/failures/overview.md)
+- [Next Steps](../../roadmap/next-steps.md)

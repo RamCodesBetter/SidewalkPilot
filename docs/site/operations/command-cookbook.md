@@ -6,6 +6,7 @@ Commands are machine-specific. Confirm the shell prompt before running anything 
 
 | Machine | Command | Verification |
 |---|---|---|
+| Jetson Orin Nano | `pgrep -af jetson_inference_server.py` and `ss -ltnp \| grep 8770` | Inference server is running and listening on the direct Ethernet link |
 | Raspberry Pi 5 | `car` | Controller initialization completes; dashboard model page shows intended version |
 | Zero 2 W | `dash` or its systemd unit | Exactly one UDP listener owns port 8765 |
 | Raspberry Pi 5 | `sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager` | Unit state and current process |
@@ -14,7 +15,7 @@ Commands are machine-specific. Confirm the shell prompt before running anything 
 | Raspberry Pi 5 | `ping -c 3 192.168.10.2` | USB network reaches the dashboard |
 | Zero 2 W | `ping -c 3 192.168.10.1` | Return path reaches the Raspberry Pi 5 |
 
-The live controller has no `--model` flag. Select all Series 1-4 versions on the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup.
+The live controller has no `--model` flag. Select a registered model through the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup. The current selector includes Series 1 through 3 and Series 4.0; Series 4.1 has not yet been integrated.
 
 ## Logs
 
@@ -39,4 +40,4 @@ python3 -m compileall code/controller/current/rc_car_app
 - A source edit does not affect a running process until the owning process restarts.
 - Do not start a second dashboard receiver while the systemd receiver already owns UDP 8765.
 
-See [Troubleshooting](troubleshooting.md), [Model Selection](../runbooks/field-test-day/model-selection.md), and [USB Link](../hardware/wiring/usb.md).
+See [Troubleshooting](troubleshooting.md), [Field Test Day](../runbooks/field-test-day/before-leaving.md), and [Wiring and Pin Map](../hardware/wiring/pin-map.md).

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-17T00:00:00.000Z" agent="SidewalkPilot diagram generator" version="24.7.17">
+  <diagram id="training-evaluation" name="Training and Evaluation Flow">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1540" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="panel-1" parent="1" vertex="1" value="Dataset Preparation" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="25" y="105" width="1750" height="355" as="geometry" />
+        </mxCell>
+        <mxCell id="panel-2" parent="1" vertex="1" value="Trainer Selection and GPU Training" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="25" y="500" width="1750" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="panel-3" parent="1" vertex="1" value="Offline Evaluation and Supervised Field Evaluation" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D0D5DD;fontColor=#344054;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=12;">
+          <mxGeometry x="25" y="1100" width="1750" height="410" as="geometry" />
+        </mxCell>
+        <mxCell id="field" parent="1" vertex="1" value="Supervised Field Drive" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="160" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="frames" parent="1" vertex="1" value="JPEG Frames + Labels&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Logical steering and absolute throttle&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="320" y="145" width="260" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="review" parent="1" vertex="1" value="Label Review and&lt;br&gt;Corrections" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="625" y="160" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="integrity" parent="1" vertex="1" value="Dataset Integrity&lt;br&gt;Audit" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="890" y="160" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="balance" parent="1" vertex="1" value="Steering-Class&lt;br&gt;Balance Audit" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1155" y="160" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="s34_data" parent="1" vertex="1" value="Series 3/4 Dataset&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;81,237 real labeled images&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1420" y="145" width="310" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="carla" parent="1" vertex="1" value="CARLA Image Generation" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="300" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="s12_data" parent="1" vertex="1" value="Series 1/2 Dataset&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Earlier real batches + CARLA-assisted images&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="320" y="285" width="260" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="split" parent="1" vertex="1" value="Family-Specific Train / Validation Split" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="700" y="335" width="360" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="sampling" parent="1" vertex="1" value="Weighted Sampling + Image Augmentation" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1120" y="335" width="330" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="s12_trainer" parent="1" vertex="1" value="Series 1/2 Trainer&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;200x66 direct regression&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="80" y="570" width="255" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_trainer" parent="1" vertex="1" value="Series 3 Trainer&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;320x180 hybrid output&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="390" y="570" width="255" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="pc_trainer" parent="1" vertex="1" value="Series 4 PC Trainer&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Past + current targets&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="700" y="570" width="255" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cf_trainer" parent="1" vertex="1" value="Series 4 CF Trainer&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Current + future targets&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1010" y="570" width="255" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="pcf_trainer" parent="1" vertex="1" value="Series 4 PCF Trainer&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Past + current + future targets&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1320" y="570" width="255" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="gpu" parent="1" vertex="1" value="RTX 6000 Ada GPU Training&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Family-specific preprocessing, loss, and output contract&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="665" y="750" width="470" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="wandb" parent="1" vertex="1" value="Weights &amp; Biases Run&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Training metrics and run files&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1250" y="760" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="checkpoints" parent="1" vertex="1" value="Trained Models&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Final and validation-selected models&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="530" y="955" width="315" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="onnx" parent="1" vertex="1" value="ONNX Export&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Deployment model&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="955" y="955" width="260" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="challenge" parent="1" vertex="1" value="Frozen Challenge Set&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;6,952 Series 3/4 frames&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="55" y="1155" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="evaluator" parent="1" vertex="1" value="Common Model Evaluator&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Family-specific adapters for all 52 checkpoints&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="420" y="1155" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="report" parent="1" vertex="1" value="Steering Model&lt;br&gt;Report PDF" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="785" y="1155" width="270" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="deploy" parent="1" vertex="1" value="Jetson Orin Nano&lt;br&gt;Deployment" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1130" y="1155" width="270" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="field_compare" parent="1" vertex="1" value="Supervised Field&lt;br&gt;Comparison" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#E8F7F8;strokeColor=#0F7C83;fontColor=#14575B;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="1450" y="1155" width="285" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="decision" parent="1" vertex="1" value="Model Selection Decision&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Offline evidence + physical-car behavior&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#FFF4E8;strokeColor=#B85C00;fontColor=#713B12;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+          <mxGeometry x="730" y="1355" width="350" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" parent="1" edge="1" source="field" target="frames" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" parent="1" edge="1" source="frames" target="review" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3" parent="1" edge="1" source="review" target="integrity" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" parent="1" edge="1" source="integrity" target="balance" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" parent="1" edge="1" source="balance" target="s34_data" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" parent="1" edge="1" source="carla" target="s12_data" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7" parent="1" edge="1" source="frames" target="s12_data" value="earlier field batches" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8" parent="1" edge="1" source="s12_data" target="split" value="Series 1/2 contract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9" parent="1" edge="1" source="s34_data" target="split" value="Series 3/4 contract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1575" y="400" />
+              <mxPoint x="1100" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10" parent="1" edge="1" source="split" target="sampling" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-11" parent="1" edge="1" source="sampling" target="s12_trainer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1285" y="500" />
+              <mxPoint x="208" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-12" parent="1" edge="1" source="sampling" target="s3_trainer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1285" y="510" />
+              <mxPoint x="518" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-13" parent="1" edge="1" source="sampling" target="pc_trainer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1285" y="520" />
+              <mxPoint x="828" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-14" parent="1" edge="1" source="sampling" target="cf_trainer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1285" y="530" />
+              <mxPoint x="1138" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-15" parent="1" edge="1" source="sampling" target="pcf_trainer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1285" y="540" />
+              <mxPoint x="1448" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-16" parent="1" edge="1" source="s12_trainer" target="gpu" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="208" y="710" />
+              <mxPoint x="620" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-17" parent="1" edge="1" source="s3_trainer" target="gpu" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="518" y="710" />
+              <mxPoint x="780" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-18" parent="1" edge="1" source="pc_trainer" target="gpu" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-19" parent="1" edge="1" source="cf_trainer" target="gpu" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1138" y="710" />
+              <mxPoint x="1015" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-20" parent="1" edge="1" source="pcf_trainer" target="gpu" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1448" y="710" />
+              <mxPoint x="1180" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-21" parent="1" edge="1" source="gpu" target="wandb" value="log metrics" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-22" parent="1" edge="1" source="gpu" target="checkpoints" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="910" />
+              <mxPoint x="688" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-23" parent="1" edge="1" source="checkpoints" target="onnx" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-24" parent="1" edge="1" source="onnx" target="evaluator" value="all model families" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1085" y="1100" />
+              <mxPoint x="570" y="1100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-25" parent="1" edge="1" source="challenge" target="evaluator" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-26" parent="1" edge="1" source="evaluator" target="report" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-27" parent="1" edge="1" source="onnx" target="deploy" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-28" parent="1" edge="1" source="deploy" target="field_compare" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-29" parent="1" edge="1" source="report" target="decision" value="offline evidence" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="1310" />
+              <mxPoint x="855" y="1310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-30" parent="1" edge="1" source="field_compare" target="decision" value="field evidence" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475467;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1592" y="1405" />
+              <mxPoint x="1130" y="1405" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

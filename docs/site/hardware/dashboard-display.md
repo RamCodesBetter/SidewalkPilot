@@ -34,4 +34,4 @@ sudo systemctl restart sidewalkpilot-z2w-dashboard.service
 
 Wrong colors indicate `--led-rgb-sequence` or ribbon/panel configuration. Horizontal tearing or flicker indicates driver timing, power, or grounding before it indicates bad telemetry. `NO LINK` with a stable test pattern indicates the panel works and the fault is in USB/network/service state.
 
-See [Dashboard Pages](../runtime-code/dashboard/pages.md) and [Zero 2 W Dashboard](../operations/zero-2w-dashboard.md).
+See [Dashboard Runtime](../runtime-code/dashboard/sender.md) and [Computer Operations](../operations/nvidia-pc.md).

@@ -17,12 +17,13 @@ The nine classes are `HL, L, L+, SL, ST, SR, R, R+, HR` over the absolute 0-to-1
 ## Decode
 
 ```text
-class = argmax(logits)
+probabilities = softmax(logits)
+class = argmax(softmax(logits))
 fraction = sigmoid(offset_for_selected_class)
 steering = class_lower_edge + fraction * class_width
 ```
 
-Only the selected class's offset affects steering. This provides a coarse turn decision and a continuous position inside that class.
+Only the selected class's offset affects steering. The decoder applies softmax to the logits and then applies argmax to those probabilities; the separately named probability vector is retained for telemetry. This provides a coarse turn decision and a continuous position inside that class.
 
 ## Why It Replaced Pure Regression
 
@@ -32,10 +33,10 @@ The design still has a discontinuity when the selected class changes. Smoothing,
 
 ## Loss
 
-Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The weighted sampler rebalances steering buckets and source types; it does not apply a separate steering-magnitude multiplier in the active Series 3 path. Steering-focused runs can set throttle loss to zero while preserving the 19-value artifact contract.
+Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The v3.4 run used class weighting and deterministic left and right balance flipping. Its sampler drew 50,000 examples per epoch but did not apply steering-bucket or source reweighting. Steering-focused runs can set throttle loss to zero while preserving the 19-value model output.
 
 ## Series 4 Relationship
 
 Series 4 removes throttle and uses 18 values per horizon: the same nine logits plus nine offsets. PC emits one horizon; CF/PCF emit four. This reuses the successful steering representation while testing temporal information separately.
 
-See [Steering Class Bins](steering-class-bins.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Bal9](../../model-evaluation/offline-evaluation/bal9.md).
+See [CNN Architecture](cnn.md), [Series 4 Temporal Experiments](series-4-plan.md), and [Bal9](../../model-evaluation/offline-evaluation/bal9.md).

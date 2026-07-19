@@ -2,7 +2,7 @@
 
 This page records the current division of responsibility: **the camera model owns
 steering, while LiDAR may cap forward throttle or request a hard stop inside the
-center safety corridor**. LiDAR no longer chooses a swerve direction.
+center safety corridor**. LiDAR does not output steering.
 
 ## Decision
 
@@ -23,17 +23,17 @@ The AEB controller toggle gates the entire LiDAR intervention policy. When it is
 off, occupancy can still be displayed, but the policy returns no throttle cap or
 stop request.
 
-## Alternatives considered
+## Alternatives Considered
 
 | Option | Pros | Cons |
 |---|---|---|
-| Fixed LiDAR left/right swerve | reacts without needing a vision label | can choose grass or another unsafe space because LiDAR does not understand sidewalk boundaries |
+| Fixed LiDAR left-or-right swerve | Reacts without needing a vision label | Can choose grass or another unsafe space because LiDAR does not understand sidewalk boundaries |
 | Blend LiDAR clearance into model steering | potentially smoother | two steering authorities can fight; difficult to explain and validate |
 | **Model steering + LiDAR throttle/stop veto (chosen)** | one steering owner and explicit distance thresholds | cannot steer around an obstacle by itself; stopping-distance and detection coverage still need measurement |
 
 ## Reason
 
-The previous fixed swerve rule could steer away from an obstacle without knowing
+Fixed swerve logic could steer away from an obstacle without knowing
 whether that side was still sidewalk. The current design keeps path choice with
 the vision model and uses LiDAR only for the narrower claim it can support:
 measured center-corridor clearance. The resulting throttle cap, emergency state,
@@ -41,11 +41,11 @@ and stop reason remain visible in telemetry instead of being hidden in a blended
 steering command.
 
 The current LiDAR is a Youyeetoo FHL-LD19 on USB (`/dev/ttyUSB0` via a CP2102
-adapter, 230400 baud). The reader auto-discovers the port and retries in a worker
+UART-to-USB Adapter, 230400 baud). The reader auto-discovers the port and retries in a worker
 after disconnects, so serial reconnect work is not intentionally performed in the
 main control loop. Missing scans remain fail-open with respect to AEB.
 
-## How to know it worked (test gate)
+## How to Know It Worked (Test Gate)
 
 - Place a controlled obstacle at each threshold and verify normal, progressive
   slowdown, 60% reference hold, and emergency braking without a LiDAR-generated
@@ -56,8 +56,8 @@ main control loop. Missing scans remain fail-open with respect to AEB.
   which branch fired.
 - Bench tools: `code/test_files/lidar/lidar_uart_test.py` and `code/test_files/lidar/lidar_viewer.py`.
 
-## Related pages
+## Related Pages
 
-- `engineering-process/design-decisions/manual-crosswalk-handoff.md`
-- `testing/failures/overview.md`
-- `roadmap/next-steps.md`
+- [Crosswalk Handoff](../../autonomy-stack/navigation/crosswalk-handoff.md)
+- [Failures and Lessons](../../testing/failures/overview.md)
+- [Next Steps](../../roadmap/next-steps.md)

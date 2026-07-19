@@ -1,32 +1,39 @@
-# Dashboard Sender
+# Dashboard Runtime
 
-`code/controller/current/rc_car_app/hub75_dashboard.py` serializes dashboard state. The live runtime wraps it with `AsyncDashboardSender` in `runtime.py`, keeping DNS, JSON encoding, socket writes, and shutdown retries outside the 60 Hz control loop.
+The Raspberry Pi 5 serializes current state in `hub75_dashboard.py`; `AsyncDashboardSender` keeps JSON encoding and socket work outside the 60 Hz control loop. The Zero 2 W receives UDP and renders the Waveshare 64x32 HUB75 panel with `z2w_dashboard.py`.
 
-## Live Configuration
+## Transport
 
-| Setting | Default |
+| Setting | Live value |
 |---|---|
-| Transport | UDP |
-| Target | `192.168.10.2` |
-| Port | `8765` |
-| Send interval | `0.1 s` |
-| Linked shutdown | enabled |
+| Route | USB Ethernet only |
+| Raspberry Pi 5 | `192.168.10.1` |
+| Zero 2 W | `192.168.10.2` |
+| UDP port | `8765` |
+| Nominal send rate | 10 Hz |
+| Linked shutdown | Enabled |
 
-Environment overrides are `RC_CAR_DASHBOARD_TRANSPORT`, `RC_CAR_DASHBOARD_HOST`, `RC_CAR_DASHBOARD_UDP_PORT`, and `RC_CAR_DASHBOARD_SHUTDOWN_ON_EXIT`.
+The sender keeps one replaceable pending state. If the controller produces several updates before transmission, only the newest survives. Notifications use a small FIFO because they should not disappear when state changes. A successful UDP `sendto()` proves only local acceptance; receiver status, ping, and the physical display verify delivery.
 
-## Latest-Payload Behavior
+## Payload
 
-The main loop calls `AsyncDashboardSender.send()` with current state. That method replaces the pending argument snapshot and returns immediately. The worker sends at the configured rate. If several 60 Hz updates occur between 10 Hz transmissions, only the newest survives; stale dashboard packets never form a backlog.
+The JSON payload carries drive state, model name and inference rate, temperatures, navigation status, steering tuning, camera preview pixels, LiDAR points/action, and autonomy evidence. Values are clamped on both sender and receiver. Camera pixels are generated only for the camera page because they are the largest field. Every normal payload includes a timestamp; receiver freshness uses local packet-arrival time.
 
-Transient notification rows use a small FIFO because notifications, unlike state, must not disappear merely because another state update arrived.
+A shutdown object is sent repeatedly during controller cleanup to improve the chance of delivery over UDP.
 
-## Failure Behavior
+## Pages and Controls
 
-UDP is intentionally connectionless. A successful `sendto()` proves only that the local kernel accepted the datagram, not that the Zero 2 W rendered it. Link health is verified with `ping`, receiver service status, and the display's `NO LINK`/`STALE` states.
+The display covers drive/PRND, steering/throttle/brake, steering and yaw tuning, model status, intervention evidence, temperatures, photo/camera status, navigation, GPS, camera preview, and LiDAR. Page IDs are intentionally sparse after old collection-countdown pages were removed. Right-stick axes move through the page grid; context-sensitive D-pad controls tune values, select models, or edit navigation.
 
-```bash
-ping -c 3 192.168.10.2
-journalctl -u sidewalkpilot-rpi-car.service -n 80 -l --no-pager
-```
+The LiDAR page shows a center safety corridor and distance rungs. It does not display or command a left-or-right swerve policy.
 
-The USB link is the only live dashboard route. Wi-Fi is not a telemetry fallback.
+## Link States and Recovery
+
+- `NO LINK`: no controller packet arrived after receiver startup;
+- `STALE`: packets arrived and then stopped;
+- **Linked shutdown:** an explicit shutdown payload exits and clears the panel;
+- **Idle exit:** an optional receiver timeout ends the process after a previously active stream becomes silent.
+
+`NO LINK` or `STALE` should be debugged in this order: controller process, receiver service and UDP listener, `usb0` carrier/address, bidirectional ping, then sender/receiver logs. Wi-Fi is not a telemetry fallback.
+
+See [Computer Operations](../../operations/nvidia-pc.md) and [Bench Tests](../../testing/bench-tests/overview.md).
