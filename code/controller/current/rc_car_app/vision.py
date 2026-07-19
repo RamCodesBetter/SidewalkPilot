@@ -75,6 +75,12 @@ STEERING_MODEL_VERSIONS = (
     "4.0g",
     "4.0a",
     "4.0c",
+    "4.1p",
+    "4.1r",
+    "4.1f",
+    "4.1g",
+    "4.1a",
+    "4.1c",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 # v3.4 won the 2026-07-13 shadow/turn field comparison. Keep newer and b checkpoints

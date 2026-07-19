@@ -36,8 +36,11 @@ class FakeSession:
 
 
 class JetsonSeries4RuntimeTests(unittest.TestCase):
-    def test_all_six_series4_versions_are_selectable(self):
-        expected = {"4.0p", "4.0r", "4.0f", "4.0g", "4.0a", "4.0c"}
+    def test_all_series4_versions_are_selectable(self):
+        expected = {
+            "4.0p", "4.0r", "4.0f", "4.0g", "4.0a", "4.0c",
+            "4.1p", "4.1r", "4.1f", "4.1g", "4.1a", "4.1c",
+        }
         self.assertTrue(expected.issubset(set(STEERING_MODEL_VERSIONS)))
 
     def test_series4_decodes_current_horizon_only(self):
@@ -59,7 +62,7 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
         self.assertEqual(int(np.argmax(probabilities)), 1)
         self.assertAlmostEqual(float(np.sum(probabilities)), 1.0, places=5)
 
-    def test_all_six_versions_require_their_exact_onnx_contract(self):
+    def test_all_versions_require_their_exact_onnx_contract(self):
         expected = {
             "4.0p": (3, ["batch", 1, 18]),
             "4.0r": (3, ["batch", 1, 18]),
@@ -67,6 +70,12 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
             "4.0g": (0, ["batch", 4, 18]),
             "4.0a": (3, ["batch", 4, 18]),
             "4.0c": (3, ["batch", 4, 18]),
+            "4.1p": (3, ["batch", 1, 18]),
+            "4.1r": (3, ["batch", 1, 18]),
+            "4.1f": (0, ["batch", 4, 18]),
+            "4.1g": (0, ["batch", 4, 18]),
+            "4.1a": (3, ["batch", 4, 18]),
+            "4.1c": (3, ["batch", 4, 18]),
         }
         for version, (history_steps, output_shape) in expected.items():
             with self.subTest(version=version):
@@ -74,7 +83,7 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
 
     def test_mislabeled_series4_contract_fails_closed(self):
         with self.assertRaisesRegex(RuntimeError, "contract mismatch"):
-            jis._validate_series4_contract("4.0f", 3, ["batch", 1, 18])
+            jis._validate_series4_contract("4.1f", 3, ["batch", 1, 18])
 
     def test_pc_history_is_fed_then_updated_with_decoded_target(self):
         session = FakeSession(hybrid18(6)[None, None, :])
@@ -199,12 +208,12 @@ class JetsonSeries4RuntimeTests(unittest.TestCase):
         client.sock = wire
         client.infer(
             np.zeros((32, 32, 3), dtype=np.uint8),
-            model_version="4.0p",
+            model_version="4.1p",
             target_history=(62.0, 71.0, 83.0),
         )
 
         version, history, jpeg = jis._recv_request(MemoryConnection(wire.sent))
-        self.assertEqual(version, "4.0p")
+        self.assertEqual(version, "4.1p")
         np.testing.assert_allclose(history, (62.0, 71.0, 83.0))
         self.assertGreater(len(jpeg), 0)
 
