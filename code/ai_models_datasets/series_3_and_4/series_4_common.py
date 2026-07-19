@@ -1017,6 +1017,22 @@ def run_fixed_experiment(
             horizon_decay=0.55,
             trajectory_delta_loss_weight=0.15,
         )
+    elif training_profile == "history_future_robust":
+        if contract != "pcf":
+            raise ValueError("history_future_robust profile requires the PCF contract")
+        parser.set_defaults(
+            history_noise_deg=4.0,
+            history_dropout_probability=0.15,
+            history_sequence_dropout_probability=0.10,
+            history_walk_noise_deg=3.0,
+            counterfactual_every=4,
+            counterfactual_batch_fraction=0.25,
+            counterfactual_loss_weight=0.35,
+            history_consistency_weight=0.02,
+            closed_loop_selection_weight=0.65,
+            horizon_decay=0.55,
+            trajectory_delta_loss_weight=0.15,
+        )
     elif training_profile != "legacy":
         raise ValueError(f"Unknown Series 4 training profile: {training_profile}")
     args = parser.parse_args()
@@ -1072,12 +1088,12 @@ def run_fixed_experiment(
     for (name, _, _), count, weight in zip(S3.STEER_CLASS_BINS, counts, class_weights.tolist()):
         print(f"  {name}: n={count} weight={weight:.3f}")
 
-    history_representation = (
-        "delta_motion" if training_profile == "history_robust" else "absolute"
-    )
-    history_fusion_mode = (
-        "bounded_residual" if training_profile == "history_robust" else "full"
-    )
+    robust_history = training_profile in {
+        "history_robust",
+        "history_future_robust",
+    }
+    history_representation = "delta_motion" if robust_history else "absolute"
+    history_fusion_mode = "bounded_residual" if robust_history else "full"
     model = SidewalkPilotV4(
         history_steps,
         future_steps,

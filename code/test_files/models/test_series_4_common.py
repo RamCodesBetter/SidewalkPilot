@@ -132,6 +132,25 @@ class Series4TemporalTests(unittest.TestCase):
         self.assertEqual(config["history_steps"], 3)
         self.assertEqual(config["future_steps"], 0)
 
+    def test_robust_pcf_combines_bounded_history_and_future_heads(self):
+        residual_scale = 0.35
+        model = s4.SidewalkPilotV4(
+            history_steps=3,
+            future_steps=3,
+            history_representation="delta_motion",
+            history_fusion_mode="bounded_residual",
+            history_logit_residual_scale=residual_scale,
+            history_offset_residual_scale=residual_scale,
+        ).eval()
+        image = torch.randn(2, 3, 64, 64)
+        flat_low = torch.full((2, 3), 30.0)
+        flat_high = torch.full((2, 3), 150.0)
+        with torch.no_grad():
+            low_output = model(image, flat_low)
+            high_output = model(image, flat_high)
+        self.assertEqual(tuple(low_output.shape), (2, 4, 18))
+        torch.testing.assert_close(low_output, high_output, rtol=0.0, atol=0.0)
+
     def test_temporal_loss_and_decode_cover_all_horizons(self):
         output = torch.randn(4, 4, 18, requires_grad=True)
         targets = torch.tensor(
