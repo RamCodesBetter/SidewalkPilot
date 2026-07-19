@@ -1,0 +1,4 @@
+interface:
+  display_name: "SidewalkPilot Jetson Readiness"
+  short_description: "Audit Jetson readiness for SidewalkPilot inference"
+  default_prompt: "Check this Jetson for SidewalkPilot inference readiness using NVIDIA Jetson diagnostics and project-specific runtime checks."
