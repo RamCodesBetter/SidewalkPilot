@@ -144,6 +144,23 @@ class Series4TemporalTests(unittest.TestCase):
         self.assertGreater(details["class_loss"], 0.0)
         self.assertEqual(tuple(s4.decode_hybrid(output.detach()).shape), (4, 4))
 
+    def test_trajectory_loss_covers_future_horizon_deltas(self):
+        output = torch.randn(4, 4, 18, requires_grad=True)
+        targets = torch.tensor(
+            [[70.0, 80.0, 95.0, 110.0]] * 4,
+            dtype=torch.float32,
+        )
+        loss = s4.temporal_trajectory_loss(output, targets)
+        loss.backward()
+        self.assertTrue(torch.isfinite(loss))
+        self.assertGreater(float(output.grad.abs().sum()), 0.0)
+
+    def test_trajectory_loss_is_zero_for_current_only_contract(self):
+        output = torch.randn(2, 1, 18, requires_grad=True)
+        targets = torch.full((2, 1), 90.0)
+        loss = s4.temporal_trajectory_loss(output, targets)
+        self.assertEqual(float(loss.detach()), 0.0)
+
     def test_evaluation_bucket_metrics_include_all_nine_classes(self):
         class FixedModel(torch.nn.Module):
             def forward(self, images, history):

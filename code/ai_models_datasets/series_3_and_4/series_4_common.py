@@ -541,6 +541,19 @@ def temporal_hybrid_loss(
     return total, details
 
 
+def temporal_trajectory_loss(
+    output: torch.Tensor,
+    targets: torch.Tensor,
+) -> torch.Tensor:
+    """Match steering changes between future horizons, not only absolute angles."""
+    if output.shape[1] < 2:
+        return output.sum() * 0.0
+    predicted = decode_hybrid_soft(output)
+    predicted_deltas = (predicted[:, 1:] - predicted[:, :-1]) / 20.0
+    target_deltas = (targets[:, 1:] - targets[:, :-1]) / 20.0
+    return F.smooth_l1_loss(predicted_deltas, target_deltas)
+
+
 def class_counts(dataset: Series4Dataset) -> list[int]:
     counts = [0] * NUM_STEER_CLASSES
     for index in range(len(dataset)):
@@ -658,6 +671,12 @@ def evaluate(
         "target_bucket_counts": target_bucket_counts.tolist(),
         "bucket_recalls": bucket_recalls.tolist(),
     }
+    if predicted.shape[1] > 1:
+        predicted_deltas = np.diff(predicted, axis=1)
+        actual_deltas = np.diff(actual, axis=1)
+        metrics["trajectory_delta_mae"] = float(
+            np.mean(np.abs(predicted_deltas - actual_deltas))
+        )
     if histories:
         history_values = np.concatenate(histories, axis=0)
         metrics["hold_last_mae"] = float(np.mean(np.abs(history_values[:, -1] - current_actual)))
@@ -946,6 +965,7 @@ def build_parser(experiment: str, contract: str, final_version: str, best_versio
     parser.add_argument("--counterfactual-loss-weight", type=float, default=0.0)
     parser.add_argument("--history-consistency-weight", type=float, default=0.0)
     parser.add_argument("--closed-loop-selection-weight", type=float, default=0.0)
+    parser.add_argument("--trajectory-delta-loss-weight", type=float, default=0.0)
     parser.add_argument("--horizon-decay", type=float, default=0.70)
     parser.add_argument("--offset-loss-weight", type=float, default=1.0)
     parser.add_argument("--focal-gamma", type=float, default=1.5)
@@ -989,6 +1009,13 @@ def run_fixed_experiment(
             counterfactual_loss_weight=0.35,
             history_consistency_weight=0.02,
             closed_loop_selection_weight=0.65,
+        )
+    elif training_profile == "future_trajectory":
+        if contract != "cf":
+            raise ValueError("future_trajectory profile requires the CF contract")
+        parser.set_defaults(
+            horizon_decay=0.55,
+            trajectory_delta_loss_weight=0.15,
         )
     elif training_profile != "legacy":
         raise ValueError(f"Unknown Series 4 training profile: {training_profile}")
@@ -1128,6 +1155,7 @@ def run_fixed_experiment(
                 "counterfactual_loss_weight": args.counterfactual_loss_weight,
                 "history_consistency_weight": args.history_consistency_weight,
                 "closed_loop_selection_weight": args.closed_loop_selection_weight,
+                "trajectory_delta_loss_weight": args.trajectory_delta_loss_weight,
             },
         )
     except Exception as exc:
@@ -1153,6 +1181,7 @@ def run_fixed_experiment(
             )
             counterfactual_loss_value = 0.0
             consistency_loss_value = 0.0
+            trajectory_loss_value = 0.0
             if (
                 uses_history
                 and args.counterfactual_every > 0
@@ -1187,6 +1216,10 @@ def run_fixed_experiment(
                 )
                 counterfactual_loss_value = float(counterfactual_loss.detach().item())
                 consistency_loss_value = float(consistency_loss.detach().item())
+            if future_steps and args.trajectory_delta_loss_weight > 0.0:
+                trajectory_loss = temporal_trajectory_loss(output, targets)
+                loss = loss + args.trajectory_delta_loss_weight * trajectory_loss
+                trajectory_loss_value = float(trajectory_loss.detach().item())
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             gradient_norm = float(torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip).item())
@@ -1213,6 +1246,7 @@ def run_fixed_experiment(
                         "grad_norm": gradient_norm,
                         "counterfactual_loss_live": counterfactual_loss_value,
                         "history_consistency_loss_live": consistency_loss_value,
+                        "trajectory_delta_loss_live": trajectory_loss_value,
                         "epoch": epoch,
                         "global_step": global_step,
                         "gpu_mem_gb": (
@@ -1229,6 +1263,7 @@ def run_fixed_experiment(
                     f"loss={loss.item():.5f} cls={details['class_loss']:.5f} "
                     f"off={details['offset_loss']:.5f} grad={gradient_norm:.3f} "
                     f"cf={counterfactual_loss_value:.5f} cons={consistency_loss_value:.5f} "
+                    f"traj={trajectory_loss_value:.5f} "
                     f"pred=[{decoded.min().item():.1f},{decoded.max().item():.1f}] "
                     f"elapsed={S3.fmt_time(time.time() - start)}"
                 )
@@ -1258,6 +1293,10 @@ def run_fixed_experiment(
             f"Turn+/-1={metrics['turn_pm1']:.3f} STExact={metrics['straight_exact']:.3f} "
             f"horizon_MAE=[{horizon_text}]"
         )
+        if "trajectory_delta_mae" in metrics:
+            print(
+                f"[trajectory] delta_MAE={metrics['trajectory_delta_mae']:.3f} deg/step"
+            )
         if robustness:
             print(
                 f"[history] neutral_MAE={metrics['neutral_history_mae']:.3f} "
@@ -1313,6 +1352,13 @@ def run_fixed_experiment(
             for horizon, horizon_mae in enumerate(metrics["horizon_mae"]):
                 name = "current" if horizon == 0 else f"future_{horizon}"
                 wandb_metrics[f"horizon_{name}_mae_deg"] = horizon_mae
+            if len(metrics["horizon_mae"]) > 1:
+                wandb_metrics["future_mean_mae_deg"] = float(
+                    np.mean(metrics["horizon_mae"][1:])
+                )
+                wandb_metrics["trajectory_delta_mae_deg"] = metrics[
+                    "trajectory_delta_mae"
+                ]
             if "hold_last_mae" in metrics:
                 wandb_metrics["hold_last_mae_deg"] = metrics["hold_last_mae"]
                 wandb_metrics["beats_hold_last"] = float(
