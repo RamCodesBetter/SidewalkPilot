@@ -17,7 +17,7 @@ LiDAR does not steer around obstacles. With AEB enabled, it can reduce forward t
 
 A hero clip proves an integrated run under the recorded route, model, lighting, payload, and operator conditions. It does not prove unrestricted autonomy, a universal top speed, detection of every obstacle, or safe unsupervised operation.
 
-The July 13 comparison selected v3.4 after the tested normal and shadow turn cases, but its exact clip and route metadata were not preserved here. Series 4 has no hero-run or field verdict yet.
+The July 13 comparison selected v3.4 after the tested normal and shadow turn cases, but its exact clip and route metadata were not preserved here. The 4.0 comparison produced private interruption clips and a qualitative verdict, but it is not a complete hero-run record.
 
 ## Evidence
 

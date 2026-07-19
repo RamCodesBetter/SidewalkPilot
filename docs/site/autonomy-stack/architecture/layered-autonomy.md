@@ -1,6 +1,6 @@
 # Layered Autonomy
 
-The Raspberry Pi 5 combines operator state, model output, LiDAR policy, and hardware limits before writing actuators.
+The Raspberry Pi 5 combines operator state, model output, LiDAR policy, and hardware limits before writing steering and motor commands.
 
 ## Current Order
 

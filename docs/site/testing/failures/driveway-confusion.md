@@ -20,7 +20,7 @@ These are hypotheses to test, not established root causes for a recorded failure
 
 1. Define a fixed set of driveway approaches, including straight crossings and nearby true turns.
 2. Preserve model version, frame/video, CSV, lighting, starting position, and whether manual takeover occurred.
-3. Compare v3.4 and Series 4 candidates without changing other runtime constants.
+3. Compare v3.4, viable v4.0f, and any v4.1 candidate that passes bench replay without changing other runtime constants.
 4. Treat entry into the vehicle path or a required takeover as a failure. Record an unnecessary stop separately from a correct straight crossing.
 
 No completed, route-level driveway comparison is currently claimed.

@@ -17,7 +17,7 @@ For a time-aligned clip and CSV interval, record:
 
 The Series 3/4 runtime applies an exponential moving average to completed Jetson Orin Nano steering
 results with `STEERING_SMOOTH_ALPHA = 0.45`. The clip analyzer can replay a Series 3 clip
-with a matching alpha, but it does not reproduce IMU correction, actuator mechanics, or the
+with a matching alpha, but it does not reproduce IMU correction, steering linkage mechanics, or the
 full closed-loop trajectory.
 
 ## Evidence Limit
@@ -28,7 +28,7 @@ not reported as a verified study result. Smoothing is implemented, but the proje
 preserved a controlled physical before/after test proving a particular comfort, wear, or
 safety improvement.
 
-For the Series 4 comparison, use synchronized video and CSV data to distinguish model-output
+For each Series 4 comparison, use synchronized video and CSV data to distinguish model-output
 changes from servo linkage, yaw correction, control-loop timing, and vehicle motion.
 
 ## Related Pages

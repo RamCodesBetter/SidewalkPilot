@@ -32,7 +32,7 @@ manual-override latency study.
 | Navigation | A* produces a followable route and the car respects AI/manual segment boundaries and crosswalk handoff. |
 | Observability | Dashboard stays linked over USB and the CSV captures the run; optional InfluxDB is verified separately when used. |
 
-The current field-selected steering baseline is v3.4: it handled the tested normal and shadow cases better than v3.3, v3.3b, and v3.4b. That is a field-test verdict from a specific run, not proof of route-independent reliability. Series 4 has offline results but has not yet received a field verdict.
+The current field-selected steering baseline is v3.4: it handled the tested normal and shadow cases better than v3.3, v3.3b, and v3.4b. Series 4.0 later produced a bounded field verdict: `4.0f` was viable, while the history models failed through prediction echo. Series 4.1 has no field result. None of these comparisons proves route-independent reliability.
 
 ## Related pages
 

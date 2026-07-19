@@ -9,7 +9,7 @@ Run on the Raspberry Pi 5 from `code/controller/current`. The checklist maps dir
 ### 1. Power and controller
 
 - Xbox controller is paired *before* launch. If no joystick is detected, `runtime.py` prints `!!! WARNING: No joystick detected` and `sys.exit(1)` — the run never starts.
-- 3S LiPo charged; motor driver (Yahboom AT8236) powered.
+- 3S LiPo charged; Yahboom AT8236 Motor Controller powered.
 - Kill switch confirmed: quit is controller button `15` (`QUIT_BUTTON`); any steer/gas/brake input cancels autonomy. Verify the takeover works while the car is on a stand *before* it's on the ground.
 
 ### 2. Sensors reporting

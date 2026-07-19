@@ -19,7 +19,7 @@ The servo exposes a single `value` property. The runtime writes a logical angle 
 
 1. Clamps the logical request to `0..180` and computes its normalized displacement from center.
 2. Maps the left and right halves linearly into the reference limits `48.812..90` and `90..131.188` degrees.
-3. Adds the center offset. The checked-in default is `12 / 90 = 0.133333...`, which adds 12 physical degrees.
+3. Adds the center offset. The checked-in default is `17 / 90 = 0.188888...`, which adds 17 physical degrees.
 4. Applies a near-center preload only when its window is greater than zero. Both preload values are currently zero, so this path is disabled.
 5. Clamps the physical result to `0..180`.
 
@@ -29,11 +29,11 @@ Current live trim constants in `config.py`:
 |---|---|---|
 | `STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG` | `48.812` | Reference output for logical full-left before center trim |
 | `STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG` | `131.188` | Reference output for logical full-right before center trim |
-| `STEERING_SERVO_CENTER_OFFSET` | `0.133333...` | Checked-in +12-degree center trim; an environment variable or `steering_tune.json` can override it |
+| `STEERING_SERVO_CENTER_OFFSET` | `0.188888...` | Checked-in +17-degree center trim; an environment variable or `steering_tune.json` can override it |
 | `STEERING_SERVO_CENTER_PRELOAD` | `0.0` | Near-center preload is disabled |
 | `STEERING_SERVO_CENTER_PRELOAD_WINDOW` | `0.0` | Near-center preload window is disabled |
 
-With the checked-in defaults, logical center `90` writes physical angle `102`. Logical full-left and full-right write approximately `60.812` and `143.188` after the +12-degree trim. These are software commands, not direct measurements of wheel angle. Bench work also observed direction-dependent return behavior, but the branch does not contain a traceable artifact supporting one exact hysteresis angle.
+With the checked-in defaults, logical center `90` writes physical angle `107`. Logical full-left and full-right write approximately `65.812` and `148.188` after the +17-degree trim. These are software commands, not direct measurements of wheel angle. Bench work also observed direction-dependent return behavior, but the branch does not contain a traceable record supporting one exact hysteresis angle.
 
 ## Why this choice
 

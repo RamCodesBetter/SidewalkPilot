@@ -1,16 +1,16 @@
 # Pin Map
 
-A consolidated table of the runtime's primary sensors, actuators, and inter-computer links. The other wiring pages break the same connections down by bus type.
+A consolidated table of the runtime's primary sensors, steering/motor connections, and inter-computer links. The other wiring pages break the same connections down by bus type.
 
 ## How it works
 
-The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (servo driver via PCA9685), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR in its current CP2102 configuration, dashboard USB Ethernet). The exact pin and port assignments live in `rc_car_app/config.py`, `rc_car_app/lidar.py`, and `rc_car_app/navigation.py`, so the table below is copied directly from those source files rather than from memory.
+The Raspberry Pi 5 is the real-time I/O controller. Every sensor and controlled hardware connection uses one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (PCA9685 Servo Controller), a UART port (GPS and IMU), or USB (LiDAR in its current CP2102 configuration and dashboard USB Ethernet). The exact pin and port assignments live in `rc_car_app/config.py`, `rc_car_app/lidar.py`, and `rc_car_app/navigation.py`, so the table below is copied directly from those source files rather than from memory.
 
 ## Master pin / port table
 
 | Subsystem | Part | Connection | Pin / address / port | Source constant |
 |---|---|---|---|---|
-| Steering servo | PCA9685 16-ch PWM driver → chassis servo | I2C bus 1 | address `0x40`, servo channel `0`, 50 Hz | `PCA9685_I2C_ADDRESS`, `PCA9685_SERVO_CHANNEL`, `PCA9685_FREQUENCY_HZ` |
+| Steering servo | PCA9685 16-channel Servo Controller -> chassis servo | I2C bus 1 | address `0x40`, servo channel `0`, 50 Hz | `PCA9685_I2C_ADDRESS`, `PCA9685_SERVO_CHANNEL`, `PCA9685_FREQUENCY_HZ` |
 | Drive motor (right fwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 19` | `MOTOR_RIGHT_FWD_PIN` |
 | Drive motor (right bwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 20` | `MOTOR_RIGHT_BWD_PIN` |
 | Drive motor (left fwd) | Yahboom AT8236 H-bridge | GPIO (BCM) | `GPIO 25` | `MOTOR_LEFT_FWD_PIN` |

@@ -63,7 +63,7 @@ strength and probability remain experimental settings rather than settled facts.
   `code/test_files/camera/preview_series3_augmentations.py`.
 - Compare hard-shadow field clips across versions (the v3.1b → v3.2b shadow study
   is the template); success = fewer shadow-driven edge drifts, not a lower MAE.
-- Re-test the exact shadow cases for every promoted model; Series 4 has not yet passed that gate.
+- Re-test the exact shadow cases for every promoted model. Series 4.0 completed a supervised comparison but produced no promotion; Series 4.1 has not reached that gate.
 
 ## Related pages
 

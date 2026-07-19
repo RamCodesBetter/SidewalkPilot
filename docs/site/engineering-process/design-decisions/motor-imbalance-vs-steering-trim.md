@@ -11,7 +11,7 @@ RIGHT_MOTOR_PWM_SCALE = 1.0
 ```
 
 No per-side motor compensation is active. The steering layer separately maps logical
-`0..180` commands through characterized reference limits and a +12-degree checked-in trim.
+`0..180` commands through characterized reference limits and a +17-degree checked-in trim.
 The IMU yaw controller is another independent, experimental correction path.
 
 ## Diagnostic sequence

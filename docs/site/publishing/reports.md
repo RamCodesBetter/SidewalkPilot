@@ -7,11 +7,11 @@ evidence associated with a commit rather than relying on a manually copied metri
 
 | Artifact | File | Source | Scope |
 |---|---|---|---|
-| Steering Model Report | `docs/steering_model_report.pdf` | `code/test_files/models/evaluate_sidewalkpilot_models.py` | 46 checkpoints from v1.0 through v4.0c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table |
+| Steering Model Report | `docs/steering_model_report.pdf` | `code/test_files/models/evaluate_sidewalkpilot_models.py` | 52 checkpoints from v1.0 through v4.1c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table |
 | Machine-readable steering results | `docs/steering_eval_current_labels.json` | same evaluator | complete metrics, source breakdowns, confusion matrices, checkpoint metadata, and historical Series 1/2 blocks |
 | CNN Parameter Visual Guide | `docs/cnn_parameter_visual_guide.pdf` | hand-authored visual guide | layer and parameter-count explanation for the major architecture families |
 
-The steering PDF is 22 pages in the current build. Its first page identifies the frozen
+The steering PDF is 23 pages in the current build. Its first page identifies the frozen
 challenge-set size and architecture-specific preprocessing. The JSON is the source of the
 published values; the PDF is a rendering of those values.
 
@@ -28,8 +28,9 @@ current cross-generation ranking.
 
 The class-balanced ranking uses Bal9, turn exact, turn +/-1, ST exact, MAE, median absolute
 error, and signed error. MAE is supporting evidence rather than the sole selection rule.
-The current offline leader by Bal9 is v4.0p; v3.4 remains the field-selected baseline until
-Series 4 completes physical testing.
+The current offline leader by Bal9 is v4.0p. Physical testing rejected its history behavior,
+while v4.0f remained viable but did not clearly beat v3.4. The six v4.1 models are included
+in the report but have not yet been integrated into the live selector or field-tested.
 
 ## Reproduce
 
@@ -58,7 +59,7 @@ generated without that filter.
 Before publishing:
 
 1. Confirm the PDF and JSON come from the same run;
-2. Confirm all 46 expected model keys exist;
+2. Confirm all 52 expected model keys exist;
 3. Confirm the shared challenge count is 6,952;
 4. Check that planned work is labeled as planned;
 5. Avoid claims about a historical checkpoint's CARLA source mix unless its saved run

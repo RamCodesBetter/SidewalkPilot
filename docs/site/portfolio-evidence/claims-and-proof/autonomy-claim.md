@@ -24,7 +24,7 @@ LiDAR does not autonomously choose an avoidance path. That division is intention
 - Physical-run demonstrations on the [YouTube channel](https://www.youtube.com/@SidewalkPilot).
 - Live runtime in `code/controller/current/`.
 - Fresh-result and powered-off Jetson Orin Nano behavior in `rc_car_app/runtime.py` and its async-client tests.
-- Public model repositories and cards through Series 3 on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat); Series 4 publication remains pending.
+- Public model repositories and cards through v4.0 on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat); v4.1 publication remains pending live and field review.
 - Model-level evidence in the [Model Claim](model-claim.md).
 - Safety boundaries in [LiDAR AEB](../../autonomy-stack/lidar-safety/aeb.md).
 

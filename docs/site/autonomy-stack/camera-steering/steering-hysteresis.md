@@ -15,7 +15,7 @@ isolates one mechanical cause.
 
 The current runtime uses three separate mechanisms. First, logical labels remain `0..180`.
 Second, `hardware.py` maps that range to the measured reference endpoints
-`48.812..131.188` and applies the current `+12` degree center trim. Third, the yaw
+`48.812..131.188` and applies the current `+17` degree center trim. Third, the yaw
 controller keeps direction-dependent feed-forward values (`119.5` after a left approach,
 `107.8` after a right approach) and can trim them from measured yaw in `straight` mode.
 The older center-preload path still exists, but its value and window are both zero.

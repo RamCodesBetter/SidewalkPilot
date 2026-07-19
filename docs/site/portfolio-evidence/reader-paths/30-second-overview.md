@@ -1,8 +1,8 @@
 # 30 Second Overview
 
-**SidewalkPilot is a real autonomous RC car and an end-to-end engineering project that began in April 2025.** An Jetson Orin Nano runs the camera-steering model, a Raspberry Pi 5 owns hardware and independent LiDAR braking, and a Zero 2 W renders live telemetry.
+**SidewalkPilot is a real autonomous RC car and an end-to-end engineering project that began in April 2025.** A Jetson Orin Nano runs the camera-steering model, a Raspberry Pi 5 owns hardware and independent LiDAR braking, and a Zero 2 W renders live telemetry.
 
-The project includes 46 evaluated steering checkpoints across four model series and a published 81,237-image real sidewalk dataset. The field-selected model, **v3.4**, was chosen after it completed every harsh-shadow case presented in a July 2026 comparison. Series 4 now tests whether previous steering targets and future-target supervision improve the same visual backbone; all six Series 4 artifacts are trained and runtime-supported, with field testing next.
+The project includes 52 evaluated steering checkpoints across four model series and a published 81,237-image real sidewalk dataset. The field-selected model, **v3.4**, was chosen after it completed every harsh-shadow case presented in a July 2026 comparison. Series 4 tests previous steering context and future-target supervision: all six v4.0 models were field-tested, and six corrective v4.1 models are trained and awaiting runtime integration.
 
 The engineering loop covers mechanical calibration, power and wiring, Python control, data capture, GPU training, ONNX/CUDA deployment, class-balanced evaluation, real failures, LiDAR safety, and public artifacts.
 

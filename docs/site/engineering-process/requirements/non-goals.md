@@ -8,7 +8,7 @@ The current project does not claim:
 - LiDAR-based steering or guaranteed obstacle avoidance;
 - An enforced 3.2 mph autonomous speed cap;
 - TensorRT, FP16, or INT8 as the live inference path;
-- Series 4 field performance before the planned comparison;
+- Series 4.1 field performance before runtime integration and a supervised comparison;
 - A fabricated custom Raspberry Pi 5 breakout PCB; or
 - Bit-identical training reproduction across different GPU/software stacks.
 

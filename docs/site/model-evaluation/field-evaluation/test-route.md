@@ -10,7 +10,7 @@ The July 13 comparison supports the bounded conclusion that v3.4 handled the nor
 
 ## Required comparison protocol
 
-For the Series 4 field test, preserve:
+For every new model comparison, preserve:
 
 1. Route identifier and direction;
 2. Fixed start pose and speed policy;
@@ -20,7 +20,7 @@ For the Series 4 field test, preserve:
 6. Autonomous distance, interventions, causes, and completion status; and
 7. The same ordered cases for every candidate.
 
-Run `3.4`, `4.0p`, `4.0r`, `4.0a`, `4.0c`, `3.4b`, `4.0f`, and `4.0g` in that order unless a safety or hardware failure stops the session. Repeating `3.4` at the end can reveal route or lighting drift during the test. Offline ranking selects candidates; it does not replace this physical comparison.
+The first v4.0 comparison is complete. It found v4.0f viable but mixed against v3.4, v4.0g worse, and all four PC/PCF models affected by steering echo. The next comparison should begin only after v4.1 live integration and bench replay. Use v3.4 and v4.0f as controls, test each v4.1 candidate that passes replay, and repeat v3.4 at the end to expose route or lighting drift. Offline ranking selects candidates; it does not replace physical comparison.
 
 ## Interpretation limits
 

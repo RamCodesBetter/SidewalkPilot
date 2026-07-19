@@ -5,7 +5,7 @@ Before Leaving is the packing-and-readiness runbook run at home, before the car 
 ## Preconditions
 
 - A test route is chosen. For AI/manual navigation segments, the route must already exist in `code/controller/current/rc_car_app/trossachs_nav_graph.json`; the current route manager uses GPS/odometry state with A* over that graph. The separate compass hardware is not an active route-planning input.
-- The steering model to run is decided (see `model-selection.md`). Series 1/2 checkpoints in `code/ai_models/` run on the Raspberry Pi 5; Series 3/4 ONNX models run on the Jetson Orin Nano at `10.42.0.2:8770`. v3.4 is the current field-selected baseline. Series 4 models require field testing before promotion.
+- The steering model to run is decided (see `model-selection.md`). Series 1/2 checkpoints in `code/ai_models/` run on the Raspberry Pi 5; Series 3 and live-supported v4.0 ONNX models run on the Jetson Orin Nano at `10.42.0.2:8770`. v3.4 is the current default. v4.1 models must not be field-tested until live integration and bench replay are complete.
 - The latest code is on the Raspberry Pi 5. The Raspberry Pi 5's `~/rc_car_code` is the git repo; the Zero 2 W's copy is synced by rsync/scp and is not a repo, so a code change only takes effect after each device re-imports it.
 
 ## Steps

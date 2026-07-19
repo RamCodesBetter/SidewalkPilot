@@ -1,6 +1,6 @@
 # Hardware Class
 
-The `Hardware` class in `code/controller/current/rc_car_app/hardware.py` is the single hardware abstraction layer for the Raspberry Pi 5 controller. It owns every physical actuator and sensor the runtime touches directly on the Raspberry Pi 5: the steering servo (through a PCA9685), the four drive-motor PWM channels (through the Yahboom AT8236 H-bridge), and the wheel hall sensor. The main loop in `runtime.py` never talks to GPIO or I2C directly — it reads and writes attributes on a single `Hardware` instance, which keeps model changes, safety logic, and dashboard code from silently changing pin behavior.
+The `Hardware` class in `code/controller/current/rc_car_app/hardware.py` is the single hardware abstraction layer for the Raspberry Pi 5 controller. It owns every steering, motor, and sensor interface the runtime touches directly: the steering servo through a PCA9685, four drive-motor PWM channels through the Yahboom AT8236, and the wheel hall sensor. The main loop in `runtime.py` never talks to GPIO or I2C directly; it reads and writes attributes on one `Hardware` instance, which keeps model changes, safety logic, and dashboard code from silently changing pin behavior.
 
 ## How it works
 

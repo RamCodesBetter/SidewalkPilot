@@ -12,7 +12,7 @@ These are the verified constraints that shape the current design.
 
 ## Compute and Connectivity
 
-- The Raspberry Pi 5 owns final actuator and safety decisions.
+- The Raspberry Pi 5 owns final motor, steering, and safety decisions.
 - Jetson Orin Nano performs Series 3/4 ONNX inference over direct Ethernet at `10.42.0.2:8770`.
 - Camera/Jetson Orin Nano work is asynchronous so it does not block local controller polling.
 - Dashboard telemetry is UDP over the dedicated Raspberry Pi 5–Zero 2 W USB network. There is no Wi-Fi fallback in the current configuration.
@@ -30,4 +30,4 @@ These are the verified constraints that shape the current design.
 - Stored steering labels are logical degrees; stored throttle labels use the absolute physical `0.0..1.0` PWM fraction (`0.55` means 55%).
 - The 81,237-frame Series 3/4 release is real driving data. CARLA is published separately; claims about whether a specific historical checkpoint used CARLA require that run's recorded roots or logs.
 - Offline metrics rank candidates. Only field testing promotes a live baseline.
-- Series 4 is trained, exported, evaluated, and runtime-supported, but not yet field-tested.
+- Series 4.0 is runtime-supported and field-tested. Series 4.1 is trained, exported, and offline-evaluated but not yet integrated or field-tested.

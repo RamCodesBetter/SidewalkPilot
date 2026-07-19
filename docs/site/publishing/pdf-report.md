@@ -1,13 +1,13 @@
 # Steering Model PDF
 
 `docs/steering_model_report.pdf` is the current generated comparison of every SidewalkPilot
-steering checkpoint from v1.0 through v4.0c.
+steering checkpoint from v1.0 through v4.1c.
 
 ## What It Contains
 
 The current report includes:
 
-- One common 6,952-frame challenge-set ranking for all 46 checkpoints;
+- One common 6,952-frame challenge-set ranking for all 52 checkpoints;
 - A separate historical Series 1/2 evaluation on 2,224 correction-set images;
 - Chronological growth tables for each model series;
 - Green-to-red metric cells for Bal9, turn exact, turn +/-1, ST exact, MAE, median error,
@@ -31,8 +31,10 @@ on the 2,211 non-straight targets. ST exact measures straight recall. MAE and me
 numeric distance from the target, while signed error exposes left/right bias.
 
 No single column proves a model is safe or best. The report is an offline screening tool.
-The current result places v4.0p first by Bal9 and v4.0c first by shared-set MAE, while v3.4
-remains the field-selected model based on the July 13 comparison.
+The current result places v4.0p first by Bal9 and v4.0c first by shared-set MAE. Their later
+history-echo failures show why the PDF is a screening report rather than a deployment
+leaderboard. v3.4 remains the field-selected default, and v4.0f is the viable 4.0 comparison
+model.
 
 ## Generation
 
@@ -61,7 +63,7 @@ edited by hand.
 - Offline inference does not reproduce closed-loop error accumulation, tire load, steering
   hysteresis, network delay, or all outdoor lighting.
 - Historical checkpoint source mixes are unknown unless preserved run evidence proves them.
-- Series 4 is not field-validated yet.
+- Series 4.0 has a supervised field comparison; Series 4.1 has not been field-tested.
 
 ## Related Pages
 

@@ -7,7 +7,7 @@ operator takeovers, and LiDAR braking on the assembled vehicle.
 ## Offline Versus Field Evidence
 
 The common evaluator writes `docs/steering_eval_current_labels.json` and
-`docs/steering_model_report.pdf` for 46 checkpoints on a frozen 6,952-frame
+`docs/steering_model_report.pdf` for 52 checkpoints on a frozen 6,952-frame
 Series 3/4 subset. Bal9 and turn metrics help reject center-collapsed candidates;
 MAE, median error, and signed error add magnitude and bias context.
 
@@ -26,8 +26,9 @@ The July 13 comparison is an operator-observed, bounded field result:
 - v3.3b was much worse than v3.2b.
 
 This record does not contain enough repeated-route quantitative measurements to
-claim a universal success rate. Series 4 has completed offline evaluation and
-runtime/CUDA smoke testing but has not yet been field tested.
+claim a universal success rate. In a later supervised v4.0 comparison, v4.0f was
+viable and complementary with v3.4, v4.0g was worse, and the PC/PCF models echoed
+prior steering predictions. The v4.1 correction models remain offline-only.
 
 ## Run Record
 

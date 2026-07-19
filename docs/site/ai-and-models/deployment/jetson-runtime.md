@@ -8,7 +8,7 @@ The Jetson Orin Nano is the inference computer. It is linked directly to the Ras
 2. `AsyncJetsonSteeringClient` keeps only the newest pending frame and selected model version.
 3. Jetson Orin Nano's `jetson_inference_server.py` loads the matching ONNX artifact, preprocesses the frame, and runs ONNX Runtime.
 4. Jetson Orin Nano decodes the model-family-specific output and returns steering plus model telemetry.
-5. The Raspberry Pi 5 accepts only a fresh response for the selected version, then applies local safety arbitration before writing actuators.
+5. The Raspberry Pi 5 accepts only a fresh response for the selected version, then applies local safety arbitration before writing steering and motor commands.
 
 ## Supported Families
 

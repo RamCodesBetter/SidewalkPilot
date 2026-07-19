@@ -6,7 +6,7 @@ Where the numbers go: training metrics to Weights & Biases, durable driving tele
 
 The current system has four telemetry paths:
 
-- **Training -> Weights & Biases.** Series 3/4 trainers log step and epoch telemetry to W&B. The three completed Series 4 runs provide the PC, CF, and PCF comparison.
+- **Training -> Weights & Biases.** Series 3/4 trainers log step and epoch telemetry to W&B. Six completed Series 4 runs cover the 4.0 and 4.1 PC, CF, and PCF comparisons.
 - **Driving -> CSV.** The runtime writes one CSV log per launch under `~/logs` by default. `LOG_INTERVAL_SEC = 0.1`, so the nominal rate is 10 rows per second. The 46 columns are defined by `CSV_HEADERS` in `config.py`.
 - **Driving -> optional local InfluxDB.** `InfluxLogger` is enabled only when `~/.influxdb.json` exists and contains a token. When enabled, the main loop queues measurements to a worker that writes to InfluxDB 2.x. When the file is absent or invalid, the logger prints that it is disabled and becomes a no-op.
 - **Driving -> Zero 2 W dashboard.** The Raspberry Pi 5 sends latest-value UDP telemetry over the private USB Ethernet link. This view is real-time only and is not a durable log.

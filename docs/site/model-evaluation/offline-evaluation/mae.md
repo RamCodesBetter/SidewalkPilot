@@ -10,7 +10,7 @@ Both values use the logical `0..180` steering scale. Lower is better.
 
 ## Current Use
 
-`code/test_files/models/evaluate_sidewalkpilot_models.py` computes MAE for all 46 checkpoints on
+`code/test_files/models/evaluate_sidewalkpilot_models.py` computes MAE for all 52 checkpoints on
 the same 6,952-frame challenge set. It also retains a separate historical 2,224-image
 Series 1/2 evaluation. The report never compares values from those two datasets as if they
 were interchangeable.

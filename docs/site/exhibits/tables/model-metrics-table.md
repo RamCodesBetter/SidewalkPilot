@@ -1,6 +1,6 @@
 # Model Metrics Table
 
-The canonical generated comparison is [steering_model_report.pdf](../../steering_model_report.pdf). It contains all 46 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.
+The canonical generated comparison is [steering_model_report.pdf](../../steering_model_report.pdf). It contains all 52 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.
 
 ## Model Families
 
@@ -32,7 +32,7 @@ All 46 models are scored on the same frozen 6,952-frame subset from the Series 3
 
 No single column is the field verdict. Bal9 and turn metrics prevent straight-heavy data from hiding turn collapse; MAE/median expose numeric precision; signed error exposes bias; field testing exposes behavior absent from labels.
 
-## Current Baseline and Series 4
+## Current Baseline and Series 4.0
 
 | Model | Bal9 | Turn exact | Turn +/-1 | ST exact | MAE | Median | Signed |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -45,7 +45,7 @@ No single column is the field verdict. Bal9 and turn metrics prevent straight-he
 | v4.0a | 33.5% | 30.9% | 65.3% | 68.1% | 12.379 | 3.115 | +0.290 |
 | v4.0c | 32.0% | 29.4% | 62.9% | 75.5% | **11.321** | **1.825** | -0.981 |
 
-The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.0c leads raw error; v4.0r has the highest straight recall. Those differences justify a physical comparison rather than declaring a winner from one column.
+The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.0c leads raw error; v4.0r has the highest straight recall. Physical testing then contradicted the simple offline order: the PC/PCF models echoed prior predictions, while image-only v4.0f remained viable.
 
 ## Field Status
 
@@ -55,7 +55,10 @@ The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.
 | v3.4b | Tested in the same comparison; slightly worse than v3.4 |
 | v3.3 | Tested; worse than v3.2 |
 | v3.3b | Tested; much worse than v3.2b |
-| v4.0p/r/f/g/a/c | Not yet field-tested |
+| v4.0f | Viable and complementary with v3.4; each passed two cases the other failed |
+| v4.0g | Tested; worse than v4.0f |
+| v4.0p/r/a/c | Tested; rejected for repeated prior steering predictions |
+| v4.1p/r/f/g/a/c | Offline-evaluated; live integration and field testing pending |
 
 The July 13 result is qualitative because exact route, conditions, clips, and takeover counts were not preserved.
 

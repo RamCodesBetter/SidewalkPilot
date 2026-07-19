@@ -15,8 +15,7 @@ Before Training is the gate runbook: the last set of checks that must pass befor
    cd code/ai_models_datasets/series_3_and_4
    python3 series_3_sidewalkpilot_trainer.py --help
    ```
-   For Series 4, use the matching `series_4_0pr_`, `series_4_0fg_`, or
-   `series_4_0ac_sidewalkpilot_trainer.py` wrapper.
+   For Series 4, use the matching `series_4_0*` or `series_4_1*` PC, CF, or PCF wrapper.
 2. Confirm the GPU is visible:
    ```bash
    python3 -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"

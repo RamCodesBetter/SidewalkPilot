@@ -4,19 +4,21 @@ Offline evaluation decides what is worth driving. A fixed supervised route decid
 
 ## Current Candidates
 
-Use this order to compare temporal designs while controlling route/battery drift:
+The v4.0 test is complete. v4.0f was viable and complementary with v3.4, while v4.0g was worse. v4.0p/r/a/c repeatedly echoed earlier predictions and were rejected even though several ranked strongly offline.
+
+After v4.1 integration and bench replay, use this order to control route and battery drift:
 
 1. v3.4 baseline;
-2. v4.0p;
-3. v4.0r;
-4. v4.0a;
-5. v4.0c;
-6. v3.4b;
-7. v4.0f;
-8. v4.0g;
+2. v4.0f control;
+3. v4.1p;
+4. v4.1r;
+5. v4.1a;
+6. v4.1c;
+7. v4.1f;
+8. v4.1g;
 9. Optional v3.4 repeat.
 
-v4.0p leads common-set Bal9/turn metrics, v4.0c leads MAE/median, and v4.0r leads ST exact. None is field-proven.
+Skip any v4.1 history model that repeats the v4.0 steering-echo failure in bench replay. Offline metrics do not override that gate.
 
 ## Procedure
 
@@ -24,7 +26,7 @@ v4.0p leads common-set Bal9/turn metrics, v4.0c leads MAE/median, and v4.0r lead
 2. Confirm the intended version loaded on Jetson Orin Nano and appears on the dashboard.
 3. Drive ordinary left and right turns plus the known hard-shadow cases.
 4. Record every takeover and reason.
-5. For PC/PCF, watch for autoregressive drift, lag, or oscillation after model switches and manual periods.
+5. For PC/PCF, watch for steering echo, drift, lag, or oscillation after large turns, model switches, and manual periods.
 6. Repeat the baseline if conditions changed during the session.
 7. Mark pass, mixed, or fail; do not infer missing details after the run.
 

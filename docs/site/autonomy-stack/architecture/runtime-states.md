@@ -21,6 +21,6 @@ The former `LDR` steering-override mode is not part of the current arbitration b
 
 ## Model and Safety State
 
-The selected steering version can change from the dashboard. Jetson Orin Nano resets Series 4 causal history on load/switch and other discontinuities. Autonomous control requires a fresh result for the selected version. LiDAR/AEB is an independent toggle and, when enabled, can cap forward throttle or request braking in either manual or autonomous Drive.
+The selected steering version can change from the dashboard. A model change invalidates prior inference results; PC/PCF requests carry the Raspberry Pi 5 client's latest three target values. Autonomous control requires a fresh result for the selected version. LiDAR/AEB is an independent toggle and, when enabled, can cap forward throttle or request braking in either manual or autonomous Drive.
 
 Navigation can still request automatic or manual route segments, but the operator remains responsible for road crossings and immediate takeover.

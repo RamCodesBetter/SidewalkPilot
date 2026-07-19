@@ -7,11 +7,11 @@ The Raspberry Pi 5 and Jetson Orin Nano communicate over a private point-to-poin
 1. The Raspberry Pi 5 camera thread captures the latest OpenCV BGR frame.
 2. The asynchronous client keeps only the newest pending frame, preventing a backlog.
 3. The client JPEG-encodes the frame and sends the selected model version plus JPEG bytes over persistent TCP.
-4. Jetson Orin Nano resolves/hot-swaps the requested artifact.
+4. Jetson Orin Nano resolves or switches to the requested ONNX model.
 5. Jetson Orin Nano decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.
 6. Jetson Orin Nano decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.
 7. The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.25 seconds old.
-8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB arbitration, yaw/hardware mapping, and actuator commands.
+8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB arbitration, yaw correction, hardware mapping, and the final steering/motor commands.
 
 JPEG encoding, connection attempts, sends, receives, and status polls run in `AsyncJetsonSteeringClient`, not the 60 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.
 
@@ -26,13 +26,13 @@ JPEG encoding, connection attempts, sends, receives, and status polls run in `As
 | S4 CF | image | `[batch,4,18]` | horizon 0; no throttle |
 | S4 PCF | image + 3-target history | `[batch,4,18]` | horizon 0; no throttle |
 
-For PC/PCF, Jetson Orin Nano owns the causal history because it serializes inference. The history initializes to `[90,90,90]`, appends each decoded current target, and resets on model load/switch, reconnect, or status-only/manual periods.
+For PC/PCF, the Raspberry Pi 5 client samples manual steering at 10 Hz before autonomy and sends its latest three targets with every request. During autonomy, each fresh prediction is added at the same cadence. Jetson Orin Nano validates and uses the three values supplied with that request; its internal centered values are only a fallback before a valid history payload arrives.
 
 ## GPU Selection
 
 Jetson Orin Nano prefers `CUDAExecutionProvider` with CPU fallback. TensorRT is selected only when CUDA is unavailable. Registering both CUDA and a partially installed TensorRT provider can make ONNX Runtime reject the complete provider list and silently fall back to CPU; the runtime avoids that failure mode.
 
-Series 4 was verified against all six real ONNX exports with CUDA active. The output shapes and probability sums matched their contracts.
+The six v4.0 ONNX models were verified through the live contracts with CUDA active. The six v4.1 models passed GPU offline evaluation but still require live registration and contract tests before field use.
 
 ## Failure Boundary
 

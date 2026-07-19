@@ -8,7 +8,7 @@ The PC hosts the training code under `code/ai_models_datasets/`:
 
 - `series_1_and_2/sidewalkpilot_trainer.py` trains the `SteeringAutonomyV2` regression model (~0.67M params, 200x66 input, single tanh steering output) that runs on the Raspberry Pi 5.
 - `series_3_and_4/series_3_sidewalkpilot_trainer.py` trains `SidewalkPilotV3` (~5.5M params, 320x180 input) with the hybrid head: 9 steering-class logits + 9 per-class offsets + 1 throttle.
-- Three Series 4 trainers implement PC, CF, and PCF experiments against the same Series 3/4 dataset.
+- Six Series 4 wrappers run 4.0 and 4.1 PC, CF, and PCF experiments against the same Series 3/4 dataset.
 
 The nine Series 3 steering buckets are HL, L, L+, SL, ST, SR, R, R+, and HR. The Series 3/4 trainers read the selected dataset roots and can optionally accept explicit correction paths. The current Series 3/4 dataset uses `sidewalkpilot_dataset/labels.json` and no checked-in correction file. CARLA data, when listed as a root, enters as pre-generated files; the trainers do not drive the simulator.
 
@@ -39,7 +39,7 @@ python3 -m py_compile code/ai_models_datasets/series_3_and_4/series_3_sidewalkpi
 - **Trainer picks the wrong labels or corrections**: confirm the dataset root and printed scan counts. Series 1/2 has a checked-in `steering_corrections.json`; the current Series 3/4 repository uses `sidewalkpilot_dataset/labels.json` and has no checked-in corrections file.
 - **Deployed model does not load on the Raspberry Pi 5**: the version string must be present in `STEERING_MODEL_VERSIONS` in `vision.py` and the checkpoint must exist in `code/ai_models`.
 
-Field-test verdicts are tracked with model evaluation, not inferred from a training run. The July 13 comparison rejected v3.3/v3.3b and selected v3.4. Series 4 still awaits field testing.
+Field-test verdicts are tracked separately from training. The July 13 comparison selected v3.4. The later 4.0 comparison found `4.0f` viable and rejected the history-input models for steering echo. Series 4.1 awaits runtime integration and field testing.
 
 ## Evidence to attach
 

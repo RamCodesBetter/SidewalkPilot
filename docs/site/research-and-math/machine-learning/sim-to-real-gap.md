@@ -25,8 +25,8 @@ These are relative factors inside a sampler that also balances steering classes.
 not mean that every training run contained all three sources. If a run has no CARLA root,
 the `0.6` path is unused.
 
-The current shared Series 3/4 dataset contains **81,237 labeled real images**. The three
-Series 4 experiments were run against that same dataset. Historical CARLA datasets are
+The current shared Series 3/4 dataset contains **81,237 labeled real images**. The six
+v4.0/v4.1 Series 4 experiments were run against that same dataset. Historical CARLA datasets are
 published separately, but a checkpoint should be described as CARLA-assisted only when its
 saved training command, run configuration, or source-count log proves that a CARLA root was
 included. Folder defaults in trainer code are not enough to prove historical usage.
@@ -51,7 +51,10 @@ test of the condition itself.
 The July 13 field comparison selected v3.4 over v3.3, v3.3b, and v3.4b after the presented
 normal-turn and harsh-shadow cases. This supports v3.4 as the current field baseline; it
 does not prove complete shadow robustness across routes, seasons, or camera conditions.
-Series 4 has common-set offline results but still needs its ordered field comparison.
+v4.0 also has a bounded field comparison: image-only v4.0f remained viable, while the
+history-input models exposed a closed-loop steering-echo failure that open-loop metrics did
+not predict. v4.1 correction models have common-set offline results but still need live
+integration and physical comparison.
 
 ## Reporting Rule
 

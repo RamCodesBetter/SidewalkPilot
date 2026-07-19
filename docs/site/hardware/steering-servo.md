@@ -2,7 +2,7 @@
 
 Steering is done by a single servo that turns the Ackermann linkage. The Raspberry Pi 5 does not
 drive the servo directly; it sends the servo's PWM through a PCA9685 16-channel PWM
-driver over I2C. This is the actuator the steering model ultimately commands.
+controller over I2C. This is the hardware the steering model ultimately commands.
 
 ## Parts (Amazon)
 
@@ -26,7 +26,7 @@ From `config.py` / `hardware.py`:
   in these logical/reference degrees; the model and training labels never see raw servo
   values.
 - `hardware.py` first maps the logical `0..180` range onto the current reference endpoints
-  (`48.812..131.188`), then applies the current `+12` degree center trim before writing the
+  (`48.812..131.188`), then applies the current `+17` degree center trim before writing the
   physical command through `adafruit_servokit`. Center preload is present as a code path
   but both preload constants are currently zero.
 - Bench work observed direction-dependent return behavior: the wheels did not always return

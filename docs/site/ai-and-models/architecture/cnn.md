@@ -1,6 +1,6 @@
 # Convolutional Steering Networks
 
-SidewalkPilot uses custom convolutional networks to map a forward camera frame to a steering command. The model does not contain LiDAR braking, GPS routing, or actuator arbitration; those remain explicit runtime layers around the learned steering proposal.
+SidewalkPilot uses custom convolutional networks to map a forward camera frame to a steering command. The model does not contain LiDAR braking, GPS routing, or steering/motor arbitration; those remain explicit runtime layers around the learned steering proposal.
 
 ## Architecture Families
 

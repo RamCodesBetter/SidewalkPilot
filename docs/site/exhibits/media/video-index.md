@@ -35,7 +35,7 @@ the failures would weaken the argument, not strengthen it.
 
 - Clip capture is ongoing; most Series 3 field footage (v3.1b onward) is recent.
 - v3.3/v3.3b were tested and rejected on July 13; v3.4 was selected. The run lacks a complete clip index.
-- Series 4 field clips are planned, not yet recorded.
+- Series 4.0 field clips were recorded and remain private pending indexing and privacy review. Series 4.1 has not been driven.
 - Privacy review (faces, license plates, house numbers) is required before any clip
   is published externally; treat all raw footage as internal until reviewed.
 

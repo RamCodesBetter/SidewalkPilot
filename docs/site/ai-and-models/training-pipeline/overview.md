@@ -28,7 +28,7 @@ manual/supervised drive
 | Series 4 CF | `code/ai_models_datasets/series_3_and_4/series_4_0fg_sidewalkpilot_trainer.py` | image | four 18-value current/future steering horizons |
 | Series 4 PCF | `code/ai_models_datasets/series_3_and_4/series_4_0ac_sidewalkpilot_trainer.py` | image + three previous targets | four 18-value current/future steering horizons |
 
-Each family still needs its own preprocessing and output decoder. The common evaluator provides those adapters and scores all 46 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset. Series 3 and experimental Series 4 train on the same 81,237-image dataset.
+Each family still needs its own preprocessing and output decoder. The common evaluator provides those adapters and scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset. Series 3 and experimental Series 4 train on the same 81,237-image dataset.
 
 ## Series 4 Temporal Comparison
 

@@ -31,8 +31,8 @@ are the evidence that a particular assembly worked.
 - The custom Raspberry Pi 5 breakout PCB is designed but not fabricated.
 - Configuration does not prove water resistance, EMI immunity, stopping distance,
   or reliability.
-- Series 4 ONNX models are integrated and smoke-tested but have no physical-car
-  result yet.
+- Series 4.0 ONNX models are integrated and were physically compared. Series 4.1
+  models are trained and exported but are not yet integrated or field-tested.
 
 ## Evidence
 

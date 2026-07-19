@@ -1,6 +1,6 @@
 # Raspberry Pi 5
 
-The Raspberry Pi 5 owns camera capture, controller input, sensor reads, final safety arbitration, actuator output, logging, and dashboard telemetry.
+The Raspberry Pi 5 owns camera capture, controller input, sensor reads, final safety arbitration, steering/motor output, logging, and dashboard telemetry.
 
 ## Current Interfaces
 

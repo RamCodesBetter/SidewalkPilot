@@ -37,8 +37,9 @@ shadow. The current repository does not link a complete route record, normalized
 and seven preserved clips sufficient to audit that exact claim, so it is not carried forward
 as a verified study result. The July 13 v3.4 verdict is also qualitative and bounded.
 
-The next ordered Series 4 field test should produce the complete record above before a new
-checkpoint is promoted over v3.4.
+The v4.0 test produced useful qualitative failure clips but not a complete route-normalized
+takeover record. The next v4.1 comparison should produce the complete record above before a
+new model is promoted over v3.4.
 
 ## Related pages
 

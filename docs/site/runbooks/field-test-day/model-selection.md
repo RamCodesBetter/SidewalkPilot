@@ -4,7 +4,7 @@ This runbook selects and verifies the steering checkpoint used for a physical te
 
 ## Available Models
 
-The registry in `code/controller/current/rc_car_app/vision.py` contains all 46 evaluated checkpoints:
+The registry in `code/controller/current/rc_car_app/vision.py` contains 46 selectable checkpoints through Series 4.0. The common report also contains six Series 4.1 checkpoints that are not yet selectable:
 
 | Family | Versions | Inference computer |
 |---|---|---|
@@ -33,23 +33,18 @@ The startup default is v3.4. `RC_CAR_STEERING_MODEL` can override it before laun
 4. Confirm the dashboard displays the intended full model suffix, including `p/r/f/g/a/c` for Series 4.
 5. With the wheels safely unloaded or the car restrained, confirm fresh steering responses before placing it on the route.
 
-Jetson Orin Nano inspects the ONNX signature. CF uses only the image. PC and PCF use a three-value target history that starts at `[90,90,90]`, updates from each completed model prediction, and resets after a model switch, reconnect, or manual/status period.
+Jetson Orin Nano inspects the ONNX signature. CF uses only the image. PC and PCF use a three-value target history. When autonomy starts, the history comes from the latest three manual steering targets; completed model predictions then replace the oldest values. Model switches and reconnects reset the prediction sequence.
 
-## Comparison Order
+## Next Comparison
 
-The common evaluator orders the first Series 4 field pass as:
+The first 4.0 comparison is complete. Keep v3.4 as the reference and `4.0f` as the viable 4.0 control. Do not repeat field time on `4.0p/r/a/c` unless testing a specific steering-echo fix.
 
-1. v3.4 reference run;
-2. v4.0p;
-3. v4.0r;
-4. v4.0a;
-5. v4.0c;
-6. v3.4b;
-7. v4.0f;
-8. v4.0g;
-9. Optional v3.4 repeat to detect route or battery drift.
+After 4.1 runtime integration and bench replay, test only the candidates that pass the history/output checks:
 
-This order prioritizes Bal9 and turn capability while retaining lower-MAE and image-only controls. It is not a claim that v4.0p is already better on the car.
+1. v3.4 reference;
+2. `4.0f` reference;
+3. selected 4.1 candidate;
+4. v3.4 repeat to detect route, lighting, or battery drift.
 
 ## Stop Conditions
 

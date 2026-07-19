@@ -66,7 +66,7 @@ The rule is not “ignore MAE.” It is “do not let MAE hide class collapse.�
 
 ## Common Evaluator
 
-`code/test_files/models/evaluate_sidewalkpilot_models.py` evaluates all 46 checkpoints on the same 6,952-frame Series 3/4 validation subset. It adapts input resolution and output decoding by series, writes `docs/steering_eval_current_labels.json`, and generates `docs/steering_model_report.pdf`.
+`code/test_files/models/evaluate_sidewalkpilot_models.py` evaluates all 52 checkpoints on the same 6,952-frame Series 3/4 validation subset. It adapts input resolution and output decoding by series, writes `docs/steering_eval_current_labels.json`, and generates `docs/steering_model_report.pdf`.
 
 Older Series 1/2 own-dataset results are retained under each model's `historical_evaluation` block. They remain useful for historical reproduction but are not mixed into the common ranking.
 
