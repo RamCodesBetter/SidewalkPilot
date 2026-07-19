@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -95,7 +95,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -337,7 +337,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="camera-steering-overview">Camera Steering Overview</h1>
-<p>The Raspberry Pi 5 captures a forward frame and submits the newest image through a background worker. Jetson Orin Nano runs the selected ONNX model and returns steering plus class probabilities. The Raspberry Pi 5 rejects stale output, applies smoothing, calibration, and safety policy, and remains the only computer that writes the steering servo.</p>
+<p>The Raspberry Pi 5 captures a forward frame and submits the newest image through a background worker. The Jetson Orin Nano runs the selected steering model on its GPU and returns steering plus available model telemetry. The Raspberry Pi 5 rejects stale output, applies smoothing, calibration, and safety policy, and remains the only computer that commands the steering servo.</p>
 <h2 id="model-contracts">Model Contracts</h2>
 <ul>
 <li>Series 1/2: direct steering regression at 200x66.</li>
@@ -347,7 +347,7 @@
 </ul>
 <h2 id="failure-boundary">Failure Boundary</h2>
 <p>Normal Jetson Orin Nano connection and inference waits occur in the worker rather than the manual-control loop. A missing, invalid, or stale prediction is not accepted as fresh steering. Manual input and LiDAR braking remain outside the learned model. No formal worst-case scheduling guarantee is claimed.</p>
-<p>v3.4 is the field-selected baseline. All six Series 4 models are runtime-supported but await physical comparison.</p>
+<p>v3.4 remains the default. The six v4.0 models are runtime-supported and have been field-tested: v4.0f was viable but mixed against v3.4, v4.0g was worse, and the four history-input models developed steering echo. The six corrective v4.1 models are trained and evaluated offline, but they are not yet registered for live use or field-tested.</p>
 <p>See <a href="../jetson-inference-link/">Jetson Orin Nano Inference Link</a>, <a href="../../../hardware/steering-servo/">Steering Servo</a>, and <a href="../../../runtime-code/vision/camera-capture/">Vision Runtime</a>.</p>
               
             </div>

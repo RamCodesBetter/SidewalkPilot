@@ -4,7 +4,7 @@ Automatic Emergency Braking (AEB) gates the center-corridor LiDAR intervention p
 enabled, LiDAR may progressively cap forward throttle and request a full brake at the
 emergency boundary. The driver can toggle the policy.
 
-## How it works
+## How It Works
 
 Each control-loop iteration evaluates the current scan once through
 `lidar_avoidance.evaluate(scan, enabled=metrics.aeb_enabled)`. The result contains the
@@ -56,7 +56,7 @@ The dashboard draws four colored distance rungs and two center-corridor guides. 
 remain visible as context but cannot change the center action. Empty or stale scans cannot
 prove clearance, so sensor freshness must be checked independently before motion testing.
 
-## Enabling / disabling
+## Enabling and Disabling
 
 AEB defaults to enabled (`Metrics.aeb_enabled = True`). The driver toggles it with
 controller button `AEB_TOGGLE_BUTTON = 14`; the change prints to the console and queues a
@@ -64,14 +64,14 @@ dashboard notification. The dashboard shows the state as `AEB:ON` / `AEB:OFF`.
 `AEB_ACTIVATION_DELAY_SEC = 1.0` remains declared in `config.py`, but no current code reads
 it. It therefore does not create an activation delay.
 
-## Why this choice
+## Why This Choice
 
 AEB is outside the neural model so the configured intervention is explicit: progressive
 slowdown followed by a close-range brake. It does not prove that all obstacles will be
 detected or that 1.05 m is sufficient under every speed, surface, payload, and brake state;
 those are field-test questions.
 
-## Key constants
+## Key Constants
 
 | Constant | Value | Meaning |
 |---|---|---|
@@ -84,7 +84,7 @@ those are field-test questions.
 
 Field-test logs and video demonstrating an AEB stop are planned to be attached.
 
-## Related pages
+## Related Pages
 
 - [Control Architecture and Runtime Data Flow](../architecture/data-flow.md)
 - [LiDAR Safety Overview](overview.md)

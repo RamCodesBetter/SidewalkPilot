@@ -1,8 +1,8 @@
-# Mac / PC Sync
+# Mac and PC Sync
 
-Moving code, datasets, photos, and models between the Mac and the NVIDIA PC (and out to the Raspberry Pi 5) without a sync accidentally deleting the docs tree or a photo run. This is the operation that has bitten the project hardest, so the rules here are conservative on purpose.
+This page explains how to move code, datasets, photos, and models between the Mac and the NVIDIA PC, and how to deploy code to the Raspberry Pi 5, without accidentally deleting documentation or a photo run. Previous reverse-sync failures justify the deliberately conservative rules below.
 
-## How it works
+## How It Works
 
 Two directions of sync exist, and they are not symmetric:
 
@@ -15,13 +15,13 @@ Data lives in a few well-known places and is treated as data, not source:
 - `media/photos/YYYY_MM_DD_run_N/` — field photo runs, often with a JSON manifest.
 - `code/ai_models/*.pth` — model checkpoints.
 
-## Why this choice
+## Why This Choice
 
-- A reverse whole-repo `rsync --delete` is dangerous: it has produced docs/site/generated-site deletion symptoms when the remote did not contain those trees. For photo pulls, sync **only** the target `media/photos/...` folder, or drop `--delete` entirely.
+- A reverse whole-repository `rsync --delete` is dangerous: it has deleted documentation and generated-site files when the remote did not contain those trees. For photo pulls, sync **only** the target `media/photos/...` folder, or omit `--delete` entirely.
 - Photos, logs, datasets, and checkpoints are never staged, renamed, or deleted as a side effect of a sync. They are the project's irreplaceable field data.
 - Keeping "push code to Raspberry Pi 5" and "pull tree to laptop" as clearly distinct operations stops the risky direction from being run by muscle memory.
 
-## Public-safe examples
+## Public-Safe Examples
 
 Use placeholders for private hosts and pull only the folder you actually want:
 
@@ -36,19 +36,19 @@ rsync -av ./code/controller/current/ <user>@<pi>:~/rc_car_code/code/controller/c
 
 Never run a whole-repo reverse sync with `--delete`.
 
-## Failure and recovery
+## Failure and Recovery
 
-- **Docs / site disappeared after a pull**: a reverse `--delete` sync removed trees the remote lacked. Recover from git (`git status`, `git checkout` the deleted paths) rather than re-syncing.
+- **Documentation or generated site disappeared after a pull:** a reverse `--delete` sync removed trees that were absent on the remote. Recover tracked files through Git rather than repeating the sync.
 - **A photo run looks truncated**: verify the manifest count against the files on disk before assuming loss; do not delete anything to "clean up."
 - **Uncertain which direction to run**: default to the push-to-Raspberry Pi 5 direction and pull only a named data folder. When in doubt, drop `--delete`.
 
-## Evidence to attach
+## Evidence to Attach
 
 - Dry-run (`rsync -avn ...`) output before the real run
 - Branch status on both ends
 - File/manifest counts before and after
 
-## Related pages
+## Related Pages
 
 - [Sync Day](../runbooks/sync-day/mac-to-pc.md)
 - [MkDocs Site](../publishing/mkdocs-site.md)

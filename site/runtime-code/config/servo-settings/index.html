@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -133,11 +133,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Runtime Configuration</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-symptom">Failure symptom</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-symptom">Failure Symptom</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#gpio-and-hardware-addresses">GPIO and Hardware Addresses</a>
     </li>
@@ -145,7 +145,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#dashboard-and-logging">Dashboard and Logging</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -349,7 +349,7 @@
                 <h1 id="runtime-configuration">Runtime Configuration</h1>
 <p>This page documents the steering-servo constants in <code>code/controller/current/rc_car_app/config.py</code> and how <code>code/controller/current/rc_car_app/hardware.py</code> turns a logical steering command into a real PCA9685 Servo Controller pulse. Logical steering is <code>0 = left</code>, <code>90 = center</code>, <code>180 = right</code>; the servo is on the PCA9685 Servo Controller at I2C <code>0x40</code>, channel <code>0</code>, running at 50 Hz.</p>
 <p><code>config.py</code> is also the central source for subsystem flags, GPIO assignments, LiDAR thresholds, dashboard transport, controller indices, model defaults, and CSV settings. Values below describe the checked-in branch; environment variables and local tuning files can override selected settings.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <p>The servo is driven through the Adafruit <code>ServoKit</code> on the PCA9685. <code>config.py</code> sets the electrical envelope and the center trim, and <code>hardware.py</code>'s <code>PCA9685SteeringServo</code> applies them.</p>
 <table>
 <thead>
@@ -392,8 +392,8 @@
 </tr>
 <tr>
 <td><code>STEERING_SERVO_CENTER_OFFSET</code></td>
-<td><code>0.133333...</code></td>
-<td>Checked-in +12-degree center trim; environment or saved tuning can override it</td>
+<td><code>0.188888...</code></td>
+<td>Checked-in +17-degree center trim; environment or saved tuning can override it</td>
 </tr>
 <tr>
 <td><code>STEERING_SERVO_CENTER_PRELOAD</code></td>
@@ -412,15 +412,15 @@
 </tr>
 </tbody>
 </table>
-<p>The trim math lives in <code>apply_steering_center_trim_degrees()</code>. It clamps logical input to <code>0..180</code>, maps the two halves into the characterized <code>48.812..131.188</code> reference range, adds <code>center_offset * 90</code>, and clamps the physical result to <code>0..180</code>. The generic preload code remains available, but its value and window are both zero. With the checked-in +12-degree trim, logical center <code>90</code> writes physical angle <code>102</code>; the two logical endpoints write approximately <code>60.812</code> and <code>143.188</code>. The model and CSV labels remain in logical <code>0..180</code> units.</p>
-<h2 id="why-this-choice">Why this choice</h2>
-<p>The project has observed direction-dependent steering return and left/right asymmetry. Isolating the reference range and center trim lets those mappings be tuned without changing the model or its labels. <code>RC_CAR_STEERING_SERVO_CENTER_OFFSET</code> and an optional <code>steering_tune.json</code> entry named <code>trim_delta_deg</code> can override the checked-in trim; no saved tuning file is checked into this branch.</p>
+<p>The trim math lives in <code>apply_steering_center_trim_degrees()</code>. It clamps logical input to <code>0..180</code>, maps the two halves into the characterized <code>48.812..131.188</code> reference range, adds <code>center_offset * 90</code>, and clamps the physical result to <code>0..180</code>. The generic preload code remains available, but its value and window are both zero. With the checked-in +17-degree trim, logical center <code>90</code> writes physical angle <code>107</code>; the two logical endpoints write approximately <code>65.812</code> and <code>148.188</code>. The model and CSV labels remain in logical <code>0..180</code> units.</p>
+<h2 id="why-this-choice">Why This Choice</h2>
+<p>The project has observed direction-dependent steering return and left-right asymmetry. Isolating the reference range and center trim lets those mappings be tuned without changing the model or its labels. <code>RC_CAR_STEERING_SERVO_CENTER_OFFSET</code> and an optional <code>steering_tune.json</code> entry named <code>trim_delta_deg</code> can override the checked-in trim; no saved tuning file is checked into this branch.</p>
 <p>Two motor-scale constants sit next to the servo block for a related reason:</p>
 <ul>
 <li><code>LEFT_MOTOR_PWM_SCALE = 1.0</code> and <code>RIGHT_MOTOR_PWM_SCALE = 1.0</code>. Both are neutral today. Changing them is one possible motor-balance experiment, not proof that an observed pull originates in the motors.</li>
 </ul>
 <p>Steering-trim constants and yaw-controller gains are hardware calibration values. Record the test condition and resulting number before changing them.</p>
-<h2 id="failure-symptom">Failure symptom</h2>
+<h2 id="failure-symptom">Failure Symptom</h2>
 <p>If the PCA9685 or its I2C/servo dependencies are missing, <code>PCA9685SteeringServo.__init__</code> raises <code>PCA9685 servo dependencies are unavailable</code> (or an I2C error). <code>hardware.py</code> retries up to four times, then falls back to a <code>DummyServo</code> and prints <code>Error initializing GPIO: ... Running in simulation mode.</code> — the wheels then never move even though steering values still update on the dashboard. On a clean boot the expected line is <code>Using PCA9685 steering servo at 0x40, channel 0.</code></p>
 <h2 id="gpio-and-hardware-addresses">GPIO and Hardware Addresses</h2>
 <table>
@@ -456,7 +456,7 @@
 <h2 id="dashboard-and-logging">Dashboard and Logging</h2>
 <p>Dashboard telemetry uses UDP over USB Ethernet to <code>192.168.10.2:8765</code> at a nominal 10 Hz. The fixed USB address is the live route; Wi-Fi/mDNS is not a fallback. Linked shutdown is enabled.</p>
 <p>Runtime CSV files are timestamped per process and written at a nominal <code>0.1 s</code> interval. Rows are flushed immediately. Steering labels/logs remain logical degrees, while throttle labels use absolute physical PWM. The exact header in <code>config.py</code> is authoritative because columns evolve with the runtime.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../runtime-loop/">Runtime Loop</a></li>
 <li><a href="../../../hardware/wiring/pin-map/">Wiring and Pin Map</a></li>

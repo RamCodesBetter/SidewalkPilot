@@ -8,18 +8,18 @@ The Raspberry Pi 5 and Jetson Orin Nano communicate over a private point-to-poin
 2. The asynchronous client keeps only the newest pending frame, preventing a backlog.
 3. The client JPEG-encodes the frame and sends the selected model version plus JPEG bytes over persistent TCP.
 4. Jetson Orin Nano loads or switches to the requested model.
-5. Jetson Orin Nano decodes JPEG, resizes and normalizes according to model input shape, and runs ONNX Runtime.
+5. Jetson Orin Nano decodes the JPEG, resizes and normalizes it for the selected family, and runs PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4.
 6. Jetson Orin Nano decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.
 7. The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.25 seconds old.
-8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB rules, yaw/hardware mapping, and the final steering-servo and motor commands.
+8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB rules, yaw correction, hardware mapping, and the final steering and motor commands.
 
 JPEG encoding, connection attempts, sends, receives, and status polls run in `AsyncJetsonSteeringClient`, not the 60 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.
 
 ## Model Contracts
 
-| Model | ONNX input | ONNX output | Live decode |
+| Model | Runtime input | Raw model output | Live decode |
 |---|---|---|---|
-| S1/S2 | image | one degree value | direct steering |
+| S1/S2 | image | one normalized steering value | direct steering around logical center |
 | S3.0 | image | `[batch,2]` | unit steering/throttle |
 | S3.1+ | image | `[batch,19]` | 9 logits + 9 offsets + throttle |
 | S4 PC | image + 3-target history | `[batch,1,18]` | horizon 0; no throttle |
@@ -32,7 +32,7 @@ For PC/PCF, the Raspberry Pi 5 sends three causal steering targets with every in
 
 Jetson Orin Nano prefers `CUDAExecutionProvider` with CPU fallback. TensorRT is selected only when CUDA is unavailable. Registering both CUDA and a partially installed TensorRT provider can make ONNX Runtime reject the complete provider list and silently fall back to CPU; the runtime avoids that failure mode.
 
-Series 4 was verified against all six real ONNX exports with CUDA active. The output shapes and probability sums matched their contracts.
+Series 4.0 was verified against all six exported ONNX models with CUDA active. The output shapes and probability sums matched their contracts. Series 4.1 still requires the same end-to-end runtime verification before field use.
 
 ## Failure Boundary
 

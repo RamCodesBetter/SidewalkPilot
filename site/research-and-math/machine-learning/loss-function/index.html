@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -341,7 +341,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-framing-and-loss">Model Framing and Loss</h1>
-<p>All model families use the same physical steering convention: <code>0</code> degrees is left, <code>90</code> is center, and <code>180</code> is right. Their output heads and losses differ.</p>
+<p>All model families use the same logical steering convention: <code>0</code> degrees is left, <code>90</code> is center, and <code>180</code> is right. Their output heads and losses differ.</p>
 <h2 id="direct-regression">Direct Regression</h2>
 <p>Series 1/2 and v3.0 predict continuous controls directly and use Smooth L1-based regression. Direct regression is compact, but common near-straight labels can dominate its aggregate objective.</p>
 <h2 id="class-plus-local-regression">Class Plus Local Regression</h2>

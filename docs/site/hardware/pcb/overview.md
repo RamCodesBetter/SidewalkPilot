@@ -1,10 +1,10 @@
 # Custom PCB Overview
 
-The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects the sensors, PCA9685 Servo Controller, and AT8236 Motor Controller to the Raspberry Pi 5. It is **DESIGNED ONLY** right now: the board has been laid out but it has **not been ordered and not been fabricated**, so nothing on the car runs on it yet. On top of that, the current layout is already outdated. I moved several pins around in the runtime after the board was drawn, so the design's GPIO map no longer matches `config.py`. A new revision with the corrected GPIO is planned before I ever send anything to a fab house.
+The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects the sensors, PCA9685 Servo Controller, and AT8236 Motor Controller to the Raspberry Pi 5. It is **DESIGN-ONLY** right now: the board has been laid out but has **not been ordered or fabricated**, so nothing on the car uses it. The current layout is also outdated. I changed several runtime pin assignments after drawing the board, so its GPIO map no longer matches `config.py`. I plan to correct the GPIO map in a new revision before sending the design for fabrication.
 
-## How it works
+## How It Works
 
-Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 Servo Controller over I2C, to a Yahboom AT8236 Motor Controller over four GPIO motor pins, to a Hall-effect wheel-speed sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.
+Today the Raspberry Pi 5 hardware path is wired point-to-point: it connects to a PCA9685 Servo Controller over I2C, a Yahboom AT8236 Motor Controller over four GPIO motor pins, a Hall-effect wheel-speed sensor, and serial devices over UART or USB. The current GPIO and I2C connections use jumper wires and a breadboard; USB devices use their own cables and adapters.
 
 The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:
 
@@ -16,13 +16,13 @@ The PCB collapses that harness into one board that seats on the Raspberry Pi 5 h
 
 The intent is that the pin assignments on the board are the *same* logical assignments the runtime already uses, so no code changes are needed when the harness is swapped for the board.
 
-## Why it matters
+## Why It Matters
 
 Breadboard and jumper wiring is a known reliability risk on a moving platform. A loose connection can resemble a software failure: a sensor drops, the servo twitches, or a motor stops. A correctly designed and fabricated board could reduce movable jumper connections and make the harness easier to inspect, but connectors, solder joints, power integrity, and an incorrect pin map would remain failure modes. The current unbuilt PCB does not improve the car's present safety or reliability.
 
-The trade-off is commitment: a PCB freezes the pinout. That is exactly why the board is still design-only. My runtime pin assignments are still moving (I re-pinned after the first layout), so committing copper now would just bake in a stale map. I would rather fabricate once, against a finalized GPIO map, than respin a board.
+The trade-off is commitment: a PCB freezes the pinout. That is why the board remains design-only. The runtime pin assignments changed after the first layout, so fabricating that revision would preserve a stale map. The next revision should use a finalized GPIO map before fabrication.
 
-## Current status
+## Current Status
 
 - **Design state:** laid out, DESIGNED ONLY.
 - **Fab state:** not ordered, not fabricated, not on the car (planned).
@@ -35,11 +35,11 @@ Until the board exists, the [Pin Map](../wiring/pin-map.md) and the runtime conf
 
 The next schematic must cover:
 
-- shared and separated power/ground paths with reviewed voltage levels and current limits;
+- Shared and separated power/ground paths with reviewed voltage levels and current limits;
 - I2C to the PCA9685 at `0x40`;
-- four AT8236 Motor Controller direction/PWM lines on BCM 19, 20, 25, and 13;
+- Four AT8236 Motor Controller direction/PWM lines on BCM 19, 20, 25, and 13;
 - Hall input on BCM 24;
-- connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement actually selected for the final harness.
+- Connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement selected for the final harness.
 
 LiDAR currently uses a CP2102 UART-to-USB Adapter. A prior build used `/dev/ttyAMA2`; Rev B must not preserve that historical choice accidentally.
 
@@ -52,7 +52,7 @@ LiDAR currently uses a CP2102 UART-to-USB Adapter. A prior build used `/dev/ttyA
 
 Before ordering Rev B, the runtime pinout must be frozen, the schematic and layout must be cross-checked against it, connector polarity and voltage must be reviewed, and continuity/power-up tests must be defined. A fabricated board will still require inspection and bench validation before controlling the car.
 
-## Related pages
+## Related Pages
 
 - [Wiring and Pin Map](../wiring/pin-map.md)
 - [Build Overview](../build-overview.md)

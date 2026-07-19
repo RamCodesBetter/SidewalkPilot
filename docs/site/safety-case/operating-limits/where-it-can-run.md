@@ -26,7 +26,7 @@ built for is:
   over `trossachs_nav_graph.json`. The car can only self-navigate along segments
   that are actually in that graph; anywhere off-graph is manual-only driving.
 
-## Preconditions before any autonomous run
+## Preconditions Before Any Autonomous Run
 
 Autonomy is never the default state. Before the car moves under the model, all of
 the following must hold:
@@ -46,15 +46,16 @@ the following must hold:
   dropouts are tolerated (the reader auto-reconnects) but a run should not start
   in a place where obstacle detection is expected to be unusable.
 
-## Where it runs today vs. planned
+## Where It Runs Today Versus Planned
 
-- **Runs today (tested):** selected supervised sidewalk/driveway sections in
-  daylight with the operator in the loop. This is where the real driving
-  photos were captured and where the field verdicts (e.g. the v3.1b night test)
-  were recorded.
+- **Runs today (tested):** selected supervised sidewalk/driveway sections,
+  primarily in daylight, with the operator in the loop. A separate v3.1b night
+  test is historical evidence for a more difficult condition, not approval for
+  ordinary night operation.
 - **Planned / not-yet-authorized:** unsupervised operation, public shared
-  sidewalks with pedestrian traffic, or any route without a hand on the kill
-  switch. None of that is claimed as tested and it is out of the current ODD.
+  sidewalks with pedestrian traffic, or any route without the controller ready
+  and an independent power-cut method available. None of that is claimed as
+  tested, and it is outside the current operating domain.
 
 ## Explicit Exclusions
 
@@ -66,7 +67,7 @@ The declared `MAX_AUTONOMOUS_SPEED_MPH` is not an enforced measured-speed cap. A
 
 The camera model has bounded daylight/shadow field evidence, not all-lighting robustness. The chassis and exposed electronics are not weather-certified. Dry daylight on a selected, empty, supervised route is the default operating condition.
 
-## Related pages
+## Related Pages
 
 - [Safety Overview](../safety-overview.md)
 - [Field Testing](../../testing/field-testing/overview.md)

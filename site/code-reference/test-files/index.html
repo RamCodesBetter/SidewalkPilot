@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -291,13 +291,13 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Test Files</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#main-utilities">Main utilities</a>
+    <li class="toctree-l2"><a class="reference internal" href="#main-utilities">Main Utilities</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#support-assets">Support assets</a>
+    <li class="toctree-l2"><a class="reference internal" href="#support-assets">Support Assets</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -344,7 +344,7 @@
 <p><code>code/test_files/</code> contains standalone bench, calibration, data, evaluation, and
 setup utilities. Checked-in utilities are grouped by the subsystem or workflow they
 exercise; the directory root contains folders rather than a second unsorted tool list.</p>
-<h2 id="main-utilities">Main utilities</h2>
+<h2 id="main-utilities">Main Utilities</h2>
 <table>
 <thead>
 <tr>
@@ -397,7 +397,7 @@ exercise; the directory root contains folders rather than a second unsorted tool
 <tr>
 <td>Models</td>
 <td><code>models/evaluate_sidewalkpilot_models.py</code>, <code>models/test_series_4_common.py</code>, <code>models/test_jetson_series4_runtime.py</code>, <code>models/clip_bucket_analyzer.py</code></td>
-<td>Cross-model report, Series 4 contracts/runtime, and clip diagnosis</td>
+<td>Cross-checkpoint report, Series 4 contracts/runtime, and clip diagnosis</td>
 </tr>
 <tr>
 <td>Setup</td>
@@ -409,20 +409,20 @@ exercise; the directory root contains folders rather than a second unsorted tool
 <p>This is an inventory of available tools, not evidence that every utility passed
 on the current hardware revision. Test records must preserve the command, device,
 result, and date separately.</p>
-<h2 id="support-assets">Support assets</h2>
+<h2 id="support-assets">Support Assets</h2>
 <p>GeoJSON files, navigation graphs, the route-planner HTML, and
 <code>house_stop_overrides.json</code> live under <code>code/test_files/navigation/</code>.
 <code>mg24_yaw_firmware/</code> and <code>camera/hsv_clahe_comparisons/</code> are checked-in supporting
 directories. Local generated caches or reports under <code>data/</code> are not part of the
 published repository merely because they appear in a working copy.</p>
 <h2 id="verification">Verification</h2>
-<pre><code class="language-bash">cd /home/rsabavat/rc_car_code
+<pre><code class="language-bash">cd ~/rc_car_code
 python -m py_compile code/test_files/steering/pca9685_servo_test.py
 bash -n code/test_files/setup/setup_and_verify.sh
 </code></pre>
 <p>Hardware-moving utilities require the car to be restrained, drive power managed,
 and an independent way to cut power.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../file-index/">Repository Reference</a></li>
 <li><a href="../../ai-and-models/training-pipeline/overview/">Training Pipeline</a></li>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -185,15 +185,19 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#v41-corrections">v4.1 Corrections</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#size">Size</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#runs-and-artifacts">Runs and Artifacts</a>
+    <li class="toctree-l2"><a class="reference internal" href="#training-runs-and-models">Training Runs and Models</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#corrected-shared-evaluation">Corrected Shared Evaluation</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#live-runtime-contract">Live Runtime Contract</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#promotion-gate">Promotion Gate</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#possible-learned-throttle-experiment">Possible Learned-Throttle Experiment</a>
     </li>
     </ul>
                   </li>
@@ -365,20 +369,20 @@
 <tr>
 <td>PC</td>
 <td>past + current</td>
-<td>image <code>I_t</code> and <code>[s_t-3, s_t-2, s_t-1]</code></td>
+<td>image <code>I_t</code> and <code>[s_{t-3}, s_{t-2}, s_{t-1}]</code></td>
 <td><code>s_t</code></td>
 </tr>
 <tr>
 <td>CF</td>
 <td>current + future</td>
 <td>image <code>I_t</code> only</td>
-<td><code>[s_t, s_t+1, s_t+2, s_t+3]</code></td>
+<td><code>[s_t, s_{t+1}, s_{t+2}, s_{t+3}]</code></td>
 </tr>
 <tr>
 <td>PCF</td>
 <td>past + current + future</td>
-<td>image <code>I_t</code> and <code>[s_t-3, s_t-2, s_t-1]</code></td>
-<td><code>[s_t, s_t+1, s_t+2, s_t+3]</code></td>
+<td>image <code>I_t</code> and <code>[s_{t-3}, s_{t-2}, s_{t-1}]</code></td>
+<td><code>[s_t, s_{t+1}, s_{t+2}, s_{t+3}]</code></td>
 </tr>
 </tbody>
 </table>
@@ -391,14 +395,14 @@
 <li>320x180 normalized OpenCV BGR images;</li>
 <li>The same six-layer Series 3 convolutional backbone;</li>
 <li>The same nine steering buckets and within-bucket offset representation;</li>
-<li>25 epochs, batch size 256, and 50,000 weighted samples per epoch;</li>
-<li>The same shadow augmentation and deterministic left/right balancing policy;</li>
+<li>25 epochs, batch size 256, and 50,000 sampler draws per epoch;</li>
+<li>The same shadow augmentation and deterministic left and right balancing policy;</li>
 <li>Three previous targets and, where applicable, three future targets.</li>
 </ul>
 <p>Temporal windows never cross a capture run, a train/validation boundary, or a timestamp gap greater than 0.25 seconds. The existing labeled captures are approximately 10 Hz, so three steps mean roughly 0.3 seconds of context, not three 30 FPS camera frames.</p>
 <h2 id="architecture">Architecture</h2>
 <p>The visual backbone produces 160 feature maps. Adaptive pooling to <code>6x10</code>, flattening, and two dense layers produce a 256-value image feature.</p>
-<p>For PC and PCF, the three steering targets are normalized as <code>(s - 90) / 90</code>, then encoded by <code>3 -&gt; 32 -&gt; 64</code> dense layers. The 256 image features and 64 history features are concatenated into 320 values and fused through <code>320 -&gt; 128 -&gt; 64</code>.</p>
+<p>For v4.0 PC and PCF, the three steering targets are normalized as <code>(s - 90) / 90</code>, then encoded by <code>3 -&gt; 32 -&gt; 64</code> dense layers. The 256 image features and 64 history features are concatenated into 320 values and fused through <code>320 -&gt; 128 -&gt; 64</code>.</p>
 <p>CF has no history branch. Its image feature goes through <code>256 -&gt; 64</code>.</p>
 <p>Each horizon has its own <code>64 -&gt; 18</code> head:</p>
 <ul>
@@ -406,7 +410,16 @@
 <li>Values 9-17: one raw local offset for each class;</li>
 <li>Decoded steering: lower bucket edge plus <code>sigmoid(selected_offset) * bucket_width</code>.</li>
 </ul>
-<p>PC emits shape <code>[batch,1,18]</code>. CF and PCF emit <code>[batch,4,18]</code>. Only horizon 0 commands live steering. Series 4 intentionally removes learned throttle.</p>
+<p>PC emits shape <code>[batch, 1, 18]</code>. CF and PCF emit <code>[batch, 4, 18]</code>. Only horizon 0 commands live steering. The later CF/PCF horizons are training targets approximately 0.1, 0.2, and 0.3 seconds ahead. Averaging them into the live command could steer early or mix targets from different moments, so horizon fusion is not part of these experiments. The existing steering filter already smooths the selected horizon-0 command. Series 4 intentionally removes learned throttle.</p>
+<h2 id="v41-corrections">v4.1 Corrections</h2>
+<p>The v4.0 physical test exposed a closed-loop failure that offline metrics did not predict. The PC and PCF models often copied their recent predictions: after one large steering command, subsequent predictions stayed near that value instead of returning to the image evidence. The v4.1 trainers retain the same PC, CF, and PCF input/output contracts while changing the training objective:</p>
+<ul>
+<li>PC/PCF encode steering motion relative to the latest history value and predict a bounded correction rather than treating the history vector as an unrestricted shortcut;</li>
+<li>History noise, dropout, random-walk perturbations, counterfactual-history loss, and history-consistency loss discourage copying one exact training sequence;</li>
+<li>CF/PCF use current-dominant horizon weighting and a trajectory-delta loss so later horizons support the current decision instead of dominating it;</li>
+<li>Checkpoint selection includes closed-loop replay criteria in addition to ordinary validation metrics.</li>
+</ul>
+<p>These changes are hypotheses encoded in the trainers. The six v4.1 models are trained and evaluated offline, but they are not in the live model selector and have not been driven.</p>
 <h2 id="size">Size</h2>
 <table>
 <thead>
@@ -425,34 +438,52 @@
 <td>visual backbone + 19-value head</td>
 </tr>
 <tr>
-<td>PC (<code>4.0p/r</code>)</td>
+<td>v4.0 PC (<code>4.0p/r</code>)</td>
 <td style="text-align: right;">5,569,186</td>
-<td style="text-align: right;">22,282,240 bytes</td>
-<td>adds history encoder/fusion; one 18-value head</td>
+<td style="text-align: right;">22,278,937 bytes</td>
+<td>history encoder/fusion; one 18-value head</td>
 </tr>
 <tr>
-<td>CF (<code>4.0f/g</code>)</td>
+<td>v4.0 CF (<code>4.0f/g</code>)</td>
 <td style="text-align: right;">5,537,560</td>
-<td style="text-align: right;">22,155,264 bytes</td>
-<td>no history encoder; four small horizon heads</td>
+<td style="text-align: right;">22,152,098 bytes</td>
+<td>no history encoder; four horizon heads</td>
 </tr>
 <tr>
-<td>PCF (<code>4.0a/c</code>)</td>
+<td>v4.0 PCF (<code>4.0a/c</code>)</td>
 <td style="text-align: right;">5,572,696</td>
-<td style="text-align: right;">22,294,528 bytes</td>
+<td style="text-align: right;">22,294,349 bytes</td>
 <td>history encoder/fusion plus four heads</td>
+</tr>
+<tr>
+<td>v4.1 PC (<code>4.1p/r</code>)</td>
+<td style="text-align: right;">5,537,460</td>
+<td style="text-align: right;">22,155,306 bytes</td>
+<td>corrected history path; one 18-value head</td>
+</tr>
+<tr>
+<td>v4.1 CF (<code>4.1f/g</code>)</td>
+<td style="text-align: right;">5,537,560</td>
+<td style="text-align: right;">22,152,098 bytes</td>
+<td>corrected loss; same graph size as v4.0 CF</td>
+</tr>
+<tr>
+<td>v4.1 PCF (<code>4.1a/c</code>)</td>
+<td style="text-align: right;">5,544,480</td>
+<td style="text-align: right;">22,186,394 bytes</td>
+<td>corrected history path plus four heads</td>
 </tr>
 </tbody>
 </table>
 <p>The file size is approximately four bytes per FP32 weight plus graph metadata. “5.5 million parameters” and “about 22 MB” therefore describe the same model, not conflicting counts.</p>
-<h2 id="runs-and-artifacts">Runs and Artifacts</h2>
+<h2 id="training-runs-and-models">Training Runs and Models</h2>
 <table>
 <thead>
 <tr>
 <th>W&amp;B run</th>
 <th>Final epoch</th>
-<th>Best current-target MAE</th>
-<th>ONNX outputs</th>
+<th>Validation-selected model</th>
+<th>ONNX output</th>
 </tr>
 </thead>
 <tbody>
@@ -474,11 +505,29 @@
 <td><code>4.0c</code>, epoch 7</td>
 <td><code>[batch,4,18]</code></td>
 </tr>
+<tr>
+<td><code>4.1pr</code></td>
+<td><code>4.1p</code></td>
+<td><code>4.1r</code></td>
+<td><code>[batch, 1, 18]</code></td>
+</tr>
+<tr>
+<td><code>4.1fg</code></td>
+<td><code>4.1f</code></td>
+<td><code>4.1g</code></td>
+<td><code>[batch, 4, 18]</code></td>
+</tr>
+<tr>
+<td><code>4.1ac</code></td>
+<td><code>4.1a</code></td>
+<td><code>4.1c</code></td>
+<td><code>[batch, 4, 18]</code></td>
+</tr>
 </tbody>
 </table>
-<p>These are three training runs and six checkpoints. The paired letter is the lowest-current-target-MAE checkpoint from the same run; it is not automatically the best field model.</p>
+<p>These are six training runs and twelve checkpoints. Each pair contains the final-epoch model and the trainer-selected validation model from the same run. The suffix records how the model was selected; it does not guarantee better physical driving.</p>
 <h2 id="corrected-shared-evaluation">Corrected Shared Evaluation</h2>
-<p>All six checkpoints and all 40 Series 1-3 checkpoints were scored on the same 6,952-frame frozen Series 3/4 challenge subset.</p>
+<p>All 52 checkpoints from Series 1 through Series 4.1 were scored on the same 6,952-frame frozen Series 3/4 challenge subset.</p>
 <table>
 <thead>
 <tr>
@@ -555,16 +604,19 @@
 </tr>
 </tbody>
 </table>
-<p>PC is the strongest first field candidate because <code>4.0p</code> leads the class-balanced and turn metrics. PCF is close and has the best raw-error checkpoint. CF did not show the same benefit in this offline comparison. That result does not isolate the temporal contract from checkpoint selection or prove that future-target supervision is generally inferior.</p>
+<p>The v4.0 offline ranking did not predict the physical result. <code>4.0p</code>, <code>4.0r</code>, <code>4.0a</code>, and <code>4.0c</code> scored strongly here but echoed earlier steering predictions on the car. Image-only <code>4.0f</code> remained drivable and showed complementary wins and failures against v3.4. This is why the project uses offline metrics to choose field candidates, not to declare a winner.</p>
+<p>The complete v4.1 metrics are in the <a href="../../model-zoo/series-4/">Series 4 Model Zoo</a> and generated report. They order the corrected models for later testing but do not prove that the steering-echo failure is fixed.</p>
 <h2 id="live-runtime-contract">Live Runtime Contract</h2>
-<p>The Raspberry Pi 5 still sends only the JPEG and selected model version over the private Ethernet link. Jetson Orin Nano reads the ONNX input metadata:</p>
+<p>The Raspberry Pi 5 sends a JPEG and selected model version over the private Ethernet link. For PC and PCF, it also sends the three previous steering targets. The Jetson Orin Nano reads the ONNX input metadata:</p>
 <ul>
 <li>Image-only graph: run CF directly;</li>
-<li>Graph with <code>target_history</code>: initialize <code>[90,90,90]</code>, feed it, decode horizon 0, then append that decoded target for the next inference.</li>
+<li>Graph with <code>target_history</code>: feed the Raspberry Pi 5's latest three steering targets, decode horizon 0, then append that decoded target for the next inference. The first autonomous request is seeded by the last three manual targets.</li>
 </ul>
-<p>History resets on model load/switch, reconnect, and status-only/manual periods. This keeps history ordered in the single inference process and avoids changing the TCP packet format. CUDA is selected without registering a partially installed TensorRT provider that could force an accidental CPU fallback.</p>
+<p>The versioned TCP request carries three big-endian float32 history values alongside the selected model and JPEG. The Jetson Orin Nano validates the model input names, output shape, and history length before CUDA inference.</p>
 <h2 id="promotion-gate">Promotion Gate</h2>
-<p>Series 4 is <strong>trained and runtime-supported</strong>, but <strong>not field-selected</strong>. It must beat v3.4 on the same physical shadow/turn route, remain smooth under autoregressive history, satisfy inference-freshness checks, and preserve AEB behavior before the live default changes.</p>
+<p>Series 4.0 is trained, runtime-supported, and field-tested. None of its models replaced v3.4: <code>4.0f</code> was viable but mixed, <code>4.0g</code> was worse, and the PC/PCF models failed from steering echo. Series 4.1 is trained and offline-evaluated but still needs live integration, closed-loop replay, and supervised physical testing. The checked-in default remains v3.4.</p>
+<h2 id="possible-learned-throttle-experiment">Possible Learned-Throttle Experiment</h2>
+<p>The current 81,237-image dataset is not suitable for learning useful variable throttle: 77,590 labels, or 95.51%, are full throttle. A new throttle head would therefore be strongly encouraged to predict full throttle almost everywhere. Series 4 remains steering-only. Learned throttle should be reconsidered only after collecting deliberate examples of normal speed, reduced speed, and stopping in varied turns and obstacle contexts.</p>
 <p>See <a href="../../model-zoo/series-4/">Series 4 Models</a>, <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>

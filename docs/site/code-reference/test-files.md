@@ -4,7 +4,7 @@
 setup utilities. Checked-in utilities are grouped by the subsystem or workflow they
 exercise; the directory root contains folders rather than a second unsorted tool list.
 
-## Main utilities
+## Main Utilities
 
 | Area | Checked-in files | Purpose |
 |---|---|---|
@@ -16,14 +16,14 @@ exercise; the directory root contains folders rather than a second unsorted tool
 | Sensors | `sensors/bn880_test.py`, `sensors/hall_sensor_test.py`, `sensors/imu_yaw_test.py` | GPS/compass, wheel speed, and IMU stream checks |
 | Controller | `controller/xbox_test.py`, `controller/joystick_velocity_test.py`, `controller/flick_detector_test.py`, `controller/test_async_jetson_client.py` | Input-device behavior and non-blocking Jetson Orin Nano client checks |
 | Navigation | `navigation/geojson_to_graph.py`, `navigation/astar_nav.py`, `navigation/generate_printable_map.py` | Route-graph generation, A* testing, and map output |
-| Models | `models/evaluate_sidewalkpilot_models.py`, `models/test_series_4_common.py`, `models/test_jetson_series4_runtime.py`, `models/clip_bucket_analyzer.py` | Cross-model report, Series 4 contracts/runtime, and clip diagnosis |
+| Models | `models/evaluate_sidewalkpilot_models.py`, `models/test_series_4_common.py`, `models/test_jetson_series4_runtime.py`, `models/clip_bucket_analyzer.py` | Cross-checkpoint report, Series 4 contracts/runtime, and clip diagnosis |
 | Setup | `setup/setup_and_verify.sh`, `setup/install_usb_dashboard_link.sh` | Environment checks and USB dashboard link installation |
 
 This is an inventory of available tools, not evidence that every utility passed
 on the current hardware revision. Test records must preserve the command, device,
 result, and date separately.
 
-## Support assets
+## Support Assets
 
 GeoJSON files, navigation graphs, the route-planner HTML, and
 `house_stop_overrides.json` live under `code/test_files/navigation/`.
@@ -34,7 +34,7 @@ published repository merely because they appear in a working copy.
 ## Verification
 
 ```bash
-cd /home/rsabavat/rc_car_code
+cd ~/rc_car_code
 python -m py_compile code/test_files/steering/pca9685_servo_test.py
 bash -n code/test_files/setup/setup_and_verify.sh
 ```
@@ -42,7 +42,7 @@ bash -n code/test_files/setup/setup_and_verify.sh
 Hardware-moving utilities require the car to be restrained, drive power managed,
 and an independent way to cut power.
 
-## Related pages
+## Related Pages
 
 - [Repository Reference](file-index.md)
 - [Training Pipeline](../ai-and-models/training-pipeline/overview.md)

@@ -28,7 +28,7 @@ Mechanical steering alignment and linkage slop became persistent problems. A phy
 
 ## April 2026: Learn Steering from Images
 
-Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. The Series 1/2 training corpus combined approximately 2,000-3,000 real field images with 50,000 CARLA-generated images from several randomized maps. Steering corrections supplied revised labels, while regular plus `b` checkpoints preserved final-epoch and best-validation behavior separately.
+Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. The Series 1/2 training dataset combined approximately 2,000-3,000 real field images with 50,000 CARLA-generated images from several randomized maps. Steering corrections supplied revised labels, while regular plus `b` models preserved final-epoch and validation-selected behavior separately.
 
 The achievement was not a perfect model. It was proving the complete loop from human driving, to labels, to GPU training, to a physical autonomous run.
 
@@ -58,7 +58,7 @@ Harsh diagonal tree shadows became the defining failure. Earlier models sometime
 
 Physical steering did not behave like an ideal 0-to-180-degree mechanism. The chassis showed asymmetric return behavior, load effects, and hysteresis. Bench tools stepped the servo through known commands; controller-driven trim tools exposed center offsets; wheel geometry was plotted and fitted to compare left and right behavior.
 
-The project separated **absolute servo commands**, which describe what hardware receives, from **reference steering values**, which preserve a clean 0-to-180 model and display convention. Current runtime calibration uses a `+12D` center trim.
+The project separated **logical steering targets**, which preserve a clean 0-to-180 model and display convention, from **calibrated physical servo commands**, which include the hardware mapping and trim. Current runtime calibration uses a `+17°` center trim.
 
 ## 2026: LiDAR from Detection to Bounded Braking
 
@@ -74,7 +74,7 @@ The dashboard was simplified to one Waveshare 64x32 HUB75 display. Obsolete MAX7
 
 ## July 13, 2026: v3.4 Field Selection
 
-Four recent models were compared on the physical car in shadow cases and normal left/right turns:
+Four recent models were compared on the physical car in shadow cases and normal left and right turns:
 
 - v3.4 completed every shadow case presented and ranked first;
 - v3.4b was slightly worse;
@@ -91,14 +91,20 @@ The runtime audit found blocking work in the control path, especially repeated n
 
 ## July 14, 2026: Series 4 Temporal Experiments
 
-The first Series 4 implementation compares three temporal contracts on the unchanged 81,237-image Series 3 dataset and the same deterministic split procedure:
+The first Series 4 implementation compares three temporal contracts on the unchanged 81,237-image Series 3/4 dataset and the same deterministic split procedure:
 
 - PC uses the image plus previous steering targets to predict the current target;
 - CF uses the image to predict current and future targets;
 - PCF combines previous-target inputs with current/future supervision.
 
-The three 25-epoch W&B runs completed and produced six final/best artifacts: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live runtime was then extended to validate each model's signature, carry three causal steering targets in a versioned Raspberry Pi 5–Jetson Orin Nano request, and decode the current 18-value steering horizon.
+The three 25-epoch W&B runs completed and produced six final/validation-selected models: `4.0p/4.0r`, `4.0f/4.0g`, and `4.0a/4.0c`. Each trainer exported a valid 320x180 ONNX graph. The live runtime was then extended to validate each model's signature, carry three causal steering targets in a versioned Raspberry Pi 5–Jetson Orin Nano request, and decode the current 18-value steering horizon.
 
-All 46 Series 1 through Series 4 checkpoints were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test makes the offline comparison more informative than comparing each family on a different image distribution. Series 4 remains experimental until physical-car testing; v3.4 remains the field-selected baseline.
+All 46 checkpoints through Series 4.0 were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test made the offline comparison more informative than comparing each family on a different image distribution.
+
+## July 2026: Series 4 Field Test and v4.1 Corrections
+
+All six v4.0 models were driven. Image-only v4.0f was viable but mixed against v3.4, v4.0g was worse, and the PC/PCF models repeatedly echoed earlier steering predictions. v3.4 therefore remained the field-selected baseline.
+
+The next three 25-epoch runs retained the PC, CF, and PCF contracts but changed the history representation, loss terms, history perturbations, and checkpoint selection to address that failure. They produced six v4.1 models. The common report was regenerated for all 52 checkpoints. The v4.1 models are evaluated offline but are not yet integrated into the live selector or physically tested.
 
 The current deployed research state is maintained in [Current Status](current-status.md).

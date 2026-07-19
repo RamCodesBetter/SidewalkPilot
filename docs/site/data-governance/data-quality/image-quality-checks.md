@@ -2,7 +2,7 @@
 
 A usable Series 3/4 sample needs an image that exists and decodes, a parseable logical steering label, and a parseable absolute-throttle field. The current tools check these properties in two stages: a read-only image decoder and the trainer's label scan. Neither stage automatically proves that the command is the correct human target for the scene; that still requires review.
 
-## Capture format
+## Capture Format
 
 The runtime queues `photo_<timestamp>.jpg` into a dated run folder and appends the sampled command to `<run>_labels.csv`. When a capture run ends, `finalize_photo_run()` builds `<run>.json`. A finalized entry has this form:
 
@@ -17,7 +17,7 @@ The runtime queues `photo_<timestamp>.jpg` into a dated run folder and appends t
 
 `steering` is the logical `0..180` command (`0` left, `90` center, `180` right). `throttle` is absolute forward physical PWM in `0.0..1.0`; physical 55% is `0.55`, not zero on the reference-throttle scale.
 
-## Image scan
+## Image Scan
 
 `code/test_files/data/check_dataset_frames.py` is read-only. It:
 
@@ -34,7 +34,7 @@ python3 code/test_files/data/check_dataset_frames.py \
 
 The script does not calculate perceptual near-duplicates and does not judge whether a visually valid label is behaviorally correct.
 
-## Trainer label scan
+## Trainer Label Scan
 
 The Series 3 trainer's `SteeringDataset` reports:
 
@@ -103,13 +103,13 @@ The first becomes missing if the file is absent, the second is skipped as bad, a
 
 ## Coverage and Leakage Review
 
-Image integrity is only the first gate. Before training, compare steering-class counts, left/right balance, ordinary turns, turns in shadow, lighting periods, surfaces, routes, and source runs. A collection countdown may guide field work, but filling numeric buckets does not prove visual diversity.
+Image integrity is only the first gate. Before training, compare steering-class counts, left and right balance, ordinary turns, turns in shadow, lighting periods, surfaces, routes, and source runs. A collection countdown may guide field work, but filling numeric buckets does not prove visual diversity.
 
 Consecutive frames create leakage risk. Series 3/4 window splitting reduces adjacency across train/validation, while Series 1/2's historical random split can place near-neighbors on both sides. Neither result should be described as capture-run-independent unless the split is actually grouped by run.
 
 After any computer-to-computer sync, verify image and label counts, representative hashes, missing files, and unexpected deletions before accepting the destination as a new source of truth. Reverse sync with `--delete` is especially dangerous when large datasets are excluded on one side.
 
-## Related pages
+## Related Pages
 
 - [Controller Mapping and Driving Modes](../../runtime-code/controller-mapping.md)
 - [Dataset Overview](../../data/dataset-overview.md)

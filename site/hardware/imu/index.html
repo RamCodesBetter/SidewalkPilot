@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -162,11 +162,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">IMU</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why it matters</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why It Matters</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -352,7 +352,7 @@ If the IMU cannot start or its data is stale, the steering path falls back to op
 This implementation status is not a blanket field-validation claim: a run should show the
 startup <code>Yaw-rate PID steering ENABLED</code> line and fresh yaw telemetry before its result is
 attributed to the controller.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li>The MG24 streams inertial data over UART to the Raspberry Pi 5. The gyro's yaw axis gives the car's
   turn rate directly.</li>
@@ -365,22 +365,22 @@ attributed to the controller.</p>
   IMU data is stale.</li>
 <li>Kp, Ki, and Kd can be adjusted in memory from the dashboard tuning page. A field record
   must preserve those values rather than assuming the checked-in defaults were active.</li>
-<li>Bench calibration utilities are tracked in <code>code/test_files</code>. A local run may produce files such as <code>code/test_files/sensors/imu_calib.csv</code>, but that output is not a tracked publication artifact in this branch.</li>
+<li>Bench calibration utilities are tracked in <code>code/test_files</code>. A local run may produce files such as <code>code/test_files/sensors/imu_calib.csv</code>, but that output is not a tracked publication file in this branch.</li>
 </ul>
-<h2 id="why-it-matters">Why it matters</h2>
+<h2 id="why-it-matters">Why It Matters</h2>
 <ul>
 <li>Bench work observed direction-dependent return behavior: the same nominal center command
   did not always produce the same motion after a left versus right approach. The checked-in
   controller therefore uses different feed-forward centers (<code>119.5</code> and <code>107.8</code>). The branch
-  does not contain a traceable artifact supporting a single exact hysteresis angle, so none
+  does not contain a traceable measurement supporting a single exact hysteresis angle, so none
   is claimed here.</li>
 <li>The current design combines measured feed-forward values with inertial feedback instead
   of relying only on a guessed center offset.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/steering-servo.md</code></li>
-<li><code>hardware/wiring/pin-map.md</code></li>
+<li><a href="../steering-servo/">Steering Servo</a></li>
+<li><a href="../wiring/pin-map/">Pin Map</a></li>
 </ul>
               
             </div>

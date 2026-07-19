@@ -77,7 +77,7 @@
 <rect x="300" y="155" width="225" height="70" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="2" filter="url(#shadow)"/>
 <text x="412.5" y="190.0" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="412.5" y="180.0">Background Inference</tspan><tspan x="412.5" y="200.0">Worker</tspan></text>
 <rect x="565" y="155" width="235" height="70" rx="7" fill="#F0F7E8" stroke="#5F9400" stroke-width="2" filter="url(#shadow)"/>
-<text x="682.5" y="190.0" text-anchor="middle" font-size="16" font-weight="600" fill="#2F4B00"><tspan x="682.5" y="180.0">Jetson Orin Nano</tspan><tspan x="682.5" y="200.0">ONNX Inference</tspan></text>
+<text x="682.5" y="190.0" text-anchor="middle" font-size="16" font-weight="600" fill="#2F4B00"><tspan x="682.5" y="180.0">Jetson Orin Nano</tspan><tspan x="682.5" y="200.0">GPU Inference</tspan></text>
 <rect x="840" y="155" width="205" height="70" rx="7" fill="#F0F7E8" stroke="#5F9400" stroke-width="2" filter="url(#shadow)"/>
 <text x="942.5" y="190.0" text-anchor="middle" font-size="16" font-weight="600" fill="#2F4B00"><tspan x="942.5" y="180.0">Latest Jetson</tspan><tspan x="942.5" y="200.0">Prediction</tspan></text>
 <rect x="1085" y="145" width="235" height="90" rx="7" fill="#FFF1F0" stroke="#B42318" stroke-width="2" filter="url(#shadow)"/>

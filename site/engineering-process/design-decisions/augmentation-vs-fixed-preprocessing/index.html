@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>Augmentation vs Fixed Preprocessing - SidewalkPilot RC Car</title>
+    <title>Augmentation Versus Fixed Preprocessing - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Augmentation vs Fixed Preprocessing";
+        var mkdocs_page_name = "Augmentation Versus Fixed Preprocessing";
         var mkdocs_page_input_path = "engineering-process/design-decisions/augmentation-vs-fixed-preprocessing.md";
         var mkdocs_page_url = null;
       </script>
@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,19 +89,19 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Augmentation Versus Fixed Preprocessing</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#decision">Decision</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-augmentation-not-a-fixed-transform">Why augmentation, not a fixed transform</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-augmentation-not-a-fixed-transform">Why Augmentation, Not a Fixed Transform</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#runtime-preprocessing-contract">Runtime Preprocessing Contract</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#alternatives-considered">Alternatives considered</a>
+    <li class="toctree-l2"><a class="reference internal" href="#alternatives-considered">Alternatives Considered</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-to-know-it-worked-test-gate">How to know it worked (test gate)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-know-it-worked-test-gate">How to Know It Worked (Test Gate)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -335,7 +335,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Engineering Process</li>
-      <li class="breadcrumb-item active">Augmentation vs Fixed Preprocessing</li>
+      <li class="breadcrumb-item active">Augmentation Versus Fixed Preprocessing</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -344,7 +344,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="augmentation-vs-fixed-preprocessing">Augmentation vs. Fixed Preprocessing</h1>
+                <h1 id="augmentation-versus-fixed-preprocessing">Augmentation Versus Fixed Preprocessing</h1>
 <p>This page records the decision to make the Series 3 model robust to lighting and
 viewpoint through <strong>randomized training-time augmentation</strong>, rather than a fixed
 inference-time preprocessing transform (like always running CLAHE on the car).</p>
@@ -409,7 +409,7 @@ augmentations and their default probabilities:</p>
 <p>The horizontal flip is a <em>label-aware</em> mirror — it flips the image and sets
 <code>steer = 180.0 - steer</code> — which cheaply balances left vs right turns. HSV and
 CLAHE are wired in as optional augmentations but default to probability <code>0.0</code>.</p>
-<h2 id="why-augmentation-not-a-fixed-transform">Why augmentation, not a fixed transform</h2>
+<h2 id="why-augmentation-not-a-fixed-transform">Why Augmentation, Not a Fixed Transform</h2>
 <p>A fixed inference transform (e.g. "always CLAHE on the car") only reshapes the
 input one way and must match training exactly. It doesn't teach the model to
 handle the <em>range</em> of real conditions — and on my worst case, tree-dappled
@@ -432,7 +432,7 @@ normalizes with <code>(x/255 - 0.5)/0.5</code>. Only legacy models 2.0 and 2.0b 
 CLAHE. This version-specific exception preserves train/runtime parity. Applying CLAHE to a
 checkpoint that was trained on raw BGR would silently change its input distribution, while
 applying it universally could amplify hard shadow boundaries and add per-frame CPU work.</p>
-<h2 id="alternatives-considered">Alternatives considered</h2>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
 <table>
 <thead>
 <tr>
@@ -459,19 +459,19 @@ applying it universally could amplify hard shadow boundaries and add per-frame C
 </tr>
 </tbody>
 </table>
-<h2 id="how-to-know-it-worked-test-gate">How to know it worked (test gate)</h2>
+<h2 id="how-to-know-it-worked-test-gate">How to Know It Worked (Test Gate)</h2>
 <ul>
 <li>Preview augmentation variants before a run with
   <code>code/test_files/camera/preview_series3_augmentations.py</code>.</li>
 <li>Compare hard-shadow field clips across versions (the v3.1b → v3.2b shadow study
   is the template); success = fewer shadow-driven edge drifts, not a lower MAE.</li>
-<li>Re-test the exact shadow cases for every promoted model; Series 4 has not yet passed that gate.</li>
+<li>Re-test the exact shadow cases for every promoted model. Series 4.0 completed a supervised comparison but produced no promotion; Series 4.1 has not reached that gate.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/camera-steering/model-inference.md</code></li>
-<li><code>testing/failures/overview.md</code></li>
-<li><code>roadmap/next-steps.md</code></li>
+<li><a href="../../../autonomy-stack/camera-steering/model-inference/">Model Inference</a></li>
+<li><a href="../../../testing/failures/overview/">Failures and Lessons</a></li>
+<li><a href="../../../roadmap/next-steps/">Next Steps</a></li>
 </ul>
               
             </div>

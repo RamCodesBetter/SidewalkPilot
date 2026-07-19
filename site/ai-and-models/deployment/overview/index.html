@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -187,15 +187,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Model Deployment</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#artifact-contracts">Artifact Contracts</a>
+    <li class="toctree-l2"><a class="reference internal" href="#model-contracts">Model Contracts</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#provider-selection">Provider Selection</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#tensorrt-status">TensorRT Status</a>
+    <li class="toctree-l2"><a class="reference internal" href="#gpu-selection">GPU Selection</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#export-and-verification">Export and Verification</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#precision-experiments">Precision Experiments</a>
     </li>
     </ul>
                   </li>
@@ -350,8 +346,8 @@
   -&gt; ONNX Runtime with CUDA
   -&gt; decoded steering returned to Raspberry Pi 5
 </code></pre>
-<p>The Raspberry Pi 5 remains responsible for the camera, actuator control, result freshness, manual override, and LiDAR safety. Jetson Orin Nano is an inference service only.</p>
-<h2 id="artifact-contracts">Artifact Contracts</h2>
+<p>The Raspberry Pi 5 remains responsible for the camera, steering servo and motor control, result freshness, manual override, and LiDAR safety. The Jetson Orin Nano runs the steering models and returns their predictions.</p>
+<h2 id="model-contracts">Model Contracts</h2>
 <table>
 <thead>
 <tr>
@@ -389,18 +385,10 @@
 </tbody>
 </table>
 <p>The server inspects input names and output shapes rather than assigning a contract from the filename alone.</p>
-<h2 id="provider-selection">Provider Selection</h2>
-<p>CUDA is preferred when ONNX Runtime reports <code>CUDAExecutionProvider</code>; CPU remains a fallback for compatibility/testing. A partially installed TensorRT provider is not registered ahead of CUDA because provider initialization failure can cause an accidental CPU retry.</p>
-<h2 id="tensorrt-status">TensorRT Status</h2>
-<p>TensorRT, FP16, and INT8 remain valid future optimization topics, but they are not the current live path. The old checked-in TensorRT builder described by earlier docs is no longer in the repository. No current field claim depends on a TensorRT engine or quantized model.</p>
+<h2 id="gpu-selection">GPU Selection</h2>
+<p>Series 1/2 run through PyTorch CUDA. Series 3/4 run through ONNX Runtime's CUDA provider. CPU execution remains available only for diagnosis; a field launch should confirm that the Jetson Orin Nano GPU path loaded.</p>
 <h2 id="export-and-verification">Export and Verification</h2>
-<p>Each model must export with the input names and output shape shown above, load in ONNX Runtime, and produce finite steering on a representative frame before deployment. Artifact hashes and the exact model/version pairing should be recorded. A successful export does not prove that the Raspberry Pi 5 and Jetson Orin Nano are using the same preprocessing or decoder, so an end-to-end fresh-response test is still required.</p>
-<h2 id="precision-experiments">Precision Experiments</h2>
-<p>FP32 stores each parameter in four bytes. FP16 can approximately halve weight storage and may improve GPU throughput; INT8 maps floating values to integer codes using a scale and zero point:</p>
-<pre><code class="language-text">q = clamp(round(x / scale) + zero_point)
-x_approx = scale * (q - zero_point)
-</code></pre>
-<p>Quantization can change a winning steering class near a boundary. Any FP16, INT8 PTQ, QAT, or TensorRT experiment therefore needs representative calibration data, artifact hashes, on-device latency/power measurements, common-set evaluation, and a supervised field comparison. File size alone is not approval.</p>
+<p>Before field use, each model must load with the expected input names and output shape, return finite steering values, and pass a complete Raspberry Pi 5-to-Jetson Orin Nano response test. The deployed filename and version must match. The current field path uses FP32 models; TensorRT, FP16, and INT8 are not active.</p>
 <p>See <a href="../jetson-runtime/">Jetson Orin Nano Runtime</a> and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>

@@ -8,10 +8,10 @@ SidewalkPilot treats model development as a closed physical engineering loop rat
 2. **Identify a concrete failure.** Examples include diagonal-shadow following, straight collapse, turn asymmetry, stale inference, or mechanical return error.
 3. **Audit the data.** Count images and labels, remove corrupt frames, inspect steering balance, and preserve correction metadata.
 4. **State one hypothesis.** Change architecture, augmentation, sampling, labels, or runtime behavior for a specific reason.
-5. **Train regular and `b` checkpoints.** The regular artifact is the final epoch; `b` is the best validation epoch.
+5. **Train regular and `b` checkpoints.** The regular model is the final epoch; `b` is the validation-selected epoch.
 6. **Evaluate compatible models.** Apply each family's input/output contract. Preserve its historical own-dataset result and use the common Series 3/4 challenge set only for the explicitly labeled cross-family comparison.
 7. **Read balanced metrics.** Bal9, turn exact, turn +/-1, straight exact, MAE, median error, signed error, and confusion patterns are considered together.
-8. **Deploy ONNX to the Jetson Orin Nano.** Confirm shape, preprocessing, decoder, and inference provider.
+8. **Deploy the model to the Jetson Orin Nano.** Confirm its file, input shape, preprocessing, decoder, and inference provider. Series 1/2 use PTH files through PyTorch CUDA; Series 3/4 use ONNX files through ONNX Runtime CUDA.
 9. **Field-test the physical car.** Test ordinary turns plus the failure condition that motivated the model.
 10. **Promote, revise, or roll back.** Preserve the reason, not only the winning filename.
 
@@ -33,7 +33,7 @@ Most field data is close to straight. Predicting near 90 degrees frequently can 
 
 The July 2026 v3.4/v3.4b result validates this policy: v3.4b had the lower MAE, but v3.4 had stronger turn/balance metrics and was better on the car.
 
-## Regular and `b` Checkpoints
+## Regular and `b` Models
 
 Every paired release answers a different question:
 
@@ -63,7 +63,7 @@ Each promoted model should have:
 - Trainer command and configuration;
 - Dataset snapshot and source counts;
 - W&B run identifier;
-- Regular and best-validation artifact hashes;
+- Final-epoch and validation-selected model hashes;
 - Evaluator output and report version;
 - Deployment target and ONNX contract;
 - Field conditions, takeovers, logs, and clips;
@@ -77,7 +77,7 @@ Verification uses two gates in order. First, the offline evaluator checks Bal9, 
 turn within one class, straight recall, error magnitude, signed bias, and confusion. Passing
 means a candidate is worth hardware time, not that it is good. Second, the freshly restarted
 deployment must re-drive the exact situation the change was intended to improve. Editing a
-file while the owning Raspberry Pi 5, Jetson Orin Nano, or Zero 2 W process remains running
+file while the owning Jetson Orin Nano, Raspberry Pi 5, or Zero 2 W process remains running
 does not verify the new code.
 
 The field record should attach evaluator output, the target-case clip/log, and the services
@@ -86,9 +86,9 @@ selection wastes time on candidates that a common replay would reject.
 
 ## Rollback Policy
 
-Rollback means selecting a previously field-accepted, versioned artifact after a newer
-candidate regresses. Before motion, confirm the intended ONNX exists on the Jetson Orin
-Nano, loads with the expected provider and signature, returns fresh results tagged with the
+Rollback means selecting a previously field-accepted, versioned model after a newer
+candidate regresses. Before motion, confirm the intended model file exists on the Jetson Orin
+Nano, loads with the expected provider and input/output contract, returns fresh results tagged with the
 selected version, and passes a restrained direction check. A dashboard name alone does not
 prove which bytes loaded.
 
@@ -99,7 +99,7 @@ hardware changes, so those revisions must be preserved separately.
 ## Historical Metrics Policy
 
 Every metric remains attached to its dataset, subset, decoder, evaluator revision, and
-artifact. The common report scores all 46 checkpoints on one frozen 6,952-frame challenge
+model. The common report scores all 52 checkpoints on one frozen 6,952-frame challenge
 set; the 2,224-image Series 1/2 historical results remain separately labeled. Values from
-different evaluation distributions are not silently mixed. Final and best-validation roles
+different evaluation distributions are not silently mixed. Final-epoch and validation-selected roles
 are provenance, and no single metric overrides the physical promotion gate.

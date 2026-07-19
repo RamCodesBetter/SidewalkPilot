@@ -18,11 +18,14 @@ The steering classes are:
 0-45 | 45-60 | 60-75 | 75-85 | 85-95 | 95-105 | 105-120 | 120-135 | 135-180
 ```
 
-At inference, the highest-logit class is selected and its sigmoid-bounded offset
-is mapped within that class. The current runtime ignores the throttle output;
-motion policy owns throttle and braking.
+At inference, the decoder applies softmax to the nine class logits and selects
+`argmax(softmax(class_logits))`. It then maps the selected class's
+sigmoid-bounded offset within that class. Softmax preserves the argmax ordering,
+but writing the complete operation makes the probability interpretation clear.
+The current runtime ignores the throttle output; motion policy owns throttle and
+braking.
 
-## Engineering reason
+## Engineering Reason
 
 A direct regression loss can favor values near a common central target on an
 imbalanced dataset. A hybrid head makes coarse steering-class behavior visible in
@@ -53,7 +56,7 @@ training settings, and weights also changed across versions.
 | Pure classification | Direct class supervision | Quantized output unless a continuous stage is added |
 | Class plus local offset | Class metrics plus continuous angle | More complex loss/decoder and class-boundary discontinuities |
 
-## Related pages
+## Related Pages
 
 - [Series 3 Hybrid Head](../../ai-and-models/architecture/series-3-hybrid-head.md)
 - [Model Framing and Loss](../../research-and-math/machine-learning/loss-function.md)

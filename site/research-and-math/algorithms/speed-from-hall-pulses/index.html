@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -337,7 +337,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="speed-measurement-and-control">Speed Measurement and Control</h1>
-<p>The Raspberry Pi 5 measures wheel speed from a Hall-effect sensor and can use that feedback for manual cruise control. The implementation is in <code>runtime.py</code>; constants are in <code>config.py</code>.</p>
+<p>The Raspberry Pi 5 measures wheel speed from a Hall-effect wheel-speed sensor and can use that feedback for manual cruise control. The implementation is in <code>runtime.py</code>; constants are in <code>config.py</code>.</p>
 <h2 id="hall-pulse-speed">Hall-Pulse Speed</h2>
 <p>The GPIO 24 callback only increments a pulse counter and records the latest pulse time. Approximately every <code>0.1 s</code>, <code>calculate_speed()</code> converts the counter difference into speed:</p>
 <pre><code class="language-text">pulses_per_second = pulses / elapsed

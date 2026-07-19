@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -99,15 +99,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Jetson Orin Nano and Raspberry Pi 5 Compute Split</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#options-considered">Options considered</a>
+    <li class="toctree-l2"><a class="reference internal" href="#options-considered">Options Considered</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#capture-and-inference-path">Capture and inference path</a>
+    <li class="toctree-l2"><a class="reference internal" href="#capture-and-inference-path">Capture and Inference Path</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -346,17 +346,17 @@
 <p>This page records the decision to use the <strong>Jetson Orin Nano as the AI brain</strong> and the
 <strong>Raspberry Pi 5 as the hardware and safety controller</strong>, instead of forcing both jobs onto
 one computer.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
-<li>The <strong>Jetson Orin Nano</strong> runs the current Series 3/4 steering neural network through ONNX
-  Runtime/CUDA and returns decoded steering plus runtime telemetry over private Ethernet at
-  <code>10.42.0.2:8770</code>.</li>
+<li>The <strong>Jetson Orin Nano</strong> runs every live-selectable steering-model family on its GPU:
+  Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. It returns
+  decoded steering plus runtime telemetry over private Ethernet at <code>10.42.0.2:8770</code>.</li>
 <li>The <strong>Raspberry Pi 5</strong> captures the camera frame and owns joystick input, LiDAR, GPS, hall
   sensing, PCA9685 steering, motor PWM, safety arbitration, logging, and the dashboard link.</li>
 <li>The Raspberry Pi 5 accepts only a fresh result for the selected model, combines it with
   LiDAR and operator safety rules, and then writes the physical outputs.</li>
 </ul>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li><strong>Current autonomy needs the Jetson Orin Nano GPU.</strong> The larger 320x180 Series 3/4 networks
   ran much more slowly on the Raspberry Pi 5 CPU. The Jetson Orin Nano GPU runs the selected
@@ -375,7 +375,7 @@ one computer.</p>
   moving to a Jetson Orin Nano-only rig would have invalidated the dataset. The Raspberry Pi 5 stays as the camera
   host.</li>
 </ul>
-<h2 id="options-considered">Options considered</h2>
+<h2 id="options-considered">Options Considered</h2>
 <table>
 <thead>
 <tr>
@@ -402,29 +402,29 @@ one computer.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="capture-and-inference-path">Capture and inference path</h2>
+<h2 id="capture-and-inference-path">Capture and Inference Path</h2>
 <ul>
 <li>The Raspberry Pi 5 captures the frame through <strong>Picamera2</strong> in OpenCV BGR
   (<code>_PiCameraCapture</code>, <code>code/controller/current/rc_car_app/vision.py</code>) and the background
   client sends its newest JPEG request to <strong>Jetson Orin Nano at <code>10.42.0.2:8770</code></strong>. The
-  Jetson Orin Nano performs model-specific resize/normalization, runs ONNX inference, decodes the
+  Jetson Orin Nano performs model-specific resize/normalization, runs the selected model, decodes the
   output, and returns steering plus telemetry. The Raspberry Pi 5 then applies safety and
   writes the Servo Controller and Motor Controller.</li>
 <li><strong>Speed motivation:</strong> Series 1/2 (<code>SteeringAutonomyV2</code>, ~0.67M parameters, 200x66)
-  can run locally on the Raspberry Pi 5. Series 3/4 use substantially larger ~5.5M-parameter
-  networks at 320x180. The dedicated Jetson Orin Nano path leaves the Raspberry Pi 5 CPU available for
-  physical I/O while the GPU handles inference. Exact throughput should still be reported
+  are smaller than the ~5.5M-parameter, 320x180 Series 3/4 networks, but all live-selectable
+  families use the same Jetson Orin Nano inference service. This leaves the Raspberry Pi 5 CPU
+  available for physical I/O while the GPU handles inference. Exact processing rate should still be reported
   from runtime telemetry for the tested model, provider, software build, and power mode.</li>
 <li><strong>Failure behavior:</strong> the model is one input to a safety-arbitrated loop, not
   the loop itself. LiDAR/AEB and manual override sit above it, and a stale or
   low-confidence model result triggers a safety stop rather than a blind command
   (see the LiDAR-priority decision).</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>start-here/project-overview.md</code></li>
-<li><code>autonomy-stack/architecture/data-flow.md</code></li>
-<li><code>hardware/compute.md</code></li>
+<li><a href="../../../start-here/project-overview/">Project Overview</a></li>
+<li><a href="../../../autonomy-stack/architecture/data-flow/">Control Architecture and Runtime Data Flow</a></li>
+<li><a href="../../../hardware/compute/">Compute Hardware</a></li>
 </ul>
               
             </div>

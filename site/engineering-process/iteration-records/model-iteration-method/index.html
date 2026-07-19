@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -109,7 +109,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#why-mae-is-secondary">Why MAE Is Secondary</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#regular-and-b-checkpoints">Regular and b Checkpoints</a>
+    <li class="toctree-l2"><a class="reference internal" href="#regular-and-b-models">Regular and b Models</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#example-v33-to-v34">Example: v3.3 to v3.4</a>
     </li>
@@ -358,10 +358,10 @@
 <li><strong>Identify a concrete failure.</strong> Examples include diagonal-shadow following, straight collapse, turn asymmetry, stale inference, or mechanical return error.</li>
 <li><strong>Audit the data.</strong> Count images and labels, remove corrupt frames, inspect steering balance, and preserve correction metadata.</li>
 <li><strong>State one hypothesis.</strong> Change architecture, augmentation, sampling, labels, or runtime behavior for a specific reason.</li>
-<li><strong>Train regular and <code>b</code> checkpoints.</strong> The regular artifact is the final epoch; <code>b</code> is the best validation epoch.</li>
+<li><strong>Train regular and <code>b</code> checkpoints.</strong> The regular model is the final epoch; <code>b</code> is the validation-selected epoch.</li>
 <li><strong>Evaluate compatible models.</strong> Apply each family's input/output contract. Preserve its historical own-dataset result and use the common Series 3/4 challenge set only for the explicitly labeled cross-family comparison.</li>
 <li><strong>Read balanced metrics.</strong> Bal9, turn exact, turn +/-1, straight exact, MAE, median error, signed error, and confusion patterns are considered together.</li>
-<li><strong>Deploy ONNX to the Jetson Orin Nano.</strong> Confirm shape, preprocessing, decoder, and inference provider.</li>
+<li><strong>Deploy the model to the Jetson Orin Nano.</strong> Confirm its file, input shape, preprocessing, decoder, and inference provider. Series 1/2 use PTH files through PyTorch CUDA; Series 3/4 use ONNX files through ONNX Runtime CUDA.</li>
 <li><strong>Field-test the physical car.</strong> Test ordinary turns plus the failure condition that motivated the model.</li>
 <li><strong>Promote, revise, or roll back.</strong> Preserve the reason, not only the winning filename.</li>
 </ol>
@@ -378,7 +378,7 @@
 <li>Signed steering bias.</li>
 </ul>
 <p>The July 2026 v3.4/v3.4b result validates this policy: v3.4b had the lower MAE, but v3.4 had stronger turn/balance metrics and was better on the car.</p>
-<h2 id="regular-and-b-checkpoints">Regular and <code>b</code> Checkpoints</h2>
+<h2 id="regular-and-b-models">Regular and <code>b</code> Models</h2>
 <p>Every paired release answers a different question:</p>
 <ul>
 <li><code>SidewalkPilot-vX.Y</code>: what training produced at the final epoch.</li>
@@ -398,7 +398,7 @@
 <li>Trainer command and configuration;</li>
 <li>Dataset snapshot and source counts;</li>
 <li>W&amp;B run identifier;</li>
-<li>Regular and best-validation artifact hashes;</li>
+<li>Final-epoch and validation-selected model hashes;</li>
 <li>Evaluator output and report version;</li>
 <li>Deployment target and ONNX contract;</li>
 <li>Field conditions, takeovers, logs, and clips;</li>
@@ -410,15 +410,15 @@
 turn within one class, straight recall, error magnitude, signed bias, and confusion. Passing
 means a candidate is worth hardware time, not that it is good. Second, the freshly restarted
 deployment must re-drive the exact situation the change was intended to improve. Editing a
-file while the owning Raspberry Pi 5, Jetson Orin Nano, or Zero 2 W process remains running
+file while the owning Jetson Orin Nano, Raspberry Pi 5, or Zero 2 W process remains running
 does not verify the new code.</p>
 <p>The field record should attach evaluator output, the target-case clip/log, and the services
 restarted on each device. Offline-only sign-off misses closed-loop failures; field-only
 selection wastes time on candidates that a common replay would reject.</p>
 <h2 id="rollback-policy">Rollback Policy</h2>
-<p>Rollback means selecting a previously field-accepted, versioned artifact after a newer
-candidate regresses. Before motion, confirm the intended ONNX exists on the Jetson Orin
-Nano, loads with the expected provider and signature, returns fresh results tagged with the
+<p>Rollback means selecting a previously field-accepted, versioned model after a newer
+candidate regresses. Before motion, confirm the intended model file exists on the Jetson Orin
+Nano, loads with the expected provider and input/output contract, returns fresh results tagged with the
 selected version, and passes a restrained direction check. A dashboard name alone does not
 prove which bytes loaded.</p>
 <p>v3.4 remains the rollback baseline until another model wins a controlled field comparison.
@@ -426,9 +426,9 @@ Rollback of the model does not undo simultaneous code, configuration, calibratio
 hardware changes, so those revisions must be preserved separately.</p>
 <h2 id="historical-metrics-policy">Historical Metrics Policy</h2>
 <p>Every metric remains attached to its dataset, subset, decoder, evaluator revision, and
-artifact. The common report scores all 46 checkpoints on one frozen 6,952-frame challenge
+model. The common report scores all 52 checkpoints on one frozen 6,952-frame challenge
 set; the 2,224-image Series 1/2 historical results remain separately labeled. Values from
-different evaluation distributions are not silently mixed. Final and best-validation roles
+different evaluation distributions are not silently mixed. Final-epoch and validation-selected roles
 are provenance, and no single metric overrides the physical promotion gate.</p>
               
             </div>

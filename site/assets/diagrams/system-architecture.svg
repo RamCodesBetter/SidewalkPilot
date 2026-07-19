@@ -57,13 +57,13 @@
 <rect x="65" y="535" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
 <text x="182.5" y="570.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="570.0">XIAO MG24 Sense IMU</tspan></text>
 <rect x="65" y="630" width="235" height="70" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
-<text x="182.5" y="665.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="655.0">Hall-Effect Wheel-Speed</tspan><tspan x="182.5" y="675.0">Sensor</tspan></text>
+<text x="182.5" y="665.0" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="182.5" y="655.0">Hall-effect Wheel-Speed</tspan><tspan x="182.5" y="675.0">Sensor</tspan></text>
 <rect x="510" y="350" width="370" height="180" rx="7" fill="#FFF0F4" stroke="#C51A4A" stroke-width="2" filter="url(#shadow)"/>
 <text x="695.0" y="431.0" text-anchor="middle" font-size="16" font-weight="600" fill="#7A1030"><tspan x="695.0" y="431.0">Raspberry Pi 5</tspan></text>
 <text x="695.0" y="512.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="695.0" y="512.0">Hardware and Safety Controller</tspan></text>
 <rect x="1010" y="145" width="390" height="150" rx="7" fill="#F0F7E8" stroke="#5F9400" stroke-width="2" filter="url(#shadow)"/>
 <text x="1205.0" y="211.0" text-anchor="middle" font-size="16" font-weight="600" fill="#2F4B00"><tspan x="1205.0" y="211.0">Jetson Orin Nano</tspan></text>
-<text x="1205.0" y="270.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1205.0" y="263.0">AI Model Manager - Series 3/4 ONNX CUDA</tspan><tspan x="1205.0" y="277.0">inference</tspan></text>
+<text x="1205.0" y="270.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1205.0" y="263.0">AI Model Manager - GPU inference for all</tspan><tspan x="1205.0" y="277.0">model families</tspan></text>
 <rect x="1050" y="515" width="290" height="115" rx="7" fill="#EDF4FF" stroke="#246BCE" stroke-width="2" filter="url(#shadow)"/>
 <text x="1195.0" y="563.5" text-anchor="middle" font-size="16" font-weight="600" fill="#153E75"><tspan x="1195.0" y="563.5">Zero 2 W</tspan></text>
 <text x="1195.0" y="612.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1195.0" y="612.0">Display Controller</tspan></text>

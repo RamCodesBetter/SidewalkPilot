@@ -1,11 +1,12 @@
-# 5 Minute Technical Tour
+# 5-Minute Technical Tour
 
 This path gives a technical or media reviewer enough context to describe SidewalkPilot accurately without reading the whole repository.
 
 ## 1. One Vehicle, Three Computers
 
-The Jetson Orin Nano is the AI brain: it runs the current Series 3/4 steering network over
-the GPU and returns the prediction that makes camera-based self-driving possible. The
+The Jetson Orin Nano is the AI brain: it runs every live-selectable steering-model family
+on the GPU and returns the prediction that makes camera-based self-driving possible. Series
+1/2 use PyTorch CUDA; Series 3/4 use ONNX Runtime CUDA. The
 Raspberry Pi 5 is the hardware and safety controller for input, sensors, steering/motor control, and
 logging. The Zero 2 W renders the external dashboard over a dedicated USB network.
 
@@ -21,13 +22,13 @@ Read: [Project Overview](../../start-here/project-overview.md), [Data Flow](../.
 
 Series 1 proved that a compact CNN could map a 200x66 camera frame to steering. Series 2 refined the data and tested fixed CLAHE lighting preprocessing. Series 3 moved to 320x180 on Jetson Orin Nano and, from v3.1, used nine steering classes plus continuous offsets. v3.4 became the field winner after handling the tested harsh shadows that earlier models followed as fake sidewalk edges.
 
-Series 4 changes the temporal contract while keeping the same 81,237-image dataset and visual backbone. PC uses the previous three target commands; CF learns current plus three future targets from the image; PCF combines both. Three 25-epoch runs produced six ONNX artifacts. PC and PCF lead offline, but none replaces v3.4 until the car says so.
+Series 4 changes the temporal contract while keeping the same 81,237-image dataset and visual backbone. PC uses the previous three target commands; CF learns current plus three future targets from the image; PCF combines both. The v4.0 PC/PCF models led offline but echoed previous predictions on the car. Image-only v4.0f was viable and complementary with v3.4, but did not replace it. Six v4.1 correction models are now trained and evaluated offline; live integration and physical testing remain.
 
 Read: [Model Zoo](../../ai-and-models/model-zoo/overview.md) and [Series 4 Temporal Experiments](../../ai-and-models/architecture/series-4-plan.md).
 
 ## 3. The Data and Evaluation Loop
 
-Manual drives save camera frames with logical `0..180` steering labels and absolute physical throttle fractions. The Series 3/4 split assigns path-sorted 100-sample windows to one side of the split, which reduces adjacent-frame leakage. It is not a capture-run-group split and does not prove complete route isolation. A common evaluator now runs all 46 checkpoints on the same 6,952-frame challenge subset.
+Manual drives save camera frames with logical `0..180` steering labels and absolute physical throttle fractions. The Series 3/4 split assigns path-sorted 100-sample windows to one side of the split, which reduces adjacent-frame leakage. It is not a capture-run-group split and does not prove complete route isolation. A common evaluator now runs all 52 checkpoints on the same 6,952-frame challenge subset.
 
 Bal9 averages exact recall across nine steering classes with equal class weight. It prevents 4,741 straight frames from hiding failures in rare turns. MAE remains useful, but it is secondary to class balance, turns, signed bias, and field behavior.
 
@@ -35,7 +36,7 @@ Read: [Bal9](../../model-evaluation/offline-evaluation/bal9.md), [Offline Evalua
 
 ## 4. Safety Is Separate from Steering
 
-The learned model controls autonomous steering. LiDAR does not choose a left/right path. It watches one center corridor and can reduce throttle or hard-brake. Earlier LiDAR swerve logic was removed because obstacle points cannot prove that adjacent ground is safe sidewalk rather than grass, curb, or another hazard.
+The learned model controls autonomous steering. LiDAR does not choose a left or right path. It watches one center corridor and can reduce throttle or request a hard brake. This keeps steering under one authority because obstacle points alone cannot prove that adjacent ground is safe sidewalk rather than grass, a curb, or another hazard.
 
 Read: [LiDAR Overview](../../autonomy-stack/lidar-safety/overview.md) and [AEB](../../autonomy-stack/lidar-safety/aeb.md).
 
@@ -48,7 +49,7 @@ This is representative of the project: measure the boundary, identify the actual
 ## 6. Current Evidence and Limits
 
 - v3.4 has a bounded qualitative field result.
-- Series 4 has training, ONNX, CUDA runtime, and common offline evidence, but no field result.
+- v4.0 has training, ONNX, CUDA runtime, common offline evidence, and a bounded field result; v4.1 has no field result yet.
 - LiDAR center-braking has automated tests; the latest policy still needs a preserved physical test record.
 - No claim is made for public-road, unattended, or unrestricted pedestrian operation.
 

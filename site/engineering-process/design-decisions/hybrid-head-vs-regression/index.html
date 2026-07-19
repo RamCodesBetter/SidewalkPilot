@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -103,13 +103,13 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#contracts">Contracts</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#engineering-reason">Engineering reason</a>
+    <li class="toctree-l2"><a class="reference internal" href="#engineering-reason">Engineering Reason</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#evidence">Evidence</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#alternatives">Alternatives</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -353,10 +353,13 @@ nine-class steering distribution plus one local offset per class.</p>
 <p>The steering classes are:</p>
 <pre><code class="language-text">0-45 | 45-60 | 60-75 | 75-85 | 85-95 | 95-105 | 105-120 | 120-135 | 135-180
 </code></pre>
-<p>At inference, the highest-logit class is selected and its sigmoid-bounded offset
-is mapped within that class. The current runtime ignores the throttle output;
-motion policy owns throttle and braking.</p>
-<h2 id="engineering-reason">Engineering reason</h2>
+<p>At inference, the decoder applies softmax to the nine class logits and selects
+<code>argmax(softmax(class_logits))</code>. It then maps the selected class's
+sigmoid-bounded offset within that class. Softmax preserves the argmax ordering,
+but writing the complete operation makes the probability interpretation clear.
+The current runtime ignores the throttle output; motion policy owns throttle and
+braking.</p>
+<h2 id="engineering-reason">Engineering Reason</h2>
 <p>A direct regression loss can favor values near a common central target on an
 imbalanced dataset. A hybrid head makes coarse steering-class behavior visible in
 the loss and in evaluation while retaining a continuous within-class angle. It
@@ -403,7 +406,7 @@ training settings, and weights also changed across versions.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../ai-and-models/architecture/series-3-hybrid-head/">Series 3 Hybrid Head</a></li>
 <li><a href="../../../research-and-math/machine-learning/loss-function/">Model Framing and Loss</a></li>

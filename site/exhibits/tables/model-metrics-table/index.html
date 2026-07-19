@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -290,7 +290,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#primary-metrics">Primary Metrics</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#current-baseline-and-series-4">Current Baseline and Series 4</a>
+    <li class="toctree-l2"><a class="reference internal" href="#current-baseline-and-series-40">Current Baseline and Series 4.0</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#field-status">Field Status</a>
     </li>
@@ -347,7 +347,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="evidence-tables">Evidence Tables</h1>
-<p>The canonical generated comparison is <a href="../../../steering_model_report.pdf">steering_model_report.pdf</a>. It contains all 46 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.</p>
+<p>The canonical generated comparison is <a href="../../../steering_model_report.pdf">steering_model_report.pdf</a>. It contains all 52 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.</p>
 <h2 id="model-families">Model Families</h2>
 <table>
 <thead>
@@ -382,30 +382,51 @@
 <td style="text-align: right;">approximately 5.53M</td>
 </tr>
 <tr>
-<td>Series 4 PC</td>
+<td>Series 4.0 PC</td>
 <td style="text-align: right;">2</td>
 <td>image + three prior targets</td>
 <td>one 18-value horizon</td>
 <td style="text-align: right;">5,569,186</td>
 </tr>
 <tr>
-<td>Series 4 CF</td>
+<td>Series 4.0 CF</td>
 <td style="text-align: right;">2</td>
 <td>image</td>
 <td>four 18-value horizons</td>
 <td style="text-align: right;">5,537,560</td>
 </tr>
 <tr>
-<td>Series 4 PCF</td>
+<td>Series 4.0 PCF</td>
 <td style="text-align: right;">2</td>
 <td>image + three prior targets</td>
 <td>four 18-value horizons</td>
 <td style="text-align: right;">5,572,696</td>
 </tr>
+<tr>
+<td>Series 4.1 PC</td>
+<td style="text-align: right;">2</td>
+<td>image + three prior targets</td>
+<td>one 18-value horizon</td>
+<td style="text-align: right;">5,537,460</td>
+</tr>
+<tr>
+<td>Series 4.1 CF</td>
+<td style="text-align: right;">2</td>
+<td>image</td>
+<td>four 18-value horizons</td>
+<td style="text-align: right;">5,537,560</td>
+</tr>
+<tr>
+<td>Series 4.1 PCF</td>
+<td style="text-align: right;">2</td>
+<td>image + three prior targets</td>
+<td>four 18-value horizons</td>
+<td style="text-align: right;">5,544,480</td>
+</tr>
 </tbody>
 </table>
 <h2 id="common-challenge-set">Common Challenge Set</h2>
-<p>All 46 models are scored on the same frozen 6,952-frame subset from the Series 3/4 dataset. The evaluator applies the matching resize, model invocation, and decoder for each architecture. This reveals how early models behave on the later shadow/lighting distribution instead of comparing unrelated per-series test sets.</p>
+<p>All 52 checkpoints are scored on the same frozen 6,952-frame subset from the Series 3/4 dataset. The evaluator applies the matching resize, model invocation, and decoder for each architecture. This reveals how early models behave on the later shadow and lighting distribution instead of comparing unrelated per-series test sets.</p>
 <h2 id="primary-metrics">Primary Metrics</h2>
 <table>
 <thead>
@@ -459,7 +480,7 @@
 </tbody>
 </table>
 <p>No single column is the field verdict. Bal9 and turn metrics prevent straight-heavy data from hiding turn collapse; MAE/median expose numeric precision; signed error exposes bias; field testing exposes behavior absent from labels.</p>
-<h2 id="current-baseline-and-series-4">Current Baseline and Series 4</h2>
+<h2 id="current-baseline-and-series-40">Current Baseline and Series 4.0</h2>
 <table>
 <thead>
 <tr>
@@ -556,7 +577,7 @@
 </tr>
 </tbody>
 </table>
-<p>The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.0c leads raw error; v4.0r has the highest straight recall. Those differences justify a physical comparison rather than declaring a winner from one column.</p>
+<p>The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.0c leads raw error; v4.0r has the highest straight recall. Physical testing then contradicted the simple offline order: the PC/PCF models echoed prior predictions, while image-only v4.0f remained viable.</p>
 <h2 id="field-status">Field Status</h2>
 <table>
 <thead>
@@ -583,8 +604,20 @@
 <td>Tested; much worse than v3.2b</td>
 </tr>
 <tr>
-<td>v4.0p/r/f/g/a/c</td>
-<td>Not yet field-tested</td>
+<td>v4.0f</td>
+<td>Viable and complementary with v3.4; each passed two cases the other failed</td>
+</tr>
+<tr>
+<td>v4.0g</td>
+<td>Tested; worse than v4.0f</td>
+</tr>
+<tr>
+<td>v4.0p/r/a/c</td>
+<td>Tested; rejected for repeated prior steering predictions</td>
+</tr>
+<tr>
+<td>v4.1p/r/f/g/a/c</td>
+<td>Offline-evaluated; live integration and field testing pending</td>
 </tr>
 </tbody>
 </table>
@@ -626,7 +659,7 @@
 <thead>
 <tr>
 <th>Claim area</th>
-<th>Strongest artifact</th>
+<th>Strongest evidence</th>
 <th>Remaining gap</th>
 </tr>
 </thead>
@@ -648,8 +681,8 @@
 </tr>
 <tr>
 <td>Series 4</td>
-<td>Training runs, artifacts, evaluator, runtime smoke tests</td>
-<td>Physical field comparison</td>
+<td>Training runs, models, evaluator, runtime smoke tests</td>
+<td>v4.1 integration and physical field comparison</td>
 </tr>
 <tr>
 <td>LiDAR AEB</td>

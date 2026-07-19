@@ -11,9 +11,9 @@ the Raspberry Pi 5 turns its fresh predictions into safety-checked physical comm
 ## Jetson Orin Nano: AI Brain
 
 Jetson Orin Nano receives the newest camera frame and requested model version over the private
-Ethernet link at `10.42.0.2:8770`. It runs the current Series 3/4 model on the GPU and returns
-steering, unused model throttle, temperatures, inference timing, and nine hybrid-bucket
-probabilities. Current v3.4 and Series 4 autonomous steering require a fresh result from this
+Ethernet link at `10.42.0.2:8770`. It runs the selected steering model on the GPU and returns
+steering, a protocol throttle value, temperatures, inference timing, and nine hybrid-bucket
+probabilities when the selected model provides them. Current autonomous steering requires a fresh result from this
 path. The Jetson Orin Nano does not command GPIO directly.
 
 ## Raspberry Pi 5: Hardware and Safety Controller

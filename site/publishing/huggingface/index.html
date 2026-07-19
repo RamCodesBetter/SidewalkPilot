@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -336,17 +336,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="hugging-face-models-datasets">Hugging Face - Models &amp; Datasets</h1>
+                <h1 id="hugging-face-models-and-datasets">Hugging Face: Models and Datasets</h1>
 <p>This is the <strong>single page</strong> for every SidewalkPilot model and dataset. Full descriptions
-(model cards, dataset cards, checkpoints, ONNX exports, images/labels) live on Hugging Face -
+(model cards, dataset cards, models, ONNX exports, images, and labels) live on Hugging Face;
 they are <strong>not</strong> duplicated in these docs.</p>
 <p>Profile: <a href="https://huggingface.co/ram-shreyas-naik-sabavat">https://huggingface.co/ram-shreyas-naik-sabavat</a></p>
 <h2 id="models">Models</h2>
-<p>Every published version is its own HF repo (<code>SidewalkPilot-v{version}</code>) with one model artifact, a card, and an artifact manifest. Series 4 artifacts remain local until physical review determines which versions deserve public model repositories.</p>
+<p>Every published version is its own Hugging Face repository (<code>SidewalkPilot-v{version}</code>) with one model file, a card, and a file manifest. Model-card source copies remain untracked locally; the live Hugging Face repositories are the source of truth.</p>
 <p><strong>Series 1</strong> — <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.0">v1.0</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.0b">v1.0b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.1">v1.1</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.1b">v1.1b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.2">v1.2</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.2b">v1.2b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.3">v1.3</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.3b">v1.3b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.4">v1.4</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.4b">v1.4b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.5">v1.5</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.5b">v1.5b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.6">v1.6</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.6b">v1.6b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.7">v1.7</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.7b">v1.7b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.8">v1.8</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.8b">v1.8b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.9">v1.9</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v1.9b">v1.9b</a></p>
 <p><strong>Series 2</strong> — <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.0">v2.0</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.0b">v2.0b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.1">v2.1</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.1b">v2.1b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.2">v2.2</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.2b">v2.2b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.3">v2.3</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.3b">v2.3b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.4">v2.4</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v2.4b">v2.4b</a></p>
 <p><strong>Series 3</strong> — <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.0">v3.0</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.0b">v3.0b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.1">v3.1</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.1b">v3.1b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.2">v3.2</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.2b">v3.2b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.3">v3.3</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.3b">v3.3b</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.4">v3.4</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v3.4b">v3.4b</a></p>
-<p><strong>Series 4</strong> — all six local artifacts are trained, exported to ONNX, included in the common evaluator, and supported by the Jetson Orin Nano runtime: <code>4.0p/4.0r</code> (PC), <code>4.0f/4.0g</code> (CF), and <code>4.0a/4.0c</code> (PCF). They are not yet field-tested or published as model repositories.</p>
+<p><strong>Series 4.0</strong> — <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0p">v4.0p</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0r">v4.0r</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0f">v4.0f</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0g">v4.0g</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0a">v4.0a</a> · <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0c">v4.0c</a></p>
+<p>The Series 4.0 cards include their supervised field results: <code>4.0f</code> was viable, while the history-input checkpoints were rejected for steering echo. The six Series 4.1 models remain local pending runtime integration and field testing.</p>
 <h2 id="datasets">Datasets</h2>
 <table>
 <thead>

@@ -4,7 +4,7 @@ This page documents the steering-servo constants in `code/controller/current/rc_
 
 `config.py` is also the central source for subsystem flags, GPIO assignments, LiDAR thresholds, dashboard transport, controller indices, model defaults, and CSV settings. Values below describe the checked-in branch; environment variables and local tuning files can override selected settings.
 
-## How it works
+## How It Works
 
 The servo is driven through the Adafruit `ServoKit` on the PCA9685. `config.py` sets the electrical envelope and the center trim, and `hardware.py`'s `PCA9685SteeringServo` applies them.
 
@@ -16,16 +16,16 @@ The servo is driven through the Adafruit `ServoKit` on the PCA9685. `config.py` 
 | `STEERING_SERVO_ACTUATION_RANGE_DEG` | `180` | Full logical/servo travel; center is `90` |
 | `STEERING_SERVO_REFERENCE_LEFT_LIMIT_DEG` | `48.812` | Reference full-left angle before center trim |
 | `STEERING_SERVO_REFERENCE_RIGHT_LIMIT_DEG` | `131.188` | Reference full-right angle before center trim |
-| `STEERING_SERVO_CENTER_OFFSET` | `0.133333...` | Checked-in +12-degree center trim; environment or saved tuning can override it |
+| `STEERING_SERVO_CENTER_OFFSET` | `0.188888...` | Checked-in +17-degree center trim; environment or saved tuning can override it |
 | `STEERING_SERVO_CENTER_PRELOAD` | `0.0` | Near-center preload is disabled |
 | `STEERING_SERVO_CENTER_PRELOAD_WINDOW` | `0.0` | Near-center preload window is disabled |
 | `STEERING_CENTER_SNAP_DEG` | `0.5` | Logical commands less than 0.5 degrees from center snap to `90` |
 
-The trim math lives in `apply_steering_center_trim_degrees()`. It clamps logical input to `0..180`, maps the two halves into the characterized `48.812..131.188` reference range, adds `center_offset * 90`, and clamps the physical result to `0..180`. The generic preload code remains available, but its value and window are both zero. With the checked-in +12-degree trim, logical center `90` writes physical angle `102`; the two logical endpoints write approximately `60.812` and `143.188`. The model and CSV labels remain in logical `0..180` units.
+The trim math lives in `apply_steering_center_trim_degrees()`. It clamps logical input to `0..180`, maps the two halves into the characterized `48.812..131.188` reference range, adds `center_offset * 90`, and clamps the physical result to `0..180`. The generic preload code remains available, but its value and window are both zero. With the checked-in +17-degree trim, logical center `90` writes physical angle `107`; the two logical endpoints write approximately `65.812` and `148.188`. The model and CSV labels remain in logical `0..180` units.
 
-## Why this choice
+## Why This Choice
 
-The project has observed direction-dependent steering return and left/right asymmetry. Isolating the reference range and center trim lets those mappings be tuned without changing the model or its labels. `RC_CAR_STEERING_SERVO_CENTER_OFFSET` and an optional `steering_tune.json` entry named `trim_delta_deg` can override the checked-in trim; no saved tuning file is checked into this branch.
+The project has observed direction-dependent steering return and left-right asymmetry. Isolating the reference range and center trim lets those mappings be tuned without changing the model or its labels. `RC_CAR_STEERING_SERVO_CENTER_OFFSET` and an optional `steering_tune.json` entry named `trim_delta_deg` can override the checked-in trim; no saved tuning file is checked into this branch.
 
 Two motor-scale constants sit next to the servo block for a related reason:
 
@@ -33,7 +33,7 @@ Two motor-scale constants sit next to the servo block for a related reason:
 
 Steering-trim constants and yaw-controller gains are hardware calibration values. Record the test condition and resulting number before changing them.
 
-## Failure symptom
+## Failure Symptom
 
 If the PCA9685 or its I2C/servo dependencies are missing, `PCA9685SteeringServo.__init__` raises `PCA9685 servo dependencies are unavailable` (or an I2C error). `hardware.py` retries up to four times, then falls back to a `DummyServo` and prints `Error initializing GPIO: ... Running in simulation mode.` — the wheels then never move even though steering values still update on the dashboard. On a clean boot the expected line is `Using PCA9685 steering servo at 0x40, channel 0.`
 
@@ -60,7 +60,7 @@ Dashboard telemetry uses UDP over USB Ethernet to `192.168.10.2:8765` at a nomin
 
 Runtime CSV files are timestamped per process and written at a nominal `0.1 s` interval. Rows are flushed immediately. Steering labels/logs remain logical degrees, while throttle labels use absolute physical PWM. The exact header in `config.py` is authoritative because columns evolve with the runtime.
 
-## Related pages
+## Related Pages
 
 - [Runtime Loop](../runtime-loop.md)
 - [Wiring and Pin Map](../../hardware/wiring/pin-map.md)

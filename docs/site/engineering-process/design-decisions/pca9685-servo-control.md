@@ -24,24 +24,24 @@ applied inside that layer by `apply_steering_center_trim_degrees(...)`, so the
 rest of the runtime and the training labels only ever deal with clean logical
 degrees.
 
-## Alternatives considered
+## Alternatives Considered
 
 | Option | Pros | Cons |
 |---|---|---|
-| Direct Raspberry Pi 5 GPIO PWM (software or hardware PWM pin) | one fewer board; no I2C dependency | the Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch; competes with the many other GPIO/PWM users already on the Raspberry Pi 5 (four motor pins, hall sensor) |
+| Direct Raspberry Pi 5 GPIO PWM (software or hardware PWM pin) | One fewer board; no I2C dependency | The Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch, and competes with the other GPIO/PWM users on the Raspberry Pi 5 (four motor pins and the Hall-effect wheel-speed sensor) |
 | **PCA9685 Servo Controller over I2C (chosen)** | dedicated 50 Hz pulse generation reduces dependence on Raspberry Pi 5 loop timing; frees Raspberry Pi 5 GPIO; reuses the Adafruit `ServoKit` library | one extra board + I2C, power, calibration, and servo dependencies |
 
 ## Reason
 
-The Raspberry Pi 5 is already running a real-time control loop that also reads LiDAR, GPS,
-the camera, and the hall sensor while pushing motor PWM. A software-timed servo
+The Raspberry Pi 5 is already running a 60 Hz software control loop that consumes the
+latest LiDAR, GPS, camera, and hall-sensor state while updating motor PWM. A software-timed servo
 pulse on that same CPU jitters whenever the loop is busy, and steering jitter is
 directly visible and bad for both driving and clean training data. Offloading
 the pulse to the PCA9685's own timer removes that class of problem entirely, and
 it follows the project rule to lean on existing, proven libraries rather than
 reinvent servo timing.
 
-## How to know it worked (test gate)
+## How to Know It Worked (Test Gate)
 
 - `code/test_files/steering/pca9685_servo_test.py` and `code/test_files/steering/calibrate_servo.py`
   drive the servo through its range on the bench with no runtime attached.
@@ -51,7 +51,7 @@ reinvent servo timing.
   and falls back to a `DummyServo` so the controller still boots (simulation
   mode) instead of crashing.
 
-## Related pages
+## Related Pages
 
 - [Steering Servo](../../hardware/steering-servo.md)
 - [Failures and Lessons](../../testing/failures/overview.md)

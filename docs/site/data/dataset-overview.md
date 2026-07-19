@@ -1,6 +1,6 @@
 # Dataset Overview
 
-SidewalkPilot learns from camera frames paired with the physical command that should accompany each frame. Dataset organization changed as the model architecture changed, so the project keeps the early Series 1/2 dataset separate from the larger Series 3/4 dataset.
+SidewalkPilot learns from camera frames paired with recorded steering and throttle targets. Dataset organization changed as the model architecture changed, so the project keeps the early Series 1/2 dataset separate from the larger Series 3/4 dataset.
 
 ## Published Datasets
 
@@ -14,7 +14,7 @@ The trainers consume files already on disk. They do not connect to a running CAR
 
 ## Label Meaning
 
-Steering uses the absolute logical servo convention:
+Steering uses a logical servo convention:
 
 | Value | Meaning |
 |---:|---|
@@ -28,13 +28,13 @@ Throttle is stored as an absolute physical PWM fraction from `0.0` to `1.0`; `0.
 
 ## Series 1 and 2 Dataset
 
-The early dataset contains 2,224 JPG images and 2,224 label records across 13 field sources. The trainer resizes mixed capture resolutions to a 200x66 model input and learns direct steering regression. Corrections can override an original label without replacing the image.
+The published early field dataset contains 2,224 JPG images and 2,224 label records across 13 sources. Series 1/2 training also used a separate set of 50,000 pre-generated CARLA frames. The trainer resizes mixed capture resolutions to a 200x66 model input and learns direct steering regression. Corrections can override an original label without replacing the image.
 
 This dataset is historically important because it established the complete collection, training, deployment, and field-test loop. It is not representative of the later 81,237-image lighting and shadow distribution.
 
 ## Series 3 and 4 Dataset
 
-Series 3 and Series 4 use the same 81,237 real-world images. The three Series 4 experiments use the same dataset and split construction, making PC, CF, and PCF architecture comparisons instead of data comparisons.
+Series 3 and Series 4 use the same 81,237 real-world images. The three v4.0 and three v4.1 experiments use the same dataset and split construction, making PC, CF, and PCF architecture comparisons instead of data comparisons.
 
 The dataset includes shadow and turn cases collected after earlier field failures. Adjacent frames are highly correlated, so the Series 3/4 trainer sorts by path and assigns contiguous 100-sample windows to one side of the split. This reduces adjacent-frame leakage, but it is not a capture-run-group split and does not prove complete independence between train and validation.
 
@@ -50,7 +50,7 @@ Future targets are training labels only. They are never supplied to the deployed
 
 The Series 3 trainer can merge base `labels.json` data with optional reviewed correction records. When a correction identifies the same image as a base label, the correction wins. The current Series 4 temporal engine uses the base labels directly and has no correction-file argument. Ordered, run-prefixed filenames support temporal construction and help audit capture batches; release metadata should preserve any additional provenance.
 
-Large image folders, dataset cards, and generated archives are intentionally not tracked in GitHub. GitHub carries source code and documentation; Hugging Face carries the published model/dataset artifacts.
+Large image folders, dataset cards, and generated archives are intentionally not tracked in GitHub. GitHub carries source code and documentation; Hugging Face carries the published models and datasets.
 
 Optional Series 3 correction files can be a list of sample objects, a `samples` object, or
 an image-to-label mapping. A matching correction overrides the base row and can carry a
@@ -63,9 +63,9 @@ Manual capture folders remain source evidence until review and promotion. They c
 
 ## Evaluation Use
 
-Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 46 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.
+Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.
 
-That common challenge set exposes the weakness of early models on later lighting and shadow conditions. It does not erase the original Series 1/2 historical results, which remain results on their earlier dataset.
+That common challenge set measures early models against the later dataset's lighting and shadow distribution. It does not erase the original Series 1/2 historical results, which remain results on their earlier dataset.
 
 ## Related Pages
 

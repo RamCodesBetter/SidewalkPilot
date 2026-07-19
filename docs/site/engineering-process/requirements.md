@@ -15,7 +15,7 @@ manual control, and enough observability to explain every result.
    and let enabled center-corridor LiDAR policy cap or stop forward motion without steering.
 4. **Plan mapped routes.** Use GPS and A* to create sidewalk and manual-crossing segments.
 5. **Make state observable.** Preserve dashboard telemetry, CSV logs, training records,
-   model artifacts, and field evidence.
+   model files and field evidence.
 
 The goal is a repeatable field-to-data-to-model-to-car engineering loop, not one successful
 drive or one low evaluation number.
@@ -36,7 +36,7 @@ or bit-identical training across unrelated GPU/software environments.
 | Steering | Logical labels remain 0-180; PCA9685 mapping and trim remain hardware concerns |
 | LiDAR | FHL-LD19 uses a CP2102 UART-to-USB Adapter at 230400 baud; missing scans are not proof of clearance |
 | GPS/IMU | GPS uses `/dev/ttyAMA0`; experimental yaw feedback uses the XIAO MG24 path |
-| Compute | Jetson Orin Nano is the AI Model Manager for asynchronous Series 3/4 ONNX inference; Raspberry Pi 5 applies hardware and safety control |
+| Compute | Jetson Orin Nano is the AI Model Manager for every live-selectable family: Series 1/2 use PyTorch CUDA and Series 3/4 use ONNX Runtime CUDA; Raspberry Pi 5 applies hardware and safety control |
 | Dashboard | Zero 2 W telemetry uses the dedicated USB network with no current Wi-Fi fallback |
 | Data | Series 3/4 use the published 81,237-image real dataset; historical source-mix claims require run evidence |
 | Promotion | Offline metrics select candidates; only physical testing changes the field baseline |
@@ -47,8 +47,8 @@ or bit-identical training across unrelated GPU/software environments.
 |---|---|---|
 | Manual responsiveness | Direct controller test plus running-car test without periodic pauses | Observed after blocking work left the control path; long-duration latency trace remains open |
 | Camera and inference | Captured frames, matching preprocessing, fresh result, correct model/version | Implemented; v3.4 is the field-selected baseline |
-| Shared evaluation | Frozen subset, evaluator revision, JSON, and PDF | Complete for 46 checkpoints on 6,952 frames |
-| Model promotion | Balanced metrics plus repeatable testing of ordinary turns and target failure cases | v3.4 selected; Series 4 pending |
+| Shared evaluation | Frozen subset, evaluator revision, JSON, and PDF | Complete for 52 checkpoints on 6,952 frames |
+| Model promotion | Balanced metrics plus repeatable testing of ordinary turns and target failure cases | v3.4 selected; v4.0 field-tested; v4.1 pending |
 | LiDAR policy | Deterministic 1.65/1.25/1.05 m tests and confirmation that steering remains untouched | Implemented in software |
 | Physical braking | Repeated tests under recorded payload, surface, battery, and speed | Preserved result pending |
 | Navigation | Followable A* route with correct automatic/manual segment boundaries | Implemented in code; end-to-end GPS field record pending |
@@ -72,7 +72,7 @@ restarted and imported it.
 |---|---|
 | Controller mapping | Confirm printed mapping and physical button/stick behavior |
 | Steering | Restrained 0/90/180 direction check; compensation remains in hardware mapping |
-| Model runtime | Verify artifact, ONNX signature, preprocessing, decoder, freshness, and provider |
+| Model runtime | Verify the model file, input/output contract, preprocessing, decoder, freshness, and GPU provider |
 | LiDAR/AEB | Verify center-corridor thresholds, no steering output, stale behavior, and reconnect |
 | Navigation | Verify route, edge types, automatic/manual segments, handoff, and resume |
 | Dashboard | Trace changed telemetry from calculation through serialization, transport, receipt, and rendering |
@@ -92,8 +92,8 @@ lighting/blur/obstruction and steering coverage, preserve provenance, and docume
 exclusions. Do not delete data without review.
 
 Before promoting a model, run the common evaluator, inspect class balance and confusion,
-export and load the exact ONNX artifact, restart affected services, then drive the same
-ordinary-turn and motivating-failure cases. Final and best-validation checkpoints are
+export and load the exact deployable model, restart affected services, then drive the same
+ordinary-turn and motivating-failure cases. Final-epoch and validation-selected checkpoints are
 separate candidates; neither role wins automatically.
 
 ## Claim Rule

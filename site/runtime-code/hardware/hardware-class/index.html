@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -135,17 +135,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Hardware Integration</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#constants-and-interface">Constants and interface</a>
+    <li class="toctree-l2"><a class="reference internal" href="#constants-and-interface">Constants and Interface</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-symptom">Failure symptom</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-symptom">Failure Symptom</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#motor-and-cleanup-rules">Motor and Cleanup Rules</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -345,23 +345,23 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="hardware-integration">Hardware Integration</h1>
-<p>The <code>Hardware</code> class in <code>code/controller/current/rc_car_app/hardware.py</code> is the single hardware abstraction layer for the Raspberry Pi 5 controller. It owns every physical actuator and sensor the runtime touches directly on the Raspberry Pi 5: the steering servo through the PCA9685 Servo Controller, the four PWM control channels for the JGB37-520 DC motors (12 V, 550 RPM) through the Yahboom AT8236 Motor Controller, and the wheel hall sensor. The main loop in <code>runtime.py</code> never talks to GPIO or I2C directly — it reads and writes attributes on a single <code>Hardware</code> instance, which keeps model changes, safety logic, and dashboard code from silently changing pin behavior.</p>
-<h2 id="how-it-works">How it works</h2>
+<p>The <code>Hardware</code> class in <code>code/controller/current/rc_car_app/hardware.py</code> is the single hardware interface for the Raspberry Pi 5 controller. It owns the steering servo through the PCA9685 Servo Controller, the four PWM control channels for the JGB37-520 DC motors (12 V, 550 RPM) through the Yahboom AT8236 Motor Controller, and the Hall-effect wheel-speed sensor. The main loop in <code>runtime.py</code> never talks to GPIO or I2C directly; it reads and writes attributes on one <code>Hardware</code> instance, which keeps model changes, safety logic, and dashboard code from silently changing pin behavior.</p>
+<h2 id="how-it-works">How It Works</h2>
 <p><code>Hardware.__init__(pulse_callback)</code> builds every device once at startup. It first assigns dummy stand-ins (<code>DummyServo</code>, <code>DummyPWM</code>, <code>DummyDigitalInput</code>) to every attribute, then attempts to bring up the real devices in order:</p>
 <ul>
 <li>Steering servo: if <code>USE_PCA9685_SERVO</code> is true, a <code>PCA9685SteeringServo</code> wrapper is created for the PCA9685 Servo Controller at I2C address <code>0x40</code>, channel 0.</li>
 <li>JGB37-520 drive motors: four <code>PWMOutputDevice</code> control channels are opened at 1000 Hz on the AT8236 Motor Controller pins: right forward/backward on GPIO 19/20 and left forward/backward on GPIO 25/13.</li>
-<li>Hall sensor: if enabled, a pull-up <code>DigitalInputDevice</code> on GPIO 24 sends both signal edges to the runtime pulse callback.</li>
+<li>Hall-effect wheel-speed sensor: if enabled, a pull-up <code>DigitalInputDevice</code> on GPIO 24 sends both signal edges to the runtime pulse callback.</li>
 </ul>
 <p>The exposed interface is deliberately attribute-based. The runtime writes <code>hardware.steering_servo.value</code>, <code>hardware.motor_left_fwd.value</code>, and so on, and reads hall pulses through the callback. It also exposes <code>hardware.gpio_initialized</code> (set true only after every device came up) and <code>hardware.cleanup()</code>.</p>
 <p>Device creation is retry-guarded. <code>_init_device(label, pin, factory)</code> calls the factory up to four times, sleeping 0.25 s between attempts, but only retries on transient <code>errno.EAGAIN</code> / "Resource temporarily unavailable" errors — a real wiring/config fault fails fast with a labeled <code>RuntimeError</code> naming the device and pin.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>One abstraction means the whole hardware surface can be swapped for dummies. If any device fails to initialize, the <code>except</code> block in <code>__init__</code> prints <code>Error initializing GPIO: ...; Running in simulation mode.</code>, runs <code>cleanup()</code>, and re-assigns all-dummy devices. The rest of the runtime keeps running (useful for bench work off the car, and so a single bad sensor does not crash the whole controller).</li>
 <li>The dummy classes share the same <code>.value</code> / <code>.close()</code> shape as the real devices, so runtime code never needs to branch on whether hardware is present.</li>
 <li>Keeping every write behind this class enforces the project rule that hardware compensation (steering center trim, per-side motor PWM scaling) lives in the mapping/hardware layer, not in model labels or the control loop.</li>
 </ul>
-<h2 id="constants-and-interface">Constants and interface</h2>
+<h2 id="constants-and-interface">Constants and Interface</h2>
 <table>
 <thead>
 <tr>
@@ -396,12 +396,12 @@
 </tr>
 </tbody>
 </table>
-<h2 id="failure-symptom">Failure symptom</h2>
-<p>If wiring or I2C is bad at boot, the console prints <code>Error initializing GPIO: &lt;reason&gt;. Running in simulation mode.</code> The car then reads/writes dummy devices: steering will not move, motors stay at 0, and the hall sensor never fires, so the dashboard shows 0 speed even while the throttle is applied. The reason string names which device and pin failed.</p>
+<h2 id="failure-symptom">Failure Symptom</h2>
+<p>If wiring or I2C is unavailable at boot, the console prints <code>Error initializing GPIO: &lt;reason&gt;. Running in simulation mode.</code> The car then reads and writes dummy devices: steering does not move, motors stay at 0, and the Hall-effect wheel-speed sensor produces no pulses, so the dashboard shows 0 speed even while throttle is applied. The reason string identifies the device or pin that failed.</p>
 <h2 id="motor-and-cleanup-rules">Motor and Cleanup Rules</h2>
-<p>Positive normalized PWM drives the forward pin pair; negative PWM selects reverse. Braking and gear logic are resolved before these writes. Left/right scale factors belong here rather than in model labels, and both are neutral unless a controlled balance test supports a change.</p>
+<p>Positive normalized PWM drives the forward pin pair; negative PWM selects reverse. Braking and gear logic are resolved before these writes. Left and right scale factors belong here rather than in model labels, and both are neutral unless a controlled balance test supports a change.</p>
 <p><code>cleanup()</code> sets owned outputs to zero and closes GPIO/PCA9685 devices. Initialization failure also invokes cleanup before installing dummy devices. Dummy mode is useful for software work, but it must be treated as "no physical control," not a healthy-car state.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../runtime-loop/">Runtime Loop</a></li>
 <li><a href="../../config/servo-settings/">Runtime Configuration</a></li>

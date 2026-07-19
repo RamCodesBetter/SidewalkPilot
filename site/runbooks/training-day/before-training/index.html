@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -268,7 +268,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#stop-condition">Stop condition</a>
+    <li class="toctree-l2"><a class="reference internal" href="#stop-condition">Stop Condition</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#evidence">Evidence</a>
     </li>
@@ -280,7 +280,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#export-and-after-training">Export and After-Training</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -351,7 +351,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="training-day">Training Day</h1>
-<p>Before Training is the gate runbook: the last set of checks that must pass before the trainer is actually launched. It ties together Command Setup and Data Audit into a single go / no-go decision so a run is never started on a broken environment or a bad dataset.</p>
+<p>Before Training is the gate runbook: the last set of checks that must pass before the trainer is launched. It ties together Command Setup and Data Audit into a single go/no-go decision so a run is not started with a broken environment or invalid dataset.</p>
 <h2 id="preconditions">Preconditions</h2>
 <ul>
 <li>Command Setup is complete: the exact trainer command is assembled and saved.</li>
@@ -364,18 +364,17 @@
    <code>bash
    cd code/ai_models_datasets/series_3_and_4
    python3 series_3_sidewalkpilot_trainer.py --help</code>
-   For Series 4, use the matching <code>series_4_0pr_</code>, <code>series_4_0fg_</code>, or
-   <code>series_4_0ac_sidewalkpilot_trainer.py</code> wrapper.</li>
+   For Series 4, use the matching <code>series_4_0*</code> or <code>series_4_1*</code> PC, CF, or PCF wrapper.</li>
 <li>Confirm the GPU is visible:
    <code>bash
    python3 -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"</code></li>
 <li>Confirm the output versions do not collide with checkpoints you want to keep. Series 3 takes <code>--model-version</code>; each Series 4 wrapper fixes its own final/best pair.</li>
 <li>Confirm the dataset roots are non-empty. If <code>--corrections</code> is supplied, confirm every correction file resolves; corrections are optional.</li>
 <li>Confirm Weights &amp; Biases is ready if the run should be logged (W&amp;B project <code>Sidewalk-Pilot/SidewalkPilot</code>). If you do not want a logged run, note that in the run note.</li>
-<li>Confirm disk space for checkpoints, ONNX export, and W&amp;B artifacts.</li>
+<li>Confirm disk space for checkpoints, ONNX export, and W&amp;B run files.</li>
 <li>Read the assembled command against the intended run: trainer family, output versions, roots, corrections, epochs, split, and augmentation settings. Run <code>--help</code> against the exact checked-out commit instead of relying on copied defaults.</li>
 </ol>
-<h2 id="stop-condition">Stop condition</h2>
+<h2 id="stop-condition">Stop Condition</h2>
 <ul>
 <li>No-go if <code>torch.cuda.is_available()</code> is <code>False</code> and you expected CUDA.</li>
 <li>No-go if the Data Audit count decision was "do not count / known-bad" and this is meant to be a clean-goal run.</li>
@@ -384,7 +383,7 @@
 </ul>
 <h2 id="evidence">Evidence</h2>
 <ul>
-<li>The go / no-go decision with a timestamp.</li>
+<li>The go/no-go decision with a timestamp.</li>
 <li>CUDA-available output and device name.</li>
 <li>Confirmation that the chosen version is unused.</li>
 <li>Link back to the Data Audit result and the Command Setup command.</li>
@@ -392,15 +391,15 @@
 <h2 id="notes">Notes</h2>
 <ul>
 <li>This runbook does not change data or code — it only decides whether to launch. If any check fails, go back to Command Setup or Data Audit; do not "fix it in the trainer command" on the fly.</li>
-<li>Keep logical steering thinking here: labels are servo degrees (0=left, 90=center, 180=right). Do not smuggle physical trim compensation into training labels.</li>
+<li>Keep logical steering thinking here: labels are logical degrees (0=left, 90=center, 180=right). Do not put physical trim compensation into training labels.</li>
 </ul>
 <h2 id="data-audit-and-command-record">Data Audit and Command Record</h2>
 <p>Before launch, record dataset repository/revision, image/label counts, decoder failures, missing paths, duplicate/conflict counts, steering/source distributions, split method, corrections and hashes, trainer commit, seed, epochs, and every non-default flag. Use a dry-run or dataset scan before consuming GPU time.</p>
 <h2 id="during-training">During Training</h2>
 <p>Monitor train/validation loss, Bal9/class or bucket behavior, steering MAE, gradient norm, learning rate, GPU use, epoch time, and W&amp;B state. Stop for nonfinite loss, broken logging, wrong data counts, an obvious output-version collision, or a CPU run when CUDA was required. Do not choose a model from one favorable graph while the run is incomplete.</p>
 <h2 id="export-and-after-training">Export and After-Training</h2>
-<p>Preserve final and best-validation artifacts separately. Validate the ONNX input names, shapes, output shape, finite inference, and matching decoder. Series 4 PC/PCF require history input; CF does not. Run the common evaluator, review confusion/turn metrics, and deploy only selected candidates. Record hashes and leave field status as untested until the car is driven.</p>
-<h2 id="related-pages">Related pages</h2>
+<p>Preserve final and validation-selected models separately. Validate the ONNX input names, shapes, output shape, finite inference, and matching decoder. Series 4 PC/PCF require history input; CF does not. Run the common evaluator, review confusion/turn metrics, and deploy only selected candidates. Record hashes and leave field status as untested until the car is driven.</p>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../ai-and-models/training-pipeline/overview/">Training Pipeline</a></li>
 <li><a href="../../../data-governance/data-quality/image-quality-checks/">Data Quality</a></li>

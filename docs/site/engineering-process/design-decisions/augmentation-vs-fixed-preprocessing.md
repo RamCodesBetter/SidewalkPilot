@@ -1,4 +1,4 @@
-# Augmentation vs. Fixed Preprocessing
+# Augmentation Versus Fixed Preprocessing
 
 This page records the decision to make the Series 3 model robust to lighting and
 viewpoint through **randomized training-time augmentation**, rather than a fixed
@@ -28,7 +28,7 @@ The horizontal flip is a *label-aware* mirror — it flips the image and sets
 `steer = 180.0 - steer` — which cheaply balances left vs right turns. HSV and
 CLAHE are wired in as optional augmentations but default to probability `0.0`.
 
-## Why augmentation, not a fixed transform
+## Why Augmentation, Not a Fixed Transform
 
 A fixed inference transform (e.g. "always CLAHE on the car") only reshapes the
 input one way and must match training exactly. It doesn't teach the model to
@@ -56,7 +56,7 @@ CLAHE. This version-specific exception preserves train/runtime parity. Applying 
 checkpoint that was trained on raw BGR would silently change its input distribution, while
 applying it universally could amplify hard shadow boundaries and add per-frame CPU work.
 
-## Alternatives considered
+## Alternatives Considered
 
 | Option | Pros | Cons |
 |---|---|---|
@@ -64,15 +64,15 @@ applying it universally could amplify hard shadow boundaries and add per-frame C
 | No augmentation, just collect more raw data | cleanest labels | needs enormous, perfectly-balanced capture to cover all lighting |
 | **Randomized training-time augmentation + minimal inference preprocessing (chosen)** | one model handles many conditions; cheap to expand; inference stays simple | too-strong aug can wash out signal; synthetic shadows ≠ real shadows (still need real data) |
 
-## How to know it worked (test gate)
+## How to Know It Worked (Test Gate)
 
 - Preview augmentation variants before a run with
   `code/test_files/camera/preview_series3_augmentations.py`.
 - Compare hard-shadow field clips across versions (the v3.1b → v3.2b shadow study
   is the template); success = fewer shadow-driven edge drifts, not a lower MAE.
-- Re-test the exact shadow cases for every promoted model; Series 4 has not yet passed that gate.
+- Re-test the exact shadow cases for every promoted model. Series 4.0 completed a supervised comparison but produced no promotion; Series 4.1 has not reached that gate.
 
-## Related pages
+## Related Pages
 
 - [Model Inference](../../autonomy-stack/camera-steering/model-inference.md)
 - [Failures and Lessons](../../testing/failures/overview.md)

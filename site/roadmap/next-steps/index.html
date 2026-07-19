@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -348,9 +348,9 @@
 <tbody>
 <tr>
 <td style="text-align: right;">1</td>
-<td>Compare all six Series 4 models with v3.4</td>
-<td>Jetson Orin Nano deployment and fixed supervised route</td>
-<td>Logged shadow/turn runs with hashes, clips, takeovers, and a clear verdict</td>
+<td>Integrate v4.1 and replay the v4.0 steering-echo cases</td>
+<td>Live contract support and preserved failure clips</td>
+<td>Every candidate uses the correct inputs and does not blindly repeat prior predictions</td>
 </tr>
 <tr>
 <td style="text-align: right;">2</td>
@@ -360,24 +360,30 @@
 </tr>
 <tr>
 <td style="text-align: right;">3</td>
-<td>Publish only the Series 4 artifacts that pass review</td>
-<td>Prior field verdict</td>
-<td>Clean Hugging Face repos/cards with exact contracts and evidence limits</td>
+<td>Field-test the v4.1 models that pass replay</td>
+<td>Fixed supervised route, v3.4/v4.0f controls</td>
+<td>Logged shadow/turn runs with hashes, clips, takeovers, and a clear verdict</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
+<td>Publish reviewed v4.1 models only after their status is clear</td>
+<td>Integration and field verdict</td>
+<td>Clean Hugging Face repositories/cards with exact contracts and evidence limits</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
 <td>Collect the next targeted field dataset</td>
 <td>A repeatable failure from the model comparison</td>
 <td>New batch closes the named gap without changing unrelated data</td>
 </tr>
 <tr>
-<td style="text-align: right;">5</td>
+<td style="text-align: right;">6</td>
 <td>Strengthen external technical collaboration</td>
 <td>Reproducible logs and privacy review</td>
 <td>A collaborator can inspect useful records without relying on autonomy claims</td>
 </tr>
 <tr>
-<td style="text-align: right;">6</td>
+<td style="text-align: right;">7</td>
 <td>Evaluate larger-scale hardware integration</td>
 <td>Stable current system and documented requirements</td>
 <td>A reviewed design improves reliability without weakening serviceability or safety</td>
@@ -392,7 +398,7 @@
 <li><strong>Turn-in-shadow collection:</strong> collect both directions, ordinary-turn controls, multiple shadow geometries, and route/run metadata rather than only filling steering buckets.</li>
 <li><strong>Jetson Orin Nano optimization:</strong> measure latency, power, and memory before considering FP16, INT8, QAT, TensorRT, or a new deployment stack.</li>
 <li><strong>PCB:</strong> redraw Rev B against the frozen runtime pinout, review power/connectors, then fabricate and bench-test before field installation.</li>
-<li><strong>Documentation media:</strong> add editable draw.io sources and high-resolution exports for system, runtime/safety, training/evaluation, and wiring diagrams.</li>
+<li><strong>Documentation media:</strong> keep the checked-in draw.io sources and SVG exports synchronized with the code, and add a wiring/power diagram after the physical layout is finalized.</li>
 </ul>
 <p>No item on this page should be described elsewhere as complete until its success gate is met.</p>
               

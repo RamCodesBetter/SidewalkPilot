@@ -62,19 +62,19 @@
         <mxCell id="gpu" parent="1" vertex="1" value="RTX 6000 Ada GPU Training&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Family-specific preprocessing, loss, and output contract&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="665" y="750" width="470" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="wandb" parent="1" vertex="1" value="Weights &amp;amp; Biases Run&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Training metrics and artifacts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+        <mxCell id="wandb" parent="1" vertex="1" value="Weights &amp; Biases Run&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Training metrics and run files&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="1250" y="760" width="260" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="checkpoints" parent="1" vertex="1" value="Training Checkpoints&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Final and best-validation artifacts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+        <mxCell id="checkpoints" parent="1" vertex="1" value="Trained Models&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Final and validation-selected models&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="530" y="955" width="315" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="onnx" parent="1" vertex="1" value="ONNX Export&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Deployment artifact&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+        <mxCell id="onnx" parent="1" vertex="1" value="ONNX Export&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Deployment model&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="955" y="955" width="260" height="100" as="geometry" />
         </mxCell>
         <mxCell id="challenge" parent="1" vertex="1" value="Frozen Challenge Set&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;6,952 Series 3/4 frames&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="55" y="1155" width="300" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="evaluator" parent="1" vertex="1" value="Common Model Evaluator&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Family-specific adapters for all 46 checkpoints&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+        <mxCell id="evaluator" parent="1" vertex="1" value="Common Model Evaluator&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#667085&quot;&gt;Family-specific adapters for all 52 checkpoints&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="420" y="1155" width="300" height="100" as="geometry" />
         </mxCell>
         <mxCell id="report" parent="1" vertex="1" value="Steering Model&lt;br&gt;Report PDF" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#ECFDF3;strokeColor=#16834A;fontColor=#14532D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">

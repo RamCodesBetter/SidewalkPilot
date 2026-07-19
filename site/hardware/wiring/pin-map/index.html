@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -166,17 +166,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Wiring and Pin Map</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#master-pin-port-table">Master pin / port table</a>
+    <li class="toctree-l2"><a class="reference internal" href="#master-pin-and-port-table">Master Pin and Port Table</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why it matters</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why It Matters</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#power-domains">Power Domains</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bus-checks">Bus Checks</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -345,17 +345,17 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="wiring-and-pin-map">Wiring and Pin Map</h1>
-<p>A consolidated reference for power domains, primary sensors, actuators, and inter-computer links.</p>
-<h2 id="how-it-works">How it works</h2>
-<p>The Raspberry Pi 5 is the real-time I/O controller. Every actuator and sensor connects to it through one of four transport types: a raw GPIO line (motors, hall sensor), the I2C bus (PCA9685 Servo Controller), a UART port (GPS, IMU, and the LiDAR when run over GPIO), or USB (LiDAR through its current CP2102 UART-to-USB Adapter, dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
-<h2 id="master-pin-port-table">Master pin / port table</h2>
+<p>A consolidated reference for power domains, primary sensors, steering/motor hardware, and inter-computer links.</p>
+<h2 id="how-it-works">How It Works</h2>
+<p>The Raspberry Pi 5 is the hardware I/O and safety controller. Its sensors, Servo Controller, and Motor Controller connect through one of four transport types: raw GPIO lines (motors and Hall-effect wheel-speed sensor), I2C (PCA9685 Servo Controller), UART (GPS and IMU), or USB (LiDAR through its current CP2102 UART-to-USB Adapter and dashboard USB Ethernet). The exact pin and port assignments live in <code>rc_car_app/config.py</code>, <code>rc_car_app/lidar.py</code>, and <code>rc_car_app/navigation.py</code>, so the table below is copied directly from those source files rather than from memory.</p>
+<h2 id="master-pin-and-port-table">Master Pin and Port Table</h2>
 <table>
 <thead>
 <tr>
 <th>Subsystem</th>
 <th>Part</th>
 <th>Connection</th>
-<th>Pin / address / port</th>
+<th>Pin, address, or port</th>
 <th>Source constant</th>
 </tr>
 </thead>
@@ -396,8 +396,8 @@
 <td><code>MOTOR_LEFT_BWD_PIN</code></td>
 </tr>
 <tr>
-<td>Hall / speed sensor</td>
-<td>Wheel hall sensor</td>
+<td>Hall-effect wheel-speed sensor</td>
+<td>Wheel-speed input</td>
 <td>GPIO (BCM), pull-up</td>
 <td><code>GPIO 24</code></td>
 <td><code>HALL_SENSOR_GPIO_PIN</code></td>
@@ -452,7 +452,7 @@
 <li>The IMU reader and yaw controller are implemented. The default <code>straight</code> mode only corrects near center and falls back to open loop if IMU data is unavailable.</li>
 <li>LiDAR now resolves its port automatically at startup, preferring the CP2102 UART-to-USB Adapter's <code>/dev/serial/by-id/*</code> symlink and falling back to <code>/dev/ttyUSB*</code>; the older GPIO-UART <code>/dev/ttyAMA2</code> path is documented for history.</li>
 </ul>
-<h2 id="why-it-matters">Why it matters</h2>
+<h2 id="why-it-matters">Why It Matters</h2>
 <p>A consolidated pin map is a safety and debugging tool. Because motor pins move real wheels, an accidental mix-up between a motor line and a sensor line is not harmless. This table was checked against <code>config.py</code>, <code>lidar.py</code>, and <code>navigation.py</code>, but it is still maintained documentation and must be re-audited when wiring or constants change.</p>
 <h2 id="power-domains">Power Domains</h2>
 <table>
@@ -493,7 +493,7 @@ ip -br addr show usb0
 ss -lunp | grep 8765
 </code></pre>
 <p>Expect the PCA9685 Servo Controller at <code>0x40</code>, the fixed USB-network addresses on the two dashboard computers, and the receiver listening on UDP 8765. UART device permissions and stable <code>/dev/serial/by-id</code> naming should be checked before field use.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../runtime-code/config/servo-settings/">Runtime Configuration</a></li>
 <li><a href="../../power/">Power</a></li>

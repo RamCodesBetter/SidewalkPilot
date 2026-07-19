@@ -10,7 +10,7 @@ PyTorch training checkpoint
   -> decoded steering returned to Raspberry Pi 5
 ```
 
-The Raspberry Pi 5 remains responsible for the camera, steering-servo and motor control, result freshness, manual override, and LiDAR safety. The Jetson Orin Nano runs the steering models and returns their predictions.
+The Raspberry Pi 5 remains responsible for the camera, steering servo and motor control, result freshness, manual override, and LiDAR safety. The Jetson Orin Nano runs the steering models and returns their predictions.
 
 ## Model Contracts
 

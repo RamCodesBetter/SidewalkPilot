@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -68,13 +68,13 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Decision Priority</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#priority-table">Priority table</a>
+    <li class="toctree-l2"><a class="reference internal" href="#priority-table">Priority Table</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -99,7 +99,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -346,7 +346,7 @@ commands on a single control tick. It is the concrete implementation of the
 layered-autonomy idea: when the human, the LiDAR safety layer, the navigation
 manager, and the steering model all want something different, this ordering
 decides who actually moves the servo and motors.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <p>The priority chain is enforced in two functions in
 <code>code/controller/current/rc_car_app/runtime.py</code>: <code>apply_autonomous_controls(...)</code>
 (which decides the autonomous steering/throttle intent) and <code>update_gpio(...)</code>
@@ -361,7 +361,7 @@ decides who actually moves the servo and motors.</p>
    inside <code>LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05 m</code> requests a hard stop before
    model inference is used for motion.</li>
 <li><strong>Model availability gate.</strong> If there is no emergency stop, the camera model
-   gets a vote. Local Raspberry Pi 5 analysis uses a 0.75-second frame-age guard; a Jetson Orin Nano result
+   gets a vote. The Raspberry Pi 5 rejects a camera frame older than 0.75 seconds; a Jetson Orin Nano result
    must be no more than <code>JETSON_RESULT_MAX_AGE_SEC = 0.25 s</code> old and match the selected
    model. Confidence must be ≥ <code>LOW_CAMERA_CONFIDENCE</code> (0.25). If the model is
    unavailable, stale, or below the configured confidence threshold, the runtime requests a hard stop with reason
@@ -372,21 +372,20 @@ decides who actually moves the servo and motors.</p>
 <li><strong>LiDAR throttle cap.</strong> With AEB enabled, center clearance governs the forward
    target: 100% at 1.65 m, linearly down to 60% reference at 1.25 m, held to
    1.05 m. The model's throttle output is not used.</li>
-<li><strong>AEB re-check + hardware write.</strong> Back in <code>update_gpio</code>, if AEB is armed and
+<li><strong>AEB re-check and steering/motor command.</strong> Back in <code>update_gpio</code>, the runtime checks the already-computed AEB state immediately before the hardware write; it does not parse a second scan. If AEB is armed and
    <code>is_stop_brake_condition(...)</code> is true, it forces brake with <code>AEB_BRAKE_RATE</code>
-   and overrides the throttle to zero. Then the rate-limited PWM and servo values
-   are written to hardware — the last, lowest-priority step.</li>
+   and overrides the throttle to zero. The steering target is clamped and mapped to the calibrated servo range. Motor PWM either moves at the selected ramp rate or snaps to zero for the hard-brake branch before the final hardware write.</li>
 </ol>
 <p>The important asymmetry is now between axes: the model owns lateral control and
 LiDAR owns only its configured longitudinal cap/stop. The same LiDAR policy object
 is reused through the control tick.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <p>The human can cancel autonomy, a stale model cannot continue driving, and the
 center-corridor policy can cap or stop forward motion without creating a second
 steering controller. Telemetry exposes model state, clearance, AEB state, and the
 chosen LiDAR action. This ordering is inspectable, but quantitative stopping and
 detection coverage still require controlled tests.</p>
-<h2 id="priority-table">Priority table</h2>
+<h2 id="priority-table">Priority Table</h2>
 <table>
 <thead>
 <tr>
@@ -429,19 +428,19 @@ detection coverage still require controlled tests.</p>
 </tr>
 <tr>
 <td style="text-align: right;">6</td>
-<td>AEB + hardware</td>
-<td>armed AEB, then final write</td>
+<td>AEB re-check and steering/motor command</td>
+<td>armed AEB, then final command</td>
 <td><code>AEB_BRAKE_RATE</code> 10.0</td>
 </tr>
 </tbody>
 </table>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/architecture/data-flow.md</code></li>
-<li><code>autonomy-stack/lidar-safety/overview.md</code></li>
-<li><code>autonomy-stack/lidar-safety/aeb.md</code></li>
-<li><code>runtime-code/runtime-loop.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../data-flow/">Control Architecture and Runtime Data Flow</a></li>
+<li><a href="../../lidar-safety/overview/">LiDAR Safety Overview</a></li>
+<li><a href="../../lidar-safety/aeb/">Autonomous Emergency Braking</a></li>
+<li><a href="../../../runtime-code/runtime-loop/">Runtime Loop</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

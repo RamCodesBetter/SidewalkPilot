@@ -50,7 +50,7 @@ A collection is ready only when:
 ```text
 Date/time:
 Route/segment:
-Model and artifact hash:
+Model version and file hash:
 Lighting/weather:
 AEB and calibration state:
 Autonomous duration/distance:

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -137,17 +137,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Vision Runtime</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-symptom">Failure symptom</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-symptom">Failure Symptom</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#preprocessing-contracts">Preprocessing Contracts</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#model-selection-and-jetson-orin-nano">Model Selection and Jetson Orin Nano</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -349,7 +349,7 @@
 frames, and hands them to the steering estimator. All of this lives in
 <code>code/controller/current/rc_car_app/vision.py</code>, inside the <code>_PiCameraCapture</code>
 helper and the <code>WebcamVisionProcessor</code> capture thread.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <p>Capture is gated by two flags in <code>config.py</code>: <code>ENABLE_WEBCAM_VISION = True</code> and
 <code>USE_PI_CAMERA = True</code>. When both are set, <code>WebcamVisionProcessor._open_capture()</code>
 builds a <code>_PiCameraCapture(PI_CAMERA_NUM)</code> (camera index <code>0</code>) and calls <code>.open()</code>.</p>
@@ -401,21 +401,21 @@ horizontal + vertical mirror.</p>
 the main control loop. Each iteration calls <code>capture.read()</code>, which returns
 <code>(ok, frame)</code> from <code>Picamera2.capture_array()</code>. On a good read the frame is fed to
 <code>_estimate_path_bias</code>, the resulting analysis is stored under a lock, the latest raw
-frame is cached for preview/photo/dashboard use, and a rolling <code>camera_fps</code> is
+frame is stored as the latest frame for preview, photo, and dashboard use, and a rolling <code>camera_fps</code> is
 computed from the inter-frame delta. A failed read sleeps 50 ms before retrying instead of
 using a tight retry loop.</p>
 <p>The size, format, and transform are explicit camera-configuration inputs. The declared
 <code>CAMERA_FPS</code> value is not currently supplied as a Picamera2 control, so it must not be
 reported as a guaranteed capture rate; the dashboard/CSV measurement is authoritative for
 a particular run.</p>
-<h2 id="why-this-choice">Why this choice</h2>
-<p>The frame is deliberately kept in <strong>BGR888</strong> so the rest of the pipeline (the model
+<h2 id="why-this-choice">Why This Choice</h2>
+<p>The frame is deliberately kept in <strong>BGR888</strong> so the rest of the pipeline (model
 preprocessing, the LAB/edge fallback analysis, the dashboard RGB565 encoder, and
 <code>cv2.imwrite</code> for training photos) uses a defined channel order. The controller loop reads
-cached analysis instead of directly calling <code>capture_array()</code>, reducing coupling to camera
+the latest analysis instead of directly calling <code>capture_array()</code>, reducing coupling to camera
 latency. This is a concurrency design, not a formal guarantee that Python scheduling or a
 process-wide camera fault can never affect loop timing.</p>
-<h2 id="failure-symptom">Failure symptom</h2>
+<h2 id="failure-symptom">Failure Symptom</h2>
 <p>If Picamera2 is unavailable or the camera fails to start, <code>start()</code> prints
 <code>Failed to open Raspberry Pi Camera for vision processing: ...</code> (or <code>Raspberry Pi 5 camera vision
 processor started.</code> on success) and returns <code>False</code>, leaving no active camera processor. If
@@ -426,11 +426,11 @@ at the empty default (<code>heading_bias = 0</code>, <code>confidence = 0</code>
 camera columns read as centered/zero.</p>
 <h2 id="preprocessing-contracts">Preprocessing Contracts</h2>
 <p>Series 1/2 images resize to <code>200x66</code>; Series 3/4 images resize to <code>320x180</code>. Frames remain BGR to match training, convert to <code>float32</code>, normalize to <code>[-1, 1]</code>, transpose HWC to CHW, and add a batch dimension. Only v2.0 and v2.0b opt into the historical CLAHE preprocessing path; every other registered model uses raw BGR preprocessing.</p>
-<p>Series 1 direct-regression output uses approximately <code>90 +/- 86</code> degrees and Series 2 uses <code>90 +/- 85</code>, followed by a <code>0..180</code> clamp. Series 3/4 decoding chooses a steering class and local offset. Physical steering trim is applied later by the hardware mapping and is not baked into model output.</p>
+<p>Series 1 direct-regression output uses approximately <code>90 +/- 86</code> degrees and Series 2 uses <code>90 +/- 85</code>, followed by a <code>0..180</code> clamp. v3.0/v3.0b use the early two-output regression decoder; v3.1 and later Series 3 models and all Series 4 models choose a steering class plus a local offset. Physical steering trim is applied later by the hardware mapping and is not baked into model output.</p>
 <h2 id="model-selection-and-jetson-orin-nano">Model Selection and Jetson Orin Nano</h2>
-<p>The registered list contains Series 1/2 PyTorch checkpoints and Series 3/4 ONNX names. In camera-only mode, the Raspberry Pi 5 records the requested name and sends it with frames; the Jetson Orin Nano must confirm loading and return a fresh matching result. Series 4 PC/PCF history resets on model changes. A dashboard name alone does not prove the artifact loaded successfully.</p>
+<p>The registered list contains Series 1/2 PyTorch models and Series 3/4 ONNX models. During model inference, the Raspberry Pi 5 records the requested version and sends it with frames; the Jetson Orin Nano must confirm loading and return a fresh matching result. Current v4.0 PC/PCF requests also carry the latest three manual or predicted steering targets. A dashboard name alone does not prove that the model loaded successfully.</p>
 <p>Inference uses latest-frame semantics. Old pending frames are replaced, and Raspberry Pi 5 autonomy rejects Jetson Orin Nano results older than the configured freshness limit.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../runtime-loop/">Runtime Loop</a></li>
 <li><a href="../../../autonomy-stack/camera-steering/model-inference/">Model Inference</a></li>

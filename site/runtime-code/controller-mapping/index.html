@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -131,15 +131,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Controller Mapping and Driving Modes</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#controller-map-image">Controller map (image)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#controller-map-image">Controller Map (Image)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#sticks-and-triggers">Sticks and triggers</a>
+    <li class="toctree-l2"><a class="reference internal" href="#sticks-and-triggers">Sticks and Triggers</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#buttons">Buttons</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#d-pad-hat">D-pad (hat)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#d-pad-hat">D-Pad (Hat)</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a>
     </li>
@@ -147,7 +147,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#photo-capture">Photo Capture</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -352,17 +352,17 @@
               
                 <h1 id="controller-mapping-and-driving-modes">Controller Mapping and Driving Modes</h1>
 <p>The car is driven and fully operated from an <strong>Xbox Wireless Controller</strong> over <code>pygame</code>.
-This page is the single source of truth for every button, trigger, stick, and D-pad action.</p>
-<h2 id="how-it-works">How it works</h2>
+This page is the human-readable reference for every button, trigger, stick, and D-pad action. The constants and event handling in <code>config.py</code> and <code>runtime.py</code> remain authoritative.</p>
+<h2 id="how-it-works">How It Works</h2>
 <p><code>runtime.py</code> reads <code>pygame</code> joystick events every loop (<code>pygame.event.get()</code>) and
 dispatches axis, button, and hat (D-pad) events to driving, gearing, autonomy, photo
 capture, navigation, turn signals, and dashboard paging. Every button and axis index is
 a named constant in <code>config.py</code>, so the physical layout and the dispatch code stay in
 sync. The values below are read straight from <code>config.py</code> and the event handler in
 <code>run()</code>.</p>
-<h2 id="controller-map-image">Controller map (image)</h2>
+<h2 id="controller-map-image">Controller Map (Image)</h2>
 <p><img alt="Controller map" src="../../exhibits/media/RC_Car_Controls_xbox.png" /></p>
-<h2 id="sticks-and-triggers">Sticks and triggers</h2>
+<h2 id="sticks-and-triggers">Sticks and Triggers</h2>
 <table>
 <thead>
 <tr>
@@ -389,7 +389,7 @@ sync. The values below are read straight from <code>config.py</code> and the eve
 <td>Right stick X</td>
 <td><code>2</code></td>
 <td><code>DASHBOARD_PAGE_HORIZONTAL_AXIS</code></td>
-<td>Dashboard: move page column left/right (threshold <code>0.65</code>)</td>
+<td>Dashboard: move page column left or right (threshold <code>0.65</code>)</td>
 </tr>
 <tr>
 <td>Right trigger</td>
@@ -446,7 +446,7 @@ observed on this controller.</p>
 <td>Toggle hazard lights</td>
 </tr>
 <tr>
-<td>—</td>
+<td>Y</td>
 <td><code>4</code></td>
 <td><code>CRUISE_TOGGLE_BUTTONS</code></td>
 <td>Cruise-control toggle (only in gear D)</td>
@@ -483,7 +483,7 @@ observed on this controller.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="d-pad-hat">D-pad (hat)</h2>
+<h2 id="d-pad-hat">D-Pad (Hat)</h2>
 <table>
 <thead>
 <tr>
@@ -493,12 +493,12 @@ observed on this controller.</p>
 </thead>
 <tbody>
 <tr>
-<td>D-pad ← / →</td>
-<td>Left / right turn indicator toggle; on the NAVIGATE page (5) it also moves the entry cursor</td>
+<td>D-pad ←/→</td>
+<td>Left and right turn-indicator toggles; on the NAVIGATE page (5), it also moves the entry cursor</td>
 </tr>
 <tr>
-<td>D-pad ↑ / ↓</td>
-<td>Context action: edit the nav entry on page 5, cycle the steering model on page 2, or adjust cruise target speed / dashboard brightness elsewhere. Holding repeats after <code>DPAD_SCROLL_REPEAT_START_SEC</code> (0.6 s) at <code>DPAD_SCROLL_REPEAT_INTERVAL_SEC</code> (0.22 s)</td>
+<td>D-pad ↑/↓</td>
+<td>Context action: edit the navigation entry on page 5, cycle the steering model on page 2, or adjust cruise target speed or dashboard brightness elsewhere. Holding repeats after <code>DPAD_SCROLL_REPEAT_START_SEC</code> (0.6 s) at <code>DPAD_SCROLL_REPEAT_INTERVAL_SEC</code> (0.22 s)</td>
 </tr>
 </tbody>
 </table>
@@ -514,9 +514,9 @@ observed on this controller.</p>
 <h2 id="photo-capture">Photo Capture</h2>
 <p>B queues one image. Menu toggles continuous capture at a configured 10 fps while the car is moving or commanded to move. A dated run directory receives timestamped JPEGs and a labels CSV containing logical steering (<code>0..180</code>) and absolute physical forward PWM (<code>0..1</code>). JPEG encoding and writing run outside the control loop. Finalization converts the CSV to the JSON format accepted by training.</p>
 <p>The label is a software command sampled near the frame request, not measured wheel-angle or motor-torque feedback. Every run must be audited for decodable images, complete labels, and accidental stationary repetition before training.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>runtime-code/runtime-loop.md</code></li>
+<li><a href="../runtime-loop/">Runtime Loop</a></li>
 <li><a href="../config/servo-settings/">Runtime Configuration</a></li>
 <li><a href="../../data/dataset-overview/">Dataset and Labels</a></li>
 </ul>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -347,7 +347,7 @@
                 <h1 id="offline-evaluation-overview">Offline Evaluation Overview</h1>
 <p>Offline evaluation orders the checkpoints eligible for a supervised physical test. It is repeatable and cheaper than a field run, but it does not establish that a checkpoint is safe.</p>
 <h2 id="common-challenge-set">Common Challenge Set</h2>
-<p>The current evaluator runs every model from v1.0 through v4.0c on the same <strong>6,952-frame frozen Series 3/4 temporal validation subset</strong>:</p>
+<p>The current evaluator runs every model from v1.0 through v4.1c on the same <strong>6,952-frame frozen Series 3/4 temporal validation subset</strong>:</p>
 <ul>
 <li>D0702: 4,230 frames;</li>
 <li>D0707: 652 frames;</li>
@@ -358,9 +358,9 @@
 <p><code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> discovers all supported checkpoints and writes:</p>
 <ul>
 <li><code>docs/steering_eval_current_labels.json</code>, containing overall, source, bucket, confusion, and selection metrics;</li>
-<li><code>docs/steering_model_report.pdf</code>, a 22-page report with the class-balanced ranking, all-series MAE bars, per-model sections, and confusion matrices.</li>
+<li><code>docs/steering_model_report.pdf</code>, a 23-page report with the class-balanced ranking, all-series MAE bars, per-model sections, and confusion matrices.</li>
 </ul>
-<p>The JSON retains older Series 1/2 own-dataset scores under <code>historical_evaluation</code>. Historical metrics answer how those models were originally reported. Common metrics answer how all 46 behave on today's challenge set. The two contexts are labeled and never silently substituted.</p>
+<p>The JSON retains older Series 1/2 own-dataset scores under <code>historical_evaluation</code>. Historical metrics answer how those models were originally reported. Common metrics answer how all 52 behave on today's challenge set. The two contexts are labeled and never silently substituted.</p>
 <h2 id="why-one-metric-is-not-enough">Why One Metric Is Not Enough</h2>
 <p>The challenge set has 4,741 ST frames and 2,211 non-ST frames. Overall exact accuracy or MAE is therefore strongly influenced by straight behavior. A useful steering model must preserve rare classes as well as the majority.</p>
 <table>
@@ -414,12 +414,12 @@
 </ul>
 <p>The confusion matrix supplies the evidence behind these summaries. A strong model should not concentrate all predictions in the straight column or systematically shift one direction.</p>
 <h2 id="offline-and-field-evidence">Offline and Field Evidence</h2>
-<p>Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. v3.4 remains the field-selected baseline because it won the recorded field comparison even though newer Series 4 models lead offline.</p>
-<p>The next field test starts with v3.4 as a control and tests <code>4.0p</code>, <code>4.0r</code>, <code>4.0a</code>, <code>4.0c</code>, v3.4b, <code>4.0f</code>, and <code>4.0g</code> in that order.</p>
+<p>Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. That limitation was visible in v4.0: PC and PCF ranked strongly offline but echoed their own earlier steering predictions on the car. v4.0f was viable but mixed against v3.4, so v3.4 remains the default.</p>
+<p>The next model test begins only after v4.1 runtime integration and closed-loop bench replay. It should use v3.4 and v4.0f as controls while testing the six v4.1 correction models under the same route and conditions.</p>
 <h2 id="reproduce">Reproduce</h2>
 <p>On the evaluation workstation with ONNX Runtime GPU installed:</p>
 <pre><code class="language-bash">cd ~/rc_car_code
-/home/rsabavat/.gpu-env/bin/python -u \
+python -u \
   code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 </code></pre>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -154,17 +154,17 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#parts-amazon">Parts (Amazon)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#wiring-and-settings">Wiring and settings</a>
+    <li class="toctree-l2"><a class="reference internal" href="#wiring-and-settings">Wiring and Settings</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#hysteresis-and-pull-diagnosis">Hysteresis and Pull Diagnosis</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify before a run</a>
+    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify Before a Run</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -348,13 +348,13 @@
               
                 <h1 id="steering-servo">Steering Servo</h1>
 <p>Steering is done by a single servo that turns the Ackermann linkage. The Raspberry Pi 5
-does not drive the servo directly; it sends the servo's PWM through a PCA9685 Servo
-Controller over I2C. This is the actuator the steering model ultimately commands.</p>
+does not generate the servo pulse directly; it sends an angle command over I2C to a
+PCA9685 Servo Controller, which generates the PWM signal for the steering servo.</p>
 <h2 id="parts-amazon">Parts (Amazon)</h2>
 <ul>
 <li><a href="https://www.amazon.com/dp/B01D1D0CX2?psc=1&amp;ref=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&amp;ref_=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1&amp;social_share=cm_sw_r_apin_ct_VRQ3EQR6JZNW89DSFF2X_1">HiLetGo PCA9685 Servo Controller</a> — $8.99</li>
 </ul>
-<h2 id="wiring-and-settings">Wiring and settings</h2>
+<h2 id="wiring-and-settings">Wiring and Settings</h2>
 <p>From <code>config.py</code> / <code>hardware.py</code>:</p>
 <table>
 <thead>
@@ -378,31 +378,31 @@ Controller over I2C. This is the actuator the steering model ultimately commands
 </tr>
 <tr>
 <td>Pulse range</td>
-<td><code>1000-2000 us</code></td>
+<td><code>1,000-2,000 microseconds</code></td>
 </tr>
 <tr>
-<td>Actuation range</td>
-<td><code>180 deg</code></td>
+<td>Steering-command range</td>
+<td><code>180 degrees</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li>Logical steering is <code>0</code> = left, <code>90</code> = center, <code>180</code> = right. The runtime thinks and logs
-  in these logical/reference degrees; the model and training labels never see raw servo
-  values.</li>
+  in these logical/reference degrees; the model and training labels never use the trimmed
+  physical servo command.</li>
 <li><code>hardware.py</code> first maps the logical <code>0..180</code> range onto the current reference endpoints
-  (<code>48.812..131.188</code>), then applies the current <code>+12</code> degree center trim before writing the
+  (<code>48.812..131.188</code>), then applies the current <code>+17</code> degree center trim before writing the
   physical command through <code>adafruit_servokit</code>. Center preload is present as a code path
   but both preload constants are currently zero.</li>
 <li>The runtime clamps the logical target, stores it for logs/dashboard use, and snaps commands
   within 0.5 degrees of logical center to exactly 90 before the hardware mapping. With the
-  current settings, logical center 90 produces a physical command near 102 degrees.</li>
+  current settings, logical center 90 produces a physical command near 107 degrees.</li>
 <li>Bench work observed direction-dependent return behavior: the wheels did not always return
   to the same physical center after approaching from opposite directions. The runtime now
   includes an experimental IMU yaw-rate correction path in default <code>straight</code> mode; field
   claims still require telemetry showing that it engaged. No exact hysteresis angle is
-  claimed without the corresponding measurement artifact.</li>
+  claimed without the corresponding measurement record.</li>
 </ul>
 <h2 id="hysteresis-and-pull-diagnosis">Hysteresis and Pull Diagnosis</h2>
 <p>The same logical center can settle differently after a left approach versus a right approach.
@@ -410,7 +410,7 @@ Possible contributors include joint play, linkage flex, servo return behavior, v
 surface conditions, or unequal motor force. The software keeps these controls separate:</p>
 <ul>
 <li>Servo trim changes front-wheel angle.</li>
-<li>Left/right motor scale changes drive force; both current scales are <code>1.0</code>.</li>
+<li>Left and right motor scale changes drive force; both current scales are <code>1.0</code>.</li>
 <li>Experimental yaw feedback changes steering from measured rotation.</li>
 </ul>
 <p>When the car pulls, repeat the test on the same surface, payload, tire state, battery state,
@@ -418,7 +418,7 @@ and throttle. Verify physical wheel center from both approach directions before 
 motor scale. Change one control at a time so one fault is not hidden by compensating for it
 elsewhere. A planned pass-through-versus-flick-to-center test remains useful because joystick
 history may affect how the linkage returns even when the final command is 90.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>The PCA9685 Servo Controller generates the 50 Hz servo pulse in dedicated hardware and offloads pulse
   timing from the Raspberry Pi 5. This reduces dependence on control-loop timing, but does not remove
@@ -426,7 +426,7 @@ history may affect how the linkage returns even when the final command is 90.</p
 <li>Keeping all servo-specific compensation in the mapping layer keeps the logical steering
   labels clean for training and for the dashboard.</li>
 </ul>
-<h2 id="verify-before-a-run">Verify before a run</h2>
+<h2 id="verify-before-a-run">Verify Before a Run</h2>
 <ul>
 <li>Bench tests: <code>code/test_files/steering/pca9685_servo_test.py</code> sweeps the servo, and
   <code>code/test_files/steering/calibrate_servo.py</code> helps set the center trim.</li>
@@ -436,12 +436,12 @@ history may affect how the linkage returns even when the final command is 90.</p
   hysteresis; it should not be assigned to one cause without a bench check.
   Do not finalize trim constants unless the exact number has been characterized.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/build-overview.md</code></li>
-<li><code>testing/bench-tests/overview.md</code></li>
-<li><code>runtime-code/hardware/hardware-class.md</code></li>
-<li><code>hardware/imu.md</code></li>
+<li><a href="../build-overview/">Hardware Build Overview</a></li>
+<li><a href="../../testing/bench-tests/overview/">Bench Tests</a></li>
+<li><a href="../../runtime-code/hardware/hardware-class/">Hardware Class</a></li>
+<li><a href="../imu/">IMU</a></li>
 </ul>
               
             </div>

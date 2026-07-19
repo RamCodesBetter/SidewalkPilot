@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -342,7 +342,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="sim-to-real-gap">Sim-To-Real Gap</h1>
+                <h1 id="sim-to-real-gap">Sim-to-Real Gap</h1>
 <p>The sim-to-real gap is the performance loss that can appear when synthetic images differ
 from the real camera, chassis, lighting, and sidewalk. SidewalkPilot's trainers can consume
 pre-generated CARLA datasets, but they do not start CARLA, connect to a simulator, or render
@@ -362,8 +362,8 @@ correction 3.0
 <p>These are relative factors inside a sampler that also balances steering classes. They do
 not mean that every training run contained all three sources. If a run has no CARLA root,
 the <code>0.6</code> path is unused.</p>
-<p>The current shared Series 3/4 dataset contains <strong>81,237 labeled real images</strong>. The three
-Series 4 experiments were run against that same dataset. Historical CARLA datasets are
+<p>The current shared Series 3/4 dataset contains <strong>81,237 labeled real images</strong>. The six
+v4.0/v4.1 Series 4 experiments were run against that same dataset. Historical CARLA datasets are
 published separately, but a checkpoint should be described as CARLA-assisted only when its
 saved training command, run configuration, or source-count log proves that a CARLA root was
 included. Folder defaults in trainer code are not enough to prove historical usage.</p>
@@ -384,7 +384,10 @@ test of the condition itself.</p>
 <p>The July 13 field comparison selected v3.4 over v3.3, v3.3b, and v3.4b after the presented
 normal-turn and harsh-shadow cases. This supports v3.4 as the current field baseline; it
 does not prove complete shadow robustness across routes, seasons, or camera conditions.
-Series 4 has common-set offline results but still needs its ordered field comparison.</p>
+v4.0 also has a bounded field comparison: image-only v4.0f remained viable, while the
+history-input models exposed a closed-loop steering-echo failure that open-loop metrics did
+not predict. v4.1 correction models have common-set offline results but still need live
+integration and physical comparison.</p>
 <h2 id="reporting-rule">Reporting Rule</h2>
 <p>For every future checkpoint, preserve:</p>
 <ol>
@@ -399,9 +402,9 @@ Series 4 has common-set offline results but still needs its ordered field compar
 auditable facts.</p>
 <h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>ai-and-models/training-pipeline/overview.md</code></li>
-<li><code>research-and-math/algorithms/weighted-sampling.md</code></li>
-<li><code>model-evaluation/field-evaluation/overview.md</code></li>
+<li><a href="../../../ai-and-models/training-pipeline/overview/">Training Pipeline</a></li>
+<li><a href="../../algorithms/weighted-sampling/">Weighted Sampling</a></li>
+<li><a href="../../../model-evaluation/field-evaluation/overview/">Field Evaluation</a></li>
 </ul>
               
             </div>

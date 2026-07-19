@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -126,19 +126,19 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#related-work">Related Work</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#1-failure-driven-sidewalk-dataset-and-test-loop">1. Failure-driven sidewalk dataset and test loop</a>
+    <li class="toctree-l2"><a class="reference internal" href="#1-failure-driven-sidewalk-dataset-and-test-loop">1. Failure-Driven Sidewalk Dataset and Test Loop</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#2-hybrid-steering-head-applied-to-sidewalk-driving">2. Hybrid steering head applied to sidewalk driving</a>
+    <li class="toctree-l2"><a class="reference internal" href="#2-hybrid-steering-head-applied-to-sidewalk-driving">2. Hybrid Steering Head Applied to Sidewalk Driving</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#3-series-4-temporal-experiments">3. Series 4 temporal experiments</a>
+    <li class="toctree-l2"><a class="reference internal" href="#3-series-4-temporal-experiments">3. Series 4 Temporal Experiments</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard</a>
+    <li class="toctree-l2"><a class="reference internal" href="#4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, Sensors, and Dashboard</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#5-evaluation-beyond-mae">5. Evaluation beyond MAE</a>
+    <li class="toctree-l2"><a class="reference internal" href="#5-evaluation-beyond-mae">5. Evaluation Beyond MAE</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evidence-standard">Evidence standard</a>
+    <li class="toctree-l2"><a class="reference internal" href="#evidence-standard">Evidence Standard</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                 </li>
@@ -358,7 +358,7 @@ was implemented on SidewalkPilot.</p>
 <li><a href="https://arxiv.org/abs/1604.07316">arXiv record</a></li>
 </ul>
 <p>Commercial sidewalk robots provide problem-setting context, not a benchmark. This repository does not contain controlled sensor, cost, speed, or safety comparisons against commercial platforms and makes no claim of matching them.</p>
-<h2 id="1-failure-driven-sidewalk-dataset-and-test-loop">1. Failure-driven sidewalk dataset and test loop</h2>
+<h2 id="1-failure-driven-sidewalk-dataset-and-test-loop">1. Failure-Driven Sidewalk Dataset and Test Loop</h2>
 <p><strong>Status: implemented, with bounded field evidence.</strong> The project collects its own
 camera/control data, identifies failure conditions, adds targeted examples, retrains, and
 returns to the car for comparison. The July 13 test recorded v3.4 as the best of the four
@@ -367,39 +367,39 @@ Series 3 candidates tested in normal turns and the shadow cases presented that d
 and iteration record were produced for this car. It is not evidence that v3.4 is universally
 shadow-robust; the route identifier, quantitative takeover count, and repeated-trial record
 for that comparison were not preserved.</p>
-<h2 id="2-hybrid-steering-head-applied-to-sidewalk-driving">2. Hybrid steering head applied to sidewalk driving</h2>
+<h2 id="2-hybrid-steering-head-applied-to-sidewalk-driving">2. Hybrid Steering Head Applied to Sidewalk Driving</h2>
 <p><strong>Status: implemented in v3.1 through v3.4b.</strong> <code>SidewalkPilotV3</code> predicts nine steering-class
 logits, nine local offsets, and throttle. Combining a discrete choice with a continuous
 offset is an established modeling pattern. The project-specific design choice is applying
 that pattern to a steering dataset where straight-heavy labels can hide weak turn recall.</p>
 <p>The architecture is therefore described as an application and engineering experiment, not
 as a new class-plus-offset algorithm.</p>
-<h2 id="3-series-4-temporal-experiments">3. Series 4 temporal experiments</h2>
-<p><strong>Status: trained and evaluated offline; not field-tested yet.</strong> Series 4 compares causal
-history (<code>4.0p/r</code>), future supervision (<code>4.0f/g</code>), and combined past/current/future targets
-(<code>4.0a/c</code>) while keeping the image backbone and 18-value steering head comparable. The
-future targets are training supervision, not unavailable future inputs at deployment.</p>
-<p>The current common-set report ranks <code>4.0p</code> highest by Bal9 among the Series 3/4 candidates,
-but that is an offline screening result. It does not replace the ordered physical test.</p>
-<h2 id="4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, sensors, and dashboard</h2>
-<p><strong>Status: implemented engineering.</strong> The Raspberry Pi 5 owns controller input, sensors, actuator output,
-logging, and dashboard telemetry. Jetson Orin Nano performs Series 3/4 ONNX inference over direct
-Ethernet. The Zero 2 W renders the USB-linked dashboard. Splitting real-time I/O from heavier
+<h2 id="3-series-4-temporal-experiments">3. Series 4 Temporal Experiments</h2>
+<p><strong>Status: v4.0 field-tested; v4.1 evaluated offline.</strong> Series 4 compares causal history,
+future supervision, and combined past/current/future targets while keeping the image
+backbone and 18-value steering head comparable. Future targets are training supervision,
+not unavailable future inputs at deployment.</p>
+<p>The v4.0 comparison demonstrated why closed-loop testing matters: PC/PCF ranked strongly
+offline but echoed earlier predictions on the car. Image-only v4.0f was viable and mixed
+against v3.4. The six v4.1 models test corrections to that failure and remain pending live
+integration and field testing.</p>
+<h2 id="4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, Sensors, and Dashboard</h2>
+<p><strong>Status: implemented engineering.</strong> The Jetson Orin Nano runs every steering-model family on its GPU: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. The Raspberry Pi 5 owns controller input, sensors, steering and motor output, logging, and dashboard telemetry. The Zero 2 W renders the USB-linked dashboard. Splitting hardware I/O from heavier
 inference is an established systems pattern; the contribution is the working integration
 and debugging record on this vehicle.</p>
-<h2 id="5-evaluation-beyond-mae">5. Evaluation beyond MAE</h2>
+<h2 id="5-evaluation-beyond-mae">5. Evaluation Beyond MAE</h2>
 <p><strong>Status: implemented evaluation practice.</strong> The report reads MAE alongside Bal9, turn
 exact, turn +/-1, straight exact, signed error, and confusion matrices. Macro recall and
 class-aware evaluation are standard methods. Their value here is practical: they expose
 straight collapse that one aggregate error number can conceal.</p>
-<h2 id="evidence-standard">Evidence standard</h2>
+<h2 id="evidence-standard">Evidence Standard</h2>
 <ul>
-<li><strong>Implemented</strong> means the code or artifact exists.</li>
+<li><strong>Implemented</strong> means the code, model, or other stated evidence exists.</li>
 <li><strong>Offline result</strong> means it was measured on the stated frozen evaluation set.</li>
 <li><strong>Field observation</strong> means it occurred in a bounded physical test.</li>
 <li><strong>Planned</strong> means it is not complete and is not presented as a result.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../engineering-process/iteration-records/turn-vs-shadow-tradeoff/">Turn vs Shadow Tradeoff</a></li>
 <li><a href="../../model-evaluation/comparisons/offline-vs-field/">Offline and Field Comparison</a></li>

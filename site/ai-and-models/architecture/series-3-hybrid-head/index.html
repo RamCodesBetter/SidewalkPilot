@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -352,16 +352,17 @@
 </code></pre>
 <p>The nine classes are <code>HL, L, L+, SL, ST, SR, R, R+, HR</code> over the absolute 0-to-180 steering range.</p>
 <h2 id="decode">Decode</h2>
-<pre><code class="language-text">class = argmax(logits)
+<pre><code class="language-text">probabilities = softmax(logits)
+class = argmax(softmax(logits))
 fraction = sigmoid(offset_for_selected_class)
 steering = class_lower_edge + fraction * class_width
 </code></pre>
-<p>Only the selected class's offset affects steering. This provides a coarse turn decision and a continuous position inside that class.</p>
+<p>Only the selected class's offset affects steering. The decoder applies softmax to the logits and then applies argmax to those probabilities; the separately named probability vector is retained for telemetry. This provides a coarse turn decision and a continuous position inside that class.</p>
 <h2 id="why-it-replaced-pure-regression">Why It Replaced Pure Regression</h2>
 <p>The dataset contains many more straight frames than sharp turns. Pure average-error training can reduce loss by staying near center. The class term makes turn-category mistakes explicit; the local offset avoids a nine-angle-only controller.</p>
 <p>The design still has a discontinuity when the selected class changes. Smoothing, temporal context, and field testing remain necessary because a good validation confusion matrix does not guarantee smooth physical steering.</p>
 <h2 id="loss">Loss</h2>
-<p>Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The weighted sampler rebalances steering buckets and source types; it does not apply a separate steering-magnitude multiplier in the active Series 3 path. Steering-focused runs can set throttle loss to zero while preserving the 19-value artifact contract.</p>
+<p>Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The v3.4 run used class weighting and deterministic left and right balance flipping. Its sampler drew 50,000 examples per epoch but did not apply steering-bucket or source reweighting. Steering-focused runs can set throttle loss to zero while preserving the 19-value model output.</p>
 <h2 id="series-4-relationship">Series 4 Relationship</h2>
 <p>Series 4 removes throttle and uses 18 values per horizon: the same nine logits plus nine offsets. PC emits one horizon; CF/PCF emit four. This reuses the successful steering representation while testing temporal information separately.</p>
 <p>See <a href="../cnn/">CNN Architecture</a>, <a href="../series-4-plan/">Series 4 Temporal Experiments</a>, and <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>.</p>

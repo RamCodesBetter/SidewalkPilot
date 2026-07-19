@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -103,7 +103,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -345,17 +345,17 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-inference">Model Inference</h1>
-<p>The Jetson Orin Nano is the AI brain for current live inference: it owns Series 3/4
+<p>The Jetson Orin Nano is the AI brain for current live inference: it owns Series 1-4
 preprocessing, GPU model execution, and output decoding. The Raspberry Pi 5 owns camera
-capture and final safety arbitration. Current autonomy stops if a fresh, matching Jetson Orin Nano
+capture and final safety rules. Current autonomy stops if a fresh, matching Jetson Orin Nano
 result is unavailable.</p>
 <h2 id="data-path">Data Path</h2>
 <ol>
 <li><code>WebcamVisionProcessor</code> captures <code>1280×720</code> <code>BGR888</code> frames from the Raspberry Pi Camera. The code declares a nominal 30 FPS target and measures the actual rate at runtime.</li>
 <li><code>AsyncJetsonSteeringClient.submit()</code> replaces any unsent frame with the newest frame and selected model version.</li>
 <li>Its worker JPEG-encodes and sends the request to Jetson Orin Nano at <code>10.42.0.2:8770</code>.</li>
-<li><code>jetson_inference_server.py</code> hot-switches to the requested <code>SidewalkPilot-v&lt;version&gt;</code> artifact when needed.</li>
-<li>Jetson Orin Nano resizes and normalizes the BGR frame, runs ONNX Runtime, decodes steering, and returns control plus telemetry.</li>
+<li><code>jetson_inference_server.py</code> hot-switches to the requested <code>SidewalkPilot-v&lt;version&gt;</code> model when needed.</li>
+<li>Jetson Orin Nano resizes and normalizes the BGR frame, runs PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4, decodes steering, and returns the result plus telemetry.</li>
 <li>The Raspberry Pi 5 consumes only a result for the selected version that is no more than <code>0.25 s</code> old.</li>
 </ol>
 <h2 id="capture-and-preprocessing">Capture and Preprocessing</h2>
@@ -398,19 +398,19 @@ result is unavailable.</p>
 <td>9 class logits, 9 within-class offsets, throttle</td>
 </tr>
 <tr>
-<td>Series 4 PC (p/r)</td>
+<td>Series 4 PC</td>
 <td>image + <code>[N,3]</code> history</td>
 <td><code>[N,1,18]</code></td>
 <td>horizon-zero steering hybrid</td>
 </tr>
 <tr>
-<td>Series 4 CF (f/g)</td>
+<td>Series 4 CF</td>
 <td><code>[N,3,180,320]</code></td>
 <td><code>[N,4,18]</code></td>
 <td>horizon-zero steering hybrid</td>
 </tr>
 <tr>
-<td>Series 4 PCF (a/c)</td>
+<td>Series 4 PCF</td>
 <td>image + <code>[N,3]</code> history</td>
 <td><code>[N,4,18]</code></td>
 <td>horizon-zero steering hybrid</td>
@@ -419,11 +419,13 @@ result is unavailable.</p>
 </table>
 <p>All recognized models normalize pixels with <code>(x / 255 - 0.5) / 0.5</code>. Versions <code>2.0/2.0b</code> additionally apply HSV-value CLAHE; current Series 3 uses raw BGR.</p>
 <p>For the hybrid head:</p>
-<pre><code class="language-text">class = argmax(logits[0:9])
+<pre><code class="language-text">probabilities = softmax(logits[0:9])
+class = argmax(softmax(logits[0:9]))
 fraction = sigmoid(offset[class])
 steering = bucket_low[class] + fraction * bucket_width[class]
 </code></pre>
-<p>The model throttle output is returned for protocol compatibility but is not used for current driving. The Raspberry Pi 5 combines model steering with its own throttle policy and center-corridor LiDAR governor.</p>
+<p>The decoder applies softmax first and then applies argmax to the resulting probabilities. The separately named probability vector is included in model telemetry.</p>
+<p>Series 1-3 retain a model throttle field, while Series 4 supplies a zero placeholder in the response protocol. Neither controls current driving. The Raspberry Pi 5 combines model steering with its own throttle policy and center-corridor LiDAR governor.</p>
 <h2 id="steering-smoothing-and-throttle-ownership">Steering Smoothing and Throttle Ownership</h2>
 <p>Series 3/4 hybrid steering can jump when adjacent class logits exchange the argmax. The runtime applies an exponential blend once per newly completed Jetson Orin Nano result:</p>
 <pre><code class="language-text">smoothed = 0.45 * decoded + 0.55 * previous
@@ -431,13 +433,13 @@ steering = bucket_low[class] + fraction * bucket_width[class]
 <p>This output filter is separate from Series 4 causal target history. Smoothing changes the command sent to the car; PC/PCF history changes the information supplied to the next inference. Excessive smoothing would delay genuine turns, so it does not replace balanced training or field testing.</p>
 <p>Current models do not control live throttle. Series 3 retains a learned throttle value for training and protocol history, while Series 4 removes it. Manual input or autonomous runtime policy supplies the requested throttle, and enabled LiDAR AEB may cap or stop forward motion. Saved training labels remain absolute physical PWM fractions rather than the dashboard's reference moving range.</p>
 <h2 id="gpu-selection">GPU Selection</h2>
-<p>Jetson Orin Nano selects CUDA plus CPU fallback when CUDA is available. It selects TensorRT plus CPU only when CUDA is unavailable but the TensorRT provider is available. This avoids a partially installed TensorRT provider causing the complete provider list to fail and retry on CPU.</p>
+<p>The Jetson Orin Nano runs Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. CPU execution is retained for diagnosis, but field startup should confirm that the GPU provider loaded. TensorRT is not part of the current field path.</p>
 <h2 id="non-blocking-and-freshness-rules">Non-Blocking and Freshness Rules</h2>
 <p>All TCP connect/send/receive and JPEG work stays in <code>AsyncJetsonSteeringClient</code>. The main loop never calls synchronous <code>infer()</code> or <code>poll_status()</code>. The worker keeps one pending frame, preventing an inference backlog.</p>
 <p>If Jetson Orin Nano is off:</p>
 <ul>
 <li>Manual driving remains responsive;</li>
-<li>Temperature/IPS telemetry remains at its last cached value;</li>
+<li>Temperature/IPS telemetry remains at its last reported value;</li>
 <li>Autonomous mode hard-stops because no fresh model command exists; and</li>
 <li>Connection retries continue in the worker.</li>
 </ul>

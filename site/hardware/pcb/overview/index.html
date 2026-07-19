@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -168,17 +168,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">PCB Development</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why it matters</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why It Matters</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#current-status">Current status</a>
+    <li class="toctree-l2"><a class="reference internal" href="#current-status">Current Status</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#required-electrical-blocks">Required Electrical Blocks</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#revision-record">Revision Record</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -345,22 +345,22 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="custom-pcb-overview">Custom PCB Overview</h1>
-<p>The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects every sensor and actuator to the Raspberry Pi 5. It is <strong>DESIGNED ONLY</strong> right now: the board has been laid out but it has <strong>not been ordered and not been fabricated</strong>, so nothing on the car runs on it yet. On top of that, the current layout is already outdated. I moved several pins around in the runtime after the board was drawn, so the design's GPIO map no longer matches <code>config.py</code>. A new revision with the corrected GPIO is planned before I ever send anything to a fab house.</p>
-<h2 id="how-it-works">How it works</h2>
-<p>Today the whole car is wired point-to-point: the Xbox-controller-driven Raspberry Pi 5 fans out to a PCA9685 Servo Controller over I2C, to a Yahboom AT8236 Motor Controller over four GPIO motor pins, to a hall sensor, and to serial devices (LiDAR, GPS, IMU) over UART / USB. Every one of those connections is a jumper wire on a breadboard.</p>
+<p>The custom Raspberry Pi 5 breakout PCB is my planned replacement for the breadboard-and-jumper wiring that currently connects the sensors, PCA9685 Servo Controller, and AT8236 Motor Controller to the Raspberry Pi 5. It is <strong>DESIGN-ONLY</strong> right now: the board has been laid out but has <strong>not been ordered or fabricated</strong>, so nothing on the car uses it. The current layout is also outdated. I changed several runtime pin assignments after drawing the board, so its GPIO map no longer matches <code>config.py</code>. I plan to correct the GPIO map in a new revision before sending the design for fabrication.</p>
+<h2 id="how-it-works">How It Works</h2>
+<p>Today the Raspberry Pi 5 hardware path is wired point-to-point: it connects to a PCA9685 Servo Controller over I2C, a Yahboom AT8236 Motor Controller over four GPIO motor pins, a Hall-effect wheel-speed sensor, and serial devices over UART or USB. The current GPIO and I2C connections use jumper wires and a breadboard; USB devices use their own cables and adapters.</p>
 <p>The PCB collapses that harness into one board that seats on the Raspberry Pi 5 header. Instead of individual jumpers, each subsystem gets a dedicated footprint and a fixed trace back to the correct Raspberry Pi 5 pin:</p>
 <ul>
 <li>The <strong>PCA9685 Servo Controller</strong> breaks out on the I2C bus (<code>0x40</code>, channel 0).</li>
 <li>The <strong>AT8236 Motor Controller</strong> takes the four motor GPIOs (right fwd/bwd, left fwd/bwd)
   and controls the JGB37-520 DC motors rated for 12 V and 550 RPM.</li>
-<li>The <strong>hall sensor</strong>, <strong>LiDAR</strong>, <strong>GPS/compass</strong>, and <strong>IMU</strong> each get a labeled connector.</li>
+<li>The <strong>Hall-effect wheel-speed sensor</strong>, <strong>LiDAR</strong>, <strong>GPS/compass</strong>, and <strong>IMU</strong> each get a labeled connector.</li>
 <li>Power and ground rails are shared instead of daisy-chained through the breadboard.</li>
 </ul>
 <p>The intent is that the pin assignments on the board are the <em>same</em> logical assignments the runtime already uses, so no code changes are needed when the harness is swapped for the board.</p>
-<h2 id="why-it-matters">Why it matters</h2>
+<h2 id="why-it-matters">Why It Matters</h2>
 <p>Breadboard and jumper wiring is a known reliability risk on a moving platform. A loose connection can resemble a software failure: a sensor drops, the servo twitches, or a motor stops. A correctly designed and fabricated board could reduce movable jumper connections and make the harness easier to inspect, but connectors, solder joints, power integrity, and an incorrect pin map would remain failure modes. The current unbuilt PCB does not improve the car's present safety or reliability.</p>
-<p>The trade-off is commitment: a PCB freezes the pinout. That is exactly why the board is still design-only. My runtime pin assignments are still moving (I re-pinned after the first layout), so committing copper now would just bake in a stale map. I would rather fabricate once, against a finalized GPIO map, than respin a board.</p>
-<h2 id="current-status">Current status</h2>
+<p>The trade-off is commitment: a PCB freezes the pinout. That is why the board remains design-only. The runtime pin assignments changed after the first layout, so fabricating that revision would preserve a stale map. The next revision should use a finalized GPIO map before fabrication.</p>
+<h2 id="current-status">Current Status</h2>
 <ul>
 <li><strong>Design state:</strong> laid out, DESIGNED ONLY.</li>
 <li><strong>Fab state:</strong> not ordered, not fabricated, not on the car (planned).</li>
@@ -371,11 +371,11 @@
 <h2 id="required-electrical-blocks">Required Electrical Blocks</h2>
 <p>The next schematic must cover:</p>
 <ul>
-<li>shared and separated power/ground paths with reviewed voltage levels and current limits;</li>
+<li>Shared and separated power/ground paths with reviewed voltage levels and current limits;</li>
 <li>I2C to the PCA9685 at <code>0x40</code>;</li>
-<li>four AT8236 Motor Controller direction/PWM lines on BCM 19, 20, 25, and 13;</li>
+<li>Four AT8236 Motor Controller direction/PWM lines on BCM 19, 20, 25, and 13;</li>
 <li>Hall input on BCM 24;</li>
-<li>connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement actually selected for the final harness.</li>
+<li>Connectors for GPS, IMU, LiDAR, and the dashboard/network arrangement selected for the final harness.</li>
 </ul>
 <p>LiDAR currently uses a CP2102 UART-to-USB Adapter. A prior build used <code>/dev/ttyAMA2</code>; Rev B must not preserve that historical choice accidentally.</p>
 <h2 id="revision-record">Revision Record</h2>
@@ -404,7 +404,7 @@
 </tbody>
 </table>
 <p>Before ordering Rev B, the runtime pinout must be frozen, the schematic and layout must be cross-checked against it, connector polarity and voltage must be reviewed, and continuity/power-up tests must be defined. A fabricated board will still require inspection and bench validation before controlling the car.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../wiring/pin-map/">Wiring and Pin Map</a></li>
 <li><a href="../../build-overview/">Build Overview</a></li>

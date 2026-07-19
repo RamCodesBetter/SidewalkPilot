@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -222,11 +222,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Data Quality</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#capture-format">Capture format</a>
+    <li class="toctree-l2"><a class="reference internal" href="#capture-format">Capture Format</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#image-scan">Image scan</a>
+    <li class="toctree-l2"><a class="reference internal" href="#image-scan">Image Scan</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#trainer-label-scan">Trainer label scan</a>
+    <li class="toctree-l2"><a class="reference internal" href="#trainer-label-scan">Trainer Label Scan</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a>
     </li>
@@ -236,7 +236,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#coverage-and-leakage-review">Coverage and Leakage Review</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -350,7 +350,7 @@
               
                 <h1 id="image-quality-checks">Image Quality Checks</h1>
 <p>A usable Series 3/4 sample needs an image that exists and decodes, a parseable logical steering label, and a parseable absolute-throttle field. The current tools check these properties in two stages: a read-only image decoder and the trainer's label scan. Neither stage automatically proves that the command is the correct human target for the scene; that still requires review.</p>
-<h2 id="capture-format">Capture format</h2>
+<h2 id="capture-format">Capture Format</h2>
 <p>The runtime queues <code>photo_&lt;timestamp&gt;.jpg</code> into a dated run folder and appends the sampled command to <code>&lt;run&gt;_labels.csv</code>. When a capture run ends, <code>finalize_photo_run()</code> builds <code>&lt;run&gt;.json</code>. A finalized entry has this form:</p>
 <pre><code class="language-json">{
   &quot;photo_20260702_141530_123456.jpg&quot;: {
@@ -360,7 +360,7 @@
 }
 </code></pre>
 <p><code>steering</code> is the logical <code>0..180</code> command (<code>0</code> left, <code>90</code> center, <code>180</code> right). <code>throttle</code> is absolute forward physical PWM in <code>0.0..1.0</code>; physical 55% is <code>0.55</code>, not zero on the reference-throttle scale.</p>
-<h2 id="image-scan">Image scan</h2>
+<h2 id="image-scan">Image Scan</h2>
 <p><code>code/test_files/data/check_dataset_frames.py</code> is read-only. It:</p>
 <ul>
 <li>Verifies each JPEG header and full decode;</li>
@@ -372,7 +372,7 @@
   code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset
 </code></pre>
 <p>The script does not calculate perceptual near-duplicates and does not judge whether a visually valid label is behaviorally correct.</p>
-<h2 id="trainer-label-scan">Trainer label scan</h2>
+<h2 id="trainer-label-scan">Trainer Label Scan</h2>
 <p>The Series 3 trainer's <code>SteeringDataset</code> reports:</p>
 <ul>
 <li><code>skipped_missing</code>: no image path could be resolved;</li>
@@ -427,10 +427,10 @@ python3 series_3_sidewalkpilot_trainer.py \
 <li>Any reviewed rows before and after correction</li>
 </ul>
 <h2 id="coverage-and-leakage-review">Coverage and Leakage Review</h2>
-<p>Image integrity is only the first gate. Before training, compare steering-class counts, left/right balance, ordinary turns, turns in shadow, lighting periods, surfaces, routes, and source runs. A collection countdown may guide field work, but filling numeric buckets does not prove visual diversity.</p>
+<p>Image integrity is only the first gate. Before training, compare steering-class counts, left and right balance, ordinary turns, turns in shadow, lighting periods, surfaces, routes, and source runs. A collection countdown may guide field work, but filling numeric buckets does not prove visual diversity.</p>
 <p>Consecutive frames create leakage risk. Series 3/4 window splitting reduces adjacency across train/validation, while Series 1/2's historical random split can place near-neighbors on both sides. Neither result should be described as capture-run-independent unless the split is actually grouped by run.</p>
 <p>After any computer-to-computer sync, verify image and label counts, representative hashes, missing files, and unexpected deletions before accepting the destination as a new source of truth. Reverse sync with <code>--delete</code> is especially dangerous when large datasets are excluded on one side.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../runtime-code/controller-mapping/">Controller Mapping and Driving Modes</a></li>
 <li><a href="../../../data/dataset-overview/">Dataset Overview</a></li>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -351,7 +351,7 @@
 <li>Drain Pygame controller events and update stick, trigger, button, D-pad, and page state.</li>
 <li>Read the latest LiDAR scan snapshot and evaluate the center-corridor policy once.</li>
 <li>Run <code>update_gpio()</code> to arbitrate manual/autonomous throttle, AEB, yaw correction, steering, brake, and gear behavior.</li>
-<li>Consume cached sensor/navigation state and update dashboard page selection.</li>
+<li>Read the latest sensor and navigation state and update dashboard page selection.</li>
 <li>Queue the newest dashboard payload for its sender worker.</li>
 <li>Append periodic CSV telemetry.</li>
 <li>Call <code>clock.tick(60)</code> to cap the loop rate.</li>
@@ -394,7 +394,7 @@
 <tr>
 <td>Jetson Orin Nano TCP/JPEG/inference</td>
 <td><code>AsyncJetsonSteeringClient</code> thread</td>
-<td>Submit latest frame and read fresh cached result</td>
+<td>Submit the latest frame and read the latest fresh result</td>
 </tr>
 <tr>
 <td>Dashboard UDP/JSON</td>
@@ -416,7 +416,7 @@
 <p>Both Jetson Orin Nano and dashboard workers are <strong>latest-value</strong> boundaries. If consumption is slower than capture, old pending work is replaced instead of building an increasingly stale queue.</p>
 <h2 id="offline-jetson-orin-nano-behavior">Offline Jetson Orin Nano Behavior</h2>
 <p>Jetson Orin Nano uses <code>10.42.0.2:8770</code>. A failed TCP connect can consume the complete <code>0.4 s</code> socket timeout, but that wait occurs only in <code>AsyncJetsonSteeringClient</code>. Manual steering and dashboard updates continue while Jetson Orin Nano is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.</p>
-<p><code>JETSON_RESULT_MAX_AGE_SEC</code> is <code>0.25 s</code>. A result older than that is unavailable for control even if it remains in the cache.</p>
+<p><code>JETSON_RESULT_MAX_AGE_SEC</code> is <code>0.25 s</code>. A result older than that is unavailable for control even if it remains stored in the client.</p>
 <h2 id="timing-diagnostics">Timing Diagnostics</h2>
 <p>The runtime emits:</p>
 <pre><code class="language-text">[loop-stall] control loop paused 412ms (auto=0)

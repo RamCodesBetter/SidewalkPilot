@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -231,15 +231,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Bench Tests</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#what-a-good-bench-test-record-captures">What a good bench-test record captures</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-a-good-bench-test-record-captures">What a Good Bench-Test Record Captures</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-bench-tests-matter-here">Why bench tests matter here</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-bench-tests-matter-here">Why Bench Tests Matter Here</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#utilities-in-this-section">Utilities in this section</a>
+    <li class="toctree-l2"><a class="reference internal" href="#utilities-in-this-section">Utilities in This Section</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bench-test-matrix">Bench-Test Matrix</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -342,10 +342,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="overview">Overview</h1>
+                <h1 id="bench-tests-overview">Bench Tests Overview</h1>
 <p>The bench-tests section documents standalone utilities used on the bench, over SSH, or with the car restrained before a field drive. Hardware and navigation utilities are grouped under matching <code>camera/</code>, <code>controller/</code>, <code>display/</code>, <code>lidar/</code>, <code>navigation/</code>, <code>sensors/</code>, <code>setup/</code>, and <code>steering/</code> folders inside <code>code/test_files/</code>; cross-cutting experiments remain at its root. Experiments stay outside the live control loop so they can be run and reviewed independently.</p>
-<p>A bench test exists to answer one question with proof: does this sensor stream real data, does this servo hit the angle I command, does this model turn the wheels the way the picture says it should. Every page here states what is being tested, the exact command, and what counts as pass, warn, or fail. Because these are hardware tests, most of them talk to real GPIO, I2C (PCA9685 at <code>0x40</code>), or a UART, so the page also notes which device the command runs on (Raspberry Pi 5 controller vs. Zero 2 W dashboard) and whether it moves anything.</p>
-<h2 id="what-a-good-bench-test-record-captures">What a good bench-test record captures</h2>
+<p>A bench test exists to answer one question with evidence: Does this sensor stream real data? Does this servo reach the commanded angle? Does this model steer in the direction expected from the image? Every page here states what is being tested, the exact command, and what counts as pass, warning, or failure. Because these are hardware tests, many communicate through GPIO, I2C (including the PCA9685 at <code>0x40</code>), or a serial port. Each page therefore identifies the computer that runs the command and whether the test can move the steering or motors.</p>
+<h2 id="what-a-good-bench-test-record-captures">What a Good Bench-Test Record Captures</h2>
 <table>
 <thead>
 <tr>
@@ -363,8 +363,8 @@
 <td>The exact command with its flags, and which state the car must be in (motors off, wheels up, controller connected)</td>
 </tr>
 <tr>
-<td>Pass / warn / fail</td>
-<td>Defined before running, in terms of the values printed</td>
+<td>Pass / warning / failure</td>
+<td>Defined before running in terms of the values printed</td>
 </tr>
 <tr>
 <td>Evidence</td>
@@ -372,13 +372,13 @@
 </tr>
 </tbody>
 </table>
-<h2 id="why-bench-tests-matter-here">Why bench tests matter here</h2>
+<h2 id="why-bench-tests-matter-here">Why Bench Tests Matter Here</h2>
 <ul>
 <li>This is real hardware that moves motors and steering. A bench test isolates one subsystem so a failure has one obvious cause, instead of debugging it live mid-drive.</li>
 <li>Tests make progress measurable: a steering-trim number, a filtered yaw-rate, a LiDAR distance in millimeters, a route distance in meters.</li>
-<li>The debugging discipline for this repo is prove, don't assume. These utilities are how I instrument and observe a value end to end instead of asserting from the armchair.</li>
+<li>The debugging rule for this repository is to measure rather than assume. These utilities expose values from input through output so a conclusion can be tied to recorded evidence.</li>
 </ul>
-<h2 id="utilities-in-this-section">Utilities in this section</h2>
+<h2 id="utilities-in-this-section">Utilities in This Section</h2>
 <p>The checked-in tools are grouped under <code>code/test_files/steering</code>, <code>sensors</code>, <code>lidar</code>, <code>display</code>, <code>camera</code>, <code>navigation</code>, <code>controller</code>, <code>models</code>, <code>data</code>, and <code>setup</code>. Use the inventory below rather than relying on an old documentation filename.</p>
 <h2 id="bench-test-matrix">Bench-Test Matrix</h2>
 <table>
@@ -398,7 +398,7 @@
 <tr>
 <td>Model steering</td>
 <td>model steering tester / live dashboard</td>
-<td>Matching artifact, finite outputs, expected directional response</td>
+<td>Matching model, finite outputs, expected directional response</td>
 </tr>
 <tr>
 <td>Servo</td>
@@ -438,7 +438,7 @@
 </tbody>
 </table>
 <p>Run hardware-moving tools with motors disabled or wheels clear. Record the exact command and output because filenames and flags can change. The authoritative inventory is <a href="../../../code-reference/test-files/">Test Files</a>.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../field-testing/overview/">Field Testing</a></li>
 <li><a href="../../../model-evaluation/field-evaluation/overview/">Field Evaluation</a></li>

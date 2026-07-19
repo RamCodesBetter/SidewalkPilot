@@ -1,6 +1,6 @@
 # Label Schema
 
-## Physical Targets
+## Recorded Targets
 
 | Field | Range | Meaning |
 |---|---:|---|

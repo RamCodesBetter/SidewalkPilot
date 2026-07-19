@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -282,13 +282,13 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">System Diagrams</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#what-the-diagram-shows">What the diagram shows</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-the-diagram-shows">What the Diagram Shows</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#links-between-devices">Links between devices</a>
+    <li class="toctree-l2"><a class="reference internal" href="#links-between-devices">Links Between Devices</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-split">Why this split</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-split">Why This Split</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#what-this-exhibit-documents">What this exhibit documents</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-this-exhibit-documents">What This Exhibit Documents</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#system-architecture">System Architecture</a>
     </li>
@@ -298,7 +298,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#navigation-flow">Navigation Flow</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -351,84 +351,44 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="system-diagrams">System Diagrams</h1>
-<p>This page is the top-level block diagram of SidewalkPilot: the three-device compute split, the sensors and actuators wired to each device, and the links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.</p>
-<h2 id="what-the-diagram-shows">What the diagram shows</h2>
+<p>This page is the top-level block diagram of SidewalkPilot: the three-device compute split, sensors, steering/motor hardware, and links that carry data between them. It is the anchor exhibit that every other diagram on this branch drills into.</p>
+<h2 id="what-the-diagram-shows">What the Diagram Shows</h2>
 <p>SidewalkPilot runs across three boards, each doing the job it is best at:</p>
 <ul>
-<li><strong>Jetson Orin Nano at <code>10.42.0.2:8770</code> — the AI brain.</strong> Runs selected Series 3/4 FP32 ONNX models at 320x180 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Current v3.4 and Series 4 autonomy require a fresh result from this path. Series 1/2 models (<code>SteeringAutonomyV2</code>, ~0.67M parameters, 200x66 input) can still load directly on the Raspberry Pi 5 inside <code>vision.py</code>.</li>
-<li><strong>Raspberry Pi 5 (<code>raspberrypi5</code>) — the hardware and safety controller.</strong> Owns all real-time I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and hall sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in <code>code/controller/current/rc_car_app/runtime.py</code> and ticks at up to 60 Hz (<code>clock.tick(60)</code>).</li>
+<li><strong>Jetson Orin Nano at <code>10.42.0.2:8770</code> - the AI brain.</strong> Runs every current steering-model family on the GPU: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. The Raspberry Pi 5 sends a camera frame and model selection; the Jetson Orin Nano returns decoded steering plus model/runtime telemetry. Autonomous driving requires a recent result from this path.</li>
+<li><strong>Raspberry Pi 5 (<code>raspberrypi5</code>) — the hardware and safety controller.</strong> Owns the live hardware I/O. It reads the Xbox controller over pygame, captures frames from the Raspberry Pi Camera Module 3 Wide through Picamera2, reads the LiDAR, GPS, and Hall-effect wheel-speed sensor over serial/GPIO, drives the steering servo through the PCA9685 Servo Controller, drives the JGB37-520 DC motors (12 V, 550 RPM) through the AT8236 Motor Controller, writes CSV logs, and sends dashboard telemetry. The main loop lives in <code>code/controller/current/rc_car_app/runtime.py</code> and ticks at up to 60 Hz (<code>clock.tick(60)</code>).</li>
 <li><strong>Zero 2 W (<code>zero2w</code>) - the dashboard.</strong> Receives telemetry over USB Ethernet and renders it on one HUB75 LED panel. Rendering code is <code>z2w_dashboard.py</code>.</li>
 </ul>
-<h2 id="links-between-devices">Links between devices</h2>
+<h2 id="links-between-devices">Links Between Devices</h2>
 <ul>
 <li><strong>Raspberry Pi 5 &lt;-&gt; Jetson Orin Nano:</strong> direct Ethernet request/response for the selected model. The exact returned contract depends on the model family; the Raspberry Pi 5 receives decoded steering and telemetry.</li>
 <li><strong>Raspberry Pi 5 &lt;-&gt; Zero 2 W:</strong> USB Ethernet gadget. Raspberry Pi 5 is <code>192.168.10.1</code>, Zero 2 W is <code>192.168.10.2</code>, dashboard telemetry is UDP to <code>192.168.10.2:8765</code> at a <code>0.1 s</code> send interval (<code>HUB75_DASHBOARD_SEND_INTERVAL_SEC</code>). This is USB-only by decision; there is no Wi-Fi fallback. When the controller quits it tells the Zero 2 W to shut down (linked shutdown, <code>HUB75_DASHBOARD_IDLE_EXIT_SEC = 2.0</code>).</li>
 <li><strong>Telemetry out:</strong> training runs report to Weights &amp; Biases; every controller launch writes a local CSV; InfluxDB logging is optional and activates only when the Raspberry Pi 5 has a valid <code>~/.influxdb.json</code> configuration.</li>
 </ul>
-<h2 id="why-this-split">Why this split</h2>
+<h2 id="why-this-split">Why This Split</h2>
 <p>The Jetson Orin Nano supplies the GPU inference that makes the current Series 3/4 self-driving
 path practical near the camera rate. The Raspberry Pi Camera Module 3 Wide remains connected
 to the Raspberry Pi 5 because the current 81,237-image dataset was captured through that
-camera path. Final actuator and AEB decisions remain on the Raspberry Pi 5.</p>
-<h2 id="what-this-exhibit-documents">What this exhibit documents</h2>
+camera path. Final steering, motor, and AEB decisions remain on the Raspberry Pi 5.</p>
+<h2 id="what-this-exhibit-documents">What This Exhibit Documents</h2>
 <p>The checked-in separation of responsibilities: AI and current autonomous steering inference
 on the Jetson Orin Nano, hardware and safety control on the Raspberry Pi 5, and observability
 on the Zero 2 W. It does not establish hard-real-time timing or fault tolerance for every link.</p>
 <h2 id="system-architecture">System Architecture</h2>
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/system-architecture.svg">
-      <img src="../../../assets/diagrams/system-architecture.svg" alt="SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, actuators, and logs">
-    </a>
-  </div>
-  <figcaption>
-    Compute, I/O, and device-link architecture. Open the <a href="../../../assets/diagrams/system-architecture.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/system-architecture.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
-
+<p><a href="../../../assets/diagrams/system-architecture.svg"><img alt="SidewalkPilot system architecture showing the Jetson Orin Nano AI Model Manager, Raspberry Pi 5 hardware and safety controller, Zero 2 W display controller, sensors, controllers, steering servo, motors, and logs" src="../../../assets/diagrams/system-architecture.svg" /></a></p>
+<p><em>Compute, I/O, and device-link architecture. Open the <a href="../../../assets/diagrams/system-architecture.svg">full-size SVG</a> or the <a href="../../../assets/diagrams/system-architecture.drawio">editable draw.io source</a>.</em></p>
 <p>Source anchors: <code>code/controller/current/rc_car_app/runtime.py</code>, <code>config.py</code>, <code>vision.py</code>, <code>jetson_inference_server.py</code>, <code>hub75_dashboard.py</code>, and <code>z2w_dashboard.py</code>.</p>
 <h2 id="runtime-and-control-flow">Runtime and Control Flow</h2>
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/runtime-control.svg">
-      <img src="../../../assets/diagrams/runtime-control.svg" alt="SidewalkPilot runtime and control flow showing latest sensor values, Jetson Orin Nano inference, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry">
-    </a>
-  </div>
-  <figcaption>
-    Runtime command and safety flow. Open the <a href="../../../assets/diagrams/runtime-control.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/runtime-control.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
-
+<p><a href="../../../assets/diagrams/runtime-control.svg"><img alt="SidewalkPilot runtime and control flow showing latest sensor values, Jetson Orin Nano inference, Raspberry Pi 5 arbitration, separate steering and motor paths, and telemetry" src="../../../assets/diagrams/runtime-control.svg" /></a></p>
+<p><em>Runtime command and safety flow. Open the <a href="../../../assets/diagrams/runtime-control.svg">full-size SVG</a> or the <a href="../../../assets/diagrams/runtime-control.drawio">editable draw.io source</a>.</em></p>
 <p>Manual input cancels autonomy when processed. A fresh model proposal is required for autonomous steering. Enabled/fresh LiDAR can reduce forward throttle or request emergency braking, but it does not steer.</p>
 <h2 id="training-and-evaluation-flow">Training and Evaluation Flow</h2>
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/training-evaluation.svg">
-      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, model artifacts, offline evaluation, and supervised field testing">
-    </a>
-  </div>
-  <figcaption>
-    Training, export, and model-selection flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
-
+<p><a href="../../../assets/diagrams/training-evaluation.svg"><img alt="SidewalkPilot training and evaluation flow showing datasets, model-family trainers, RTX 6000 Ada training, trained models, offline evaluation, and supervised field testing" src="../../../assets/diagrams/training-evaluation.svg" /></a></p>
+<p><em>Training, export, and model-selection flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a> or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.</em></p>
 <h2 id="navigation-flow">Navigation Flow</h2>
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/navigation-flow.svg">
-      <img src="../../../assets/diagrams/navigation-flow.svg" alt="SidewalkPilot navigation and crosswalk handoff flow showing the offline graph, GPS localization, A-star route, automatic sidewalk segments, and manual crossing segments">
-    </a>
-  </div>
-  <figcaption>
-    Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
-
-<h2 id="related-pages">Related pages</h2>
+<p><a href="../../../assets/diagrams/navigation-flow.svg"><img alt="SidewalkPilot navigation and crosswalk handoff flow showing the offline graph, GPS localization, A-star route, automatic sidewalk segments, and manual crossing segments" src="../../../assets/diagrams/navigation-flow.svg" /></a></p>
+<p><em>Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a> or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.</em></p>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a></li>
 <li><a href="../../../publishing/reports/">Reports and PDF</a></li>

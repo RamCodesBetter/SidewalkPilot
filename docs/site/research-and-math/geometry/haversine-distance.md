@@ -47,8 +47,8 @@ A* expands the state with the lowest `f = g + h`:
 
 - `g` is accumulated edge distance, edge-kind penalties, and turn penalties;
 - `h` is the haversine distance to the goal;
-- the state is `(previous_node, current_node)`, allowing the next expansion to price the turn;
-- the result is an ordered list of graph node IDs.
+- The state is `(previous_node, current_node)`, allowing the next expansion to price the turn;
+- The result is an ordered list of graph node IDs.
 
 Less-preferred edge kinds receive fixed costs: `+220 m` for `crosswalk_transfer`, `+48 m` for `intersection` or `osm_gap`, and `+36 m` for `inferred_crosswalk`. Intermediate house nodes are excluded so a route does not cut through an unrelated driveway.
 

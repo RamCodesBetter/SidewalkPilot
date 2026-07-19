@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -82,7 +82,7 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Navigation Overview</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#graph-and-endpoint-mapping">Graph and Endpoint Mapping</a>
     </li>
@@ -92,11 +92,11 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#automatic-and-manual-segments">Automatic and Manual Segments</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#layers">Layers</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -107,7 +107,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -365,19 +365,9 @@ segments. On every control-loop tick, <code>NavigationManager.update()</code> re
 car to the nearest path node, computes remaining distance and ETA, and decides whether
 the current segment should be driven by the model (<code>AUTO</code>) or handed to the human
 (<code>MNUL</code>).</p>
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/navigation-flow.svg">
-      <img src="../../../assets/diagrams/navigation-flow.svg" alt="SidewalkPilot navigation flow from an offline map graph and GPS position through A-star routing, sidewalk and crossing segments, manual handoff, automatic resume, and runtime safety">
-    </a>
-  </div>
-  <figcaption>
-    Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
-
-<h2 id="how-it-works">How it works</h2>
+<p><a href="../../../assets/diagrams/navigation-flow.svg"><img alt="SidewalkPilot navigation flow from an offline map graph and GPS position through A-star routing, sidewalk and crossing segments, manual handoff, automatic resume, and runtime safety" src="../../../assets/diagrams/navigation-flow.svg" /></a></p>
+<p><em>Navigation and crosswalk handoff flow. Open the <a href="../../../assets/diagrams/navigation-flow.svg">full-size SVG</a> or the <a href="../../../assets/diagrams/navigation-flow.drawio">editable draw.io source</a>.</em></p>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li><code>NavigationManager</code> loads the graph on startup: <code>6183</code> nodes and <code>10072</code> edges of
   the Trossachs test neighborhood, keyed by uppercase 3-character IDs like <code>AAA</code>.</li>
@@ -424,14 +414,14 @@ intersection, transfer, gap, or unknown kinds become <code>MNUL</code> segments.
 to manual. This keeps the camera model inside its sidewalk training domain and assigns road
 crossings to the operator. Each segment records its nodes, edge kinds, distance, and path
 indices so the transition is inspectable.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>Route planning is far easier to inspect, debug, and defend to reviewers when it is
   an explicit graph search rather than something buried inside the CNN.</li>
 <li>Separating map-level decisions from local steering keeps each piece small and
   testable: the model only ever has to follow the sidewalk in front of it.</li>
-<li>The graph is a real OpenStreetMap-derived map of the actual test route, so planned
-  paths correspond to real sidewalks the car has driven and photographed.</li>
+<li>The graph is derived from OpenStreetMap data for the test neighborhood, so planned
+  paths correspond to mapped local sidewalk geometry. This does not claim that every graph edge has been physically driven and verified.</li>
 </ul>
 <h2 id="layers">Layers</h2>
 <table>
@@ -466,17 +456,17 @@ indices so the transition is inspectable.</p>
 <tr>
 <td>Camera model</td>
 <td>Follow the local sidewalk on AI segments</td>
-<td><code>vision.py</code> (Series 3 on Jetson Orin Nano)</td>
+<td><code>vision.py</code>, <code>jetson_client.py</code>, and the Jetson Orin Nano inference server</td>
 </tr>
 </tbody>
 </table>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/architecture/data-flow.md</code></li>
-<li><code>autonomy-stack/navigation/crosswalk-handoff.md</code></li>
-<li><code>hardware/gps-compass.md</code></li>
-<li><code>runtime-code/runtime-loop.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../../architecture/data-flow/">Control Architecture and Runtime Data Flow</a></li>
+<li><a href="../crosswalk-handoff/">Crosswalk Handoff</a></li>
+<li><a href="../../../hardware/gps-compass/">GPS and Compass</a></li>
+<li><a href="../../../runtime-code/runtime-loop/">Runtime Loop</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

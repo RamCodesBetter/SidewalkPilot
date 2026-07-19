@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -336,7 +336,7 @@
               
                 <h1 id="compute">Compute</h1>
 <p>SidewalkPilot splits work across three computers. The Jetson Orin Nano is the AI brain for
-current Series 3/4 self-driving; the other computers connect that intelligence to the physical
+the current camera-based self-driving system; the other computers connect that intelligence to the physical
 car and its display.</p>
 <table>
 <thead>
@@ -349,7 +349,7 @@ car and its display.</p>
 <tbody>
 <tr>
 <td>Jetson Orin Nano</td>
-<td>AI Model Manager: Series 3/4 ONNX inference through ONNX Runtime, normally with CUDA</td>
+<td>AI Model Manager: Series 1/2 PyTorch inference and Series 3/4 ONNX Runtime inference on the GPU</td>
 <td>Direct Ethernet at <code>10.42.0.2:8770</code></td>
 </tr>
 <tr>
@@ -368,14 +368,13 @@ car and its display.</p>
 <p>The Jetson Orin Nano supplies the GPU performance that makes the current 320x180 Series 3/4
 models practical at the selected live rate. If its result is missing, stale, or for the wrong
 model, current autonomy requests a stop. The Raspberry Pi 5 keeps the established Camera
-Module 3 Wide, actuator, sensor, and safety integration, while the Zero 2 W isolates panel
+Module 3 Wide, steering/motor, sensor, and safety integration, while the Zero 2 W isolates panel
 rendering from the control loop.</p>
-<p>Series 1/2 can run locally on the Raspberry Pi 5. Series 3/4 use the Jetson Orin Nano because
-their larger 320x180 networks ran much more slowly on the Raspberry Pi 5 CPU, while the
+<p>The unified field runtime sends every steering-model family to the Jetson Orin Nano. Series 1/2 use PyTorch CUDA; Series 3/4 use ONNX Runtime CUDA. The larger 320x180 Series 3/4 networks ran much more slowly on the Raspberry Pi 5 CPU, while the
 Jetson Orin Nano GPU can run the selected models near the camera rate in the current deployment.
 Exact inference rate remains runtime telemetry and should be reported with the model,
 provider, software build, and power mode used for the measurement.</p>
-<p>The Zero 2 W does not issue actuator commands. Losing the display removes observability but does not transfer control authority.</p>
+<p>The Zero 2 W does not command the steering servo or motors. Losing the display removes observability but does not transfer control authority.</p>
               
             </div>
           </div><footer>

@@ -9,14 +9,14 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 
 | Assembly | Main parts | Purpose |
 |---|---|---|
-| AI Model Manager | Jetson Orin Nano | GPU-accelerated Series 3/4 ONNX camera-steering inference |
+| AI Model Manager | Jetson Orin Nano | Series 1/2 PyTorch CUDA and Series 3/4 ONNX Runtime CUDA camera-steering inference |
 | Chassis and steering | Yahboom Ackermann 520M, JGB37-520 DC motors (12 V, 550 RPM), high-torque steering servo, steering rods/linkage | Physical vehicle, drive power, and car-like front-wheel geometry |
 | Hardware and safety controller | Raspberry Pi 5, PCA9685 Servo Controller, AT8236 Motor Controller | Sensors, controller, servo, motors, safety, logs |
 | Display computer | Zero 2 W, Waveshare 64x32 HUB75 panel | Independent live telemetry display |
 | Vision | Raspberry Pi Camera Module 3 Wide | Forward sidewalk image stream and training photos |
 | Obstacle sensing | Youyeetoo FHL-LD19 360-degree LiDAR, CP2102 UART-to-USB Adapter | Center-corridor slowdown and emergency braking |
 | Navigation | BN880 GPS and HMC5883L-compatible compass | GPS fixes feed the route manager; compass is currently bench-only |
-| Motion sensing | Hall-effect sensor | Wheel speed estimate |
+| Motion sensing | Hall-effect wheel-speed sensor | Wheel-speed estimate |
 | Manual control | Xbox Series X controller | Steering, throttle, brake, model/page controls, takeover, quit |
 
 ## Compute and Network Layout
@@ -28,7 +28,7 @@ safety-controlled steering and motor path.
 - **Raspberry Pi 5 to Jetson Orin Nano:** dedicated Ethernet, Raspberry Pi 5 `10.42.0.1`, Jetson Orin Nano `10.42.0.2`, inference TCP port `8770`.
 - **Raspberry Pi 5 to Zero 2 W:** USB Ethernet gadget, Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, telemetry UDP port `8765`.
 - **Xbox controller:** Bluetooth HID directly to the Raspberry Pi 5.
-- **LiDAR:** USB 3.0 through a CP2102 UART-to-USB Adapter, current serial device `/dev/ttyUSB0`.
+- **LiDAR:** USB serial through a CP2102 UART-to-USB Adapter, current serial device `/dev/ttyUSB0`.
 
 The two wired links are separate. Dashboard recovery must not rewrite the Jetson Orin Nano Ethernet configuration, and Jetson Orin Nano availability must not determine whether the dashboard works.
 
@@ -66,11 +66,11 @@ The steering mechanism is not treated as a perfect mathematical servo. Vehicle l
 - Fixed-angle PCA9685 tests;
 - Controller-driven 15-degree step tests;
 - Live center-trim adjustment;
-- Left/right wheel regression plots;
+- Left and right wheel regression plots;
 - Direction-dependent feed-forward calibration;
 - IMU yaw-rate experiments.
 
-The current center trim is `+12D`. Reference steering limits are intentionally narrower than absolute hardware commands during normal driving. Tight absolute commands remain a separate future maneuver decision, not a default training range.
+The current center trim is `+17D`. Reference steering limits are intentionally narrower than absolute hardware commands during normal driving. Tight absolute commands remain a separate future maneuver decision, not a default training range.
 
 ## Bring-Up Order
 
@@ -103,7 +103,7 @@ Run only one program that owns a device at a time. Stop the live car service bef
 |---|---|
 | USB `error -110` or failure to enumerate | Cable, connector, damaged port, power/ground, host timing |
 | Steering returns differently from left and right | Linkage hysteresis, servo load, calibration, rod geometry |
-| Car pulls more as throttle rises | Left/right motor-force imbalance, not only steering trim |
+| Car pulls more as throttle rises | Left and right motor-force imbalance, not only steering trim |
 | Dashboard shows `NO LINK` | Controller not sending, dashboard service stopped, or USB network unavailable |
 | LiDAR shows no points | Serial ownership, CP2102 UART-to-USB Adapter/device path, LiDAR power, packet stream |
 | Controls pause rhythmically | Blocking work inside the runtime loop or repeated network timeouts |

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -97,13 +97,13 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#decision">Decision</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#alternatives-considered">Alternatives considered</a>
+    <li class="toctree-l2"><a class="reference internal" href="#alternatives-considered">Alternatives Considered</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#reason">Reason</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-to-know-it-worked-test-gate">How to know it worked (test gate)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-know-it-worked-test-gate">How to Know It Worked (Test Gate)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -364,7 +364,7 @@ simple <code>value</code> setter in the logical <code>0..180</code> degree space
 applied inside that layer by <code>apply_steering_center_trim_degrees(...)</code>, so the
 rest of the runtime and the training labels only ever deal with clean logical
 degrees.</p>
-<h2 id="alternatives-considered">Alternatives considered</h2>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
 <table>
 <thead>
 <tr>
@@ -376,8 +376,8 @@ degrees.</p>
 <tbody>
 <tr>
 <td>Direct Raspberry Pi 5 GPIO PWM (software or hardware PWM pin)</td>
-<td>one fewer board; no I2C dependency</td>
-<td>the Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch; competes with the many other GPIO/PWM users already on the Raspberry Pi 5 (four motor pins, hall sensor)</td>
+<td>One fewer board; no I2C dependency</td>
+<td>The Raspberry Pi 5's software PWM jitters under CPU load, causing servo twitch, and competes with the other GPIO/PWM users on the Raspberry Pi 5 (four motor pins and the Hall-effect wheel-speed sensor)</td>
 </tr>
 <tr>
 <td><strong>PCA9685 Servo Controller over I2C (chosen)</strong></td>
@@ -387,14 +387,14 @@ degrees.</p>
 </tbody>
 </table>
 <h2 id="reason">Reason</h2>
-<p>The Raspberry Pi 5 is already running a real-time control loop that also reads LiDAR, GPS,
-the camera, and the hall sensor while pushing motor PWM. A software-timed servo
+<p>The Raspberry Pi 5 is already running a 60 Hz software control loop that consumes the
+latest LiDAR, GPS, camera, and hall-sensor state while updating motor PWM. A software-timed servo
 pulse on that same CPU jitters whenever the loop is busy, and steering jitter is
 directly visible and bad for both driving and clean training data. Offloading
 the pulse to the PCA9685's own timer removes that class of problem entirely, and
 it follows the project rule to lean on existing, proven libraries rather than
 reinvent servo timing.</p>
-<h2 id="how-to-know-it-worked-test-gate">How to know it worked (test gate)</h2>
+<h2 id="how-to-know-it-worked-test-gate">How to Know It Worked (Test Gate)</h2>
 <ul>
 <li><code>code/test_files/steering/pca9685_servo_test.py</code> and <code>code/test_files/steering/calibrate_servo.py</code>
   drive the servo through its range on the bench with no runtime attached.</li>
@@ -404,11 +404,11 @@ reinvent servo timing.</p>
   and falls back to a <code>DummyServo</code> so the controller still boots (simulation
   mode) instead of crashing.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/steering-servo.md</code></li>
-<li><code>testing/failures/overview.md</code></li>
-<li><code>roadmap/next-steps.md</code></li>
+<li><a href="../../../hardware/steering-servo/">Steering Servo</a></li>
+<li><a href="../../../testing/failures/overview/">Failures and Lessons</a></li>
+<li><a href="../../../roadmap/next-steps/">Next Steps</a></li>
 </ul>
               
             </div>

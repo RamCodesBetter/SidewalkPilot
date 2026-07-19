@@ -1,6 +1,6 @@
 # Model Framing and Loss
 
-All model families use the same physical steering convention: `0` degrees is left, `90` is center, and `180` is right. Their output heads and losses differ.
+All model families use the same logical steering convention: `0` degrees is left, `90` is center, and `180` is right. Their output heads and losses differ.
 
 ## Direct Regression
 

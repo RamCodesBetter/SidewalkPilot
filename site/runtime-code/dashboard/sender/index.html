@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -383,13 +383,13 @@
 <p>A shutdown object is sent repeatedly during controller cleanup to improve the chance of delivery over UDP.</p>
 <h2 id="pages-and-controls">Pages and Controls</h2>
 <p>The display covers drive/PRND, steering/throttle/brake, steering and yaw tuning, model status, intervention evidence, temperatures, photo/camera status, navigation, GPS, camera preview, and LiDAR. Page IDs are intentionally sparse after old collection-countdown pages were removed. Right-stick axes move through the page grid; context-sensitive D-pad controls tune values, select models, or edit navigation.</p>
-<p>The LiDAR page shows a center safety corridor and distance rungs. It does not display or command a left/right swerve policy.</p>
+<p>The LiDAR page shows a center safety corridor and distance rungs. It does not display or command a left-or-right swerve policy.</p>
 <h2 id="link-states-and-recovery">Link States and Recovery</h2>
 <ul>
 <li><code>NO LINK</code>: no controller packet arrived after receiver startup;</li>
 <li><code>STALE</code>: packets arrived and then stopped;</li>
-<li>linked shutdown: an explicit shutdown payload exits and clears the panel;</li>
-<li>idle exit: optional receiver timeout after a previously active stream becomes silent.</li>
+<li><strong>Linked shutdown:</strong> an explicit shutdown payload exits and clears the panel;</li>
+<li><strong>Idle exit:</strong> an optional receiver timeout ends the process after a previously active stream becomes silent.</li>
 </ul>
 <p><code>NO LINK</code> or <code>STALE</code> should be debugged in this order: controller process, receiver service and UDP listener, <code>usb0</code> carrier/address, bidirectional ping, then sender/receiver logs. Wi-Fi is not a telemetry fallback.</p>
 <p>See <a href="../../../operations/nvidia-pc/">Computer Operations</a> and <a href="../../../testing/bench-tests/overview/">Bench Tests</a>.</p>

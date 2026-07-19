@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -185,13 +185,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Series 4 Models</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#checkpoints">Checkpoints</a>
+    <li class="toctree-l2"><a class="reference internal" href="#version-map">Version Map</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#common-evaluation">Common Evaluation</a>
+    <li class="toctree-l2"><a class="reference internal" href="#40-common-evaluation">4.0 Common Evaluation</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#comparison-baseline">Comparison Baseline</a>
+    <li class="toctree-l2"><a class="reference internal" href="#40-field-result">4.0 Field Result</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#field-order">Field Order</a>
+    <li class="toctree-l2"><a class="reference internal" href="#41-correction-experiments">4.1 Correction Experiments</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#41-common-evaluation">4.1 Common Evaluation</a>
     </li>
     </ul>
                   </li>
@@ -341,134 +343,81 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="series-4-models">Series 4 Models</h1>
-<p>Series 4 keeps the Series 3 image backbone and hybrid steering bins while testing temporal information. All six checkpoints are trained, exported to ONNX, and selectable in the live runtime. None has a physical-car verdict yet, so v3.4 remains the live default.</p>
-<h2 id="checkpoints">Checkpoints</h2>
+<p>Series 4 keeps the Series 3 visual backbone and hybrid steering decoder while testing whether nearby steering targets improve the current prediction. It removes learned throttle and separates three contracts: previous-context (PC), current-plus-future supervision (CF), and both together (PCF).</p>
+<h2 id="version-map">Version Map</h2>
 <table>
 <thead>
 <tr>
+<th>Generation</th>
 <th>Pair</th>
-<th>Final</th>
-<th>Best validation</th>
-<th>Contract</th>
+<th>Final epoch</th>
+<th>Validation-selected</th>
+<th>Runtime input</th>
+<th>Training target</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>PC</td>
+<td>4.0</td>
+<td><code class="nowrap">PC</code></td>
 <td><code>4.0p</code></td>
 <td><code>4.0r</code></td>
-<td>previous + current</td>
+<td>image + previous 3 steering targets</td>
+<td>current target</td>
 </tr>
 <tr>
-<td>CF</td>
+<td>4.0</td>
+<td><code class="nowrap">CF</code></td>
 <td><code>4.0f</code></td>
 <td><code>4.0g</code></td>
-<td>current + future</td>
+<td>image</td>
+<td>current + next 3 targets</td>
 </tr>
 <tr>
-<td>PCF</td>
+<td>4.0</td>
+<td><code class="nowrap">PCF</code></td>
 <td><code>4.0a</code></td>
 <td><code>4.0c</code></td>
-<td>previous + current + future</td>
+<td>image + previous 3 steering targets</td>
+<td>current + next 3 targets</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td><code class="nowrap">PC</code></td>
+<td><code>4.1p</code></td>
+<td><code>4.1r</code></td>
+<td>image + previous 3 steering targets</td>
+<td>current target</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td><code class="nowrap">CF</code></td>
+<td><code>4.1f</code></td>
+<td><code>4.1g</code></td>
+<td>image</td>
+<td>current + next 3 targets</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td><code class="nowrap">PCF</code></td>
+<td><code>4.1a</code></td>
+<td><code>4.1c</code></td>
+<td>image + previous 3 steering targets</td>
+<td>current + next 3 targets</td>
 </tr>
 </tbody>
 </table>
-<ul>
-<li><strong>PC:</strong> runtime input is the image plus three previous steering targets; output is <code>[batch,1,18]</code>.</li>
-<li><strong>CF:</strong> runtime input is the image; output is <code>[batch,4,18]</code>.</li>
-<li><strong>PCF:</strong> runtime input is the image plus three previous steering targets; output is <code>[batch,4,18]</code>.</li>
-</ul>
-<p>Every horizon is 18 values: nine class logits and nine class-local offsets. There is no learned throttle. The live runtime decodes horizon 0; later horizons are auxiliary training outputs.</p>
-<h2 id="common-evaluation">Common Evaluation</h2>
-<p>Balanced and exact-class metrics:</p>
+<p>Future steering values are labels used during training. They are never runtime inputs. PC emits <code>[batch,1,18]</code>; CF and PCF emit <code>[batch,4,18]</code>. Each 18-value horizon contains nine steering-class logits and nine class-local offsets. Live control uses horizon 0.</p>
+<h2 id="40-common-evaluation">4.0 Common Evaluation</h2>
+<p>These values come from the frozen 6,952-frame challenge set used by the common evaluator.</p>
 <table>
 <thead>
 <tr>
 <th>Model</th>
 <th style="text-align: right;">Bal9</th>
 <th style="text-align: right;">Turn exact</th>
-<th style="text-align: right;">ST exact</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>4.0p</strong></td>
-<td style="text-align: right;"><strong>34.5%</strong></td>
-<td style="text-align: right;"><strong>32.1%</strong></td>
-<td style="text-align: right;">67.7%</td>
-</tr>
-<tr>
-<td>4.0r</td>
-<td style="text-align: right;">32.9%</td>
-<td style="text-align: right;">27.4%</td>
-<td style="text-align: right;"><strong>77.6%</strong></td>
-</tr>
-<tr>
-<td>4.0f</td>
-<td style="text-align: right;">25.4%</td>
-<td style="text-align: right;">23.5%</td>
-<td style="text-align: right;">62.8%</td>
-</tr>
-<tr>
-<td>4.0g</td>
-<td style="text-align: right;">20.4%</td>
-<td style="text-align: right;">17.1%</td>
-<td style="text-align: right;">76.0%</td>
-</tr>
-<tr>
-<td>4.0a</td>
-<td style="text-align: right;">33.5%</td>
-<td style="text-align: right;">30.9%</td>
-<td style="text-align: right;">68.1%</td>
-</tr>
-<tr>
-<td>4.0c</td>
-<td style="text-align: right;">32.0%</td>
-<td style="text-align: right;">29.4%</td>
-<td style="text-align: right;">75.5%</td>
-</tr>
-</tbody>
-</table>
-<p>Adjacent-class turn tolerance:</p>
-<table>
-<thead>
-<tr>
-<th>Model</th>
 <th style="text-align: right;">Turn +/-1</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>4.0p</strong></td>
-<td style="text-align: right;"><strong>65.9%</strong></td>
-</tr>
-<tr>
-<td>4.0r</td>
-<td style="text-align: right;">62.6%</td>
-</tr>
-<tr>
-<td>4.0f</td>
-<td style="text-align: right;">56.4%</td>
-</tr>
-<tr>
-<td>4.0g</td>
-<td style="text-align: right;">46.4%</td>
-</tr>
-<tr>
-<td>4.0a</td>
-<td style="text-align: right;">65.3%</td>
-</tr>
-<tr>
-<td>4.0c</td>
-<td style="text-align: right;">62.9%</td>
-</tr>
-</tbody>
-</table>
-<p>Numeric steering error in degrees:</p>
-<table>
-<thead>
-<tr>
-<th>Model</th>
+<th style="text-align: right;">ST exact</th>
 <th style="text-align: right;">MAE</th>
 <th style="text-align: right;">Median</th>
 <th style="text-align: right;">Signed</th>
@@ -476,60 +425,190 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>4.0p</strong></td>
+<td><code>4.0p</code></td>
+<td style="text-align: right;"><strong>34.5%</strong></td>
+<td style="text-align: right;"><strong>32.1%</strong></td>
+<td style="text-align: right;"><strong>65.9%</strong></td>
+<td style="text-align: right;">67.7%</td>
 <td style="text-align: right;">12.396</td>
 <td style="text-align: right;">2.967</td>
 <td style="text-align: right;">+0.120</td>
 </tr>
 <tr>
-<td>4.0r</td>
+<td><code>4.0r</code></td>
+<td style="text-align: right;">32.9%</td>
+<td style="text-align: right;">27.4%</td>
+<td style="text-align: right;">62.6%</td>
+<td style="text-align: right;"><strong>77.6%</strong></td>
 <td style="text-align: right;">11.636</td>
 <td style="text-align: right;">1.846</td>
 <td style="text-align: right;">-1.136</td>
 </tr>
 <tr>
-<td>4.0f</td>
+<td><code>4.0f</code></td>
+<td style="text-align: right;">25.4%</td>
+<td style="text-align: right;">23.5%</td>
+<td style="text-align: right;">56.4%</td>
+<td style="text-align: right;">62.8%</td>
 <td style="text-align: right;">15.623</td>
 <td style="text-align: right;">6.723</td>
 <td style="text-align: right;">+1.057</td>
 </tr>
 <tr>
-<td>4.0g</td>
+<td><code>4.0g</code></td>
+<td style="text-align: right;">20.4%</td>
+<td style="text-align: right;">17.1%</td>
+<td style="text-align: right;">46.4%</td>
+<td style="text-align: right;">76.0%</td>
 <td style="text-align: right;">14.116</td>
 <td style="text-align: right;">2.114</td>
 <td style="text-align: right;">-1.864</td>
 </tr>
 <tr>
-<td>4.0a</td>
+<td><code>4.0a</code></td>
+<td style="text-align: right;">33.5%</td>
+<td style="text-align: right;">30.9%</td>
+<td style="text-align: right;">65.3%</td>
+<td style="text-align: right;">68.1%</td>
 <td style="text-align: right;">12.379</td>
 <td style="text-align: right;">3.115</td>
 <td style="text-align: right;">+0.290</td>
 </tr>
 <tr>
-<td>4.0c</td>
+<td><code>4.0c</code></td>
+<td style="text-align: right;">32.0%</td>
+<td style="text-align: right;">29.4%</td>
+<td style="text-align: right;">62.9%</td>
+<td style="text-align: right;">75.5%</td>
 <td style="text-align: right;"><strong>11.321</strong></td>
 <td style="text-align: right;"><strong>1.825</strong></td>
 <td style="text-align: right;">-0.981</td>
 </tr>
 </tbody>
 </table>
-<p>The field order below is a test sequence, not a claim of field quality. <code>4.0p</code> leads the equal-weight class and turn metrics; <code>4.0c</code> leads numeric error. That disagreement is exactly why both should be driven.</p>
-<h2 id="comparison-baseline">Comparison Baseline</h2>
-<p>On the same subset, v3.4 scores Bal9 24.2%, turn exact 22.6%, turn +/-1 56.2%, straight exact 64.2%, and MAE 15.083 degrees. The PC and PCF candidates clear the intended offline comparison gate on the balanced and turn metrics. The weaker CF results remain useful negative evidence. No Series 4 model has cleared the field gate.</p>
-<h2 id="field-order">Field Order</h2>
-<ol>
-<li>v3.4 baseline</li>
-<li><code>4.0p</code></li>
-<li><code>4.0r</code></li>
-<li><code>4.0a</code></li>
-<li><code>4.0c</code></li>
-<li>v3.4b</li>
-<li><code>4.0f</code></li>
-<li><code>4.0g</code></li>
-<li>Optional v3.4 repeat</li>
-</ol>
-<p>Use the same route and test normal left/right turns on both sidewalk sides plus the harsh-shadow cases that separated v3.4 from v3.3. Record every takeover and do not infer a winner from one clean section.</p>
-<p>See <a href="../../architecture/series-4-plan/">Series 4 Temporal Experiments</a> for the layer-by-layer design.</p>
+<p>The offline table made PC and PCF look strongest. Physical testing contradicted that simple ranking.</p>
+<p>Public v4.0 model repositories: <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0p">v4.0p</a>, <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0r">v4.0r</a>, <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0f">v4.0f</a>, <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0g">v4.0g</a>, <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0a">v4.0a</a>, and <a href="https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0c">v4.0c</a>.</p>
+<h2 id="40-field-result">4.0 Field Result</h2>
+<p>All six 4.0 checkpoints were compared on the physical car under supervision:</p>
+<ul>
+<li><code>4.0f</code> was the only viable 4.0 candidate. It and v3.4 produced complementary results: each passed two cases that the other failed. That comparison did not establish one as generally better.</li>
+<li><code>4.0g</code> was worse than <code>4.0f</code>.</li>
+<li><code>4.0p</code>, <code>4.0r</code>, <code>4.0a</code>, and <code>4.0c</code> repeatedly echoed a previous steering prediction. After a large prediction, later outputs could remain near that turn instead of following the new image. They were not drivable enough for promotion.</li>
+<li>Within the failed history pairs, <code>4.0p</code> was better than <code>4.0r</code>, and <code>4.0a</code> was slightly better than <code>4.0c</code>.</li>
+</ul>
+<p>This is why v3.4 remains the default even though several 4.0 checkpoints score better offline. The comparison was supervised and video was captured, but it was not a formal route-controlled benchmark with a preserved per-case score sheet.</p>
+<h2 id="41-correction-experiments">4.1 Correction Experiments</h2>
+<p>The 4.1 runs were created after reviewing the 4.0 failure clips. They keep the same PC, CF, and PCF questions while changing the training behavior that could reward steering echo.</p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Change</th>
+<th>Final</th>
+<th>Validation-selected model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4.1pr</code></td>
+<td>encode bounded steering motion instead of unrestricted absolute-history fusion; add history corruption, counterfactual-history loss, and closed-loop selection</td>
+<td><code>4.1p</code></td>
+<td><code>4.1r</code>, epoch 1</td>
+</tr>
+<tr>
+<td><code>4.1fg</code></td>
+<td>emphasize the current horizon and add trajectory-delta consistency across future horizons</td>
+<td><code>4.1f</code></td>
+<td><code>4.1g</code>, epoch 15</td>
+</tr>
+<tr>
+<td><code>4.1ac</code></td>
+<td>combine robust history handling with future-trajectory supervision</td>
+<td><code>4.1a</code></td>
+<td><code>4.1c</code>, epoch 10</td>
+</tr>
+</tbody>
+</table>
+<p>All three 4.1 runs completed 25 epochs and exported six ONNX models. They are not yet supported by the live model selector and have not been tested on the car. Their purpose is to test whether the 4.0 history failure can be corrected without collecting a new dataset.</p>
+<h2 id="41-common-evaluation">4.1 Common Evaluation</h2>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align: right;">Bal9</th>
+<th style="text-align: right;">Turn exact</th>
+<th style="text-align: right;">Turn +/-1</th>
+<th style="text-align: right;">ST exact</th>
+<th style="text-align: right;">MAE</th>
+<th style="text-align: right;">Median</th>
+<th style="text-align: right;">Signed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4.1p</code></td>
+<td style="text-align: right;">25.1%</td>
+<td style="text-align: right;">23.1%</td>
+<td style="text-align: right;">56.5%</td>
+<td style="text-align: right;">65.7%</td>
+<td style="text-align: right;">14.585</td>
+<td style="text-align: right;">5.048</td>
+<td style="text-align: right;">-0.144</td>
+</tr>
+<tr>
+<td><code>4.1r</code></td>
+<td style="text-align: right;">17.8%</td>
+<td style="text-align: right;">9.2%</td>
+<td style="text-align: right;">37.2%</td>
+<td style="text-align: right;">87.5%</td>
+<td style="text-align: right;"><strong>13.382</strong></td>
+<td style="text-align: right;"><strong>1.431</strong></td>
+<td style="text-align: right;">-5.765</td>
+</tr>
+<tr>
+<td><code>4.1f</code></td>
+<td style="text-align: right;">25.1%</td>
+<td style="text-align: right;">22.9%</td>
+<td style="text-align: right;"><strong>57.9%</strong></td>
+<td style="text-align: right;">61.5%</td>
+<td style="text-align: right;">15.466</td>
+<td style="text-align: right;">7.218</td>
+<td style="text-align: right;">+1.183</td>
+</tr>
+<tr>
+<td><code>4.1g</code></td>
+<td style="text-align: right;">24.0%</td>
+<td style="text-align: right;">21.2%</td>
+<td style="text-align: right;">56.8%</td>
+<td style="text-align: right;">67.4%</td>
+<td style="text-align: right;">14.652</td>
+<td style="text-align: right;">4.659</td>
+<td style="text-align: right;">+0.555</td>
+</tr>
+<tr>
+<td><code>4.1a</code></td>
+<td style="text-align: right;"><strong>25.3%</strong></td>
+<td style="text-align: right;">22.9%</td>
+<td style="text-align: right;">57.0%</td>
+<td style="text-align: right;">63.2%</td>
+<td style="text-align: right;">14.805</td>
+<td style="text-align: right;">6.352</td>
+<td style="text-align: right;">+0.130</td>
+</tr>
+<tr>
+<td><code>4.1c</code></td>
+<td style="text-align: right;">23.2%</td>
+<td style="text-align: right;">19.5%</td>
+<td style="text-align: right;">52.3%</td>
+<td style="text-align: right;">75.0%</td>
+<td style="text-align: right;">13.566</td>
+<td style="text-align: right;">2.270</td>
+<td style="text-align: right;">-0.984</td>
+</tr>
+</tbody>
+</table>
+<p>The 4.1 open-loop results do not beat the strongest 4.0 PC/PCF rows. That is not sufficient to reject the correction, because 4.1 was designed around the closed-loop failure those open-loop rows missed. <code>4.1r</code> also shows a familiar warning pattern: very high straight recall, weak turn recall, and low median error. It should not be selected from MAE alone.</p>
+<p>See <a href="../../architecture/series-4-plan/">Series 4 Temporal Experiments</a> for the layer and loss details, and <a href="../../../model-evaluation/comparisons/model-selection-rubric/">Model Selection Rubric</a> for the promotion rules.</p>
               
             </div>
           </div><footer>

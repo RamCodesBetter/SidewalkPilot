@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -247,17 +247,17 @@
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Environment Setup</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery">Failure and recovery</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery">Failure and Recovery</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to attach</a>
+    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to Attach</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -345,12 +345,12 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="environment-setup">Environment Setup</h1>
-<p>How each SidewalkPilot machine is prepared before it can run its part of the stack: the Jetson Orin Nano inference host, Raspberry Pi 5 controller, Zero 2 W dashboard receiver, and Mac/PC workstations. The goal is a repeatable setup so a fresh device can be brought online without guessing at paths or ports.</p>
-<h2 id="how-it-works">How it works</h2>
+<p>This page explains how each SidewalkPilot machine is prepared for its role: the Jetson Orin Nano inference host, Raspberry Pi 5 controller, Zero 2 W dashboard receiver, and Mac and NVIDIA PC workstations. The goal is a repeatable setup that brings a new device online without guessing at paths or ports.</p>
+<h2 id="how-it-works">How It Works</h2>
 <p>The runtime discovers most of its layout from the repository itself and a small set of optional environment overrides, so setup is mostly "put the repo in the right place and connect the hardware."</p>
 <ul>
 <li><strong>Project and output paths</strong> are resolved in <code>config.py</code>. <code>PROJECT_ROOT</code> is four levels above <code>rc_car_app/config.py</code>; photos default to <code>PROJECT_ROOT/media/photos</code>, while CSV logs independently default to <code>~/logs</code>. <code>RC_CAR_PHOTO_DIR</code> and <code>RC_CAR_LOG_DIR</code> can override those defaults.</li>
-<li><strong>Model directory</strong>: <code>vision.py</code> loads steering checkpoints from <code>code/ai_models</code> (overridable with <code>RC_CAR_AI_MODELS_DIR</code>). Each Series 1/2 checkpoint follows the name <code>SidewalkPilot-v&lt;version&gt;.pth</code>.</li>
+<li><strong>Model directory:</strong> <code>vision.py</code> registers selectable versions on the Raspberry Pi 5. The Jetson Orin Nano inference server resolves the corresponding file from <code>code/ai_models</code> (overridable with <code>RC_CAR_AI_MODELS_DIR</code>). Series 1/2 use <code>SidewalkPilot-v&lt;version&gt;.pth</code>; Series 3/4 use <code>SidewalkPilot-v&lt;version&gt;.onnx</code>.</li>
 <li><strong>Dashboard transport</strong> defaults to UDP over the USB Ethernet gadget. The relevant config keys are <code>HUB75_DASHBOARD_TRANSPORT</code> (<code>udp</code>), <code>HUB75_DASHBOARD_HOST</code> (<code>192.168.10.2</code>), and <code>HUB75_DASHBOARD_UDP_PORT</code> (<code>8765</code>).</li>
 </ul>
 <p>Per-machine setup:</p>
@@ -365,13 +365,13 @@
 <tbody>
 <tr>
 <td>Jetson Orin Nano</td>
-<td>AI Model Manager for Series 3/4 ONNX inference</td>
-<td>ONNX Runtime, model <code>.onnx</code> files copied over, headless inference service; reachable at <code>10.42.0.2:8770</code> over direct Ethernet</td>
+<td>AI Model Manager for every steering-model family</td>
+<td>PyTorch and ONNX Runtime GPU dependencies, PTH and ONNX model files, and the headless inference service; reachable at <code>10.42.0.2:8770</code> over direct Ethernet</td>
 </tr>
 <tr>
 <td>Raspberry Pi 5</td>
-<td>Controller: Xbox controller, camera, LiDAR, GPS, hall sensor, servo, motors, logging, telemetry</td>
-<td>Repo cloned, Python deps (<code>gpiozero</code>, <code>adafruit-servokit</code>, <code>picamera2</code>, <code>pyserial</code>, <code>opencv</code>, <code>torch</code>), USB <code>usb0</code> at <code>192.168.10.1/24</code>, I2C enabled for the PCA9685 at <code>0x40</code></td>
+<td>Controller: Xbox controller, camera, LiDAR, GPS, Hall-effect wheel-speed sensor, servo, motors, logging, and telemetry</td>
+<td>Repository cloned, Python dependencies (<code>gpiozero</code>, <code>adafruit-servokit</code>, <code>picamera2</code>, <code>pyserial</code>, <code>opencv</code>, <code>torch</code>), USB <code>usb0</code> at <code>192.168.10.1/24</code>, and I2C enabled for the PCA9685 at <code>0x40</code></td>
 </tr>
 <tr>
 <td>Zero 2 W</td>
@@ -379,16 +379,16 @@
 <td>Repo synced (not a git checkout — populated by rsync/scp), <code>rpi-rgb-led-matrix</code> bindings built, USB <code>usb0</code> at <code>192.168.10.2/24</code>, valid <code>/etc/machine-id</code></td>
 </tr>
 <tr>
-<td>Mac / NVIDIA PC</td>
+<td>Mac and NVIDIA PC</td>
 <td>Git, sync, photo pull, training</td>
-<td>Git access, rsync, training deps for the trainers under <code>code/ai_models_datasets/</code></td>
+<td>Git access, rsync, and training dependencies for the trainers under <code>code/ai_models_datasets/</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>Deriving paths from the repo location means a fresh checkout works without hand-editing constants, and the same code runs on the Raspberry Pi 5 and in a laptop simulation fallback (the hardware layer degrades to dummy devices when GPIO/I2C is absent).</li>
-<li>Environment overrides exist for the few things that legitimately differ per host (log dir, photo dir, model dir) without turning the runtime into a pile of flags. Toggles that change behavior are kept in code, not asked of the operator at run time.</li>
+<li>Environment overrides cover the few values that legitimately differ by host (log, photo, and model directories) without requiring many command-line flags. Behavioral toggles remain in configuration rather than prompting the operator at run time.</li>
 <li>Fixed USB Ethernet addresses (<code>.1</code> Raspberry Pi 5, <code>.2</code> Zero 2 W) keep dashboard routing independent of Wi-Fi and mDNS.</li>
 </ul>
 <h2 id="verification">Verification</h2>
@@ -401,23 +401,23 @@ ip -br addr show usb0
 cat /sys/class/net/usb0/carrier
 </code></pre>
 <p>A healthy Raspberry Pi 5 controller prints <code>Hub75 dashboard telemetry transport: UDP (192.168.10.2:8765).</code> on startup, and the PCA9685 line <code>Using PCA9685 steering servo at 0x40, channel 0.</code> once I2C is up.</p>
-<h2 id="failure-and-recovery">Failure and recovery</h2>
+<h2 id="failure-and-recovery">Failure and Recovery</h2>
 <ul>
 <li><strong>Runtime drops to "simulation mode"</strong>: <code>hardware.py</code> caught a GPIO/I2C init error and swapped in dummy devices. Check wiring, I2C enablement, and that no other process holds the bus.</li>
 <li><strong>Zero 2 W boots then hangs headless</strong>: a missing <code>/etc/machine-id</code> triggers the systemd first-boot wizard. Regenerate the machine-id.</li>
-<li><strong>Model not found</strong>: confirm the checkpoint exists under <code>code/ai_models</code> (or set <code>RC_CAR_AI_MODELS_DIR</code>); the version string must match one in <code>STEERING_MODEL_VERSIONS</code>.</li>
+<li><strong>Model not found:</strong> confirm that the version is registered in <code>STEERING_MODEL_VERSIONS</code> on the Raspberry Pi 5 and that its matching PTH or ONNX file exists under <code>code/ai_models</code> on the Jetson Orin Nano (or set <code>RC_CAR_AI_MODELS_DIR</code>).</li>
 </ul>
-<h2 id="evidence-to-attach">Evidence to attach</h2>
+<h2 id="evidence-to-attach">Evidence to Attach</h2>
 <ul>
 <li>Compile / import log</li>
 <li><code>ip -br addr show usb0</code> output on both devices</li>
 <li>Controller startup lines (transport + servo)</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>operations/mac-pc-sync.md</code></li>
-<li><code>runbooks/sync-day/mac-to-pc.md</code></li>
-<li><code>publishing/mkdocs-site.md</code></li>
+<li><a href="../mac-pc-sync/">Mac and PC Sync</a></li>
+<li><a href="../../runbooks/sync-day/mac-to-pc/">Mac-to-PC Sync Runbook</a></li>
+<li><a href="../../publishing/mkdocs-site/">MkDocs Site Publishing</a></li>
 </ul>
               
             </div>

@@ -83,7 +83,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -115,7 +115,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -365,8 +365,8 @@ into a supervised physical-car experiment.</p>
 <table>
 <thead>
 <tr>
-<th>Manager</th>
-<th>Hardware</th>
+<th>Role</th>
+<th>Device</th>
 <th>Responsibility</th>
 </tr>
 </thead>
@@ -374,7 +374,7 @@ into a supervised physical-car experiment.</p>
 <tr>
 <td>AI Model Manager</td>
 <td>Jetson Orin Nano</td>
-<td>Receives the newest camera frame, runs Series 3/4 ONNX inference on the GPU, and returns a steering result</td>
+<td>Receives the newest camera frame, runs Series 1/2 with PyTorch CUDA or Series 3/4 with ONNX Runtime CUDA, and returns a steering result</td>
 </tr>
 <tr>
 <td>Hardware and Safety Controller</td>
@@ -388,27 +388,27 @@ into a supervised physical-car experiment.</p>
 </tr>
 </tbody>
 </table>
-<p>The Jetson Orin Nano is required for the current v3.4 and Series 4 self-driving path. The
-Raspberry Pi 5 rejects missing or stale Jetson Orin Nano results and remains the final hardware and
-safety controller; the Zero 2 W observes the system and does not control motion. Legacy
-Series 1/2 models can run locally, but they are not the current autonomy baseline.</p>
+<p>The Jetson Orin Nano is required for the current self-driving path. It runs all model families on
+its GPU: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. The Raspberry
+Pi 5 rejects missing or stale results and remains the final hardware and safety controller; the
+Zero 2 W observes the system and does not control motion.</p>
 <h2 id="runtime-architecture">Runtime Architecture</h2>
 <p>The control path is:</p>
 <pre><code class="language-text">Xbox controller ----------------------------+
-Raspberry Pi Camera -&gt; Raspberry Pi 5 -&gt; Jetson Orin Nano model --+--&gt; arbitration -&gt; servo and motors
+Raspberry Pi Camera Module 3 Wide -&gt; Raspberry Pi 5 -&gt; Jetson Orin Nano model --+--&gt; arbitration -&gt; servo and motors
 LiDAR --------------------------------------+         |
-GPS and hall sensor ------------------------+         +--&gt; logs and photos
+GPS and Hall-effect wheel-speed sensor -----+         +--&gt; logs and photos
                                                       +--&gt; Zero 2 W dashboard
 </code></pre>
-<p>Manual input is sampled in the Raspberry Pi 5 loop. Camera transmission and Jetson Orin Nano inference run in a background worker, so normal connection waits to an offline Jetson Orin Nano are not performed in the controller loop. LiDAR has its own reader and decision path. Dashboard transmission is also asynchronous. This reduces coupling but is not a formal worst-case latency guarantee.</p>
-<p>See <a href="../../runtime-code/runtime-loop/">Runtime Loop</a> and <a href="../../autonomy-stack/architecture/data-flow/">Data Flow</a> for exact timing and ownership.</p>
+<p>The Raspberry Pi 5 reads manual controls continuously. A separate worker sends camera frames to the Jetson Orin Nano, so a powered-off Jetson Orin Nano does not pause manual steering while the worker waits for a connection. LiDAR independently limits throttle or requests braking, and dashboard updates also run outside the controller loop. This design removed the pauses observed in one physical retest, but a formal worst-case latency has not been measured.</p>
+<p>See <a href="../../runtime-code/runtime-loop/">Runtime Loop</a> and <a href="../../autonomy-stack/architecture/data-flow/">Data Flow</a> for implementation timing and ownership.</p>
 <h2 id="learned-steering">Learned Steering</h2>
 <p>The model family has evolved in four stages:</p>
 <ul>
 <li><strong>Series 1:</strong> a compact 200x66 camera model established that image-to-steering learning could control the car.</li>
 <li><strong>Series 2:</strong> retained direct steering regression while refining the data and testing HSV/CLAHE preprocessing for difficult lighting.</li>
 <li><strong>Series 3:</strong> moved to 320x180 input and a larger network. v3.0 used separate steering and throttle outputs; v3.1 and later use a 19-value hybrid output containing nine steering-class logits, nine class-local regression offsets, and one throttle value.</li>
-<li><strong>Series 4:</strong> keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six PC/CF/PCF artifacts are trained and runtime-supported but not yet field-promoted.</li>
+<li><strong>Series 4:</strong> keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six v4.0 models are runtime-supported and field-tested; six corrected v4.1 models are trained and evaluated offline but not yet integrated.</li>
 </ul>
 <p>The current physical-car selection is <strong>v3.4</strong>, not the checkpoint with the lowest raw mean error. The project uses balanced steering metrics and field behavior because a dataset dominated by straight frames can reward a model that avoids turning.</p>
 <p>Read the <a href="../../ai-and-models/model-zoo/series-3/">Series 3 Model Zoo</a>, <a href="../../ai-and-models/model-zoo/series-4/">Series 4 Model Zoo</a>, and <a href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>.</p>
@@ -420,11 +420,11 @@ GPS and hall sensor ------------------------+         +--&gt; logs and photos
 <li>Hold the 60% reference command near an obstacle.</li>
 <li>Command a hard brake inside the emergency boundary.</li>
 </ul>
-<p>It cannot choose left or right steering. Earlier lane-based swerve logic was removed because LiDAR obstacle points do not identify the sidewalk boundary; a swerve away from an obstacle could send the car into grass, a curb, or another hazard.</p>
+<p>It cannot choose left or right steering because LiDAR obstacle points do not identify the sidewalk boundary; a distance return alone cannot establish that either side is safe sidewalk rather than grass, a curb, or another hazard.</p>
 <p>The AEB toggle controls all LiDAR slowdown and braking. When AEB is off, LiDAR does not change the car's motion in manual or autonomous mode. Before a run, the operator must confirm that the LiDAR is connected and updating.</p>
 <h2 id="data-and-training">Data and Training</h2>
-<p>Driving sessions save camera images with logical <code>0..180</code> steering labels and absolute physical throttle fractions. The trainer sorts the images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets. Series 3/4 apply lighting, color, flip, and synthetic-shadow augmentation, then evaluate exact steering classes, adjacent classes, error magnitude, and signed bias.</p>
-<p>Series 3 and 4 use the same <strong>81,237 real labeled images</strong> and split procedure. The generated report adapts all four architecture families and scores all 46 checkpoints on a common 6,952-frame challenge subset. Series 1-3 model repositories and the datasets are published on <a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face</a>; Series 4 publication waits for field results. Training runs are recorded in the project's configured experiment tracker.</p>
+<p>Driving sessions save camera images with logical <code>0..180</code> steering labels and absolute physical throttle fractions. The trainer sorts the images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets. Series 3 and 4 training applies lighting, color, flip, and synthetic-shadow augmentation, then evaluates exact steering classes, adjacent classes, error magnitude, and signed bias.</p>
+<p>Series 3 and 4 use the same <strong>81,237 real labeled images</strong> and split procedure. The generated report adapts all four architecture families and scores all 52 checkpoints on a common 6,952-frame challenge subset. Series 1-3 and Series 4.0 model repositories, plus the datasets, are published on <a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face</a>. The v4.1 models remain local while integration and field testing are pending. Training runs are recorded in the project's configured experiment tracker.</p>
 <h2 id="physical-hardware">Physical Hardware</h2>
 <table>
 <thead>
@@ -462,7 +462,7 @@ GPS and hall sensor ------------------------+         +--&gt; logs and photos
 </tr>
 <tr>
 <td>Wheel speed</td>
-<td>Hall-effect sensor through Raspberry Pi 5 GPIO</td>
+<td>Hall-effect wheel-speed sensor through Raspberry Pi 5 GPIO</td>
 <td>Supplies pulse-based speed and distance</td>
 </tr>
 <tr>
@@ -528,7 +528,7 @@ journalctl -u sidewalkpilot-z2w-dashboard.service -n 100 -l --no-pager
 </tr>
 <tr>
 <td><code>code/ai_models/</code></td>
-<td>Local/Hugging Face PTH and ONNX artifacts; binaries are ignored by Git</td>
+<td>Local/Hugging Face PTH and ONNX models; binaries are ignored by Git</td>
 </tr>
 <tr>
 <td><code>code/test_files/</code></td>
@@ -550,7 +550,7 @@ journalctl -u sidewalkpilot-z2w-dashboard.service -n 100 -l --no-pager
 <li>Camera-based steering on the physical car during supervised field runs.</li>
 <li>Manual takeover and shutdown through the Xbox controller.</li>
 <li>Model selection, camera capture, label collection, and Jetson Orin Nano inference.</li>
-<li>LiDAR slowdown and emergency braking in the center corridor.</li>
+<li>LiDAR center-corridor slowdown and emergency-braking logic in software and bench tests; a preserved physical stopping-distance result remains open.</li>
 <li>GPS route-planning software and a live external dashboard.</li>
 </ul>
 <h3 id="not-demonstrated">Not Demonstrated</h3>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -272,15 +272,15 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#reverse-sync-and-delete-risk">Reverse Sync and Delete Risk</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#stop-condition">Stop condition</a>
+    <li class="toctree-l2"><a class="reference internal" href="#stop-condition">Stop Condition</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#cleanup">Cleanup</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#notes-history">Notes / history</a>
+    <li class="toctree-l2"><a class="reference internal" href="#notes-and-history">Notes and History</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to attach</a>
+    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to Attach</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -384,30 +384,30 @@
 <li><strong>Verify counts match:</strong> <code>find &lt;run_dir&gt; -type f | wc -l</code> on both ends must agree, representative hashes should match, and a trainer scan on the PC should report <code>missing=0</code>.</li>
 </ol>
 <h2 id="reverse-sync-and-delete-risk">Reverse Sync and Delete Risk</h2>
-<p>Pulling PC-to-Mac follows the same rules: dry-run, scope to the named artifact/run, and omit <code>--delete</code>. A whole-repository reverse mirror can remove docs, datasets, or photos absent on the remote. Source code should return through Git; model/data artifacts should return through an explicit path.</p>
+<p>Pulling PC-to-Mac follows the same rules: dry-run, scope the transfer to the named model, dataset, or run, and omit <code>--delete</code>. A whole-repository reverse mirror can remove documentation, datasets, or photos that are absent on the remote. Source code should return through Git; model and data files should return through an explicit path.</p>
 <p>After transfer, compare counts and representative hashes, run the dataset/image audit where applicable, and inspect <code>git status</code> to ensure generated or binary data did not enter source control. If a transfer was interrupted, rerun the same additive copy rather than deleting the partial destination.</p>
-<h2 id="stop-condition">Stop condition</h2>
+<h2 id="stop-condition">Stop Condition</h2>
 <ul>
 <li>Abort if the dry run shows a delete, a whole-repo transfer, or any path outside <code>media/photos/...</code> (code should have gone through git, not rsync).</li>
 <li>Abort if branches disagree in a way that means the copy would clobber newer work. Resolve in git first.</li>
 </ul>
 <h2 id="cleanup">Cleanup</h2>
 <ul>
-<li>No generated artifacts to clean on a push. If a partial run folder was created by an interrupted copy, leave the files in place and re-run the same scoped rsync — do not delete to "start clean."</li>
+<li>There are no generated files to clean on a push. If an interrupted copy created a partial run folder, leave the files in place and rerun the same scoped rsync; do not delete them to "start clean."</li>
 </ul>
-<h2 id="notes-history">Notes / history</h2>
+<h2 id="notes-and-history">Notes and History</h2>
 <ul>
 <li>The everyday code-to-Raspberry Pi 5 direction is <code>rpisync</code> (pushes the local branch to the Raspberry Pi 5). That is the safe push. The dangerous alias is <code>mrpisync</code>, which pulls the whole remote tree back and can delete local files when combined with <code>--delete</code> — never use it for a Mac↔PC photo move.</li>
 <li>Photos, logs, datasets, and checkpoints are treated as irreplaceable data. They are never staged, renamed, or deleted as a side effect of a sync.</li>
 </ul>
-<h2 id="evidence-to-attach">Evidence to attach</h2>
+<h2 id="evidence-to-attach">Evidence to Attach</h2>
 <ul>
 <li>Dry-run (<code>rsync -avn</code>) output</li>
 <li>Branch status on both ends</li>
 <li>File/manifest counts before and after</li>
 <li>Trainer scan <code>missing=</code> line</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../operations/mac-pc-sync/">Mac and Computer Sync</a></li>
 <li><a href="../../../data-governance/data-quality/image-quality-checks/">Data Quality</a></li>

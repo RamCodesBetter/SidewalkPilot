@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -280,15 +280,15 @@
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Media Index</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#what-lives-here">What lives here</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-lives-here">What Lives Here</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-keep-an-index-and-keep-failures">Why keep an index (and keep failures)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-keep-an-index-and-keep-failures">Why Keep an Index (and Keep Failures)</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#status">Status</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#required-metadata">Required Metadata</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -344,15 +344,15 @@
               
                 <h1 id="media-index">Media Index</h1>
 <p>This page is the master index for all SidewalkPilot driving video, grouping the
-individual clip pages and stating what each set of footage is meant to prove.</p>
-<h2 id="what-lives-here">What lives here</h2>
+available field footage and stating what each set of recordings is meant to show.</p>
+<h2 id="what-lives-here">What Lives Here</h2>
 <p>Video is the primary field evidence for an autonomy project: a confusion matrix
 proves what a model does on held-out frames, but only recorded driving proves
-what the whole loop (Raspberry Pi 5 controller -&gt; Jetson Orin Nano inference at 10.42.0.2:8770
--&gt; camera/LiDAR/GPS fusion -&gt; PCA9685 Servo Controller + AT8236 Motor Controller + JGB37-520 DC motors) does on a real
-sidewalk. Each clip is tied to a model version, a route, a date, and a weather /
-lighting condition so a viewer can trust the artifact instead of taking a claim on
-faith.</p>
+what the whole loop (Raspberry Pi 5 controller -&gt; Jetson Orin Nano inference at
+<code>10.42.0.2:8770</code> -&gt; camera, LiDAR, and GPS state -&gt; PCA9685 Servo Controller,
+AT8236 Motor Controller, and JGB37-520 DC motors) does on a real sidewalk. Each
+clip should be tied to a model version, route, date, weather, and lighting
+condition so a viewer can assess the evidence in context.</p>
 <p>The media record groups:</p>
 <table>
 <thead>
@@ -385,7 +385,7 @@ faith.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="why-keep-an-index-and-keep-failures">Why keep an index (and keep failures)</h2>
+<h2 id="why-keep-an-index-and-keep-failures">Why Keep an Index (and Keep Failures)</h2>
 <p>Two reasons. First, a single indexed list with model version and condition columns
 is far easier to scan than prose scattered across a long report. Second, and more
 important for the technical record: <strong>failure clips are evidence too.</strong> The core
@@ -397,13 +397,13 @@ the failures would weaken the argument, not strengthen it.</p>
 <ul>
 <li>Clip capture is ongoing; most Series 3 field footage (v3.1b onward) is recent.</li>
 <li>v3.3/v3.3b were tested and rejected on July 13; v3.4 was selected. The run lacks a complete clip index.</li>
-<li>Series 4 field clips are planned, not yet recorded.</li>
+<li>Series 4.0 field clips were recorded and remain private pending indexing and privacy review. Series 4.1 has not been driven.</li>
 <li>Privacy review (faces, license plates, house numbers) is required before any clip
   is published externally; treat all raw footage as internal until reviewed.</li>
 </ul>
 <h2 id="required-metadata">Required Metadata</h2>
 <p>Every published clip or image should carry date, model/version where relevant, route/condition description, what is visible, whether the result is success/failure/illustration, and a privacy-review state. A cropped highlight without its run context is not standalone evidence.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a></li>
 <li><a href="../../../publishing/reports/">Reports and PDF</a></li>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -271,7 +271,7 @@
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Reports and PDF</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#current-artifacts">Current Artifacts</a>
+    <li class="toctree-l2"><a class="reference internal" href="#current-outputs">Current Outputs</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#comparison-contract">Comparison Contract</a>
     </li>
@@ -347,11 +347,11 @@
                 <h1 id="reports-and-pdf">Reports and PDF</h1>
 <p>SidewalkPilot keeps generated reports in the repository so a reader can inspect the exact
 evidence associated with a commit rather than relying on a manually copied metric.</p>
-<h2 id="current-artifacts">Current Artifacts</h2>
+<h2 id="current-outputs">Current Outputs</h2>
 <table>
 <thead>
 <tr>
-<th>Artifact</th>
+<th>Output</th>
 <th>File</th>
 <th>Source</th>
 <th>Scope</th>
@@ -362,7 +362,7 @@ evidence associated with a commit rather than relying on a manually copied metri
 <td>Steering Model Report</td>
 <td><code>docs/steering_model_report.pdf</code></td>
 <td><code>code/test_files/models/evaluate_sidewalkpilot_models.py</code></td>
-<td>46 checkpoints from v1.0 through v4.0c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table</td>
+<td>52 checkpoints from v1.0 through v4.1c on one 6,952-frame shared challenge set, plus a separate 2,224-image historical Series 1/2 table</td>
 </tr>
 <tr>
 <td>Machine-readable steering results</td>
@@ -370,15 +370,9 @@ evidence associated with a commit rather than relying on a manually copied metri
 <td>same evaluator</td>
 <td>complete metrics, source breakdowns, confusion matrices, checkpoint metadata, and historical Series 1/2 blocks</td>
 </tr>
-<tr>
-<td>CNN Parameter Visual Guide</td>
-<td><code>docs/cnn_parameter_visual_guide.pdf</code></td>
-<td>hand-authored visual guide</td>
-<td>layer and parameter-count explanation for the major architecture families</td>
-</tr>
 </tbody>
 </table>
-<p>The steering PDF is 22 pages in the current build. Its first page identifies the frozen
+<p>The steering PDF is 23 pages in the current build. Its first page identifies the frozen
 challenge-set size and architecture-specific preprocessing. The JSON is the source of the
 published values; the PDF is a rendering of those values.</p>
 <h2 id="comparison-contract">Comparison Contract</h2>
@@ -391,13 +385,14 @@ They are useful for reconstructing the early project, but they are not mixed int
 current cross-generation ranking.</p>
 <p>The class-balanced ranking uses Bal9, turn exact, turn +/-1, ST exact, MAE, median absolute
 error, and signed error. MAE is supporting evidence rather than the sole selection rule.
-The current offline leader by Bal9 is v4.0p; v3.4 remains the field-selected baseline until
-Series 4 completes physical testing.</p>
+The current offline leader by Bal9 is v4.0p. Physical testing rejected its history behavior,
+while v4.0f remained viable but did not clearly beat v3.4. The six v4.1 models are included
+in the report but have not yet been integrated into the live selector or field-tested.</p>
 <h2 id="reproduce">Reproduce</h2>
 <p>Run on the evaluation workstation with PyTorch, OpenCV, ReportLab, Matplotlib, and
 ONNX Runtime GPU installed:</p>
 <pre><code class="language-bash">cd ~/rc_car_code
-/home/rsabavat/.gpu-env/bin/python -u \
+python -u \
   code/test_files/models/evaluate_sidewalkpilot_models.py \
   --device cuda --batch-size 256
 </code></pre>
@@ -405,13 +400,13 @@ ONNX Runtime GPU installed:</p>
 <pre><code class="language-text">docs/steering_eval_current_labels.json
 docs/steering_model_report.pdf
 </code></pre>
-<p><code>--versions</code> can restrict a debugging run, but a publishable all-model report must be
+<p><code>--versions</code> can restrict a debugging run, but a publishable all-checkpoint report must be
 generated without that filter.</p>
 <h2 id="publication-checks">Publication Checks</h2>
 <p>Before publishing:</p>
 <ol>
 <li>Confirm the PDF and JSON come from the same run;</li>
-<li>Confirm all 46 expected model keys exist;</li>
+<li>Confirm all 52 expected model keys exist;</li>
 <li>Confirm the shared challenge count is 6,952;</li>
 <li>Check that planned work is labeled as planned;</li>
 <li>Avoid claims about a historical checkpoint's CARLA source mix unless its saved run
@@ -420,7 +415,7 @@ generated without that filter.</p>
 </ol>
 <h2 id="pdf-generation-contract">PDF Generation Contract</h2>
 <p>The evaluator owns both the JSON and PDF so table values are not manually recopied. A publishable report is generated from the full version list on the frozen challenge set, with GPU execution requested where available. Review page count, model count, gradient coloring, confusion matrices, Series 1/2 historical separation, and the field-status wording before committing the outputs.</p>
-<p>If the evaluator or dataset changes, regenerate JSON and PDF together. Never update one artifact while leaving the other from a different run.</p>
+<p>If the evaluator or dataset changes, regenerate the JSON and PDF together. Never update one output while leaving the other from a different run.</p>
 <h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../model-evaluation/offline-evaluation/overview/">Offline Evaluation</a></li>

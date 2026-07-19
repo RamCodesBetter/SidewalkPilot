@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -345,12 +345,12 @@
 <p>Series 3/4 sorts paths, groups adjacent samples into 100-frame windows, and assigns approximately every tenth window to validation. For 81,237 frames this produces 813 windows and approximately 81 validation windows. This reduces adjacent-frame leakage but does not provide full capture-run isolation.</p>
 <p>Training uses an augmented dataset copy. Validation uses the clean base copy. Any metric must retain its dataset, trainer, split method, and checkpoint context.</p>
 <h2 id="weighted-sampling">Weighted Sampling</h2>
-<p>Series 3 uses <code>WeightedRandomSampler</code> with replacement. For steering bucket <code>b</code>:</p>
+<p>The Series 3/4 trainer supports <code>WeightedRandomSampler</code> with replacement. When bucket and source weighting are enabled, the relative weight for steering bucket <code>b</code> is:</p>
 <pre><code class="language-text">bucket_weight = (median_nonempty_count / count[b]) ^ sampler_balance_power
 sample_weight = bucket_weight * source_weight
 </code></pre>
-<p>The default Series 3 balance power is <code>0.3</code>, with 50,000 draws per epoch. Source weights are correction <code>3.0</code>, real <code>2.0</code>, and CARLA-tagged <code>0.6</code>. These are relative sampling multipliers, not dataset percentages.</p>
-<p>The fixed Series 4 experiments use <code>sampler_balance_power = 0.0</code>, deterministic left/right balance flipping, and class weighting in the loss. Historical commands and W&amp;B configuration remain the source of truth for a particular run.</p>
+<p>The general trainer defaults expose a balance power of <code>0.3</code> and relative source factors of correction <code>3.0</code>, real <code>2.0</code>, and CARLA-tagged <code>0.6</code>. Those settings describe trainer capability, not every completed run.</p>
+<p>The current v3.4 and Series 4 experiments used 50,000 sampler draws per epoch with <code>sampler_balance_power = 0.0</code>, deterministic left and right balance flipping, and class weighting in the loss. Their 81,237-image training root is entirely real, and no correction or CARLA root was loaded, so source factors did not change one sample's probability relative to another. Saved commands and run configuration remain the source of truth for a particular model.</p>
 <h2 id="overfitting-and-straight-collapse">Overfitting and Straight Collapse</h2>
 <p>Most sidewalk frames are near straight. A model that predicts center for every image can obtain a deceptively low aggregate error while failing turns. The project counters this with augmentation, dropout, weight decay, balanced sampling or class weighting, clean validation, confusion matrices, Bal9, turn recall, and field testing.</p>
 <p>Sampling cannot invent missing scene diversity. Excessive rebalancing can repeatedly expose a small set of rare frames, and aggressive augmentation can erase useful turn cues. Promotion therefore never relies on training loss or MAE alone.</p>

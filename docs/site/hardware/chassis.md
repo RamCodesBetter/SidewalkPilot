@@ -9,7 +9,7 @@ dashboard - is mounted on this chassis.
 
 - [Yahboom Ackermann 520M Chassis](https://www.amazon.com/dp/B0BR9PGZWN?th=1&linkCode=sl1&tag=ramcodes-20&linkId=2d71e1269d116bb03b4dca16401e9028&language=en_US&ref_=as_li_ss_tl) — $99.99
 
-## How it works
+## How It Works
 
 - The chassis uses **Ackermann steering**: the front wheels pivot on a linkage driven by a
   single steering servo, while the drive comes from JGB37-520 DC motors rated for 12 V and
@@ -23,7 +23,7 @@ dashboard - is mounted on this chassis.
   can have multiple contributors, including linkage geometry, load, surface, trim, and
   motor balance; the current motor scales remain neutral at `1.0` on both sides.
 
-## Why this choice
+## Why This Choice
 
 - An Ackermann chassis produces car-like turning geometry, which keeps the steering-model
   labels meaningful and matches the target domain (sidewalks/roads) far better than a
@@ -32,7 +32,7 @@ dashboard - is mounted on this chassis.
   autonomy stack instead of fabricating a frame - the same reuse-what-exists reasoning
   behind the rest of the build.
 
-## Related pages
+## Related Pages
 
 - [Hardware Build Overview](build-overview.md)
 - [Bench Tests](../testing/bench-tests/overview.md)

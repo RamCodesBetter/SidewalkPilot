@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -348,11 +348,11 @@
 <ul>
 <li>Use the same supervised route and comparable lighting for every candidate.</li>
 <li>Start and end with the current v3.4 baseline when time permits.</li>
-<li>Include normal left/right turns and both directions of turn under hard shadows.</li>
+<li>Include normal left and right turns and both turn directions under hard shadows.</li>
 <li>Record interventions, oscillation, late turns, edge drift, and model/link freshness.</li>
 <li>Preserve the matching video and CSV rather than relying on memory.</li>
 </ul>
-<p>The next ordered comparison is v3.4, v4.0p, v4.0r, v4.0a, v4.0c, v3.4b, v4.0f, and v4.0g, with an optional closing v3.4 control.</p>
+<p>The next comparison occurs after v4.1 live integration and steering-echo bench replay. Use v3.4 and v4.0f as controls, test the v4.1 models that pass replay, and close with v3.4 when conditions allow.</p>
 <h2 id="lidar-test-method">LiDAR Test Method</h2>
 <p>The current LiDAR policy has one center corridor and no steering output. With AEB enabled, verify progressive throttle capping at the 1.65 m and 1.25 m boundaries and a hard stop at 1.05 m. Run the first checks with wheels unloaded, then conduct low-speed physical obstacle tests under the real payload.</p>
 <p>Record distance, requested throttle, actual speed, brake response, surface, battery state, and false triggers. A unit test proves policy math; only a physical run characterizes stopping performance.</p>
@@ -360,15 +360,16 @@
 <ul>
 <li>v3.4 was selected in the July 13 shadow/turn comparison.</li>
 <li>v3.3 and v3.3b regressed in that field comparison; v3.4b was slightly worse than v3.4.</li>
-<li>Series 4 has completed offline evaluation and runtime integration but has not yet been driven.</li>
+<li>All six v4.0 models were driven. v4.0f was viable but mixed against v3.4; v4.0g was worse; v4.0 PC/PCF models echoed prior predictions.</li>
+<li>Six v4.1 correction models are trained and evaluated offline but not yet integrated or driven.</li>
 <li>The latest center-corridor LiDAR configuration still needs a preserved physical result.</li>
 </ul>
 <h2 id="preflight-and-run-record">Preflight and Run Record</h2>
-<p>Before leaving, confirm batteries, connectors, tire/linkage condition, controller pairing, model artifacts, storage space, camera, LiDAR, GPS where needed, IMU where enabled, Jetson Orin Nano Ethernet, dashboard USB, and a physical power-cut method. Begin with wheels unloaded after hardware or control changes.</p>
-<p>For each run preserve model and artifact hash, branch/commit, route and direction, lighting/weather/surface, payload and battery state, AEB state, start/end time, distance, CSV, clips, and every takeover with cause and location. Define pass/warn/fail before driving.</p>
-<p>The planned Series 4 comparison uses the order above so v3.4 is a control. A closing v3.4 repeat helps reveal a route, battery, or lighting change during the session.</p>
+<p>Before leaving, confirm batteries, connectors, tire/linkage condition, controller pairing, model files, storage space, camera, LiDAR, GPS where needed, IMU where enabled, Jetson Orin Nano Ethernet, dashboard USB, and a physical power-cut method. Begin with wheels unloaded after hardware or control changes.</p>
+<p>For each run preserve model version and file hash, branch/commit, route and direction, lighting/weather/surface, payload and battery state, AEB state, start/end time, distance, CSV, clips, and every takeover with cause and location. Define pass/warn/fail before driving.</p>
+<p>The next Series 4 comparison should begin with v3.4, include v4.0f as a second control, and then test only the v4.1 models that pass integration and replay checks. A closing v3.4 repeat helps reveal route, battery, or lighting changes during the session.</p>
 <h2 id="manual-takeovers">Manual Takeovers</h2>
-<p>A takeover begins when qualifying manual input cancels autonomy. Review the nominal 10 Hz CSV together with video to identify the prior autonomous interval, navigation node/route position, model, steering/throttle state, sensor freshness, and intervention cause. A future analysis utility is planned; until then, claims should not exceed what the preserved log can reconstruct.</p>
+<p>A takeover begins when qualifying manual input cancels autonomy. <code>code/test_files/data/takeover_log_report.py</code> identifies valid manual disengagements, their cause, run time, preceding autonomous duration, speed, steering, throttle/brake state, AEB state, and model when the CSV payload contains it. Review that output with video and available navigation telemetry to identify route position or node; the utility does not infer a node that the log did not record. Claims should not exceed what the preserved files can reconstruct.</p>
               
             </div>
           </div><footer>

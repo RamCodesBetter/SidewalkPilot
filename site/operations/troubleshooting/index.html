@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -255,25 +255,25 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Troubleshooting</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#dashboard-shows-no-link">Dashboard shows NO LINK</a>
+    <li class="toctree-l2"><a class="reference internal" href="#dashboard-shows-no-link">Dashboard Shows NO LINK</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#controller-exits-immediately">Controller exits immediately</a>
+    <li class="toctree-l2"><a class="reference internal" href="#controller-exits-immediately">Controller Exits Immediately</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#lidar-reads-none-zero">LiDAR reads none / zero</a>
+    <li class="toctree-l2"><a class="reference internal" href="#lidar-reads-none-or-zero">LiDAR Reads None or Zero</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#gps-permission-denied">GPS permission denied</a>
+    <li class="toctree-l2"><a class="reference internal" href="#gps-permission-denied">GPS Permission Denied</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#usb-enumeration-errors-on-the-zero-2-w">USB enumeration errors on the Zero 2 W</a>
+    <li class="toctree-l2"><a class="reference internal" href="#usb-enumeration-errors-on-the-zero-2-w">USB Enumeration Errors on the Zero 2 W</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#zero-2-w-boots-then-hangs-headless">Zero 2 W boots then hangs headless</a>
+    <li class="toctree-l2"><a class="reference internal" href="#zero-2-w-boots-then-hangs-headless">Zero 2 W Boots Then Hangs Headless</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-discipline">Why this discipline</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-discipline">Why This Discipline</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery-quick-table">Failure and recovery quick table</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery-quick-table">Failure and Recovery Quick Table</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to attach</a>
+    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to Attach</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -354,7 +354,7 @@
               
                 <h1 id="troubleshooting">Troubleshooting</h1>
 <p>The consolidated failure playbook for SidewalkPilot: the dashboard link, the controller, sensors, and the USB gadget. Each entry names the machine, the check, what it can break, and how to confirm the fix. The guiding rule is prove, do not assume — grep the value across every layer and observe the wire before forming a theory.</p>
-<h2 id="dashboard-shows-no-link">Dashboard shows <code>NO LINK</code></h2>
+<h2 id="dashboard-shows-no-link">Dashboard Shows <code>NO LINK</code></h2>
 <p><code>NO LINK</code> means the Zero 2 W receiver is alive but has not received a packet recently. Work outward from the sender:</p>
 <ol>
 <li><strong>Raspberry Pi 5 — controller running?</strong> Confirm the controller process is up and printed its UDP transport line.</li>
@@ -363,34 +363,34 @@
 <li><strong>Ping both ways</strong>: <code>ping -c 3 192.168.10.2</code> from the Raspberry Pi 5, <code>ping -c 3 192.168.10.1</code> from the Zero 2 W.</li>
 <li><strong>Carrier <code>1</code> but ping fails</strong> — the classic ARP/USB stall. Restart the USB keeper, or run the USB hard-reset sequence on both devices.</li>
 </ol>
-<h2 id="controller-exits-immediately">Controller exits immediately</h2>
+<h2 id="controller-exits-immediately">Controller Exits Immediately</h2>
 <ul>
-<li>Almost always "No joystick detected." Connect the Xbox controller before starting the controller.</li>
+<li>If the log says "No joystick detected," connect the Xbox controller before starting the controller.</li>
 <li>If it drops to "Running in simulation mode," <code>hardware.py</code> caught a GPIO/I2C init error and swapped in dummy devices — check wiring, I2C enablement, and bus contention.</li>
 </ul>
-<h2 id="lidar-reads-none-zero">LiDAR reads none / zero</h2>
+<h2 id="lidar-reads-none-or-zero">LiDAR Reads None or Zero</h2>
 <ul>
 <li>Confirm the LiDAR is present: the FHL-LD19 is currently on USB <code>/dev/ttyUSB0</code> via a CP2102 UART-to-USB Adapter at <code>230400</code> baud (it was previously GPIO UART <code>/dev/ttyAMA2</code>).</li>
 <li>Confirm the LiDAR motor is spinning.</li>
 <li>Stop any second reader before a raw serial test — two readers on one port is a common cause.</li>
 </ul>
-<h2 id="gps-permission-denied">GPS permission denied</h2>
+<h2 id="gps-permission-denied">GPS Permission Denied</h2>
 <ul>
 <li>The error looks like permission denied on <code>/dev/ttyAMA0</code>. Confirm the serial console is freed on that UART and check group membership / port ownership.</li>
 <li>Do not confuse the GPS port (<code>/dev/ttyAMA0</code>, <code>9600</code>) with the LiDAR port.</li>
 </ul>
-<h2 id="usb-enumeration-errors-on-the-zero-2-w">USB enumeration errors on the Zero 2 W</h2>
+<h2 id="usb-enumeration-errors-on-the-zero-2-w">USB Enumeration Errors on the Zero 2 W</h2>
 <ul>
 <li><code>-110</code>/<code>-62</code> or "device descriptor read" errors establish an enumeration failure; they do not identify power, cable, port, host, or device as the cause. Reproduce with the known working power arrangement, data cable, and host port before replacing hardware.</li>
-<li>If the Zero 2 W is reachable over Wi-Fi but not USB, fix the dedicated USB path before continuing dashboard debugging.</li>
+<li>If the Zero 2 W is not reachable over the dedicated USB link, repair that link before continuing dashboard debugging; the current dashboard has no Wi-Fi fallback.</li>
 </ul>
-<h2 id="zero-2-w-boots-then-hangs-headless">Zero 2 W boots then hangs headless</h2>
+<h2 id="zero-2-w-boots-then-hangs-headless">Zero 2 W Boots Then Hangs Headless</h2>
 <ul>
 <li>A missing <code>/etc/machine-id</code> runs the systemd first-boot wizard, which stalls a headless boot. Regenerate the machine-id.</li>
 </ul>
-<h2 id="why-this-discipline">Why this discipline</h2>
-<p>Repeatable, machine-labelled checks reduce accidental branch leaks, sync damage, and deployment confusion, and they stop the real failure mode: asserting a cause from the armchair. When a value is wrong on the wire, grep that value across <strong>every</strong> file first (config, runtime, serializer, renderer), read the whole file rather than a single grepped line, check which process is actually running (<code>pgrep -af</code>, <code>/proc/PID/cwd</code>), and instrument the data path end-to-end before declaring it fixed. A remembered case cost ~2.5 hours because a hardcoded literal in the serializer was assumed away instead of grepped.</p>
-<h2 id="failure-and-recovery-quick-table">Failure and recovery quick table</h2>
+<h2 id="why-this-discipline">Why This Discipline</h2>
+<p>Repeatable, machine-labeled checks reduce accidental branch leaks, sync damage, and deployment confusion. They also prevent a common failure: asserting a cause before tracing the data. When a value is wrong on the wire, search for that value across <strong>every</strong> file first (configuration, runtime, serializer, and renderer), read each complete file rather than one matching line, check which process is actually running (<code>pgrep -af</code>, <code>/proc/PID/cwd</code>), and instrument the complete data path before declaring the issue fixed.</p>
+<h2 id="failure-and-recovery-quick-table">Failure and Recovery Quick Table</h2>
 <table>
 <thead>
 <tr>
@@ -437,17 +437,17 @@
 </tr>
 </tbody>
 </table>
-<h2 id="evidence-to-attach">Evidence to attach</h2>
+<h2 id="evidence-to-attach">Evidence to Attach</h2>
 <ul>
 <li>Command output for the failing check</li>
 <li><code>ss</code>/<code>ip</code>/<code>ping</code> results</li>
 <li>Relevant startup lines from the affected process</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>operations/mac-pc-sync.md</code></li>
-<li><code>runbooks/sync-day/mac-to-pc.md</code></li>
-<li><code>publishing/mkdocs-site.md</code></li>
+<li><a href="../mac-pc-sync/">Mac and PC Sync</a></li>
+<li><a href="../../runbooks/sync-day/mac-to-pc/">Mac-to-PC Sync Runbook</a></li>
+<li><a href="../../publishing/mkdocs-site/">MkDocs Site Publishing</a></li>
 </ul>
               
             </div>

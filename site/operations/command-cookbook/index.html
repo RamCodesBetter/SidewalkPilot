@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -353,6 +353,11 @@
 </thead>
 <tbody>
 <tr>
+<td>Jetson Orin Nano</td>
+<td><code>pgrep -af jetson_inference_server.py</code> and <code>ss -ltnp \| grep 8770</code></td>
+<td>Inference server is running and listening on the direct Ethernet link</td>
+</tr>
+<tr>
 <td>Raspberry Pi 5</td>
 <td><code>car</code></td>
 <td>Controller initialization completes; dashboard model page shows intended version</td>
@@ -389,7 +394,7 @@
 </tr>
 </tbody>
 </table>
-<p>The live controller has no <code>--model</code> flag. Select all Series 1-4 versions on the dashboard model page, or set <code>RC_CAR_STEERING_MODEL</code> before startup.</p>
+<p>The live controller has no <code>--model</code> flag. Select a registered model through the dashboard model page, or set <code>RC_CAR_STEERING_MODEL</code> before startup. The current selector includes Series 1 through 3 and Series 4.0; Series 4.1 has not yet been integrated.</p>
 <h2 id="logs">Logs</h2>
 <pre><code class="language-bash">journalctl -u sidewalkpilot-rpi-car.service -n 100 -l --no-pager
 journalctl -u sidewalkpilot-z2w-dashboard.service -n 100 -l --no-pager

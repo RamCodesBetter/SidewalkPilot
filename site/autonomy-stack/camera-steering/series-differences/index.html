@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -74,13 +74,13 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Series Differences</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#design-progression">Design progression</a>
+    <li class="toctree-l2"><a class="reference internal" href="#design-progression">Design Progression</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#key-findings">Key findings</a>
+    <li class="toctree-l2"><a class="reference internal" href="#key-findings">Key Findings</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -99,7 +99,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -344,7 +344,7 @@
 <p>Series 1/2, Series 3, and experimental Series 4 are different answers to the same question:
 look at a sidewalk and decide how to steer. They differ in architecture, input history,
 output horizon, deployment target, and evaluation criteria.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <table>
 <thead>
 <tr>
@@ -387,9 +387,9 @@ output horizon, deployment target, and evaluation criteria.</p>
 </tr>
 <tr>
 <td>Runs on</td>
-<td>Raspberry Pi 5</td>
 <td>Jetson Orin Nano</td>
-<td>Jetson Orin Nano runtime-supported; not field-promoted</td>
+<td>Jetson Orin Nano</td>
+<td>Jetson Orin Nano for v4.0; v4.1 integration pending</td>
 </tr>
 <tr>
 <td>Throttle</td>
@@ -403,14 +403,13 @@ output horizon, deployment target, and evaluation criteria.</p>
 scale of <code>86.0°</code>, Series 2 uses <code>85.0°</code> (<code>SERIES_1/2_STEERING_OUTPUT_SCALE_DEG</code>), and the
 runtime picks Series by the model-choice prefix (<code>steering_model_series()</code>: <code>2.</code> → Series 2,
 else Series 1).</p>
-<h2 id="design-progression">Design progression</h2>
-<p>Series 1/2 established the compact Raspberry Pi 5-capable regression path. v3.0 tested a larger
+<h2 id="design-progression">Design Progression</h2>
+<p>Series 1/2 established the compact regression path. v3.0 tested a larger
 regression model on 320x180 input. v3.1 and later changed the steering contract to a class
 plus within-class offset, which makes class recall directly measurable while retaining a
 continuous angle. The Series 3 graph also contains a throttle output, but current training
-and deployment do not use learned throttle. The larger visual model is deployed on Jetson Orin Nano;
-the project has not published a Raspberry Pi 5-versus-Jetson Orin Nano latency benchmark for this architecture.</p>
-<h2 id="key-findings">Key findings</h2>
+and deployment do not use learned throttle. The current unified server runs every model family on the Jetson Orin Nano GPU: PyTorch CUDA for Series 1/2 and ONNX Runtime CUDA for Series 3/4.</p>
+<h2 id="key-findings">Key Findings</h2>
 <ul>
 <li><strong>Turn-vs-shadow observation.</strong> Some field-tested iterations that reacted more strongly
   to turn cues also followed shadow edges; more center-biased checkpoints could miss turns.
@@ -422,15 +421,15 @@ the project has not published a Raspberry Pi 5-versus-Jetson Orin Nano latency b
 </ul>
 <p>v3.4 is the current field-selected baseline. In the July 13 comparison it handled every
 presented shadow case; v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was
-much worse than v3.2b. All three Series 4 runs completed. Their six ONNX artifacts passed
-signature and CUDA inference checks, and the Jetson Orin Nano runtime supports all three contracts.
-No Series 4 field test has occurred, so offline results order candidates but do not select
-a field baseline.</p>
-<h2 id="related-pages">Related pages</h2>
+much worse than v3.2b. All six v4.0 models were later driven: v4.0f was viable but mixed
+against v3.4, v4.0g was worse, and the PC/PCF models echoed previous predictions. Six v4.1
+correction models are trained and evaluated offline, but they are not yet integrated or driven.
+The Jetson Orin Nano runtime currently supports all three v4.0 contracts.</p>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/architecture/data-flow.md</code></li>
-<li><code>runtime-code/runtime-loop.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../../architecture/data-flow/">Control Architecture and Runtime Data Flow</a></li>
+<li><a href="../../../runtime-code/runtime-loop/">Runtime Loop</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

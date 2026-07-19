@@ -69,7 +69,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -101,7 +101,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -344,8 +344,9 @@
                 <h1 id="sidewalkpilot">SidewalkPilot</h1>
 <p>SidewalkPilot is a solo-built autonomous RC-car research platform that uses a camera model to steer along sidewalks while a separate LiDAR layer can slow or stop the vehicle. The project began in early April 2025 after a smaller Raspberry Pi Pico project. It grew from a drivable RC chassis into a complete hardware, data, model, deployment, and safety system.</p>
 <p>It is a real, working vehicle rather than a simulation-only demonstration. The Jetson Orin
-Nano is the AI brain for current Series 3/4 autonomy, running the neural network that turns
-camera frames into steering predictions. The Raspberry Pi 5 is the hardware and safety
+Nano is the AI brain for every live-selectable steering-model family: Series 1/2 run through
+PyTorch CUDA and Series 3/4 run through ONNX Runtime CUDA. It turns camera frames into
+steering predictions. The Raspberry Pi 5 is the hardware and safety
 controller, and the Zero 2 W drives a live 64x32 dashboard. Without a fresh Jetson Orin Nano result,
 current autonomy stops rather than driving on a stale prediction. An Xbox controller remains
 the manual takeover and shutdown interface.</p>
@@ -356,18 +357,18 @@ the manual takeover and shutdown interface.</p>
 <p>The field-selected steering model is <strong>SidewalkPilot v3.4</strong>. In the July 13, 2026 comparison, it completed every shadow case presented during the run and handled the normal left and right turns included in that test. This mattered because sharp tree shadows had repeatedly caused earlier models to follow the shadow edge instead of the sidewalk.</p>
 <p>The result is supported by two different kinds of evidence:</p>
 <ul>
-<li><a href="model-evaluation/offline-evaluation/overview/">Offline model evaluation</a> compares all 46 Series 1-4 checkpoints on the same frozen 6,952-frame challenge set from the 81,237-image Series 3/4 dataset.</li>
+<li><a href="model-evaluation/offline-evaluation/overview/">Offline model evaluation</a> compares all 52 Series 1-4 checkpoints on the same frozen 6,952-frame challenge set from the 81,237-image Series 3/4 dataset.</li>
 <li><a href="model-evaluation/field-evaluation/overview/">Field evaluation</a> records the qualitative v3.3 through v3.4b comparison and its evidence limits.</li>
 </ul>
 <p>Offline scores did not choose the winner by themselves. v3.4b had a slightly lower mean absolute error, but v3.4 had stronger balanced turn behavior and won on the physical car.</p>
 <h2 id="what-the-car-does">What the Car Does</h2>
 <ol>
-<li>The Raspberry Pi Camera captures a forward sidewalk view.</li>
+<li>The Raspberry Pi Camera Module 3 Wide captures a forward sidewalk view.</li>
 <li>The Raspberry Pi 5 submits the newest frame to a background Jetson Orin Nano client so connection and inference waits do not run in the controller loop.</li>
-<li>The Jetson Orin Nano runs the selected ONNX model and returns a steering prediction.</li>
+<li>The Jetson Orin Nano runs the selected model on its GPU and returns a steering prediction.</li>
 <li>The Raspberry Pi 5 applies steering, throttle policy, manual takeover, and LiDAR emergency braking.</li>
 <li>The Zero 2 W displays steering, model, navigation, camera, temperature, and LiDAR telemetry over a dedicated USB network.</li>
-<li>Camera frames and absolute steering/throttle labels are saved for the next training iteration.</li>
+<li>During operator-enabled collection runs, camera frames and logical steering/absolute throttle labels are saved for the next training iteration.</li>
 </ol>
 <p>Read <a href="start-here/project-overview/">Project Overview</a> for the full component map or <a href="autonomy-stack/architecture/data-flow/">Data Flow</a> for the runtime path.</p>
 <h2 id="the-engineering-journey">The Engineering Journey</h2>
@@ -382,8 +383,8 @@ the manual takeover and shutdown interface.</p>
 <p>The full sequence is in the <a href="start-here/build-timeline/">Build Timeline</a> and <a href="engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>.</p>
 <h2 id="reader-paths">Reader Paths</h2>
 <ul>
-<li><strong>Media and public readers:</strong> <a href="portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>, then <a href="start-here/build-timeline/">Build Timeline</a>.</li>
-<li><strong>Technical reviewers:</strong> <a href="portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>, then <a href="portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>.</li>
+<li><strong>Media and public readers:</strong> <a href="portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>, then <a href="start-here/build-timeline/">Build Timeline</a>.</li>
+<li><strong>Technical reviewers:</strong> <a href="portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>, then <a href="portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>.</li>
 <li><strong>Builders:</strong> <a href="start-here/project-overview/">Project Overview</a>, <a href="runtime-code/runtime-loop/">Runtime Loop</a>, and <a href="operations/nvidia-pc/">Computer Operations</a>.</li>
 <li><strong>Safety reviewers:</strong> <a href="safety-case/safety-overview/">Safety Overview</a>, <a href="autonomy-stack/lidar-safety/aeb/">LiDAR AEB</a>, and <a href="safety-and-ethics/research-scope/">Research Scope and Limits</a>.</li>
 </ul>
@@ -442,5 +443,5 @@ the manual takeover and shutdown interface.</p>
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-07-17 09:12:09.523055+00:00
+Build Date UTC : 2026-07-19 06:38:18.498642+00:00
 -->

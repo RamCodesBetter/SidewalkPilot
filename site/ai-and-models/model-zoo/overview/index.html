@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -341,7 +341,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-zoo">Model Zoo</h1>
-<p>SidewalkPilot has <strong>46 evaluated checkpoints</strong> across four series. Version numbers identify experiments; a newer name is not a guarantee of better driving.</p>
+<p>SidewalkPilot has <strong>52 evaluated checkpoints</strong> across four series. The live selector currently contains 46 versions through Series 4.0; the six Series 4.1 models are trained and offline-evaluated but not yet integrated. Version numbers identify experiments, not guaranteed improvements.</p>
 <h2 id="families">Families</h2>
 <table>
 <thead>
@@ -387,68 +387,104 @@
 <td><code>320x180</code> + 3 targets</td>
 <td>one 18-value steering horizon</td>
 <td style="text-align: right;">5,569,186</td>
-<td>strongest offline temporal candidate</td>
+<td>rejected after steering echo in field testing</td>
 </tr>
 <tr>
 <td>4.0 CF</td>
 <td><code>320x180</code></td>
 <td>four 18-value steering horizons</td>
 <td style="text-align: right;">5,537,560</td>
-<td>future-supervision experiment</td>
+<td><code>4.0f</code> viable; complementary to v3.4</td>
 </tr>
 <tr>
 <td>4.0 PCF</td>
 <td><code>320x180</code> + 3 targets</td>
 <td>four 18-value steering horizons</td>
 <td style="text-align: right;">5,572,696</td>
-<td>combined temporal experiment</td>
+<td>rejected after steering echo in field testing</td>
+</tr>
+<tr>
+<td>4.1 PC</td>
+<td><code>320x180</code> + 3 targets</td>
+<td>corrected history training; one horizon</td>
+<td style="text-align: right;">5,537,460</td>
+<td>trained and offline-evaluated; integration pending</td>
+</tr>
+<tr>
+<td>4.1 CF</td>
+<td><code>320x180</code></td>
+<td>corrected future-target loss; four horizons</td>
+<td style="text-align: right;">5,537,560</td>
+<td>trained and offline-evaluated; integration pending</td>
+</tr>
+<tr>
+<td>4.1 PCF</td>
+<td><code>320x180</code> + 3 targets</td>
+<td>corrected history/future training; four horizons</td>
+<td style="text-align: right;">5,544,480</td>
+<td>trained and offline-evaluated; integration pending</td>
 </tr>
 </tbody>
 </table>
 <h2 id="field-and-research-state">Field and Research State</h2>
-<p>Regular <strong>v3.4</strong> is the current field-selected model. It won the July 13, 2026 comparison across every shadow case presented and the tested normal left/right turns.</p>
-<p>Series 4 is trained and runtime-supported. <code>4.0p</code> currently leads the common offline evaluation, but no Series 4 checkpoint has been field-tested. The field-selected default therefore stays on v3.4 until a controlled physical comparison says otherwise.</p>
+<p>Regular <strong>v3.4</strong> is the current field-selected model. It won the July 13, 2026 comparison across every shadow case presented and the tested normal left and right turns.</p>
+<p>Series 4.0 was field-tested. <code>4.0f</code> was viable and traded two passed/failed cases with v3.4, but it did not establish a clear promotion case. <code>4.0p/r/a/c</code> repeated prior steering predictions and were rejected. Series 4.1 was trained to address that failure and still needs runtime integration and physical testing.</p>
 <h2 id="paired-checkpoints">Paired Checkpoints</h2>
 <p>Series 1-3 use a numeric model and a <code>b</code> checkpoint. Series 4 uses contract-specific letters:</p>
 <table>
 <thead>
 <tr>
 <th>Run</th>
-<th>Final</th>
-<th>Best-validation</th>
+<th>Final epoch</th>
+<th>Validation-selected</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>PC</td>
+<td>4.0 PC</td>
 <td><code>4.0p</code></td>
 <td><code>4.0r</code></td>
 </tr>
 <tr>
-<td>CF</td>
+<td>4.0 CF</td>
 <td><code>4.0f</code></td>
 <td><code>4.0g</code></td>
 </tr>
 <tr>
-<td>PCF</td>
+<td>4.0 PCF</td>
 <td><code>4.0a</code></td>
 <td><code>4.0c</code></td>
 </tr>
+<tr>
+<td>4.1 PC</td>
+<td><code>4.1p</code></td>
+<td><code>4.1r</code></td>
+</tr>
+<tr>
+<td>4.1 CF</td>
+<td><code>4.1f</code></td>
+<td><code>4.1g</code></td>
+</tr>
+<tr>
+<td>4.1 PCF</td>
+<td><code>4.1a</code></td>
+<td><code>4.1c</code></td>
+</tr>
 </tbody>
 </table>
-<p>For current Series 3/4 runs, “best validation” means lowest steering/current-target MAE during that run. Series 1/2 used validation loss. Neither rule means field-best. Regular v3.4 beat v3.4b on the car, and <code>4.0p</code> has stronger turn metrics than its lower-MAE partner <code>4.0r</code>.</p>
-<p>Regular artifacts preserve the final requested epoch. Their paired <code>b/r/g/c</code> artifacts
+<p>For Series 3 and 4.0, validation selection primarily follows steering or current-target MAE. Series 4.1 PC/PCF also include closed-loop rollout error in checkpoint selection. Series 1/2 used validation loss. No rule makes the alternate model field-best.</p>
+<p>Regular model files preserve the final requested epoch. Their paired <code>b/r/g/c</code> models
 preserve the epoch selected by that trainer's validation objective. Both are retained so
 validation behavior can be compared with field behavior. The suffix records provenance,
 not superiority. A release must keep version, filename, model card, architecture contract,
-and artifact hash aligned; the field-selected default changes only after a recorded drive.</p>
+and model hash aligned; the field-selected default changes only after a recorded drive.</p>
 <h2 id="selection-evidence">Selection Evidence</h2>
 <p>Aggregate MAE is secondary because the challenge set is straight-heavy. Review Bal9, turn exact, turn within one class, straight exact, signed error, confusion behavior, and a fixed field route together.</p>
 <ul>
 <li><a href="../series-3/">Series 3 Model Table</a></li>
 <li><a href="../series-4/">Series 4 Model Table</a></li>
 <li><a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a></li>
-<li><a href="../../../model-evaluation/comparisons/offline-vs-field/">Offline vs Field</a></li>
+<li><a href="../../../model-evaluation/comparisons/offline-vs-field/">Offline Versus Field</a></li>
 <li><a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face profile</a></li>
 </ul>
               

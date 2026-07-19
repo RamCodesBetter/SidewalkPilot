@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -251,17 +251,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Mac and Computer Sync</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#public-safe-examples">Public-safe examples</a>
+    <li class="toctree-l2"><a class="reference internal" href="#public-safe-examples">Public-Safe Examples</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery">Failure and recovery</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery">Failure and Recovery</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to attach</a>
+    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to Attach</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -344,9 +344,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="mac-pc-sync">Mac / PC Sync</h1>
-<p>Moving code, datasets, photos, and models between the Mac and the NVIDIA PC (and out to the Raspberry Pi 5) without a sync accidentally deleting the docs tree or a photo run. This is the operation that has bitten the project hardest, so the rules here are conservative on purpose.</p>
-<h2 id="how-it-works">How it works</h2>
+                <h1 id="mac-and-pc-sync">Mac and PC Sync</h1>
+<p>This page explains how to move code, datasets, photos, and models between the Mac and the NVIDIA PC, and how to deploy code to the Raspberry Pi 5, without accidentally deleting documentation or a photo run. Previous reverse-sync failures justify the deliberately conservative rules below.</p>
+<h2 id="how-it-works">How It Works</h2>
 <p>Two directions of sync exist, and they are not symmetric:</p>
 <ul>
 <li><strong>Push code to the Raspberry Pi 5</strong>: sends the local branch's controller/runtime code to the Raspberry Pi 5 after switching and pulling the chosen branch. This is the safe, everyday direction.</li>
@@ -358,13 +358,13 @@
 <li><code>media/photos/YYYY_MM_DD_run_N/</code> — field photo runs, often with a JSON manifest.</li>
 <li><code>code/ai_models/*.pth</code> — model checkpoints.</li>
 </ul>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
-<li>A reverse whole-repo <code>rsync --delete</code> is dangerous: it has produced docs/site/generated-site deletion symptoms when the remote did not contain those trees. For photo pulls, sync <strong>only</strong> the target <code>media/photos/...</code> folder, or drop <code>--delete</code> entirely.</li>
+<li>A reverse whole-repository <code>rsync --delete</code> is dangerous: it has deleted documentation and generated-site files when the remote did not contain those trees. For photo pulls, sync <strong>only</strong> the target <code>media/photos/...</code> folder, or omit <code>--delete</code> entirely.</li>
 <li>Photos, logs, datasets, and checkpoints are never staged, renamed, or deleted as a side effect of a sync. They are the project's irreplaceable field data.</li>
 <li>Keeping "push code to Raspberry Pi 5" and "pull tree to laptop" as clearly distinct operations stops the risky direction from being run by muscle memory.</li>
 </ul>
-<h2 id="public-safe-examples">Public-safe examples</h2>
+<h2 id="public-safe-examples">Public-Safe Examples</h2>
 <p>Use placeholders for private hosts and pull only the folder you actually want:</p>
 <pre><code class="language-bash"># Pull ONE photo run from a device, no --delete
 rsync -av &lt;user&gt;@&lt;device&gt;:~/rc_car_code/media/photos/2026_07_02_run_1/ \
@@ -374,19 +374,19 @@ rsync -av &lt;user&gt;@&lt;device&gt;:~/rc_car_code/media/photos/2026_07_02_run_
 rsync -av ./code/controller/current/ &lt;user&gt;@&lt;pi&gt;:~/rc_car_code/code/controller/current/
 </code></pre>
 <p>Never run a whole-repo reverse sync with <code>--delete</code>.</p>
-<h2 id="failure-and-recovery">Failure and recovery</h2>
+<h2 id="failure-and-recovery">Failure and Recovery</h2>
 <ul>
-<li><strong>Docs / site disappeared after a pull</strong>: a reverse <code>--delete</code> sync removed trees the remote lacked. Recover from git (<code>git status</code>, <code>git checkout</code> the deleted paths) rather than re-syncing.</li>
+<li><strong>Documentation or generated site disappeared after a pull:</strong> a reverse <code>--delete</code> sync removed trees that were absent on the remote. Recover tracked files through Git rather than repeating the sync.</li>
 <li><strong>A photo run looks truncated</strong>: verify the manifest count against the files on disk before assuming loss; do not delete anything to "clean up."</li>
 <li><strong>Uncertain which direction to run</strong>: default to the push-to-Raspberry Pi 5 direction and pull only a named data folder. When in doubt, drop <code>--delete</code>.</li>
 </ul>
-<h2 id="evidence-to-attach">Evidence to attach</h2>
+<h2 id="evidence-to-attach">Evidence to Attach</h2>
 <ul>
 <li>Dry-run (<code>rsync -avn ...</code>) output before the real run</li>
 <li>Branch status on both ends</li>
 <li>File/manifest counts before and after</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../runbooks/sync-day/mac-to-pc/">Sync Day</a></li>
 <li><a href="../../publishing/mkdocs-site/">MkDocs Site</a></li>

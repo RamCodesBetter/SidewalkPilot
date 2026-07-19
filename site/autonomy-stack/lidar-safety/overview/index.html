@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -78,17 +78,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">LiDAR Safety Overview</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#why-lidar-does-not-steer">Why LiDAR Does Not Steer</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#layer-priority">Layer priority</a>
+    <li class="toctree-l2"><a class="reference internal" href="#layer-priority">Layer Priority</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#current-status">Current status</a>
+    <li class="toctree-l2"><a class="reference internal" href="#current-status">Current Status</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -103,7 +103,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -348,7 +348,7 @@
 <p>The LiDAR safety layer is SidewalkPilot's deterministic center-corridor throttle and
 braking guard. It sits outside the neural steering model: the model owns steering,
 while LiDAR can reduce forward throttle or request a stop when AEB is enabled. It does
-not select a swerve direction.</p>
+not output steering.</p>
 <p>The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
 connects over USB through a CP2102 UART-to-USB Adapter (auto-resolved from
 <code>/dev/serial/by-id/*CP2102*</code>, falling back to <code>/dev/ttyUSB*</code>); an earlier wiring used the
@@ -356,7 +356,7 @@ Raspberry Pi 5's GPIO UART at <code>/dev/ttyAMA2</code>. A background reader thr
 (<code>rc_car_app/lidar.py</code>, <code>LidarParser</code>) parses the raw packet stream into a full 360-degree
 scan of <code>LidarPoint</code> objects, and the main control loop in <code>rc_car_app/runtime.py</code> pulls
 the latest scan once per iteration with <code>get_latest_scan()</code>.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <p>The pipeline is a straight line from bytes to a throttle or braking decision:</p>
 <ol>
 <li><strong>Parse.</strong> <code>LidarParser</code> reads the LD19's 47-byte packets, extracts 12 measurement
@@ -375,22 +375,20 @@ the latest scan once per iteration with <code>get_latest_scan()</code>.</p>
 <p>The same computed policy is reused within a control iteration, so autonomous command
 generation and final hardware arbitration do not intentionally interpret two different
 scans. Operator input can cancel autonomy while the controller and Raspberry Pi 5 loop are responsive.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <p>Keeping close-range throttle and braking outside the neural network makes those decisions
 explicit and auditable. The model handles visual path choice; LiDAR handles measured
 center clearance. This is a bounded design decision, not a claim that LiDAR detects every
 hazard or that the configured threshold guarantees a particular stopping distance.</p>
 <h2 id="why-lidar-does-not-steer">Why LiDAR Does Not Steer</h2>
-<p>SidewalkPilot previously implemented fixed left/right LiDAR steering and later a
-left/center/right lane concept. Both were removed. Obstacle points can identify occupied
-range but cannot prove where the sidewalk ends or whether apparently empty space is grass,
+<p>Obstacle points can identify occupied range but cannot prove where the sidewalk ends or whether apparently empty space is grass,
 a curb, sparse sensing, or another unseen hazard. The current policy therefore always
 returns no steering command. One autonomous steering owner is easier to reason about: the
 camera model chooses the path, while LiDAR constrains only longitudinal motion.</p>
 <p>The runtime also does not cluster or classify LiDAR points. It uses the nearest valid return
 inside one center corridor. This intentionally simple rule cannot distinguish a person from
 a wall, estimate object width, or establish that adjacent space is traversable.</p>
-<h2 id="layer-priority">Layer priority</h2>
+<h2 id="layer-priority">Layer Priority</h2>
 <table>
 <thead>
 <tr>
@@ -417,19 +415,17 @@ a wall, estimate object width, or establish that adjacent space is traversable.<
 </tr>
 </tbody>
 </table>
-<h2 id="current-status">Current status</h2>
+<h2 id="current-status">Current Status</h2>
 <p>Implemented and wired into the runtime: packet parsing, background reconnect, center
-occupancy, progressive throttle governance, AEB braking, and dashboard telemetry. The
-earlier left/center/right swerve-through design was removed because range points alone do
-not identify a safe sidewalk boundary. Quantitative stopping-distance, false-positive,
+occupancy, progressive throttle governance, AEB braking, and dashboard telemetry. LiDAR does not provide steering because range points alone do not identify a safe sidewalk boundary. Quantitative stopping-distance, false-positive,
 and obstacle-coverage evidence is still to be collected.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/architecture/data-flow.md</code></li>
-<li><code>autonomy-stack/lidar-safety/aeb.md</code></li>
-<li><code>hardware/lidar.md</code></li>
-<li><code>runtime-code/runtime-loop.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../../architecture/data-flow/">Control Architecture and Runtime Data Flow</a></li>
+<li><a href="../aeb/">Autonomous Emergency Braking</a></li>
+<li><a href="../../../hardware/lidar/">LiDAR Hardware</a></li>
+<li><a href="../../../runtime-code/runtime-loop/">Runtime Loop</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

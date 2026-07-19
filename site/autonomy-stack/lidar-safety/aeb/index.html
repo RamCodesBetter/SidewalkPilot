@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -80,17 +80,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Autonomous Emergency Braking</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#center-corridor-distance-regions">Center-Corridor Distance Regions</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#enabling-disabling">Enabling / disabling</a>
+    <li class="toctree-l2"><a class="reference internal" href="#enabling-and-disabling">Enabling and Disabling</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#key-constants">Key constants</a>
+    <li class="toctree-l2"><a class="reference internal" href="#key-constants">Key Constants</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -103,7 +103,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -348,7 +348,7 @@
 <p>Automatic Emergency Braking (AEB) gates the center-corridor LiDAR intervention policy. When
 enabled, LiDAR may progressively cap forward throttle and request a full brake at the
 emergency boundary. The driver can toggle the policy.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <p>Each control-loop iteration evaluates the current scan once through
 <code>lidar_avoidance.evaluate(scan, enabled=metrics.aeb_enabled)</code>. The result contains the
 center clearance, throttle cap, occupancy, action, and stop request. The final brake check
@@ -410,18 +410,18 @@ trigger input remains physical and must cross the measured dead zone before the 
 <p>The dashboard draws four colored distance rungs and two center-corridor guides. Side points
 remain visible as context but cannot change the center action. Empty or stale scans cannot
 prove clearance, so sensor freshness must be checked independently before motion testing.</p>
-<h2 id="enabling-disabling">Enabling / disabling</h2>
+<h2 id="enabling-and-disabling">Enabling and Disabling</h2>
 <p>AEB defaults to enabled (<code>Metrics.aeb_enabled = True</code>). The driver toggles it with
 controller button <code>AEB_TOGGLE_BUTTON = 14</code>; the change prints to the console and queues a
 dashboard notification. The dashboard shows the state as <code>AEB:ON</code> / <code>AEB:OFF</code>.
 <code>AEB_ACTIVATION_DELAY_SEC = 1.0</code> remains declared in <code>config.py</code>, but no current code reads
 it. It therefore does not create an activation delay.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <p>AEB is outside the neural model so the configured intervention is explicit: progressive
 slowdown followed by a close-range brake. It does not prove that all obstacles will be
 detected or that 1.05 m is sufficient under every speed, surface, payload, and brake state;
 those are field-test questions.</p>
-<h2 id="key-constants">Key constants</h2>
+<h2 id="key-constants">Key Constants</h2>
 <table>
 <thead>
 <tr>
@@ -464,12 +464,12 @@ those are field-test questions.</p>
 </tbody>
 </table>
 <p>Field-test logs and video demonstrating an AEB stop are planned to be attached.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/architecture/data-flow.md</code></li>
-<li><code>autonomy-stack/lidar-safety/overview.md</code></li>
-<li><code>runtime-code/runtime-loop.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../../architecture/data-flow/">Control Architecture and Runtime Data Flow</a></li>
+<li><a href="../overview/">LiDAR Safety Overview</a></li>
+<li><a href="../../../runtime-code/runtime-loop/">Runtime Loop</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

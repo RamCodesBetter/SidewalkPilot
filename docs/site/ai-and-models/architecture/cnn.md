@@ -9,13 +9,16 @@ SidewalkPilot uses custom convolutional networks to map a forward camera frame t
 | Series 1/2 | `3x66x200` | 672,877 | direct steering regression |
 | Series 3 v3.0 | `3x180x320` | approximately 5.53M | steering + throttle regression |
 | Series 3 v3.1+ | `3x180x320` | v3.4: 5,534,115 | 9 logits + 9 offsets + throttle |
-| Series 4 PC | image + three targets | 5,569,186 | one 18-value steering horizon |
-| Series 4 CF | image | 5,537,560 | four 18-value steering horizons |
-| Series 4 PCF | image + three targets | 5,572,696 | four 18-value steering horizons |
+| Series 4.0 PC | image + three targets | 5,569,186 | one 18-value steering horizon |
+| Series 4.0 CF | image | 5,537,560 | four 18-value steering horizons |
+| Series 4.0 PCF | image + three targets | 5,572,696 | four 18-value steering horizons |
+| Series 4.1 PC | image + three targets | 5,537,460 | one 18-value steering horizon |
+| Series 4.1 CF | image | 5,537,560 | four 18-value steering horizons |
+| Series 4.1 PCF | image + three targets | 5,544,480 | four 18-value steering horizons |
 
 Parameter counts are weights, not megabytes. FP32 normally stores each parameter in four bytes, so approximately 5.5 million parameters require approximately 22 MB before small graph metadata. That is why the Series 3/4 ONNX files are about 22.1-22.3 MB.
 
-## Series 1/2 Network
+## Series 1 and 2 Network
 
 The early network uses five convolution stages with channels `3 -> 24 -> 36 -> 48 -> 64 -> 64`, adaptive pooling to `64x4x8`, and a compact dense steering head. The output is bounded by `tanh` and decoded around logical center:
 
@@ -33,20 +36,20 @@ v3.0 uses the early two-output contract. v3.1 and later use the hybrid steering 
 
 ```text
 probabilities = softmax(9 logits)
-class = argmax(probabilities)
+class = argmax(softmax(class_logits))
 fraction = sigmoid(offset_for_selected_class)
 steering = class_low + fraction * (class_high - class_low)
 ```
 
-The class term encourages commitment to turns; the local offset preserves a continuous servo command instead of limiting output to nine fixed angles. The implementation can select `argmax(logits)` directly because softmax preserves their ordering and therefore selects the same class.
+The decoder applies softmax to the nine logits and then applies argmax to those probabilities. The separately named `probabilities` vector is also returned as telemetry. The class term encourages commitment to turns; the local offset preserves a continuous servo command instead of limiting output to nine fixed angles.
 
 ## Series 4 Visual and Temporal Network
 
 Series 4 reuses the Series 3 convolutional backbone. Adaptive pooling and dense layers produce a 256-value image feature.
 
-PC and PCF normalize the three prior targets as `(steering - 90) / 90`, encode them through `3 -> 32 -> 64`, concatenate the 64 history features with the 256 image features, and fuse `320 -> 128 -> 64`.
+Series 4.0 PC and PCF normalize the three prior targets as `(steering - 90) / 90`, encode them through `3 -> 32 -> 64`, concatenate the 64 history features with the 256 image features, and fuse `320 -> 128 -> 64`. Series 4.1 PC and PCF instead encode bounded steering motion and predict a bounded image-led correction to reduce the steering-echo behavior found in v4.0.
 
-CF has no history branch and maps `256 -> 64`. Each horizon then uses its own `64 -> 18` output layer. The extra history/fusion layers explain why PC/PCF are slightly larger than CF; the four small horizon heads add much less capacity than the dense visual encoder.
+CF has no history branch and maps `256 -> 64`. Each horizon then uses its own `64 -> 18` output layer. The history and fusion layers explain why PC/PCF differ slightly in size from CF; the four small horizon heads add much less capacity than the dense visual encoder.
 
 ## Input Preprocessing
 

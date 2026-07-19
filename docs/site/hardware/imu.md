@@ -16,7 +16,7 @@ This implementation status is not a blanket field-validation claim: a run should
 startup `Yaw-rate PID steering ENABLED` line and fresh yaw telemetry before its result is
 attributed to the controller.
 
-## How it works
+## How It Works
 
 - The MG24 streams inertial data over UART to the Raspberry Pi 5. The gyro's yaw axis gives the car's
   turn rate directly.
@@ -29,19 +29,19 @@ attributed to the controller.
   IMU data is stale.
 - Kp, Ki, and Kd can be adjusted in memory from the dashboard tuning page. A field record
   must preserve those values rather than assuming the checked-in defaults were active.
-- Bench calibration utilities are tracked in `code/test_files`. A local run may produce files such as `code/test_files/sensors/imu_calib.csv`, but that output is not a tracked publication artifact in this branch.
+- Bench calibration utilities are tracked in `code/test_files`. A local run may produce files such as `code/test_files/sensors/imu_calib.csv`, but that output is not a tracked publication file in this branch.
 
-## Why it matters
+## Why It Matters
 
 - Bench work observed direction-dependent return behavior: the same nominal center command
   did not always produce the same motion after a left versus right approach. The checked-in
   controller therefore uses different feed-forward centers (`119.5` and `107.8`). The branch
-  does not contain a traceable artifact supporting a single exact hysteresis angle, so none
+  does not contain a traceable measurement supporting a single exact hysteresis angle, so none
   is claimed here.
 - The current design combines measured feed-forward values with inertial feedback instead
   of relying only on a guessed center offset.
 
-## Related pages
+## Related Pages
 
 - [Steering Servo](steering-servo.md)
 - [Pin Map](wiring/pin-map.md)

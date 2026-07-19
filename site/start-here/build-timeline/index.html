@@ -82,12 +82,14 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#july-14-2026-series-4-temporal-experiments">July 14, 2026: Series 4 Temporal Experiments</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#july-2026-series-4-field-test-and-v41-corrections">July 2026: Series 4 Field Test and v4.1 Corrections</a>
+    </li>
     </ul>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -119,7 +121,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -375,7 +377,7 @@
 <p>The project expanded to include camera capture, labeling, motor control, steering calibration, LiDAR processing, GPS and navigation work, telemetry, and safety behavior. The design also began growing from one small computer toward separate inference, control, and display roles.</p>
 <p>Mechanical steering alignment and linkage slop became persistent problems. A physically misaligned steering mechanism delayed serious photo collection by roughly 2.5 weeks. During this broader development period, the car also completed an early approximately 0.5-mile physical autonomy run with five interventions, or roughly 0.1 miles per intervention. The exact date and complete run record were not preserved, so that result is historical context rather than a formal benchmark.</p>
 <h2 id="april-2026-learn-steering-from-images">April 2026: Learn Steering from Images</h2>
-<p>Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. The Series 1/2 training corpus combined approximately 2,000-3,000 real field images with 50,000 CARLA-generated images from several randomized maps. Steering corrections supplied revised labels, while regular plus <code>b</code> checkpoints preserved final-epoch and best-validation behavior separately.</p>
+<p>Series 1 created the first end-to-end image-to-steering pipeline. A compact CNN accepted 200x66 images and regressed a steering command. The Series 1/2 training dataset combined approximately 2,000-3,000 real field images with 50,000 CARLA-generated images from several randomized maps. Steering corrections supplied revised labels, while regular plus <code>b</code> models preserved final-epoch and validation-selected behavior separately.</p>
 <p>The achievement was not a perfect model. It was proving the complete loop from human driving, to labels, to GPU training, to a physical autonomous run.</p>
 <h2 id="late-april-may-2026-refine-data-and-preprocessing">Late April-May 2026: Refine Data and Preprocessing</h2>
 <p>Later Series 1 models and Series 2 retained direct steering regression while exploring cleaner data, corrections, steering ranges, and lighting preprocessing. HSV/CLAHE variants tested whether fixed contrast enhancement could protect the model from difficult exposure.</p>
@@ -393,7 +395,7 @@
 <p>Harsh diagonal tree shadows became the defining failure. Earlier models sometimes followed a dark shadow edge as if it were the edge of the sidewalk. The training pipeline added stronger lighting and synthetic-shadow augmentation, while evaluation expanded beyond mean error to balanced nine-class and turn metrics.</p>
 <h2 id="2026-steering-mechanics-and-calibration">2026: Steering Mechanics and Calibration</h2>
 <p>Physical steering did not behave like an ideal 0-to-180-degree mechanism. The chassis showed asymmetric return behavior, load effects, and hysteresis. Bench tools stepped the servo through known commands; controller-driven trim tools exposed center offsets; wheel geometry was plotted and fitted to compare left and right behavior.</p>
-<p>The project separated <strong>absolute servo commands</strong>, which describe what hardware receives, from <strong>reference steering values</strong>, which preserve a clean 0-to-180 model and display convention. Current runtime calibration uses a <code>+12D</code> center trim.</p>
+<p>The project separated <strong>logical steering targets</strong>, which preserve a clean 0-to-180 model and display convention, from <strong>calibrated physical servo commands</strong>, which include the hardware mapping and trim. Current runtime calibration uses a <code>+17°</code> center trim.</p>
 <h2 id="2026-lidar-from-detection-to-bounded-braking">2026: LiDAR from Detection to Bounded Braking</h2>
 <p>LiDAR integration went through USB disconnects, UART experiments, motor-enable wiring, packet parsing, and dashboard visualization. A multi-lane swerve-through design was implemented and then removed.</p>
 <p>The removal was a safety decision. Obstacle points alone do not reveal the safe sidewalk boundary, so choosing left or right could steer into grass, a curb, or an unseen object. The current system uses one center corridor and only changes longitudinal motion: clear, slow, hold, or emergency brake.</p>
@@ -401,7 +403,7 @@
 <p>The Zero 2 W dashboard experienced boot-order problems, <code>NO LINK</code> states, damaged-port enumeration failures, and intermittent USB networking. Permanent NetworkManager profiles and a USB link-keeper service were added on both computers. The current design uses USB-only telemetry at fixed <code>192.168.10.1/24</code> and <code>192.168.10.2/24</code> addresses, with no Wi-Fi fallback.</p>
 <p>The dashboard was simplified to one Waveshare 64x32 HUB75 display. Obsolete MAX7219 and photo-count pages were removed from the current runtime and documentation.</p>
 <h2 id="july-13-2026-v34-field-selection">July 13, 2026: v3.4 Field Selection</h2>
-<p>Four recent models were compared on the physical car in shadow cases and normal left/right turns:</p>
+<p>Four recent models were compared on the physical car in shadow cases and normal left and right turns:</p>
 <ul>
 <li>v3.4 completed every shadow case presented and ranked first;</li>
 <li>v3.4b was slightly worse;</li>
@@ -413,21 +415,24 @@
 <p>Manual steering and the dashboard had been running smoothly for several seconds, pausing briefly, then resuming. A direct controller test was instantaneous, which ruled out Bluetooth as the main cause.</p>
 <p>The runtime audit found blocking work in the control path, especially repeated network waits to an offline Jetson Orin Nano, photo-directory scans, and temperature subprocesses. Jetson Orin Nano communication moved to a background worker with latest-frame semantics; dashboard sending remained asynchronous; recurring file and subprocess work left the loop. In one physical retest with the Jetson Orin Nano powered off, the previously observed periodic pauses were absent. A long-duration latency trace is still an evidence gap.</p>
 <h2 id="july-14-2026-series-4-temporal-experiments">July 14, 2026: Series 4 Temporal Experiments</h2>
-<p>The first Series 4 implementation compares three temporal contracts on the unchanged 81,237-image Series 3 dataset and the same deterministic split procedure:</p>
+<p>The first Series 4 implementation compares three temporal contracts on the unchanged 81,237-image Series 3/4 dataset and the same deterministic split procedure:</p>
 <ul>
 <li>PC uses the image plus previous steering targets to predict the current target;</li>
 <li>CF uses the image to predict current and future targets;</li>
 <li>PCF combines previous-target inputs with current/future supervision.</li>
 </ul>
-<p>The three 25-epoch W&amp;B runs completed and produced six final/best artifacts: <code>4.0p/4.0r</code>, <code>4.0f/4.0g</code>, and <code>4.0a/4.0c</code>. Each trainer exported a valid 320x180 ONNX graph. The live Jetson Orin Nano server was then extended to inspect each model's signature, maintain causal history for PC/PCF, decode 18-value steering horizons, and preserve the existing Raspberry Pi 5–Jetson Orin Nano wire protocol.</p>
-<p>All 46 Series 1 through Series 4 checkpoints were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test makes the offline comparison more informative than comparing each family on a different image distribution. Series 4 remains experimental until physical-car testing; v3.4 remains the field-selected baseline.</p>
+<p>The three 25-epoch W&amp;B runs completed and produced six final/validation-selected models: <code>4.0p/4.0r</code>, <code>4.0f/4.0g</code>, and <code>4.0a/4.0c</code>. Each trainer exported a valid 320x180 ONNX graph. The live runtime was then extended to validate each model's signature, carry three causal steering targets in a versioned Raspberry Pi 5–Jetson Orin Nano request, and decode the current 18-value steering horizon.</p>
+<p>All 46 checkpoints through Series 4.0 were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test made the offline comparison more informative than comparing each family on a different image distribution.</p>
+<h2 id="july-2026-series-4-field-test-and-v41-corrections">July 2026: Series 4 Field Test and v4.1 Corrections</h2>
+<p>All six v4.0 models were driven. Image-only v4.0f was viable but mixed against v3.4, v4.0g was worse, and the PC/PCF models repeatedly echoed earlier steering predictions. v3.4 therefore remained the field-selected baseline.</p>
+<p>The next three 25-epoch runs retained the PC, CF, and PCF contracts but changed the history representation, loss terms, history perturbations, and checkpoint selection to address that failure. They produced six v4.1 models. The common report was regenerated for all 52 checkpoints. The v4.1 models are evaluated offline but are not yet integrated into the live selector or physically tested.</p>
 <p>The current deployed research state is maintained in <a href="../current-status/">Current Status</a>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../current-status/" class="btn btn-neutral float-left" title="Current Status"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/" class="btn btn-neutral float-right" title="5 Minute Technical Tour">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/" class="btn btn-neutral float-right" title="5-Minute Technical Tour">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>

@@ -12,10 +12,10 @@ the operator judges unsafe (a bad steering angle, driving toward a person, enter
 a road). The software override reduces this risk only while the controller is connected
 and the Raspberry Pi 5 event loop remains responsive; it is not a substitute for physical power control.
 
-## Detection and trigger
+## Detection and Trigger
 
 The main loop watches the Xbox controller (pygame) every iteration. Autonomous mode
-is cancelled by `cancel_autonomous_mode()` when the loop processes any of these:
+is canceled by `cancel_autonomous_mode()` when the loop processes any of these:
 
 - **Steering input** with `abs(value) > 0.1` (`STEERING_AXIS`).
 - **Gas** with `throttle > 0.05` (`THROTTLE_AXIS`).
@@ -23,7 +23,7 @@ is cancelled by `cancel_autonomous_mode()` when the loop processes any of these:
 
 Pressing the autonomy toggle (`AUTONOMY_TOGGLE_BUTTON = 0`) turns autonomous mode
 off directly. Any of these also cancels cruise control. Navigation "AUTO" segments
-are cancelled by the same operator inputs via `navigation_manual_input_should_cancel`.
+are canceled by the same operator inputs via `navigation_manual_input_should_cancel`.
 
 ## Response
 
@@ -37,7 +37,7 @@ sets `shutdown_flag`, which breaks the main loop and runs the ordered teardown a
 exit, sending a dashboard shutdown, stopping sensors/camera, and cleaning up GPIO
 (`dashboard_sender.send_shutdown()`, `hardware.cleanup()`).
 
-## Stop condition and who triggers it
+## Stop Condition and Who Triggers It
 
 The operator triggers override. In the implemented arbitration order, manual
 input takes priority over model steering but not over enabled AEB; an AEB
@@ -53,9 +53,9 @@ ordering does not cover a disconnected controller or failed control process.
 - Field evidence: the operator uses manual takeover during supervised runs; a
   labeled, timed override-latency test has not yet been preserved.
 
-## Series 3 note
+## Jetson Orin Nano Inference Note
 
-Series 3 moves steering inference to the Jetson Orin Nano, but override still lives on
+Steering inference runs on the Jetson Orin Nano, but override still lives on
 the Raspberry Pi 5 in the same loop and is unchanged: the Raspberry Pi 5 owns the controller and the motors,
 so operator override does not depend on the model host being reachable.
 
@@ -72,7 +72,7 @@ so operator override does not depend on the model host being reachable.
 
 Fault handling must be tested with wheels unloaded before intentional disconnect tests on the ground.
 
-## Related pages
+## Related Pages
 
 - [Safety Overview](../safety-overview.md)
 - [Field Testing](../../testing/field-testing/overview.md)

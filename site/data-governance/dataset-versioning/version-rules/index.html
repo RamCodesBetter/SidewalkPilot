@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -226,15 +226,15 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#snapshot-naming-and-active-labels">Snapshot Naming and Active Labels</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#good-vs-bad-example">Good vs bad example</a>
+    <li class="toctree-l2"><a class="reference internal" href="#valid-and-invalid-examples">Valid and Invalid Examples</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#validation">Validation</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#recovery-when-a-rule-is-broken">Recovery when a rule is broken</a>
+    <li class="toctree-l2"><a class="reference internal" href="#recovery-when-a-rule-is-broken">Recovery When a Rule Is Broken</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -380,12 +380,20 @@
 <td>shared 81,237-frame dataset</td>
 </tr>
 <tr>
-<td>4</td>
+<td>4.0</td>
 <td>PC / CF / PCF, 5.54-5.57M params</td>
 <td>320x180 plus optional previous targets</td>
 <td>steering horizons only</td>
 <td>same Series 3/4 base records</td>
-<td>experimental, trained; field test pending</td>
+<td>all six models field-tested; CF model v4.0f remained viable</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td>PC / CF / PCF, 5.54-5.55M params</td>
+<td>320x180 plus optional previous targets</td>
+<td>steering horizons only</td>
+<td>same Series 3/4 base records</td>
+<td>trained and evaluated offline; not integrated into the live selector or field-tested</td>
 </tr>
 </tbody>
 </table>
@@ -400,12 +408,12 @@
 </ol>
 <h2 id="snapshot-naming-and-active-labels">Snapshot Naming and Active Labels</h2>
 <p>Working run folders use date/run identities; published dataset repositories use stable series identities. The active label set is the exact base snapshot plus any explicitly named correction file used by a command. A local file's presence does not make it active.</p>
-<p>Removed labels should be recorded as exclusions with a reason rather than erased from project history. Historical metrics remain attached to the dataset, trainer, split, and artifact that produced them. They are never silently recalculated and presented under the old name.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<p>Removed labels should be recorded as exclusions with a reason rather than erased from project history. Historical metrics remain attached to the dataset, trainer, split, and model that produced them. They are never silently recalculated and presented under the old name.</p>
+<h2 id="why-this-choice">Why This Choice</h2>
 <p>Offline metrics are only comparable when architecture adapters, dataset snapshot,
 split, and command are known. These rules prevent later documentation from
-inventing provenance that the artifacts do not contain.</p>
-<h2 id="good-vs-bad-example">Good vs bad example</h2>
+inventing provenance that the saved files do not contain.</p>
+<h2 id="valid-and-invalid-examples">Valid and Invalid Examples</h2>
 <p>Good — a Series 3 entry with matching schema:</p>
 <pre><code class="language-json">{ &quot;photo_20260520_123456.jpg&quot;: { &quot;steering&quot;: 92, &quot;throttle&quot;: 0.37 } }
 </code></pre>
@@ -423,15 +431,15 @@ print(&quot;rows&quot;, len(rows),
 PY
 </code></pre>
 <p>An empty list was valid when a new dataset was first initialized. It is not the current state: the Series 3/4 dataset now contains 81,237 labeled frames.</p>
-<h2 id="recovery-when-a-rule-is-broken">Recovery when a rule is broken</h2>
+<h2 id="recovery-when-a-rule-is-broken">Recovery When a Rule Is Broken</h2>
 <ul>
 <li>Missing throttle in Series 3: re-derive it from that run's CSV log for the affected frames and re-write the label file; do not backfill a constant.</li>
 <li>Unknown provenance: quarantine the row from a claimed reproducible snapshot until the capture source is established.</li>
 </ul>
 <p>Never delete images or label files to "fix" a rule violation without Ram's sign-off — count and report the bad rows first.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>data/dataset-overview.md</code></li>
+<li><a href="../../../data/dataset-overview/">Dataset Overview</a></li>
 <li><a href="../../../publishing/huggingface/">Hugging Face Publishing</a></li>
 <li><a href="../../data-quality/image-quality-checks/">Data Quality</a></li>
 </ul>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -107,15 +107,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Turn vs Shadow Tradeoff</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#what-was-observed">What was observed</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-was-observed">What Was Observed</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#plausible-explanation">Plausible explanation</a>
+    <li class="toctree-l2"><a class="reference internal" href="#plausible-explanation">Plausible Explanation</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#current-training-behavior">Current training behavior</a>
+    <li class="toctree-l2"><a class="reference internal" href="#current-training-behavior">Current Training Behavior</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-to-test-the-hypothesis">How to test the hypothesis</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-test-the-hypothesis">How to Test the Hypothesis</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -342,12 +342,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="turn-vs-shadow-tradeoff">Turn vs Shadow Tradeoff</h1>
+                <h1 id="turn-versus-shadow-tradeoff">Turn Versus Shadow Tradeoff</h1>
 <p>Field tests exposed two different steering failures: missing a real turn and
 following a strong shadow edge as though it were the sidewalk boundary. Both are
 important, but the project has not proved that they are controlled by one scalar
 "turn eagerness" setting.</p>
-<h2 id="what-was-observed">What was observed</h2>
+<h2 id="what-was-observed">What Was Observed</h2>
 <ul>
 <li>Some earlier checkpoints resisted shadows but failed to commit strongly enough
   to real turns.</li>
@@ -362,7 +362,7 @@ important, but the project has not proved that they are controlled by one scalar
   matrices, command telemetry, and synchronized video, but those observations do not
   identify one root cause by themselves.</li>
 </ul>
-<h2 id="plausible-explanation">Plausible explanation</h2>
+<h2 id="plausible-explanation">Plausible Explanation</h2>
 <p>A dark diagonal region can resemble a geometric path edge. Dataset balance,
 augmentation, model capacity, and labels may all affect how the model resolves
 that ambiguity. Synthetic shadow bands can increase exposure to lighting
@@ -370,13 +370,18 @@ variation, while real turn-in-shadow captures preserve the actual camera,
 surface, route, and steering target together.</p>
 <p>Those mechanisms are plausible engineering explanations. No controlled ablation
 has isolated one as the cause of a specific checkpoint's field behavior.</p>
-<h2 id="current-training-behavior">Current training behavior</h2>
-<p>The Series 3 trainer balances its seven sampling bands with inverse-frequency
-weights raised to <code>sampler_balance_power</code> (default <code>0.3</code>) and optional source
-weights, while the loss applies weights to the nine output classes. The current sampler does not use the legacy
-<code>steering_magnitude_weight()</code> helper. Training also includes configurable color,
-lighting, flip, and synthetic-shadow augmentation.</p>
-<p>The 81,237-frame Series 3/4 dataset and the v3.4 training configuration produced
+<h2 id="current-training-behavior">Current Training Behavior</h2>
+<p>The Series 3 trainer can rebalance seven sampling bands with inverse-frequency
+weights raised to <code>sampler_balance_power</code>; its parser default is <code>0.3</code>. It also
+supports source weights, while the loss applies weights to the nine output
+classes. The sampler does not use the legacy <code>steering_magnitude_weight()</code>
+helper. Training also includes configurable color, lighting, flip, and
+synthetic-shadow augmentation.</p>
+<p>The v3.4 and Series 4 runs set <code>sampler_balance_power=0.0</code>, used deterministic
+left and right balance flipping, and applied class weighting in the loss. Their
+81,237-image root contained only real images, so CARLA and correction-source
+weights did not affect those runs.</p>
+<p>The 81,237-image Series 3/4 dataset and the v3.4 training configuration produced
 the current field-selected result. Future collection should remain
 failure-driven, especially for weak turn classes under difficult lighting.</p>
 <p>Implemented augmentation includes synthetic diagonal, tree, edge, mixed-lighting, glare,
@@ -385,7 +390,7 @@ steering to <code>180 - steering</code>. The exact v3.3 command and resolved pro
 preserved, so current trainer defaults cannot be presented as the historical v3.3 setup.
 No controlled ablation proved that one augmentation or sampler parameter caused its field
 regression.</p>
-<h2 id="how-to-test-the-hypothesis">How to test the hypothesis</h2>
+<h2 id="how-to-test-the-hypothesis">How to Test the Hypothesis</h2>
 <ol>
 <li>Keep the dataset membership, split, seed, and evaluation subset fixed.</li>
 <li>Change one sampling or augmentation setting at a time.</li>
@@ -393,7 +398,7 @@ regression.</p>
 <li>Repeat the same left-turn, right-turn, and shadow field route.</li>
 <li>Promote only when both offline and repeated field evidence improve.</li>
 </ol>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../../data-governance/data-quality/image-quality-checks/">Data Quality</a></li>
 <li><a href="../../../ai-and-models/training-pipeline/overview/">Training Pipeline</a></li>

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -177,7 +177,7 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#architecture-families">Architecture Families</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#series-12-network">Series 1/2 Network</a>
+    <li class="toctree-l2"><a class="reference internal" href="#series-1-and-2-network">Series 1 and 2 Network</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#series-3-visual-network">Series 3 Visual Network</a>
     </li>
@@ -345,7 +345,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="convolutional-steering-networks">Convolutional Steering Networks</h1>
-<p>SidewalkPilot uses custom convolutional networks to map a forward camera frame to a steering command. The model does not contain LiDAR braking, GPS routing, or actuator arbitration; those remain explicit runtime layers around the learned steering proposal.</p>
+<p>SidewalkPilot uses custom convolutional networks to map a forward camera frame to a steering command. The model does not contain LiDAR braking or GPS routing. The Raspberry Pi 5 applies those rules separately before commanding the steering servo and motors.</p>
 <h2 id="architecture-families">Architecture Families</h2>
 <table>
 <thead>
@@ -376,43 +376,62 @@
 <td>9 logits + 9 offsets + throttle</td>
 </tr>
 <tr>
-<td>Series 4 PC</td>
+<td>Series 4.0 PC</td>
 <td style="text-align: right;">image + three targets</td>
 <td style="text-align: right;">5,569,186</td>
 <td>one 18-value steering horizon</td>
 </tr>
 <tr>
-<td>Series 4 CF</td>
+<td>Series 4.0 CF</td>
 <td style="text-align: right;">image</td>
 <td style="text-align: right;">5,537,560</td>
 <td>four 18-value steering horizons</td>
 </tr>
 <tr>
-<td>Series 4 PCF</td>
+<td>Series 4.0 PCF</td>
 <td style="text-align: right;">image + three targets</td>
 <td style="text-align: right;">5,572,696</td>
+<td>four 18-value steering horizons</td>
+</tr>
+<tr>
+<td>Series 4.1 PC</td>
+<td style="text-align: right;">image + three targets</td>
+<td style="text-align: right;">5,537,460</td>
+<td>one 18-value steering horizon</td>
+</tr>
+<tr>
+<td>Series 4.1 CF</td>
+<td style="text-align: right;">image</td>
+<td style="text-align: right;">5,537,560</td>
+<td>four 18-value steering horizons</td>
+</tr>
+<tr>
+<td>Series 4.1 PCF</td>
+<td style="text-align: right;">image + three targets</td>
+<td style="text-align: right;">5,544,480</td>
 <td>four 18-value steering horizons</td>
 </tr>
 </tbody>
 </table>
 <p>Parameter counts are weights, not megabytes. FP32 normally stores each parameter in four bytes, so approximately 5.5 million parameters require approximately 22 MB before small graph metadata. That is why the Series 3/4 ONNX files are about 22.1-22.3 MB.</p>
-<h2 id="series-12-network">Series 1/2 Network</h2>
+<h2 id="series-1-and-2-network">Series 1 and 2 Network</h2>
 <p>The early network uses five convolution stages with channels <code>3 -&gt; 24 -&gt; 36 -&gt; 48 -&gt; 64 -&gt; 64</code>, adaptive pooling to <code>64x4x8</code>, and a compact dense steering head. The output is bounded by <code>tanh</code> and decoded around logical center:</p>
 <pre><code class="language-text">steering = 90 + output_scale * tanh(raw)
 </code></pre>
-<p>Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. The model is small enough for local Raspberry Pi 5 inference and established the first complete image-to-servo pipeline.</p>
+<p>Series 1 uses an 86-degree output scale and Series 2 uses 85 degrees. These compact models established the first complete image-to-steering pipeline. The current unified runtime loads them on the Jetson Orin Nano, just like Series 3 and 4.</p>
 <h2 id="series-3-visual-network">Series 3 Visual Network</h2>
 <p>Series 3 uses channels <code>3 -&gt; 32 -&gt; 48 -&gt; 64 -&gt; 96 -&gt; 128 -&gt; 160</code>, adaptive pooling to <code>160x6x10</code>, and dense layers that turn the 9,600 pooled features into the output head.</p>
 <p>v3.0 uses the early two-output contract. v3.1 and later use the hybrid steering head:</p>
-<pre><code class="language-text">class = argmax(9 logits)
+<pre><code class="language-text">probabilities = softmax(9 logits)
+class = argmax(softmax(class_logits))
 fraction = sigmoid(offset_for_selected_class)
 steering = class_low + fraction * (class_high - class_low)
 </code></pre>
-<p>The class term encourages commitment to turns; the local offset preserves a continuous servo command instead of limiting output to nine fixed angles.</p>
+<p>The decoder applies softmax to the nine logits and then applies argmax to those probabilities. The separately named <code>probabilities</code> vector is also returned as telemetry. The class term encourages commitment to turns; the local offset preserves a continuous servo command instead of limiting output to nine fixed angles.</p>
 <h2 id="series-4-visual-and-temporal-network">Series 4 Visual and Temporal Network</h2>
 <p>Series 4 reuses the Series 3 convolutional backbone. Adaptive pooling and dense layers produce a 256-value image feature.</p>
-<p>PC and PCF normalize the three prior targets as <code>(steering - 90) / 90</code>, encode them through <code>3 -&gt; 32 -&gt; 64</code>, concatenate the 64 history features with the 256 image features, and fuse <code>320 -&gt; 128 -&gt; 64</code>.</p>
-<p>CF has no history branch and maps <code>256 -&gt; 64</code>. Each horizon then uses its own <code>64 -&gt; 18</code> output layer. The extra history/fusion layers explain why PC/PCF are slightly larger than CF; the four small horizon heads add much less capacity than the dense visual encoder.</p>
+<p>Series 4.0 PC and PCF normalize the three prior targets as <code>(steering - 90) / 90</code>, encode them through <code>3 -&gt; 32 -&gt; 64</code>, concatenate the 64 history features with the 256 image features, and fuse <code>320 -&gt; 128 -&gt; 64</code>. Series 4.1 PC and PCF instead encode bounded steering motion and predict a bounded image-led correction to reduce the steering-echo behavior found in v4.0.</p>
+<p>CF has no history branch and maps <code>256 -&gt; 64</code>. Each horizon then uses its own <code>64 -&gt; 18</code> output layer. The history and fusion layers explain why PC/PCF differ slightly in size from CF; the four small horizon heads add much less capacity than the dense visual encoder.</p>
 <h2 id="input-preprocessing">Input Preprocessing</h2>
 <ul>
 <li>Frames originate as OpenCV BGR arrays from Raspberry Pi 5 camera capture.</li>
@@ -422,7 +441,7 @@ steering = class_low + fraction * (class_high - class_low)
 </ul>
 <p>Preprocessing is part of the model contract. A checkpoint evaluated with the wrong resize, channel order, or decoder is not a valid comparison.</p>
 <h2 id="deployment">Deployment</h2>
-<p>Series 3/4 ONNX inference runs on Jetson Orin Nano through ONNX Runtime with CUDA when available. The server inspects input names and output shapes to choose the decoder. TensorRT is not required for the current models and should not be claimed as the active path unless a TensorRT engine is actually built and measured.</p>
+<p>All current model families run on the Jetson Orin Nano GPU. Series 1/2 use PyTorch with CUDA; Series 3/4 use ONNX Runtime with CUDA. CPU execution is retained only as a diagnostic fallback. TensorRT is not part of the current field runtime.</p>
 <p>See <a href="../series-3-hybrid-head/">Series 3 Hybrid Head</a>, <a href="../series-4-plan/">Series 4 Temporal Experiments</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
               
             </div>

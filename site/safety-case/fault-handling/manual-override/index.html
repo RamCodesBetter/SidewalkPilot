@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -242,19 +242,19 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#hazard">Hazard</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#detection-and-trigger">Detection and trigger</a>
+    <li class="toctree-l2"><a class="reference internal" href="#detection-and-trigger">Detection and Trigger</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#response">Response</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#stop-condition-and-who-triggers-it">Stop condition and who triggers it</a>
+    <li class="toctree-l2"><a class="reference internal" href="#stop-condition-and-who-triggers-it">Stop Condition and Who Triggers It</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#evidence">Evidence</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#series-3-note">Series 3 note</a>
+    <li class="toctree-l2"><a class="reference internal" href="#jetson-orin-nano-inference-note">Jetson Orin Nano Inference Note</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#fault-responses">Fault Responses</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -358,9 +358,9 @@ necessary for faults that prevent software input processing.</p>
 the operator judges unsafe (a bad steering angle, driving toward a person, entering
 a road). The software override reduces this risk only while the controller is connected
 and the Raspberry Pi 5 event loop remains responsive; it is not a substitute for physical power control.</p>
-<h2 id="detection-and-trigger">Detection and trigger</h2>
+<h2 id="detection-and-trigger">Detection and Trigger</h2>
 <p>The main loop watches the Xbox controller (pygame) every iteration. Autonomous mode
-is cancelled by <code>cancel_autonomous_mode()</code> when the loop processes any of these:</p>
+is canceled by <code>cancel_autonomous_mode()</code> when the loop processes any of these:</p>
 <ul>
 <li><strong>Steering input</strong> with <code>abs(value) &gt; 0.1</code> (<code>STEERING_AXIS</code>).</li>
 <li><strong>Gas</strong> with <code>throttle &gt; 0.05</code> (<code>THROTTLE_AXIS</code>).</li>
@@ -368,7 +368,7 @@ is cancelled by <code>cancel_autonomous_mode()</code> when the loop processes an
 </ul>
 <p>Pressing the autonomy toggle (<code>AUTONOMY_TOGGLE_BUTTON = 0</code>) turns autonomous mode
 off directly. Any of these also cancels cruise control. Navigation "AUTO" segments
-are cancelled by the same operator inputs via <code>navigation_manual_input_should_cancel</code>.</p>
+are canceled by the same operator inputs via <code>navigation_manual_input_should_cancel</code>.</p>
 <h2 id="response">Response</h2>
 <p><code>cancel_autonomous_mode()</code> sets <code>autonomous_mode = False</code>, zeroes throttle and motor
 PWM, clears brake state, re-centers steering, and resets the cruise PID. Control
@@ -378,7 +378,7 @@ iteration.</p>
 sets <code>shutdown_flag</code>, which breaks the main loop and runs the ordered teardown at
 exit, sending a dashboard shutdown, stopping sensors/camera, and cleaning up GPIO
 (<code>dashboard_sender.send_shutdown()</code>, <code>hardware.cleanup()</code>).</p>
-<h2 id="stop-condition-and-who-triggers-it">Stop condition and who triggers it</h2>
+<h2 id="stop-condition-and-who-triggers-it">Stop Condition and Who Triggers It</h2>
 <p>The operator triggers override. In the implemented arbitration order, manual
 input takes priority over model steering but not over enabled AEB; an AEB
 hard-stop can still hold the car under a manual forward-throttle command. This
@@ -392,8 +392,8 @@ ordering does not cover a disconnected controller or failed control process.</p>
 <li>Field evidence: the operator uses manual takeover during supervised runs; a
   labeled, timed override-latency test has not yet been preserved.</li>
 </ul>
-<h2 id="series-3-note">Series 3 note</h2>
-<p>Series 3 moves steering inference to the Jetson Orin Nano, but override still lives on
+<h2 id="jetson-orin-nano-inference-note">Jetson Orin Nano Inference Note</h2>
+<p>Steering inference runs on the Jetson Orin Nano, but override still lives on
 the Raspberry Pi 5 in the same loop and is unchanged: the Raspberry Pi 5 owns the controller and the motors,
 so operator override does not depend on the model host being reachable.</p>
 <h2 id="fault-responses">Fault Responses</h2>
@@ -439,7 +439,7 @@ so operator override does not depend on the model host being reachable.</p>
 </tbody>
 </table>
 <p>Fault handling must be tested with wheels unloaded before intentional disconnect tests on the ground.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../safety-overview/">Safety Overview</a></li>
 <li><a href="../../../testing/field-testing/overview/">Field Testing</a></li>

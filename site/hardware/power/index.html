@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -150,13 +150,13 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#parts-amazon">Parts (Amazon)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#power-domains">Power domains</a>
+    <li class="toctree-l2"><a class="reference internal" href="#power-domains">Power Domains</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -357,17 +357,17 @@ clean logic rail is the main goal of the power design.</p>
 <li><a href="https://www.amazon.com/dp/B07Q9PL4R6?ref=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&amp;ref_=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&amp;social_share=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&amp;th=1">ATC/ATO 14AWG 10A AMP Fuses</a> — $15.99</li>
 <li><a href="https://www.amazon.com/OVONIC-5200mAh-Connector-Airplane-Helicopter/dp/B07JJ4Q65Z/ref=sr_1_8?crid=2NY4T275TZZDB&amp;dib=eyJ2IjoiMSJ9.Rx8egGP6AfIhC3F36F5hy8xQM1pkK1UUD4O91eWDFWOL-Fw_cr1d5doCeeuUT0vxny-_y3O_y6AvLNoltS2AIQGWh2vtm95tvG8lWMBekmPIH12AGF8m8L9jMd0PL185T55rPshJNzElpkimOm41_aKg9BzsrzMo2SwYsfhdHiOs76vWOg0-0VAyHhjtpP_DZLezpPq5ng148Zxdwn0YhipqGVkLzsBOTkzVveF1asJP3y7wRCdIfSB99gM3_zZT0jaL8XqqjPpJpKtFuqUgeO5Y3tqUu8EIWLsFjBN5xiU.lwZBeg8mwdMMPBLFXqVR_ZQzgn0Lq4VTwuzRRhEU7AE&amp;dib_tag=se&amp;keywords=ovonic+2s+lipo+battery+5200mah+t+plug&amp;qid=1779576913&amp;sprefix=ovonic+2s+lipo+battery+5200mah+t+plu%2Caps%2C177&amp;sr=8-8">OVONIC 2S (7.4V) 5200mAh 50C</a> — $13.29</li>
 </ul>
-<h2 id="power-domains">Power domains</h2>
+<h2 id="power-domains">Power Domains</h2>
 <ul>
-<li><strong>Motor rail:</strong> a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 Motor Controller
+<li><strong>Motor rail:</strong> a 3S LiPo (11.1 V; for example, the OVONIC 3S 5,200 mAh) feeds the AT8236 Motor Controller
   and JGB37-520 DC drive motors. A DROK DC buck converter steps voltage down where a rail needs it,
-  ATC/ATO fuses protect against shorts.</li>
-<li><strong>Logic rail:</strong> the compute boards run from USB power banks (a 27000 mAh 140W bank and a
-  10000 mAh 45W bank), keeping the Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W off the noisy motor supply.</li>
-<li><strong>Support gear:</strong> a dual LiPo charger/discharger and a 2S LiPo are part of the battery kit
-  for charging and bench work.</li>
+  and ATC/ATO fuses protect against shorts.</li>
+<li><strong>Logic rail:</strong> the compute boards run from USB power banks (a 27,000 mAh, 140 W bank and a
+  10,000 mAh, 45 W bank), keeping the Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W off the noisy motor supply.</li>
+<li><strong>Display rail:</strong> a 2S LiPo supplies the HUB75 display through its fused buck converter.
+  A dual LiPo charger/discharger supports the battery set.</li>
 </ul>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li>Motors and logic are on separate supplies to reduce how strongly motor start/brake current
   transients couple into the compute boards. A correctly configured buck converter regulates
@@ -376,19 +376,19 @@ clean logic rail is the main goal of the power design.</p>
 <li>The Zero 2 W needs a stable supply, but a USB enumeration failure does not identify one
   cause. Power, cable integrity, the host port, and gadget state must be checked separately.</li>
 </ul>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>A 3S LiPo delivers the high current the drive motors need at a usable voltage, while USB
-  power banks give the regulated, steady 5V the SBCs expect.</li>
-<li>Splitting the domains and adding capacitance/fusing is intended to reduce resets and contain
+  power banks give the regulated, steady 5 V that the single-board computers expect.</li>
+<li>Splitting the domains and adding fusing is intended to reduce resets and contain
   electrical faults. A measured rail-voltage trace would be needed to attribute a particular
   reset or USB failure to power.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/build-overview.md</code></li>
-<li><code>testing/bench-tests/overview.md</code></li>
-<li><code>runtime-code/hardware/hardware-class.md</code></li>
+<li><a href="../build-overview/">Hardware Build Overview</a></li>
+<li><a href="../../testing/bench-tests/overview/">Bench Tests</a></li>
+<li><a href="../../runtime-code/hardware/hardware-class/">Hardware Class</a></li>
 </ul>
               
             </div>

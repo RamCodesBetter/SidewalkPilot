@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -206,11 +206,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Model Selection Rubric</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#gate-1-artifact">Gate 1: Artifact</a>
+    <li class="toctree-l2"><a class="reference internal" href="#gate-1-model-validity">Gate 1: Model Validity</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#gate-2-offline">Gate 2: Offline</a>
+    <li class="toctree-l2"><a class="reference internal" href="#gate-2-offline-evaluation">Gate 2: Offline Evaluation</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#gate-3-field">Gate 3: Field</a>
+    <li class="toctree-l2"><a class="reference internal" href="#gate-3-physical-car-comparison">Gate 3: Physical-Car Comparison</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#current-decision">Current Decision</a>
     </li>
@@ -341,45 +341,46 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-selection-rubric">Model Selection Rubric</h1>
-<p>A checkpoint moves through three gates: artifact validity, offline capability, and physical-car behavior. Passing one gate does not imply passing the next.</p>
-<h2 id="gate-1-artifact">Gate 1: Artifact</h2>
+<p>A checkpoint moves through three gates: model validity, offline capability, and physical-car behavior. Passing one gate does not imply passing the next.</p>
+<h2 id="gate-1-model-validity">Gate 1: Model Validity</h2>
 <ul>
-<li>Checkpoint and ONNX file load;</li>
-<li>Input names and shapes match the runtime contract;</li>
-<li>Output shape and decoder agree;</li>
-<li>CUDA provider is active on Jetson Orin Nano;</li>
-<li>Inference is fresh and does not block manual control;</li>
-<li>Temporal state resets safely on model switch/reconnect.</li>
+<li>The deployable model file loads: PTH for Series 1/2 or ONNX for Series 3/4.</li>
+<li>Input names and shapes match the intended model contract, including PC, CF, or PCF where applicable.</li>
+<li>Output shape and steering decoder agree.</li>
+<li>Inference uses the expected Jetson Orin Nano GPU path: PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4.</li>
+<li>Predictions are fresh and manual control remains responsive.</li>
+<li>PC/PCF history starts from recent manual steering when autonomy begins and resets on model changes or reconnects.</li>
 </ul>
-<h2 id="gate-2-offline">Gate 2: Offline</h2>
+<h2 id="gate-2-offline-evaluation">Gate 2: Offline Evaluation</h2>
 <p>Read the metric panel in this order:</p>
 <ol>
-<li>Bal9 and nine-class confusion matrix: no dead or collapsed steering classes.</li>
+<li>Bal9 and the nine-class confusion matrix: no dead or collapsed steering classes.</li>
 <li>Turn exact and turn +/-1: enough turn capability to justify a field test.</li>
 <li>ST exact: enough straight stability to avoid needless oscillation.</li>
 <li>Signed error: no severe directional bias.</li>
-<li>MAE and median: numeric precision among models that passed the class gate.</li>
-<li>Per-source behavior and hold-last baseline: no result explained by one easy run or simple temporal persistence.</li>
+<li>MAE and median error: numeric precision among models that passed the class checks.</li>
+<li>Per-source behavior and the hold-last baseline: no result explained by one easy run or simple steering persistence.</li>
 </ol>
-<h2 id="gate-3-field">Gate 3: Field</h2>
+<h2 id="gate-3-physical-car-comparison">Gate 3: Physical-Car Comparison</h2>
 <ul>
-<li>Same route, direction, lighting cases, and speed policy;</li>
-<li>Baseline model first and, ideally, repeated last;</li>
-<li>Takeover count and reason;</li>
-<li>Shadow following, missed turns, curb/grass approach, and oscillation;</li>
-<li>Inference rate and stale-command behavior;</li>
-<li>AEB state and any safety interventions;</li>
-<li>Linked video and CSV evidence.</li>
+<li>Use the same route, direction, lighting cases, and speed policy.</li>
+<li>Run the baseline first and, when practical, repeat it last.</li>
+<li>Record takeover count and reason.</li>
+<li>Watch for shadow following, missed turns, curb or grass approach, oscillation, and repeated steering.</li>
+<li>Verify inference rate and stale-prediction handling.</li>
+<li>Record AEB state and any safety interventions.</li>
+<li>Preserve video and CSV evidence.</li>
 </ul>
-<p>The field-selected model remains the live baseline even if another checkpoint has lower MAE. That happened when v3.4 beat v3.4b.</p>
+<p>The field-selected model remains the baseline even if another checkpoint has lower MAE. v3.4 beat v3.4b despite v3.4b's lower offline MAE. The 4.0 comparison reinforced the same lesson: history-based 4.0 models ranked strongly offline but repeated earlier predictions on the car.</p>
 <h2 id="current-decision">Current Decision</h2>
 <ul>
-<li>Field-selected baseline: v3.4.</li>
-<li>First challenger: <code>4.0p</code> because it leads Bal9 and turn metrics.</li>
-<li>Lowest-error challenger: <code>4.0c</code>.</li>
-<li>Not yet eligible for promotion: every Series 4 checkpoint, pending field evidence.</li>
+<li><strong>Field-selected baseline:</strong> v3.4.</li>
+<li><strong>Viable 4.0 comparison model:</strong> <code>4.0f</code>; it showed complementary wins and failures against v3.4, not a clear promotion case.</li>
+<li><strong>Rejected 4.0 history models:</strong> <code>4.0p</code>, <code>4.0r</code>, <code>4.0a</code>, and <code>4.0c</code> because of closed-loop steering echo.</li>
+<li><strong>Lower-ranked 4.0 CF checkpoint:</strong> <code>4.0g</code>, which was worse than <code>4.0f</code> in the supervised comparison.</li>
+<li><strong>Pending:</strong> all six 4.1 checkpoints have common-set results but still require runtime integration, closed-loop replay, and physical testing.</li>
 </ul>
-<p>The final-vs-best suffix is descriptive, not a deployment rule. Test both when their tradeoff is meaningful.</p>
+<p>Final-versus-best naming is descriptive, not a deployment rule. Both checkpoints must pass the same gates.</p>
               
             </div>
           </div><footer>

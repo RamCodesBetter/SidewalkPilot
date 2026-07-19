@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -229,17 +229,17 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Failure Records</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#why-a-failure-log-exists">Why a failure log exists</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-a-failure-log-exists">Why a Failure Log Exists</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-a-failure-page-is-structured">How a failure page is structured</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-a-failure-record-is-structured">How a Failure Record Is Structured</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#test-record-fields">Test record fields</a>
+    <li class="toctree-l2"><a class="reference internal" href="#test-record-fields">Test Record Fields</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#current-failure-pages">Current failure pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#current-failure-classes">Current Failure Classes</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#consolidated-failure-record">Consolidated Failure Record</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -344,19 +344,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="overview">Overview</h1>
-<p>This section is the honest half of SidewalkPilot: the failure log. Every page under <code>testing/failures</code> records a place where the car did the wrong thing — misread a driveway as the sidewalk, chased a hard shadow, drifted toward the road, dropped the LiDAR link — and pairs the symptom with a suspected cause and the next dataset or code change. The clean demos live elsewhere; this is where the project's real learning is captured.</p>
-<h2 id="why-a-failure-log-exists">Why a failure log exists</h2>
+                <h1 id="failure-records-overview">Failure Records Overview</h1>
+<p>This page consolidates SidewalkPilot's failure record: cases where the car misread a driveway, chased a hard shadow, drifted toward the road, or lost the LiDAR link. Each failure class pairs the observed symptom with an evidence limit and the next dataset, test, or code response. Positive demonstrations live elsewhere; this page preserves what the project learned when behavior was wrong.</p>
+<h2 id="why-a-failure-log-exists">Why a Failure Log Exists</h2>
 <p>I keep these notes so each change can be tied to a specific failure. A lower MAE does not establish better driving on a straight-heavy set, so the failure pages record what happened on the sidewalk: corridor holding, turn completion, braking response, and operator takeover. Those observations complement the offline metrics rather than replacing them with another single score.</p>
-<h2 id="how-a-failure-page-is-structured">How a failure page is structured</h2>
-<p>Each page tries to answer four questions in order:</p>
+<h2 id="how-a-failure-record-is-structured">How a Failure Record Is Structured</h2>
+<p>Each record should answer four questions in order:</p>
 <ul>
 <li><strong>What was being tested</strong> — the route or bench setup, the model version, and the branch/hardware in play.</li>
 <li><strong>What went wrong</strong> — the observed symptom, described concretely (which direction it drifted, how far, under what light).</li>
 <li><strong>Suspected cause</strong> — a hypothesis tied to code or data, never an armchair assertion. The project rule is prove-don't-guess: grep the constant across every layer, read the whole code path, instrument the wire before concluding.</li>
 <li><strong>Next change</strong> — the dataset bucket to collect, the constant to tune, or the code path to fix, marked clearly as done vs. planned.</li>
 </ul>
-<h2 id="test-record-fields">Test record fields</h2>
+<h2 id="test-record-fields">Test Record Fields</h2>
 <table>
 <thead>
 <tr>
@@ -367,7 +367,7 @@
 <tbody>
 <tr>
 <td>Setup</td>
-<td>Hardware (Raspberry Pi 5 controller, Zero 2 W dashboard, LiDAR/GPS/IMU as relevant), branch, model version, dataset tag</td>
+<td>Hardware (Jetson Orin Nano inference, Raspberry Pi 5 controller, Zero 2 W dashboard, and LiDAR/GPS/IMU as relevant), branch, model version, dataset tag</td>
 </tr>
 <tr>
 <td>Procedure</td>
@@ -383,7 +383,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="current-failure-pages">Current failure pages</h2>
+<h2 id="current-failure-classes">Current Failure Classes</h2>
 <ul>
 <li><strong>Shadow failures</strong> — the car chases hard-edged shadows across the sidewalk as if they were the path edge. The core turn-vs-shadow tradeoff.</li>
 <li><strong>Evening failures</strong> — low-light and point-light-source (orange lamppost) failures, including the v3.1b field note.</li>
@@ -435,11 +435,11 @@
 </tbody>
 </table>
 <p>The most important field comparison found v3.3/v3.3b worse than earlier baselines under the tested conditions, while v3.4 handled all shadow cases presented and became the baseline. This remains a bounded qualitative record because complete route/clip/takeover evidence was not preserved.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>testing/field-testing/overview.md</code></li>
-<li><code>model-evaluation/field-evaluation/overview.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../../field-testing/overview/">Field Testing</a></li>
+<li><a href="../../../model-evaluation/field-evaluation/overview/">Field Evaluation</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

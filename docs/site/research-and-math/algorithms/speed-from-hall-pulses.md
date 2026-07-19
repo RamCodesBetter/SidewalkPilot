@@ -1,6 +1,6 @@
 # Speed Measurement and Control
 
-The Raspberry Pi 5 measures wheel speed from a Hall-effect sensor and can use that feedback for manual cruise control. The implementation is in `runtime.py`; constants are in `config.py`.
+The Raspberry Pi 5 measures wheel speed from a Hall-effect wheel-speed sensor and can use that feedback for manual cruise control. The implementation is in `runtime.py`; constants are in `config.py`.
 
 ## Hall-Pulse Speed
 

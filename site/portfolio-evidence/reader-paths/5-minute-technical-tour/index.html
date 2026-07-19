@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../../img/favicon.ico" />
-    <title>5 Minute Technical Tour - SidewalkPilot RC Car</title>
+    <title>5-Minute Technical Tour - SidewalkPilot RC Car</title>
     <link rel="stylesheet" href="../../../css/theme.css" />
     <link rel="stylesheet" href="../../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "5 Minute Technical Tour";
+        var mkdocs_page_name = "5-Minute Technical Tour";
         var mkdocs_page_input_path = "portfolio-evidence/reader-paths/5-minute-technical-tour.md";
         var mkdocs_page_url = null;
       </script>
@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">5 Minute Technical Tour</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">5-Minute Technical Tour</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#1-one-vehicle-three-computers">1. One Vehicle, Three Computers</a>
     </li>
@@ -103,7 +103,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -335,7 +335,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Project Evidence</li>
-      <li class="breadcrumb-item active">5 Minute Technical Tour</li>
+      <li class="breadcrumb-item active">5-Minute Technical Tour</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -344,12 +344,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="5-minute-technical-tour">5 Minute Technical Tour</h1>
+                <h1 id="5-minute-technical-tour">5-Minute Technical Tour</h1>
 <p>This path gives a technical or media reviewer enough context to describe SidewalkPilot accurately without reading the whole repository.</p>
 <h2 id="1-one-vehicle-three-computers">1. One Vehicle, Three Computers</h2>
-<p>The Jetson Orin Nano is the AI brain: it runs the current Series 3/4 steering network over
-the GPU and returns the prediction that makes camera-based self-driving possible. The
-Raspberry Pi 5 is the hardware and safety controller for input, sensors, actuators, and
+<p>The Jetson Orin Nano is the AI brain: it runs every live-selectable steering-model family
+on the GPU and returns the prediction that makes camera-based self-driving possible. Series
+1/2 use PyTorch CUDA; Series 3/4 use ONNX Runtime CUDA. The
+Raspberry Pi 5 is the hardware and safety controller for input, sensors, steering/motor control, and
 logging. The Zero 2 W renders the external dashboard over a dedicated USB network.</p>
 <p>This is a responsibility split, not three boards doing the same job. Current v3.4 and Series
 4 autonomy depend on a fresh Jetson Orin Nano result; without one, autonomy stops. The display has no
@@ -359,14 +360,14 @@ worst-case real-time guarantee.</p>
 <p>Read: <a href="../../../start-here/project-overview/">Project Overview</a>, <a href="../../../autonomy-stack/architecture/data-flow/">Data Flow</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
 <h2 id="2-the-model-journey">2. The Model Journey</h2>
 <p>Series 1 proved that a compact CNN could map a 200x66 camera frame to steering. Series 2 refined the data and tested fixed CLAHE lighting preprocessing. Series 3 moved to 320x180 on Jetson Orin Nano and, from v3.1, used nine steering classes plus continuous offsets. v3.4 became the field winner after handling the tested harsh shadows that earlier models followed as fake sidewalk edges.</p>
-<p>Series 4 changes the temporal contract while keeping the same 81,237-image dataset and visual backbone. PC uses the previous three target commands; CF learns current plus three future targets from the image; PCF combines both. Three 25-epoch runs produced six ONNX artifacts. PC and PCF lead offline, but none replaces v3.4 until the car says so.</p>
+<p>Series 4 changes the temporal contract while keeping the same 81,237-image dataset and visual backbone. PC uses the previous three target commands; CF learns current plus three future targets from the image; PCF combines both. The v4.0 PC/PCF models led offline but echoed previous predictions on the car. Image-only v4.0f was viable and complementary with v3.4, but did not replace it. Six v4.1 correction models are now trained and evaluated offline; live integration and physical testing remain.</p>
 <p>Read: <a href="../../../ai-and-models/model-zoo/overview/">Model Zoo</a> and <a href="../../../ai-and-models/architecture/series-4-plan/">Series 4 Temporal Experiments</a>.</p>
 <h2 id="3-the-data-and-evaluation-loop">3. The Data and Evaluation Loop</h2>
-<p>Manual drives save camera frames with logical <code>0..180</code> steering labels and absolute physical throttle fractions. The Series 3/4 split assigns path-sorted 100-sample windows to one side of the split, which reduces adjacent-frame leakage. It is not a capture-run-group split and does not prove complete route isolation. A common evaluator now runs all 46 checkpoints on the same 6,952-frame challenge subset.</p>
+<p>Manual drives save camera frames with logical <code>0..180</code> steering labels and absolute physical throttle fractions. The Series 3/4 split assigns path-sorted 100-sample windows to one side of the split, which reduces adjacent-frame leakage. It is not a capture-run-group split and does not prove complete route isolation. A common evaluator now runs all 52 checkpoints on the same 6,952-frame challenge subset.</p>
 <p>Bal9 averages exact recall across nine steering classes with equal class weight. It prevents 4,741 straight frames from hiding failures in rare turns. MAE remains useful, but it is secondary to class balance, turns, signed bias, and field behavior.</p>
 <p>Read: <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>, <a href="../../../model-evaluation/offline-evaluation/overview/">Offline Evaluation</a>, and <a href="../../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>.</p>
 <h2 id="4-safety-is-separate-from-steering">4. Safety Is Separate from Steering</h2>
-<p>The learned model controls autonomous steering. LiDAR does not choose a left/right path. It watches one center corridor and can reduce throttle or hard-brake. Earlier LiDAR swerve logic was removed because obstacle points cannot prove that adjacent ground is safe sidewalk rather than grass, curb, or another hazard.</p>
+<p>The learned model controls autonomous steering. LiDAR does not choose a left or right path. It watches one center corridor and can reduce throttle or request a hard brake. This keeps steering under one authority because obstacle points alone cannot prove that adjacent ground is safe sidewalk rather than grass, a curb, or another hazard.</p>
 <p>Read: <a href="../../../autonomy-stack/lidar-safety/overview/">LiDAR Overview</a> and <a href="../../../autonomy-stack/lidar-safety/aeb/">AEB</a>.</p>
 <h2 id="5-a-failure-that-changed-the-architecture">5. A Failure That Changed the Architecture</h2>
 <p>Manual steering once ran smoothly for several seconds, paused, then resumed. <code>jstest</code> showed instant controller input, so Bluetooth was not the root cause. The application was blocking on network and recurring system work. Jetson Orin Nano I/O moved to a latest-frame worker; file scans and temperature subprocesses left the control path. In one physical retest with the Jetson Orin Nano powered off, the previously observed delay was absent. This was a bounded retest, not a long-duration latency benchmark.</p>
@@ -374,7 +375,7 @@ worst-case real-time guarantee.</p>
 <h2 id="6-current-evidence-and-limits">6. Current Evidence and Limits</h2>
 <ul>
 <li>v3.4 has a bounded qualitative field result.</li>
-<li>Series 4 has training, ONNX, CUDA runtime, and common offline evidence, but no field result.</li>
+<li>v4.0 has training, ONNX, CUDA runtime, common offline evidence, and a bounded field result; v4.1 has no field result yet.</li>
 <li>LiDAR center-braking has automated tests; the latest policy still needs a preserved physical test record.</li>
 <li>No claim is made for public-road, unattended, or unrestricted pedestrian operation.</li>
 </ul>

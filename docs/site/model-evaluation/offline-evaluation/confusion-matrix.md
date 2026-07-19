@@ -6,10 +6,10 @@ is the metric that catches the failure MAE hides: a model that has quietly
 collapsed toward straight or gone dead on a whole turn class. If MAE is a single
 grade, the confusion matrix is the report card that shows *which* classes passed.
 
-## How it works
+## How It Works
 
 The common evaluator (`code/test_files/models/evaluate_sidewalkpilot_models.py`) builds a
-**9x9** matrix over these servo-angle classes (target on rows, prediction on
+**9x9** matrix over these logical steering classes (target on rows, prediction on
 columns):
 
 | Bucket | Servo range |
@@ -29,7 +29,7 @@ per-class target/prediction counts, and class-balanced recall. The same nine
 boundaries let direct-regression Series 1/2 checkpoints and hybrid Series 3/4
 checkpoints be compared without pretending their network heads are identical.
 
-## Why it matters
+## Why It Matters
 
 MAE can hide class collapse on a straight-heavy set. A model that predicts near
 center for many turn targets may retain a competitive average error while its
@@ -41,7 +41,7 @@ The matrix is a screening tool, not a deployment verdict. Use Bal9 and the turn
 columns to find models that retain class coverage, then require a physical field
 test before calling one better on the car.
 
-## Related pages
+## Related Pages
 
 - [Offline vs Field](../comparisons/offline-vs-field.md)
 - [Series 3 Hybrid Head](../../ai-and-models/architecture/series-3-hybrid-head.md)

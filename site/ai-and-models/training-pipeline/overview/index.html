@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -355,18 +355,8 @@
                 <h1 id="training-pipeline-overview">Training Pipeline Overview</h1>
 <p>SidewalkPilot training begins with a supervised field drive and ends only after an exported ONNX model passes offline and physical-car review.</p>
 <h2 id="pipeline">Pipeline</h2>
-<figure class="project-diagram">
-  <div class="project-diagram__viewport">
-    <a href="../../../assets/diagrams/training-evaluation.svg">
-      <img src="../../../assets/diagrams/training-evaluation.svg" alt="SidewalkPilot training and evaluation flow from field data and CARLA-assisted Series 1 and 2 data through family-specific trainers, GPU training, ONNX export, offline evaluation, and supervised field comparison">
-    </a>
-  </div>
-  <figcaption>
-    Training and evaluation flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a>
-    or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.
-  </figcaption>
-</figure>
-
+<p><a href="../../../assets/diagrams/training-evaluation.svg"><img alt="SidewalkPilot training and evaluation flow from field data and CARLA-assisted Series 1 and 2 data through family-specific trainers, GPU training, ONNX export, offline evaluation, and supervised field comparison" src="../../../assets/diagrams/training-evaluation.svg" /></a></p>
+<p><em>Training and evaluation flow. Open the <a href="../../../assets/diagrams/training-evaluation.svg">full-size SVG</a> or the <a href="../../../assets/diagrams/training-evaluation.drawio">editable draw.io source</a>.</em></p>
 <h2 id="series-specific-trainers">Series-Specific Trainers</h2>
 <table>
 <thead>
@@ -392,28 +382,28 @@
 </tr>
 <tr>
 <td>Series 4 PC</td>
-<td><code>code/ai_models_datasets/series_3_and_4/series_4_0pr_sidewalkpilot_trainer.py</code></td>
+<td><code>series_4_0pr_sidewalkpilot_trainer.py</code>, <code>series_4_1pr_sidewalkpilot_trainer.py</code></td>
 <td>image + three previous targets</td>
 <td>one 18-value current steering horizon</td>
 </tr>
 <tr>
 <td>Series 4 CF</td>
-<td><code>code/ai_models_datasets/series_3_and_4/series_4_0fg_sidewalkpilot_trainer.py</code></td>
+<td><code>series_4_0fg_sidewalkpilot_trainer.py</code>, <code>series_4_1fg_sidewalkpilot_trainer.py</code></td>
 <td>image</td>
 <td>four 18-value current/future steering horizons</td>
 </tr>
 <tr>
 <td>Series 4 PCF</td>
-<td><code>code/ai_models_datasets/series_3_and_4/series_4_0ac_sidewalkpilot_trainer.py</code></td>
+<td><code>series_4_0ac_sidewalkpilot_trainer.py</code>, <code>series_4_1ac_sidewalkpilot_trainer.py</code></td>
 <td>image + three previous targets</td>
 <td>four 18-value current/future steering horizons</td>
 </tr>
 </tbody>
 </table>
-<p>Each family still needs its own preprocessing and output decoder. The common evaluator provides those adapters and scores all 46 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset. Series 3 and experimental Series 4 train on the same 81,237-image dataset.</p>
+<p>Each family still needs its own preprocessing and output decoder. The common evaluator provides those adapters and scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset. Series 3 and experimental Series 4 train on the same 81,237-image dataset.</p>
 <h2 id="series-4-temporal-comparison">Series 4 Temporal Comparison</h2>
 <p>Series 4 removes throttle learning and keeps the Series 3 visual backbone and nine steering bins. Every horizon is 18 values: nine class logits plus nine class-local offsets. Previous-target history is a causal runtime input for PC/PCF; future targets are training supervision for CF/PCF and are never runtime inputs.</p>
-<p>The model names form three final/best pairs:</p>
+<p>The model names form six final/validation-selected pairs:</p>
 <table>
 <thead>
 <tr>
@@ -438,42 +428,39 @@
 <td><code>4.0a</code></td>
 <td><code>4.0c</code></td>
 </tr>
+<tr>
+<td><code>4.1pr</code></td>
+<td><code>4.1p</code></td>
+<td><code>4.1r</code></td>
+</tr>
+<tr>
+<td><code>4.1fg</code></td>
+<td><code>4.1f</code></td>
+<td><code>4.1g</code></td>
+</tr>
+<tr>
+<td><code>4.1ac</code></td>
+<td><code>4.1a</code></td>
+<td><code>4.1c</code></td>
+</tr>
 </tbody>
 </table>
-<p>All three completed 25 epochs and logged into the same W&amp;B project as v3.4. This creates three comparable runs, while the six model names identify the final and best artifact from each run.</p>
+<p>All six Series 4 runs completed 25 epochs and logged to the same W&amp;B project. The twelve model names identify the final and validation-selected model from each run.</p>
 <h2 id="labels">Labels</h2>
 <p>Training records use physical values:</p>
 <ul>
-<li>Steering: absolute servo convention from 0 to 180 degrees;</li>
+<li>Steering: logical target from 0 to 180 degrees;</li>
 <li>Throttle: absolute physical PWM fraction from 0.0 to 1.0.</li>
 </ul>
 <p>Runtime reference throttle is different. The car does not physically move below roughly 55%, so policy maps a useful reference range onto the physical range. Historical photo labels stay absolute so data collection remains honest and reversible.</p>
 <p>Series 3 requires both a steering and throttle field in each accepted label, even when a run trains with <code>--throttle-loss-weight 0.0</code>.</p>
 <h2 id="split-integrity">Split Integrity</h2>
 <p>Consecutive driving frames are near-duplicates. Randomly distributing individual images would leak almost the same scene into both training and validation.</p>
-<p>The Series 3/4 trainer instead assigns path-sorted 100-sample windows to training or validation, reserving approximately 10% by default. This reduces adjacent-frame leakage. It is not a run-group split and should not be described as complete isolation between capture runs.</p>
+<p>The trainer sorts images by path and groups them into 100-frame windows. Each window, including the final partial window when present, goes to training or validation, with approximately 10% reserved for validation by default. This keeps most neighboring frames together, although one capture run can still contribute different windows to both sets.</p>
 <h2 id="sampling-and-augmentation">Sampling and Augmentation</h2>
-<p>The trainer can apply:</p>
-<ul>
-<li>Steering-bucket weighted sampling;</li>
-<li>Focal/class weighting for the hybrid classes;</li>
-<li>Horizontal flip augmentation or deterministic balance flipping;</li>
-<li>Brightness, HSV, and CLAHE variants;</li>
-<li>Synthetic diagonal shadow bands;</li>
-<li>CARLA-domain randomization for samples explicitly tagged as CARLA;</li>
-<li>Separate real, CARLA, and correction sample weights.</li>
-</ul>
-<p>More augmentation is not automatically better. v3.3/v3.3b increased shadow-hardening pressure but regressed on the physical car. v3.4 is evidence that augmentation must preserve the features needed for ordinary turns.</p>
-<p>When pre-generated CARLA data is explicitly included, source weighting defaults to
-correction <code>3.0</code>, real <code>2.0</code>, and CARLA <code>0.6</code>, multiplied by class/bucket balancing. These
-numbers are relative sample factors, not percentages. Synthetic data is down-weighted
-because simulator texture, lighting, camera geometry, and object appearance differ from
-the physical car. The current Series 3/4 and Series 4 runs use the 81,237 real images; older
-checkpoint source mixes must be taken from their saved command or source-count log rather
-than inferred from trainer capability.</p>
-<p>A reproducible run saves the printed source counts and resolved sampler settings. A run
-described as CARLA-assisted must name the synthetic root; a real-only run must show no
-CARLA samples.</p>
+<p>The v3.4 and Series 4 runs used class-weighted focal loss, deterministic left and right balance flipping, lighting and color augmentation, and synthetic diagonal shadow bands.</p>
+<p>More augmentation is not automatically better. v3.3/v3.3b increased shadow-hardening pressure but performed worse on the physical car. v3.4 shows why augmentation changes must still be tested on ordinary turns.</p>
+<p>The 81,237-image dataset used for the current Series 3 and Series 4 runs contains real field images only. These runs did not use CARLA images or source weighting. Their samplers selected 50,000 examples per epoch without steering-bucket reweighting.</p>
 <h2 id="series-3-hybrid-loss">Series 3 Hybrid Loss</h2>
 <p>For v3.1 and later, the 19-value output is decoded into:</p>
 <ul>
@@ -481,7 +468,7 @@ CARLA samples.</p>
 <li>An offset within the selected class;</li>
 <li>Optional throttle.</li>
 </ul>
-<p>Training combines focal-weighted classification loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. Bucket/source weighting happens in the sampler rather than through an active steering-magnitude loss multiplier. The current steering-focused runs use throttle weight zero because the collected throttle distribution does not support a useful learned-throttle claim.</p>
+<p>Training combines focal-weighted classification loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. Current steering-focused runs set throttle loss to zero because 95.51% of the 81,237 throttle labels are full throttle. That distribution cannot teach useful variable-speed control.</p>
 <h2 id="typical-steering-focused-command">Typical Steering-Focused Command</h2>
 <p>From <code>code/ai_models_datasets/series_3_and_4/</code>:</p>
 <pre><code class="language-bash">python3 series_3_sidewalkpilot_trainer.py \
@@ -492,17 +479,17 @@ CARLA samples.</p>
   --throttle-loss-weight 0.0 \
   --keep-pth
 </code></pre>
-<p>This is a documented training pattern, not a claim that every Series 3 release used identical flags. A release is exactly reproducible only when its W&amp;B configuration, dataset snapshot, and artifact hash are preserved together.</p>
-<p>Important defaults in the current trainer include batch size 256, learning rate <code>3e-4</code>, weight decay <code>3e-4</code>, 320x180 input, 50,000 weighted samples per epoch, 10% validation, and ONNX opset 17.</p>
+<p>This is a documented training pattern, not a claim that every Series 3 release used identical flags. Reproducing a release requires its W&amp;B configuration, dataset version, and exact model file.</p>
+<p>The trainer uses AdamW. Important defaults include batch size 256, learning rate <code>3e-4</code>, weight decay <code>3e-4</code>, 320x180 input, 50,000 sampler draws per epoch, 10% validation, and ONNX opset 17.</p>
 <h2 id="checkpoints-and-export">Checkpoints and Export</h2>
-<p>Training produces two paired artifacts:</p>
+<p>Training produces two paired models:</p>
 <ul>
 <li>Regular: final epoch;</li>
-<li><code>b</code>: best validation checkpoint.</li>
+<li>Paired suffix (<code>b</code>, or Series 4 <code>r/g/c</code>): the validation-selected model from that run.</li>
 </ul>
-<p>Both are exported to ONNX. PTH files are removed unless <code>--keep-pth</code> is specified. TensorRT build flags remain available, but current Jetson Orin Nano throughput is sufficient to run the ONNX models directly; quantization is not required for the present operating target.</p>
+<p>Both are exported to ONNX. PTH files are removed unless <code>--keep-pth</code> is specified. Recent runtime telemetry measured approximately 30 inference results per second on the Jetson Orin Nano, near the 30 FPS camera target; the exact rate depends on the selected model, software build, and power mode. The active field runtime does not require TensorRT or quantization.</p>
 <h2 id="evaluation-and-promotion">Evaluation and Promotion</h2>
-<p>The evaluator at <code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> produces the cross-model report. Current ranking considers:</p>
+<p>The evaluator at <code>code/test_files/models/evaluate_sidewalkpilot_models.py</code> produces the cross-checkpoint report. Current ranking considers:</p>
 <ul>
 <li>Balanced nine-class accuracy;</li>
 <li>Turn exact and turn within one class;</li>
@@ -510,7 +497,7 @@ CARLA samples.</p>
 <li>Mean and median absolute error;</li>
 <li>Signed error and confusion patterns.</li>
 </ul>
-<p>Field promotion then checks the model on ordinary left/right turns and the failure condition it was designed to improve. See <a href="../../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a> and <a href="../../model-zoo/series-3/">Series 3 Results</a>.</p>
+<p>Field promotion then checks the model on ordinary left and right turns and the failure condition it was designed to improve. See <a href="../../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a> and <a href="../../model-zoo/series-3/">Series 3 Results</a>.</p>
               
             </div>
           </div><footer>

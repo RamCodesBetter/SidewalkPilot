@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -244,15 +244,15 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#the-intended-operating-domain">The Intended Operating Domain</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#preconditions-before-any-autonomous-run">Preconditions before any autonomous run</a>
+    <li class="toctree-l2"><a class="reference internal" href="#preconditions-before-any-autonomous-run">Preconditions Before Any Autonomous Run</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#where-it-runs-today-vs-planned">Where it runs today vs. planned</a>
+    <li class="toctree-l2"><a class="reference internal" href="#where-it-runs-today-versus-planned">Where It Runs Today Versus Planned</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#explicit-exclusions">Explicit Exclusions</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#speed-lighting-and-weather">Speed, Lighting, and Weather</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -369,7 +369,7 @@ built for is:</p>
   over <code>trossachs_nav_graph.json</code>. The car can only self-navigate along segments
   that are actually in that graph; anywhere off-graph is manual-only driving.</li>
 </ul>
-<h2 id="preconditions-before-any-autonomous-run">Preconditions before any autonomous run</h2>
+<h2 id="preconditions-before-any-autonomous-run">Preconditions Before Any Autonomous Run</h2>
 <p>Autonomy is never the default state. Before the car moves under the model, all of
 the following must hold:</p>
 <ul>
@@ -388,22 +388,23 @@ the following must hold:</p>
   dropouts are tolerated (the reader auto-reconnects) but a run should not start
   in a place where obstacle detection is expected to be unusable.</li>
 </ul>
-<h2 id="where-it-runs-today-vs-planned">Where it runs today vs. planned</h2>
+<h2 id="where-it-runs-today-versus-planned">Where It Runs Today Versus Planned</h2>
 <ul>
-<li><strong>Runs today (tested):</strong> selected supervised sidewalk/driveway sections in
-  daylight with the operator in the loop. This is where the real driving
-  photos were captured and where the field verdicts (e.g. the v3.1b night test)
-  were recorded.</li>
+<li><strong>Runs today (tested):</strong> selected supervised sidewalk/driveway sections,
+  primarily in daylight, with the operator in the loop. A separate v3.1b night
+  test is historical evidence for a more difficult condition, not approval for
+  ordinary night operation.</li>
 <li><strong>Planned / not-yet-authorized:</strong> unsupervised operation, public shared
-  sidewalks with pedestrian traffic, or any route without a hand on the kill
-  switch. None of that is claimed as tested and it is out of the current ODD.</li>
+  sidewalks with pedestrian traffic, or any route without the controller ready
+  and an independent power-cut method available. None of that is claimed as
+  tested, and it is outside the current operating domain.</li>
 </ul>
 <h2 id="explicit-exclusions">Explicit Exclusions</h2>
 <p>Do not run autonomously on public roads, at unsupervised crossings, around uncontrolled pedestrian traffic, on stairs/steep ramps, in rain or wet electronics conditions, in snow/ice, outside the verified route geometry, or when camera/model/LiDAR/controller health is uncertain. Night and severe glare remain separate experimental conditions rather than ordinary operation.</p>
 <h2 id="speed-lighting-and-weather">Speed, Lighting, and Weather</h2>
 <p>The declared <code>MAX_AUTONOMOUS_SPEED_MPH</code> is not an enforced measured-speed cap. Actual motion depends on throttle mapping, battery, load, and surface. The operator therefore selects low test speed and verifies physical stopping behavior.</p>
 <p>The camera model has bounded daylight/shadow field evidence, not all-lighting robustness. The chassis and exposed electronics are not weather-certified. Dry daylight on a selected, empty, supervised route is the default operating condition.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../safety-overview/">Safety Overview</a></li>
 <li><a href="../../../testing/field-testing/overview/">Field Testing</a></li>

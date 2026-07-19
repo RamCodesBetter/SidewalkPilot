@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -187,7 +187,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#why-v34-won">Why v3.4 Won</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#artifact-contract">Artifact Contract</a>
+    <li class="toctree-l2"><a class="reference internal" href="#model-contract">Model Contract</a>
     </li>
     </ul>
                   </li>
@@ -431,7 +431,7 @@
 <td style="text-align: right;">15.168</td>
 <td style="text-align: right;">6.130</td>
 <td style="text-align: right;">-5.411</td>
-<td>Field regression vs 3.2</td>
+<td>Went farther than 3.3b, but performed worse than 3.2 in the shadow test</td>
 </tr>
 <tr>
 <td>3.3b</td>
@@ -442,7 +442,7 @@
 <td style="text-align: right;">16.078</td>
 <td style="text-align: right;">1.897</td>
 <td style="text-align: right;">-8.194</td>
-<td>Severe field regression vs 3.2b</td>
+<td>Left the sidewalk in shadow within about 10 m; much worse than 3.2b</td>
 </tr>
 <tr>
 <td><strong>3.4</strong></td>
@@ -471,16 +471,16 @@
 <h2 id="why-v34-won">Why v3.4 Won</h2>
 <p>v3.4b has lower MAE, lower median error, and higher straight recall. v3.4 has stronger turn exact, turn-within-one-bucket, and near-zero signed error. More importantly, v3.4 completed every shadow case presented in the July 13 physical comparison. That combined evidence is more relevant to steering than any isolated column.</p>
 <p>v3.3 and v3.3b are useful negative results. They were trained to improve shadow robustness, but the physical car became worse. Stronger augmentation is not automatically better if it obscures geometry needed for real turns.</p>
-<h2 id="artifact-contract">Artifact Contract</h2>
+<h2 id="model-contract">Model Contract</h2>
 <ul>
-<li>Artifact: <code>code/ai_models/SidewalkPilot-v&lt;version&gt;.onnx</code></li>
+<li>Model file: <code>code/ai_models/SidewalkPilot-v&lt;version&gt;.onnx</code></li>
 <li>Input: <code>[batch,3,180,320]</code>, normalized OpenCV BGR</li>
 <li>v3.0/v3.0b output: <code>[batch,2]</code> steering and throttle regression</li>
 <li>v3.1+ output: <code>[batch,19]</code> = 9 logits + 9 offsets + throttle</li>
 <li>Runtime default: <code>DEFAULT_STEERING_MODEL_CHOICE = "3.4"</code></li>
 <li>Deployment: ONNX Runtime CUDA on Jetson Orin Nano</li>
 </ul>
-<p>See the <a href="../series-4/">Series 4 table</a> for the temporal experiments and the <a href="../../../steering_model_report.pdf">full PDF report</a> for confusion matrices and all 46 checkpoints.</p>
+<p>See the <a href="../series-4/">Series 4 table</a> for the temporal experiments and the <a href="../../../steering_model_report.pdf">full PDF report</a> for confusion matrices and all 52 checkpoints.</p>
               
             </div>
           </div><footer>

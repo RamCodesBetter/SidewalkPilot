@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -339,7 +339,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="repository-reference">Repository Reference</h1>
-<p>This index maps current repository areas to their responsibilities. Generated data and public artifact cards are intentionally separated from source code.</p>
+<p>This index maps current repository areas to their responsibilities. Generated data and public model or dataset cards are intentionally separated from source code.</p>
 <table>
 <thead>
 <tr>
@@ -366,8 +366,8 @@
 </tr>
 <tr>
 <td><code>code/controller/current/rc_car_app/jetson_inference_server.py</code></td>
-<td>ONNX Runtime inference server</td>
-<td>Runs on Jetson Orin Nano</td>
+<td>Unified steering-model inference server</td>
+<td>Runs Series 1/2 with PyTorch CUDA and Series 3/4 with ONNX Runtime CUDA on Jetson Orin Nano</td>
 </tr>
 <tr>
 <td><code>code/controller/current/z2w_dashboard.py</code></td>
@@ -376,8 +376,8 @@
 </tr>
 <tr>
 <td><code>code/ai_models/</code></td>
-<td>Local/Hugging Face PTH/ONNX artifacts</td>
-<td>Binary artifacts are ignored by Git; preserve version names</td>
+<td>Local/Hugging Face PTH and ONNX models</td>
+<td>Binary model files are ignored by Git; preserve version names</td>
 </tr>
 <tr>
 <td><code>code/ai_models_datasets/series_1_and_2/</code></td>
@@ -386,12 +386,12 @@
 </tr>
 <tr>
 <td><code>code/ai_models_datasets/series_3_and_4/</code></td>
-<td>Series 3 trainer, three Series 4 trainers, shared temporal code</td>
+<td>Series 3 trainer, six Series 4 wrappers, shared temporal code</td>
 <td>320x180 families</td>
 </tr>
 <tr>
 <td><code>code/test_files/models/evaluate_sidewalkpilot_models.py</code></td>
-<td>Common 46-model evaluator</td>
+<td>Common 52-checkpoint evaluator</td>
 <td>Produces JSON/PDF report</td>
 </tr>
 <tr>
@@ -407,7 +407,7 @@
 <tr>
 <td><code>docs/steering_model_report.pdf</code></td>
 <td>Generated comparison report</td>
-<td>46 checkpoints</td>
+<td>52 checkpoints</td>
 </tr>
 <tr>
 <td><code>docs/steering_eval_current_labels.json</code></td>
@@ -416,7 +416,7 @@
 </tr>
 </tbody>
 </table>
-<p>Large image datasets, generated archives, model cards, and dataset cards are not tracked as ordinary GitHub source. Published artifacts live on Hugging Face.</p>
+<p>Large image datasets, generated archives, model cards, and dataset cards are not tracked as ordinary GitHub source. Published models and datasets live on Hugging Face.</p>
 <h2 id="runtime-starting-points">Runtime Starting Points</h2>
 <table>
 <thead>
@@ -439,11 +439,15 @@
 <td><code>rc_car_app/hardware.py</code></td>
 </tr>
 <tr>
-<td>Model registry and Raspberry Pi 5 inference client</td>
+<td>Model registry and Raspberry Pi 5 preprocessing</td>
 <td><code>rc_car_app/vision.py</code></td>
 </tr>
 <tr>
-<td>ONNX loading/decoding</td>
+<td>Raspberry Pi 5 inference client and temporal-history state</td>
+<td><code>rc_car_app/jetson_client.py</code></td>
+</tr>
+<tr>
+<td>Model loading and output decoding</td>
 <td><code>rc_car_app/jetson_inference_server.py</code></td>
 </tr>
 <tr>
@@ -469,7 +473,7 @@
 python3 -m compileall code/controller/current/rc_car_app
 </code></pre>
 <h2 id="configuration-functions-and-flags">Configuration, Functions, and Flags</h2>
-<p><code>config.py</code> is the source of truth for pins, thresholds, controller indices, model defaults, telemetry, and logging. <code>runtime.py</code> owns state and arbitration; <code>hardware.py</code> owns physical writes; <code>vision.py</code> owns camera/model selection and Raspberry Pi 5 preprocessing; <code>lidar.py</code> parses scans; <code>lidar_avoidance.py</code> computes longitudinal policy; <code>navigation.py</code> owns GPS/graph routing.</p>
+<p><code>config.py</code> is the source of truth for pins, thresholds, controller indices, model defaults, telemetry, and logging. <code>runtime.py</code> owns state and arbitration; <code>hardware.py</code> owns physical writes; <code>vision.py</code> owns camera/model selection and Raspberry Pi 5 preprocessing; <code>jetson_client.py</code> owns asynchronous inference requests and Series 4 steering history; <code>lidar.py</code> parses scans; <code>lidar_avoidance.py</code> computes longitudinal policy; <code>navigation.py</code> owns GPS/graph routing.</p>
 <p>Do not treat a named constant as active without finding its current call site. Do not change a hardware mapping in a model, trainer, or dashboard layer. Public code-reference claims should name the owning file/function and be rechecked after refactors.</p>
 <p>See <a href="../../runtime-code/runtime-loop/">Runtime Code</a>, <a href="../../ai-and-models/training-pipeline/overview/">Training Pipeline</a>, and <a href="../test-files/">Test Files</a>.</p>
               

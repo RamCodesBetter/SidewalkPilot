@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -113,7 +113,7 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -369,7 +369,7 @@ manual control, and enough observability to explain every result.</p>
    and let enabled center-corridor LiDAR policy cap or stop forward motion without steering.</li>
 <li><strong>Plan mapped routes.</strong> Use GPS and A* to create sidewalk and manual-crossing segments.</li>
 <li><strong>Make state observable.</strong> Preserve dashboard telemetry, CSV logs, training records,
-   model artifacts, and field evidence.</li>
+   model files and field evidence.</li>
 </ol>
 <p>The goal is a repeatable field-to-data-to-model-to-car engineering loop, not one successful
 drive or one low evaluation number.</p>
@@ -406,7 +406,7 @@ or bit-identical training across unrelated GPU/software environments.</p>
 </tr>
 <tr>
 <td>Compute</td>
-<td>Jetson Orin Nano is the AI Model Manager for asynchronous Series 3/4 ONNX inference; Raspberry Pi 5 applies hardware and safety control</td>
+<td>Jetson Orin Nano is the AI Model Manager for every live-selectable family: Series 1/2 use PyTorch CUDA and Series 3/4 use ONNX Runtime CUDA; Raspberry Pi 5 applies hardware and safety control</td>
 </tr>
 <tr>
 <td>Dashboard</td>
@@ -445,12 +445,12 @@ or bit-identical training across unrelated GPU/software environments.</p>
 <tr>
 <td>Shared evaluation</td>
 <td>Frozen subset, evaluator revision, JSON, and PDF</td>
-<td>Complete for 46 checkpoints on 6,952 frames</td>
+<td>Complete for 52 checkpoints on 6,952 frames</td>
 </tr>
 <tr>
 <td>Model promotion</td>
 <td>Balanced metrics plus repeatable testing of ordinary turns and target failure cases</td>
-<td>v3.4 selected; Series 4 pending</td>
+<td>v3.4 selected; v4.0 field-tested; v4.1 pending</td>
 </tr>
 <tr>
 <td>LiDAR policy</td>
@@ -501,7 +501,7 @@ restarted and imported it.</p>
 </tr>
 <tr>
 <td>Model runtime</td>
-<td>Verify artifact, ONNX signature, preprocessing, decoder, freshness, and provider</td>
+<td>Verify the model file, input/output contract, preprocessing, decoder, freshness, and GPU provider</td>
 </tr>
 <tr>
 <td>LiDAR/AEB</td>
@@ -523,7 +523,7 @@ restarted and imported it.</p>
 </table>
 <h3 id="hardware">Hardware</h3>
 <ul>
-<li>Start actuator tests with the car restrained or wheels unloaded and the controller ready.</li>
+<li>Start steering and motor tests with the car restrained or wheels unloaded and the controller ready.</li>
 <li>Verify USB dashboard addresses, carrier, neighbors, and ping in both directions.</li>
 <li>Stop competing services before opening raw LiDAR serial.</li>
 <li>Confirm the selected model and enabled safety state before autonomous motion.</li>
@@ -533,8 +533,8 @@ restarted and imported it.</p>
 lighting/blur/obstruction and steering coverage, preserve provenance, and document
 exclusions. Do not delete data without review.</p>
 <p>Before promoting a model, run the common evaluator, inspect class balance and confusion,
-export and load the exact ONNX artifact, restart affected services, then drive the same
-ordinary-turn and motivating-failure cases. Final and best-validation checkpoints are
+export and load the exact deployable model, restart affected services, then drive the same
+ordinary-turn and motivating-failure cases. Final-epoch and validation-selected checkpoints are
 separate candidates; neither role wins automatically.</p>
 <h2 id="claim-rule">Claim Rule</h2>
 <p>Code proves implementation, not physical performance. A valid field claim records the
@@ -546,7 +546,7 @@ distance or duration, takeovers and reasons, logs, video, and the keep/rollback 
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../../autonomy-stack/navigation/crosswalk-handoff/" class="btn btn-neutral float-left" title="Crosswalk Handoff"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../design-decisions/augmentation-vs-fixed-preprocessing/" class="btn btn-neutral float-right" title="Augmentation vs Fixed Preprocessing">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../design-decisions/augmentation-vs-fixed-preprocessing/" class="btn btn-neutral float-right" title="Augmentation Versus Fixed Preprocessing">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>

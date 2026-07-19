@@ -3,7 +3,7 @@
 The LiDAR safety layer is SidewalkPilot's deterministic center-corridor throttle and
 braking guard. It sits outside the neural steering model: the model owns steering,
 while LiDAR can reduce forward throttle or request a stop when AEB is enabled. It does
-not select a swerve direction.
+not output steering.
 
 The sensor is a Youyeetoo FHL-LD19 spinning LiDAR running at 230400 baud. It currently
 connects over USB through a CP2102 UART-to-USB Adapter (auto-resolved from
@@ -13,7 +13,7 @@ Raspberry Pi 5's GPIO UART at `/dev/ttyAMA2`. A background reader thread
 scan of `LidarPoint` objects, and the main control loop in `rc_car_app/runtime.py` pulls
 the latest scan once per iteration with `get_latest_scan()`.
 
-## How it works
+## How It Works
 
 The pipeline is a straight line from bytes to a throttle or braking decision:
 
@@ -34,7 +34,7 @@ The same computed policy is reused within a control iteration, so autonomous com
 generation and final hardware arbitration do not intentionally interpret two different
 scans. Operator input can cancel autonomy while the controller and Raspberry Pi 5 loop are responsive.
 
-## Why this choice
+## Why This Choice
 
 Keeping close-range throttle and braking outside the neural network makes those decisions
 explicit and auditable. The model handles visual path choice; LiDAR handles measured
@@ -43,9 +43,7 @@ hazard or that the configured threshold guarantees a particular stopping distanc
 
 ## Why LiDAR Does Not Steer
 
-SidewalkPilot previously implemented fixed left/right LiDAR steering and later a
-left/center/right lane concept. Both were removed. Obstacle points can identify occupied
-range but cannot prove where the sidewalk ends or whether apparently empty space is grass,
+Obstacle points can identify occupied range but cannot prove where the sidewalk ends or whether apparently empty space is grass,
 a curb, sparse sensing, or another unseen hazard. The current policy therefore always
 returns no steering command. One autonomous steering owner is easier to reason about: the
 camera model chooses the path, while LiDAR constrains only longitudinal motion.
@@ -54,7 +52,7 @@ The runtime also does not cluster or classify LiDAR points. It uses the nearest 
 inside one center corridor. This intentionally simple rule cannot distinguish a person from
 a wall, estimate object width, or establish that adjacent space is traversable.
 
-## Layer priority
+## Layer Priority
 
 | Layer | Role | Priority |
 |---|---|---|
@@ -62,15 +60,13 @@ a wall, estimate object width, or establish that adjacent space is traversable.
 | LiDAR / AEB | Center clearance, throttle cap, emergency brake | Overrides forward throttle only |
 | Camera model | Autonomous steering command | Sole autonomous steering owner |
 
-## Current status
+## Current Status
 
 Implemented and wired into the runtime: packet parsing, background reconnect, center
-occupancy, progressive throttle governance, AEB braking, and dashboard telemetry. The
-earlier left/center/right swerve-through design was removed because range points alone do
-not identify a safe sidewalk boundary. Quantitative stopping-distance, false-positive,
+occupancy, progressive throttle governance, AEB braking, and dashboard telemetry. LiDAR does not provide steering because range points alone do not identify a safe sidewalk boundary. Quantitative stopping-distance, false-positive,
 and obstacle-coverage evidence is still to be collected.
 
-## Related pages
+## Related Pages
 
 - [Control Architecture and Runtime Data Flow](../architecture/data-flow.md)
 - [Autonomous Emergency Braking](aeb.md)

@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../../requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -99,13 +99,13 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#decision">Decision</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#alternatives-considered">Alternatives considered</a>
+    <li class="toctree-l2"><a class="reference internal" href="#alternatives-considered">Alternatives Considered</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#reason">Reason</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-to-know-it-worked-test-gate">How to know it worked (test gate)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-know-it-worked-test-gate">How to Know It Worked (Test Gate)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -366,7 +366,7 @@ HUB75_DASHBOARD_SEND_INTERVAL_SEC = 0.1
 gear, turn signals, servo angle, throttle/brake percent, drive mode, LiDAR
 points, camera pixels, CPU temp, nav status, and so on. The Zero 2 W renders it in
 <code>z2w_dashboard.py</code>.</p>
-<h2 id="alternatives-considered">Alternatives considered</h2>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
 <table>
 <thead>
 <tr>
@@ -394,7 +394,7 @@ points, camera pixels, CPU temp, nav status, and so on. The Zero 2 W renders it 
 </tbody>
 </table>
 <h2 id="reason">Reason</h2>
-<p>UDP fits a replaceable display feed because it has no acknowledgement or retransmission
+<p>UDP fits a replaceable display feed because it has no acknowledgment or retransmission
 contract; a lost datagram can be replaced by the next update. <code>runtime.py</code> wraps the
 transport in <code>AsyncDashboardSender</code>. The controller replaces one pending state snapshot,
 while the worker performs JSON serialization and <code>sendto()</code>. This prevents stale state
@@ -403,7 +403,7 @@ UDP send proves only that the local kernel accepted the datagram.</p>
 <p>Pinning it to the USB Ethernet gadget with static IPs (<code>.1</code> / <code>.2</code>) removes Wi-Fi
 fallback and mDNS resolution from the dashboard path. Wi-Fi/<code>zero2w.local</code>
 fallback was deliberately removed and must not be re-added unless Ram explicitly asks.</p>
-<h2 id="how-to-know-it-worked-test-gate">How to know it worked (test gate)</h2>
+<h2 id="how-to-know-it-worked-test-gate">How to Know It Worked (Test Gate)</h2>
 <ul>
 <li>The car log should print <code>Hub75 dashboard telemetry sending UDP to
   192.168.10.2:8765.</code> (if it says <code>zero2w.local</code>, stale code/env is active).</li>
@@ -413,11 +413,11 @@ fallback was deliberately removed and must not be re-added unless Ram explicitly
 <li><code>code/test_files/setup/install_usb_dashboard_link.sh</code> installs the static IPs
   plus the keeper service used for the project's ARP/USB recovery procedure.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>engineering-process/design-decisions/pi-plus-jetson-compute-split.md</code></li>
-<li><code>testing/failures/overview.md</code></li>
-<li><code>roadmap/next-steps.md</code></li>
+<li><a href="../pi-plus-jetson-compute-split/">Raspberry Pi 5 and Jetson Orin Nano Compute Split</a></li>
+<li><a href="../../../testing/failures/overview/">Failures and Lessons</a></li>
+<li><a href="../../../roadmap/next-steps/">Next Steps</a></li>
 </ul>
               
             </div>

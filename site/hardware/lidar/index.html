@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -160,15 +160,15 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#parts-amazon">Parts (Amazon)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#packet-and-reconnect-details">Packet and Reconnect Details</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify before a run</a>
+    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify Before a Run</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -353,7 +353,7 @@ safety corridor. It does not override steering.</p>
 <ul>
 <li><a href="https://www.amazon.com/youyeetoo-D300-Resistant-Raspberry-Tutorial/dp/B0B1QCV4XR/ref=sr_1_1_sspa?crid=3PEW81EWE77M7&amp;dib=eyJ2IjoiMSJ9.xRO1HLsQgyMGosjt-JLHK9NqlXmGjamO5bCBS0lTVvkKceKizVjNtRJ3cI42GtjPJxSbJA4rzaZDZM4Z43hq8VfxQSR5uKnsO5NMGsJTmzSih8dLVOIXbmJpmVdPm1Buyj2lSyYpqdF4PS0G0R8_dBrWu-5AYZNAj_wmSIGBrgeO_OGNC_uhA6_08faa9d5yj2dfggXqZCbPKTx8zgCmSA8voegwEa_e2ndl5pjxQNA.L1wKA35gI2jbHtEu054aB8yYEMsVkcJbPMc74HFGLcM&amp;dib_tag=se&amp;keywords=youyeetoo+lidar&amp;qid=1779578773&amp;sprefix=youyeetoo+lidar%2Caps%2C182&amp;sr=8-1-spons&amp;sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&amp;psc=1">Youyeetoo FHL-LD19 360 12M 30K Lux LiDAR</a> — $71.90</li>
 </ul>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li><code>lidar.py</code> reads the scanner over a serial port at <code>230400</code> baud. The current wiring is
   <strong>USB via a CP2102 UART-to-USB Adapter</strong> (<code>/dev/ttyUSB0</code>); an earlier setup ran it on the
@@ -380,7 +380,7 @@ its buffer, and re-resolves the port. Retry delay starts at 1.5 seconds, increas
 a 10-second ceiling, and resets after a successful connection. Repeated status messages are
 limited to once every 15 seconds. This recovery keeps serial waits outside the driving loop,
 but AEB coverage is absent while valid scans are missing.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>A 360-degree scanner gives cheap, all-around distance sensing that the camera model cannot
   provide, which is what makes an independent safety/AEB layer possible.</li>
@@ -388,7 +388,7 @@ but AEB coverage is absent while valid scans are missing.</p>
   distance thresholds rather than a learned output. Their real stopping performance still
   has to be measured under the intended payload and surface conditions.</li>
 </ul>
-<h2 id="verify-before-a-run">Verify before a run</h2>
+<h2 id="verify-before-a-run">Verify Before a Run</h2>
 <ul>
 <li>Bench test: <code>code/test_files/lidar/lidar_viewer.py</code> visualizes the live scan.</li>
 <li>Failure symptoms: if the dashboard shows <code>NONE</code>/<code>000</code>, stop the car service and check the
@@ -396,11 +396,11 @@ but AEB coverage is absent while valid scans are missing.</p>
   confirm baud <code>230400</code>. Stop the controller before raw serial tests so two readers do not
   fight over the port.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/build-overview.md</code></li>
-<li><code>testing/bench-tests/overview.md</code></li>
-<li><code>runtime-code/hardware/hardware-class.md</code></li>
+<li><a href="../build-overview/">Hardware Build Overview</a></li>
+<li><a href="../../testing/bench-tests/overview/">Bench Tests</a></li>
+<li><a href="../../runtime-code/hardware/hardware-class/">Hardware Class</a></li>
 </ul>
               
             </div>

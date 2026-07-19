@@ -14,17 +14,18 @@ clean logic rail is the main goal of the power design.
 - [DROK DC Buck Converter](https://www.amazon.com/dp/B078Q1624B?ref=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V&ref_=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V&social_share=cm_sw_r_apin_ct_8W0Y8Q0X4RRRAV84QT9V&th=1) — $17.49
 - [ATC/ATO 14AWG 10A AMP Fuses](https://www.amazon.com/dp/B07Q9PL4R6?ref=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&ref_=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&social_share=cm_sw_r_apin_ct_D0V24X6N2HC7GX465WYJ&th=1) — $15.99
 - [OVONIC 2S (7.4V) 5200mAh 50C](https://www.amazon.com/OVONIC-5200mAh-Connector-Airplane-Helicopter/dp/B07JJ4Q65Z/ref=sr_1_8?crid=2NY4T275TZZDB&dib=eyJ2IjoiMSJ9.Rx8egGP6AfIhC3F36F5hy8xQM1pkK1UUD4O91eWDFWOL-Fw_cr1d5doCeeuUT0vxny-_y3O_y6AvLNoltS2AIQGWh2vtm95tvG8lWMBekmPIH12AGF8m8L9jMd0PL185T55rPshJNzElpkimOm41_aKg9BzsrzMo2SwYsfhdHiOs76vWOg0-0VAyHhjtpP_DZLezpPq5ng148Zxdwn0YhipqGVkLzsBOTkzVveF1asJP3y7wRCdIfSB99gM3_zZT0jaL8XqqjPpJpKtFuqUgeO5Y3tqUu8EIWLsFjBN5xiU.lwZBeg8mwdMMPBLFXqVR_ZQzgn0Lq4VTwuzRRhEU7AE&dib_tag=se&keywords=ovonic+2s+lipo+battery+5200mah+t+plug&qid=1779576913&sprefix=ovonic+2s+lipo+battery+5200mah+t+plu%2Caps%2C177&sr=8-8) — $13.29
-## Power domains
 
-- **Motor rail:** a 3S LiPo (11.1V; e.g. the OVONIC 3S 5200 mAh) feeds the AT8236 Motor Controller
+## Power Domains
+
+- **Motor rail:** a 3S LiPo (11.1 V; for example, the OVONIC 3S 5,200 mAh) feeds the AT8236 Motor Controller
   and JGB37-520 DC drive motors. A DROK DC buck converter steps voltage down where a rail needs it,
-  ATC/ATO fuses protect against shorts.
-- **Logic rail:** the compute boards run from USB power banks (a 27000 mAh 140W bank and a
-  10000 mAh 45W bank), keeping the Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W off the noisy motor supply.
-- **Support gear:** a dual LiPo charger/discharger and a 2S LiPo are part of the battery kit
-  for charging and bench work.
+  and ATC/ATO fuses protect against shorts.
+- **Logic rail:** the compute boards run from USB power banks (a 27,000 mAh, 140 W bank and a
+  10,000 mAh, 45 W bank), keeping the Jetson Orin Nano, Raspberry Pi 5, and Zero 2 W off the noisy motor supply.
+- **Display rail:** a 2S LiPo supplies the HUB75 display through its fused buck converter.
+  A dual LiPo charger/discharger supports the battery set.
 
-## How it works
+## How It Works
 
 - Motors and logic are on separate supplies to reduce how strongly motor start/brake current
   transients couple into the compute boards. A correctly configured buck converter regulates
@@ -33,15 +34,15 @@ clean logic rail is the main goal of the power design.
 - The Zero 2 W needs a stable supply, but a USB enumeration failure does not identify one
   cause. Power, cable integrity, the host port, and gadget state must be checked separately.
 
-## Why this choice
+## Why This Choice
 
 - A 3S LiPo delivers the high current the drive motors need at a usable voltage, while USB
-  power banks give the regulated, steady 5V the SBCs expect.
-- Splitting the domains and adding capacitance/fusing is intended to reduce resets and contain
+  power banks give the regulated, steady 5 V that the single-board computers expect.
+- Splitting the domains and adding fusing is intended to reduce resets and contain
   electrical faults. A measured rail-voltage trace would be needed to attribute a particular
   reset or USB failure to power.
 
-## Related pages
+## Related Pages
 
 - [Hardware Build Overview](build-overview.md)
 - [Bench Tests](../testing/bench-tests/overview.md)

@@ -25,14 +25,14 @@ A shutdown object is sent repeatedly during controller cleanup to improve the ch
 
 The display covers drive/PRND, steering/throttle/brake, steering and yaw tuning, model status, intervention evidence, temperatures, photo/camera status, navigation, GPS, camera preview, and LiDAR. Page IDs are intentionally sparse after old collection-countdown pages were removed. Right-stick axes move through the page grid; context-sensitive D-pad controls tune values, select models, or edit navigation.
 
-The LiDAR page shows a center safety corridor and distance rungs. It does not display or command a left/right swerve policy.
+The LiDAR page shows a center safety corridor and distance rungs. It does not display or command a left-or-right swerve policy.
 
 ## Link States and Recovery
 
 - `NO LINK`: no controller packet arrived after receiver startup;
 - `STALE`: packets arrived and then stopped;
-- linked shutdown: an explicit shutdown payload exits and clears the panel;
-- idle exit: optional receiver timeout after a previously active stream becomes silent.
+- **Linked shutdown:** an explicit shutdown payload exits and clears the panel;
+- **Idle exit:** an optional receiver timeout ends the process after a previously active stream becomes silent.
 
 `NO LINK` or `STALE` should be debugged in this order: controller process, receiver service and UDP listener, `usb0` carrier/address, bidirectional ping, then sender/receiver logs. Wi-Fi is not a telemetry fallback.
 

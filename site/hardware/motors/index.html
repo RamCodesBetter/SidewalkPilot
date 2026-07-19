@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -156,17 +156,17 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#parts-amazon">Parts (Amazon)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#motor-specification">Motor specification</a>
+    <li class="toctree-l2"><a class="reference internal" href="#motor-specification">Motor Specification</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#wiring">Wiring</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify before a run</a>
+    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify Before a Run</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -354,7 +354,7 @@ pins. Steering is separate (a servo on the PCA9685); these motors only provide t
 <ul>
 <li><a href="https://www.amazon.com/Yahboom-Controller-AT8236-H-Bridge-Raspberry/dp/B0BVW7PBYW/ref=sr_1_1?dib=eyJ2IjoiMSJ9.uPNafB0Kecl7MEifvky-Os4jq9LSVLKfYZ7ng7QQyCusNhtxa5eWjFZ0gjil7eLqQtz6A-GbYKyZXwdw432rlWBHtOqQWKJaU9NIKS05CPcQ9cay-cspsfSoXnukBXOGOoMaqYK5hOnGgK2L1PYDXVb9lNHt7H6HH1stR_3gc1O4vMcXviPEp4CKCcOh8c2F_DAkKhYTZGDTjyLmKcLu__rs3sfnahMZBBAGsrQoyvHIROsZDXMkPHNpqFdAV74yTVv22c8zVqZE3uDRF7uhoXd5wNsgoVEj5WDY3Y9kkkk.cDRzL8BTvFn8RCop3P581cf5S1qfAQCxjEKbVSsehe0&amp;dib_tag=se&amp;keywords=Yahboom%2BDual%2BMotor%2BDrive%2BController%2BBoard%2BModule%2BAT8236%2BDual%2BH-Bridge%2BDC%2BStepper%2Bfor%2BArduino%2BRaspberry%2BPi%2BSTM32%2B(Motor%2BDrive%2BModule%2B%2BPower%2BCable)&amp;nsdOptOutParam=true&amp;qid=1779578440&amp;sr=8-1&amp;th=1">Yahboom AT8236 Motor Controller</a> — $12.99</li>
 </ul>
-<h2 id="motor-specification">Motor specification</h2>
+<h2 id="motor-specification">Motor Specification</h2>
 <table>
 <thead>
 <tr>
@@ -411,7 +411,7 @@ pins. Steering is separate (a servo on the PCA9685); these motors only provide t
 </table>
 <p>Each channel is a <code>PWMOutputDevice</code> at <strong>1 kHz</strong> (<code>hardware.py</code>). To drive forward,
 the forward pins get a PWM duty and the backward pins stay at 0; reverse swaps them.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li>The control loop computes a motor PWM value (0..1) from throttle, cruise/PID, or autonomy,
   clamped by acceleration/brake rates, and writes it to the AT8236 Motor Controller through the four GPIO
@@ -424,26 +424,26 @@ the forward pins get a PWM duty and the backward pins stay at 0; reverse swaps t
   force (including an AEB emergency stop) bypasses that ramp, forces motor PWM to zero,
   and drives both AT8236 Motor Controller inputs high on each side for active brake mode.</li>
 </ul>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>The AT8236 Motor Controller is sized for this chassis and exposes simple
   PWM/direction control that maps cleanly onto four GPIO pins.</li>
-<li>Keeping optional left/right motor scaling separate from steering calibration makes the two
+<li>Keeping optional left and right motor scaling separate from steering calibration makes the two
   effects measurable instead of hiding one inside the other.</li>
 </ul>
-<h2 id="verify-before-a-run">Verify before a run</h2>
+<h2 id="verify-before-a-run">Verify Before a Run</h2>
 <ul>
-<li>Bench test: the hall sensor (<code>code/test_files/sensors/hall_sensor_test.py</code>) confirms wheel
+<li>Bench test: the Hall-effect wheel-speed sensor (<code>code/test_files/sensors/hall_sensor_test.py</code>) confirms wheel
   rotation and feeds the speed estimate.</li>
 <li>A car that pulls with logical steering centered is a symptom, not a diagnosis. Compare
   physical wheel alignment, free-wheel behavior, loaded motor speed/current, tire condition,
   surface, and payload before changing either PWM scale or steering trim.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/build-overview.md</code></li>
-<li><code>testing/bench-tests/overview.md</code></li>
-<li><code>runtime-code/hardware/hardware-class.md</code></li>
+<li><a href="../build-overview/">Hardware Build Overview</a></li>
+<li><a href="../../testing/bench-tests/overview/">Bench Tests</a></li>
+<li><a href="../../runtime-code/hardware/hardware-class/">Hardware Class</a></li>
 </ul>
               
             </div>

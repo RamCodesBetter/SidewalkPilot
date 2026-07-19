@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -366,7 +366,7 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 <tr>
 <td>AI Model Manager</td>
 <td>Jetson Orin Nano</td>
-<td>GPU-accelerated Series 3/4 ONNX camera-steering inference</td>
+<td>Series 1/2 PyTorch CUDA and Series 3/4 ONNX Runtime CUDA camera-steering inference</td>
 </tr>
 <tr>
 <td>Chassis and steering</td>
@@ -400,8 +400,8 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 </tr>
 <tr>
 <td>Motion sensing</td>
-<td>Hall-effect sensor</td>
-<td>Wheel speed estimate</td>
+<td>Hall-effect wheel-speed sensor</td>
+<td>Wheel-speed estimate</td>
 </tr>
 <tr>
 <td>Manual control</td>
@@ -413,12 +413,12 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 <h2 id="compute-and-network-layout">Compute and Network Layout</h2>
 <p>The Jetson Orin Nano is the AI brain. The Raspberry Pi 5 is the wired hardware and network
 hub that carries camera frames to it and applies returned steering predictions through the
-safety-controlled actuator path.</p>
+safety-controlled steering and motor path.</p>
 <ul>
 <li><strong>Raspberry Pi 5 to Jetson Orin Nano:</strong> dedicated Ethernet, Raspberry Pi 5 <code>10.42.0.1</code>, Jetson Orin Nano <code>10.42.0.2</code>, inference TCP port <code>8770</code>.</li>
 <li><strong>Raspberry Pi 5 to Zero 2 W:</strong> USB Ethernet gadget, Raspberry Pi 5 <code>192.168.10.1</code>, Zero 2 W <code>192.168.10.2</code>, telemetry UDP port <code>8765</code>.</li>
 <li><strong>Xbox controller:</strong> Bluetooth HID directly to the Raspberry Pi 5.</li>
-<li><strong>LiDAR:</strong> USB 3.0 through a CP2102 UART-to-USB Adapter, current serial device <code>/dev/ttyUSB0</code>.</li>
+<li><strong>LiDAR:</strong> USB serial through a CP2102 UART-to-USB Adapter, current serial device <code>/dev/ttyUSB0</code>.</li>
 </ul>
 <p>The two wired links are separate. Dashboard recovery must not rewrite the Jetson Orin Nano Ethernet configuration, and Jetson Orin Nano availability must not determine whether the dashboard works.</p>
 <h2 id="power-domains">Power Domains</h2>
@@ -458,7 +458,7 @@ safety-controlled actuator path.</p>
 <td>GPIO 25 / GPIO 13</td>
 </tr>
 <tr>
-<td>Hall sensor</td>
+<td>Hall-effect wheel-speed sensor</td>
 <td>GPIO 24</td>
 </tr>
 <tr>
@@ -474,11 +474,11 @@ safety-controlled actuator path.</p>
 <li>Fixed-angle PCA9685 tests;</li>
 <li>Controller-driven 15-degree step tests;</li>
 <li>Live center-trim adjustment;</li>
-<li>Left/right wheel regression plots;</li>
+<li>Left and right wheel regression plots;</li>
 <li>Direction-dependent feed-forward calibration;</li>
 <li>IMU yaw-rate experiments.</li>
 </ul>
-<p>The current center trim is <code>+12D</code>. Reference steering limits are intentionally narrower than absolute hardware commands during normal driving. Tight absolute commands remain a separate future maneuver decision, not a default training range.</p>
+<p>The current center trim is <code>+17D</code>. Reference steering limits are intentionally narrower than absolute hardware commands during normal driving. Tight absolute commands remain a separate future maneuver decision, not a default training range.</p>
 <h2 id="bring-up-order">Bring-Up Order</h2>
 <ol>
 <li>Raise the car so wheels cannot drive it unexpectedly.</li>
@@ -518,7 +518,7 @@ sudo python code/test_files/display/hub75_rgbmatrix_test.py
 </tr>
 <tr>
 <td>Car pulls more as throttle rises</td>
-<td>Left/right motor-force imbalance, not only steering trim</td>
+<td>Left and right motor-force imbalance, not only steering trim</td>
 </tr>
 <tr>
 <td>Dashboard shows <code>NO LINK</code></td>

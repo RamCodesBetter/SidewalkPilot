@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -344,9 +344,9 @@
 <ol>
 <li>The Raspberry Pi 5 captures the current camera frame.</li>
 <li><code>AsyncJetsonSteeringClient</code> keeps only the newest pending frame and selected model version.</li>
-<li>Jetson Orin Nano's <code>jetson_inference_server.py</code> loads the matching ONNX artifact, preprocesses the frame, and runs ONNX Runtime.</li>
-<li>Jetson Orin Nano decodes the model-family-specific output and returns steering plus model telemetry.</li>
-<li>The Raspberry Pi 5 accepts only a fresh response for the selected version, then applies local safety arbitration before writing actuators.</li>
+<li>Jetson Orin Nano's <code>jetson_inference_server.py</code> loads the selected model, preprocesses the frame, and runs it on the GPU.</li>
+<li>Jetson Orin Nano uses the decoder required by that model's output shape and returns steering plus model telemetry.</li>
+<li>The Raspberry Pi 5 accepts only a recent response for the selected version, applies its safety rules, and then commands the steering servo and motors.</li>
 </ol>
 <h2 id="supported-families">Supported Families</h2>
 <ul>
@@ -355,7 +355,7 @@
 <li>Series 3.1 through 3.4b: 19-output hybrid head.</li>
 <li>Series 4 PC, CF, and PCF: temporal/horizon hybrid contracts, decoded at horizon zero for live steering.</li>
 </ul>
-<p>CUDA is preferred when available. CPU remains a fallback for compatibility and bench diagnosis. TensorRT is not the current live path.</p>
+<p>All listed families are supported on the Jetson Orin Nano GPU. Series 1/2 use PyTorch with CUDA; Series 3/4 use ONNX Runtime with CUDA. CPU remains a diagnostic fallback. TensorRT is not the current live path.</p>
 <h2 id="failure-behavior">Failure Behavior</h2>
 <p>The Raspberry Pi 5 client does not block the control loop while waiting for Jetson Orin Nano. If no fresh response exists, autonomous driving does not receive a valid new steering command. Manual control and local Raspberry Pi 5 LiDAR braking remain on the Raspberry Pi 5.</p>
 <p>Model selection is performed from the dashboard or <code>RC_CAR_STEERING_MODEL</code>; the live runtime currently defaults to v3.4.</p>

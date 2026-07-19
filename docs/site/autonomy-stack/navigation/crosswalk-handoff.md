@@ -6,7 +6,7 @@ tells the human to drive, just before a road crossing. It is computed by
 `NavigationManager.update()` in
 `code/controller/current/rc_car_app/navigation.py`.
 
-## How it works
+## How It Works
 
 - During `build_segment_plan()`, whenever a `sidewalk` segment is immediately followed
   by a `crosswalk` segment, the planner marks a **handoff node** partway back from the
@@ -32,12 +32,11 @@ far sidewalk. The runtime also publishes the resume node, distance, and readines
 the dashboard. This keeps the human in control through the crossing while tolerating normal
 GPS error near the far curb.
 
-## Why this choice
+## Why This Choice
 
-- A crossing is the highest-risk part of any route and the camera model was never
-  trained to cross roads, so control must leave the model before the car is in the
+- A road crossing is outside the camera model's sidewalk training domain, so control must leave the model before the car is in the
   crossing, not at the last second.
-- Handing off ~3 m early gives the human real reaction time to take the controller and
+- Handing off approximately 3 m early gives the operator advance warning to take the controller and
   check for traffic, instead of being surprised at the curb.
 - Basing the trigger on distance-to-node (not just "reached the last sidewalk node")
   means the alert fires at a consistent physical distance regardless of how the
@@ -53,12 +52,12 @@ A valid test must show the dashboard warning before the crossing, the operator c
 resume node. Code presence alone does not prove that GPS triggers each transition at the
 correct physical point.
 
-## Key constants
+## Key Constants
 
 - `HANDOFF_ALERT_M = 3.0` (meters before the crosswalk to hand off).
 - `RESUME_RADIUS_M = 2.5` (meters from the far-side node before the next segment resumes).
 
-## Related pages
+## Related Pages
 
 - [Navigation Overview](overview.md)
 - [Safety Overview](../../safety-case/safety-overview.md)

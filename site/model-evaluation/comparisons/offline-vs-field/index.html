@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -204,15 +204,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Offline and Field Comparison</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#offline-evidence">Offline evidence</a>
+    <li class="toctree-l2"><a class="reference internal" href="#offline-evidence">Offline Evidence</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#field-evidence">Field evidence</a>
+    <li class="toctree-l2"><a class="reference internal" href="#field-evidence">Field Evidence</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#promotion-rule">Promotion rule</a>
+    <li class="toctree-l2"><a class="reference internal" href="#promotion-rule">Promotion Rule</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#common-comparison-questions">Common Comparison Questions</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -344,30 +344,31 @@
               
                 <h1 id="offline-versus-field-evaluation">Offline Versus Field Evaluation</h1>
 <p>Offline evaluation and physical testing answer different questions.</p>
-<h2 id="offline-evidence">Offline evidence</h2>
+<h2 id="offline-evidence">Offline Evidence</h2>
 <p>The common evaluator applies every compatible checkpoint to the same labeled
 challenge subset. It can expose class collapse, directional bias, large errors,
 and candidates worth driving. It cannot reproduce closed-loop error growth,
 servo load, wheel behavior, route hazards, or a particular lighting geometry.</p>
-<h2 id="field-evidence">Field evidence</h2>
+<h2 id="field-evidence">Field Evidence</h2>
 <p>A supervised field comparison reveals whether the car actually holds the tested
-route. The result is strongest when the route, lighting, artifact hash, takeover
+route. The result is strongest when the route, lighting, model file hash, takeover
 count, logs, and clips are preserved. A successful run remains bounded to those
 conditions.</p>
 <p>The July 13, 2026 comparison rejected v3.3 and v3.3b, found v3.4b slightly worse
 than v3.4, and selected v3.4. Its route and clip record was incomplete, so the
-verdict is qualitative rather than a repeatable benchmark. Series 4 remains
-offline-only until the planned physical comparison.</p>
-<h2 id="promotion-rule">Promotion rule</h2>
+verdict is qualitative rather than a repeatable benchmark. The later v4.0 test
+also produced a qualitative verdict: v4.0f was viable but mixed against v3.4,
+while the history-input models failed from steering echo. v4.1 remains offline-only.</p>
+<h2 id="promotion-rule">Promotion Rule</h2>
 <p>Use offline metrics to order candidates, then require a supervised physical run
 before changing the field baseline. Neither stage alone establishes general
 safety or universal robustness.</p>
 <h2 id="common-comparison-questions">Common Comparison Questions</h2>
-<p><strong>Final versus best-validation checkpoints.</strong> Regular artifacts preserve the final epoch. Suffixes such as <code>b</code>, and Series 4 <code>r/g/c</code>, preserve the best validation checkpoint from the same run. The suffix does not guarantee better driving; both are candidates until evaluated.</p>
+<p><strong>Final versus validation-selected checkpoints.</strong> Regular models preserve the final epoch. Suffixes such as <code>b</code>, and Series 4 <code>r/g/c</code>, preserve the validation-selected checkpoint from the same run. The suffix does not guarantee better driving; both are candidates until evaluated.</p>
 <p><strong>Raw BGR versus CLAHE.</strong> v2.0/v2.0b use the historical CLAHE path. Other current models use raw BGR with matching training preprocessing. A comparison is valid only when each checkpoint receives its intended preprocessing.</p>
 <p><strong>MAE versus turning capability.</strong> On a straight-heavy set, lower MAE can accompany weaker turn recall. Bal9, turn exact, turn +/-1, confusion balance, and signed error are evaluated before using MAE to separate otherwise capable candidates.</p>
 <p><strong>Per-dataset behavior.</strong> Overall scores can be driven by one large or easy source. The evaluator therefore retains source-level results and a hold-last temporal baseline. Dataset names and counts must accompany claims.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../../offline-evaluation/overview/">Offline Evaluation</a></li>
 <li><a href="../../../testing/field-testing/overview/">Field Testing</a></li>

@@ -6,6 +6,7 @@ Commands are machine-specific. Confirm the shell prompt before running anything 
 
 | Machine | Command | Verification |
 |---|---|---|
+| Jetson Orin Nano | `pgrep -af jetson_inference_server.py` and `ss -ltnp \| grep 8770` | Inference server is running and listening on the direct Ethernet link |
 | Raspberry Pi 5 | `car` | Controller initialization completes; dashboard model page shows intended version |
 | Zero 2 W | `dash` or its systemd unit | Exactly one UDP listener owns port 8765 |
 | Raspberry Pi 5 | `sudo systemctl status sidewalkpilot-rpi-car.service -l --no-pager` | Unit state and current process |
@@ -14,7 +15,7 @@ Commands are machine-specific. Confirm the shell prompt before running anything 
 | Raspberry Pi 5 | `ping -c 3 192.168.10.2` | USB network reaches the dashboard |
 | Zero 2 W | `ping -c 3 192.168.10.1` | Return path reaches the Raspberry Pi 5 |
 
-The live controller has no `--model` flag. Select all Series 1-4 versions on the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup.
+The live controller has no `--model` flag. Select a registered model through the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup. The current selector includes Series 1 through 3 and Series 4.0; Series 4.1 has not yet been integrated.
 
 ## Logs
 

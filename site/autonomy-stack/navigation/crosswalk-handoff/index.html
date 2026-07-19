@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -84,15 +84,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Crosswalk Handoff</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#returning-to-automatic-control">Returning to Automatic Control</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#key-constants">Key constants</a>
+    <li class="toctree-l2"><a class="reference internal" href="#key-constants">Key Constants</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -101,7 +101,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -348,7 +348,7 @@ tells the human to drive, just before a road crossing. It is computed by
 <code>handoff_index()</code> and applied in <code>operator_for_index()</code> /
 <code>NavigationManager.update()</code> in
 <code>code/controller/current/rc_car_app/navigation.py</code>.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li>During <code>build_segment_plan()</code>, whenever a <code>sidewalk</code> segment is immediately followed
   by a <code>crosswalk</code> segment, the planner marks a <strong>handoff node</strong> partway back from the
@@ -372,12 +372,11 @@ exists, <code>operator_for_index()</code> returns the next segment's operator, n
 far sidewalk. The runtime also publishes the resume node, distance, and readiness state to
 the dashboard. This keeps the human in control through the crossing while tolerating normal
 GPS error near the far curb.</p>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
-<li>A crossing is the highest-risk part of any route and the camera model was never
-  trained to cross roads, so control must leave the model before the car is in the
+<li>A road crossing is outside the camera model's sidewalk training domain, so control must leave the model before the car is in the
   crossing, not at the last second.</li>
-<li>Handing off ~3 m early gives the human real reaction time to take the controller and
+<li>Handing off approximately 3 m early gives the operator advance warning to take the controller and
   check for traffic, instead of being surprised at the curb.</li>
 <li>Basing the trigger on distance-to-node (not just "reached the last sidewalk node")
   means the alert fires at a consistent physical distance regardless of how the
@@ -391,15 +390,15 @@ keeps a human present for the crossing and makes unknown segment types manual by
 <code>MNUL</code>, human control through the road segment, and <code>AUTO</code> returning only near the far-side
 resume node. Code presence alone does not prove that GPS triggers each transition at the
 correct physical point.</p>
-<h2 id="key-constants">Key constants</h2>
+<h2 id="key-constants">Key Constants</h2>
 <ul>
 <li><code>HANDOFF_ALERT_M = 3.0</code> (meters before the crosswalk to hand off).</li>
 <li><code>RESUME_RADIUS_M = 2.5</code> (meters from the far-side node before the next segment resumes).</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>autonomy-stack/navigation/overview.md</code></li>
-<li><code>safety-case/safety-overview.md</code></li>
+<li><a href="../overview/">Navigation Overview</a></li>
+<li><a href="../../../safety-case/safety-overview/">Safety Overview</a></li>
 </ul>
               
             </div>

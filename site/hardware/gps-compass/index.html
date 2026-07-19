@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -162,13 +162,13 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#parts-amazon">Parts (Amazon)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify before a run</a>
+    <li class="toctree-l2"><a class="reference internal" href="#verify-before-a-run">Verify Before a Run</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -342,7 +342,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="gps-compass-hardware">GPS / Compass Hardware</h1>
+                <h1 id="gps-and-compass-hardware">GPS and Compass Hardware</h1>
 <p>The BN880 board combines a GPS receiver with an HMC5883L-compatible magnetometer. The
 current navigation runtime consumes GPS fixes from the UART. Compass reading is available
 in a separate bench utility but is not integrated into the live route manager, so the docs
@@ -351,7 +351,7 @@ do not claim live compass-based heading control.</p>
 <ul>
 <li><a href="https://www.amazon.com/Geekstory-Navigation-Raspberry-Aircraft-Controller/dp/B078Y6323W/ref=sr_1_1?crid=11E0TMTZNTPEW&amp;dib=eyJ2IjoiMSJ9.lSbdcLk7wwVdqd53Tw4NBuhT5XOMygBLYjY5jVspVPybtMQnA99WVMzlC8_j1CsvxaRKx9XgN4b5KhVveSR54WHJXFKDf-iSPapWIcQiyH9-y83yzg35qv0hw8mFAJUm77b6UdN6iObi31usEx_kxlhn1T4N6mwRMHrsJDZyzOC4VNrgW0DFn5dgvd_WWVI1Lj2s5GA4lpd3i1fh87ub_s61VfXUxDszRuTKBCONfbmSEGUbaNXu12K-tYs8_KeCrONdNbG_udvGQhSviQtwh0I2iYEQ8g5IoFeHLi-VTx0.msDaC2RQmowR-0TLZyxZ9b-i7OEqQv7YDCqyOlhrigg&amp;dib_tag=se&amp;keywords=bn880&amp;qid=1779579754&amp;s=electronics&amp;sprefix=bn880%2Celectronics%2C188&amp;sr=1-1&amp;th=1">BN880 GPS Module with HMC5883L</a> — $33.98</li>
 </ul>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ul>
 <li><code>navigation.py</code> opens the GPS on <code>/dev/ttyAMA0</code> at <code>9600</code> baud and reads NMEA sentences
   line by line (<code>GPS_PORT</code>, <code>GPS_BAUD</code>).</li>
@@ -361,14 +361,14 @@ do not claim live compass-based heading control.</p>
 <li><code>code/test_files/sensors/bn880_test.py</code> can read the magnetometer over I2C for bench verification.
   That test path is separate from <code>navigation.py</code>.</li>
 </ul>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
 <li>The BN880 packages GPS and compass hardware on one board, which keeps the physical sensor
   assembly compact even though the current runtime uses only the GPS path.</li>
 <li>UART at 9600 baud is the standard, low-overhead interface for NMEA GPS and does not
   compete with the higher-rate LiDAR or camera buses.</li>
 </ul>
-<h2 id="verify-before-a-run">Verify before a run</h2>
+<h2 id="verify-before-a-run">Verify Before a Run</h2>
 <ul>
 <li>Bench test: <code>code/test_files/sensors/bn880_test.py</code> reads the module and prints fixes and
   compass data.</li>
@@ -376,11 +376,11 @@ do not claim live compass-based heading control.</p>
   device permissions, or another process owns the port. Do not confuse this port with the
   LiDAR: GPS is <code>/dev/ttyAMA0</code>; the LiDAR uses a CP2102 UART-to-USB Adapter.</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>hardware/build-overview.md</code></li>
-<li><code>testing/bench-tests/overview.md</code></li>
-<li><code>runtime-code/hardware/hardware-class.md</code></li>
+<li><a href="../build-overview/">Hardware Build Overview</a></li>
+<li><a href="../../testing/bench-tests/overview/">Bench Tests</a></li>
+<li><a href="../../runtime-code/hardware/hardware-class/">Hardware Class</a></li>
 </ul>
               
             </div>

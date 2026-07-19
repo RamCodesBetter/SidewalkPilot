@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -249,15 +249,15 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Computer Operations</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why this choice</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-this-choice">Why This Choice</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#key-finding-to-remember">Key finding to remember</a>
+    <li class="toctree-l2"><a class="reference internal" href="#key-finding-to-remember">Key Finding to Remember</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery">Failure and recovery</a>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-and-recovery">Failure and Recovery</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#raspberry-pi-5-controller">Raspberry Pi 5 Controller</a>
     </li>
@@ -265,9 +265,9 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#zero-2-w-dashboard">Zero 2 W Dashboard</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to attach</a>
+    <li class="toctree-l2"><a class="reference internal" href="#evidence-to-attach">Evidence to Attach</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -353,46 +353,46 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="computer-operations">Computer Operations</h1>
-<p>The NVIDIA PC is the training and simulation workstation. It is where the Series 1/2 and Series 3 trainers run, where datasets are assembled, and where GPU-heavy experiments happen before a model is exported for the field. It is not part of the live driving loop.</p>
-<h2 id="how-it-works">How it works</h2>
+<p>The NVIDIA PC is the training and simulation workstation. It is where the Series 1/2, Series 3, and Series 4 trainers run, where datasets are assembled, and where GPU-heavy experiments happen before a model is exported for the field. It is not part of the live driving loop.</p>
+<h2 id="how-it-works">How It Works</h2>
 <p>The PC hosts the training code under <code>code/ai_models_datasets/</code>:</p>
 <ul>
-<li><code>series_1_and_2/sidewalkpilot_trainer.py</code> trains the <code>SteeringAutonomyV2</code> regression model (~0.67M params, 200x66 input, single tanh steering output) that runs on the Raspberry Pi 5.</li>
+<li><code>series_1_and_2/sidewalkpilot_trainer.py</code> trains the <code>SteeringAutonomyV2</code> regression model (approximately 0.67 million parameters, 200x66 input, and one tanh steering output). The exported checkpoint runs on the Jetson Orin Nano through PyTorch CUDA.</li>
 <li><code>series_3_and_4/series_3_sidewalkpilot_trainer.py</code> trains <code>SidewalkPilotV3</code> (~5.5M params, 320x180 input) with the hybrid head: 9 steering-class logits + 9 per-class offsets + 1 throttle.</li>
-<li>Three Series 4 trainers implement PC, CF, and PCF experiments against the same Series 3/4 dataset.</li>
+<li>Six Series 4 wrappers run 4.0 and 4.1 PC, CF, and PCF experiments against the same Series 3/4 dataset.</li>
 </ul>
-<p>The nine Series 3 steering buckets are HL, L, L+, SL, ST, SR, R, R+, and HR. The Series 3/4 trainers read the selected dataset roots and can optionally accept explicit correction paths. The current Series 3/4 dataset uses <code>sidewalkpilot_dataset/labels.json</code> and no checked-in correction file. CARLA data, when listed as a root, enters as pre-generated files; the trainers do not drive the simulator.</p>
+<p>The nine Series 3 steering buckets are HL, L, L+, SL, ST, SR, R, R+, and HR. The Series 3 trainer reads selected dataset roots and can optionally accept explicit correction paths. The current Series 4 temporal trainer reads the ordered base labels directly and has no correction-file argument. The current Series 3/4 dataset uses <code>sidewalkpilot_dataset/labels.json</code> and no checked-in correction file. CARLA data, when listed as a Series 3 root, enters as pre-generated files; the trainers do not drive the simulator.</p>
 <p>Once trained, a model reaches the field two ways:</p>
 <ul>
-<li><strong>Series 1/2</strong>: the <code>.pth</code> is copied into <code>code/ai_models</code> on the Raspberry Pi 5 and selected with <code>car</code> followed by dashboard model selection.</li>
-<li><strong>Series 3/4</strong>: the version is registered in <code>STEERING_MODEL_VERSIONS</code> and the <code>.onnx</code> is copied to Jetson Orin Nano. Jetson Orin Nano answers inference over the direct Ethernet link at <code>10.42.0.2:8770</code>.</li>
+<li><strong>Series 1/2:</strong> the <code>.pth</code> is copied into <code>code/ai_models</code> on the Jetson Orin Nano, and its version is registered in <code>STEERING_MODEL_VERSIONS</code> on the Raspberry Pi 5.</li>
+<li><strong>Series 3/4:</strong> the <code>.onnx</code> is copied into the same Jetson Orin Nano model directory, and its version is registered in the same Raspberry Pi 5 selector. The Jetson Orin Nano answers inference requests over the direct Ethernet link at <code>10.42.0.2:8770</code>.</li>
 </ul>
-<h2 id="why-this-choice">Why this choice</h2>
+<h2 id="why-this-choice">Why This Choice</h2>
 <ul>
-<li>The heavy Series-3 model needs a GPU that neither the Raspberry Pi 5 nor a laptop has; the PC supplies that for training, and the Jetson Orin Nano supplies it for inference. The Raspberry Pi 5 stays dedicated to real-time I/O.</li>
+<li>The Series 3/4 models train on the RTX 6000 Ada GPU and run near the camera rate on the Jetson Orin Nano GPU in the current deployment. Keeping inference off the Raspberry Pi 5 leaves that computer focused on controller input, sensors, safety decisions, steering, and motor control.</li>
 <li>Keeping Series 1/2 and Series 3 trainers in separate directories prevents correction-JSON and checkpoint-naming crossover between the two very different architectures.</li>
 </ul>
-<h2 id="key-finding-to-remember">Key finding to remember</h2>
-<p>MAE is insufficient for these models because the common set is straight-heavy. Judge a checkpoint with confusion balance, Bal9, turn metrics, signed error, and field testing. Targeted turn-in-shadow collection is the current response to the observed shadow failure; augmentation settings alone are not field evidence.</p>
+<h2 id="key-finding-to-remember">Key Finding to Remember</h2>
+<p>MAE is insufficient for these models because the common set is straight-heavy. Judge a model with confusion balance, Bal9, turn metrics, signed error, and field testing. Targeted turn-in-shadow collection remains a useful response to observed shadow failures; augmentation settings alone are not field evidence.</p>
 <h2 id="verification">Verification</h2>
 <pre><code class="language-bash"># NVIDIA PC: confirm the trainers compile after an edit
 python3 -m py_compile code/ai_models_datasets/series_1_and_2/sidewalkpilot_trainer.py
 python3 -m py_compile code/ai_models_datasets/series_3_and_4/series_3_sidewalkpilot_trainer.py
 </code></pre>
-<h2 id="failure-and-recovery">Failure and recovery</h2>
+<h2 id="failure-and-recovery">Failure and Recovery</h2>
 <ul>
-<li><strong>Trainer picks the wrong labels or corrections</strong>: confirm the dataset root and printed scan counts. Series 1/2 has a checked-in <code>steering_corrections.json</code>; the current Series 3/4 repository uses <code>sidewalkpilot_dataset/labels.json</code> and has no checked-in corrections file.</li>
-<li><strong>Deployed model does not load on the Raspberry Pi 5</strong>: the version string must be present in <code>STEERING_MODEL_VERSIONS</code> in <code>vision.py</code> and the checkpoint must exist in <code>code/ai_models</code>.</li>
+<li><strong>Trainer picks the wrong labels or corrections:</strong> confirm the dataset root and printed scan counts. The Series 1/2 directory has a checked-in <code>steering_corrections.json</code>; the current Series 3/4 repository uses <code>sidewalkpilot_dataset/labels.json</code> and has no checked-in corrections file.</li>
+<li><strong>Selected model does not load:</strong> the version string must be present in <code>STEERING_MODEL_VERSIONS</code> in <code>vision.py</code>, and the matching PTH or ONNX file must exist in the Jetson Orin Nano's <code>code/ai_models</code> directory. Check the inference-server log for the resolved filename, backend, and GPU provider.</li>
 </ul>
-<p>Field-test verdicts are tracked with model evaluation, not inferred from a training run. The July 13 comparison rejected v3.3/v3.3b and selected v3.4. Series 4 still awaits field testing.</p>
+<p>Field-test verdicts are tracked separately from training. The July 13 comparison selected v3.4. The later 4.0 comparison found <code>4.0f</code> viable and rejected the history-input models for steering echo. Series 4.1 awaits runtime integration and field testing.</p>
 <h2 id="raspberry-pi-5-controller">Raspberry Pi 5 Controller</h2>
-<p>The Raspberry Pi 5 owns camera capture, controller input, sensors, final arbitration, actuators, logs, and dashboard telemetry. With the car restrained and controller connected:</p>
+<p>The Raspberry Pi 5 owns camera capture, controller input, sensors, final safety decisions, steering/motor commands, logs, and dashboard telemetry. With the car restrained and controller connected:</p>
 <pre><code class="language-bash">cd ~/rc_car_code/code/controller/current
 car
 </code></pre>
 <p>The default model is v3.4; select another model on the dashboard or through <code>RC_CAR_STEERING_MODEL</code>. Verify joystick, PCA9685, LiDAR, camera, Jetson Orin Nano link, and dashboard status in logs. A degraded optional sensor state must be recorded before testing.</p>
 <h2 id="jetson-orin-nano">Jetson Orin Nano</h2>
-<p>The Jetson Orin Nano runs the ONNX inference server over direct Ethernet at <code>10.42.0.2:8770</code>. Confirm the intended artifact and CUDA provider in its startup log. The Raspberry Pi 5 rejects stale or wrong-version responses and retains manual control if the Jetson Orin Nano is unavailable.</p>
+<p>The Jetson Orin Nano runs the inference server over direct Ethernet at <code>10.42.0.2:8770</code>. Confirm the intended model and CUDA provider in its startup log. The Raspberry Pi 5 rejects stale or wrong-version responses and retains manual control if the Jetson Orin Nano is unavailable.</p>
 <h2 id="zero-2-w-dashboard">Zero 2 W Dashboard</h2>
 <p>The live dashboard route is USB Ethernet: Raspberry Pi 5 <code>192.168.10.1</code>, Zero 2 W <code>192.168.10.2</code>, UDP 8765. Install or verify recovery profiles with:</p>
 <pre><code class="language-bash">sudo code/test_files/setup/install_usb_dashboard_link.sh z2w
@@ -400,13 +400,13 @@ code/test_files/setup/install_usb_dashboard_link.sh verify-z2w
 sudo systemctl restart sidewalkpilot-z2w-dashboard.service
 </code></pre>
 <p>Use the <code>rpi</code> role on the Raspberry Pi 5. Check <code>usb0</code>, carrier, neighbors, ping, UDP listener, and services on both ends. Descriptor errors such as <code>-110</code> or <code>-62</code> are below Python; use a known-good data cable/port and verify enumeration before changing application code.</p>
-<h2 id="evidence-to-attach">Evidence to attach</h2>
+<h2 id="evidence-to-attach">Evidence to Attach</h2>
 <ul>
 <li>Training run config / log</li>
 <li>Compile log after a trainer edit</li>
 <li>Confusion-matrix / bucket summary for the checkpoint under review</li>
 </ul>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
 <li><a href="../mac-pc-sync/">Mac and Computer Sync</a></li>
 <li><a href="../../runbooks/sync-day/mac-to-pc/">Sync Day</a></li>

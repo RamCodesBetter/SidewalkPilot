@@ -6,7 +6,7 @@ layered-autonomy idea: when the human, the LiDAR safety layer, the navigation
 manager, and the steering model all want something different, this ordering
 decides who actually moves the servo and motors.
 
-## How it works
+## How It Works
 
 The priority chain is enforced in two functions in
 `code/controller/current/rc_car_app/runtime.py`: `apply_autonomous_controls(...)`
@@ -22,7 +22,7 @@ The priority chain is enforced in two functions in
    inside `LIDAR_OVERRIDE_EMERGENCY_STOP_M = 1.05 m` requests a hard stop before
    model inference is used for motion.
 3. **Model availability gate.** If there is no emergency stop, the camera model
-   gets a vote. Local Raspberry Pi 5 analysis uses a 0.75-second frame-age guard; a Jetson Orin Nano result
+   gets a vote. The Raspberry Pi 5 rejects a camera frame older than 0.75 seconds; a Jetson Orin Nano result
    must be no more than `JETSON_RESULT_MAX_AGE_SEC = 0.25 s` old and match the selected
    model. Confidence must be ≥ `LOW_CAMERA_CONFIDENCE` (0.25). If the model is
    unavailable, stale, or below the configured confidence threshold, the runtime requests a hard stop with reason
@@ -33,16 +33,15 @@ The priority chain is enforced in two functions in
 5. **LiDAR throttle cap.** With AEB enabled, center clearance governs the forward
    target: 100% at 1.65 m, linearly down to 60% reference at 1.25 m, held to
    1.05 m. The model's throttle output is not used.
-6. **AEB re-check + servo/motor command.** Back in `update_gpio`, if AEB is armed and
+6. **AEB re-check and steering/motor command.** Back in `update_gpio`, the runtime checks the already-computed AEB state immediately before the hardware write; it does not parse a second scan. If AEB is armed and
    `is_stop_brake_condition(...)` is true, it forces brake with `AEB_BRAKE_RATE`
-   and overrides the throttle to zero. Then the rate-limited PWM and servo values
-   are written to hardware — the last, lowest-priority step.
+   and overrides the throttle to zero. The steering target is clamped and mapped to the calibrated servo range. Motor PWM either moves at the selected ramp rate or snaps to zero for the hard-brake branch before the final hardware write.
 
 The important asymmetry is now between axes: the model owns lateral control and
 LiDAR owns only its configured longitudinal cap/stop. The same LiDAR policy object
 is reused through the control tick.
 
-## Why this choice
+## Why This Choice
 
 The human can cancel autonomy, a stale model cannot continue driving, and the
 center-corridor policy can cap or stop forward motion without creating a second
@@ -50,7 +49,7 @@ steering controller. Telemetry exposes model state, clearance, AEB state, and th
 chosen LiDAR action. This ordering is inspectable, but quantitative stopping and
 detection coverage still require controlled tests.
 
-## Priority table
+## Priority Table
 
 | Priority | Decision | Trigger | Constant / code |
 |---:|---|---|---|
@@ -59,9 +58,9 @@ detection coverage still require controlled tests.
 | 3 | Model gate | fresh matching result + conf >= 0.25 | 0.75 s local frame guard; `JETSON_RESULT_MAX_AGE_SEC = 0.25` |
 | 4 | Model steering | mapped heading | `MAX_TARGET_HEADING_DEG` 60° |
 | 5 | LiDAR throttle cap | enabled AEB and center clearance < 1.65 m | `LIDAR_GOV_*` |
-| 6 | AEB + servo/motor command | armed AEB, then final command | `AEB_BRAKE_RATE` 10.0 |
+| 6 | AEB re-check and steering/motor command | armed AEB, then final command | `AEB_BRAKE_RATE` 10.0 |
 
-## Related pages
+## Related Pages
 
 - [Control Architecture and Runtime Data Flow](data-flow.md)
 - [LiDAR Safety Overview](../lidar-safety/overview.md)

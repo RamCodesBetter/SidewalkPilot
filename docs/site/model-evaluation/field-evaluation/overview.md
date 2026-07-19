@@ -7,12 +7,12 @@ operator takeovers, and LiDAR braking on the assembled vehicle.
 ## Offline Versus Field Evidence
 
 The common evaluator writes `docs/steering_eval_current_labels.json` and
-`docs/steering_model_report.pdf` for 46 checkpoints on a frozen 6,952-frame
+`docs/steering_model_report.pdf` for 52 checkpoints on a frozen 6,952-frame
 Series 3/4 subset. Bal9 and turn metrics help reject center-collapsed candidates;
 MAE, median error, and signed error add magnitude and bias context.
 
 Those values do not select a field baseline by themselves. A model must load
-through the live ONNX path, preserve manual response, and complete a
+through its matching live Jetson Orin Nano path, preserve manual response, and complete a
 supervised field comparison under the condition it is intended to improve.
 
 ## Current Field Record
@@ -26,14 +26,15 @@ The July 13 comparison is an operator-observed, bounded field result:
 - v3.3b was much worse than v3.2b.
 
 This record does not contain enough repeated-route quantitative measurements to
-claim a universal success rate. Series 4 has completed offline evaluation and
-runtime/CUDA smoke testing but has not yet been field tested.
+claim a universal success rate. In a later supervised v4.0 comparison, v4.0f was
+viable and complementary with v3.4, v4.0g was worse, and the PC/PCF models echoed
+prior steering predictions. The v4.1 correction models remain offline-only.
 
 ## Run Record
 
 A reproducible field comparison should retain:
 
-- Model version and artifact hash;
+- Model version and model file hash;
 - Route, surface, lighting, weather, battery, and payload;
 - Start/end time and distance;
 - Takeover count and cause;
@@ -52,7 +53,7 @@ cancels autonomy through `cancel_autonomous_mode()`.
 - **Curb and road risk:** record approach direction and whether recovery occurred before the operator intervened.
 - **Shadow behavior:** test ordinary turns and turns under distinct shadow geometry; do not generalize one successful route to every lighting condition.
 - **Evening/night behavior:** remains a separate, higher-risk condition and is not approved by daylight results.
-- **LiDAR:** record governor, hold, and emergency actions separately from model errors. LiDAR no longer steers.
+- **LiDAR:** record governor, hold, and emergency actions separately from model errors. LiDAR does not steer.
 
 The historical 0.5-mile/five-intervention run is journey context, not a formal current-model benchmark because its complete date, route, and run record were not preserved.
 

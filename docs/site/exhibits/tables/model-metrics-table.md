@@ -1,6 +1,6 @@
 # Evidence Tables
 
-The canonical generated comparison is [steering_model_report.pdf](../../steering_model_report.pdf). It contains all 46 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.
+The canonical generated comparison is [steering_model_report.pdf](../../steering_model_report.pdf). It contains all 52 checkpoints, class-balanced gradient tables, confusion matrices, and per-model details. This page explains the compact metrics used to read it.
 
 ## Model Families
 
@@ -9,13 +9,16 @@ The canonical generated comparison is [steering_model_report.pdf](../../steering
 | Series 1 | 20 | 200x66 image | direct steering | 672,877 |
 | Series 2 | 10 | 200x66 image | direct steering | 672,877 |
 | Series 3 | 10 | 320x180 image | v3.0 regression; v3.1+ 19-value hybrid | approximately 5.53M |
-| Series 4 PC | 2 | image + three prior targets | one 18-value horizon | 5,569,186 |
-| Series 4 CF | 2 | image | four 18-value horizons | 5,537,560 |
-| Series 4 PCF | 2 | image + three prior targets | four 18-value horizons | 5,572,696 |
+| Series 4.0 PC | 2 | image + three prior targets | one 18-value horizon | 5,569,186 |
+| Series 4.0 CF | 2 | image | four 18-value horizons | 5,537,560 |
+| Series 4.0 PCF | 2 | image + three prior targets | four 18-value horizons | 5,572,696 |
+| Series 4.1 PC | 2 | image + three prior targets | one 18-value horizon | 5,537,460 |
+| Series 4.1 CF | 2 | image | four 18-value horizons | 5,537,560 |
+| Series 4.1 PCF | 2 | image + three prior targets | four 18-value horizons | 5,544,480 |
 
 ## Common Challenge Set
 
-All 46 models are scored on the same frozen 6,952-frame subset from the Series 3/4 dataset. The evaluator applies the matching resize, model invocation, and decoder for each architecture. This reveals how early models behave on the later shadow/lighting distribution instead of comparing unrelated per-series test sets.
+All 52 checkpoints are scored on the same frozen 6,952-frame subset from the Series 3/4 dataset. The evaluator applies the matching resize, model invocation, and decoder for each architecture. This reveals how early models behave on the later shadow and lighting distribution instead of comparing unrelated per-series test sets.
 
 ## Primary Metrics
 
@@ -32,7 +35,7 @@ All 46 models are scored on the same frozen 6,952-frame subset from the Series 3
 
 No single column is the field verdict. Bal9 and turn metrics prevent straight-heavy data from hiding turn collapse; MAE/median expose numeric precision; signed error exposes bias; field testing exposes behavior absent from labels.
 
-## Current Baseline and Series 4
+## Current Baseline and Series 4.0
 
 | Model | Bal9 | Turn exact | Turn +/-1 | ST exact | MAE | Median | Signed |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -45,7 +48,7 @@ No single column is the field verdict. Bal9 and turn metrics prevent straight-he
 | v4.0a | 33.5% | 30.9% | 65.3% | 68.1% | 12.379 | 3.115 | +0.290 |
 | v4.0c | 32.0% | 29.4% | 62.9% | 75.5% | **11.321** | **1.825** | -0.981 |
 
-The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.0c leads raw error; v4.0r has the highest straight recall. Those differences justify a physical comparison rather than declaring a winner from one column.
+The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.0c leads raw error; v4.0r has the highest straight recall. Physical testing then contradicted the simple offline order: the PC/PCF models echoed prior predictions, while image-only v4.0f remained viable.
 
 ## Field Status
 
@@ -55,7 +58,10 @@ The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.
 | v3.4b | Tested in the same comparison; slightly worse than v3.4 |
 | v3.3 | Tested; worse than v3.2 |
 | v3.3b | Tested; much worse than v3.2b |
-| v4.0p/r/f/g/a/c | Not yet field-tested |
+| v4.0f | Viable and complementary with v3.4; each passed two cases the other failed |
+| v4.0g | Tested; worse than v4.0f |
+| v4.0p/r/a/c | Tested; rejected for repeated prior steering predictions |
+| v4.1p/r/f/g/a/c | Offline-evaluated; live integration and field testing pending |
 
 The July 13 result is qualitative because exact route, conditions, clips, and takeover counts were not preserved.
 
@@ -70,12 +76,12 @@ The July 13 result is qualitative because exact route, conditions, clips, and ta
 
 ## Evidence Matrix
 
-| Claim area | Strongest artifact | Remaining gap |
+| Claim area | Strongest evidence | Remaining gap |
 |---|---|---|
 | Model architecture | Trainers, ONNX contracts, parameter counts | Independent reproduction |
 | Offline capability | Evaluator JSON/PDF and confusion matrices | Distribution/field transfer |
 | v3.4 field selection | July 13 operator comparison | Complete route, clips, and takeover record |
-| Series 4 | Training runs, artifacts, evaluator, runtime smoke tests | Physical field comparison |
+| Series 4 | Training runs, models, evaluator, runtime smoke tests | v4.1 integration and physical field comparison |
 | LiDAR AEB | Source and deterministic tests | Preserved stopping-distance/false-trigger field test |
 | Hardware | Wiring/config, photos, bench utilities | Finished matching PCB revision |
 

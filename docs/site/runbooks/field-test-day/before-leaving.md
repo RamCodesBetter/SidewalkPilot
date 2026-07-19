@@ -5,20 +5,20 @@ Before Leaving is the packing-and-readiness runbook run at home, before the car 
 ## Preconditions
 
 - A test route is chosen. For AI/manual navigation segments, the route must already exist in `code/controller/current/rc_car_app/trossachs_nav_graph.json`; the current route manager uses GPS/odometry state with A* over that graph. The separate compass hardware is not an active route-planning input.
-- The steering model is selected before leaving. All current families run on the Jetson Orin Nano at `10.42.0.2:8770`: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. v3.4 is the current field-selected baseline. Series 4 models require field testing before promotion.
+- The steering model is selected before leaving. All live-selectable families run on the Jetson Orin Nano at `10.42.0.2:8770`: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. v3.4 is the current field-selected baseline. v4.0 has a bounded field result; v4.1 is not yet live-selectable.
 - The latest code is on the Raspberry Pi 5. The Raspberry Pi 5's `~/rc_car_code` is the git repo; the Zero 2 W's copy is synced by rsync/scp and is not a repo, so a code change only takes effect after each device re-imports it.
 
 ## Steps
 
-1. Charge and inspect the 3S LiPo that powers the drive motors, plus the Raspberry Pi 5/electronics power. Check pack voltage, swelling, connectors, and physical damage before loading anything. Evidence: measured pack voltage.
+1. Charge and inspect the 3S drive LiPo, the 2S display LiPo, and the compute power banks. Check LiPo voltage, swelling, connectors, and physical damage before loading anything. Evidence: measured LiPo voltage.
 2. Pack the Xbox controller and confirm it is charged/paired. The runtime hard-exits at startup with `!!! WARNING: No joystick detected` if pygame sees zero joysticks (`rc_car_app/runtime.py`, `pygame.joystick.get_count() == 0`), so a dead controller means no run.
-3. Confirm the sensor harness is intact: LiDAR (Youyeetoo FHL-LD19, USB `/dev/ttyUSB0` via a CP2102 UART-to-USB Adapter, 230400 baud), GPS (BN880 on `/dev/ttyAMA0`, 9600), hall sensor (GPIO24), servo ribbon to the PCA9685 Servo Controller (I2C `0x40`, channel 0), and the JGB37-520 DC motor leads through the AT8236 Motor Controller (GPIO 19/20 right, 25/13 left). Evidence: visual/tug check of each connector.
+3. Confirm the sensor harness is intact: LiDAR (Youyeetoo FHL-LD19, USB `/dev/ttyUSB0` via a CP2102 UART-to-USB Adapter, 230400 baud), GPS (BN880 on `/dev/ttyAMA0`, 9600), Hall-effect wheel-speed sensor (GPIO 24), servo ribbon to the PCA9685 Servo Controller (I2C `0x40`, channel 0), and the JGB37-520 DC motor leads through the AT8236 Motor Controller (GPIO 19/20 right, 25/13 left). Evidence: visual/tug check of each connector.
 4. Confirm the Raspberry Pi Camera Module 3 Wide is seated and its ribbon is locked. The current camera integration and all 81,237 Series 3/4 images use this Raspberry Pi 5 camera path; a loose ribbon breaks capture and model input.
 5. Pack the Zero 2 W dashboard and the USB Ethernet cable. The dashboard is USB-only: Raspberry Pi 5 `usb0` is `192.168.10.1`, Zero 2 W `usb0` is `192.168.10.2`, telemetry is UDP to `192.168.10.2:8765`. Use the known working port and power arrangement; `-110`/`-62` enumeration errors indicate a failed USB transaction but do not by themselves prove whether the cause is power, cable, port, or gadget state.
 6. Clear space on the Raspberry Pi 5 for the run's output. Each run writes a CSV to `~/logs/log_YYYYMMDD_HHMMSS.csv` by default (or under `RC_CAR_LOG_DIR`) and photos to `media/photos/YYYY_MM_DD_run_N/` with a per-run JSON label file. Confirm free disk in both locations.
 7. Bring the takeover plan: confirm the Xbox controller is connected and keep it in reach before any autonomous motion.
 
-## Stop condition
+## Stop Condition
 
 Abort the trip if the LiPo will not reach a safe field voltage, the controller will not charge/pair, the camera ribbon is damaged, or the drive-motor / servo harness is compromised. These cannot be fixed on the route.
 
@@ -34,7 +34,7 @@ Abort the trip if the LiPo will not reach a safe field voltage, the controller w
 
 Cancel autonomy, stop motion, shift to Park, stop recording, then perform an orderly controller shutdown and verify linked dashboard behavior. Disconnect drive power before handling steering or motor wiring.
 
-Record artifact, commit, route/direction, light/weather/surface, battery/payload, times, distance, AEB state, takeovers and causes, CSV path, clip IDs, and pass/warn/fail verdict. Copy data additively and do not erase a failed run; failures are evidence for the next iteration.
+Record model version and file hash, commit, route/direction, light/weather/surface, battery/payload, times, distance, AEB state, takeovers and causes, CSV path, clip IDs, and pass/warn/fail verdict. Copy data additively and do not erase a failed run; failures are evidence for the next iteration.
 
 ## Evidence
 
@@ -42,7 +42,7 @@ Record artifact, commit, route/direction, light/weather/surface, battery/payload
 - LiPo voltage reading and inspection result
 - Photo of the connector/harness state before departure
 
-## Related pages
+## Related Pages
 
 - [Field Testing](../../testing/field-testing/overview.md)
 - [Computer Operations](../../operations/nvidia-pc.md)

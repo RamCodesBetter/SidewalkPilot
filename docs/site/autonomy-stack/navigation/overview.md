@@ -22,7 +22,7 @@ the current segment should be driven by the model (`AUTO`) or handed to the huma
 
 *Navigation and crosswalk handoff flow. Open the [full-size SVG](../../assets/diagrams/navigation-flow.svg) or the [editable draw.io source](../../assets/diagrams/navigation-flow.drawio).*
 
-## How it works
+## How It Works
 
 - `NavigationManager` loads the graph on startup: `6183` nodes and `10072` edges of
   the Trossachs test neighborhood, keyed by uppercase 3-character IDs like `AAA`.
@@ -79,14 +79,14 @@ to manual. This keeps the camera model inside its sidewalk training domain and a
 crossings to the operator. Each segment records its nodes, edge kinds, distance, and path
 indices so the transition is inspectable.
 
-## Why this choice
+## Why This Choice
 
 - Route planning is far easier to inspect, debug, and defend to reviewers when it is
   an explicit graph search rather than something buried inside the CNN.
 - Separating map-level decisions from local steering keeps each piece small and
   testable: the model only ever has to follow the sidewalk in front of it.
-- The graph is a real OpenStreetMap-derived map of the actual test route, so planned
-  paths correspond to real sidewalks the car has driven and photographed.
+- The graph is derived from OpenStreetMap data for the test neighborhood, so planned
+  paths correspond to mapped local sidewalk geometry. This does not claim that every graph edge has been physically driven and verified.
 
 ## Layers
 
@@ -96,9 +96,9 @@ indices so the transition is inspectable.
 | A* + turn penalties | Compute the route over the graph | `astar()` in `navigation.py` |
 | Segment planner | Split path into AI vs manual stretches | `build_segment_plan()` |
 | GPS reader | Localize the car on the graph | `GpsReader` in `navigation.py` |
-| Camera model | Follow the local sidewalk on AI segments | `vision.py` (Series 3 on Jetson Orin Nano) |
+| Camera model | Follow the local sidewalk on AI segments | `vision.py`, `jetson_client.py`, and the Jetson Orin Nano inference server |
 
-## Related pages
+## Related Pages
 
 - [Control Architecture and Runtime Data Flow](../architecture/data-flow.md)
 - [Crosswalk Handoff](crosswalk-handoff.md)

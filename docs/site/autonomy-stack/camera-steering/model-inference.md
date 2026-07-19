@@ -11,7 +11,7 @@ result is unavailable.
 2. `AsyncJetsonSteeringClient.submit()` replaces any unsent frame with the newest frame and selected model version.
 3. Its worker JPEG-encodes and sends the request to Jetson Orin Nano at `10.42.0.2:8770`.
 4. `jetson_inference_server.py` hot-switches to the requested `SidewalkPilot-v<version>` model when needed.
-5. Jetson Orin Nano resizes and normalizes the BGR frame, runs ONNX Runtime, decodes steering, and returns control plus telemetry.
+5. Jetson Orin Nano resizes and normalizes the BGR frame, runs PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4, decodes steering, and returns the result plus telemetry.
 6. The Raspberry Pi 5 consumes only a result for the selected version that is no more than `0.25 s` old.
 
 ## Capture and Preprocessing
@@ -34,9 +34,9 @@ Keeping BGR capture, resize, normalization, orientation, and optional CLAHE cons
 | Series 1/2 | `[N,3,66,200]` | one value | steering degrees |
 | Series 3.0 | `[N,3,180,320]` | two values | normalized steering and throttle |
 | Series 3.1-3.4 | `[N,3,180,320]` | 19 values | 9 class logits, 9 within-class offsets, throttle |
-| Series 4 PC (p/r) | image + `[N,3]` history | `[N,1,18]` | horizon-zero steering hybrid |
-| Series 4 CF (f/g) | `[N,3,180,320]` | `[N,4,18]` | horizon-zero steering hybrid |
-| Series 4 PCF (a/c) | image + `[N,3]` history | `[N,4,18]` | horizon-zero steering hybrid |
+| Series 4 PC | image + `[N,3]` history | `[N,1,18]` | horizon-zero steering hybrid |
+| Series 4 CF | `[N,3,180,320]` | `[N,4,18]` | horizon-zero steering hybrid |
+| Series 4 PCF | image + `[N,3]` history | `[N,4,18]` | horizon-zero steering hybrid |
 
 All recognized models normalize pixels with `(x / 255 - 0.5) / 0.5`. Versions `2.0/2.0b` additionally apply HSV-value CLAHE; current Series 3 uses raw BGR.
 
@@ -44,14 +44,14 @@ For the hybrid head:
 
 ```text
 probabilities = softmax(logits[0:9])
-class = argmax(probabilities)
+class = argmax(softmax(logits[0:9]))
 fraction = sigmoid(offset[class])
 steering = bucket_low[class] + fraction * bucket_width[class]
 ```
 
-The implementation can take `argmax` directly over the logits because softmax preserves their ordering and selects the same class.
+The decoder applies softmax first and then applies argmax to the resulting probabilities. The separately named probability vector is included in model telemetry.
 
-The model throttle output is returned for protocol compatibility but is not used for current driving. The Raspberry Pi 5 combines model steering with its own throttle policy and center-corridor LiDAR governor.
+Series 1-3 retain a model throttle field, while Series 4 supplies a zero placeholder in the response protocol. Neither controls current driving. The Raspberry Pi 5 combines model steering with its own throttle policy and center-corridor LiDAR governor.
 
 ## Steering Smoothing and Throttle Ownership
 

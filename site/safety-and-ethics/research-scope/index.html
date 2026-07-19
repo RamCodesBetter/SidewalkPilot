@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -349,7 +349,7 @@
 <ul>
 <li>Collecting and correcting real field data;</li>
 <li>Training and comparing custom neural networks;</li>
-<li>Deploying ONNX inference to a Jetson Orin Nano;</li>
+<li>Deploying GPU inference to a Jetson Orin Nano: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA;</li>
 <li>Controlling real motors and steering from a Raspberry Pi 5;</li>
 <li>Keeping manual takeover and deterministic LiDAR braking independent of the model;</li>
 <li>Recording telemetry on a separate Zero 2 W dashboard;</li>
@@ -361,15 +361,16 @@
 <li>Physical camera-to-steering runs under operator supervision.</li>
 <li>v3.4 handled every shadow case presented in one July 13 comparison and was selected over v3.4b/v3.3/v3.3b for current use.</li>
 <li>A published 81,237-image real Series 3/4 dataset supports reproducible training work.</li>
-<li>Forty-six checkpoints can be decoded and compared on one frozen challenge subset.</li>
+<li>Fifty-two checkpoints can be decoded and compared on one frozen challenge subset.</li>
 <li>LiDAR software can govern throttle and command emergency braking without choosing steering direction.</li>
 <li>Manual steering remained responsive in a hardware retest with Jetson Orin Nano powered off after network work moved outside the control loop.</li>
-<li>Six Series 4 artifacts completed training, ONNX export, offline evaluation, and runtime compatibility checks.</li>
+<li>Six v4.0 models completed training, ONNX export, offline evaluation, runtime compatibility checks, and supervised field testing.</li>
+<li>Six v4.1 correction models completed training, ONNX export, and offline evaluation.</li>
 </ul>
 <h2 id="evidence-limits">Evidence Limits</h2>
 <ul>
 <li>The July 13 v3.4 result is qualitative. Exact route, weather, takeover count, and clip identifiers were not preserved.</li>
-<li>No Series 4 model has completed a physical field test.</li>
+<li>The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 has not yet completed live integration or physical testing.</li>
 <li>Offline metrics do not prove obstacle avoidance, pedestrian response, recovery from a road-edge error, or operation outside the test distribution.</li>
 <li>The LiDAR policy has automated software tests, but the latest configuration still needs a preserved physical test record.</li>
 <li>GPS/navigation code exists, but it does not make the car safe for unattended route execution.</li>

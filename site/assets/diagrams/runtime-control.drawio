@@ -23,7 +23,7 @@
         <mxCell id="worker" parent="1" vertex="1" value="Background Inference&lt;br&gt;Worker" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F4F3FF;strokeColor=#6941C6;fontColor=#42307D;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="300" y="155" width="225" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="infer" parent="1" vertex="1" value="Jetson Orin Nano&lt;br&gt;ONNX Inference" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
+        <mxCell id="infer" parent="1" vertex="1" value="Jetson Orin Nano&lt;br&gt;GPU Inference" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">
           <mxGeometry x="565" y="155" width="235" height="70" as="geometry" />
         </mxCell>
         <mxCell id="prediction" parent="1" vertex="1" value="Latest Jetson&lt;br&gt;Prediction" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;shadow=1;fillColor=#F0F7E8;strokeColor=#5F9400;fontColor=#2F4B00;fontFamily=Arial;fontSize=16;fontStyle=1;verticalAlign=middle;spacing=8;">

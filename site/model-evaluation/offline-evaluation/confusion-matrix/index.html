@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -198,11 +198,11 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Confusion Matrix</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why it matters</a>
+    <li class="toctree-l2"><a class="reference internal" href="#why-it-matters">Why It Matters</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related pages</a>
+    <li class="toctree-l2"><a class="reference internal" href="#related-pages">Related Pages</a>
     </li>
     </ul>
                   </li>
@@ -344,9 +344,9 @@ steering classes, then tabulates every (ground class → predicted class) pair. 
 is the metric that catches the failure MAE hides: a model that has quietly
 collapsed toward straight or gone dead on a whole turn class. If MAE is a single
 grade, the confusion matrix is the report card that shows <em>which</em> classes passed.</p>
-<h2 id="how-it-works">How it works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <p>The common evaluator (<code>code/test_files/models/evaluate_sidewalkpilot_models.py</code>) builds a
-<strong>9x9</strong> matrix over these servo-angle classes (target on rows, prediction on
+<strong>9x9</strong> matrix over these logical steering classes (target on rows, prediction on
 columns):</p>
 <table>
 <thead>
@@ -398,7 +398,7 @@ columns):</p>
 per-class target/prediction counts, and class-balanced recall. The same nine
 boundaries let direct-regression Series 1/2 checkpoints and hybrid Series 3/4
 checkpoints be compared without pretending their network heads are identical.</p>
-<h2 id="why-it-matters">Why it matters</h2>
+<h2 id="why-it-matters">Why It Matters</h2>
 <p>MAE can hide class collapse on a straight-heavy set. A model that predicts near
 center for many turn targets may retain a competitive average error while its
 turn rows drain into the ST column. The matrix exposes that behavior directly.
@@ -407,11 +407,11 @@ not sufficient to establish physical driving quality.</p>
 <p>The matrix is a screening tool, not a deployment verdict. Use Bal9 and the turn
 columns to find models that retain class coverage, then require a physical field
 test before calling one better on the car.</p>
-<h2 id="related-pages">Related pages</h2>
+<h2 id="related-pages">Related Pages</h2>
 <ul>
-<li><code>model-evaluation/comparisons/offline-vs-field.md</code></li>
-<li><code>ai-and-models/architecture/series-3-hybrid-head.md</code></li>
-<li><code>model-evaluation/offline-evaluation/overview.md</code></li>
+<li><a href="../../comparisons/offline-vs-field/">Offline vs Field</a></li>
+<li><a href="../../../ai-and-models/architecture/series-3-hybrid-head/">Series 3 Hybrid Head</a></li>
+<li><a href="../overview/">Offline Evaluation</a></li>
 </ul>
               
             </div>

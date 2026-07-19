@@ -4,7 +4,7 @@ SidewalkPilot moves a physical RC-scale vehicle. Its current safeguards reduce
 specific risks during supervised tests; they do not constitute certification or
 a complete functional-safety system.
 
-## Implemented layers
+## Implemented Layers
 
 1. **Operator control:** while the Xbox controller is connected and the Raspberry Pi 5 loop
    is responsive, steering, gas, or brake input cancels autonomy. The Share
@@ -22,7 +22,7 @@ a complete functional-safety system.
    `MAX_AUTONOMOUS_SPEED_MPH` is not wired into a measured-speed governor and must
    not be described as an enforced cap.
 
-## Known gaps
+## Known Gaps
 
 - Stale or empty LiDAR data removes obstacle intervention rather than forcing a
   stop.
@@ -32,14 +32,14 @@ a complete functional-safety system.
 - Quantitative false-trigger, disconnect, stopping-distance, and override-latency
   records still need controlled physical tests.
 
-## Evidence standard
+## Evidence Standard
 
 Code and unit tests establish the configured arbitration logic. Physical claims
 require a preserved setup, payload, speed, route, logs, video, and pass/fail
 record. The July 13 model comparison selected v3.4 in the cases presented, but it
 was not a safety certification or complete route benchmark.
 
-## Related pages
+## Related Pages
 
 - [Research Scope and Limits](../safety-and-ethics/research-scope.md)
 - [Manual Override](fault-handling/manual-override.md)

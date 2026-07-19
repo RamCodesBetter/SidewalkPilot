@@ -57,7 +57,7 @@
               </ul>
               <p class="caption"><span class="caption-text">Project Evidence</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5 Minute Technical Tour</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
                   </li>
@@ -89,7 +89,7 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/requirements/">Requirements and Success Criteria</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation vs Fixed Preprocessing</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
                   </li>
@@ -394,8 +394,8 @@ bearing = (degrees(atan2(x, y)) + 360) % 360
 <ul>
 <li><code>g</code> is accumulated edge distance, edge-kind penalties, and turn penalties;</li>
 <li><code>h</code> is the haversine distance to the goal;</li>
-<li>the state is <code>(previous_node, current_node)</code>, allowing the next expansion to price the turn;</li>
-<li>the result is an ordered list of graph node IDs.</li>
+<li>The state is <code>(previous_node, current_node)</code>, allowing the next expansion to price the turn;</li>
+<li>The result is an ordered list of graph node IDs.</li>
 </ul>
 <p>Less-preferred edge kinds receive fixed costs: <code>+220 m</code> for <code>crosswalk_transfer</code>, <code>+48 m</code> for <code>intersection</code> or <code>osm_gap</code>, and <code>+36 m</code> for <code>inferred_crosswalk</code>. Intermediate house nodes are excluded so a route does not cut through an unrelated driveway.</p>
 <h2 id="runtime-boundaries">Runtime Boundaries</h2>

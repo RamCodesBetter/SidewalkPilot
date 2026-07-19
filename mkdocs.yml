@@ -17,7 +17,7 @@ nav:
     - Current Status: start-here/current-status.md
     - Build Timeline: start-here/build-timeline.md
   - Project Evidence:
-    - 5 Minute Technical Tour: portfolio-evidence/reader-paths/5-minute-technical-tour.md
+    - 5-Minute Technical Tour: portfolio-evidence/reader-paths/5-minute-technical-tour.md
     - Evidence Map: portfolio-evidence/reader-paths/evidence-map.md
   - Autonomy Stack:
     - Control Architecture and Data Flow: autonomy-stack/architecture/data-flow.md
@@ -32,7 +32,7 @@ nav:
     - Crosswalk Handoff: autonomy-stack/navigation/crosswalk-handoff.md
   - Engineering Process:
     - Requirements and Success Criteria: engineering-process/requirements.md
-    - Augmentation vs Fixed Preprocessing: engineering-process/design-decisions/augmentation-vs-fixed-preprocessing.md
+    - Augmentation Versus Fixed Preprocessing: engineering-process/design-decisions/augmentation-vs-fixed-preprocessing.md
     - LiDAR Priority: engineering-process/design-decisions/lidar-priority.md
     - PCA9685 Servo Control: engineering-process/design-decisions/pca9685-servo-control.md
     - Dashboard UDP Telemetry: engineering-process/design-decisions/dashboard-udp-telemetry.md
