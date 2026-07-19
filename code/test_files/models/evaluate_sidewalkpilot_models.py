@@ -95,6 +95,14 @@ def bucket9_index(value):
     return len(BUCKETS9) - 1
 
 
+def softmax_rows(logits):
+    """Convert a batch of class logits to stable probabilities."""
+    logits = np.asarray(logits, dtype=np.float32)
+    shifted = logits - np.max(logits, axis=1, keepdims=True)
+    exponentials = np.exp(shifted)
+    return exponentials / np.sum(exponentials, axis=1, keepdims=True)
+
+
 # Official source code = D{MMDD}_{HH} (run start hour, 24h).
 SOURCE_PURPOSES = {
     "D0328_17": "First dataset relabel, March 28",
@@ -601,7 +609,7 @@ def _decode_s3_steering(out, s3mod):
     if k and out.ndim == 2 and out.shape[1] == 2 * k + 1:
         logits = out[:, 0:k]
         offset = 1.0 / (1.0 + np.exp(-out[:, k:2 * k]))          # sigmoid -> 0..1 fraction
-        cls = np.argmax(logits, axis=1)                          # which bucket
+        cls = np.argmax(softmax_rows(logits), axis=1)            # softmax, then bucket
         lo = np.asarray(s3mod._STEER_BIN_LO, dtype=np.float32)[cls]
         hi = np.asarray(s3mod._STEER_BIN_HI, dtype=np.float32)[cls]
         chosen = offset[np.arange(len(cls)), cls]               # offset for the picked bucket
@@ -867,7 +875,7 @@ def _decode_s4_current(output, s3mod):
     current = output[:, 0, :]
     logits = current[:, :9]
     offsets = 1.0 / (1.0 + np.exp(-current[:, 9:18]))
-    classes = np.argmax(logits, axis=1)
+    classes = np.argmax(softmax_rows(logits), axis=1)
     lows = np.asarray(s3mod._STEER_BIN_LO, dtype=np.float32)[classes]
     highs = np.asarray(s3mod._STEER_BIN_HI, dtype=np.float32)[classes]
     chosen = offsets[np.arange(len(classes)), classes]

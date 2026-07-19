@@ -254,10 +254,18 @@ def _series4_current_raw(values):
     return None
 
 
+def _softmax9(logits):
+    """Convert nine class logits to stable float32 probabilities."""
+    logits = np.asarray(logits, dtype=np.float32)
+    shifted = logits - np.max(logits)
+    exponentials = np.exp(shifted)
+    return (exponentials / np.sum(exponentials)).astype(np.float32)
+
+
 def _decode_hybrid18(raw):
     logits = raw[:9]
     offset_raw = raw[9:18]
-    cls = int(np.argmax(logits))
+    cls = int(np.argmax(_softmax9(logits)))
     offset = float(1.0 / (1.0 + np.exp(-offset_raw[cls])))
     lo = float(_S3_HYBRID_LO[cls])
     hi = float(_S3_HYBRID_HI[cls])
@@ -268,7 +276,8 @@ def decode_output(values):
     """Model output -> (steering_deg 0..180, throttle 0..1), auto-detected:
       * [...,18] -> Series 4: decode horizon 0; steering only, throttle=0.
       * 19 -> Series 3.1+ hybrid: 9 class logits + 9 within-bucket offsets + 1 throttle.
-              argmax the logits, sigmoid that bucket's offset, steer = lo + off*(hi-lo).
+              softmax the logits, argmax the probabilities, sigmoid that bucket's offset,
+              steer = lo + off*(hi-lo).
       * 2  -> Series 3.0 unit controls (steer,throttle in [-1,1]).
       * 1  -> Series 1/2, already in degrees."""
     series4_raw = _series4_current_raw(values)
@@ -280,7 +289,7 @@ def decode_output(values):
     if n == 2 * k + 1:                                       # 19 -> hybrid head
         logits = flat[0:k]
         offset = 1.0 / (1.0 + np.exp(-flat[k:2 * k]))        # sigmoid -> 0..1 fraction
-        cls = int(np.argmax(logits))
+        cls = int(np.argmax(_softmax9(logits)))
         lo = float(_S3_HYBRID_LO[cls]); hi = float(_S3_HYBRID_HI[cls])
         steer = lo + float(offset[cls]) * (hi - lo)          # place inside the picked bucket
         throttle = float(1.0 / (1.0 + np.exp(-flat[2 * k]))) # throttle head (off in training)
@@ -296,16 +305,11 @@ def decode_probs9(values):
     """Current-horizon 9-bucket probabilities; zeros for non-hybrid outputs."""
     series4_raw = _series4_current_raw(values)
     if series4_raw is not None:
-        logits = series4_raw[:9]
-        z = logits - np.max(logits)
-        e = np.exp(z)
-        return (e / float(np.sum(e))).astype(np.float32)
+        return _softmax9(series4_raw[:9])
     flat = np.asarray(values, dtype=np.float32).reshape(-1)
     k = _S3_HYBRID_LO.size
     if flat.size == 2 * k + 1:                               # hybrid: first k are class logits
-        z = flat[0:k] - np.max(flat[0:k])
-        e = np.exp(z)
-        return (e / float(np.sum(e))).astype(np.float32)
+        return _softmax9(flat[0:k])
     return np.zeros(k, dtype=np.float32)
 
 
