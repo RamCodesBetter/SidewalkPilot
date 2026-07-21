@@ -108,4 +108,4 @@ Training runs on an NVIDIA RTX 6000 Ada Generation GPU. The Series 3/4 trainers 
 
 ## License
 
-Apache 2.0. See [LICENSE](LICENSE).
+Apache 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
