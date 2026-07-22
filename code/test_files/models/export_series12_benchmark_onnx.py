@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 import re
 import sys
 from pathlib import Path
@@ -17,7 +15,7 @@ import torch.nn as nn
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
-DEFAULT_OUTPUT = SCRIPT_DIR / "series12_benchmark_onnx"
+DEFAULT_OUTPUT = MODELS_DIR
 SERVER_DIR = REPO_ROOT / "code" / "controller" / "current" / "rc_car_app"
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>[12]\.\d+b?)\.pth$")
 
@@ -40,14 +38,6 @@ class FixedAdaptivePool4x8(nn.Module):
         return pooled_row.repeat(1, 1, 4, 1)
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def _state_dict(checkpoint: object) -> dict[str, torch.Tensor]:
     state = checkpoint
     if isinstance(checkpoint, dict):
@@ -68,7 +58,7 @@ def _version_key(version: str) -> tuple[int, int, int]:
     return int(match.group(1)), int(match.group(2)), int(bool(match.group(3)))
 
 
-def export_models(models_dir: Path, output_dir: Path, opset: int) -> dict[str, object]:
+def export_models(models_dir: Path, output_dir: Path, opset: int) -> None:
     sources: list[tuple[str, Path]] = []
     for path in models_dir.glob("SidewalkPilot-v*.pth"):
         match = MODEL_RE.fullmatch(path.name)
@@ -79,7 +69,6 @@ def export_models(models_dir: Path, output_dir: Path, opset: int) -> dict[str, o
         raise SystemExit(f"No Series 1/2 checkpoints found in {models_dir}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    records: list[dict[str, object]] = []
     example = torch.linspace(
         -1.0, 1.0, steps=3 * 66 * 200, dtype=torch.float32
     ).reshape(1, 3, 66, 200)
@@ -120,38 +109,7 @@ def export_models(models_dir: Path, output_dir: Path, opset: int) -> dict[str, o
             )
             if not torch.allclose(expected, actual, atol=1e-4, rtol=1e-5):
                 raise RuntimeError(f"ONNX output did not match PyTorch for v{version}")
-        parameter_count = sum(parameter.numel() for parameter in model.parameters())
-        records.append(
-            {
-                "version": version,
-                "source": source.name,
-                "source_sha256": _sha256(source),
-                "onnx": destination.name,
-                "onnx_sha256": _sha256(destination),
-                "parameter_count": parameter_count,
-                "fp32_parameter_mib": parameter_count * 4 / (1024.0 * 1024.0),
-                "preprocessing": (
-                    "HSV/CLAHE then normalized BGR"
-                    if version in {"2.0", "2.0b"}
-                    else "normalized BGR"
-                ),
-            }
-        )
         print(f"[{index:02d}/{len(sources):02d}] exported v{version} -> {destination}")
-
-    manifest: dict[str, object] = {
-        "schema_version": 1,
-        "purpose": "Temporary FP32 ONNX exports for Pi-vs-Jetson benchmarking",
-        "opset": opset,
-        "model_count": len(records),
-        "models": records,
-    }
-    manifest_path = output_dir / "manifest.json"
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    print(f"Manifest: {manifest_path}")
-    return manifest
 
 
 def main() -> None:

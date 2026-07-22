@@ -40,7 +40,6 @@ CLIENT_DIR = SERVER.parent
 DEFAULT_IMAGES = SCRIPT_DIR / "v41a_benchmark_sidewalks"
 DEFAULT_MODEL_DIRS = [
     REPO_ROOT / "code" / "ai_models",
-    SCRIPT_DIR / "series12_benchmark_onnx",
 ]
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+[a-z]?)\.onnx$")
 
@@ -131,6 +130,15 @@ def _stats(values: list[float]) -> dict[str, float]:
 def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     model_dirs = [path.expanduser().resolve() for path in args.models_dir]
     models = _discover_models(model_dirs)
+    released_models_dir = (REPO_ROOT / "code" / "ai_models").resolve()
+    extra_model_dirs = [
+        directory for directory in model_dirs if directory != released_models_dir
+    ]
+    if len(extra_model_dirs) > 1:
+        raise SystemExit(
+            "The production inference server accepts one extra model directory; "
+            f"received {extra_model_dirs}"
+        )
     if args.versions.strip().lower() == "all":
         versions = sorted(models, key=_version_key)
     else:
@@ -150,13 +158,13 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             str(SERVER),
             "--model",
             "highest",
-            "--models-dir",
-            str(SCRIPT_DIR / "series12_benchmark_onnx"),
             "--host",
             "127.0.0.1",
             "--port",
             str(args.port),
         ]
+        if extra_model_dirs:
+            command.extend(["--models-dir", str(extra_model_dirs[0])])
         process = subprocess.Popen(
             command,
             stdout=server_log,

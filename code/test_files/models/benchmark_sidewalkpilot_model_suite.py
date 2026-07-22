@@ -21,7 +21,6 @@ BENCHMARK_SCRIPT = SCRIPT_DIR / "benchmark_v41a_devices.py"
 DEFAULT_IMAGES = SCRIPT_DIR / "v41a_benchmark_sidewalks"
 DEFAULT_MODEL_DIRS = [
     REPO_ROOT / "code" / "ai_models",
-    SCRIPT_DIR / "series12_benchmark_onnx",
 ]
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+[a-z]?)\.onnx$")
 
@@ -308,7 +307,9 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         type=Path,
         default=None,
-        help="repeatable; defaults to released models plus benchmark Series 1/2 ONNX",
+        help=(
+            "repeatable; defaults to the canonical code/ai_models directory"
+        ),
     )
     run.add_argument("--images", type=Path, default=DEFAULT_IMAGES)
     run.add_argument("--provider", choices=("auto", "cpu", "cuda"), default="auto")
