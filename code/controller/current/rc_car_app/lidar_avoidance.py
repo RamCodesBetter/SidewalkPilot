@@ -73,7 +73,7 @@ def governor_target(front_m: float) -> float:
     )
 
 
-def evaluate(scan, enabled: bool = True) -> dict:
+def evaluate(scan, enabled: bool = True, scan_fresh: bool = True) -> dict:
     """Return the center-corridor throttle/stop decision for manual or autonomous use."""
     front_m = center_forward_distance(scan)
     occupancy = "C" if front_m <= C.LIDAR_GOV_FULL_M else ""
@@ -92,6 +92,19 @@ def evaluate(scan, enabled: bool = True) -> dict:
             "lane_occupancy": occupancy,
             "emergency_lane_occupancy": emergency_occupancy,
             "lane_action": "disabled",
+        }
+
+    if not scan_fresh:
+        return {
+            "code": "EMR",
+            "stop": True,
+            "steer": None,
+            "throttle": 0.0,
+            "front_m": front_m,
+            "reason": "lidar_unavailable",
+            "lane_occupancy": occupancy,
+            "emergency_lane_occupancy": emergency_occupancy,
+            "lane_action": "brake",
         }
 
     if emergency_occupancy:

@@ -57,8 +57,17 @@ S3_DATASET_DIR = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / 
 S3_TRAINER_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "series_3_sidewalkpilot_trainer.py"
 S4_COMMON_PATH = REPO_ROOT / "code" / "ai_models_datasets" / "series_3_and_4" / "series_4_common.py"
 S3_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>3\.\d+b?)\.pth$")
-S4_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>4\.0[acfgpr])\.(?P<ext>onnx|pt|pth)$")
+S4_MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>4\.(?:0|1)[acfgpr])\.(?P<ext>onnx|pt|pth)$")
 S4_SUFFIX_ORDER = {"p": 0, "r": 1, "f": 2, "g": 3, "a": 4, "c": 5}
+
+
+def report_checkpoint_path(path):
+    """Return a portable checkpoint path without exposing a workstation home path."""
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(REPO_ROOT.resolve()))
+    except ValueError:
+        return resolved.name
 
 BUCKETS = [
     ("HL 0-45", 0.0, 45.0),
@@ -84,6 +93,14 @@ def bucket9_index(value):
         if lo <= value < hi:
             return i
     return len(BUCKETS9) - 1
+
+
+def softmax_rows(logits):
+    """Convert a batch of class logits to stable probabilities."""
+    logits = np.asarray(logits, dtype=np.float32)
+    shifted = logits - np.max(logits, axis=1, keepdims=True)
+    exponentials = np.exp(shifted)
+    return exponentials / np.sum(exponentials, axis=1, keepdims=True)
 
 
 # Official source code = D{MMDD}_{HH} (run start hour, 24h).
@@ -154,7 +171,7 @@ def version_key(version):
     major = int(match.group("major"))
     minor = int(match.group("minor"))
     suffix = match.group("suffix")
-    if major == 4 and minor == 0:
+    if major == 4:
         suffix_rank = S4_SUFFIX_ORDER.get(suffix, -1)
     else:
         suffix_rank = 1 if suffix == "b" else 0
@@ -507,7 +524,7 @@ def evaluate_models(
 
         bucket_data = bucket_summary(preds, targets)
         results[version] = {
-            "checkpoint": str(path.resolve()),
+            "checkpoint": report_checkpoint_path(path),
             "series": series_for_version(version),
             "preprocessing": preprocessing_for_version(version),
             "output_head": "1 continuous steering output",
@@ -592,7 +609,7 @@ def _decode_s3_steering(out, s3mod):
     if k and out.ndim == 2 and out.shape[1] == 2 * k + 1:
         logits = out[:, 0:k]
         offset = 1.0 / (1.0 + np.exp(-out[:, k:2 * k]))          # sigmoid -> 0..1 fraction
-        cls = np.argmax(logits, axis=1)                          # which bucket
+        cls = np.argmax(softmax_rows(logits), axis=1)            # softmax, then bucket
         lo = np.asarray(s3mod._STEER_BIN_LO, dtype=np.float32)[cls]
         hi = np.asarray(s3mod._STEER_BIN_HI, dtype=np.float32)[cls]
         chosen = offset[np.arange(len(cls)), cls]               # offset for the picked bucket
@@ -716,7 +733,7 @@ def evaluate_series3(models_dir, device, batch_size, versions=None):
             by_source[name] = metric_block(preds[idx], targets[idx])
 
         results[version] = {
-            "checkpoint": str(path.resolve()),
+            "checkpoint": report_checkpoint_path(path),
             "series": 3,
             "preprocessing": "raw BGR 320x180",
             "output_head": ("2 continuous controls (steering + throttle)"
@@ -858,7 +875,7 @@ def _decode_s4_current(output, s3mod):
     current = output[:, 0, :]
     logits = current[:, :9]
     offsets = 1.0 / (1.0 + np.exp(-current[:, 9:18]))
-    classes = np.argmax(logits, axis=1)
+    classes = np.argmax(softmax_rows(logits), axis=1)
     lows = np.asarray(s3mod._STEER_BIN_LO, dtype=np.float32)[classes]
     highs = np.asarray(s3mod._STEER_BIN_HI, dtype=np.float32)[classes]
     chosen = offsets[np.arange(len(classes)), classes]
@@ -879,7 +896,7 @@ def _series34_result(path, version, series, preds, data, output_head):
         indices = [index for index, value in enumerate(sources) if value == name]
         by_source[name] = metric_block(preds[indices], targets[indices])
     return {
-        "checkpoint": str(path.resolve()),
+        "checkpoint": report_checkpoint_path(path),
         "series": series,
         "preprocessing": "raw BGR 320x180",
         "output_head": output_head,
@@ -1184,8 +1201,8 @@ def build_pdf(results, samples, s34_samples, pdf_out):
             "validation subset from the shared 81,237-frame dataset. Series 1/2 images are resized to their required 200x66 "
             "input and use their original model-specific preprocessing; Series 3/4 use 320x180. The original "
             f"{len(samples):,}-image Series 1/2 evaluation is retained as a separate historical table, but it is not used for "
-            "cross-generation ranking. Series 4 uses paired experiment names: p/r for PC, f/g for CF, and a/c for PCF "
-            "(final/best respectively).",
+            "cross-generation ranking. Each Series 4 generation uses paired experiment names: p/r for PC, f/g for CF, "
+            "and a/c for PCF (final/best respectively).",
             normal,
         )
     )
@@ -1372,7 +1389,7 @@ def build_pdf(results, samples, s34_samples, pdf_out):
             Image(image_data, width=9.1 * inch, height=3.1 * inch),
         ]))
 
-    # Show all six Series 4 experiments plus the latest Series 3 final/best pair.
+    # Keep the confusion-matrix section bounded to the eight newest hybrid checkpoints.
     recent_hybrid = sorted(
         (v for v in versions if results[v].get("series") in {3, 4}
          and "bucket9_confusion_ground_rows_pred_cols" in results[v]),
@@ -1440,7 +1457,7 @@ def build_pdf(results, samples, s34_samples, pdf_out):
         f"The shared source dataset contains 81,237 curated real field frames across five manual-driving runs from July 2 through July 12, 2026; {len(s34_samples):,} anchors satisfy the common report contract.",
         "The hold-last baseline repeats the most recent previous target. It is a persistence reference for Series 4 history models, not a deployed controller behavior.",
         "Series 3 throttle labels are near-constant at full throttle, so this report evaluates steering only; throttle control remains disabled pending varied-throttle data.",
-        "The July 13 field comparison selected v3.4 from the cases presented. Series 4 checkpoints remain experimental and require deployment-compatible integration and field testing.",
+        "The July 13 field comparison selected v3.4 from the cases presented. A later supervised comparison found v4.0f viable but not clearly better than v3.4; v4.0p/v4.0r/v4.0a/v4.0c repeatedly held prior steering predictions and were not drivable. The v4.1 checkpoints are offline-only pending runtime integration and field testing.",
     ]
     for note in notes:
         story.append(paragraph(f"- {note}", normal))

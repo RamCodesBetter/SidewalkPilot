@@ -51,8 +51,13 @@ class InfluxLogger:
                     cfg = json.load(f)
             except Exception as exc:
                 print(f"[influx] bad {_CFG}: {exc}", flush=True)
-        if not cfg or not cfg.get("token"):
-            print("[influx] disabled (no ~/.influxdb.json with a token)", flush=True)
+        required = ("url", "token", "org", "bucket")
+        missing = [key for key in required if not isinstance(cfg, dict) or not cfg.get(key)]
+        if missing:
+            print(
+                f"[influx] disabled (missing {', '.join(missing)} in ~/.influxdb.json)",
+                flush=True,
+            )
             return
         self._url = (f"{cfg['url'].rstrip('/')}/api/v2/write?org={cfg['org']}"
                      f"&bucket={cfg['bucket']}&precision=ms")

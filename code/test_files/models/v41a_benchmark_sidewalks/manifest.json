@@ -1,0 +1,2580 @@
+{
+  "description": "Real SidewalkPilot frames for identical Raspberry Pi 5 CPU and Jetson Orin Nano CUDA v4.1a inference benchmarks.",
+  "image_count": 180,
+  "image_height": 180,
+  "image_width": 320,
+  "images_per_bucket": 20,
+  "jpeg_quality": 90,
+  "records": [
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "a99ff5fa937466eb18d1efb07fd4915ec835e48e26c5d2028ed505c29f2ce3eb",
+      "source_file": "2026_07_02_run_1__photo_20260702_164025_492236.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 41.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_01.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "791a26774d11c6f47f0a8d06e4305c2845aac93791f46458f0998c875f199b15",
+      "source_file": "2026_07_02_run_2__photo_20260702_165825_943953.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 19.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "48f885932516523f1f818afeec17b1e26b65ad2dc3a4aba53251e24d33ee793a",
+      "source_file": "2026_07_02_run_2__photo_20260702_171707_118749.jpg",
+      "target_history": [
+        85.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 41.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "d330d1fd7109b207fa79e1cb40d2092109ad2e629c559dd272876c5b91c19164",
+      "source_file": "2026_07_02_run_2__photo_20260702_171950_261031.jpg",
+      "target_history": [
+        54.0,
+        34.0,
+        2.0
+      ],
+      "target_steering": 2.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "aba5ecc23c2242109acfab03ad846d203bdb0063568c05e17f27f9b23e055e1a",
+      "source_file": "2026_07_02_run_2__photo_20260702_173103_101130.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 41.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "7ba37878e952576af2697017c7d49c91a5652a0cf78bb93d3d3fe2851026fc0f",
+      "source_file": "2026_07_02_run_2__photo_20260702_175502_045009.jpg",
+      "target_history": [
+        180.0,
+        171.0,
+        0.0
+      ],
+      "target_steering": 0.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "c4b9e55bcf718599e2e6b11108339db604e84f59a17bddfe248999fda735957f",
+      "source_file": "2026_07_02_run_2__photo_20260702_181152_718620.jpg",
+      "target_history": [
+        178.0,
+        74.0,
+        57.0
+      ],
+      "target_steering": 0.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "dc3896d5bac60c46bc41b54128e163460a513851b9db244c5c4e554662e9b2ff",
+      "source_file": "2026_07_02_run_2__photo_20260702_181614_320730.jpg",
+      "target_history": [
+        61.0,
+        0.0,
+        0.0
+      ],
+      "target_steering": 0.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "9e67a020c71278429b4ce492491b913e295da2f93bd406ad6ebd4875962b4f19",
+      "source_file": "2026_07_02_run_2__photo_20260702_182514_064611.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        180.0
+      ],
+      "target_steering": 25.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "3ebb7574a2b409d15765e0c5cb13f1b71014dc67842d7afd2b3d5133499396d0",
+      "source_file": "2026_07_02_run_2__photo_20260702_183006_092773.jpg",
+      "target_history": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "target_steering": 1.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "da1f829379fe9979de39c2644ff3f7040dfb60f5cd998296581c5f2fcc183779",
+      "source_file": "2026_07_02_run_2__photo_20260702_183948_768612.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 40.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_11.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "13fc72714b001e363f117a9b10314e316301796a1f83cbb455dc1f36294a7895",
+      "source_file": "2026_07_02_run_2__photo_20260702_184911_964125.jpg",
+      "target_history": [
+        165.0,
+        165.0,
+        15.0
+      ],
+      "target_steering": 0.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_12.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "258421627fa8220653e4ca67e02670a650444a1a5b6874dcf36224b70f040401",
+      "source_file": "2026_07_07_run_1__photo_20260707_170020_371052.jpg",
+      "target_history": [
+        87.0,
+        90.0,
+        61.0
+      ],
+      "target_steering": 37.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_13.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "3ec3fa9799f73a8f85ede0f257c5d885c2285e895dd56d1fb65bd64c08d400ab",
+      "source_file": "2026_07_07_run_1__photo_20260707_170215_510895.jpg",
+      "target_history": [
+        80.0,
+        70.0,
+        85.0
+      ],
+      "target_steering": 37.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_14.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "afb8b38c96f26d5ba3987671e9c648127eb55dec9d97631e2e91d9161bed5b4a",
+      "source_file": "2026_07_07_run_1__photo_20260707_170552_212983.jpg",
+      "target_history": [
+        149.0,
+        98.0,
+        90.0
+      ],
+      "target_steering": 41.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_15.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "80f9e125b0cecadd7f6c6e6e6fac672264b1169f6574b4e542e1e7fc75955127",
+      "source_file": "2026_07_07_run_1__photo_20260707_170818_111050.jpg",
+      "target_history": [
+        54.0,
+        67.0,
+        90.0
+      ],
+      "target_steering": 33.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_16.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "fddf6d8c4aa8be3a654ec37eb2cfbccd19ff1467f3c4d46ed46d919bdb234b26",
+      "source_file": "2026_07_07_run_1__photo_20260707_171141_894572.jpg",
+      "target_history": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "target_steering": 1.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "de760c25ced7676a8fb05caaeb83733caf2d0e6e9cdc20829d6f037eac1eef68",
+      "source_file": "2026_07_12_run_2__photo_20260712_162427_899693.jpg",
+      "target_history": [
+        90.0,
+        85.0,
+        90.0
+      ],
+      "target_steering": 34.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "d8697dcb1c632d8c3e747108719c6b4235e7f5f3683e27fee1d38163e2bb29cb",
+      "source_file": "2026_07_12_run_2__photo_20260712_165325_239147.jpg",
+      "target_history": [
+        80.0,
+        78.0,
+        89.0
+      ],
+      "target_steering": 40.0
+    },
+    {
+      "bucket_index": 0,
+      "bucket_name": "hard_left_0_45",
+      "file": "b0_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "8ebd6ddf51a499c933acd1762ef9226807a8801546d72e17a81d83867dce668a",
+      "source_file": "2026_07_12_run_2__photo_20260712_171938_372151.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 43.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "07c63a3dcfce158d0fbb8f8b435e08952bc78fc0c1637bb301eb7fcbe512470e",
+      "source_file": "2026_07_02_run_1__photo_20260702_163142_940529.jpg",
+      "target_history": [
+        158.0,
+        110.0,
+        90.0
+      ],
+      "target_steering": 58.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_01.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "b6e9dd35e8e1f76207d08ecdcbaf8ee270085350d2bb742a3822cc3cd57692e4",
+      "source_file": "2026_07_02_run_2__photo_20260702_165310_298317.jpg",
+      "target_history": [
+        124.0,
+        92.0,
+        90.0
+      ],
+      "target_steering": 54.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "b7ba9056fbc94109d74a88c002a64382987d725c06053a113281f20369529255",
+      "source_file": "2026_07_02_run_2__photo_20260702_170758_340759.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 58.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "2d90e501d06e45e553b77dcf99bf3d27b02490fe876b44a533ec08b03cef52e9",
+      "source_file": "2026_07_02_run_2__photo_20260702_172654_396512.jpg",
+      "target_history": [
+        45.0,
+        90.0,
+        42.0
+      ],
+      "target_steering": 49.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "3a86e097abeb723cfaa91a1207992a85288786fad67825cfc17e90b8df4653da",
+      "source_file": "2026_07_02_run_2__photo_20260702_174423_540773.jpg",
+      "target_history": [
+        79.0,
+        63.0,
+        56.0
+      ],
+      "target_steering": 45.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "fd509344f034ce696787852781a61772a85980e92c2e7322bc933cdd96b0f5b3",
+      "source_file": "2026_07_02_run_2__photo_20260702_180037_295494.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 59.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "2b1f0ce683b7f993350548fed6621b240f081247c9baf05843b6215732ec87c3",
+      "source_file": "2026_07_02_run_2__photo_20260702_181929_025279.jpg",
+      "target_history": [
+        180.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 55.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "e4582b2478cde8d04ebc139fbd07d30d266d940f6c254ac7701ab05717b5a234",
+      "source_file": "2026_07_02_run_2__photo_20260702_183140_151747.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 58.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "08a8b603167f87998b5adc4de68c1055361c5e5f78a9529c4041775508399f5a",
+      "source_file": "2026_07_02_run_2__photo_20260702_184746_869616.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        85.0
+      ],
+      "target_steering": 54.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_09.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "fc863fcbe2f7d2a271082370553fef667357872f98b12c3057f662b8054a44c6",
+      "source_file": "2026_07_07_run_1__photo_20260707_165926_268739.jpg",
+      "target_history": [
+        80.0,
+        76.0,
+        62.0
+      ],
+      "target_steering": 56.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_10.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "8fa5182f9a9286bf7f98ce1404e626f6eea23571312b6a77af1c18a4a9eb78e2",
+      "source_file": "2026_07_07_run_1__photo_20260707_170052_687161.jpg",
+      "target_history": [
+        143.0,
+        90.0,
+        69.0
+      ],
+      "target_steering": 46.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_11.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "0798088a10869a6be154f1a1b298ea20415f8f72fd66af76f5ae9ed30d3e07ee",
+      "source_file": "2026_07_07_run_1__photo_20260707_170218_908166.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 47.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_12.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "5522b22c920a928d936c42b4dbc425ec9acb9594e7ced6fe65941496122f1db4",
+      "source_file": "2026_07_07_run_1__photo_20260707_170407_146152.jpg",
+      "target_history": [
+        75.0,
+        42.0,
+        30.0
+      ],
+      "target_steering": 56.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_13.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "34c01240b453994938fa8911e603a957e714a214176d8edb212d35e3869573c0",
+      "source_file": "2026_07_07_run_1__photo_20260707_170614_625025.jpg",
+      "target_history": [
+        50.0,
+        42.0,
+        42.0
+      ],
+      "target_steering": 49.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_14.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "6d7037840c75c00f2264f7992dd29ececb1384a80b9007d37766679899a6aa45",
+      "source_file": "2026_07_07_run_1__photo_20260707_170705_397836.jpg",
+      "target_history": [
+        77.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 58.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_15.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "c431ebec68de02b406957c68df61f6a6f75d10f355943b0c7aef92769eacf5aa",
+      "source_file": "2026_07_07_run_1__photo_20260707_170952_558438.jpg",
+      "target_history": [
+        99.0,
+        93.0,
+        39.0
+      ],
+      "target_steering": 49.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_16.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "6d57e5d08866100d30e57875dd1c6227b23e5ee6bf2b54198752a9923e99c1e2",
+      "source_file": "2026_07_12_run_1__photo_20260712_155918_827589.jpg",
+      "target_history": [
+        63.0,
+        56.0,
+        56.0
+      ],
+      "target_steering": 56.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "a850d4b2a7e19244991b9fb08576b589eb946dfe95cf67163801626eddec61cb",
+      "source_file": "2026_07_12_run_2__photo_20260712_162435_314155.jpg",
+      "target_history": [
+        88.0,
+        49.0,
+        50.0
+      ],
+      "target_steering": 50.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "a23a9b84a70bcf26021bdba48c397ac93e6de3ffe7f6af54c94b0a3d72012363",
+      "source_file": "2026_07_12_run_2__photo_20260712_164834_363004.jpg",
+      "target_history": [
+        129.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 55.0
+    },
+    {
+      "bucket_index": 1,
+      "bucket_name": "left_45_60",
+      "file": "b1_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "4dae30b30015769933e290183d260db696504549abba9cbe5b7d04f3f037a2a6",
+      "source_file": "2026_07_12_run_2__photo_20260712_171937_692229.jpg",
+      "target_history": [
+        90.0,
+        74.0,
+        90.0
+      ],
+      "target_steering": 57.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "0642861ca9b7a15d6378028d64b60dd5424671a834f2e0f7b9185eda4a401adf",
+      "source_file": "2026_07_02_run_1__photo_20260702_163038_356563.jpg",
+      "target_history": [
+        84.0,
+        79.0,
+        79.0
+      ],
+      "target_steering": 74.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_01.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "b89870ca6ea618949573bdfa50d9492e7bb64a548bf05e60a4d57db85b0d4554",
+      "source_file": "2026_07_02_run_1__photo_20260702_164226_362240.jpg",
+      "target_history": [
+        90.0,
+        83.0,
+        79.0
+      ],
+      "target_steering": 65.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "1ebfd71fec55258752733dac0bd9af0ea21992efde4612b1bfaec02e5e3fa596",
+      "source_file": "2026_07_02_run_2__photo_20260702_165106_833847.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 69.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "dae68e609831c8064ea31611b83aa81d75cf4032e7770cf0dc126f9044f38762",
+      "source_file": "2026_07_02_run_2__photo_20260702_170730_374435.jpg",
+      "target_history": [
+        65.0,
+        71.0,
+        83.0
+      ],
+      "target_steering": 61.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "c74f39e305faea43dedd9e7fe507013685c44a07095e66a0d2ac1729b4b1cbf3",
+      "source_file": "2026_07_02_run_2__photo_20260702_171915_967628.jpg",
+      "target_history": [
+        84.0,
+        70.0,
+        66.0
+      ],
+      "target_steering": 66.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "490f910c9ba4766f487efb6da4319120e517a7f3fb150dcd26e414c7e1454cf8",
+      "source_file": "2026_07_02_run_2__photo_20260702_173835_645794.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 68.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "d7051ad6dd0000ae1e32bd0ce259ca66777ecc19bdd7683d12e9621cff0180cb",
+      "source_file": "2026_07_02_run_2__photo_20260702_180657_472115.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        69.0
+      ],
+      "target_steering": 67.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "1ef29b2b8b0799f563d17fc29296d6066316b5cde0a7c30c5c51b615f7937f07",
+      "source_file": "2026_07_02_run_2__photo_20260702_183156_431302.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 73.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ff95a687f99f2899301885f82adfc0c4f21c2e98376bbd5d4a061e98f7ce22fb",
+      "source_file": "2026_07_02_run_2__photo_20260702_185307_783860.jpg",
+      "target_history": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "target_steering": 71.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_09.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "57a542c05ef8f3fa0c4d8c89c8aa1b3d8bc0e4a10b4dfb40bd83833e03304784",
+      "source_file": "2026_07_07_run_1__photo_20260707_165947_853889.jpg",
+      "target_history": [
+        88.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 68.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_10.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "8bef1dfd7dd4fd19181126766279d315dd3330d0ca91d22d1164920c1ebc8e02",
+      "source_file": "2026_07_07_run_1__photo_20260707_170144_849714.jpg",
+      "target_history": [
+        90.0,
+        88.0,
+        76.0
+      ],
+      "target_steering": 68.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_11.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "dc1d308e1ebd0c7cdf6fdad276bcf1a3db9169650cbd05a90e029f6289f4b19b",
+      "source_file": "2026_07_07_run_1__photo_20260707_170356_535997.jpg",
+      "target_history": [
+        109.0,
+        109.0,
+        90.0
+      ],
+      "target_steering": 62.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_12.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "0cfec28ef6300c16bd3fac8dd5f810b784b76d0aa62f5750228aa0de0465b28a",
+      "source_file": "2026_07_07_run_1__photo_20260707_170547_151544.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        83.0
+      ],
+      "target_steering": 73.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_13.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "779e55257772f2d2b6f64af5a630c2393c15644d082b046cb6189f2315b86969",
+      "source_file": "2026_07_07_run_1__photo_20260707_170657_885538.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 65.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_14.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "12a982ccdd7a099a2371a37b64ceafa051e3c7e702d1a9fdf46ce5ab5e8f36d2",
+      "source_file": "2026_07_07_run_1__photo_20260707_170854_570640.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 69.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_15.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "e40ef1d82959dce59041a60bd813334b731a175676fb0ed05d970fa55858e1b2",
+      "source_file": "2026_07_07_run_1__photo_20260707_171009_884447.jpg",
+      "target_history": [
+        138.0,
+        94.0,
+        90.0
+      ],
+      "target_steering": 63.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "a611f56961c7a063c4d0f2ea8222baa9605075fe800cc9749795c72e67a4c677",
+      "source_file": "2026_07_12_run_2__photo_20260712_162025_820470.jpg",
+      "target_history": [
+        90.0,
+        86.0,
+        73.0
+      ],
+      "target_steering": 73.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "93d742962ec5497bd338b88acc1110c42bd8f7963c02cbf571603d1435c1f965",
+      "source_file": "2026_07_12_run_2__photo_20260712_162911_202936.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 73.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "3eb90f6fc396448889217219552db202b44f3ba70788f4bc51ca4c7eb3ca4f54",
+      "source_file": "2026_07_12_run_2__photo_20260712_165909_909203.jpg",
+      "target_history": [
+        49.0,
+        67.0,
+        75.0
+      ],
+      "target_steering": 68.0
+    },
+    {
+      "bucket_index": 2,
+      "bucket_name": "left_60_75",
+      "file": "b2_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "4e78dd91ef4abcba775a4b8e561660987424bcd588d62ef4a79fdde151795dcd",
+      "source_file": "2026_07_12_run_2__photo_20260712_171938_596002.jpg",
+      "target_history": [
+        90.0,
+        43.0,
+        90.0
+      ],
+      "target_steering": 72.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "d1a09451ad12ffb8e1f214769c54422f8b56afa173768989e79a6c3e5e78844f",
+      "source_file": "2026_07_02_run_1__photo_20260702_163030_561648.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        87.0
+      ],
+      "target_steering": 81.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_01.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "65b8bd31b7969792531b8e9426ff09549f18ca1b254228ea859bf5e2beefe346",
+      "source_file": "2026_07_02_run_1__photo_20260702_163524_599971.jpg",
+      "target_history": [
+        90.0,
+        84.0,
+        81.0
+      ],
+      "target_steering": 84.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_02.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "ca4159666ae4e805d69b6824127383fc040ac1c1d43e3d4db10c0242e71000d1",
+      "source_file": "2026_07_02_run_1__photo_20260702_164040_634328.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        79.0
+      ],
+      "target_steering": 79.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "a6fe8af9520493396cfc465707d0d555f8faec9d8915fcca2efb08c0c9d7df5d",
+      "source_file": "2026_07_02_run_2__photo_20260702_164823_436298.jpg",
+      "target_history": [
+        90.0,
+        81.0,
+        78.0
+      ],
+      "target_steering": 77.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "b7f9b338bc9e763eb0b51c6de424108bf0a9948df4fb3fad2c7f1f6dad410191",
+      "source_file": "2026_07_02_run_2__photo_20260702_165551_163814.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 80.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "74c961ac616a5074f6137bf1def9590af216b3231261440bed445d63590a8030",
+      "source_file": "2026_07_02_run_2__photo_20260702_170816_447690.jpg",
+      "target_history": [
+        90.0,
+        83.0,
+        83.0
+      ],
+      "target_steering": 84.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "5347160f5adb9d1a4b743ee69c9c6f4aa5fdd3a5153c6ce3888ff0c783c8ec92",
+      "source_file": "2026_07_02_run_2__photo_20260702_171900_027840.jpg",
+      "target_history": [
+        67.0,
+        65.0,
+        65.0
+      ],
+      "target_steering": 77.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "9b4c3d7cc1f4bd9a8456943e2890ad469f1dcad68ba18a0c8ce18371ff5d4be2",
+      "source_file": "2026_07_02_run_2__photo_20260702_173233_543879.jpg",
+      "target_history": [
+        91.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 78.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "10c25a7866a4c962f2c4d02035ed00f3e1c26e8ea9fc3140816726338da8db43",
+      "source_file": "2026_07_02_run_2__photo_20260702_175541_955936.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 81.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "1b4334e642857010068c2fe883b7b717bb33e436bfdc8f5b34f2da353ff00ba3",
+      "source_file": "2026_07_02_run_2__photo_20260702_182200_669313.jpg",
+      "target_history": [
+        87.0,
+        86.0,
+        86.0
+      ],
+      "target_steering": 81.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ba0c458ddf2fc60275ca9c7005f0e55b1cd499cd6d58c663f11ed94de1167b7c",
+      "source_file": "2026_07_02_run_2__photo_20260702_184754_045904.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 82.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_11.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "4da14c1237c577b4a9f547564bf380ca1d1df301599bf8dc09d1a0d6047864aa",
+      "source_file": "2026_07_07_run_1__photo_20260707_165952_469828.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 76.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_12.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "1dd44579b158e6a57c669e7e333ad50a23925fc87fa9523e81339076a33cabd9",
+      "source_file": "2026_07_07_run_1__photo_20260707_170350_892843.jpg",
+      "target_history": [
+        64.0,
+        90.0,
+        84.0
+      ],
+      "target_steering": 75.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_13.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "166f51b09a2217575edcc6b8de46514ba850d2a6d152b09508d217d77e627cda",
+      "source_file": "2026_07_07_run_1__photo_20260707_170650_353492.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 79.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_14.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "e67b4b0c5cdb147b18a87346b2061edd4c02d2fbee02f4b7f702bae0cb063300",
+      "source_file": "2026_07_07_run_1__photo_20260707_171019_329590.jpg",
+      "target_history": [
+        61.0,
+        61.0,
+        79.0
+      ],
+      "target_steering": 79.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_15.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "78079bbe5f93da40239f95db5fcd5b74e9bf0862063cadd6271120efc7b89f57",
+      "source_file": "2026_07_12_run_2__photo_20260712_161259_592830.jpg",
+      "target_history": [
+        149.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 79.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "2af8c5f57107c690f18325c2de777c2bd66154be4c503c7bf4bfd567fa940c1e",
+      "source_file": "2026_07_12_run_2__photo_20260712_162140_431334.jpg",
+      "target_history": [
+        77.0,
+        90.0,
+        82.0
+      ],
+      "target_steering": 75.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "4dfc5e8d5a902914feebda883fe5cc29b75ba8575c4a9835f5d457a9184a4f1e",
+      "source_file": "2026_07_12_run_2__photo_20260712_163537_919888.jpg",
+      "target_history": [
+        90.0,
+        83.0,
+        83.0
+      ],
+      "target_steering": 83.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "fe5c113656ff27f3be2f4066bc75975782f956ee3f203bd7546c9e6419a50cce",
+      "source_file": "2026_07_12_run_2__photo_20260712_165850_837200.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 81.0
+    },
+    {
+      "bucket_index": 3,
+      "bucket_name": "soft_left_75_85",
+      "file": "b3_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "81c732fcc07655176d8ad78a98de9cc7d9684dbc8a6caa6fbe766c8e460a6ce6",
+      "source_file": "2026_07_12_run_2__photo_20260712_171934_584164.jpg",
+      "target_history": [
+        73.0,
+        71.0,
+        70.0
+      ],
+      "target_steering": 79.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "240c1f8d87a85dd69e604710ce9c0365a637eb8ffaddb2e7e41d312cf270c32e",
+      "source_file": "2026_07_02_run_1__photo_20260702_163028_424024.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_01.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "f9e5753d58d56470ce8859a608bda7e683c5dcb316f63c793efa8325041eb46f",
+      "source_file": "2026_07_02_run_1__photo_20260702_164238_935324.jpg",
+      "target_history": [
+        90.0,
+        92.0,
+        108.0
+      ],
+      "target_steering": 91.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "d2de4bf6ecf7c4d5ca0dbbd7ccc8069fb5a9ae96968fcf9c060a4ac36a1e1ba6",
+      "source_file": "2026_07_02_run_2__photo_20260702_165304_840820.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "528ae53bfd63b6167f4d177a41f2b01047d6b83037e878396d5239ec8d601a8b",
+      "source_file": "2026_07_02_run_2__photo_20260702_170258_394657.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "3603a5c997adc39901b9997cec9d2db289008bbc16959e4e37975f2963e3e552",
+      "source_file": "2026_07_02_run_2__photo_20260702_171211_316078.jpg",
+      "target_history": [
+        90.0,
+        61.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "a5651482dafd341c0844b030da43d79616359724ebc9f45963caf08b833ad3b4",
+      "source_file": "2026_07_02_run_2__photo_20260702_172823_701758.jpg",
+      "target_history": [
+        87.0,
+        87.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "f5c495e753e9373f71593c205fdc8399c86d07a18e8465bd64af904acfc559c7",
+      "source_file": "2026_07_02_run_2__photo_20260702_173815_052978.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        27.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "f56ecba211c3376e9a583fa5a75229c4dfb0dbb8ba9f9d8f042a5c5247d87222",
+      "source_file": "2026_07_02_run_2__photo_20260702_174640_841593.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "3d240ac6de4bfd404d1328a14ac10ead1449b5fa4a2732d03942440411c60787",
+      "source_file": "2026_07_02_run_2__photo_20260702_175544_548571.jpg",
+      "target_history": [
+        90.0,
+        180.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "f08a0f2b5e676aeaf06621371532f408e1dc37010c0d30405bc166960531cacd",
+      "source_file": "2026_07_02_run_2__photo_20260702_180543_285469.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        151.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "772dd17c46f8f5199abdc2e906d8d4121af15d490ade275450a8e0748caa4301",
+      "source_file": "2026_07_02_run_2__photo_20260702_181944_842071.jpg",
+      "target_history": [
+        31.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_11.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ce86d120edce2259b88eea22faefd9ce7f0ddf7f6442be361ea7fe3e7ad9e452",
+      "source_file": "2026_07_02_run_2__photo_20260702_183041_092008.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        131.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_12.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "2793aa6d92b7d94c4c7e22992f1167e58e3ce7526f8a7c3e7460c24855808daf",
+      "source_file": "2026_07_02_run_2__photo_20260702_184354_842679.jpg",
+      "target_history": [
+        81.0,
+        88.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_13.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "a5be52eb09fccc446be21adf250b377ae05f33c70a5076f6bec9f610559801cf",
+      "source_file": "2026_07_07_run_1__photo_20260707_170048_749608.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 88.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_14.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "97bafbc490859c934c20578d5c6be3e23a868582773f99e30a66d28128d47e07",
+      "source_file": "2026_07_12_run_1__photo_20260712_160740_638991.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_15.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "806edcab9afc181e51dc8232ee503ea8bd7766c8d2ad3b84c5eb77b485cae5a6",
+      "source_file": "2026_07_12_run_2__photo_20260712_162729_708655.jpg",
+      "target_history": [
+        61.0,
+        90.0,
+        77.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "8e173ad4b8d34494a50fe854a29ca949de0b3c953c5c7d75339556d15f38282d",
+      "source_file": "2026_07_12_run_2__photo_20260712_164157_265373.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "1cfec90595ff7d399ee63dd35675ffbad81cefefc99c104332e14544cede1a7a",
+      "source_file": "2026_07_12_run_2__photo_20260712_165333_130846.jpg",
+      "target_history": [
+        109.0,
+        103.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "29cd6d80e8fe5db3b716e6da1a57dcd5f90408c5e5bbabdcd626a3b64c66bb38",
+      "source_file": "2026_07_12_run_2__photo_20260712_171105_983361.jpg",
+      "target_history": [
+        90.0,
+        101.0,
+        145.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 4,
+      "bucket_name": "straight_85_95",
+      "file": "b4_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "cfc724c039d0e979fe61a624b56e1e9a1d60184cbef2216dbfc9cddd840ae164",
+      "source_file": "2026_07_12_run_2__photo_20260712_171941_231042.jpg",
+      "target_history": [
+        134.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 90.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "50f9094b2ec3098300a720181188bf2c7e5cc91e94cf8872a7c35b3a3458a272",
+      "source_file": "2026_07_02_run_1__photo_20260702_163029_437499.jpg",
+      "target_history": [
+        133.0,
+        141.0,
+        141.0
+      ],
+      "target_steering": 104.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_01.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "2fa4b088e0909daa62de615a47f042d98ac696729f1eda4269257b192e1f6c48",
+      "source_file": "2026_07_02_run_1__photo_20260702_164110_568429.jpg",
+      "target_history": [
+        90.0,
+        145.0,
+        90.0
+      ],
+      "target_steering": 102.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "4556c93efe4b07cb61d342d2f35a832b547afc3cee074cc783cd1a374e585630",
+      "source_file": "2026_07_02_run_2__photo_20260702_164805_105770.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 104.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "377debf7adb822fac0042bd5bd3cb5db3b4fa051c7ea9b1d33b98a14ad167d3a",
+      "source_file": "2026_07_02_run_2__photo_20260702_165926_419823.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 104.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "a09819eee4e43c224a897de08640427f4d52f39f3aa8a6cf05d50922109f4345",
+      "source_file": "2026_07_02_run_2__photo_20260702_170837_052892.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 96.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "41766b062786f1099fc65a4269149b82597caacc36af604a59b91033ea8b43b6",
+      "source_file": "2026_07_02_run_2__photo_20260702_171854_650853.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 99.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "9379bf4a1fc7c4f37b1857aa66dd49d6b93e5d64951a7de68a2839885f18427a",
+      "source_file": "2026_07_02_run_2__photo_20260702_173757_162478.jpg",
+      "target_history": [
+        128.0,
+        129.0,
+        90.0
+      ],
+      "target_steering": 97.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ec292d0a154cceaf21733a35094c80fafa9604c1664cb03cc55f6ec087ce99fe",
+      "source_file": "2026_07_02_run_2__photo_20260702_174610_565545.jpg",
+      "target_history": [
+        90.0,
+        130.0,
+        90.0
+      ],
+      "target_steering": 97.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "c03f06dfef693761befd8ec1076ad978379d2db453c94e4ee72ed1ccfa1e30ce",
+      "source_file": "2026_07_02_run_2__photo_20260702_175652_236419.jpg",
+      "target_history": [
+        90.0,
+        143.0,
+        115.0
+      ],
+      "target_steering": 104.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "99a2b263af6bcb134cd859c2863b245227b993a2ddfdc9a5889769e96a8d6d32",
+      "source_file": "2026_07_02_run_2__photo_20260702_181119_133747.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 104.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "bde73d9932c8c343c31c2ecbf6491fd5af8a7051a1018d6b6aa3ccf2d0b6efcc",
+      "source_file": "2026_07_02_run_2__photo_20260702_183247_144377.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 97.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_11.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "17b20da68ab32b8eee48eaabcd1e58f5d2b7c79c55f1966498081cd2fc6959f5",
+      "source_file": "2026_07_02_run_2__photo_20260702_184928_491523.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 98.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_12.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "0007740de9e49b3606fb7628a85da437ffcf5353af8439cf3eb7f861acbdabee",
+      "source_file": "2026_07_07_run_1__photo_20260707_170606_311876.jpg",
+      "target_history": [
+        90.0,
+        98.0,
+        98.0
+      ],
+      "target_steering": 98.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_13.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "00bbfabf81d9a7ceeddc9cc264e659ad0e417dcaebf21d5dfa214919ab6461dc",
+      "source_file": "2026_07_12_run_1__photo_20260712_160745_161134.jpg",
+      "target_history": [
+        93.0,
+        93.0,
+        98.0
+      ],
+      "target_steering": 98.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_14.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "6a57bc0b6ac80c7a53d75ca51f257bbef9709db9acad2f62c1ed567a95a9b0ea",
+      "source_file": "2026_07_12_run_2__photo_20260712_161735_474292.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 101.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_15.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "64cc61fd1644cd88d5b5b039de05e7c7110bdbb1097b21887bdad1f9acedb438",
+      "source_file": "2026_07_12_run_2__photo_20260712_163002_080861.jpg",
+      "target_history": [
+        76.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 100.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "0d481da45a3721f3911162e8f5c8732681c77ecfc61d634bcc70cab9fdc946cb",
+      "source_file": "2026_07_12_run_2__photo_20260712_164004_891955.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        101.0
+      ],
+      "target_steering": 102.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "dc0192324c11b9731ee241f4219781ebfc9a92cb6e84e3d9b572fe2416a1b6f3",
+      "source_file": "2026_07_12_run_2__photo_20260712_164925_612720.jpg",
+      "target_history": [
+        90.0,
+        149.0,
+        120.0
+      ],
+      "target_steering": 95.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "ac9f934654d8d960e9c0e4a2bab6bcbdd8d33a805f0bfd53693002bf3a1f6409",
+      "source_file": "2026_07_12_run_2__photo_20260712_170351_074427.jpg",
+      "target_history": [
+        90.0,
+        118.0,
+        106.0
+      ],
+      "target_steering": 95.0
+    },
+    {
+      "bucket_index": 5,
+      "bucket_name": "soft_right_95_105",
+      "file": "b5_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "9c2a584f3c070bd2bfedf631d2806bab601861ec892933cd6da4acbaf245278b",
+      "source_file": "2026_07_12_run_2__photo_20260712_171939_607346.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        110.0
+      ],
+      "target_steering": 103.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "c86c15bd5cb36e6545ba175588a63ee1b0f5be1e1f03300443e8c1636a08de3f",
+      "source_file": "2026_07_02_run_1__photo_20260702_163034_757339.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        99.0
+      ],
+      "target_steering": 105.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_01.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "560aeda84964b52cd47ddd41a468a9c77c0dbc53c7c555e2e2f581758192d0fc",
+      "source_file": "2026_07_02_run_1__photo_20260702_164009_894580.jpg",
+      "target_history": [
+        141.0,
+        101.0,
+        94.0
+      ],
+      "target_steering": 113.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "53b40e83c1d8b921fddbf6ef16c497d76b9cf42c407d50ee2f84c2e5e931b947",
+      "source_file": "2026_07_02_run_2__photo_20260702_164828_749797.jpg",
+      "target_history": [
+        118.0,
+        118.0,
+        118.0
+      ],
+      "target_steering": 118.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "625dbef870269b83af5e174fea59400f18723fd889f6d0d48e7366b91cecb0c3",
+      "source_file": "2026_07_02_run_2__photo_20260702_165912_948771.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 106.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "97956fd2d324e06072a5938f1c0ae269f5043a3fbef446849267c22d21c0ed1a",
+      "source_file": "2026_07_02_run_2__photo_20260702_170835_590553.jpg",
+      "target_history": [
+        90.0,
+        104.0,
+        114.0
+      ],
+      "target_steering": 114.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "f78c8691391d5d38ee2ff55644f7ba267febddbc650ee9507426b0a5be3ad26e",
+      "source_file": "2026_07_02_run_2__photo_20260702_171952_001864.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 108.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "0480ae64007ef6fc4170680085526509ba6e47c465d15f2feeb79ee242a6aaa5",
+      "source_file": "2026_07_02_run_2__photo_20260702_173814_603761.jpg",
+      "target_history": [
+        90.0,
+        91.0,
+        90.0
+      ],
+      "target_steering": 108.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "848e329d0dc26a6c66d1ead42ce0f4c73c06b1ce6be7c4d42967514af4d02afb",
+      "source_file": "2026_07_02_run_2__photo_20260702_174821_991191.jpg",
+      "target_history": [
+        90.0,
+        93.0,
+        111.0
+      ],
+      "target_steering": 111.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "4aeec77228238d08acc99a14a5b949ddf50113b8c6c3530d0ee30d14e4cefb67",
+      "source_file": "2026_07_02_run_2__photo_20260702_175949_028875.jpg",
+      "target_history": [
+        103.0,
+        114.0,
+        90.0
+      ],
+      "target_steering": 112.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "2130e190cde2e8ea58ceb300fb4ea311db323f70122062111032195ad04d30f0",
+      "source_file": "2026_07_02_run_2__photo_20260702_181114_590808.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        111.0
+      ],
+      "target_steering": 118.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "c3e06d3c11f4d1edd8544eb6d8559365e3184ac49e4766fdfa15e1bb8359b826",
+      "source_file": "2026_07_02_run_2__photo_20260702_183912_911387.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 114.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_11.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "70a0caeabdc7558853b5c05e4768a5abc0ee7edf695557f273bc9d7857dc89d0",
+      "source_file": "2026_07_07_run_1__photo_20260707_170047_399479.jpg",
+      "target_history": [
+        83.0,
+        89.0,
+        90.0
+      ],
+      "target_steering": 110.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_12.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "3b7f40ea0050913f83c5abd4f2a20c759cbd7b7779ce0060eaa7309ec71b1d4c",
+      "source_file": "2026_07_12_run_1__photo_20260712_160244_178008.jpg",
+      "target_history": [
+        121.0,
+        107.0,
+        107.0
+      ],
+      "target_steering": 116.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_13.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "c0ce2b64b22dc651988eeaf035f3f614a4403bfee521fe4c223ed669f90a6235",
+      "source_file": "2026_07_12_run_1__photo_20260712_160848_613009.jpg",
+      "target_history": [
+        147.0,
+        95.0,
+        92.0
+      ],
+      "target_steering": 105.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_14.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "833a73e387ac2860c79c743a1a99550d5304f0733d6f246e3f272a7c86b9f7f3",
+      "source_file": "2026_07_12_run_2__photo_20260712_161750_705637.jpg",
+      "target_history": [
+        90.0,
+        112.0,
+        112.0
+      ],
+      "target_steering": 112.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_15.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "5a2d9e01132c4b038a3f68a5da949995ad8fb0af04473df716ad4bf94fdc35c7",
+      "source_file": "2026_07_12_run_2__photo_20260712_163202_320798.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        120.0
+      ],
+      "target_steering": 119.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "3f95a8704b81e1e8fea192d039cbd070246fe079155f778adfa4e54e1058ad03",
+      "source_file": "2026_07_12_run_2__photo_20260712_164128_921787.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 116.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "e75276c213bcbd4ebd451bdcd51e979304ac1ac784fd00164fbc0e819c859d81",
+      "source_file": "2026_07_12_run_2__photo_20260712_165045_650527.jpg",
+      "target_history": [
+        174.0,
+        174.0,
+        125.0
+      ],
+      "target_steering": 114.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "5cc3e8da2152d8df630f9cd6ca68f2603b5c55babc301c0262baa7d80fa8cb9d",
+      "source_file": "2026_07_12_run_2__photo_20260712_170543_425929.jpg",
+      "target_history": [
+        93.0,
+        90.0,
+        112.0
+      ],
+      "target_steering": 107.0
+    },
+    {
+      "bucket_index": 6,
+      "bucket_name": "right_105_120",
+      "file": "b6_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "21eb243a24c86b7476075d36b63a5569be6908e6bb61230fede191c973e83e7f",
+      "source_file": "2026_07_12_run_2__photo_20260712_171939_495086.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 110.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "b72eecad1ef96c5f83e0283faa4a78877356b8a2849544b71e65b6b804c4d36a",
+      "source_file": "2026_07_02_run_1__photo_20260702_163028_762494.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 134.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_01.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "9a81af0ff33663f6187a1c63e140a3ab56cf81bf84be2f0e4a69774d8b174bca",
+      "source_file": "2026_07_02_run_1__photo_20260702_164145_640550.jpg",
+      "target_history": [
+        90.0,
+        105.0,
+        112.0
+      ],
+      "target_steering": 133.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "fcad2c3e9c3beb9882b5a0a6dbb5dd3d3a5dd9dcae709c570d7e9307248ae95c",
+      "source_file": "2026_07_02_run_2__photo_20260702_164839_689402.jpg",
+      "target_history": [
+        121.0,
+        121.0,
+        121.0
+      ],
+      "target_steering": 121.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "957d63a84138bb8a3f413d443835ca259ae021e11d6124b4ab351893b5f709cf",
+      "source_file": "2026_07_02_run_2__photo_20260702_170134_747317.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 122.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "d225dd98fc36c4df94dedfa9b6bc8b26be086d8ba8d851178457d133d40c17c0",
+      "source_file": "2026_07_02_run_2__photo_20260702_170906_665446.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 132.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "8543509596d800efa51beb26f9ae7b8ef62693faa142a27ba5fdb01f0877454c",
+      "source_file": "2026_07_02_run_2__photo_20260702_172638_127975.jpg",
+      "target_history": [
+        90.0,
+        140.0,
+        180.0
+      ],
+      "target_steering": 129.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "f96cf304bdfab7ec2afb51c23ed1334fce7f905fcd3b4bb41289cf30456db86b",
+      "source_file": "2026_07_02_run_2__photo_20260702_173903_676446.jpg",
+      "target_history": [
+        90.0,
+        137.0,
+        106.0
+      ],
+      "target_steering": 130.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "4780d874d964657f6ba505923650cec3c9870bea2ffa15261b8851d2966ecf8b",
+      "source_file": "2026_07_02_run_2__photo_20260702_174837_612528.jpg",
+      "target_history": [
+        136.0,
+        136.0,
+        136.0
+      ],
+      "target_steering": 126.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "cd66a4526c42cf4f5c5dda560aac09ec184245a2a9d75ded02bfdf0602ea0c50",
+      "source_file": "2026_07_02_run_2__photo_20260702_180049_119751.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        153.0
+      ],
+      "target_steering": 123.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "cb8ee9ae5542701a393c0fd633874a39bcac42a49b871534228f0452dd570b7e",
+      "source_file": "2026_07_02_run_2__photo_20260702_181250_744403.jpg",
+      "target_history": [
+        104.0,
+        91.0,
+        113.0
+      ],
+      "target_steering": 130.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ca41a3df4f302c665e6d73dc176ccc159b0b257eb762cb54b3ec9608407e7df8",
+      "source_file": "2026_07_02_run_2__photo_20260702_184039_679790.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 134.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_11.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "84781edc66885417334154e0951573c2ead076e557d00f9cfc92dba3e2fdd892",
+      "source_file": "2026_07_07_run_1__photo_20260707_170136_178621.jpg",
+      "target_history": [
+        90.0,
+        97.0,
+        97.0
+      ],
+      "target_steering": 127.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_12.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "6fe3fe20a946dd9dfbd1b226018a745bf3c974a67da976f9e7794e143a7a0560",
+      "source_file": "2026_07_12_run_1__photo_20260712_160459_391652.jpg",
+      "target_history": [
+        135.0,
+        135.0,
+        130.0
+      ],
+      "target_steering": 130.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_13.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "e92755515b6f5c918bc1cc559034c52e2c7c5dd979add1205b9dffdcbe0eaaed",
+      "source_file": "2026_07_12_run_2__photo_20260712_161322_300919.jpg",
+      "target_history": [
+        120.0,
+        120.0,
+        120.0
+      ],
+      "target_steering": 120.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_14.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "493914de5cf474b531b2b96cb05d7b3d615f41be8ab98d1026b838d0469e6a98",
+      "source_file": "2026_07_12_run_2__photo_20260712_161701_779605.jpg",
+      "target_history": [
+        131.0,
+        131.0,
+        131.0
+      ],
+      "target_steering": 134.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_15.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "9e0263f11bbe565fe8ad6e3caef70d49b473e5c8d2497f7524362f1b68831a7b",
+      "source_file": "2026_07_12_run_2__photo_20260712_163119_137315.jpg",
+      "target_history": [
+        133.0,
+        133.0,
+        128.0
+      ],
+      "target_steering": 128.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "4667fa79396eb2b44818fd653b8acc67785c317142c2584c14ff09f9b8af42cc",
+      "source_file": "2026_07_12_run_2__photo_20260712_164019_892204.jpg",
+      "target_history": [
+        135.0,
+        124.0,
+        133.0
+      ],
+      "target_steering": 134.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "5776caa2aae44533c6e23e91348f1874e5fddc9092dc2ddba6a87037a0be0388",
+      "source_file": "2026_07_12_run_2__photo_20260712_164821_420572.jpg",
+      "target_history": [
+        98.0,
+        156.0,
+        156.0
+      ],
+      "target_steering": 120.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "9875bff17c6f6de6eb086077fffc08410964a2a66276a5268a4e0a586a60e9d3",
+      "source_file": "2026_07_12_run_2__photo_20260712_170208_788448.jpg",
+      "target_history": [
+        90.0,
+        91.0,
+        90.0
+      ],
+      "target_steering": 126.0
+    },
+    {
+      "bucket_index": 7,
+      "bucket_name": "right_120_135",
+      "file": "b7_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "f848812980a963822793bfe95f1898a48b0bad40290aa5cc11a00ca04a19cb86",
+      "source_file": "2026_07_12_run_2__photo_20260712_171940_891806.jpg",
+      "target_history": [
+        122.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 134.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_00.jpg",
+      "run": "2026_07_02_run_1",
+      "sha256": "296acb25526952f6fc93f5cf81d66c62e479d58af6ac1eef51d402de155f9c7a",
+      "source_file": "2026_07_02_run_1__photo_20260702_163028_875286.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        134.0
+      ],
+      "target_steering": 137.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_01.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "e878518ac66b95a24270cd92347357b45a5750de01b1c093524a071f1b7cb452",
+      "source_file": "2026_07_02_run_2__photo_20260702_164927_016777.jpg",
+      "target_history": [
+        113.0,
+        133.0,
+        140.0
+      ],
+      "target_steering": 137.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_02.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "37e613324e38e01b70192f4de67cf3737391687ce63a2b4eb14f8df53302b1a2",
+      "source_file": "2026_07_02_run_2__photo_20260702_170452_789348.jpg",
+      "target_history": [
+        82.0,
+        90.0,
+        105.0
+      ],
+      "target_steering": 175.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_03.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "170c01ec0c57c79b0fd606e16bde34ef1c203b3f9bab0368eaf1c4e392c0dd27",
+      "source_file": "2026_07_02_run_2__photo_20260702_171628_954948.jpg",
+      "target_history": [
+        136.0,
+        90.0,
+        146.0
+      ],
+      "target_steering": 180.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_04.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ff1fda90c609ab3f551f0a2d6e1c2912c727dac129b8d0201311db2127166004",
+      "source_file": "2026_07_02_run_2__photo_20260702_173114_810577.jpg",
+      "target_history": [
+        151.0,
+        125.0,
+        100.0
+      ],
+      "target_steering": 139.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_05.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "63c3a557fa3974f9d455d4554bd7d68f8953ba2c8b895efb013977ff03b597d1",
+      "source_file": "2026_07_02_run_2__photo_20260702_174011_467963.jpg",
+      "target_history": [
+        142.0,
+        142.0,
+        142.0
+      ],
+      "target_steering": 142.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_06.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "257aabc56072ef962216b3fd4c106dee09a888be28fc48d77e0ca30b26c6e97b",
+      "source_file": "2026_07_02_run_2__photo_20260702_175035_083590.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        124.0
+      ],
+      "target_steering": 135.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_07.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "ce587116ec38953a95100b281b8fd6b6adfcf6f9a81c07ee82b7470cc81893f2",
+      "source_file": "2026_07_02_run_2__photo_20260702_175645_879610.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        113.0
+      ],
+      "target_steering": 164.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_08.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "2b679fc8ea82becc6b7875c1d8dfb5b81ae809f2ea8dea32a7cb19cf6fe3735a",
+      "source_file": "2026_07_02_run_2__photo_20260702_180605_939434.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 173.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_09.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "e314f88fbfbe88afc99d89aa34465355a54547f2549eb8889009df6d6dcf8fc1",
+      "source_file": "2026_07_02_run_2__photo_20260702_182240_357266.jpg",
+      "target_history": [
+        117.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 174.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_10.jpg",
+      "run": "2026_07_02_run_2",
+      "sha256": "b5abe51ce595104f0a05876afc4feb6d845695af6f8a8f4e7816b2429bac7b23",
+      "source_file": "2026_07_02_run_2__photo_20260702_184004_575276.jpg",
+      "target_history": [
+        90.0,
+        146.0,
+        90.0
+      ],
+      "target_steering": 180.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_11.jpg",
+      "run": "2026_07_07_run_1",
+      "sha256": "c5637cd69a5536f4ac12d794582b9405fce0ccd21a2e93e7cfd5900231b5dbfa",
+      "source_file": "2026_07_07_run_1__photo_20260707_170739_405087.jpg",
+      "target_history": [
+        97.0,
+        168.0,
+        171.0
+      ],
+      "target_steering": 178.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_12.jpg",
+      "run": "2026_07_12_run_1",
+      "sha256": "d754918b50e05d6c179d4e97de0d3dfa2409087a0bc930cef90b4080e2adddc5",
+      "source_file": "2026_07_12_run_1__photo_20260712_160556_960945.jpg",
+      "target_history": [
+        136.0,
+        136.0,
+        136.0
+      ],
+      "target_steering": 139.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_13.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "f78e6f18e5a6afa97b96b7209e9721bcf266365ee5162906d237458f11d88eda",
+      "source_file": "2026_07_12_run_2__photo_20260712_161540_815594.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        137.0
+      ],
+      "target_steering": 149.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_14.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "d90f151c7e32a6d1eff7cf8e8d31e463cf75a807a6d563d4523c4fc0c824b188",
+      "source_file": "2026_07_12_run_2__photo_20260712_162956_298698.jpg",
+      "target_history": [
+        117.0,
+        125.0,
+        127.0
+      ],
+      "target_steering": 159.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_15.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "e36a4678c5badb08d074fe0f9df1eb27b42d0d2f27607b546190f903258278e9",
+      "source_file": "2026_07_12_run_2__photo_20260712_164102_620691.jpg",
+      "target_history": [
+        120.0,
+        112.0,
+        99.0
+      ],
+      "target_steering": 142.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_16.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "5322891d8ed4f69b0f51965bd7bbd263b84febd87604626d6ec564d8f10ab5e5",
+      "source_file": "2026_07_12_run_2__photo_20260712_164759_448378.jpg",
+      "target_history": [
+        90.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 137.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_17.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "7b3c2b009b2b821aa4a95447db14cbd1ae275833d16c2050f919a3f1887d87a9",
+      "source_file": "2026_07_12_run_2__photo_20260712_165316_977738.jpg",
+      "target_history": [
+        144.0,
+        146.0,
+        146.0
+      ],
+      "target_steering": 146.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_18.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "6685d306cdd892467006f1f58a96d20da953bb33243019ed019537029e560b29",
+      "source_file": "2026_07_12_run_2__photo_20260712_171040_244302.jpg",
+      "target_history": [
+        56.0,
+        90.0,
+        90.0
+      ],
+      "target_steering": 154.0
+    },
+    {
+      "bucket_index": 8,
+      "bucket_name": "hard_right_135_180",
+      "file": "b8_19.jpg",
+      "run": "2026_07_12_run_2",
+      "sha256": "78242ff2236f0a4d43f3ff1078331745031a68c6740d74d4d591fed8a93afdbb",
+      "source_file": "2026_07_12_run_2__photo_20260712_171935_887099.jpg",
+      "target_history": [
+        137.0,
+        90.0,
+        138.0
+      ],
+      "target_steering": 142.0
+    }
+  ],
+  "schema_version": 1,
+  "selection": "deterministic chronological spacing within each steering bucket",
+  "source_dataset": "SidewalkPilot-v3-and-v4",
+  "steering_bins": [
+    {
+      "lower": 0.0,
+      "name": "hard_left_0_45",
+      "upper": 45.0
+    },
+    {
+      "lower": 45.0,
+      "name": "left_45_60",
+      "upper": 60.0
+    },
+    {
+      "lower": 60.0,
+      "name": "left_60_75",
+      "upper": 75.0
+    },
+    {
+      "lower": 75.0,
+      "name": "soft_left_75_85",
+      "upper": 85.0
+    },
+    {
+      "lower": 85.0,
+      "name": "straight_85_95",
+      "upper": 95.0
+    },
+    {
+      "lower": 95.0,
+      "name": "soft_right_95_105",
+      "upper": 105.0
+    },
+    {
+      "lower": 105.0,
+      "name": "right_105_120",
+      "upper": 120.0
+    },
+    {
+      "lower": 120.0,
+      "name": "right_120_135",
+      "upper": 135.0
+    },
+    {
+      "lower": 135.0,
+      "name": "hard_right_135_180",
+      "upper": 180.0
+    }
+  ]
+}

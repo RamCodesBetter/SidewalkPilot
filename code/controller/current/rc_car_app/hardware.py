@@ -2,7 +2,7 @@
 import errno
 import time
 
-from gpiozero import PWMOutputDevice, DigitalInputDevice, DigitalOutputDevice, Servo
+from gpiozero import PWMOutputDevice, DigitalInputDevice
 try:
     from gpiozero.pins.lgpio import LGPIOFactory
 except Exception:

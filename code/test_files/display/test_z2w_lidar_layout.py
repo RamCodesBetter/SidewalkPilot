@@ -13,6 +13,10 @@ from pathlib import Path
 
 CURRENT_DIR = Path(__file__).resolve().parents[2] / "controller" / "current"
 MODULE_PATH = CURRENT_DIR / "z2w_dashboard.py"
+if str(CURRENT_DIR) not in sys.path:
+    sys.path.insert(0, str(CURRENT_DIR))
+
+from rc_car_app.hub75_dashboard import Hub75DashboardSender  # noqa: E402
 
 
 def load_dashboard_module():
@@ -50,6 +54,20 @@ def renderer():
 
 
 class LidarDashboardLayoutTest(unittest.TestCase):
+    def test_dashboard_sender_reports_failed_transport_write(self):
+        sender = Hub75DashboardSender(
+            transport="udp",
+            baud_rate=115200,
+            udp_host="192.168.10.2",
+            udp_port=8765,
+        )
+        sender._ensure_connected = lambda: True
+        sender._write_payload = lambda _payload, _now: False
+        sender.queue_notification(["A"])
+
+        self.assertFalse(sender.send(0.0, "P", False, False, "", 80))
+        self.assertEqual(len(sender.pending_notifications), 1)
+
     def test_removed_photo_countdown_pages_are_outside_page_range(self):
         self.assertEqual(D.DASHBOARD_PAGE_COUNT, 17)
         self.assertFalse(hasattr(D.DashboardRenderer, "_draw_photo_run_stats_page"))

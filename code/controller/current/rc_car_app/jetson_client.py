@@ -5,8 +5,10 @@ The low-level client is synchronous. Production runtime wraps it in
 ``AsyncJetsonSteeringClient`` so connect, JPEG encode, send, receive, and status polls
 never block controller events or hardware writes.
 
-Protocol (TCP):
-    Pi  -> Jon : [1B version-len V][V bytes version utf8][4B big-endian len N][N bytes JPEG]
+Protocol (TCP, v2):
+    Pi  -> Jon : [1B 0x80|version-len V][V bytes version utf8]
+                 [1B history count H][H big-endian float32 steering targets]
+                 [4B big-endian JPEG length N][N bytes JPEG]
     Jon -> Pi  : 60 bytes = struct '>15f' (steering_deg, throttle, telemetry,
                  and nine steering-bucket probabilities)
 
@@ -24,6 +26,7 @@ Standalone test (from a machine with a test image):
     python3 jetson_client.py --host 192.168.x.x --image frame.jpg
 """
 
+import math
 import socket
 import struct
 import threading
@@ -53,6 +56,7 @@ class JetsonSteeringClient:
 
     def connect(self):
         self.close()
+        s = None
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(self.timeout)
@@ -61,6 +65,11 @@ class JetsonSteeringClient:
             self.sock = s
             return True
         except OSError:
+            if s is not None:
+                try:
+                    s.close()
+                except OSError:
+                    pass
             self.sock = None
             return False
 
@@ -81,7 +90,7 @@ class JetsonSteeringClient:
             buf += chunk
         return buf
 
-    def infer(self, frame_bgr, model_version=None):
+    def infer(self, frame_bgr, model_version=None, target_history=None):
         """Send one BGR frame (+ desired model version), return (steering_deg, throttle) or None."""
         if cv2 is None:
             return None
@@ -91,23 +100,39 @@ class JetsonSteeringClient:
         if not ok:
             return None
         data = jpg.tobytes()
-        vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:255]
+        vbytes = ("" if model_version is None else str(model_version)).encode("utf-8")[:127]
         try:
-            self.sock.sendall(bytes([len(vbytes)]) + vbytes + struct.pack(">I", len(data)) + data)
+            history_values = () if target_history is None else target_history
+            history = [float(value) for value in history_values][:255]
+            if not all(math.isfinite(value) and 0.0 <= value <= 180.0 for value in history):
+                raise ValueError("invalid steering history")
+            history_payload = struct.pack(f">{len(history)}f", *history) if history else b""
+            self.sock.sendall(
+                bytes([0x80 | len(vbytes)])
+                + vbytes
+                + bytes([len(history)])
+                + history_payload
+                + struct.pack(">I", len(data))
+                + data
+            )
             self.last_jpeg = data           # exact bytes sent to Jon -> interruption recorder buffers these
             # reply: steering, throttle, jcpu, jgpu, infer_fps, infer_ms + 9 bucket probs (15x f32)
             reply = self._recv_exact(60)
             if reply is None:
                 raise OSError("short reply")
             v = struct.unpack(">15f", reply)
+            if not all(math.isfinite(value) for value in v):
+                raise OSError("non-finite inference reply")
             steering, throttle, jcpu, jgpu, ifps, ims = v[0:6]
+            if not 0.0 <= float(steering) <= 180.0:
+                raise OSError(f"steering reply outside 0..180 degrees: {steering}")
             self.jon_cpu_temp_c = float(jcpu)
             self.jon_gpu_temp_c = float(jgpu)
             self.infer_fps = float(ifps)
             self.infer_ms = float(ims)
             self.bucket_probs = [float(p) for p in v[6:15]]
             return float(steering), float(throttle)
-        except OSError:
+        except (OSError, TypeError, ValueError):
             self.close()          # drop the socket; next infer() reconnects
             return None
 
@@ -118,11 +143,15 @@ class JetsonSteeringClient:
         if self.sock is None and not self.connect():
             return False
         try:
-            self.sock.sendall(bytes([0]) + struct.pack(">I", 0))  # version-len 0, jpeg-len 0
+            # v2, version-len 0, history-count 0, jpeg-len 0
+            self.sock.sendall(bytes([0x80, 0]) + struct.pack(">I", 0))
             reply = self._recv_exact(60)
             if reply is None:
                 raise OSError("short reply")
-            _s, _t, jcpu, jgpu, ifps, ims = struct.unpack(">15f", reply)[0:6]
+            values = struct.unpack(">15f", reply)
+            if not all(math.isfinite(value) for value in values):
+                raise OSError("non-finite status reply")
+            _s, _t, jcpu, jgpu, ifps, ims = values[0:6]
             self.jon_cpu_temp_c = float(jcpu)
             self.jon_gpu_temp_c = float(jgpu)
             self.infer_fps = float(ifps)
@@ -150,6 +179,8 @@ class AsyncJetsonSteeringClient:
         jpeg_quality=80,
         timeout=0.4,
         status_interval_sec=1.0,
+        history_sample_interval_sec=0.1,
+        history_result_max_age_sec=0.25,
         client=None,
     ):
         self.client = client or JetsonSteeringClient(
@@ -159,6 +190,8 @@ class AsyncJetsonSteeringClient:
             timeout=timeout,
         )
         self.status_interval_sec = max(0.1, float(status_interval_sec))
+        self.history_sample_interval_sec = max(0.0, float(history_sample_interval_sec))
+        self.history_result_max_age_sec = max(0.0, float(history_result_max_age_sec))
         self._condition = threading.Condition()
         self._running = True
         self._request_sequence = 0
@@ -168,12 +201,17 @@ class AsyncJetsonSteeringClient:
         self._latest_result_sequence = 0
         self._latest_result_model = ""
         self._latest_result_time = 0.0
+        self._sequence_generation = 0
+        self._latest_result_generation = -1
+        self._autonomous_sequence_active = False
         self.jon_cpu_temp_c = 0.0
         self.jon_gpu_temp_c = 0.0
         self.infer_fps = 0.0
         self.infer_ms = 0.0
         self.last_jpeg = None
         self.bucket_probs = [0.0] * 9
+        self._target_history = [90.0, 90.0, 90.0]
+        self._last_history_sample_time = 0.0
         self._thread = threading.Thread(
             target=self._run,
             name="sidewalkpilot-jetson-client",
@@ -190,9 +228,68 @@ class AsyncJetsonSteeringClient:
                 return 0
             self._request_sequence += 1
             sequence = self._request_sequence
-            self._latest_request = (sequence, frame_bgr, str(model_version or ""))
+            self._latest_request = (
+                sequence,
+                self._sequence_generation,
+                time.monotonic(),
+                frame_bgr,
+                str(model_version or ""),
+            )
             self._condition.notify()
             return sequence
+
+    def _record_target_locked(self, steering_deg, sampled_at, *, force=False) -> bool:
+        value = float(steering_deg)
+        if not math.isfinite(value):
+            return False
+        value = max(0.0, min(180.0, value))
+        sampled_at = float(sampled_at)
+        elapsed = sampled_at - self._last_history_sample_time
+        if (
+            not force
+            and self._last_history_sample_time
+            and elapsed + 1e-9 < self.history_sample_interval_sec
+        ):
+            return False
+        if (
+            force
+            and self._last_history_sample_time
+            and elapsed + 1e-9 < self.history_sample_interval_sec
+            and abs(self._target_history[-1] - value) < 1e-6
+        ):
+            return False
+        self._target_history = (self._target_history + [value])[-3:]
+        self._last_history_sample_time = sampled_at
+        return True
+
+    def observe_manual_steering(self, steering_deg, *, sampled_at=None, force=False) -> None:
+        """Sample manual targets at the same 10 Hz cadence used by Series 4 training."""
+        now = time.monotonic() if sampled_at is None else float(sampled_at)
+        with self._condition:
+            if self._autonomous_sequence_active:
+                self._autonomous_sequence_active = False
+                self._sequence_generation += 1
+                self._latest_request = None
+                self._latest_result = None
+                self._latest_result_sequence = 0
+                self._latest_result_model = ""
+                self._latest_result_time = 0.0
+                self._latest_result_generation = -1
+            self._record_target_locked(steering_deg, now, force=force)
+
+    def begin_autonomous_sequence(self, steering_deg, *, sampled_at=None) -> None:
+        """Prime PC/PCF from manual steering and invalidate every older inference."""
+        now = time.monotonic() if sampled_at is None else float(sampled_at)
+        with self._condition:
+            self._record_target_locked(steering_deg, now, force=True)
+            self._autonomous_sequence_active = True
+            self._sequence_generation += 1
+            self._latest_request = None
+            self._latest_result = None
+            self._latest_result_sequence = 0
+            self._latest_result_model = ""
+            self._latest_result_time = 0.0
+            self._latest_result_generation = -1
 
     def get_latest_sample(self, model_version=None, max_age_sec=0.25):
         """Return a fresh cached result dict, or ``None`` without doing network I/O."""
@@ -200,6 +297,8 @@ class AsyncJetsonSteeringClient:
         now = time.monotonic()
         with self._condition:
             if self._latest_result is None:
+                return None
+            if self._latest_result_generation != self._sequence_generation:
                 return None
             if expected_model and self._latest_result_model != expected_model:
                 return None
@@ -223,7 +322,7 @@ class AsyncJetsonSteeringClient:
             self.bucket_probs = probs[:9] + [0.0] * max(0, 9 - len(probs))
 
     def _run(self):
-        next_status_poll = 0.0
+        next_status_poll = time.monotonic() + self.status_interval_sec
         while True:
             request = None
             with self._condition:
@@ -242,19 +341,48 @@ class AsyncJetsonSteeringClient:
                     break
 
             if request is not None:
-                sequence, frame_bgr, model_version = request
-                result = self.client.infer(frame_bgr, model_version=model_version)
+                sequence, generation, submitted_at, frame_bgr, model_version = request
+                with self._condition:
+                    target_history = tuple(self._target_history)
+                try:
+                    result = self.client.infer(
+                        frame_bgr,
+                        model_version=model_version,
+                        target_history=target_history,
+                    )
+                except Exception as exc:
+                    print(f"Jetson inference worker error ignored: {exc}", flush=True)
+                    result = None
                 completed_at = time.monotonic()
                 self._copy_client_state()
                 with self._condition:
                     self._processed_sequence = max(self._processed_sequence, sequence)
-                    self._latest_result = result
-                    self._latest_result_sequence = sequence
-                    self._latest_result_model = model_version
-                    self._latest_result_time = completed_at
+                    if generation == self._sequence_generation:
+                        self._latest_result = result
+                        self._latest_result_sequence = sequence
+                        self._latest_result_model = model_version
+                        # Freshness starts when this frame entered the client, not when
+                        # a delayed reconnect/model load finally produced its result.
+                        self._latest_result_time = submitted_at
+                        self._latest_result_generation = generation
+                    result_age_sec = completed_at - submitted_at
+                    if (
+                        result is not None
+                        and generation == self._sequence_generation
+                        and result_age_sec <= self.history_result_max_age_sec
+                    ):
+                        steering = max(0.0, min(180.0, float(result[0])))
+                        self._record_target_locked(steering, completed_at)
+                # A status-only request resets Series 4 temporal history on the
+                # Jetson. Keep postponing it while inference frames are active;
+                # manual/idle mode still gets a poll after one full idle interval.
+                next_status_poll = completed_at + self.status_interval_sec
                 continue
 
-            self.client.poll_status()
+            try:
+                self.client.poll_status()
+            except Exception as exc:
+                print(f"Jetson status worker error ignored: {exc}", flush=True)
             self._copy_client_state()
             next_status_poll = time.monotonic() + self.status_interval_sec
 

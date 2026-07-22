@@ -210,10 +210,24 @@ class LidarParser:
             self.buffer = self.buffer[PACKET_LENGTH:]
 
     def get_latest_scan(self):
+        scan, _fresh = self.get_latest_scan_state()
+        return scan
+
+    def get_latest_scan_state(self):
+        """Return scan points and freshness from one lock-consistent snapshot."""
         with self.lock:
-            if time.monotonic() - self.last_scan_time > SCAN_STALE_SEC:
-                return []
-            return list(self.last_full_scan_points)
+            fresh = bool(
+                self.last_scan_time > 0.0
+                and time.monotonic() - self.last_scan_time <= SCAN_STALE_SEC
+            )
+            return (list(self.last_full_scan_points) if fresh else []), fresh
+
+    def is_scan_fresh(self) -> bool:
+        with self.lock:
+            return bool(
+                self.last_scan_time > 0.0
+                and time.monotonic() - self.last_scan_time <= SCAN_STALE_SEC
+            )
 
 
 def determine_turn_direction(

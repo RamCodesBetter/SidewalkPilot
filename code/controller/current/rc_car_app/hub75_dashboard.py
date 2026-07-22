@@ -220,14 +220,13 @@ class Hub75DashboardSender:
             "autonomy_avg_uptime_s": round(max(0.0, float(autonomy_avg_uptime_s)), 1),
             "timestamp": time.time(),
         }
-        notification_sent = False
         if self.pending_notifications:
             payload["dashboard_notification"] = self.pending_notifications[0]
-        if self._write_payload(payload, now):
-            notification_sent = "dashboard_notification" in payload
+        sent = self._write_payload(payload, now)
+        notification_sent = sent and "dashboard_notification" in payload
         if notification_sent:
             self.pending_notifications.pop(0)
-        return True
+        return sent
 
     def send_shutdown(self):
         if not self._ensure_connected():

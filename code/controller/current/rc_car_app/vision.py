@@ -75,6 +75,12 @@ STEERING_MODEL_VERSIONS = (
     "4.0g",
     "4.0a",
     "4.0c",
+    "4.1p",
+    "4.1r",
+    "4.1f",
+    "4.1g",
+    "4.1a",
+    "4.1c",
 )
 STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
 # v3.4 won the 2026-07-13 shadow/turn field comparison. Keep newer and b checkpoints
@@ -240,17 +246,29 @@ class _PiCameraCapture:
         return True, frame
 
     def release(self):
-        if self.camera is not None:
-            try:
-                self.camera.stop()
-            except Exception:
-                pass
-            try:
-                self.camera.close()
-            except Exception:
-                pass
+        camera = self.camera
         self.camera = None
         self.started = False
+        if camera is not None:
+            def close_camera():
+                try:
+                    camera.stop()
+                except Exception:
+                    pass
+                try:
+                    camera.close()
+                except Exception:
+                    pass
+
+            close_thread = threading.Thread(
+                target=close_camera,
+                name="sidewalkpilot-camera-close",
+                daemon=True,
+            )
+            close_thread.start()
+            close_thread.join(timeout=3.0)
+            if close_thread.is_alive():
+                print("Pi camera close exceeded 3 seconds; continuing shutdown.")
 
 
 def _empty_analysis():
@@ -769,15 +787,19 @@ class WebcamVisionProcessor:
         self._fps_last_frame_time = 0.0
         self.analysis = _empty_analysis()
         self.latest_frame = None
+        self.frame_sequence = 0
         self.model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
         self.model_path = resolve_steering_model_path(self.model_choice)
         self.steering_model = None
         self.torch_device = None
         # async JPEG writer: keep the slow cv2.imwrite OFF the control loop so
         # high-rate run capture doesn't stutter steering or the dashboard.
-        self._save_q: "queue.Queue" = queue.Queue(maxsize=240)
+        # Bound queued raw 1280x720 frames to roughly three seconds of capture.
+        # A 240-frame queue could retain hundreds of MB and pressure the control loop.
+        self._save_q: "queue.Queue" = queue.Queue(maxsize=30)
         self._save_thread = None
         self.frames_dropped = 0
+        self._capture_error_next_log = 0.0
 
     def _load_steering_model(self, model_choice):
         model_path = resolve_steering_model_path(model_choice)
@@ -871,7 +893,8 @@ class WebcamVisionProcessor:
             except queue.Empty:
                 continue
             try:
-                cv2.imwrite(path, frame)
+                if not cv2.imwrite(path, frame):
+                    print(f"Async frame write failed for {path}: OpenCV returned false")
             except Exception as exc:
                 print(f"Async frame write failed for {path}: {exc}")
 
@@ -930,6 +953,13 @@ class WebcamVisionProcessor:
         with self.lock:
             return None if self.latest_frame is None else self.latest_frame.copy()
 
+    def grab_latest_frame_sample(self, after_sequence=0):
+        """Return each captured frame at most once to the inference sender."""
+        with self.lock:
+            if self.latest_frame is None or self.frame_sequence <= int(after_sequence):
+                return None
+            return self.frame_sequence, self.latest_frame.copy()
+
     def get_analysis(self):
         with self.lock:
             return dict(self.analysis), self.last_frame_time
@@ -977,7 +1007,15 @@ class WebcamVisionProcessor:
 
     def _run(self):
         while self.running and self.capture:
-            ok, frame = self.capture.read()
+            try:
+                ok, frame = self.capture.read()
+            except Exception as exc:
+                now = time.monotonic()
+                if now >= self._capture_error_next_log:
+                    self._capture_error_next_log = now + 2.0
+                    print(f"Pi camera capture error; retrying: {exc}", flush=True)
+                time.sleep(0.05)
+                continue
             if not ok or frame is None:
                 time.sleep(0.05)
                 continue
@@ -987,6 +1025,7 @@ class WebcamVisionProcessor:
                 self.confidence = analysis["confidence"]
                 self.analysis = analysis
                 self.latest_frame = frame.copy()
+                self.frame_sequence += 1
                 now = time.time()
                 dt = now - self._fps_last_frame_time
                 self.camera_fps = (1.0 / dt) if dt > 0 else 0.0

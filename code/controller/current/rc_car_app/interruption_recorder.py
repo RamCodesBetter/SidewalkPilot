@@ -118,15 +118,15 @@ class InterruptionClipRecorder:
     def ship_to_jon(self, host):
         """On quit: drain the writer, then rsync every clip to Jon:/nvme/interruption_clips/
         and delete the local copies + folder AFTER a successful transfer (fail-safe: an
-        unreachable Jon leaves the clips on the Pi). Never raises."""
-        if not self.enabled:
-            return
-        try:                                  # let the writer finish any pending clip
-            self._q.put(None)
-            if self._writer is not None:
-                self._writer.join(timeout=10.0)
-        except Exception:
-            pass
+        unreachable Jon leaves the clips on the Pi). Shipping existing clips is independent
+        of whether this process recorded or entered autonomy. Never raises."""
+        if self.enabled:
+            try:                              # let the writer finish any pending clip
+                self._q.put(None)
+                if self._writer is not None:
+                    self._writer.join(timeout=10.0)
+            except Exception:
+                pass
         host = (host or "").strip()
         if not host:
             return

@@ -42,7 +42,23 @@ def _load_series3_module():
 
 
 S3 = _load_series3_module()
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+def _select_device() -> str:
+    # The RTX workstation can briefly report CUDA unavailable while the driver
+    # finishes initializing. Never silently launch a full training run on CPU.
+    for _ in range(5):
+        try:
+            torch.empty(1, device="cuda")
+            return "cuda"
+        except (AssertionError, RuntimeError):
+            pass
+        time.sleep(0.25)
+    return "cpu"
+
+
+DEVICE = _select_device()
+S3.DEVICE = DEVICE
 NUM_STEER_CLASSES = S3.NUM_STEER_CLASSES
 SERIES4_OUTPUTS_PER_HORIZON = 2 * NUM_STEER_CLASSES
 
@@ -250,6 +266,8 @@ class Series4Dataset(Dataset):
         clahe_probability: float = 0.0,
         history_noise_deg: float = 0.0,
         history_dropout_probability: float = 0.0,
+        history_sequence_dropout_probability: float = 0.0,
+        history_walk_noise_deg: float = 0.0,
     ):
         self.samples = list(samples)
         self.width = int(width)
@@ -262,6 +280,10 @@ class Series4Dataset(Dataset):
         self.clahe_probability = float(np.clip(clahe_probability, 0.0, 1.0))
         self.history_noise_deg = max(0.0, float(history_noise_deg))
         self.history_dropout_probability = float(np.clip(history_dropout_probability, 0.0, 1.0))
+        self.history_sequence_dropout_probability = float(
+            np.clip(history_sequence_dropout_probability, 0.0, 1.0)
+        )
+        self.history_walk_noise_deg = max(0.0, float(history_walk_noise_deg))
         self.forced_flip = [False] * len(self.samples)
 
     def __len__(self) -> int:
@@ -329,12 +351,22 @@ class Series4Dataset(Dataset):
                 history = np.clip(history + steering_shift, 0.0, 180.0)
                 targets = np.clip(targets + steering_shift, 0.0, 180.0)
 
-            if history.size and self.history_dropout_probability > 0.0:
+            if (
+                history.size
+                and self.history_sequence_dropout_probability > 0.0
+                and random.random() < self.history_sequence_dropout_probability
+            ):
+                history.fill(90.0)
+            elif history.size and self.history_dropout_probability > 0.0:
                 mask = np.random.random(history.shape) < self.history_dropout_probability
-                history = np.where(mask, 90.0, history)
+                previous = np.concatenate((history[:1], history[:-1]))
+                history = np.where(mask, previous, history)
             if history.size and self.history_noise_deg > 0.0:
                 noise = np.random.normal(0.0, self.history_noise_deg, history.shape)
                 history = np.clip(history + noise, 0.0, 180.0)
+            if history.size and self.history_walk_noise_deg > 0.0:
+                increments = np.random.normal(0.0, self.history_walk_noise_deg, history.shape)
+                history = np.clip(history + np.cumsum(increments), 0.0, 180.0)
 
         return (
             S3.image_to_tensor(image),
@@ -346,10 +378,30 @@ class Series4Dataset(Dataset):
 class SidewalkPilotV4(nn.Module):
     """Series 3 visual backbone with optional causal history fusion and horizon heads."""
 
-    def __init__(self, history_steps: int, future_steps: int):
+    def __init__(
+        self,
+        history_steps: int,
+        future_steps: int,
+        history_representation: str = "absolute",
+        history_fusion_mode: str = "full",
+        history_logit_residual_scale: float = 0.35,
+        history_offset_residual_scale: float = 0.35,
+    ):
         super().__init__()
         self.history_steps = int(history_steps)
         self.future_steps = int(future_steps)
+        self.history_representation = str(history_representation)
+        self.history_fusion_mode = str(history_fusion_mode)
+        self.history_logit_residual_scale = float(history_logit_residual_scale)
+        self.history_offset_residual_scale = float(history_offset_residual_scale)
+        if self.history_representation not in {"absolute", "delta_motion"}:
+            raise ValueError(f"Unknown history representation: {self.history_representation}")
+        if self.history_fusion_mode not in {"full", "bounded_residual"}:
+            raise ValueError(f"Unknown history fusion mode: {self.history_fusion_mode}")
+        if self.history_representation == "delta_motion" and self.history_steps < 3:
+            raise ValueError("delta_motion history requires at least three previous targets")
+        if self.history_fusion_mode == "bounded_residual" and not self.history_steps:
+            raise ValueError("bounded_residual fusion requires target history")
         self.backbone = S3.SidewalkPilotV3().backbone
         self.image_encoder = nn.Sequential(
             nn.AdaptiveAvgPool2d((6, 10)),
@@ -361,7 +413,7 @@ class SidewalkPilotV4(nn.Module):
             nn.ELU(inplace=True),
             nn.Dropout(p=0.12),
         )
-        if self.history_steps:
+        if self.history_steps and self.history_fusion_mode == "full":
             self.history_encoder = nn.Sequential(
                 nn.Linear(self.history_steps, 32),
                 nn.ELU(inplace=True),
@@ -375,23 +427,63 @@ class SidewalkPilotV4(nn.Module):
                 nn.Linear(128, 64),
                 nn.ELU(inplace=True),
             )
+            self.history_residual_heads = None
         else:
             self.history_encoder = None
             self.fusion = nn.Sequential(nn.Linear(256, 64), nn.ELU(inplace=True))
+            if self.history_steps:
+                history_features = 3 if self.history_representation == "delta_motion" else self.history_steps
+                self.history_encoder = nn.Sequential(
+                    nn.Linear(history_features, 32),
+                    nn.ELU(inplace=True),
+                    nn.Linear(32, 64),
+                    nn.ELU(inplace=True),
+                )
+                self.history_residual_heads = nn.ModuleList(
+                    nn.Linear(64, SERIES4_OUTPUTS_PER_HORIZON)
+                    for _ in range(self.future_steps + 1)
+                )
+            else:
+                self.history_residual_heads = None
         self.horizon_heads = nn.ModuleList(
             nn.Linear(64, SERIES4_OUTPUTS_PER_HORIZON) for _ in range(self.future_steps + 1)
         )
 
+    def history_features(self, target_history: torch.Tensor) -> torch.Tensor:
+        if self.history_representation == "absolute":
+            return (target_history - 90.0) / 90.0
+        recent = target_history[:, -3:]
+        first_delta = recent[:, 1] - recent[:, 0]
+        second_delta = recent[:, 2] - recent[:, 1]
+        acceleration = second_delta - first_delta
+        return torch.stack((first_delta, second_delta, acceleration), dim=1) / 90.0
+
     def forward(self, image: torch.Tensor, target_history: torch.Tensor | None = None) -> torch.Tensor:
         visual = self.image_encoder(self.backbone(image))
-        if self.history_steps:
-            if target_history is None:
-                raise ValueError("This Series 4 model requires target_history.")
-            normalized_history = (target_history - 90.0) / 90.0
-            fused = self.fusion(torch.cat((visual, self.history_encoder(normalized_history)), dim=1))
+        if self.history_steps and target_history is None:
+            raise ValueError("This Series 4 model requires target_history.")
+        if self.history_steps and self.history_fusion_mode == "full":
+            fused = self.fusion(
+                torch.cat((visual, self.history_encoder(self.history_features(target_history))), dim=1)
+            )
         else:
             fused = self.fusion(visual)
-        return torch.stack([head(fused) for head in self.horizon_heads], dim=1)
+        visual_outputs = torch.stack([head(fused) for head in self.horizon_heads], dim=1)
+        if self.history_residual_heads is None:
+            return visual_outputs
+        history_embedding = self.history_encoder(self.history_features(target_history))
+        residual = torch.stack(
+            [head(history_embedding) for head in self.history_residual_heads], dim=1
+        )
+        logit_residual, offset_residual = split_hybrid_output(residual)
+        bounded_residual = torch.cat(
+            (
+                torch.tanh(logit_residual) * self.history_logit_residual_scale,
+                torch.tanh(offset_residual) * self.history_offset_residual_scale,
+            ),
+            dim=-1,
+        )
+        return visual_outputs + bounded_residual
 
 
 def split_hybrid_output(output: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
@@ -404,6 +496,14 @@ def decode_hybrid(output: torch.Tensor) -> torch.Tensor:
     offsets = torch.sigmoid(offset_raw).gather(-1, classes.unsqueeze(-1)).squeeze(-1)
     _, lows, highs = S3._steer_bins_on(output.device, output.dtype)
     return lows[classes] + offsets * (highs[classes] - lows[classes])
+
+
+def decode_hybrid_soft(output: torch.Tensor) -> torch.Tensor:
+    """Differentiable expected steering angle across all nine hybrid bins."""
+    logits, offset_raw = split_hybrid_output(output)
+    _, lows, highs = S3._steer_bins_on(output.device, output.dtype)
+    angles = lows + torch.sigmoid(offset_raw) * (highs - lows)
+    return (torch.softmax(logits, dim=-1) * angles).sum(dim=-1)
 
 
 def temporal_hybrid_loss(
@@ -439,6 +539,19 @@ def temporal_hybrid_loss(
         "offset_loss": float(torch.stack(offset_losses).mean().detach().item()),
     }
     return total, details
+
+
+def temporal_trajectory_loss(
+    output: torch.Tensor,
+    targets: torch.Tensor,
+) -> torch.Tensor:
+    """Match steering changes between future horizons, not only absolute angles."""
+    if output.shape[1] < 2:
+        return output.sum() * 0.0
+    predicted = decode_hybrid_soft(output)
+    predicted_deltas = (predicted[:, 1:] - predicted[:, :-1]) / 20.0
+    target_deltas = (targets[:, 1:] - targets[:, :-1]) / 20.0
+    return F.smooth_l1_loss(predicted_deltas, target_deltas)
 
 
 def class_counts(dataset: Series4Dataset) -> list[int]:
@@ -558,10 +671,180 @@ def evaluate(
         "target_bucket_counts": target_bucket_counts.tolist(),
         "bucket_recalls": bucket_recalls.tolist(),
     }
+    if predicted.shape[1] > 1:
+        predicted_deltas = np.diff(predicted, axis=1)
+        actual_deltas = np.diff(actual, axis=1)
+        metrics["trajectory_delta_mae"] = float(
+            np.mean(np.abs(predicted_deltas - actual_deltas))
+        )
     if histories:
         history_values = np.concatenate(histories, axis=0)
         metrics["hold_last_mae"] = float(np.mean(np.abs(history_values[:, -1] - current_actual)))
     return metrics
+
+
+def make_counterfactual_history(history: torch.Tensor) -> torch.Tensor:
+    """Create plausible but image-independent trends for history robustness training."""
+    if history.shape[1] < 3:
+        raise ValueError("Counterfactual history requires at least three values.")
+    batch_size = history.shape[0]
+    base = 45.0 + 90.0 * torch.rand(batch_size, 1, device=history.device)
+    magnitude = 4.0 + 12.0 * torch.rand(batch_size, 1, device=history.device)
+    direction = torch.where(
+        torch.rand(batch_size, 1, device=history.device) < 0.5,
+        -torch.ones_like(magnitude),
+        torch.ones_like(magnitude),
+    )
+    slope = magnitude * direction
+    curvature = (torch.rand(batch_size, 1, device=history.device) - 0.5) * 8.0
+    recent = torch.cat(
+        (base - 2.0 * slope + curvature, base - slope, base), dim=1
+    ).clamp(0.0, 180.0)
+    if history.shape[1] == 3:
+        return recent
+    return torch.cat((history[:, :-3], recent), dim=1)
+
+
+def evaluate_history_robustness(
+    model: SidewalkPilotV4,
+    loader: DataLoader,
+    max_samples: int = 1024,
+) -> dict[str, float]:
+    if not model.history_steps:
+        return {}
+    model.eval()
+    neutral_errors = []
+    trend_spans = []
+    flat_shift_spans = []
+    seen = 0
+    with torch.no_grad():
+        for images, _, targets in loader:
+            remaining = int(max_samples) - seen
+            if remaining <= 0:
+                break
+            images = images[:remaining].to(DEVICE, non_blocking=True)
+            targets = targets[:remaining].to(DEVICE, non_blocking=True)
+            batch_size = images.shape[0]
+            flat_low = torch.full(
+                (batch_size, model.history_steps), 30.0, device=DEVICE
+            )
+            flat_high = torch.full_like(flat_low, 150.0)
+            rising = torch.full_like(flat_low, 90.0)
+            falling = torch.full_like(flat_low, 90.0)
+            rising[:, -3:] = torch.tensor([60.0, 75.0, 90.0], device=DEVICE)
+            falling[:, -3:] = torch.tensor([120.0, 105.0, 90.0], device=DEVICE)
+
+            low_angle = decode_hybrid_soft(model(images, flat_low))[:, 0]
+            high_angle = decode_hybrid_soft(model(images, flat_high))[:, 0]
+            rising_angle = decode_hybrid_soft(model(images, rising))[:, 0]
+            falling_angle = decode_hybrid_soft(model(images, falling))[:, 0]
+            neutral_errors.append((low_angle - targets[:, 0]).abs().cpu().numpy())
+            flat_shift_spans.append((low_angle - high_angle).abs().cpu().numpy())
+            trend_spans.append((rising_angle - falling_angle).abs().cpu().numpy())
+            seen += batch_size
+    return {
+        "neutral_history_mae": float(np.mean(np.concatenate(neutral_errors))),
+        "flat_shift_span": float(np.mean(np.concatenate(flat_shift_spans))),
+        "opposing_trend_span": float(np.mean(np.concatenate(trend_spans))),
+    }
+
+
+def build_closed_loop_segments(
+    samples: Sequence[TemporalSample], max_gap_sec: float
+) -> list[list[TemporalSample]]:
+    by_run: dict[str, list[TemporalSample]] = defaultdict(list)
+    for sample in samples:
+        by_run[sample.anchor.run_key].append(sample)
+    segments: list[list[TemporalSample]] = []
+    for run_samples in by_run.values():
+        run_samples.sort(
+            key=lambda sample: (
+                sample.anchor.timestamp is None,
+                sample.anchor.timestamp or 0.0,
+                str(sample.anchor.path),
+            )
+        )
+        current: list[TemporalSample] = []
+        previous: TemporalSample | None = None
+        for sample in run_samples:
+            split_here = False
+            if previous is not None:
+                left = previous.anchor.timestamp
+                right = sample.anchor.timestamp
+                if left is not None and right is not None:
+                    gap = right - left
+                    split_here = gap <= 0.0 or (
+                        max_gap_sec > 0.0 and gap > max_gap_sec
+                    )
+            if split_here and current:
+                segments.append(current)
+                current = []
+            current.append(sample)
+            previous = sample
+        if current:
+            segments.append(current)
+    return segments
+
+
+def evaluate_closed_loop(
+    model: SidewalkPilotV4,
+    samples: Sequence[TemporalSample],
+    width: int,
+    height: int,
+    crop_top_ratio: float,
+    max_gap_sec: float,
+) -> dict[str, float]:
+    """Evaluate PC/PCF using each preceding prediction as the next history value."""
+    if not model.history_steps:
+        return {}
+    segments = build_closed_loop_segments(samples, max_gap_sec)
+    histories = [list(segment[0].history) for segment in segments]
+    errors = []
+    echo_hits = 0
+    center_extreme = 0
+    saturation = 0
+    count = 0
+    model.eval()
+    with torch.no_grad():
+        for position in range(max((len(segment) for segment in segments), default=0)):
+            active = [index for index, segment in enumerate(segments) if position < len(segment)]
+            if not active:
+                continue
+            image_tensors = []
+            history_values = []
+            active_samples = []
+            for segment_index in active:
+                sample = segments[segment_index][position]
+                image = cv2.imread(str(sample.anchor.path), cv2.IMREAD_COLOR)
+                if image is None:
+                    raise FileNotFoundError(sample.anchor.path)
+                image = S3.resize_image_uint8(image, width, height, crop_top_ratio)
+                image_tensors.append(S3.image_to_tensor(image))
+                history_values.append(histories[segment_index][-model.history_steps :])
+                active_samples.append(sample)
+            images = torch.stack(image_tensors).to(DEVICE, non_blocking=True)
+            history = torch.tensor(history_values, dtype=torch.float32, device=DEVICE)
+            predicted = decode_hybrid(model(images, history))[:, 0].cpu().numpy()
+            for row, (segment_index, sample) in enumerate(zip(active, active_samples)):
+                prediction = float(predicted[row])
+                actual = float(sample.targets[0])
+                previous_value = float(histories[segment_index][-1])
+                errors.append(abs(prediction - actual))
+                echo_hits += abs(prediction - previous_value) <= 5.0
+                actual_class = S3.steer_class_index(actual)
+                predicted_class = S3.steer_class_index(prediction)
+                center_extreme += actual_class == 4 and predicted_class in {0, 1, 7, 8}
+                saturation += prediction <= 5.0 or prediction >= 175.0
+                histories[segment_index].append(prediction)
+                count += 1
+    return {
+        "closed_loop_mae": float(np.mean(errors)),
+        "closed_loop_median_ae": float(np.median(errors)),
+        "closed_loop_echo_within_5": float(echo_hits / max(1, count)),
+        "closed_loop_center_to_extreme": float(center_extreme / max(1, count)),
+        "closed_loop_saturation": float(saturation / max(1, count)),
+        "closed_loop_segments": float(len(segments)),
+    }
 
 
 def checkpoint_payload(model: SidewalkPilotV4, experiment: str, contract: str, args) -> dict:
@@ -573,6 +856,10 @@ def checkpoint_payload(model: SidewalkPilotV4, experiment: str, contract: str, a
             "contract": contract,
             "history_steps": model.history_steps,
             "future_steps": model.future_steps,
+            "history_representation": model.history_representation,
+            "history_fusion_mode": model.history_fusion_mode,
+            "history_logit_residual_scale": model.history_logit_residual_scale,
+            "history_offset_residual_scale": model.history_offset_residual_scale,
             "width": int(args.width),
             "height": int(args.height),
         },
@@ -600,7 +887,14 @@ def load_checkpoint(path: Path, device: str = DEVICE) -> tuple[SidewalkPilotV4, 
     if not isinstance(payload, dict) or "series4_config" not in payload:
         raise ValueError(f"Series 4 checkpoint metadata missing from {path}")
     config = payload["series4_config"]
-    model = SidewalkPilotV4(config["history_steps"], config["future_steps"]).to(device)
+    model = SidewalkPilotV4(
+        config["history_steps"],
+        config["future_steps"],
+        history_representation=config.get("history_representation", "absolute"),
+        history_fusion_mode=config.get("history_fusion_mode", "full"),
+        history_logit_residual_scale=config.get("history_logit_residual_scale", 0.35),
+        history_offset_residual_scale=config.get("history_offset_residual_scale", 0.35),
+    ).to(device)
     model.load_state_dict(payload["model_state_dict"], strict=True)
     model.eval()
     return model, config
@@ -662,6 +956,16 @@ def build_parser(experiment: str, contract: str, final_version: str, best_versio
     parser.add_argument("--future-steps", type=int, default=3)
     parser.add_argument("--history-noise-deg", type=float, default=1.0)
     parser.add_argument("--history-dropout-probability", type=float, default=0.05)
+    parser.add_argument("--history-sequence-dropout-probability", type=float, default=0.0)
+    parser.add_argument("--history-walk-noise-deg", type=float, default=0.0)
+    parser.add_argument("--history-logit-residual-scale", type=float, default=0.35)
+    parser.add_argument("--history-offset-residual-scale", type=float, default=0.35)
+    parser.add_argument("--counterfactual-every", type=int, default=0)
+    parser.add_argument("--counterfactual-batch-fraction", type=float, default=0.25)
+    parser.add_argument("--counterfactual-loss-weight", type=float, default=0.0)
+    parser.add_argument("--history-consistency-weight", type=float, default=0.0)
+    parser.add_argument("--closed-loop-selection-weight", type=float, default=0.0)
+    parser.add_argument("--trajectory-delta-loss-weight", type=float, default=0.0)
     parser.add_argument("--horizon-decay", type=float, default=0.70)
     parser.add_argument("--offset-loss-weight", type=float, default=1.0)
     parser.add_argument("--focal-gamma", type=float, default=1.5)
@@ -684,10 +988,54 @@ def build_parser(experiment: str, contract: str, final_version: str, best_versio
     return parser
 
 
-def run_fixed_experiment(experiment: str, contract: str, final_version: str, best_version: str) -> None:
+def run_fixed_experiment(
+    experiment: str,
+    contract: str,
+    final_version: str,
+    best_version: str,
+    training_profile: str = "legacy",
+) -> None:
     if contract not in CONTRACTS:
         raise ValueError(f"Unknown Series 4 contract: {contract}")
-    args = build_parser(experiment, contract, final_version, best_version).parse_args()
+    parser = build_parser(experiment, contract, final_version, best_version)
+    if training_profile == "history_robust":
+        parser.set_defaults(
+            history_noise_deg=4.0,
+            history_dropout_probability=0.15,
+            history_sequence_dropout_probability=0.10,
+            history_walk_noise_deg=3.0,
+            counterfactual_every=4,
+            counterfactual_batch_fraction=0.25,
+            counterfactual_loss_weight=0.35,
+            history_consistency_weight=0.02,
+            closed_loop_selection_weight=0.65,
+        )
+    elif training_profile == "future_trajectory":
+        if contract != "cf":
+            raise ValueError("future_trajectory profile requires the CF contract")
+        parser.set_defaults(
+            horizon_decay=0.55,
+            trajectory_delta_loss_weight=0.15,
+        )
+    elif training_profile == "history_future_robust":
+        if contract != "pcf":
+            raise ValueError("history_future_robust profile requires the PCF contract")
+        parser.set_defaults(
+            history_noise_deg=4.0,
+            history_dropout_probability=0.15,
+            history_sequence_dropout_probability=0.10,
+            history_walk_noise_deg=3.0,
+            counterfactual_every=4,
+            counterfactual_batch_fraction=0.25,
+            counterfactual_loss_weight=0.35,
+            history_consistency_weight=0.02,
+            closed_loop_selection_weight=0.65,
+            horizon_decay=0.55,
+            trajectory_delta_loss_weight=0.15,
+        )
+    elif training_profile != "legacy":
+        raise ValueError(f"Unknown Series 4 training profile: {training_profile}")
+    args = parser.parse_args()
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -701,7 +1049,8 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
     future_steps = max(1, args.future_steps) if uses_future else 0
     print(
         f"[start] EXPERIMENTAL Series 4 {experiment} contract={contract} device={DEVICE} "
-        f"history={history_steps} current=1 future={future_steps} final={final_version} best={best_version}"
+        f"history={history_steps} current=1 future={future_steps} profile={training_profile} "
+        f"final={final_version} best={best_version}"
     )
 
     roots = discover_roots(args.roots)
@@ -724,6 +1073,10 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
         clahe_probability=args.clahe_aug_probability,
         history_noise_deg=args.history_noise_deg if uses_history else 0.0,
         history_dropout_probability=args.history_dropout_probability if uses_history else 0.0,
+        history_sequence_dropout_probability=(
+            args.history_sequence_dropout_probability if uses_history else 0.0
+        ),
+        history_walk_noise_deg=args.history_walk_noise_deg if uses_history else 0.0,
     )
     val_dataset = Series4Dataset(
         val_samples, args.width, args.height, args.crop_top_ratio, augment=False
@@ -735,7 +1088,20 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
     for (name, _, _), count, weight in zip(S3.STEER_CLASS_BINS, counts, class_weights.tolist()):
         print(f"  {name}: n={count} weight={weight:.3f}")
 
-    model = SidewalkPilotV4(history_steps, future_steps).to(DEVICE)
+    robust_history = training_profile in {
+        "history_robust",
+        "history_future_robust",
+    }
+    history_representation = "delta_motion" if robust_history else "absolute"
+    history_fusion_mode = "bounded_residual" if robust_history else "full"
+    model = SidewalkPilotV4(
+        history_steps,
+        future_steps,
+        history_representation=history_representation,
+        history_fusion_mode=history_fusion_mode,
+        history_logit_residual_scale=args.history_logit_residual_scale,
+        history_offset_residual_scale=args.history_offset_residual_scale,
+    ).to(DEVICE)
     parameter_count = sum(parameter.numel() for parameter in model.parameters())
     with torch.no_grad():
         image = torch.zeros(2, 3, args.height, args.width, device=DEVICE)
@@ -743,6 +1109,7 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
         shape = tuple(model(image, history).shape)
     print(
         f"[model] parameters={parameter_count:,} output_shape={shape} "
+        f"history_representation={history_representation} fusion={history_fusion_mode} "
         f"sequence_stats={sequence_stats}"
     )
     if args.audit_only:
@@ -759,6 +1126,7 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
     best_path = Path(args.best_output).expanduser()
     final_path.parent.mkdir(parents=True, exist_ok=True)
     best_path.parent.mkdir(parents=True, exist_ok=True)
+    best_score = float("inf")
     best_mae = float("inf")
     best_epoch = 0
     start = time.time()
@@ -775,6 +1143,7 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                 "experimental": True,
                 "series": 4,
                 "contract": contract,
+                "training_profile": training_profile,
                 "final_version": final_version,
                 "best_version": best_version,
                 "history_steps": history_steps,
@@ -793,6 +1162,16 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                 "shadow_aug_probability": args.shadow_aug_probability,
                 "horizon_decay": args.horizon_decay,
                 "max_frame_gap_sec": args.max_frame_gap_sec,
+                "history_representation": history_representation,
+                "history_fusion_mode": history_fusion_mode,
+                "history_noise_deg": args.history_noise_deg,
+                "history_dropout_probability": args.history_dropout_probability,
+                "history_sequence_dropout_probability": args.history_sequence_dropout_probability,
+                "history_walk_noise_deg": args.history_walk_noise_deg,
+                "counterfactual_loss_weight": args.counterfactual_loss_weight,
+                "history_consistency_weight": args.history_consistency_weight,
+                "closed_loop_selection_weight": args.closed_loop_selection_weight,
+                "trajectory_delta_loss_weight": args.trajectory_delta_loss_weight,
             },
         )
     except Exception as exc:
@@ -816,6 +1195,47 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                 args.focal_gamma,
                 args.horizon_decay,
             )
+            counterfactual_loss_value = 0.0
+            consistency_loss_value = 0.0
+            trajectory_loss_value = 0.0
+            if (
+                uses_history
+                and args.counterfactual_every > 0
+                and step % args.counterfactual_every == 0
+            ):
+                counterfactual_count = max(
+                    1,
+                    int(images.shape[0] * args.counterfactual_batch_fraction),
+                )
+                alternate_history = make_counterfactual_history(
+                    history[:counterfactual_count]
+                )
+                alternate_output = model(
+                    images[:counterfactual_count], alternate_history
+                )
+                counterfactual_loss, _ = temporal_hybrid_loss(
+                    alternate_output,
+                    targets[:counterfactual_count],
+                    class_weights,
+                    args.offset_loss_weight,
+                    args.focal_gamma,
+                    args.horizon_decay,
+                )
+                consistency_loss = F.smooth_l1_loss(
+                    decode_hybrid_soft(alternate_output),
+                    decode_hybrid_soft(output[:counterfactual_count]).detach(),
+                )
+                loss = (
+                    loss
+                    + args.counterfactual_loss_weight * counterfactual_loss
+                    + args.history_consistency_weight * consistency_loss
+                )
+                counterfactual_loss_value = float(counterfactual_loss.detach().item())
+                consistency_loss_value = float(consistency_loss.detach().item())
+            if future_steps and args.trajectory_delta_loss_weight > 0.0:
+                trajectory_loss = temporal_trajectory_loss(output, targets)
+                loss = loss + args.trajectory_delta_loss_weight * trajectory_loss
+                trajectory_loss_value = float(trajectory_loss.detach().item())
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             gradient_norm = float(torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip).item())
@@ -840,6 +1260,9 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                         "train_loss_live": loss_ema,
                         "lr": float(optimizer.param_groups[0]["lr"]),
                         "grad_norm": gradient_norm,
+                        "counterfactual_loss_live": counterfactual_loss_value,
+                        "history_consistency_loss_live": consistency_loss_value,
+                        "trajectory_delta_loss_live": trajectory_loss_value,
                         "epoch": epoch,
                         "global_step": global_step,
                         "gpu_mem_gb": (
@@ -855,11 +1278,28 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                     f"[train] epoch={epoch}/{args.epochs} step={step}/{len(train_loader)} "
                     f"loss={loss.item():.5f} cls={details['class_loss']:.5f} "
                     f"off={details['offset_loss']:.5f} grad={gradient_norm:.3f} "
+                    f"cf={counterfactual_loss_value:.5f} cons={consistency_loss_value:.5f} "
+                    f"traj={trajectory_loss_value:.5f} "
                     f"pred=[{decoded.min().item():.1f},{decoded.max().item():.1f}] "
                     f"elapsed={S3.fmt_time(time.time() - start)}"
                 )
         scheduler.step()
         metrics = evaluate(model, val_loader, class_weights, args)
+        robustness = evaluate_history_robustness(model, val_loader) if uses_history else {}
+        closed_loop = (
+            evaluate_closed_loop(
+                model,
+                val_samples,
+                args.width,
+                args.height,
+                args.crop_top_ratio,
+                args.max_frame_gap_sec,
+            )
+            if uses_history and args.closed_loop_selection_weight > 0.0
+            else {}
+        )
+        metrics.update(robustness)
+        metrics.update(closed_loop)
         average_train = train_loss / max(1, len(train_loader))
         horizon_text = ",".join(f"{value:.2f}" for value in metrics["horizon_mae"])
         print(
@@ -869,11 +1309,41 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
             f"Turn+/-1={metrics['turn_pm1']:.3f} STExact={metrics['straight_exact']:.3f} "
             f"horizon_MAE=[{horizon_text}]"
         )
-        if metrics["mae"] < best_mae:
+        if "trajectory_delta_mae" in metrics:
+            print(
+                f"[trajectory] delta_MAE={metrics['trajectory_delta_mae']:.3f} deg/step"
+            )
+        if robustness:
+            print(
+                f"[history] neutral_MAE={metrics['neutral_history_mae']:.3f} "
+                f"flat_shift_span={metrics['flat_shift_span']:.4f} "
+                f"opposing_trend_span={metrics['opposing_trend_span']:.3f}"
+            )
+        selection_score = float(metrics["mae"])
+        if closed_loop:
+            closed_weight = float(np.clip(args.closed_loop_selection_weight, 0.0, 1.0))
+            selection_score = (
+                (1.0 - closed_weight) * float(metrics["mae"])
+                + closed_weight * float(metrics["closed_loop_mae"])
+                + 0.10 * float(metrics["opposing_trend_span"])
+            )
+            print(
+                f"[closed-loop] MAE={metrics['closed_loop_mae']:.3f} "
+                f"Med={metrics['closed_loop_median_ae']:.3f} "
+                f"echo5={metrics['closed_loop_echo_within_5']:.3f} "
+                f"center_extreme={metrics['closed_loop_center_to_extreme']:.4f} "
+                f"saturation={metrics['closed_loop_saturation']:.4f} "
+                f"segments={int(metrics['closed_loop_segments'])} selection={selection_score:.3f}"
+            )
+        if selection_score < best_score:
+            best_score = selection_score
             best_mae = float(metrics["mae"])
             best_epoch = epoch
             torch.save(checkpoint_payload(model, experiment, contract, args), best_path)
-            print(f"[save] best {best_version}: epoch={epoch} MAE={best_mae:.3f} -> {best_path}")
+            print(
+                f"[save] best {best_version}: epoch={epoch} MAE={best_mae:.3f} "
+                f"selection={best_score:.3f} -> {best_path}"
+            )
         if tracker is not None and tracker.enabled:
             wandb_metrics = {
                 "train_loss": average_train,
@@ -886,6 +1356,7 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
                 "turn_exact": metrics["turn_exact"],
                 "turn_pm1": metrics["turn_pm1"],
                 "straight_exact": metrics["straight_exact"],
+                "selection_score": selection_score,
                 "lr": float(optimizer.param_groups[0]["lr"]),
                 "epoch_time_s": time.time() - epoch_start,
                 "gpu_mem_gb": (
@@ -897,14 +1368,33 @@ def run_fixed_experiment(experiment: str, contract: str, final_version: str, bes
             for horizon, horizon_mae in enumerate(metrics["horizon_mae"]):
                 name = "current" if horizon == 0 else f"future_{horizon}"
                 wandb_metrics[f"horizon_{name}_mae_deg"] = horizon_mae
+            if len(metrics["horizon_mae"]) > 1:
+                wandb_metrics["future_mean_mae_deg"] = float(
+                    np.mean(metrics["horizon_mae"][1:])
+                )
+                wandb_metrics["trajectory_delta_mae_deg"] = metrics[
+                    "trajectory_delta_mae"
+                ]
             if "hold_last_mae" in metrics:
                 wandb_metrics["hold_last_mae_deg"] = metrics["hold_last_mae"]
+                wandb_metrics["beats_hold_last"] = float(
+                    metrics["mae"] < metrics["hold_last_mae"]
+                    and (
+                        not closed_loop
+                        or metrics["closed_loop_mae"] < metrics["hold_last_mae"]
+                    )
+                )
+            wandb_metrics.update(robustness)
+            wandb_metrics.update(closed_loop)
             add_wandb_bucket_metrics(wandb_metrics, metrics)
             tracker.push(epoch, wandb_metrics)
 
     torch.save(checkpoint_payload(model, experiment, contract, args), final_path)
     print(f"[save] final {final_version}: {final_path}")
-    print(f"[result] best {best_version}: epoch={best_epoch} MAE={best_mae:.3f}")
+    print(
+        f"[result] best {best_version}: epoch={best_epoch} "
+        f"MAE={best_mae:.3f} selection={best_score:.3f}"
+    )
     if tracker is not None:
         tracker.finish()
 
