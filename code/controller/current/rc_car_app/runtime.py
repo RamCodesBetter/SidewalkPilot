@@ -1807,12 +1807,13 @@ def update_gpio(state, metrics, hardware, webcam_vision, lidar_scan, dt, dashboa
     calculate_speed(state, metrics, dt)
 
 
-def _ship_logs_to_jon():
+def _ship_logs_to_jon(host=None):
     """On exit, rsync the run CSV logs to Jon (/nvme/logs) and delete the ones that
     transferred (rsync --remove-source-files). Fails safe: keeps logs locally if Jon
-    is unreachable or there's no passwordless SSH key. Never raises -- shutdown must
-    not depend on it. Auto-runs on every quit; no flag."""
-    host = (JETSON_STEERING_HOST or "").strip()
+    is unreachable or there's no passwordless SSH key. Never raises because shutdown
+    must not depend on it. Local Raspberry Pi inference tests skip this transfer."""
+    configured_host = JETSON_STEERING_HOST if host is None else host
+    host = (configured_host or "").strip()
     if not host:
         return
     logs_dir = os.path.dirname(CSV_FILENAME)
@@ -1835,7 +1836,7 @@ def _ship_logs_to_jon():
         print(f"Log ship to Jon skipped (kept locally): {exc}")
 
 
-def run(model_choice=None):
+def run(model_choice=None, inference_host=None, local_inference=False):
     global photo_status
     shutdown_flag.clear()
     print("RC Car Controller Starting...")
@@ -1923,7 +1924,10 @@ def run(model_choice=None):
     else:
         print("Yaw-rate PID steering OFF (open-loop). Set STEERING_YAW_PID_MODE=straight|full to enable.")
 
-    jetson_host = (JETSON_STEERING_HOST or "").strip()
+    configured_inference_host = (
+        JETSON_STEERING_HOST if inference_host is None else inference_host
+    )
+    jetson_host = (configured_inference_host or "").strip()
     jetson_client = None
     if jetson_host:
         jetson_client = AsyncJetsonSteeringClient(
@@ -1931,8 +1935,17 @@ def run(model_choice=None):
             JETSON_STEERING_PORT,
             history_result_max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
         )
-        print(f"Autonomy inference on Jetson (Jon) at {jetson_host}:{JETSON_STEERING_PORT}. "
-              f"Pi will NOT run a local steering model.")
+        if local_inference:
+            print(
+                "TEMPORARY TEST MODE: autonomy inference runs on the Raspberry Pi "
+                f"CPU through the local server at {jetson_host}:{JETSON_STEERING_PORT}."
+            )
+        else:
+            print(
+                "Autonomy inference on Jetson Orin Nano at "
+                f"{jetson_host}:{JETSON_STEERING_PORT}. Raspberry Pi will not run "
+                "a local steering model."
+            )
 
     # Interruption clip recorder: rolling buffer of the exact JPEGs sent to Jon; on every
     # autonomous->manual takeover it saves the 2s-before as a clip (background thread), and
@@ -2531,9 +2544,12 @@ def run(model_choice=None):
         hardware.cleanup()
         if csv_file:
             csv_file.close()
-        _ship_logs_to_jon()          # rsync logs -> Jon:/nvme/logs, delete local on success
-        if clip_recorder is not None:
-            clip_recorder.ship_to_jon(jetson_host)   # rsync interruption clips -> Jon:/nvme/interruption_clips
+        if not local_inference:
+            _ship_logs_to_jon(jetson_host)
+            if clip_recorder is not None:
+                clip_recorder.ship_to_jon(jetson_host)
+        elif clip_recorder is not None:
+            print("Local inference test: keeping run logs and interruption clips on the Raspberry Pi.")
         influx.close()               # drain remaining telemetry to InfluxDB
         cleanup_photo_run_dir()
         pygame.quit()
