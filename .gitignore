@@ -30,6 +30,7 @@ code/ai_models_datasets/series_3_and_4/dataset_real_*/
 # Model checkpoints / exports — kept local / hosted on Hugging Face, never pushed to GitHub
 *.pth
 *.onnx
+code/test_files/models/series12_benchmark_onnx/
 
 # Hugging Face publishing artifacts stay local. Dataset/model cards and archives are
 # published to Hugging Face, not tracked on the GitHub branch.

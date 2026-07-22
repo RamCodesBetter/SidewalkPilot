@@ -50,6 +50,9 @@ class JetsonSteeringClient:
         self.jon_gpu_temp_c = 0.0
         self.infer_fps = 0.0
         self.infer_ms = 0.0
+        self.jpeg_encode_ms = 0.0
+        self.socket_round_trip_ms = 0.0
+        self.inference_request_ms = 0.0
         self.last_jpeg = None       # exact JPEG bytes of the frame last sent to Jon
                                     # (interruption_recorder.py records these verbatim)
         self.bucket_probs = [0.0] * 9   # 9 steering-bucket softmax probs from Jon's last inference
@@ -96,7 +99,10 @@ class JetsonSteeringClient:
             return None
         if self.sock is None and not self.connect():
             return None
+        request_started = time.perf_counter()
+        encode_started = time.perf_counter()
         ok, jpg = cv2.imencode(".jpg", frame_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), self.jpeg_quality])
+        self.jpeg_encode_ms = (time.perf_counter() - encode_started) * 1000.0
         if not ok:
             return None
         data = jpg.tobytes()
@@ -107,6 +113,7 @@ class JetsonSteeringClient:
             if not all(math.isfinite(value) and 0.0 <= value <= 180.0 for value in history):
                 raise ValueError("invalid steering history")
             history_payload = struct.pack(f">{len(history)}f", *history) if history else b""
+            socket_started = time.perf_counter()
             self.sock.sendall(
                 bytes([0x80 | len(vbytes)])
                 + vbytes
@@ -131,6 +138,12 @@ class JetsonSteeringClient:
             self.infer_fps = float(ifps)
             self.infer_ms = float(ims)
             self.bucket_probs = [float(p) for p in v[6:15]]
+            self.socket_round_trip_ms = (
+                time.perf_counter() - socket_started
+            ) * 1000.0
+            self.inference_request_ms = (
+                time.perf_counter() - request_started
+            ) * 1000.0
             return float(steering), float(throttle)
         except (OSError, TypeError, ValueError):
             self.close()          # drop the socket; next infer() reconnects
@@ -208,6 +221,10 @@ class AsyncJetsonSteeringClient:
         self.jon_gpu_temp_c = 0.0
         self.infer_fps = 0.0
         self.infer_ms = 0.0
+        self.jpeg_encode_ms = 0.0
+        self.socket_round_trip_ms = 0.0
+        self.inference_request_ms = 0.0
+        self.submit_to_result_ms = 0.0
         self.last_jpeg = None
         self.bucket_probs = [0.0] * 9
         self._target_history = [90.0, 90.0, 90.0]
@@ -309,6 +326,8 @@ class AsyncJetsonSteeringClient:
                 "model_version": self._latest_result_model,
                 "result": tuple(self._latest_result),
                 "age_sec": max(0.0, now - self._latest_result_time),
+                "submit_to_result_ms": self.submit_to_result_ms,
+                "inference_request_ms": self.inference_request_ms,
             }
 
     def _copy_client_state(self):
@@ -317,6 +336,13 @@ class AsyncJetsonSteeringClient:
             self.jon_gpu_temp_c = float(getattr(self.client, "jon_gpu_temp_c", 0.0))
             self.infer_fps = float(getattr(self.client, "infer_fps", 0.0))
             self.infer_ms = float(getattr(self.client, "infer_ms", 0.0))
+            self.jpeg_encode_ms = float(getattr(self.client, "jpeg_encode_ms", 0.0))
+            self.socket_round_trip_ms = float(
+                getattr(self.client, "socket_round_trip_ms", 0.0)
+            )
+            self.inference_request_ms = float(
+                getattr(self.client, "inference_request_ms", 0.0)
+            )
             self.last_jpeg = getattr(self.client, "last_jpeg", None)
             probs = list(getattr(self.client, "bucket_probs", [0.0] * 9))
             self.bucket_probs = probs[:9] + [0.0] * max(0, 9 - len(probs))
@@ -356,6 +382,9 @@ class AsyncJetsonSteeringClient:
                 completed_at = time.monotonic()
                 self._copy_client_state()
                 with self._condition:
+                    self.submit_to_result_ms = max(
+                        0.0, (completed_at - submitted_at) * 1000.0
+                    )
                     self._processed_sequence = max(self._processed_sequence, sequence)
                     if generation == self._sequence_generation:
                         self._latest_result = result

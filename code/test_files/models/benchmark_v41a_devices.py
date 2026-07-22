@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Benchmark the same SidewalkPilot v4.1a FP32 ONNX model on Pi and Jetson.
+"""Benchmark SidewalkPilot FP32 ONNX models identically on Pi and Jetson.
 
 Run this file once on each device, then compare the two JSON reports:
 
@@ -12,22 +12,28 @@ Run this file once on each device, then compare the two JSON reports:
     python3 code/test_files/models/benchmark_v41a_devices.py compare \
         /tmp/rpi5-v4.1a.json /tmp/jetson-v4.1a.json
 
-The timed section measures local batch-one ``InferenceSession.run`` calls. It does
-not include camera capture, JPEG encoding, Ethernet transfer, preprocessing, or
-servo response. Process RSS is useful on both devices, but it may not include all
-CUDA allocations on a Jetson. The system-memory delta is reported alongside RSS
-because Jetson CPU and GPU share physical LPDDR5 memory.
+The timed model section measures local batch-one ``InferenceSession.run`` calls.
+It does not include camera capture, JPEG encoding, Ethernet transfer, or servo
+response. A second local-pipeline number includes image decode and preprocessing.
+Process RSS, system memory, and CUDA-visible memory are reported separately because
+Jetson CPU and GPU share physical LPDDR5 memory and no one counter captures every
+allocation reliably.
 """
 
 from __future__ import annotations
 
 import argparse
+import ctypes
+import ctypes.util
 import gc
 import hashlib
 import json
+import math
 import os
 import platform
+import re
 import statistics
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -48,6 +54,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_MODEL = REPO_ROOT / "code" / "ai_models" / "SidewalkPilot-v4.1a.onnx"
 DEFAULT_IMAGES = Path(__file__).resolve().parent / "v41a_benchmark_sidewalks"
 MIB = 1024.0 * 1024.0
+MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+[a-z]?)\.onnx$")
+CLAHE_VERSIONS = {"2.0", "2.0b"}
+_CUDART: Any = None
+_CUDART_ERROR = ""
 
 
 def _read_text(path: str | Path) -> str:
@@ -91,7 +101,56 @@ def _system_memory_bytes() -> tuple[int, int]:
     return total, max(0, total - available)
 
 
-def _memory_snapshot() -> dict[str, float]:
+def _load_cudart() -> Any:
+    global _CUDART, _CUDART_ERROR
+    if _CUDART is not None or _CUDART_ERROR:
+        return _CUDART
+    candidates = [
+        ctypes.util.find_library("cudart"),
+        "libcudart.so",
+        "libcudart.so.12",
+        "libcudart.so.11.0",
+    ]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        try:
+            library = ctypes.CDLL(candidate)
+            library.cudaMemGetInfo.argtypes = [
+                ctypes.POINTER(ctypes.c_size_t),
+                ctypes.POINTER(ctypes.c_size_t),
+            ]
+            library.cudaMemGetInfo.restype = ctypes.c_int
+            _CUDART = library
+            return _CUDART
+        except OSError as exc:
+            _CUDART_ERROR = str(exc)
+    _CUDART_ERROR = _CUDART_ERROR or "CUDA runtime library was not found"
+    return None
+
+
+def _cuda_memory_snapshot(enabled: bool) -> dict[str, Any]:
+    if not enabled:
+        return {"available": False, "reason": "CUDA provider not active"}
+    library = _load_cudart()
+    if library is None:
+        return {"available": False, "reason": _CUDART_ERROR}
+    free_bytes = ctypes.c_size_t()
+    total_bytes = ctypes.c_size_t()
+    status = library.cudaMemGetInfo(
+        ctypes.byref(free_bytes), ctypes.byref(total_bytes)
+    )
+    if status != 0:
+        return {"available": False, "reason": f"cudaMemGetInfo status {status}"}
+    return {
+        "available": True,
+        "free_mib": free_bytes.value / MIB,
+        "total_mib": total_bytes.value / MIB,
+        "used_mib": (total_bytes.value - free_bytes.value) / MIB,
+    }
+
+
+def _memory_snapshot(cuda_enabled: bool = False) -> dict[str, Any]:
     rss, hwm = _proc_memory_bytes()
     system_total, system_used = _system_memory_bytes()
     return {
@@ -99,6 +158,7 @@ def _memory_snapshot() -> dict[str, float]:
         "process_peak_rss_mib": hwm / MIB,
         "system_total_mib": system_total / MIB,
         "system_used_mib": system_used / MIB,
+        "cuda_visible": _cuda_memory_snapshot(cuda_enabled),
     }
 
 
@@ -108,6 +168,52 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _onnx_initializer_stats(path: Path) -> dict[str, Any]:
+    try:
+        import onnx
+    except ImportError:
+        return {
+            "available": False,
+            "reason": "onnx package is not installed; runtime timing is unaffected",
+        }
+    model = onnx.load(str(path), load_external_data=False)
+    bytes_per_element = {
+        1: 4,   # FLOAT
+        2: 1,   # UINT8
+        3: 1,   # INT8
+        4: 2,   # UINT16
+        5: 2,   # INT16
+        6: 4,   # INT32
+        7: 8,   # INT64
+        9: 1,   # BOOL
+        10: 2,  # FLOAT16
+        11: 8,  # DOUBLE
+        12: 4,  # UINT32
+        13: 8,  # UINT64
+        16: 2,  # BFLOAT16
+    }
+    element_count = 0
+    storage_bytes = 0
+    for initializer in model.graph.initializer:
+        elements = math.prod(initializer.dims)
+        element_count += elements
+        if initializer.raw_data:
+            storage_bytes += len(initializer.raw_data)
+        else:
+            storage_bytes += elements * bytes_per_element.get(initializer.data_type, 0)
+    return {
+        "available": True,
+        "tensor_count": len(model.graph.initializer),
+        "element_count": element_count,
+        "storage_bytes": storage_bytes,
+        "storage_mib": storage_bytes / MIB,
+        "note": (
+            "ONNX initializer storage is exact for the graph file. It is not the "
+            "same as total runtime memory."
+        ),
+    }
 
 
 def _provider_list(requested: str) -> list[str]:
@@ -162,39 +268,137 @@ def _load_fixture_manifest(image_dir: Path) -> tuple[list[dict[str, Any]], str]:
 
 
 def _fixture_feed(
-    record: dict[str, Any], image_dir: Path, image_name: str, history_name: str
+    record: dict[str, Any],
+    image_dir: Path,
+    image_name: str,
+    width: int,
+    height: int,
+    history_name: str | None,
+    history_steps: int,
+    use_clahe: bool,
 ) -> dict[str, np.ndarray]:
     path = image_dir / str(record["file"])
     image = cv2.imread(str(path), cv2.IMREAD_COLOR)
     if image is None:
         raise SystemExit(f"Could not decode fixture image: {path}")
-    if image.shape[:2] != (180, 320):
-        image = cv2.resize(image, (320, 180), interpolation=cv2.INTER_AREA)
+    if use_clahe:
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        h_channel, s_channel, v_channel = cv2.split(hsv)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        image = cv2.cvtColor(
+            cv2.merge((h_channel, s_channel, clahe.apply(v_channel))),
+            cv2.COLOR_HSV2BGR,
+        )
+    if image.shape[:2] != (height, width):
+        image = cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
     tensor = image.astype(np.float32) / 255.0
     tensor = (tensor - 0.5) / 0.5
     tensor = np.transpose(tensor, (2, 0, 1))[np.newaxis, ...].astype(np.float32)
-    history = np.asarray([record["target_history"]], dtype=np.float32)
-    return {image_name: tensor, history_name: history}
+    feeds = {image_name: tensor}
+    if history_name is not None:
+        source_history = [float(value) for value in record["target_history"]]
+        history = ([90.0] * history_steps + source_history)[-history_steps:]
+        feeds[history_name] = np.asarray([history], dtype=np.float32)
+    return feeds
 
 
-def _validate_contract(session: "ort.InferenceSession") -> tuple[str, str]:
+def _validate_contract(session: "ort.InferenceSession") -> dict[str, Any]:
     inputs = session.get_inputs()
     image = next((item for item in inputs if len(item.shape) == 4), None)
-    history = next((item for item in inputs if item.name == "target_history"), None)
+    history = next((item for item in inputs if len(item.shape) == 2), None)
     output = session.get_outputs()[0]
-    if image is None or list(image.shape[1:]) != [3, 180, 320]:
+    if image is None or image.type != "tensor(float)":
         details = [(item.name, item.shape) for item in inputs]
-        raise SystemExit(f"Unexpected v4.1a image input: {details}")
-    if history is None or list(history.shape[1:]) != [3]:
+        raise SystemExit(f"Expected one FP32 NCHW image input: {details}")
+    channels, height, width = image.shape[1:]
+    if channels != 3 or not isinstance(height, int) or not isinstance(width, int):
         details = [(item.name, item.shape) for item in inputs]
-        raise SystemExit(f"Unexpected v4.1a history input: {details}")
-    if list(output.shape[1:]) != [4, 18]:
-        raise SystemExit(f"Unexpected v4.1a output: {(output.name, output.shape)}")
-    if image.type != "tensor(float)" or history.type != "tensor(float)":
+        raise SystemExit(f"Expected a concrete [batch,3,H,W] input: {details}")
+    history_steps = 0
+    if history is not None:
+        if history.type != "tensor(float)" or not isinstance(history.shape[1], int):
+            raise SystemExit(
+                f"Expected a concrete FP32 history input, got {history.name}: "
+                f"{history.shape} {history.type}"
+            )
+        history_steps = int(history.shape[1])
+    if len(inputs) != 1 + int(history is not None):
+        details = [(item.name, item.shape) for item in inputs]
+        raise SystemExit(f"Unsupported extra model inputs: {details}")
+    if output.type != "tensor(float)":
         raise SystemExit(
-            f"Expected FP32 inputs, got image={image.type}, history={history.type}"
+            f"Expected an FP32 model output, got {output.name}: {output.type}"
         )
-    return image.name, history.name
+    return {
+        "image_name": image.name,
+        "width": int(width),
+        "height": int(height),
+        "history_name": history.name if history is not None else None,
+        "history_steps": history_steps,
+        "output_name": output.name,
+        "output_shape": list(output.shape),
+    }
+
+
+def _version_from_path(path: Path) -> str:
+    match = MODEL_RE.fullmatch(path.name)
+    return match.group("version") if match else path.stem
+
+
+def _series_from_version(version: str) -> int | None:
+    match = re.match(r"^(\d+)\.", version)
+    return int(match.group(1)) if match else None
+
+
+def _jetson_gpu_load_percent() -> float | None:
+    candidates = [
+        Path("/sys/devices/platform/17000000.gpu/load"),
+        Path("/sys/class/devfreq/17000000.gpu/load"),
+    ]
+    for path in candidates:
+        raw = _read_text(path)
+        if not raw:
+            continue
+        try:
+            value = float(raw)
+        except ValueError:
+            continue
+        return value / 10.0 if value > 100.0 else value
+    return None
+
+
+class _GpuLoadSampler:
+    def __init__(self, enabled: bool, interval_sec: float = 0.01):
+        self.enabled = enabled
+        self.interval_sec = interval_sec
+        self.values: list[float] = []
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def start(self) -> None:
+        if not self.enabled or _jetson_gpu_load_percent() is None:
+            return
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _run(self) -> None:
+        while not self._stop.wait(self.interval_sec):
+            value = _jetson_gpu_load_percent()
+            if value is not None:
+                self.values.append(value)
+
+    def finish(self) -> dict[str, float] | None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=1.0)
+        if not self.values:
+            return None
+        return {
+            "sample_count": len(self.values),
+            "mean_percent": statistics.fmean(self.values),
+            "p95_percent": _percentile(self.values, 95.0),
+            "max_percent": max(self.values),
+        }
 
 
 def _percentile(values: list[float], percentile: float) -> float:
@@ -205,6 +409,16 @@ def _delta(after: dict[str, float], before: dict[str, float], key: str) -> float
     return float(after[key] - before[key])
 
 
+def _cuda_used_delta(
+    after: dict[str, Any], before: dict[str, Any]
+) -> float | None:
+    after_cuda = after.get("cuda_visible", {})
+    before_cuda = before.get("cuda_visible", {})
+    if not after_cuda.get("available") or not before_cuda.get("available"):
+        return None
+    return float(after_cuda["used_mib"] - before_cuda["used_mib"])
+
+
 def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     model_path = args.model.expanduser().resolve()
     image_dir = args.images.expanduser().resolve()
@@ -213,9 +427,10 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     if args.warmup < 1 or args.runs < 2:
         raise SystemExit("Use at least 1 warm-up and 2 measured inferences.")
 
-    gc.collect()
-    memory_before_load = _memory_snapshot()
     providers = _provider_list(args.provider)
+    cuda_enabled = providers[0] == "CUDAExecutionProvider"
+    gc.collect()
+    memory_before_load = _memory_snapshot(cuda_enabled)
     options = ort.SessionOptions()
     options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 
@@ -224,50 +439,75 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
         str(model_path), sess_options=options, providers=providers
     )
     load_seconds = time.perf_counter() - load_started
-    image_name, history_name = _validate_contract(session)
+    contract = _validate_contract(session)
     providers_used = session.get_providers()
     primary_provider = providers_used[0]
     if args.provider == "cuda" and primary_provider != "CUDAExecutionProvider":
         raise SystemExit(
             f"CUDA was requested but the active provider is {providers_used}"
         )
-    memory_after_load = _memory_snapshot()
+    memory_after_load = _memory_snapshot(cuda_enabled)
 
     records, fixture_hash = _load_fixture_manifest(image_dir)
+    version = _version_from_path(model_path)
+    use_clahe = version in CLAHE_VERSIONS
 
     output_shape: list[int] | None = None
     for index in range(args.warmup):
         feeds = _fixture_feed(
-            records[index % len(records)], image_dir, image_name, history_name
+            records[index % len(records)],
+            image_dir,
+            contract["image_name"],
+            contract["width"],
+            contract["height"],
+            contract["history_name"],
+            contract["history_steps"],
+            use_clahe,
         )
         output = session.run(None, feeds)[0]
         output_shape = list(output.shape)
-    memory_after_warmup = _memory_snapshot()
+    memory_after_warmup = _memory_snapshot(cuda_enabled)
 
     latencies_ms: list[float] = []
+    inference_cpu_seconds = 0.0
     preprocessing_ms: list[float] = []
+    gpu_sampler = _GpuLoadSampler(cuda_enabled)
+    gpu_sampler.start()
+    local_pipeline_cpu_started = time.process_time()
     measured_started = time.perf_counter()
     for index in range(args.runs):
         preprocessing_started = time.perf_counter()
         feeds = _fixture_feed(
-            records[index % len(records)], image_dir, image_name, history_name
+            records[index % len(records)],
+            image_dir,
+            contract["image_name"],
+            contract["width"],
+            contract["height"],
+            contract["history_name"],
+            contract["history_steps"],
+            use_clahe,
         )
         preprocessing_ms.append((time.perf_counter() - preprocessing_started) * 1000.0)
+        cpu_started = time.process_time()
         started = time.perf_counter()
         output = session.run(None, feeds)[0]
         latencies_ms.append((time.perf_counter() - started) * 1000.0)
+        inference_cpu_seconds += time.process_time() - cpu_started
     local_pipeline_seconds = time.perf_counter() - measured_started
+    local_pipeline_cpu_seconds = time.process_time() - local_pipeline_cpu_started
+    gpu_load = gpu_sampler.finish()
     inference_seconds = sum(latencies_ms) / 1000.0
-    memory_after_runs = _memory_snapshot()
+    memory_after_runs = _memory_snapshot(cuda_enabled)
 
-    if output_shape != [1, 4, 18] or list(output.shape) != [1, 4, 18]:
-        raise SystemExit(f"Unexpected runtime output shape: {list(output.shape)}")
+    if output_shape is None or list(output.shape) != output_shape:
+        raise SystemExit(f"Output shape changed during the run: {list(output.shape)}")
     if not np.all(np.isfinite(output)):
         raise SystemExit("Model output contains a non-finite value.")
+    initializer_stats = _onnx_initializer_stats(model_path)
 
     report: dict[str, Any] = {
-        "schema_version": 1,
-        "benchmark": "SidewalkPilot-v4.1a-FP32-ONNX-batch1",
+        "schema_version": 2,
+        "benchmark": "SidewalkPilot-FP32-ONNX-batch1-v2",
         "label": args.label or _device_name(),
         "timestamp_local": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "device": {
@@ -287,14 +527,26 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             "primary_provider": primary_provider,
         },
         "model": {
+            "version": version,
+            "series": _series_from_version(version),
             "path": str(model_path),
             "size_mib": model_path.stat().st_size / MIB,
             "sha256": _sha256(model_path),
             "input_dtype": "float32",
-            "image_shape": [1, 3, 180, 320],
-            "history_shape": [1, 3],
-            "output_shape": [1, 4, 18],
+            "image_shape": [1, 3, contract["height"], contract["width"]],
+            "history_shape": (
+                [1, contract["history_steps"]]
+                if contract["history_name"] is not None
+                else None
+            ),
+            "output_shape": output_shape,
             "batch_size": 1,
+            "preprocessing": (
+                "HSV/CLAHE then normalized BGR"
+                if use_clahe
+                else "normalized BGR"
+            ),
+            "onnx_initializers": initializer_stats,
         },
         "fixtures": {
             "path": str(image_dir),
@@ -307,7 +559,14 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             "measured_runs": args.runs,
             "session_load_seconds": load_seconds,
             "inference_seconds": inference_seconds,
+            "inference_process_cpu_seconds": inference_cpu_seconds,
+            "inference_effective_cpu_cores": inference_cpu_seconds
+            / inference_seconds,
             "local_pipeline_seconds": local_pipeline_seconds,
+            "local_pipeline_process_cpu_seconds": local_pipeline_cpu_seconds,
+            "local_pipeline_effective_cpu_cores": local_pipeline_cpu_seconds
+            / local_pipeline_seconds,
+            "jetson_gpu_load": gpu_load,
             "ips": args.runs / inference_seconds,
             "local_image_pipeline_ips": args.runs / local_pipeline_seconds,
             "latency_mean_ms": statistics.fmean(latencies_ms),
@@ -334,10 +593,16 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             "warm_system_used_delta_mib": _delta(
                 memory_after_warmup, memory_before_load, "system_used_mib"
             ),
+            "warm_cuda_visible_used_delta_mib": _cuda_used_delta(
+                memory_after_warmup, memory_before_load
+            ),
             "measurement_note": (
-                "Process RSS can exclude CUDA allocations. On Jetson, also inspect the "
-                "system-used delta because CPU and GPU share LPDDR5. Run on an "
-                "otherwise idle device and repeat before publishing a memory claim."
+                "The model file size is exact disk storage. RSS, system-used, and "
+                "CUDA-visible deltas are runtime allocation estimates, not "
+                "model-weight-only values. "
+                "Jetson uses shared LPDDR5, so these counters overlap and must not be "
+                "added together. Run on an otherwise idle device and repeat "
+                "before publishing a memory claim."
             ),
         },
     }
@@ -348,7 +613,7 @@ def _print_report(report: dict[str, Any]) -> None:
     perf = report["performance"]
     memory = report["memory"]
     warm = memory["after_warmup"]
-    print("\nSidewalkPilot v4.1a FP32 ONNX benchmark")
+    print(f"\nSidewalkPilot v{report['model']['version']} FP32 ONNX benchmark")
     print(f"  Device:       {report['label']}")
     print(f"  Board:        {report['device']['board']}")
     print(f"  Provider:     {report['runtime']['primary_provider']}")
@@ -373,7 +638,24 @@ def _print_report(report: dict[str, Any]) -> None:
         f"p95 {perf['latency_p95_ms']:.2f} ms | "
         f"p99 {perf['latency_p99_ms']:.2f} ms"
     )
+    print(
+        f"  CPU cores:    {perf['inference_effective_cpu_cores']:.2f} effective "
+        "cores during model execution"
+    )
+    gpu_load = perf.get("jetson_gpu_load")
+    if gpu_load is not None:
+        print(
+            f"  GPU load:     mean {gpu_load['mean_percent']:.1f}% | "
+            f"p95 {gpu_load['p95_percent']:.1f}% | "
+            f"max {gpu_load['max_percent']:.1f}%"
+        )
     print(f"  Model file:   {report['model']['size_mib']:.2f} MiB")
+    initializers = report["model"].get("onnx_initializers", {})
+    if initializers.get("available"):
+        print(
+            f"  Parameters:   {initializers['element_count']:,} ONNX initializer "
+            f"elements ({initializers['storage_mib']:.2f} MiB stored)"
+        )
     print(
         f"  Warm RSS:     {warm['process_rss_mib']:.2f} MiB total process memory"
     )
@@ -385,6 +667,12 @@ def _print_report(report: dict[str, Any]) -> None:
         f"  System delta: {memory['warm_system_used_delta_mib']:+.2f} MiB "
         "from pre-load"
     )
+    cuda_delta = memory.get("warm_cuda_visible_used_delta_mib")
+    if cuda_delta is not None:
+        print(
+            f"  CUDA delta:   {cuda_delta:+.2f} MiB CUDA-visible shared memory "
+            "from pre-load"
+        )
 
 
 def _load_report(path: Path) -> dict[str, Any]:
@@ -410,15 +698,20 @@ def compare_reports(first_path: Path, second_path: Path) -> None:
 
     a_perf, b_perf = first["performance"], second["performance"]
     speedup = b_perf["ips"] / a_perf["ips"]
-    latency_reduction = 100.0 * (
+    throughput_gain = 100.0 * (speedup - 1.0)
+    mean_latency_reduction = 100.0 * (
+        1.0 - b_perf["latency_mean_ms"] / a_perf["latency_mean_ms"]
+    )
+    median_latency_reduction = 100.0 * (
         1.0 - b_perf["latency_median_ms"] / a_perf["latency_median_ms"]
     )
 
-    print("\nSidewalkPilot v4.1a device comparison")
+    version = first["model"].get("version", "unknown")
+    print(f"\nSidewalkPilot v{version} device comparison")
     print(f"  Same model: {first['model']['sha256']}")
     print(
         f"  {'Device':24} {'Provider':24} {'IPS':>9} {'Median ms':>11} "
-        f"{'Warm RSS':>11} {'RSS delta':>11}"
+        f"{'CPU cores':>10} {'RSS delta':>11}"
     )
     for report in (first, second):
         perf = report["performance"]
@@ -427,11 +720,13 @@ def compare_reports(first_path: Path, second_path: Path) -> None:
             f"  {report['label'][:24]:24} "
             f"{report['runtime']['primary_provider'][:24]:24} "
             f"{perf['ips']:9.2f} {perf['latency_median_ms']:11.2f} "
-            f"{memory['after_warmup']['process_rss_mib']:11.2f} "
+            f"{perf.get('inference_effective_cpu_cores', float('nan')):10.2f} "
             f"{memory['warm_process_rss_delta_mib']:11.2f}"
         )
     print(f"\n  Second/first IPS speedup: {speedup:.2f}x")
-    print(f"  Median latency reduction: {latency_reduction:.1f}%")
+    print(f"  Throughput gain: {throughput_gain:.1f}%")
+    print(f"  Mean model-latency reduction: {mean_latency_reduction:.1f}%")
+    print(f"  Median model-latency reduction: {median_latency_reduction:.1f}%")
     print(
         "  Memory caution: compare both RSS delta and system delta; Jetson CUDA uses "
         "unified memory that process RSS may not fully attribute."
@@ -441,7 +736,8 @@ def compare_reports(first_path: Path, second_path: Path) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Benchmark SidewalkPilot v4.1a identically on Raspberry Pi 5 and Jetson."
+            "Benchmark SidewalkPilot ONNX models identically on Raspberry Pi 5 "
+            "and Jetson."
         )
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
