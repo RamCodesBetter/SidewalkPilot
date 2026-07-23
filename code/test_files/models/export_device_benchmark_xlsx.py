@@ -87,6 +87,42 @@ def fit_columns(sheet: Any, maximum: int = 22) -> None:
         sheet.column_dimensions[letter].width = min(max(width, 10), maximum)
 
 
+def flatten_json(value: Any, prefix: str = "") -> list[tuple[str, Any, str]]:
+    rows: list[tuple[str, Any, str]] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            path = f"{prefix}.{key}" if prefix else str(key)
+            rows.extend(flatten_json(child, path))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            rows.extend(flatten_json(child, f"{prefix}[{index}]"))
+    else:
+        cell_value = "<null>" if value is None else value
+        rows.append((prefix, cell_value, type(value).__name__))
+    return rows
+
+
+def add_raw_json_sheet(
+    workbook: Workbook,
+    title: str,
+    payload: dict[str, Any],
+    table_name: str,
+) -> None:
+    sheet = workbook.create_sheet(title)
+    sheet.append(["JSON path", "Value", "Type"])
+    for row in flatten_json(payload):
+        sheet.append(row)
+    style_header(sheet[1])
+    add_table(sheet, table_name)
+    sheet.freeze_panes = "B2"
+    sheet.column_dimensions["A"].width = 64
+    sheet.column_dimensions["B"].width = 72
+    sheet.column_dimensions["C"].width = 14
+    for row in sheet.iter_rows(min_row=2):
+        row[0].alignment = Alignment(vertical="top")
+        row[1].alignment = Alignment(wrap_text=True, vertical="top")
+
+
 def validate_suites(
     baseline: dict[str, Any], comparison: dict[str, Any]
 ) -> tuple[list[str], dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
@@ -354,6 +390,85 @@ def build_workbook(
     summary.column_dimensions["D"].width = 36
     summary.column_dimensions["E"].width = 18
 
+    presentation = workbook.create_sheet("Presentation Numbers")
+    presentation.sheet_view.showGridLines = False
+    presentation["A1"] = "Presentation-Ready Jetson Results"
+    presentation["A1"].font = Font(size=18, bold=True, color=WHITE)
+    presentation["A1"].fill = PatternFill("solid", fgColor=BLUE)
+    presentation.merge_cells("A1:H1")
+    headline_values = (
+        ("A3", "2.345x", "Series 3/4 geometric throughput speedup"),
+        ("C3", "57.3%", "Mean model-execution latency reduction"),
+        ("E3", "88.5%", "Mean effective CPU-core reduction"),
+        ("G3", "1.787x", "Mean local image-pipeline speedup"),
+    )
+    for value_cell, value, label in headline_values:
+        column = presentation[value_cell].column
+        presentation[value_cell] = value
+        presentation[value_cell].font = Font(size=24, bold=True, color=BLUE)
+        presentation.cell(row=4, column=column, value=label)
+        presentation.cell(row=4, column=column).alignment = Alignment(
+            wrap_text=True, vertical="top"
+        )
+        presentation.merge_cells(
+            start_row=4,
+            start_column=column,
+            end_row=5,
+            end_column=column + 1,
+        )
+    presentation["A7"] = "Recommended measured statement"
+    presentation["B7"] = (
+        "Across the 22 current Series 3/4 models in this run, Jetson Orin Nano "
+        "delivered 2.345x geometric-mean FP32 ONNX throughput and reduced mean "
+        "model-execution latency by 57.3% compared with Raspberry Pi 5."
+    )
+    presentation.merge_cells("B7:H8")
+    presentation["B7"].alignment = Alignment(wrap_text=True, vertical="top")
+    presentation["A10"] = "Honest small-model result"
+    presentation["B10"] = (
+        "Series 1/2 favored Raspberry Pi 5: their 672,877-parameter network was "
+        "too small to amortize CUDA dispatch, synchronization, and clock-ramp costs."
+    )
+    presentation.merge_cells("B10:H11")
+    presentation["B10"].alignment = Alignment(wrap_text=True, vertical="top")
+    presentation["A13"] = "Current model examples"
+    presentation.append([])
+    presentation.append(
+        [
+            "Model",
+            "Pi IPS",
+            "Jetson IPS",
+            "Speedup x",
+            "Throughput gain %",
+            "Pi mean ms",
+            "Jetson mean ms",
+            "Latency reduction %",
+        ]
+    )
+    current_versions = ("3.4", "3.4b", "4.0f", "4.1a", "4.1g")
+    for version in current_versions:
+        row = next(item for item in rows if item[0] == f"v{version}")
+        presentation.append(
+            [row[0], row[3], row[4], row[5], row[6], row[7], row[8], row[9]]
+        )
+    style_header(presentation[15])
+    for row in presentation.iter_rows(min_row=16, max_row=20):
+        row[3].number_format = '0.000"x"'
+        row[4].number_format = '0.0"%"'
+        row[7].number_format = '0.0"%"'
+    presentation["A23"] = "Publication caution"
+    presentation["B23"] = (
+        "Repeat the suite across multiple passes with temperature, clock, and "
+        "background-load logging before treating one percentage as a final "
+        "public bound."
+    )
+    presentation.merge_cells("B23:H24")
+    presentation["B23"].alignment = Alignment(wrap_text=True, vertical="top")
+    presentation["B23"].fill = PatternFill("solid", fgColor=LIGHT_BLUE)
+    presentation.column_dimensions["A"].width = 26
+    for column in range(2, 9):
+        presentation.column_dimensions[get_column_letter(column)].width = 18
+
     models_sheet = workbook.create_sheet("All Models")
     models_sheet.append(MODEL_HEADERS)
     for row in rows:
@@ -540,6 +655,102 @@ def build_workbook(
     for row in definitions.iter_rows(min_row=2):
         row[1].alignment = Alignment(wrap_text=True, vertical="top")
     definitions.freeze_panes = "A2"
+
+    metadata = workbook.create_sheet("Test Metadata")
+    metadata.append(["Field", "Raspberry Pi 5", "Jetson Orin Nano"])
+    first_baseline = baseline_reports[versions[0]]
+    first_comparison = comparison_reports[versions[0]]
+    metadata_rows = [
+        ("Suite timestamp", baseline["timestamp_local"], comparison["timestamp_local"]),
+        ("Label", baseline["label"], comparison["label"]),
+        ("Provider", baseline["provider"], comparison["provider"]),
+        (
+            "Active providers",
+            ", ".join(first_baseline["runtime"]["active_providers"]),
+            ", ".join(first_comparison["runtime"]["active_providers"]),
+        ),
+        (
+            "ONNX Runtime",
+            first_baseline["runtime"]["onnxruntime"],
+            first_comparison["runtime"]["onnxruntime"],
+        ),
+        (
+            "Python",
+            first_baseline["runtime"]["python"],
+            first_comparison["runtime"]["python"],
+        ),
+        (
+            "Board",
+            first_baseline["device"]["board"],
+            first_comparison["device"]["board"],
+        ),
+        (
+            "CPU",
+            first_baseline["device"]["cpu"],
+            first_comparison["device"]["cpu"],
+        ),
+        (
+            "Logical CPU count",
+            first_baseline["device"]["logical_cpu_count"],
+            first_comparison["device"]["logical_cpu_count"],
+        ),
+        (
+            "Platform",
+            first_baseline["device"]["platform"],
+            first_comparison["device"]["platform"],
+        ),
+        (
+            "Image count",
+            first_baseline["fixtures"]["image_count"],
+            first_comparison["fixtures"]["image_count"],
+        ),
+        (
+            "Fixture SHA-256",
+            first_baseline["fixtures"]["set_sha256"],
+            first_comparison["fixtures"]["set_sha256"],
+        ),
+        (
+            "Warmup runs",
+            first_baseline["performance"]["warmup_runs"],
+            first_comparison["performance"]["warmup_runs"],
+        ),
+        (
+            "Measured runs",
+            first_baseline["performance"]["measured_runs"],
+            first_comparison["performance"]["measured_runs"],
+        ),
+        ("Model count", baseline["model_count"], comparison["model_count"]),
+    ]
+    for row in metadata_rows:
+        metadata.append(row)
+    style_header(metadata[1])
+    add_table(metadata, "TestMetadata")
+    metadata.freeze_panes = "B2"
+    metadata.column_dimensions["A"].width = 25
+    metadata.column_dimensions["B"].width = 62
+    metadata.column_dimensions["C"].width = 62
+    for row in metadata.iter_rows(min_row=2):
+        for cell in row:
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
+
+    derived_payload = {
+        "benchmark": "SidewalkPilot-device-comparison-workbook-v1",
+        "baseline": baseline["label"],
+        "comparison": comparison["label"],
+        "family_summaries": [
+            dict(zip(FAMILY_HEADERS, family, strict=True)) for family in families
+        ],
+        "models": [
+            dict(zip(MODEL_HEADERS, row, strict=True)) for row in rows
+        ],
+    }
+    add_raw_json_sheet(workbook, "Raw Pi JSON", baseline, "RawPiJson")
+    add_raw_json_sheet(
+        workbook, "Raw Jetson JSON", comparison, "RawJetsonJson"
+    )
+    add_raw_json_sheet(
+        workbook, "Raw Derived JSON", derived_payload, "RawDerivedJson"
+    )
 
     for sheet in workbook.worksheets:
         sheet.sheet_properties.pageSetUpPr.fitToPage = True
