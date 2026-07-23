@@ -1,9 +1,11 @@
 {
-  "description": "Real SidewalkPilot frames for identical Raspberry Pi 5 CPU and Jetson Orin Nano CUDA v4.1a inference benchmarks.",
+  "dataset_role": "mini inference-speed test dataset",
+  "description": "A 180-image mini test dataset sampled from the separate 81,237-image Series 3/4 training corpus for Raspberry Pi 5 and Jetson Orin Nano inference-speed tests. This is not the training dataset.",
   "image_count": 180,
   "image_height": 180,
   "image_width": 320,
   "images_per_bucket": 20,
+  "is_training_dataset": false,
   "jpeg_quality": 90,
   "records": [
     {
