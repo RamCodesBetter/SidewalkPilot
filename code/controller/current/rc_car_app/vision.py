@@ -225,6 +225,7 @@ class _PiCameraCapture:
             # Keep the frame in OpenCV-style BGR order for the rest of the
             # pipeline and avoid any extra channel swaps.
             "main": {"size": (CAMERA_FRAME_WIDTH, CAMERA_FRAME_HEIGHT), "format": "BGR888"},
+            "controls": {"FrameRate": float(CAMERA_FPS)},
         }
         if Transform is not None:
             config_kwargs["transform"] = Transform(hflip=PI_CAMERA_ROTATE_180, vflip=PI_CAMERA_ROTATE_180)

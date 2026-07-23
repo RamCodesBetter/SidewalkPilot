@@ -23,6 +23,7 @@ from .config import (
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
     JETSON_RESULT_MAX_AGE_SEC,
+    CONTROL_LOOP_HZ,
     CONTROL_LOOP_STALL_WARN_SEC,
     INTERRUPTION_CLIP_ENABLED,
     INTERRUPTION_CLIP_SECONDS,
@@ -1493,7 +1494,7 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             jon_steer_deg, _jon_throttle = jon_result
             # Temporal smoothing (EMA): the v3.1 hybrid head can flip steering buckets
             # frame-to-frame (blocky output). Blend with the previous command to damp it.
-            # Apply the EMA once per completed inference, not once per 60 Hz control tick.
+            # Apply the EMA once per completed inference, not once per control tick.
             jon_sequence = int(jon_sample["sequence"])
             if jon_sequence != int(state.get("_jon_result_sequence", 0)):
                 _prev_steer = state.get("steer_smoothed_deg")
@@ -2502,7 +2503,7 @@ def run(model_choice=None, inference_host=None, local_inference=False):
                 )
                 last_log_time = current_loop_time
 
-            clock.tick(60)
+            clock.tick(CONTROL_LOOP_HZ)
 
     except KeyboardInterrupt:
         state["event_quit_pressed"] = True
