@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-23T00:00:00.000Z" agent="SidewalkPilot diagram generator" version="24.7.17">
+  <diagram id="sidewalkpilot-training-pipeline" name="Training Pipeline">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Data Collection" vertex="1">
+          <mxGeometry height="90" width="260" x="470" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Catch and Delete" vertex="1">
+          <mxGeometry height="90" width="260" x="850" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Split Dataset: Train and Validation" vertex="1">
+          <mxGeometry height="90" width="300" x="1190" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Pre-process Images" vertex="1">
+          <mxGeometry height="90" width="260" x="1290" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Apply Data Augmentation" vertex="1">
+          <mxGeometry height="90" width="300" x="1160" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Train the Convolutional Neural Network" vertex="1">
+          <mxGeometry height="90" width="330" x="790" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Save 2 Checkpoints" vertex="1">
+          <mxGeometry height="90" width="270" x="430" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Export Models To ONNX" vertex="1">
+          <mxGeometry height="90" width="290" x="100" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Generate Offline Metrics" vertex="1">
+          <mxGeometry height="90" width="280" x="30" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Evaluate Models On Physical Car" vertex="1">
+          <mxGeometry height="90" width="310" x="130" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="12" edge="1" parent="1" source="2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="13" edge="1" parent="1" source="3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="14" edge="1" parent="1" source="4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="15" edge="1" parent="1" source="5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="16" edge="1" parent="1" source="6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="7"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="17" edge="1" parent="1" source="7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="8"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="18" edge="1" parent="1" source="8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="9"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="19" edge="1" parent="1" source="9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="10"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="20" edge="1" parent="1" source="10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="11"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="21" edge="1" parent="1" source="11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;curved=1;" target="2"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

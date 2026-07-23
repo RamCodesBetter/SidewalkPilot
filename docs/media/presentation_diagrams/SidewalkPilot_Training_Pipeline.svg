@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="SidewalkPilot training pipeline">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6c8ebf"/>
+    </marker>
+    <style>
+      .edge { fill: none; stroke: #6c8ebf; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .label { font: 400 17px Arial, sans-serif; fill: #1f2937; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#ffffff"/>
+
+  <path class="edge" d="M730 125 C770 105 810 105 850 125"/>
+  <path class="edge" d="M1110 125 C1160 140 1195 165 1235 195"/>
+  <path class="edge" d="M1450 265 C1510 300 1535 345 1485 400"/>
+  <path class="edge" d="M1420 485 C1415 545 1380 590 1335 625"/>
+  <path class="edge" d="M1160 670 C1135 710 1110 730 1085 747"/>
+  <path class="edge" d="M790 775 L700 775"/>
+  <path class="edge" d="M430 775 C390 750 365 710 350 675"/>
+  <path class="edge" d="M145 625 C100 585 80 535 95 485"/>
+  <path class="edge" d="M95 395 C85 335 130 285 185 260"/>
+  <path class="edge" d="M360 190 C390 155 425 135 470 125"/>
+
+  <g fill="#dae8fc" stroke="#6c8ebf" stroke-width="2">
+    <ellipse cx="600" cy="125" rx="130" ry="45"/>
+    <ellipse cx="980" cy="125" rx="130" ry="45"/>
+    <ellipse cx="1340" cy="235" rx="150" ry="45"/>
+    <ellipse cx="1420" cy="440" rx="130" ry="45"/>
+    <ellipse cx="1310" cy="670" rx="150" ry="45"/>
+    <ellipse cx="955" cy="775" rx="165" ry="45"/>
+    <ellipse cx="565" cy="775" rx="135" ry="45"/>
+    <ellipse cx="245" cy="670" rx="145" ry="45"/>
+    <ellipse cx="170" cy="440" rx="140" ry="45"/>
+    <ellipse cx="285" cy="235" rx="155" ry="45"/>
+  </g>
+
+  <text x="600" y="125" class="label">Data Collection</text>
+  <text x="980" y="125" class="label">Catch and Delete</text>
+  <text x="1340" y="225" class="label"><tspan x="1340" dy="0">Split Dataset: Train</tspan><tspan x="1340" dy="22">and Validation</tspan></text>
+  <text x="1420" y="440" class="label">Pre-process Images</text>
+  <text x="1310" y="670" class="label">Apply Data Augmentation</text>
+  <text x="955" y="765" class="label"><tspan x="955" dy="0">Train the Convolutional</tspan><tspan x="955" dy="22">Neural Network</tspan></text>
+  <text x="565" y="775" class="label">Save 2 Checkpoints</text>
+  <text x="245" y="670" class="label">Export Models To ONNX</text>
+  <text x="170" y="440" class="label">Generate Offline Metrics</text>
+  <text x="285" y="225" class="label"><tspan x="285" dy="0">Evaluate Models On</tspan><tspan x="285" dy="22">Physical Car</tspan></text>
+</svg>

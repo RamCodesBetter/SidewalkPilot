@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="SidewalkPilot v3.4 convolutional neural network architecture">
+  <defs>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#101828" flood-opacity="0.14"/></filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="2.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,5 L7,2.5 z" fill="#475467"/></marker>
+    <marker id="small-arrow" markerWidth="6" markerHeight="6" refX="5" refY="2" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,4 L5,2 z" fill="#98A2B3"/></marker>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #101828; }
+      .subtitle { font: 400 15px Arial, sans-serif; fill: #667085; }
+      .flow { fill: none; stroke: #475467; stroke-width: 2; marker-end: url(#arrow); }
+      .dense { fill: none; stroke: #98A2B3; stroke-width: .65; opacity: .62; marker-end: url(#small-arrow); }
+      .label { font: 400 11px Arial, sans-serif; text-anchor: middle; }
+      .strong { font: 700 11px Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="35" y="57" class="title">SidewalkPilot v3.4 CNN Architecture</text>
+  <text x="37" y="88" class="subtitle">Six convolution blocks extract image features; dense layers produce the 19-value hybrid output.</text>
+
+  <path class="flow" d="M158 342 L214 342"/>
+  <path class="flow" d="M248 342 L314 342"/>
+  <path class="flow" d="M354 342 L418 342"/>
+  <path class="flow" d="M464 342 L528 342"/>
+  <path class="flow" d="M580 342 L642 342"/>
+  <path class="flow" d="M704 342 L772 342"/>
+  <path class="flow" d="M846 342 L915 342"/>
+  <path class="flow" d="M993 353 L1060 202"/>
+  <path class="flow" d="M993 353 L1060 282"/>
+  <path class="flow" d="M993 353 L1060 417"/>
+  <path class="flow" d="M993 353 L1060 497"/>
+
+  <g class="dense">
+    <line x1="1084" y1="202" x2="1185" y2="216"/><line x1="1084" y1="202" x2="1185" y2="296"/><line x1="1084" y1="202" x2="1185" y2="481"/>
+    <line x1="1084" y1="282" x2="1185" y2="216"/><line x1="1084" y1="282" x2="1185" y2="296"/><line x1="1084" y1="282" x2="1185" y2="481"/>
+    <line x1="1084" y1="417" x2="1185" y2="216"/><line x1="1084" y1="417" x2="1185" y2="296"/><line x1="1084" y1="417" x2="1185" y2="481"/>
+    <line x1="1084" y1="497" x2="1185" y2="216"/><line x1="1084" y1="497" x2="1185" y2="296"/><line x1="1084" y1="497" x2="1185" y2="481"/>
+    <line x1="1207" y1="216" x2="1300" y2="216"/><line x1="1207" y1="216" x2="1300" y2="296"/><line x1="1207" y1="216" x2="1300" y2="481"/>
+    <line x1="1207" y1="296" x2="1300" y2="216"/><line x1="1207" y1="296" x2="1300" y2="296"/><line x1="1207" y1="296" x2="1300" y2="481"/>
+    <line x1="1207" y1="481" x2="1300" y2="216"/><line x1="1207" y1="481" x2="1300" y2="296"/><line x1="1207" y1="481" x2="1300" y2="481"/>
+    <line x1="1322" y1="216" x2="1410" y2="216"/><line x1="1322" y1="216" x2="1410" y2="296"/><line x1="1322" y1="216" x2="1410" y2="481"/>
+    <line x1="1322" y1="296" x2="1410" y2="216"/><line x1="1322" y1="296" x2="1410" y2="296"/><line x1="1322" y1="296" x2="1410" y2="481"/>
+    <line x1="1322" y1="481" x2="1410" y2="216"/><line x1="1322" y1="481" x2="1410" y2="296"/><line x1="1322" y1="481" x2="1410" y2="481"/>
+    <line x1="1432" y1="216" x2="1515" y2="216"/><line x1="1432" y1="216" x2="1515" y2="296"/><line x1="1432" y1="216" x2="1515" y2="481"/>
+    <line x1="1432" y1="296" x2="1515" y2="216"/><line x1="1432" y1="296" x2="1515" y2="296"/><line x1="1432" y1="296" x2="1515" y2="481"/>
+    <line x1="1432" y1="481" x2="1515" y2="216"/><line x1="1432" y1="481" x2="1515" y2="296"/><line x1="1432" y1="481" x2="1515" y2="481"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="11" font-style="italic" fill="#667085" text-anchor="middle">
+    <rect x="1110" y="145" width="50" height="22" fill="#ffffff"/><text x="1135" y="160">w_ij</text>
+    <rect x="1225" y="145" width="50" height="22" fill="#ffffff"/><text x="1250" y="160">w_ij</text>
+    <rect x="1335" y="145" width="50" height="22" fill="#ffffff"/><text x="1360" y="160">w_ij</text>
+    <rect x="1440" y="145" width="50" height="22" fill="#ffffff"/><text x="1465" y="160">w_ij</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="170" width="110" height="320" fill="#D1E9FF" stroke="#1570EF" opacity=".55"/>
+    <rect x="48" y="182" width="110" height="320" fill="#EFF8FF" stroke="#1570EF" stroke-width="2"/>
+    <text x="103" y="332" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1849A9">BGR</text>
+    <text x="103" y="357" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#1849A9">IMAGE</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="226" y="188" width="34" height="290" fill="#C7D7FE" stroke="#3538CD" opacity=".45"/><rect x="220" y="194" width="34" height="290" fill="#D9E2FF" stroke="#3538CD" opacity=".7"/><rect x="214" y="200" width="34" height="290" fill="#EEF4FF" stroke="#3538CD" stroke-width="2"/>
+    <text x="231" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2D31A6">32</text>
+    <rect x="326" y="218" width="40" height="240" fill="#C7D7FE" stroke="#3538CD" opacity=".45"/><rect x="320" y="224" width="40" height="240" fill="#D9E2FF" stroke="#3538CD" opacity=".7"/><rect x="314" y="230" width="40" height="240" fill="#EEF4FF" stroke="#3538CD" stroke-width="2"/>
+    <text x="334" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2D31A6">48</text>
+    <rect x="430" y="243" width="46" height="195" fill="#C7D7FE" stroke="#3538CD" opacity=".45"/><rect x="424" y="249" width="46" height="195" fill="#D9E2FF" stroke="#3538CD" opacity=".7"/><rect x="418" y="255" width="46" height="195" fill="#EEF4FF" stroke="#3538CD" stroke-width="2"/>
+    <text x="441" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2D31A6">64</text>
+    <rect x="540" y="268" width="52" height="150" fill="#C7D7FE" stroke="#3538CD" opacity=".45"/><rect x="534" y="274" width="52" height="150" fill="#D9E2FF" stroke="#3538CD" opacity=".7"/><rect x="528" y="280" width="52" height="150" fill="#EEF4FF" stroke="#3538CD" stroke-width="2"/>
+    <text x="554" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2D31A6">96</text>
+    <rect x="654" y="268" width="62" height="150" fill="#C7D7FE" stroke="#3538CD" opacity=".45"/><rect x="648" y="274" width="62" height="150" fill="#D9E2FF" stroke="#3538CD" opacity=".7"/><rect x="642" y="280" width="62" height="150" fill="#EEF4FF" stroke="#3538CD" stroke-width="2"/>
+    <text x="673" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2D31A6">128</text>
+    <rect x="784" y="268" width="74" height="150" fill="#C7D7FE" stroke="#3538CD" opacity=".45"/><rect x="778" y="274" width="74" height="150" fill="#D9E2FF" stroke="#3538CD" opacity=".7"/><rect x="772" y="280" width="74" height="150" fill="#EEF4FF" stroke="#3538CD" stroke-width="2"/>
+    <text x="809" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2D31A6">160</text>
+    <rect x="925" y="296" width="78" height="94" fill="#DDD6FE" stroke="#6941C6" opacity=".55"/><rect x="915" y="306" width="78" height="94" fill="#F4F3FF" stroke="#6941C6" stroke-width="2"/>
+    <text x="954" y="344" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#42307D">160</text><text x="954" y="364" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#42307D">x 6 x 10</text>
+  </g>
+
+  <g>
+    <circle cx="1072" cy="202" r="12" fill="#F4F3FF" stroke="#6941C6"/><circle cx="1072" cy="282" r="12" fill="#F4F3FF" stroke="#6941C6"/><circle cx="1072" cy="417" r="12" fill="#F4F3FF" stroke="#6941C6"/><circle cx="1072" cy="497" r="12" fill="#F4F3FF" stroke="#6941C6"/>
+    <text x="1072" y="206" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#42307D">n1</text><text x="1072" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#42307D">n2</text><text x="1072" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#42307D">n9599</text><text x="1072" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#42307D">n9600</text>
+    <text x="1072" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6941C6">...</text>
+    <circle cx="1196" cy="216" r="11" fill="#ECFDF3" stroke="#16834A"/><circle cx="1196" cy="296" r="11" fill="#ECFDF3" stroke="#16834A"/><circle cx="1196" cy="481" r="11" fill="#ECFDF3" stroke="#16834A"/><text x="1196" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#16834A">...</text>
+    <text x="1196" y="219" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#14532D">n1</text><text x="1196" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#14532D">n2</text><text x="1196" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#14532D">n512</text>
+    <circle cx="1311" cy="216" r="11" fill="#ECFDF3" stroke="#16834A"/><circle cx="1311" cy="296" r="11" fill="#ECFDF3" stroke="#16834A"/><circle cx="1311" cy="481" r="11" fill="#ECFDF3" stroke="#16834A"/><text x="1311" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#16834A">...</text>
+    <text x="1311" y="219" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#14532D">n1</text><text x="1311" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#14532D">n2</text><text x="1311" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#14532D">n256</text>
+    <circle cx="1421" cy="216" r="11" fill="#ECFDF3" stroke="#16834A"/><circle cx="1421" cy="296" r="11" fill="#ECFDF3" stroke="#16834A"/><circle cx="1421" cy="481" r="11" fill="#ECFDF3" stroke="#16834A"/><text x="1421" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#16834A">...</text>
+    <text x="1421" y="219" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#14532D">n1</text><text x="1421" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#14532D">n2</text><text x="1421" y="484" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#14532D">n64</text>
+    <circle cx="1526" cy="216" r="11" fill="#FFF4ED" stroke="#E04F16"/><circle cx="1526" cy="296" r="11" fill="#FFF4ED" stroke="#E04F16"/><circle cx="1526" cy="481" r="11" fill="#FFF4ED" stroke="#E04F16"/><text x="1526" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#E04F16">...</text>
+    <text x="1526" y="219" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#7A2E0E">n1</text><text x="1526" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#7A2E0E">n2</text><text x="1526" y="484" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="#7A2E0E">n19</text>
+  </g>
+
+  <g fill="#2D31A6">
+    <text x="103" y="552" class="strong">Input</text><text x="103" y="573" class="label">3 x 180 x 320</text><text x="103" y="592" class="label">normalized [-1, 1]</text>
+    <text x="231" y="552" class="strong">Conv1 + BN + ELU</text><text x="231" y="571" class="label">5x5 s2 p2</text><text x="231" y="590" class="label">32 x 90 x 160</text>
+    <text x="334" y="552" class="strong">Conv2 + BN + ELU</text><text x="334" y="571" class="label">5x5 s2 p2</text><text x="334" y="590" class="label">48 x 45 x 80</text>
+    <text x="441" y="552" class="strong">Conv3 + BN + ELU</text><text x="441" y="571" class="label">5x5 s2 p2</text><text x="441" y="590" class="label">64 x 23 x 40</text>
+    <text x="554" y="552" class="strong">Conv4 + BN + ELU</text><text x="554" y="571" class="label">3x3 s2 p1</text><text x="554" y="590" class="label">96 x 12 x 20</text>
+    <text x="673" y="552" class="strong">Conv5 + BN + ELU</text><text x="673" y="571" class="label">3x3 s1 p1</text><text x="673" y="590" class="label">128 x 12 x 20</text>
+    <text x="809" y="552" class="strong">Conv6 + BN + ELU</text><text x="809" y="571" class="label">3x3 s1 p1</text><text x="809" y="590" class="label">160 x 12 x 20</text>
+  </g>
+  <g>
+    <text x="954" y="552" class="strong" fill="#42307D">Adaptive Avg Pool</text><text x="954" y="573" class="label" fill="#42307D">160 x 6 x 10</text>
+    <text x="1072" y="552" class="strong" fill="#42307D">Flatten</text><text x="1072" y="573" class="label" fill="#42307D">9,600 features</text>
+    <text x="1196" y="552" class="strong" fill="#14532D">Dense 9600 -&gt; 512</text><text x="1196" y="573" class="label" fill="#14532D">ELU + Dropout .18</text>
+    <text x="1311" y="552" class="strong" fill="#14532D">Dense 512 -&gt; 256</text><text x="1311" y="573" class="label" fill="#14532D">ELU + Dropout .12</text>
+    <text x="1421" y="552" class="strong" fill="#14532D">Dense 256 -&gt; 64</text><text x="1421" y="573" class="label" fill="#14532D">ELU</text>
+    <text x="1526" y="552" class="strong" fill="#7A2E0E">64 -&gt; 19</text><text x="1526" y="573" class="label" fill="#7A2E0E">9 logits + 9 offsets</text><text x="1526" y="592" class="label" fill="#7A2E0E">+ throttle</text>
+  </g>
+  <text x="45" y="660" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#101828">Hybrid Steering Decoder</text>
+  <g font-family="Arial, sans-serif" font-size="14" text-anchor="middle">
+    <rect x="45" y="690" width="325" height="90" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="1.5"/>
+    <text x="207.5" y="740" fill="#42307D">probabilities = softmax(9 logits)</text>
+    <rect x="440" y="690" width="300" height="90" rx="7" fill="#EEF4FF" stroke="#3538CD" stroke-width="1.5"/>
+    <text x="590" y="740" fill="#2D31A6">class = argmax(probabilities)</text>
+    <rect x="810" y="690" width="315" height="90" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="1.5"/>
+    <text x="967.5" y="740" fill="#14532D">fraction = sigmoid(offset[class])</text>
+    <rect x="1195" y="690" width="360" height="90" rx="7" fill="#FFF4ED" stroke="#E04F16" stroke-width="1.5"/>
+    <text x="1375" y="730" fill="#7A2E0E">steering = class_low + fraction x</text>
+    <text x="1375" y="752" fill="#7A2E0E">(class_high - class_low)</text>
+  </g>
+  <path class="flow" d="M370 735 L440 735"/>
+  <path class="flow" d="M740 735 L810 735"/>
+  <path class="flow" d="M1125 735 L1195 735"/>
+</svg>
