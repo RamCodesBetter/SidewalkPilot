@@ -138,8 +138,11 @@ def validate_suites(
         right = comparison_reports[version]
         if left["model"]["sha256"] != right["model"]["sha256"]:
             raise SystemExit(f"Model hash mismatch for v{version}")
-        if left["fixtures"]["set_sha256"] != right["fixtures"]["set_sha256"]:
-            raise SystemExit(f"Fixture hash mismatch for v{version}")
+        if (
+            left["mini_test_dataset"]["set_sha256"]
+            != right["mini_test_dataset"]["set_sha256"]
+        ):
+            raise SystemExit(f"Mini test dataset hash mismatch for v{version}")
     return versions, baseline_reports, comparison_reports
 
 
@@ -352,7 +355,9 @@ def build_workbook(
     summary["A5"] = "Models"
     summary["B5"] = len(rows)
     summary["A6"] = "Images per model"
-    summary["B6"] = baseline_reports[versions[0]]["fixtures"]["image_count"]
+    summary["B6"] = baseline_reports[versions[0]]["mini_test_dataset"][
+        "image_count"
+    ]
     summary["A7"] = "Warmup / measured runs"
     summary["B7"] = (
         f"{baseline_reports[versions[0]]['performance']['warmup_runs']} / "
@@ -701,13 +706,13 @@ def build_workbook(
         ),
         (
             "Image count",
-            first_baseline["fixtures"]["image_count"],
-            first_comparison["fixtures"]["image_count"],
+            first_baseline["mini_test_dataset"]["image_count"],
+            first_comparison["mini_test_dataset"]["image_count"],
         ),
         (
-            "Fixture SHA-256",
-            first_baseline["fixtures"]["set_sha256"],
-            first_comparison["fixtures"]["set_sha256"],
+            "Mini test dataset SHA-256",
+            first_baseline["mini_test_dataset"]["set_sha256"],
+            first_comparison["mini_test_dataset"]["set_sha256"],
         ),
         (
             "Warmup runs",

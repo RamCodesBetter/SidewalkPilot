@@ -12,12 +12,13 @@ Run this file once on each device, then compare the two JSON reports:
     python3 code/test_files/models/benchmark_v41a_devices.py compare \
         /tmp/rpi5-v4.1a.json /tmp/jetson-v4.1a.json
 
-The timed model section measures local batch-one ``InferenceSession.run`` calls.
-It does not include camera capture, JPEG encoding, Ethernet transfer, or servo
-response. A second local-pipeline number includes image decode and preprocessing.
-Process RSS, system memory, and CUDA-visible memory are reported separately because
-Jetson CPU and GPU share physical LPDDR5 memory and no one counter captures every
-allocation reliably.
+The default images are a 180-image timing-only mini test dataset sampled from the
+separate 81,237-image Series 3/4 training corpus. The timed model section measures
+local batch-one ``InferenceSession.run`` calls. It does not include camera capture,
+JPEG encoding, Ethernet transfer, or servo response. A second local-pipeline
+number includes image decode and preprocessing. Process RSS, system memory, and
+CUDA-visible memory are reported separately because Jetson CPU and GPU share
+physical LPDDR5 memory and no one counter captures every allocation reliably.
 """
 
 from __future__ import annotations
@@ -52,7 +53,7 @@ except ImportError as exc:  # pragma: no cover - depends on the target device
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_MODEL = REPO_ROOT / "code" / "ai_models" / "SidewalkPilot-v4.1a.onnx"
-DEFAULT_IMAGES = Path(__file__).resolve().parent / "v41a_benchmark_sidewalks"
+DEFAULT_IMAGES = Path(__file__).resolve().parent / "mini_test_dataset"
 MIB = 1024.0 * 1024.0
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+[a-z]?)\.onnx$")
 CLAHE_VERSIONS = {"2.0", "2.0b"}
@@ -237,7 +238,7 @@ def _provider_list(requested: str) -> list[str]:
     raise SystemExit(f"No supported ONNX Runtime provider is available: {available}")
 
 
-def _fixture_set_hash(records: list[dict[str, Any]], image_dir: Path) -> str:
+def _mini_dataset_hash(records: list[dict[str, Any]], image_dir: Path) -> str:
     digest = hashlib.sha256()
     for record in records:
         digest.update(str(record["file"]).encode("utf-8"))
@@ -248,26 +249,32 @@ def _fixture_set_hash(records: list[dict[str, Any]], image_dir: Path) -> str:
     return digest.hexdigest()
 
 
-def _load_fixture_manifest(image_dir: Path) -> tuple[list[dict[str, Any]], str]:
+def _load_mini_dataset_manifest(
+    image_dir: Path,
+) -> tuple[list[dict[str, Any]], str]:
     manifest_path = image_dir / "manifest.json"
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise SystemExit(
-            f"Could not read fixture manifest {manifest_path}: {exc}"
+            f"Could not read mini test dataset manifest {manifest_path}: {exc}"
         ) from exc
     records = manifest.get("records")
     if not isinstance(records, list) or not records:
-        raise SystemExit(f"Fixture manifest has no image records: {manifest_path}")
+        raise SystemExit(
+            f"Mini test dataset manifest has no image records: {manifest_path}"
+        )
     for record in records:
         path = image_dir / str(record.get("file", ""))
         history = record.get("target_history")
         if not path.is_file() or not isinstance(history, list) or len(history) != 3:
-            raise SystemExit(f"Invalid fixture record in {manifest_path}: {record}")
-    return records, _fixture_set_hash(records, image_dir)
+            raise SystemExit(
+                f"Invalid mini test dataset record in {manifest_path}: {record}"
+            )
+    return records, _mini_dataset_hash(records, image_dir)
 
 
-def _fixture_feed(
+def _mini_dataset_feed(
     record: dict[str, Any],
     image_dir: Path,
     image_name: str,
@@ -280,7 +287,7 @@ def _fixture_feed(
     path = image_dir / str(record["file"])
     image = cv2.imread(str(path), cv2.IMREAD_COLOR)
     if image is None:
-        raise SystemExit(f"Could not decode fixture image: {path}")
+        raise SystemExit(f"Could not decode mini test dataset image: {path}")
     if use_clahe:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         h_channel, s_channel, v_channel = cv2.split(hsv)
@@ -448,13 +455,13 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
         )
     memory_after_load = _memory_snapshot(cuda_enabled)
 
-    records, fixture_hash = _load_fixture_manifest(image_dir)
+    records, mini_dataset_hash = _load_mini_dataset_manifest(image_dir)
     version = _version_from_path(model_path)
     use_clahe = version in CLAHE_VERSIONS
 
     output_shape: list[int] | None = None
     for index in range(args.warmup):
-        feeds = _fixture_feed(
+        feeds = _mini_dataset_feed(
             records[index % len(records)],
             image_dir,
             contract["image_name"],
@@ -477,7 +484,7 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     measured_started = time.perf_counter()
     for index in range(args.runs):
         preprocessing_started = time.perf_counter()
-        feeds = _fixture_feed(
+        feeds = _mini_dataset_feed(
             records[index % len(records)],
             image_dir,
             contract["image_name"],
@@ -548,11 +555,12 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
             ),
             "onnx_initializers": initializer_stats,
         },
-        "fixtures": {
+        "mini_test_dataset": {
             "path": str(image_dir),
             "image_count": len(records),
-            "set_sha256": fixture_hash,
+            "set_sha256": mini_dataset_hash,
             "source": "real SidewalkPilot sidewalk frames",
+            "is_training_dataset": False,
         },
         "performance": {
             "warmup_runs": args.warmup,
@@ -619,8 +627,8 @@ def _print_report(report: dict[str, Any]) -> None:
     print(f"  Provider:     {report['runtime']['primary_provider']}")
     print(f"  Model SHA256: {report['model']['sha256']}")
     print(
-        f"  Real images:  {report['fixtures']['image_count']} "
-        f"(set {report['fixtures']['set_sha256']})"
+        f"  Mini dataset: {report['mini_test_dataset']['image_count']} real images "
+        f"(set {report['mini_test_dataset']['set_sha256']})"
     )
     print(
         f"  Runs:         {perf['measured_runs']} "
@@ -691,7 +699,10 @@ def compare_reports(first_path: Path, second_path: Path) -> None:
         raise SystemExit("Reports used different model files; comparison rejected.")
     if first["model"]["batch_size"] != second["model"]["batch_size"]:
         raise SystemExit("Reports used different batch sizes; comparison rejected.")
-    if first["fixtures"]["set_sha256"] != second["fixtures"]["set_sha256"]:
+    if (
+        first["mini_test_dataset"]["set_sha256"]
+        != second["mini_test_dataset"]["set_sha256"]
+    ):
         raise SystemExit(
             "Reports used different sidewalk image sets; comparison rejected."
         )

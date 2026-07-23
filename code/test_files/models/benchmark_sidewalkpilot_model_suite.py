@@ -18,7 +18,7 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 BENCHMARK_SCRIPT = SCRIPT_DIR / "benchmark_v41a_devices.py"
-DEFAULT_IMAGES = SCRIPT_DIR / "v41a_benchmark_sidewalks"
+DEFAULT_IMAGES = SCRIPT_DIR / "mini_test_dataset"
 DEFAULT_MODEL_DIRS = [
     REPO_ROOT / "code" / "ai_models",
 ]
@@ -181,8 +181,13 @@ def compare_suites(args: argparse.Namespace) -> dict[str, Any]:
         second = comparison_models[version]
         if first["model"]["sha256"] != second["model"]["sha256"]:
             raise SystemExit(f"v{version} model hashes differ between devices")
-        if first["fixtures"]["set_sha256"] != second["fixtures"]["set_sha256"]:
-            raise SystemExit(f"v{version} fixture hashes differ between devices")
+        if (
+            first["mini_test_dataset"]["set_sha256"]
+            != second["mini_test_dataset"]["set_sha256"]
+        ):
+            raise SystemExit(
+                f"v{version} mini test dataset hashes differ between devices"
+            )
         first_perf = first["performance"]
         second_perf = second["performance"]
         speedup = second_perf["ips"] / first_perf["ips"]

@@ -37,7 +37,7 @@ SERVER = (
     / "jetson_inference_server.py"
 )
 CLIENT_DIR = SERVER.parent
-DEFAULT_IMAGES = SCRIPT_DIR / "v41a_benchmark_sidewalks"
+DEFAULT_IMAGES = SCRIPT_DIR / "mini_test_dataset"
 DEFAULT_MODEL_DIRS = [
     REPO_ROOT / "code" / "ai_models",
 ]
@@ -74,7 +74,7 @@ def _discover_models(model_dirs: list[Path]) -> dict[str, Path]:
     return models
 
 
-def _fixture_hash(records: list[dict[str, Any]], image_dir: Path) -> str:
+def _mini_dataset_hash(records: list[dict[str, Any]], image_dir: Path) -> str:
     digest = hashlib.sha256()
     for record in records:
         digest.update(str(record["file"]).encode("utf-8"))
@@ -87,14 +87,18 @@ def _load_frames(image_dir: Path) -> tuple[list[np.ndarray], str]:
     manifest = json.loads((image_dir / "manifest.json").read_text(encoding="utf-8"))
     records = manifest.get("records", [])
     if not records:
-        raise SystemExit(f"No fixture records in {image_dir / 'manifest.json'}")
+        raise SystemExit(
+            f"No mini test dataset records in {image_dir / 'manifest.json'}"
+        )
     frames = []
     for record in records:
         frame = cv2.imread(str(image_dir / str(record["file"])), cv2.IMREAD_COLOR)
         if frame is None:
-            raise SystemExit(f"Could not decode fixture {record['file']}")
+            raise SystemExit(
+                f"Could not decode mini test dataset image {record['file']}"
+            )
         frames.append(cv2.resize(frame, (1280, 720), interpolation=cv2.INTER_CUBIC))
-    return frames, _fixture_hash(records, image_dir)
+    return frames, _mini_dataset_hash(records, image_dir)
 
 
 def _wait_for_server(port: int, process: subprocess.Popen[Any], timeout: float) -> None:

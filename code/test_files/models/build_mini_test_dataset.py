@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a compact, steering-balanced real-image fixture set for v4.1a."""
+"""Build the compact real-image mini dataset used for device timing tests."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ DEFAULT_DATASET = (
     / "series_3_and_4"
     / "sidewalkpilot_dataset"
 )
-DEFAULT_OUTPUT = Path(__file__).resolve().parent / "v41a_benchmark_sidewalks"
+DEFAULT_OUTPUT = Path(__file__).resolve().parent / "mini_test_dataset"
 STEERING_BINS = (
     ("hard_left_0_45", 0.0, 45.0),
     ("left_45_60", 45.0, 60.0),
@@ -131,7 +131,7 @@ def build(args: argparse.Namespace) -> None:
                 resized,
                 [int(cv2.IMWRITE_JPEG_QUALITY), args.jpeg_quality],
             ):
-                raise SystemExit(f"Could not write fixture image: {destination}")
+                raise SystemExit(f"Could not write mini test image: {destination}")
             manifest_records.append(
                 {
                     **record,
@@ -143,9 +143,12 @@ def build(args: argparse.Namespace) -> None:
     manifest = {
         "schema_version": 1,
         "description": (
-            "Real SidewalkPilot frames for identical Raspberry Pi 5 CPU and "
-            "Jetson Orin Nano CUDA v4.1a inference benchmarks."
+            "A 180-image mini test dataset sampled from the separate 81,237-image "
+            "Series 3/4 training corpus for Raspberry Pi 5 and Jetson Orin Nano "
+            "inference-speed tests. This is not the training dataset."
         ),
+        "dataset_role": "mini inference-speed test dataset",
+        "is_training_dataset": False,
         "selection": "deterministic chronological spacing within each steering bucket",
         "source_dataset": "SidewalkPilot-v3-and-v4",
         "image_width": 320,
