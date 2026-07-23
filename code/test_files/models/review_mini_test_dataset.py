@@ -93,7 +93,34 @@ def save_rows(output: Path, rows: list[dict[str, object]]) -> None:
     temporary.replace(output)
 
 
-def open_in_preview(image_path: Path) -> None:
+def frontmost_application_name() -> str:
+    result = subprocess.run(
+        [
+            "osascript",
+            "-e",
+            (
+                'tell application "System Events" to get name of first '
+                "application process whose frontmost is true"
+            ),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def activate_application(application_name: str) -> None:
+    escaped_name = application_name.replace('"', '\\"')
+    subprocess.run(
+        ["osascript", "-e", f'tell application "{escaped_name}" to activate'],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def open_in_preview(image_path: Path, terminal_application: str) -> None:
     subprocess.run(
         ["open", "-a", "Preview", str(image_path)],
         check=True,
@@ -101,6 +128,8 @@ def open_in_preview(image_path: Path) -> None:
         stderr=subprocess.DEVNULL,
     )
     time.sleep(0.15)
+    activate_application(terminal_application)
+    time.sleep(0.05)
 
 
 def close_front_preview_document() -> None:
@@ -157,6 +186,7 @@ def main() -> int:
     output = args.output.expanduser().resolve()
     records = load_records(dataset_dir)
     rows = [] if args.restart else load_existing(output)
+    terminal_application = frontmost_application_name()
     if len(rows) > len(records):
         raise ValueError(f"{output} has more rows than the manifest")
 
@@ -171,7 +201,7 @@ def main() -> int:
             original = float(record["target_steering"])
             original_text = str(int(original)) if original.is_integer() else str(original)
 
-            open_in_preview(image_path)
+            open_in_preview(image_path, terminal_application)
             print()
             print(
                 f"[{index + 1}/{len(records)}] {record['file']} | "
