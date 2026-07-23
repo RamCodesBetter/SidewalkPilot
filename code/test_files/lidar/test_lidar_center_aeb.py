@@ -220,7 +220,7 @@ class LidarCenterAebTest(unittest.TestCase):
             def __init__(self):
                 self.submissions = []
 
-            def submit(self, frame, model_version=None):
+            def submit(self, frame, model_version=None, **metadata):
                 self.submissions.append((frame, model_version))
                 return 8
 

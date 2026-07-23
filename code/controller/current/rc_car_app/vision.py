@@ -6,7 +6,13 @@ import threading
 import time
 from pathlib import Path
 
-from .config import ENABLE_WEBCAM_VISION, PI_CAMERA_NUM, PI_CAMERA_ROTATE_180, USE_PI_CAMERA
+from .config import (
+    CONTROL_LOOP_HZ,
+    ENABLE_WEBCAM_VISION,
+    PI_CAMERA_NUM,
+    PI_CAMERA_ROTATE_180,
+    USE_PI_CAMERA,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 AI_MODELS_DIR = Path(
@@ -90,7 +96,7 @@ YOLO_IMGSZ = 640
 YOLO_CONF = 0.20
 CAMERA_FRAME_WIDTH = 1280
 CAMERA_FRAME_HEIGHT = 720
-CAMERA_FPS = 30
+CAMERA_FPS = CONTROL_LOOP_HZ
 FORCE_YOLO_ONLY = False
 STEERING_MODEL_WIDTH = 200
 STEERING_MODEL_HEIGHT = 66
@@ -788,6 +794,7 @@ class WebcamVisionProcessor:
         self._fps_last_frame_time = 0.0
         self.analysis = _empty_analysis()
         self.latest_frame = None
+        self.latest_frame_captured_at = 0.0
         self.frame_sequence = 0
         self.model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
         self.model_path = resolve_steering_model_path(self.model_choice)
@@ -820,7 +827,10 @@ class WebcamVisionProcessor:
         if USE_PI_CAMERA and Picamera2 is not None:
             pi_capture = _PiCameraCapture(PI_CAMERA_NUM)
             if pi_capture.open():
-                print(f"Using Pi Camera {PI_CAMERA_NUM} for vision processing.")
+                print(
+                    f"Using Pi Camera {PI_CAMERA_NUM} at "
+                    f"{CAMERA_FRAME_WIDTH}x{CAMERA_FRAME_HEIGHT}, target {CAMERA_FPS} FPS."
+                )
                 return pi_capture
             raise RuntimeError(f"Failed to start Pi Camera {PI_CAMERA_NUM}")
         raise RuntimeError("Pi Camera support is required but Picamera2 is unavailable")
@@ -955,11 +965,15 @@ class WebcamVisionProcessor:
             return None if self.latest_frame is None else self.latest_frame.copy()
 
     def grab_latest_frame_sample(self, after_sequence=0):
-        """Return each captured frame at most once to the inference sender."""
+        """Return each captured frame and its timestamp at most once."""
         with self.lock:
             if self.latest_frame is None or self.frame_sequence <= int(after_sequence):
                 return None
-            return self.frame_sequence, self.latest_frame.copy()
+            return (
+                self.frame_sequence,
+                self.latest_frame_captured_at,
+                self.latest_frame.copy(),
+            )
 
     def get_analysis(self):
         with self.lock:
@@ -1020,12 +1034,14 @@ class WebcamVisionProcessor:
             if not ok or frame is None:
                 time.sleep(0.05)
                 continue
+            captured_at = time.monotonic()
             analysis = self._estimate_path_bias(frame)
             with self.lock:
                 self.frame_center_bias = analysis["heading_bias"]
                 self.confidence = analysis["confidence"]
                 self.analysis = analysis
                 self.latest_frame = frame.copy()
+                self.latest_frame_captured_at = captured_at
                 self.frame_sequence += 1
                 now = time.time()
                 dt = now - self._fps_last_frame_time

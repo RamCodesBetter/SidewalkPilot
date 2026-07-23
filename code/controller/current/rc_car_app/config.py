@@ -337,7 +337,8 @@ PHOTO_RUN_CAPTURE_FPS = 10.0
 # Pi5<->Zero2W dashboard USB link.
 JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
-JETSON_RESULT_MAX_AGE_SEC = 0.25
+JETSON_RESULT_MAX_AGE_SEC = 0.08
+JETSON_RESULT_MAX_FRAME_LAG = 2
 CONTROL_LOOP_STALL_WARN_SEC = 0.10
 
 # Interruption clip recorder (dad+son suggestion #1). While autonomous, keep a rolling

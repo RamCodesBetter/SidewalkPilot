@@ -214,6 +214,7 @@ class AsyncJetsonSteeringClient:
         self._latest_result_sequence = 0
         self._latest_result_model = ""
         self._latest_result_time = 0.0
+        self._latest_result_source_frame_sequence = 0
         self._sequence_generation = 0
         self._latest_result_generation = -1
         self._autonomous_sequence_active = False
@@ -225,6 +226,7 @@ class AsyncJetsonSteeringClient:
         self.socket_round_trip_ms = 0.0
         self.inference_request_ms = 0.0
         self.submit_to_result_ms = 0.0
+        self.capture_to_result_ms = 0.0
         self.last_jpeg = None
         self.bucket_probs = [0.0] * 9
         self._target_history = [90.0, 90.0, 90.0]
@@ -236,21 +238,39 @@ class AsyncJetsonSteeringClient:
         )
         self._thread.start()
 
-    def submit(self, frame_bgr, model_version=None) -> int:
-        """Replace any pending frame and return immediately with its sequence ID."""
+    def submit(
+        self,
+        frame_bgr,
+        model_version=None,
+        *,
+        source_frame_sequence=None,
+        captured_at=None,
+    ) -> int:
+        """Queue one frame with the steering history present at submission."""
         if frame_bgr is None:
             return 0
         with self._condition:
             if not self._running:
                 return 0
+            submitted_at = time.monotonic()
+            frame_captured_at = submitted_at if captured_at is None else float(captured_at)
+            if (
+                not math.isfinite(frame_captured_at)
+                or frame_captured_at <= 0.0
+                or frame_captured_at > submitted_at
+            ):
+                frame_captured_at = submitted_at
             self._request_sequence += 1
             sequence = self._request_sequence
             self._latest_request = (
                 sequence,
                 self._sequence_generation,
-                time.monotonic(),
+                submitted_at,
+                frame_captured_at,
+                int(source_frame_sequence or 0),
                 frame_bgr,
                 str(model_version or ""),
+                tuple(self._target_history),
             )
             self._condition.notify()
             return sequence
@@ -291,6 +311,7 @@ class AsyncJetsonSteeringClient:
                 self._latest_result_sequence = 0
                 self._latest_result_model = ""
                 self._latest_result_time = 0.0
+                self._latest_result_source_frame_sequence = 0
                 self._latest_result_generation = -1
             self._record_target_locked(steering_deg, now, force=force)
 
@@ -306,6 +327,7 @@ class AsyncJetsonSteeringClient:
             self._latest_result_sequence = 0
             self._latest_result_model = ""
             self._latest_result_time = 0.0
+            self._latest_result_source_frame_sequence = 0
             self._latest_result_generation = -1
 
     def get_latest_sample(self, model_version=None, max_age_sec=0.25):
@@ -323,10 +345,12 @@ class AsyncJetsonSteeringClient:
                 return None
             return {
                 "sequence": self._latest_result_sequence,
+                "source_frame_sequence": self._latest_result_source_frame_sequence,
                 "model_version": self._latest_result_model,
                 "result": tuple(self._latest_result),
                 "age_sec": max(0.0, now - self._latest_result_time),
                 "submit_to_result_ms": self.submit_to_result_ms,
+                "capture_to_result_ms": self.capture_to_result_ms,
                 "inference_request_ms": self.inference_request_ms,
             }
 
@@ -367,9 +391,16 @@ class AsyncJetsonSteeringClient:
                     break
 
             if request is not None:
-                sequence, generation, submitted_at, frame_bgr, model_version = request
-                with self._condition:
-                    target_history = tuple(self._target_history)
+                (
+                    sequence,
+                    generation,
+                    submitted_at,
+                    captured_at,
+                    source_frame_sequence,
+                    frame_bgr,
+                    model_version,
+                    target_history,
+                ) = request
                 try:
                     result = self.client.infer(
                         frame_bgr,
@@ -385,16 +416,20 @@ class AsyncJetsonSteeringClient:
                     self.submit_to_result_ms = max(
                         0.0, (completed_at - submitted_at) * 1000.0
                     )
+                    self.capture_to_result_ms = max(
+                        0.0, (completed_at - captured_at) * 1000.0
+                    )
                     self._processed_sequence = max(self._processed_sequence, sequence)
                     if generation == self._sequence_generation:
                         self._latest_result = result
                         self._latest_result_sequence = sequence
+                        self._latest_result_source_frame_sequence = source_frame_sequence
                         self._latest_result_model = model_version
-                        # Freshness starts when this frame entered the client, not when
-                        # a delayed reconnect/model load finally produced its result.
-                        self._latest_result_time = submitted_at
+                        # Freshness starts at camera capture, not after queueing,
+                        # reconnecting, loading a model, or completing inference.
+                        self._latest_result_time = captured_at
                         self._latest_result_generation = generation
-                    result_age_sec = completed_at - submitted_at
+                    result_age_sec = completed_at - captured_at
                     if (
                         result is not None
                         and generation == self._sequence_generation

@@ -219,6 +219,56 @@ class AsyncJetsonClientTest(unittest.TestCase):
         finally:
             client.close()
 
+    def test_submit_binds_frame_to_history_snapshot(self):
+        fake = BlockingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=0.05,
+            history_sample_interval_sec=0.0,
+            client=fake,
+        )
+        try:
+            self.assertTrue(fake.status_started.wait(timeout=0.2))
+            for steering in (62.0, 71.0, 83.0):
+                client.observe_manual_steering(steering)
+
+            client.submit("captured-frame", model_version="4.1a")
+            client.observe_manual_steering(120.0)
+            fake.release_status.set()
+            self.assertTrue(fake.inference_finished.wait(timeout=0.5))
+
+            self.assertEqual(fake.infer_histories, [(62.0, 71.0, 83.0)])
+        finally:
+            fake.release_status.set()
+            client.close()
+
+    def test_result_age_and_metadata_start_at_camera_capture(self):
+        fake = RecordingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            client=fake,
+        )
+        try:
+            captured_at = time.monotonic() - 0.06
+            client.submit(
+                "captured-frame",
+                model_version="3.4",
+                source_frame_sequence=42,
+                captured_at=captured_at,
+            )
+            self.assertTrue(fake.wait_for_inferences(1))
+
+            self.assertIsNone(
+                client.get_latest_sample(model_version="3.4", max_age_sec=0.03)
+            )
+            sample = client.get_latest_sample(model_version="3.4", max_age_sec=1.0)
+            self.assertIsNotNone(sample)
+            self.assertEqual(sample["source_frame_sequence"], 42)
+            self.assertGreaterEqual(sample["capture_to_result_ms"], 60.0)
+        finally:
+            client.close()
+
     def test_history_matches_ten_hz_training_cadence_and_latest_manual_target(self):
         fake = RecordingFakeClient()
         client = AsyncJetsonSteeringClient(

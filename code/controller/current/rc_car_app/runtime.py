@@ -23,6 +23,7 @@ from .config import (
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
     JETSON_RESULT_MAX_AGE_SEC,
+    JETSON_RESULT_MAX_FRAME_LAG,
     CONTROL_LOOP_HZ,
     CONTROL_LOOP_STALL_WARN_SEC,
     INTERRUPTION_CLIP_ENABLED,
@@ -1482,13 +1483,28 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             if frame is not None:
                 frame_sample = (int(state.get("_jon_submitted_frame_sequence", 0)) + 1, frame)
         if frame_sample is not None:
-            frame_sequence, frame = frame_sample
-            jetson_client.submit(frame, model_version=active_model_choice)
+            if len(frame_sample) == 3:
+                frame_sequence, frame_captured_at, frame = frame_sample
+            else:
+                frame_sequence, frame = frame_sample
+                frame_captured_at = time.monotonic()
+            jetson_client.submit(
+                frame,
+                model_version=active_model_choice,
+                source_frame_sequence=frame_sequence,
+                captured_at=frame_captured_at,
+            )
             state["_jon_submitted_frame_sequence"] = int(frame_sequence)
         jon_sample = jetson_client.get_latest_sample(
             model_version=active_model_choice,
             max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
         )
+        if jon_sample is not None:
+            source_frame_sequence = int(jon_sample.get("source_frame_sequence", 0))
+            latest_frame_sequence = int(state.get("_jon_submitted_frame_sequence", 0))
+            frame_lag = max(0, latest_frame_sequence - source_frame_sequence)
+            if source_frame_sequence and frame_lag > JETSON_RESULT_MAX_FRAME_LAG:
+                jon_sample = None
         if jon_sample is not None:
             jon_result = jon_sample["result"]
             jon_steer_deg, _jon_throttle = jon_result
@@ -1510,13 +1526,23 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))
             state["infer_fps"] = float(getattr(jetson_client, "infer_fps", 0.0))
             state["infer_ms"] = float(getattr(jetson_client, "infer_ms", 0.0))
+            state["capture_to_result_ms"] = float(
+                jon_sample.get("capture_to_result_ms", 0.0)
+            )
+            state["model_frame_lag"] = frame_lag
             # perf on the Pi cmdline (Jon is headless): IPS vs FPS + Jon session.run ms, throttled ~2s.
             # If infer_ms is small but IPS<FPS -> Pi-loop/JPEG bound, not the model.
             _perf_now = time.time()
             if _perf_now >= state.get("_perf_next", 0.0):
                 state["_perf_next"] = _perf_now + 2.0
                 _cam_fps = webcam_vision.camera_fps if webcam_vision is not None else 0.0
-                print(f"[perf] IPS={state['infer_fps']:.1f}  FPS={_cam_fps:.1f}  infer={state['infer_ms']:.0f}ms", flush=True)
+                print(
+                    f"[perf] IPS={state['infer_fps']:.1f}  "
+                    f"FPS={_cam_fps:.1f}  infer={state['infer_ms']:.1f}ms  "
+                    f"capture-result={state['capture_to_result_ms']:.1f}ms  "
+                    f"lag={state['model_frame_lag']}f",
+                    flush=True,
+                )
             camera_analysis = {
                 "heading_bias": max(-1.0, min(1.0, (jon_steer_deg - 90.0) / 90.0)),
                 "confidence": 1.0,
