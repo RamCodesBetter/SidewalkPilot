@@ -1457,21 +1457,10 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
         "method": "none",
     }
     model_frame_is_stale = True
-    if webcam_vision:
-        camera_analysis, last_frame_time = webcam_vision.get_analysis()
-        model_frame_is_stale = time.time() - last_frame_time > 0.75
-        if model_frame_is_stale:
-            camera_analysis["heading_bias"] = 0.0
-            camera_analysis["confidence"] = 0.0
-            camera_analysis["left_edge_found"] = False
-            camera_analysis["right_edge_found"] = False
-            camera_analysis["corridor_width_px"] = 0.0
-            camera_analysis["method"] = "stale_model_frame"
 
-    # Jetson ("Jon") inference: the Pi sends the live frame + active model choice
-    # through a latest-frame worker and consumes only cached results here. Network,
-    # JPEG, and model latency therefore never block controller events or GPIO writes.
-    # If Jon is unreachable or stale, confidence stays 0 -> safe hard stop below.
+    # The Raspberry Pi 5 sends the live frame and active model choice through a
+    # latest-frame worker. Network, JPEG, and inference waits stay off the control
+    # loop. If the Jetson result is missing, mismatched, or stale, autonomy stops.
     if jetson_client is not None:
         frame_sample = None
         if webcam_vision is not None and hasattr(webcam_vision, "grab_latest_frame_sample"):
@@ -1558,6 +1547,8 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             model_frame_is_stale = True
             camera_analysis["confidence"] = 0.0
             camera_analysis["method"] = "jetson_unreachable"
+    else:
+        camera_analysis["method"] = "jetson_unavailable"
 
     state["camera_steering_bias"] = camera_analysis["heading_bias"]
     state["camera_confidence"] = camera_analysis["confidence"]
@@ -1838,7 +1829,7 @@ def _ship_logs_to_jon(host=None):
     """On exit, rsync the run CSV logs to Jon (/nvme/logs) and delete the ones that
     transferred (rsync --remove-source-files). Fails safe: keeps logs locally if Jon
     is unreachable or there's no passwordless SSH key. Never raises because shutdown
-    must not depend on it. Local Raspberry Pi inference tests skip this transfer."""
+    must not depend on it."""
     configured_host = JETSON_STEERING_HOST if host is None else host
     host = (configured_host or "").strip()
     if not host:
@@ -1863,7 +1854,7 @@ def _ship_logs_to_jon(host=None):
         print(f"Log ship to Jon skipped (kept locally): {exc}")
 
 
-def run(model_choice=None, inference_host=None, local_inference=False):
+def run(model_choice=None, inference_host=None):
     global photo_status
     shutdown_flag.clear()
     print("RC Car Controller Starting...")
@@ -1872,6 +1863,15 @@ def run(model_choice=None, inference_host=None, local_inference=False):
         valid = ", ".join(STEERING_MODEL_CHOICES)
         raise ValueError(
             f"Unknown steering model '{active_model_choice}'. Valid choices: {valid}"
+        )
+    configured_inference_host = (
+        JETSON_STEERING_HOST if inference_host is None else inference_host
+    )
+    jetson_host = (configured_inference_host or "").strip()
+    if not jetson_host:
+        raise ValueError(
+            "JETSON_STEERING_HOST is required because steering inference is "
+            "Jetson Orin Nano-only."
         )
     state = create_state()
     metrics = Metrics()
@@ -1951,35 +1951,23 @@ def run(model_choice=None, inference_host=None, local_inference=False):
     else:
         print("Yaw-rate PID steering OFF (open-loop). Set STEERING_YAW_PID_MODE=straight|full to enable.")
 
-    configured_inference_host = (
-        JETSON_STEERING_HOST if inference_host is None else inference_host
+    jetson_client = AsyncJetsonSteeringClient(
+        jetson_host,
+        JETSON_STEERING_PORT,
+        history_result_max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
     )
-    jetson_host = (configured_inference_host or "").strip()
-    jetson_client = None
-    if jetson_host:
-        jetson_client = AsyncJetsonSteeringClient(
-            jetson_host,
-            JETSON_STEERING_PORT,
-            history_result_max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
-        )
-        if local_inference:
-            print(
-                "TEMPORARY TEST MODE: autonomy inference runs on the Raspberry Pi "
-                f"CPU through the local server at {jetson_host}:{JETSON_STEERING_PORT}."
-            )
-        else:
-            print(
-                "Autonomy inference on Jetson Orin Nano at "
-                f"{jetson_host}:{JETSON_STEERING_PORT}. Raspberry Pi will not run "
-                "a local steering model."
-            )
+    print(
+        "Autonomy inference on Jetson Orin Nano at "
+        f"{jetson_host}:{JETSON_STEERING_PORT}. The Raspberry Pi 5 captures "
+        "frames and applies fresh returned steering values."
+    )
 
     # Interruption clip recorder: rolling buffer of the exact JPEGs sent to Jon; on every
     # autonomous->manual takeover it saves the 2s-before as a clip (background thread), and
     # ships them to Jon at quit. Only meaningful when Jon is the inference source.
     clip_recorder = InterruptionClipRecorder(
         clip_seconds=INTERRUPTION_CLIP_SECONDS, out_dir=INTERRUPTION_CLIP_DIR,
-        enabled=INTERRUPTION_CLIP_ENABLED and jetson_client is not None)
+        enabled=INTERRUPTION_CLIP_ENABLED)
 
     # Telemetry -> local InfluxDB (non-blocking; disabled if ~/.influxdb.json absent).
     # One run_id per car launch; browse at http://raspberrypi.local:8086.
@@ -1987,9 +1975,7 @@ def run(model_choice=None, inference_host=None, local_inference=False):
     dashboard_run_number = _run_number_today()   # R### shown on z2w V1H1
     influx = InfluxLogger(drive_run_id, base_tags={"model": str(active_model_choice), "device": "rpi5"})
 
-    webcam_vision = WebcamVisionProcessor(
-        model_choice=active_model_choice, camera_only=jetson_client is not None
-    )
+    webcam_vision = WebcamVisionProcessor(model_choice=active_model_choice)
     if not webcam_vision.start():
         webcam_vision = None
 
@@ -2571,12 +2557,9 @@ def run(model_choice=None, inference_host=None, local_inference=False):
         hardware.cleanup()
         if csv_file:
             csv_file.close()
-        if not local_inference:
-            _ship_logs_to_jon(jetson_host)
-            if clip_recorder is not None:
-                clip_recorder.ship_to_jon(jetson_host)
-        elif clip_recorder is not None:
-            print("Local inference test: keeping run logs and interruption clips on the Raspberry Pi.")
+        _ship_logs_to_jon(jetson_host)
+        if clip_recorder is not None:
+            clip_recorder.ship_to_jon(jetson_host)
         influx.close()               # drain remaining telemetry to InfluxDB
         cleanup_photo_run_dir()
         pygame.quit()

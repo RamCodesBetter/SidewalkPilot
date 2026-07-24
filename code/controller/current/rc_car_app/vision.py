@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 import os
 import queue
-import sys
 import threading
 import time
-from pathlib import Path
 
 from .config import (
     CONTROL_LOOP_HZ,
@@ -14,17 +12,6 @@ from .config import (
     USE_PI_CAMERA,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
-AI_MODELS_DIR = Path(
-    os.environ.get("RC_CAR_AI_MODELS_DIR", str(PROJECT_ROOT / "code" / "ai_models"))
-).expanduser()
-YOLO_VENV_SITE_PACKAGES = str(AI_MODELS_DIR / ".yolo_env" / "lib" / "python3.13" / "site-packages")
-if os.path.isdir(YOLO_VENV_SITE_PACKAGES) and YOLO_VENV_SITE_PACKAGES not in sys.path:
-    sys.path.append(YOLO_VENV_SITE_PACKAGES)
-
-YOLO_MODEL_PATH = Path(
-    os.environ.get("RC_CAR_YOLO_MODEL_PATH", str(AI_MODELS_DIR / "best_24.pt"))
-).expanduser()
 STEERING_MODEL_VERSIONS = (
     "1.0",
     "1.0b",
@@ -56,8 +43,8 @@ STEERING_MODEL_VERSIONS = (
     "2.3b",
     "2.4",
     "2.4b",
-    # Series 3/4 (heavy, Jetson-only): the Pi cannot run these locally — they are
-    # selectable so the model page can tell the Jetson ("Jon") to run them.
+    # Series 3/4 hybrid models. Every listed family runs on the Jetson Orin Nano;
+    # the Raspberry Pi stores only the selected version and sends it with frames.
     # 3.0/3.0b = 2-output regression; 3.1+ = 19-output hybrid (9 class logits +
     # 9 within-bucket offsets + 1 throttle), decoded on Jon by output length.
     "3.0",
@@ -88,7 +75,7 @@ STEERING_MODEL_VERSIONS = (
     "4.1a",
     "4.1c",
 )
-STEERING_MODEL_CHOICES = {version: f"SidewalkPilot-v{version}.pth" for version in STEERING_MODEL_VERSIONS}
+STEERING_MODEL_CHOICES = {version: version for version in STEERING_MODEL_VERSIONS}
 # v3.4 won the 2026-07-13 shadow/turn field comparison. Keep newer and b checkpoints
 # selectable, but do not infer the live research default from list order.
 DEFAULT_STEERING_MODEL_CHOICE = os.environ.get("RC_CAR_STEERING_MODEL", "3.4")
@@ -97,11 +84,6 @@ YOLO_CONF = 0.20
 CAMERA_FRAME_WIDTH = 1280
 CAMERA_FRAME_HEIGHT = 720
 CAMERA_FPS = CONTROL_LOOP_HZ
-FORCE_YOLO_ONLY = False
-STEERING_MODEL_WIDTH = 200
-STEERING_MODEL_HEIGHT = 66
-SERIES_1_STEERING_OUTPUT_SCALE_DEG = 86.0
-SERIES_2_STEERING_OUTPUT_SCALE_DEG = 85.0
 
 try:
     import cv2
@@ -111,111 +93,11 @@ except ImportError:
     np = None
 
 try:
-    from ultralytics import YOLO
-except ImportError:
-    YOLO = None
-
-try:
-    import torch
-    import torch.nn as nn
-except ImportError:
-    torch = None
-    nn = None
-
-try:
     from picamera2 import Picamera2
     from libcamera import Transform
 except ImportError:
     Picamera2 = None
     Transform = None
-
-
-if nn is not None:
-    class SteeringAutonomyV2(nn.Module):
-        def __init__(self, output_scale_deg=SERIES_1_STEERING_OUTPUT_SCALE_DEG):
-            super().__init__()
-            self.output_scale_deg = float(output_scale_deg)
-            self.backbone = nn.Sequential(
-                nn.Conv2d(3, 24, 5, stride=2),
-                nn.BatchNorm2d(24),
-                nn.ELU(inplace=True),
-                nn.Conv2d(24, 36, 5, stride=2),
-                nn.BatchNorm2d(36),
-                nn.ELU(inplace=True),
-                nn.Conv2d(36, 48, 5, stride=2),
-                nn.BatchNorm2d(48),
-                nn.ELU(inplace=True),
-                nn.Conv2d(48, 64, 3, stride=1),
-                nn.BatchNorm2d(64),
-                nn.ELU(inplace=True),
-                nn.Conv2d(64, 64, 3, stride=1),
-                nn.BatchNorm2d(64),
-                nn.ELU(inplace=True),
-            )
-            self.head = nn.Sequential(
-                nn.AdaptiveAvgPool2d((4, 8)),
-                nn.Flatten(),
-                nn.Linear(64 * 4 * 8, 256),
-                nn.ELU(inplace=True),
-                nn.Dropout(p=0.10),
-                nn.Linear(256, 64),
-                nn.ELU(inplace=True),
-                nn.Linear(64, 1),
-                nn.Tanh(),
-            )
-
-        def forward(self, x):
-            x = self.backbone(x)
-            return 90.0 + self.output_scale_deg * self.head(x)
-else:
-    SteeringAutonomyV2 = None
-
-
-def resolve_steering_model_path(model_choice):
-    explicit_path = os.environ.get("RC_CAR_STEERING_MODEL_PATH", "").strip()
-    if explicit_path:
-        return Path(explicit_path).expanduser()
-    choice = str(model_choice or DEFAULT_STEERING_MODEL_CHOICE).strip()
-    if choice not in STEERING_MODEL_CHOICES:
-        valid = ", ".join(sorted(STEERING_MODEL_CHOICES))
-        raise ValueError(f"unknown steering model '{choice}', expected one of: {valid}")
-    return AI_MODELS_DIR / STEERING_MODEL_CHOICES[choice]
-
-
-def steering_model_series(model_choice) -> int:
-    choice = str(model_choice or DEFAULT_STEERING_MODEL_CHOICE).strip().lower()
-    if choice.startswith("2."):
-        return 2
-    return 1
-
-
-def steering_output_scale_deg(model_choice) -> float:
-    return SERIES_2_STEERING_OUTPUT_SCALE_DEG if steering_model_series(model_choice) == 2 else SERIES_1_STEERING_OUTPUT_SCALE_DEG
-
-
-def steering_uses_clahe(model_choice) -> bool:
-    choice = str(model_choice or DEFAULT_STEERING_MODEL_CHOICE).strip().lower()
-    return choice in {"2.0", "2.0b"}
-
-
-def apply_clahe_to_bgr(frame):
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    h_channel, s_channel, v_channel = cv2.split(hsv)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    enhanced_v = clahe.apply(v_channel)
-    enhanced_hsv = cv2.merge((h_channel, s_channel, enhanced_v))
-    return cv2.cvtColor(enhanced_hsv, cv2.COLOR_HSV2BGR)
-
-
-def preprocess_steering_frame(frame, model_choice=None):
-    if steering_uses_clahe(model_choice):
-        frame = apply_clahe_to_bgr(frame)
-    img = cv2.resize(frame, (STEERING_MODEL_WIDTH, STEERING_MODEL_HEIGHT), interpolation=cv2.INTER_AREA)
-    img = img.astype(np.float32) / 255.0
-    img = (img - 0.5) / 0.5
-    img = np.transpose(img, (2, 0, 1))
-    return torch.from_numpy(img).float().unsqueeze(0)
-
 
 class _PiCameraCapture:
     def __init__(self, camera_num):
@@ -776,19 +658,13 @@ def annotate_sidewalk_edges(frame, analysis):
 
 
 class WebcamVisionProcessor:
-    """Pi camera steering estimator backed by a SteeringAutonomyV2 checkpoint."""
+    """Capture Pi camera frames for Jetson inference, previews, and data collection."""
 
-    def __init__(self, model_choice=None, camera_only=False):
-        # camera_only: capture frames but do NOT load/run a local steering model.
-        # Used when the Jetson ("Jon") runs the model and the Pi only feeds it frames.
-        self.camera_only = bool(camera_only)
+    def __init__(self, model_choice=None):
         self.capture = None
         self.lock = threading.Lock()
-        self.model_lock = threading.Lock()
         self.running = False
         self.thread = None
-        self.frame_center_bias = 0.0
-        self.confidence = 0.0
         self.last_frame_time = 0.0
         self.camera_fps = 0.0
         self._fps_last_frame_time = 0.0
@@ -797,9 +673,6 @@ class WebcamVisionProcessor:
         self.latest_frame_captured_at = 0.0
         self.frame_sequence = 0
         self.model_choice = model_choice or DEFAULT_STEERING_MODEL_CHOICE
-        self.model_path = resolve_steering_model_path(self.model_choice)
-        self.steering_model = None
-        self.torch_device = None
         # async JPEG writer: keep the slow cv2.imwrite OFF the control loop so
         # high-rate run capture doesn't stutter steering or the dashboard.
         # Bound queued raw 1280x720 frames to roughly three seconds of capture.
@@ -808,20 +681,6 @@ class WebcamVisionProcessor:
         self._save_thread = None
         self.frames_dropped = 0
         self._capture_error_next_log = 0.0
-
-    def _load_steering_model(self, model_choice):
-        model_path = resolve_steering_model_path(model_choice)
-        if not model_path.exists():
-            raise FileNotFoundError(f"Steering autonomy model not found: {model_path}")
-        model = SteeringAutonomyV2(output_scale_deg=steering_output_scale_deg(model_choice)).to(self.torch_device)
-        try:
-            checkpoint = torch.load(str(model_path), map_location=self.torch_device, weights_only=True)
-        except TypeError:
-            checkpoint = torch.load(str(model_path), map_location=self.torch_device)
-        state_dict = checkpoint.get("state_dict", checkpoint) if isinstance(checkpoint, dict) else checkpoint
-        model.load_state_dict(state_dict)
-        model.eval()
-        return model, model_path
 
     def _open_capture(self):
         if USE_PI_CAMERA and Picamera2 is not None:
@@ -840,26 +699,7 @@ class WebcamVisionProcessor:
             print("Camera vision disabled or OpenCV unavailable.")
             return False
 
-        if self.camera_only:
-            # Jon runs the model; the Pi just captures frames to send over.
-            print("Camera vision in CAMERA-ONLY mode (steering model runs on the Jetson).")
-            self.steering_model = None
-            self.torch_device = None
-        else:
-            if torch is None or SteeringAutonomyV2 is None:
-                print("PyTorch unavailable; steering autonomy model cannot run.")
-                return False
-            if not self.model_path.exists():
-                print(f"Steering autonomy model not found: {self.model_path}")
-                return False
-            try:
-                self.torch_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                self.steering_model, self.model_path = self._load_steering_model(self.model_choice)
-                print(f"Loaded steering autonomy model {self.model_choice}: {self.model_path}")
-            except Exception as e:
-                self.steering_model = None
-                print(f"Failed to load steering autonomy model {self.model_path}: {e}")
-                return False
+        print("Pi camera capture active; steering inference runs on the Jetson Orin Nano.")
 
         try:
             self.capture = self._open_capture()
@@ -911,36 +751,19 @@ class WebcamVisionProcessor:
 
     def set_model_choice(self, model_choice: str) -> bool:
         requested_choice = str(model_choice).strip()
+        if requested_choice not in STEERING_MODEL_CHOICES:
+            print(f"Cannot select unknown steering model: {requested_choice}")
+            return False
         if requested_choice == self.model_choice:
             return True
-        if self.camera_only:
-            # No local model to load — just record the choice. The runtime sends it
-            # to the Jetson each frame, which hot-swaps to the requested model.
-            with self.lock:
-                self.model_choice = requested_choice
-                self.analysis = _empty_analysis()
-                self.confidence = 0.0
-                self.frame_center_bias = 0.0
-            print(f"Model choice -> {requested_choice} (runs on the Jetson).")
-            return True
-        if torch is None or SteeringAutonomyV2 is None or self.torch_device is None:
-            print("Cannot switch steering model: PyTorch/model runtime is unavailable.")
-            return False
-        try:
-            next_model, next_path = self._load_steering_model(requested_choice)
-        except Exception as exc:
-            print(f"Failed to switch steering model to {requested_choice}: {exc}")
-            return False
-        with self.model_lock:
-            self.steering_model = next_model
-            self.model_choice = requested_choice
-            self.model_path = next_path
         with self.lock:
+            self.model_choice = requested_choice
             self.analysis = _empty_analysis()
-            self.confidence = 0.0
-            self.frame_center_bias = 0.0
-            self.last_frame_time = 0.0
-        print(f"Switched steering autonomy model to {self.model_choice}: {self.model_path}")
+            self.analysis["method"] = "camera_capture"
+        print(
+            f"Model choice -> {requested_choice} "
+            "(inference runs on the Jetson Orin Nano)."
+        )
         return True
 
     def stop(self):
@@ -952,10 +775,6 @@ class WebcamVisionProcessor:
         if self.capture:
             self.capture.release()
             self.capture = None
-
-    def get_steering_bias(self):
-        with self.lock:
-            return self.frame_center_bias, self.confidence, self.last_frame_time
 
     def grab_latest_frame(self):
         """Fast copy of the most recent BGR frame (for sending to the Jetson)."""
@@ -974,10 +793,6 @@ class WebcamVisionProcessor:
                 self.latest_frame_captured_at,
                 self.latest_frame.copy(),
             )
-
-    def get_analysis(self):
-        with self.lock:
-            return dict(self.analysis), self.last_frame_time
 
     def get_preview_frame(self):
         if cv2 is None:
@@ -1035,10 +850,11 @@ class WebcamVisionProcessor:
                 time.sleep(0.05)
                 continue
             captured_at = time.monotonic()
-            analysis = self._estimate_path_bias(frame)
+            analysis = _empty_analysis()
+            analysis["method"] = "camera_capture"
+            analysis["image_width"] = int(frame.shape[1])
+            analysis["image_height"] = int(frame.shape[0])
             with self.lock:
-                self.frame_center_bias = analysis["heading_bias"]
-                self.confidence = analysis["confidence"]
                 self.analysis = analysis
                 self.latest_frame = frame.copy()
                 self.latest_frame_captured_at = captured_at
@@ -1048,33 +864,3 @@ class WebcamVisionProcessor:
                 self.camera_fps = (1.0 / dt) if dt > 0 else 0.0
                 self._fps_last_frame_time = now
                 self.last_frame_time = now
-
-    def _estimate_path_bias(self, frame):
-        try:
-            with self.model_lock:
-                steering_model = self.steering_model
-                model_choice = self.model_choice
-                if steering_model is None or self.torch_device is None or torch is None:
-                    analysis = _empty_analysis()
-                    analysis["method"] = "steering_model_unavailable"
-                    return analysis
-                tensor = preprocess_steering_frame(frame, model_choice).to(self.torch_device)
-                with torch.no_grad():
-                    steering_angle = float(torch.clamp(steering_model(tensor), 0.0, 180.0).item())
-        except Exception as exc:
-            analysis = _empty_analysis()
-            analysis["method"] = f"steering_model_error:{type(exc).__name__}"
-            return analysis
-
-        heading_bias = max(-1.0, min(1.0, (steering_angle - 90.0) / 90.0))
-        analysis = _empty_analysis()
-        preprocess_name = "clahe" if steering_uses_clahe(model_choice) else "raw_bgr"
-        analysis.update(
-            {
-                "heading_bias": heading_bias,
-                "confidence": 1.0,
-                "steering_angle_deg": steering_angle,
-                "method": f"SidewalkPilot:{model_choice}:{preprocess_name}",
-            }
-        )
-        return analysis

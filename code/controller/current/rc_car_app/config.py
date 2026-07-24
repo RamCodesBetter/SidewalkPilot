@@ -323,16 +323,14 @@ AUTO_PHOTO_BUTTON = 11
 # JSON is built when the run ends).
 PHOTO_RUN_CAPTURE_FPS = 10.0
 
-# Jetson ("Jon") remote inference. When JETSON_STEERING_HOST is non-empty the Pi
-# does NOT run a steering model: in autonomous mode it sends the camera frame +
-# the active model choice to Jon and steers with the (steering, throttle) it gets
-# back. Empty host = current behavior (Pi runs its own Series-1/2 model locally).
-# If Jon is unreachable the car holds (safe stop), it does not free-run.
-# Jon = Jetson Orin Nano, over the wired Pi<->Jetson Ethernet link. Pi eth0 is
-# 10.42.0.1 (NetworkManager "shared" mode, connection 'jetson-eth-share'); Jon's
-# eth is pinned STATIC to 10.42.0.2 (below the DHCP pool, so it survives reboots).
-# Jon keeps internet via gateway 10.42.0.1. Separate from the 192.168.10.x
-# Pi5<->Zero2W dashboard USB link.
+# Jetson Orin Nano remote inference. The Raspberry Pi 5 sends each camera frame
+# and the active model choice over Ethernet, then applies the returned steering
+# value. A host is required; if the Jetson is unreachable, autonomy holds safely.
+# The Raspberry Pi 5 Ethernet address is
+# 10.42.0.1 (NetworkManager "shared" mode, connection 'jetson-eth-share'); the
+# Jetson Orin Nano is pinned to 10.42.0.2 so the link survives reboots. It keeps
+# internet access through gateway 10.42.0.1. This is separate from the
+# Raspberry Pi 5-to-Zero 2 W dashboard USB link on 192.168.10.x.
 JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
 JETSON_RESULT_MAX_AGE_SEC = 0.08
