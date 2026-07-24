@@ -193,7 +193,7 @@ otf2bdf -v -o myfont.bdf -r 72 -p 30 /path/to/font-Bold.ttf
 Integrating in your own application
 -----------------------------------
 Until this library shows up in your favorite Linux distribution, you can just
-include the library via github; it is pretty easy to be up-to-date.
+include the library via GitHub; it is pretty easy to be up-to-date.
 
 I suggest to add this code as a sub-module in your git repository. That way
 you can use that particular version and easily update it if there are changes:
