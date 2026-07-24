@@ -39,7 +39,7 @@ observed on this controller.
 |---|---|---|---|
 | A | `0` | `AUTONOMY_TOGGLE_BUTTON` | Toggle autonomous driving (forces gear D on) |
 | B | `1` | `PHOTO_BUTTON` | Take a single photo (`take_photo`) |
-| Menu | `11` | `AUTO_PHOTO_BUTTON` | Toggle continuous run capture at the configured 10 fps while moving |
+| Menu | `11` | `AUTO_PHOTO_BUTTON` | Toggle continuous run capture at the configured 10 fps (100 ms) while moving |
 | View | `10` | `HAZARD_BUTTON` | Toggle hazard lights |
 | Y | `4` | `CRUISE_TOGGLE_BUTTONS` | Cruise-control toggle (only in gear D) |
 | LB | `6` | `SHIFT_DOWN_BUTTON` | Shift down (P←R←N←D) |
@@ -68,7 +68,7 @@ The gear state begins in Park and steps through `P`, `R`, `N`, and `D` with LB/R
 
 ## Photo Capture
 
-B queues one image. Menu toggles continuous capture at a configured 10 fps while the car is moving or commanded to move. A dated run directory receives timestamped JPEGs and a labels CSV containing logical steering (`0..180`) and absolute physical forward PWM (`0..1`). JPEG encoding and writing run outside the control loop. Finalization converts the CSV to the JSON format accepted by training.
+B queues one image. Menu toggles continuous capture at a configured 10 fps (100 ms) while the car is moving or commanded to move. A dated run directory receives timestamped JPEGs and a labels CSV containing logical steering (`0..180`) and absolute physical forward PWM (`0..1`). JPEG encoding and writing run outside the control loop. Finalization converts the CSV to the JSON format accepted by training.
 
 The label is a software command sampled near the frame request, not measured wheel-angle or motor-torque feedback. Every run must be audited for decodable images, complete labels, and accidental stationary repetition before training.
 

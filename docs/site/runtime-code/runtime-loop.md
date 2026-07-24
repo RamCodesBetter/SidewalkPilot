@@ -1,6 +1,6 @@
 # Runtime Loop and Entrypoint
 
-The Raspberry Pi 5 controller is a 60 Hz arbitration loop owned by `run()` in `code/controller/current/rc_car_app/runtime.py`. The loop reads already-available state, applies control priority, writes hardware commands, and publishes telemetry. Slow device and network work must not execute synchronously in this loop.
+The Raspberry Pi 5 controller is a 50 Hz (20 ms target period) arbitration loop owned by `run()` in `code/controller/current/rc_car_app/runtime.py`. The loop reads already-available state, applies control priority, writes hardware commands, and publishes telemetry. Slow device and network work must not execute synchronously in this loop.
 
 `code/controller/current/rc_car.py` is the minimal executable entrypoint. It calls `runtime.run()`; model selection happens on the dashboard or through `RC_CAR_STEERING_MODEL`, with v3.4 as the checked-in default. Startup initializes controller input, hardware, sensors, camera, Jetson Orin Nano inference, logging, and dashboard telemetry. If no joystick is detected, startup exits rather than enabling a car without its manual-control interface.
 
@@ -13,7 +13,7 @@ The Raspberry Pi 5 controller is a 60 Hz arbitration loop owned by `run()` in `c
 5. Read the latest sensor and navigation state and update dashboard page selection.
 6. Queue the newest dashboard payload for its sender worker.
 7. Append periodic CSV telemetry.
-8. Call `clock.tick(60)` to cap the loop rate.
+8. Call `clock.tick(CONTROL_LOOP_HZ)` to cap the loop rate at 50 Hz.
 
 ## Worker Ownership
 
@@ -35,7 +35,7 @@ Both Jetson Orin Nano and dashboard workers are **latest-value** boundaries. If 
 
 Jetson Orin Nano uses `10.42.0.2:8770`. A failed TCP connect can consume the complete `0.4 s` socket timeout, but that wait occurs only in `AsyncJetsonSteeringClient`. Manual steering and dashboard updates continue while Jetson Orin Nano is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.
 
-`JETSON_RESULT_MAX_AGE_SEC` is `0.25 s`. A result older than that is unavailable for control even if it remains stored in the client.
+`JETSON_RESULT_MAX_AGE_SEC` is `0.08 s` (80 ms), and `JETSON_RESULT_MAX_FRAME_LAG` is `2` (40 ms at the nominal 50 FPS target). A result violating either limit is unavailable for control even if it remains stored in the client.
 
 ## Timing Diagnostics
 

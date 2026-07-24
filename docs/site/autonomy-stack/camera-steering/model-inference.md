@@ -7,16 +7,16 @@ result is unavailable.
 
 ## Data Path
 
-1. `WebcamVisionProcessor` captures `1280×720` `BGR888` frames from the Raspberry Pi Camera. The code declares a nominal 30 FPS target and measures the actual rate at runtime.
+1. `WebcamVisionProcessor` captures `1280×720` `BGR888` frames from the Raspberry Pi Camera. The code requests a nominal 50 FPS and measures the actual rate at runtime.
 2. `AsyncJetsonSteeringClient.submit()` replaces any unsent frame with the newest frame and selected model version.
 3. Its worker JPEG-encodes and sends the request to Jetson Orin Nano at `10.42.0.2:8770`.
 4. `jetson_inference_server.py` hot-switches to the requested `SidewalkPilot-v<version>` model when needed.
 5. Jetson Orin Nano resizes and normalizes the BGR frame, runs PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4, decodes steering, and returns the result plus telemetry.
-6. The Raspberry Pi 5 consumes only a result for the selected version that is no more than `0.25 s` old.
+6. The Raspberry Pi 5 consumes only a result for the selected version that is no more than `0.08 s` (80 ms) old and no more than two camera frames (40 ms at the nominal 50 FPS target) behind.
 
 ## Capture and Preprocessing
 
-`WebcamVisionProcessor` uses Picamera2 to capture the Raspberry Pi Camera Module 3 Wide at a nominal 1280x720, 30 FPS, in `BGR888`. The camera is mounted upside down, so the configured libcamera transform flips both axes during capture. Capture and analysis run in a daemon worker; the controller reads the newest completed frame and result rather than waiting for the camera.
+`WebcamVisionProcessor` uses Picamera2 to capture the Raspberry Pi Camera Module 3 Wide at a nominal 1280x720, 50 FPS, in `BGR888`. The camera is mounted upside down, so the configured libcamera transform flips both axes during capture. Capture and analysis run in a daemon worker; the controller reads the newest completed frame and result rather than waiting for the camera.
 
 Runtime preprocessing must match each checkpoint:
 

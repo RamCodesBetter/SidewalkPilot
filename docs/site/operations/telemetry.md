@@ -17,7 +17,7 @@ CSV is the primary local run record, but it still depends on successful process 
 
 - Training and driving telemetry answer different questions and have different retention needs, so they use different backends. Mixing them would bury per-run driving signals under training noise.
 - CSV logging does not require network connectivity and remains portable for later analysis.
-- Optional InfluxDB writes are non-blocking: a full queue or failed write drops telemetry instead of stalling the 60 Hz control loop.
+- Optional InfluxDB writes are non-blocking: a full queue or failed write drops telemetry instead of stalling the 50 Hz control loop.
 - CSV headers and row construction are kept in one checked-in schema. A completed file records sampled software state at nominal 10 Hz; it is not a hardware-synchronized ground-truth trace.
 
 ## Planned and Not Yet Final

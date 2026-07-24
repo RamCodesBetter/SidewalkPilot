@@ -21,7 +21,7 @@ stream with these exact parameters (all constants in `vision.py`):
 | Camera index | `PI_CAMERA_NUM = 0` (from `config.py`) |
 | Frame size | `CAMERA_FRAME_WIDTH` × `CAMERA_FRAME_HEIGHT` = 1280 × 720 |
 | Pixel format | `BGR888` (kept in OpenCV BGR order on purpose) |
-| Nominal FPS constant | `CAMERA_FPS = 30`; actual rate is measured because this value is not currently passed into the Picamera2 configuration |
+| Nominal FPS constant | `CAMERA_FPS = 50`; passed to Picamera2 as the `FrameRate` control, with actual rate measured at runtime |
 | Rotation | `PI_CAMERA_ROTATE_180 = True` → `Transform(hflip=True, vflip=True)` |
 
 The 180-degree rotation is applied through libcamera's `Transform` because the
@@ -37,10 +37,9 @@ frame is stored as the latest frame for preview, photo, and dashboard use, and a
 computed from the inter-frame delta. A failed read sleeps 50 ms before retrying instead of
 using a tight retry loop.
 
-The size, format, and transform are explicit camera-configuration inputs. The declared
-`CAMERA_FPS` value is not currently supplied as a Picamera2 control, so it must not be
-reported as a guaranteed capture rate; the dashboard/CSV measurement is authoritative for
-a particular run.
+The size, format, transform, and nominal frame rate are explicit camera-configuration inputs.
+The `CAMERA_FPS` value is a requested Picamera2 control, not a guaranteed capture rate; the
+dashboard/CSV measurement is authoritative for a particular run.
 
 ## Why This Choice
 

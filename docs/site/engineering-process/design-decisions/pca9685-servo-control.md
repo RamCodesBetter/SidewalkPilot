@@ -33,7 +33,7 @@ degrees.
 
 ## Reason
 
-The Raspberry Pi 5 is already running a 60 Hz software control loop that consumes the
+The Raspberry Pi 5 is already running a 50 Hz software control loop that consumes the
 latest LiDAR, GPS, camera, and hall-sensor state while updating motor PWM. A software-timed servo
 pulse on that same CPU jitters whenever the loop is busy, and steering jitter is
 directly visible and bad for both driving and clean training data. Offloading

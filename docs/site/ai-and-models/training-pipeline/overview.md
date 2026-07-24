@@ -97,7 +97,7 @@ Training produces two paired models:
 - Regular: final epoch;
 - Paired suffix (`b`, or Series 4 `r/g/c`): the validation-selected model from that run.
 
-Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specified. Recent runtime telemetry measured approximately 30 inference results per second on the Jetson Orin Nano, near the 30 FPS camera target; the exact rate depends on the selected model, software build, and power mode. The active field runtime does not require TensorRT or quantization.
+Both are exported to ONNX. PTH files are removed unless `--keep-pth` is specified. The updated runtime targets up to 50 inference requests per second alongside the 50 FPS camera target; the sustained measured rate depends on the selected model, software build, and power mode. The active field runtime does not require TensorRT or quantization.
 
 ## Evaluation and Promotion
 

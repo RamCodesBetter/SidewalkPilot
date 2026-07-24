@@ -16,10 +16,10 @@ The Raspberry Pi 5 is the hardware I/O and safety controller. Its sensors, Servo
 | Left drive control (forward) | AT8236 Motor Controller -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 25` | `MOTOR_LEFT_FWD_PIN` |
 | Left drive control (backward) | AT8236 Motor Controller -> JGB37-520 DC motors (12 V, 550 RPM) | GPIO (BCM) | `GPIO 13` | `MOTOR_LEFT_BWD_PIN` |
 | Hall-effect wheel-speed sensor | Wheel-speed input | GPIO (BCM), pull-up | `GPIO 24` | `HALL_SENSOR_GPIO_PIN` |
-| GPS | BN880 GPS receiver | UART | `/dev/ttyAMA0` @ `9600` | `GPS_PORT`, `GPS_BAUD` (`navigation.py`) |
+| GPS | BN880 GPS receiver | UART | `/dev/ttyAMA0` @ `9600`; default 1 Hz (1,000 ms) fixes | `GPS_PORT`, `GPS_BAUD` (`navigation.py`) |
 | Compass (bench only) | BN880 HMC5883L-compatible magnetometer | I2C | Detected by `bn880_test.py`; not consumed by live navigation | bench utility only |
 | IMU | Seeed XIAO MG24 Sense (6-axis) | UART, Raspberry Pi 5 GPIO8/9 | `/dev/ttyAMA3` @ `115200` | `STEERING_YAW_PID_PORT`, `STEERING_YAW_PID_BAUD` |
-| LiDAR (current) | Youyeetoo FHL-LD19 via CP2102 UART-to-USB Adapter | USB serial | `/dev/ttyUSB0` @ `230400` (auto-resolved) | `lidar.py` `resolve_lidar_serial_port` |
+| LiDAR (current) | Youyeetoo FHL-LD19 via CP2102 UART-to-USB Adapter | USB serial | `/dev/ttyUSB0` @ `230400` (auto-resolved); typical 10 Hz (100 ms) scans and 4,500 points/s | `lidar.py` `resolve_lidar_serial_port` |
 | LiDAR (former) | Youyeetoo FHL-LD19 | GPIO UART | `/dev/ttyAMA2` @ `230400` | earlier config, now superseded |
 | Dashboard link | Zero 2 W over USB Ethernet gadget | USB (usb0) | Raspberry Pi 5 `192.168.10.1`, Zero 2 W `192.168.10.2`, UDP `8765` | `HUB75_DASHBOARD_*` (`config.py`) |
 

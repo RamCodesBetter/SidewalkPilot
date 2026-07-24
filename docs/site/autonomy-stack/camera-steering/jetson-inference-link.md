@@ -10,10 +10,10 @@ The Raspberry Pi 5 and Jetson Orin Nano communicate over a private point-to-poin
 4. Jetson Orin Nano loads or switches to the requested model.
 5. Jetson Orin Nano decodes the JPEG, resizes and normalizes it for the selected family, and runs PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4.
 6. Jetson Orin Nano decodes the current steering target and sends 15 floats: steering, throttle placeholder, CPU/GPU temperatures, inference rate/time, and nine current-horizon bucket probabilities.
-7. The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.25 seconds old.
+7. The Raspberry Pi 5 accepts only a result for the active model that is no more than 0.08 seconds (80 ms) old and no more than two camera frames (40 ms at the nominal 50 FPS target) behind.
 8. The Raspberry Pi 5 applies steering EMA, LiDAR/AEB rules, yaw correction, hardware mapping, and the final steering and motor commands.
 
-JPEG encoding, connection attempts, sends, receives, and status polls run in `AsyncJetsonSteeringClient`, not the 60 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.
+JPEG encoding, connection attempts, sends, receives, and status polls run in `AsyncJetsonSteeringClient`, not the 50 Hz hardware/controller loop. If camera frame production exceeds inference, pending frames are replaced rather than queued. This keeps commands recent.
 
 ## Model Contracts
 

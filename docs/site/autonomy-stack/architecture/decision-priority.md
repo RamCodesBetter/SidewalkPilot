@@ -23,7 +23,8 @@ The priority chain is enforced in two functions in
    model inference is used for motion.
 3. **Model availability gate.** If there is no emergency stop, the camera model
    gets a vote. The Raspberry Pi 5 rejects a camera frame older than 0.75 seconds; a Jetson Orin Nano result
-   must be no more than `JETSON_RESULT_MAX_AGE_SEC = 0.25 s` old and match the selected
+   must be no more than `JETSON_RESULT_MAX_AGE_SEC = 0.08 s` old, no more than
+   `JETSON_RESULT_MAX_FRAME_LAG = 2` frames behind, and match the selected
    model. Confidence must be ≥ `LOW_CAMERA_CONFIDENCE` (0.25). If the model is
    unavailable, stale, or below the configured confidence threshold, the runtime requests a hard stop with reason
    `model_unavailable` or `model_low_confidence`. Accepted neural results currently use confidence `1.0`, so this gate is not a calibrated scene-uncertainty detector.
@@ -55,7 +56,7 @@ detection coverage still require controlled tests.
 |---:|---|---|---|
 | 1 | Manual override | stick/throttle/brake input | `cancel_autonomous_mode` |
 | 2 | Emergency hard stop | enabled AEB and center clearance <= 1.05 m | `LIDAR_OVERRIDE_EMERGENCY_STOP_M` |
-| 3 | Model gate | fresh matching result + conf >= 0.25 | 0.75 s local frame guard; `JETSON_RESULT_MAX_AGE_SEC = 0.25` |
+| 3 | Model gate | fresh matching result + conf >= 0.25 | 0.75 s local frame guard; `JETSON_RESULT_MAX_AGE_SEC = 0.08`; `JETSON_RESULT_MAX_FRAME_LAG = 2` |
 | 4 | Model steering | mapped heading | `MAX_TARGET_HEADING_DEG` 60° |
 | 5 | LiDAR throttle cap | enabled AEB and center clearance < 1.65 m | `LIDAR_GOV_*` |
 | 6 | AEB re-check and steering/motor command | armed AEB, then final command | `AEB_BRAKE_RATE` 10.0 |

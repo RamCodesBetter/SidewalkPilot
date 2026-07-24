@@ -12,7 +12,7 @@ The display system is a Zero 2 W driving one Waveshare 64×32 RGB LED matrix thr
 | `code/rpi-rgb-led-matrix/` | Matrix driver/library |
 | `code/test_files/display/hub75_rgbmatrix_test.py` | Panel color/glyph bench test |
 
-The panel is fixed at 64×32 pixels and uses an 8×8 cell system for text pages. Camera view is downsampled to the full panel and serialized as RGB565. The LiDAR page uses raw pixels for guides, rungs, points, the car marker, and an 8×8 `C` glyph.
+The panel is fixed at 64×32 pixels and uses an 8×8 cell system for text pages. Dashboard telemetry and camera/LiDAR preview data update at a nominal 10 Hz (100 ms). Camera view is downsampled to the full panel and serialized as RGB565. The LiDAR page uses raw pixels for guides, rungs, points, the car marker, and an 8×8 `C` glyph.
 
 ## Runtime Parameters
 

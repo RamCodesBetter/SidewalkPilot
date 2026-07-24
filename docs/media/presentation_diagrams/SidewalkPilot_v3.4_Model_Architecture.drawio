@@ -5,8 +5,6 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" vertex="1" value="SidewalkPilot v3.4 CNN Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=30;fontStyle=1;fontColor=#101828;"><mxGeometry x="35" y="25" width="700" height="45" as="geometry" /></mxCell>
-        <mxCell id="subtitle" parent="1" vertex="1" value="Six convolution blocks extract image features; dense layers produce the 19-value hybrid output." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=15;fontColor=#667085;"><mxGeometry x="37" y="67" width="900" height="30" as="geometry" /></mxCell>
 
         <mxCell id="input-back" parent="1" vertex="1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D1E9FF;strokeColor=#1570EF;opacity=55;"><mxGeometry x="60" y="170" width="110" height="320" as="geometry" /></mxCell>
         <mxCell id="input" parent="1" vertex="1" value="BGR&lt;br&gt;IMAGE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EFF8FF;strokeColor=#1570EF;strokeWidth=2;fontFamily=Arial;fontSize=18;fontStyle=1;fontColor=#1849A9;shadow=1;"><mxGeometry x="48" y="182" width="110" height="320" as="geometry" /></mxCell>
@@ -138,7 +136,6 @@
         <mxCell id="64c-outb" parent="1" edge="1" source="d64c" target="outb" style="html=1;strokeColor=#98A2B3;strokeWidth=0.7;opacity=55;endArrow=classic;endSize=3;"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="64c-outc" parent="1" edge="1" source="d64c" target="outc" style="html=1;strokeColor=#98A2B3;strokeWidth=0.7;opacity=55;endArrow=classic;endSize=3;"><mxGeometry relative="1" as="geometry" /></mxCell>
 
-        <mxCell id="decoder-title" parent="1" vertex="1" value="Hybrid Steering Decoder" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Arial;fontSize=17;fontStyle=1;fontColor=#101828;"><mxGeometry x="45" y="635" width="300" height="30" as="geometry" /></mxCell>
         <mxCell id="decoder-softmax" parent="1" vertex="1" value="probabilities = softmax(9 logits)" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#F4F3FF;strokeColor=#6941C6;strokeWidth=1.5;fontFamily=Arial;fontSize=14;fontColor=#42307D;"><mxGeometry x="45" y="690" width="325" height="90" as="geometry" /></mxCell>
         <mxCell id="decoder-argmax" parent="1" vertex="1" value="class = argmax(probabilities)" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#3538CD;strokeWidth=1.5;fontFamily=Arial;fontSize=14;fontColor=#2D31A6;"><mxGeometry x="440" y="690" width="300" height="90" as="geometry" /></mxCell>
         <mxCell id="decoder-fraction" parent="1" vertex="1" value="fraction = sigmoid(offset[class])" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#ECFDF3;strokeColor=#16834A;strokeWidth=1.5;fontFamily=Arial;fontSize=14;fontColor=#14532D;"><mxGeometry x="810" y="690" width="315" height="90" as="geometry" /></mxCell>

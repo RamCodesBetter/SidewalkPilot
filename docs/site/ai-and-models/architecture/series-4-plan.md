@@ -27,7 +27,7 @@ All three runs used:
 - The same shadow augmentation and deterministic left and right balancing policy;
 - Three previous targets and, where applicable, three future targets.
 
-Temporal windows never cross a capture run, a train/validation boundary, or a timestamp gap greater than 0.25 seconds. The existing labeled captures are approximately 10 Hz, so three steps mean roughly 0.3 seconds of context, not three 30 FPS camera frames.
+Temporal windows never cross a capture run, a train/validation boundary, or a timestamp gap greater than 0.25 seconds. The existing labeled captures are approximately 10 Hz, so three steps mean roughly 0.3 seconds of context, not three 50 FPS camera frames.
 
 ## Architecture
 

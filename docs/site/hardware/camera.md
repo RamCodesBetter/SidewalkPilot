@@ -13,8 +13,8 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
 
 - `vision.py` opens the module with `Picamera2(camera_num=PI_CAMERA_NUM)` and configures a
   `1280x720` (`CAMERA_FRAME_WIDTH` x `CAMERA_FRAME_HEIGHT`) `BGR888` video stream.
-  `CAMERA_FPS = 30` records the nominal target, but the current Picamera2 configuration
-  does not explicitly pass a frame-rate control; runtime `camera_fps` is the measured value.
+  `CAMERA_FPS = 50` is passed to Picamera2 as the nominal `FrameRate` control; runtime
+  `camera_fps` remains the measured value.
 - The current camera mount requires a 180-degree correction, so `PI_CAMERA_ROTATE_180 = True`
   applies a `Transform(hflip=True, vflip=True)` in the capture configuration to give an
   upright frame.

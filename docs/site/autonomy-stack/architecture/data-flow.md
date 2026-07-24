@@ -41,7 +41,7 @@ LiDAR does not select a path or output steering. Side returns are telemetry beca
 
 Camera, LiDAR, GPS, IMU, Jetson Orin Nano transport, dashboard transport, photo writes, and
 telemetry use background workers. Each worker keeps its latest available result in memory,
-and the 60 Hz runtime loop reads those values without waiting for the device or network.
+and the 50 Hz runtime loop reads those values without waiting for the device or network.
 See [Runtime Loop](../../runtime-code/runtime-loop.md) for ownership and stall diagnostics.
 
 ## Runtime States

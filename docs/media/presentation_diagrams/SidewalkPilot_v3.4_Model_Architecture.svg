@@ -4,8 +4,6 @@
     <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="2.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,5 L7,2.5 z" fill="#475467"/></marker>
     <marker id="small-arrow" markerWidth="6" markerHeight="6" refX="5" refY="2" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,4 L5,2 z" fill="#98A2B3"/></marker>
     <style>
-      .title { font: 700 30px Arial, sans-serif; fill: #101828; }
-      .subtitle { font: 400 15px Arial, sans-serif; fill: #667085; }
       .flow { fill: none; stroke: #475467; stroke-width: 2; marker-end: url(#arrow); }
       .dense { fill: none; stroke: #98A2B3; stroke-width: .65; opacity: .62; marker-end: url(#small-arrow); }
       .label { font: 400 11px Arial, sans-serif; text-anchor: middle; }
@@ -13,8 +11,6 @@
     </style>
   </defs>
   <rect width="1600" height="900" fill="#ffffff"/>
-  <text x="35" y="57" class="title">SidewalkPilot v3.4 CNN Architecture</text>
-  <text x="37" y="88" class="subtitle">Six convolution blocks extract image features; dense layers produce the 19-value hybrid output.</text>
 
   <path class="flow" d="M158 342 L214 342"/>
   <path class="flow" d="M248 342 L314 342"/>
@@ -105,7 +101,6 @@
     <text x="1421" y="552" class="strong" fill="#14532D">Dense 256 -&gt; 64</text><text x="1421" y="573" class="label" fill="#14532D">ELU</text>
     <text x="1526" y="552" class="strong" fill="#7A2E0E">64 -&gt; 19</text><text x="1526" y="573" class="label" fill="#7A2E0E">9 logits + 9 offsets</text><text x="1526" y="592" class="label" fill="#7A2E0E">+ throttle</text>
   </g>
-  <text x="45" y="660" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#101828">Hybrid Steering Decoder</text>
   <g font-family="Arial, sans-serif" font-size="14" text-anchor="middle">
     <rect x="45" y="690" width="325" height="90" rx="7" fill="#F4F3FF" stroke="#6941C6" stroke-width="1.5"/>
     <text x="207.5" y="740" fill="#42307D">probabilities = softmax(9 logits)</text>

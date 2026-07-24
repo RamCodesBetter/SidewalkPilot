@@ -16,7 +16,8 @@ safety corridor. It does not override steering.
   Raspberry Pi 5 GPIO UART at `/dev/ttyAMA2`. The port is auto-resolved, preferring the CP2102
   `by-id` path and falling back to `ttyUSB*`/`ttyACM*`.
 - The parser decodes the LD19 packet format (47-byte packets, 12 measurement points each)
-  into angle/distance/confidence points, with a max usable range of ~12 m.
+  into angle/distance/confidence points, with a max usable range of ~12 m. The sensor's
+  typical scan rate is 10 Hz (100 ms per revolution), with 4,500 ranging points per second.
 - `lidar_avoidance.py` measures the nearest valid point in a center corridor. With AEB
   enabled, it allows full throttle at 1.65 m, reduces the reference target to 60% by
   1.25 m, holds to 1.05 m, then requests a hard stop. Left and right points are display
@@ -38,6 +39,9 @@ its buffer, and re-resolves the port. Retry delay starts at 1.5 seconds, increas
 a 10-second ceiling, and resets after a successful connection. Repeated status messages are
 limited to once every 15 seconds. This recovery keeps serial waits outside the driving loop,
 but AEB coverage is absent while valid scans are missing.
+
+The reader checks its serial buffer every 10 ms, or up to 100 polls per second. That polling
+rate is not the complete-scan rate; the hardware normally completes about 10 scans per second.
 
 ## Why This Choice
 

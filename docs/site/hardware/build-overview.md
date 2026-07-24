@@ -13,9 +13,9 @@ power sources. It is closer to a mobile systems-integration bench than a stock R
 | Chassis and steering | Yahboom Ackermann 520M, JGB37-520 DC motors (12 V, 550 RPM), high-torque steering servo, steering rods/linkage | Physical vehicle, drive power, and car-like front-wheel geometry |
 | Hardware and safety controller | Raspberry Pi 5, PCA9685 Servo Controller, AT8236 Motor Controller | Sensors, controller, servo, motors, safety, logs |
 | Display computer | Zero 2 W, Waveshare 64x32 HUB75 panel | Independent live telemetry display |
-| Vision | Raspberry Pi Camera Module 3 Wide | Forward sidewalk image stream and training photos |
-| Obstacle sensing | Youyeetoo FHL-LD19 360-degree LiDAR, CP2102 UART-to-USB Adapter | Center-corridor slowdown and emergency braking |
-| Navigation | BN880 GPS and HMC5883L-compatible compass | GPS fixes feed the route manager; compass is currently bench-only |
+| Vision | Raspberry Pi Camera Module 3 Wide | 1280x720 forward sidewalk stream at a nominal 50 FPS (20 ms) and 10 FPS (100 ms) training photos |
+| Obstacle sensing | Youyeetoo FHL-LD19 360-degree LiDAR, CP2102 UART-to-USB Adapter | Typical 10 Hz (100 ms) scans for center-corridor slowdown and emergency braking |
+| Navigation | BN880 GPS and HMC5883L-compatible compass | Default 1 Hz (1,000 ms) GPS fixes feed the route manager; compass is currently bench-only |
 | Motion sensing | Hall-effect wheel-speed sensor | Wheel-speed estimate |
 | Manual control | Xbox Series X controller | Steering, throttle, brake, model/page controls, takeover, quit |
 

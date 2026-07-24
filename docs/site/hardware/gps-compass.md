@@ -12,7 +12,9 @@ do not claim live compass-based heading control.
 ## How It Works
 
 - `navigation.py` opens the GPS on `/dev/ttyAMA0` at `9600` baud and reads NMEA sentences
-  line by line (`GPS_PORT`, `GPS_BAUD`).
+  line by line (`GPS_PORT`, `GPS_BAUD`). The BN880 default fix rate is 1 Hz (1,000 ms between
+  fixes), and the runtime does not send a command to increase it. Navigation logic checks the
+  latest fix at 10 Hz (100 ms), so several checks can reuse one GPS fix.
 - Parsed fixes can be passed to the route manager and snapped to a graph vertex in
   `trossachs_nav_graph.json`. The A* planner routes over that graph and divides the route
   into AI and manual segments with crosswalk handoffs.

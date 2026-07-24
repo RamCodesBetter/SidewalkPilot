@@ -38,8 +38,8 @@ the following must hold:
   does not self-enable.
 - The camera stream is live. `apply_autonomous_controls(...)` hard-stops with
   `model_unavailable` or `model_low_confidence` if `webcam_vision` is missing, local
-  analysis is older than 0.75 seconds, a matching Jetson Orin Nano result is unavailable or older
-  than 0.25 seconds, or confidence is below `LOW_CAMERA_CONFIDENCE` (0.25). This verifies result freshness/availability;
+  analysis is older than 0.75 seconds, a matching Jetson Orin Nano result is unavailable, older
+  than 0.08 seconds, or more than two camera frames behind, or confidence is below `LOW_CAMERA_CONFIDENCE` (0.25). This verifies result freshness/availability;
   accepted neural confidence is not calibrated proof that the scene is understood.
 - The LiDAR safety layer is available for AEB. AEB is toggled by
   `AEB_TOGGLE_BUTTON = 14` and defaults on (`Metrics.aeb_enabled = True`). LiDAR

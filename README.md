@@ -85,14 +85,14 @@ Training runs on an NVIDIA RTX 6000 Ada Generation GPU. The Series 3/4 trainers 
 | Hardware and Safety Controller | Raspberry Pi 5 |
 | Display Controller | Zero 2 W |
 | Chassis | Yahboom Ackermann 520M |
-| Camera | Raspberry Pi Camera Module 3 Wide |
-| Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through a CP2102 UART-to-USB Adapter |
-| Steering | PCA9685 Servo Controller and high-torque steering servo |
+| Camera | Raspberry Pi Camera Module 3 Wide, 1280x720 at a nominal 50 FPS (20 ms frame period) |
+| Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through a CP2102 UART-to-USB Adapter; typical 10 Hz scans (100 ms per revolution) and 4,500 ranging points per second |
+| Steering | PCA9685 Servo Controller at 50 Hz (20 ms period) and high-torque steering servo |
 | Drive | Yahboom AT8236 Motor Controller and JGB37-520 DC motors (12 V, 550 RPM) |
-| Navigation | BN880 GPS; onboard HMC5883L compass is bench-only (not used during runtime) |
+| Navigation | BN880 GPS at its default 1 Hz fix rate (1,000 ms); onboard HMC5883L compass is bench-only (not used during runtime) |
 | Motion feedback | Hall-effect wheel-speed sensor and external IMU |
 | Manual control | Xbox Wireless Controller |
-| Dashboard | Waveshare 64x32 HUB75 RGB LED matrix |
+| Dashboard | Waveshare 64x32 HUB75 RGB LED matrix with nominal 10 Hz (100 ms) telemetry |
 
 ## Repository Map
 

@@ -1,6 +1,6 @@
 # Dashboard Runtime
 
-The Raspberry Pi 5 serializes current state in `hub75_dashboard.py`; `AsyncDashboardSender` keeps JSON encoding and socket work outside the 60 Hz control loop. The Zero 2 W receives UDP and renders the Waveshare 64x32 HUB75 panel with `z2w_dashboard.py`.
+The Raspberry Pi 5 serializes current state in `hub75_dashboard.py`; `AsyncDashboardSender` keeps JSON encoding and socket work outside the 50 Hz control loop. The Zero 2 W receives UDP and renders the Waveshare 64x32 HUB75 panel with `z2w_dashboard.py`.
 
 ## Transport
 
@@ -10,7 +10,7 @@ The Raspberry Pi 5 serializes current state in `hub75_dashboard.py`; `AsyncDashb
 | Raspberry Pi 5 | `192.168.10.1` |
 | Zero 2 W | `192.168.10.2` |
 | UDP port | `8765` |
-| Nominal send rate | 10 Hz |
+| Nominal send rate | 10 Hz (100 ms) |
 | Linked shutdown | Enabled |
 
 The sender keeps one replaceable pending state. If the controller produces several updates before transmission, only the newest survives. Notifications use a small FIFO because they should not disappear when state changes. A successful UDP `sendto()` proves only local acceptance; receiver status, ping, and the physical display verify delivery.
