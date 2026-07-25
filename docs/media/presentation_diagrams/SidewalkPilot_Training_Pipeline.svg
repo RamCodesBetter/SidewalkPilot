@@ -5,43 +5,67 @@
     </marker>
     <style>
       .edge { fill: none; stroke: #6c8ebf; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
-      .label { font: 400 17px Arial, sans-serif; fill: #1f2937; text-anchor: middle; dominant-baseline: middle; }
+      .node { fill: #dae8fc; stroke: #6c8ebf; stroke-width: 2; }
+      .main { font: 700 18px Arial, sans-serif; fill: #1f2937; text-anchor: middle; }
+      .sub { font: 400 12px Arial, sans-serif; fill: #475467; text-anchor: middle; }
     </style>
   </defs>
   <rect width="1600" height="900" fill="#ffffff"/>
 
-  <path class="edge" d="M730 125 C770 105 810 105 850 125"/>
-  <path class="edge" d="M1110 125 C1160 140 1195 165 1235 195"/>
-  <path class="edge" d="M1450 265 C1510 300 1535 345 1485 400"/>
-  <path class="edge" d="M1420 485 C1415 545 1380 590 1335 625"/>
-  <path class="edge" d="M1160 670 C1135 710 1110 730 1085 747"/>
-  <path class="edge" d="M790 775 L700 775"/>
-  <path class="edge" d="M430 775 C390 750 365 710 350 675"/>
-  <path class="edge" d="M145 625 C100 585 80 535 95 485"/>
-  <path class="edge" d="M95 395 C85 335 130 285 185 260"/>
-  <path class="edge" d="M360 190 C390 155 425 135 470 125"/>
+  <path class="edge" d="M710 145 C750 125 780 125 820 145"/>
+  <path class="edge" d="M1120 145 C1170 160 1200 185 1230 210"/>
+  <path class="edge" d="M1485 285 C1535 320 1545 365 1500 410"/>
+  <path class="edge" d="M1430 510 C1415 565 1380 610 1340 635"/>
+  <path class="edge" d="M1135 700 C1095 735 1070 750 1040 760"/>
+  <path class="edge" d="M765 790 L710 790"/>
+  <path class="edge" d="M410 790 C370 760 345 735 330 710"/>
+  <path class="edge" d="M85 680 C45 630 30 565 70 505"/>
+  <path class="edge" d="M95 405 C70 350 105 300 145 280"/>
+  <path class="edge" d="M420 205 C460 170 500 155 540 150"/>
 
-  <g fill="#dae8fc" stroke="#6c8ebf" stroke-width="2">
-    <ellipse cx="600" cy="125" rx="130" ry="45"/>
-    <ellipse cx="980" cy="125" rx="130" ry="45"/>
-    <ellipse cx="1340" cy="235" rx="150" ry="45"/>
-    <ellipse cx="1420" cy="440" rx="130" ry="45"/>
-    <ellipse cx="1310" cy="670" rx="150" ry="45"/>
-    <ellipse cx="955" cy="775" rx="165" ry="45"/>
-    <ellipse cx="565" cy="775" rx="135" ry="45"/>
-    <ellipse cx="245" cy="670" rx="145" ry="45"/>
-    <ellipse cx="170" cy="440" rx="140" ry="45"/>
-    <ellipse cx="285" cy="235" rx="155" ry="45"/>
+  <g>
+    <ellipse class="node" cx="560" cy="145" rx="150" ry="55"/>
+    <ellipse class="node" cx="970" cy="145" rx="150" ry="55"/>
+    <ellipse class="node" cx="1330" cy="250" rx="170" ry="55"/>
+    <ellipse class="node" cx="1430" cy="455" rx="140" ry="55"/>
+    <ellipse class="node" cx="1305" cy="680" rx="170" ry="55"/>
+    <ellipse class="node" cx="945" cy="790" rx="180" ry="55"/>
+    <ellipse class="node" cx="560" cy="790" rx="150" ry="55"/>
+    <ellipse class="node" cx="240" cy="680" rx="155" ry="55"/>
+    <ellipse class="node" cx="165" cy="455" rx="155" ry="55"/>
+    <ellipse class="node" cx="270" cy="250" rx="175" ry="55"/>
   </g>
 
-  <text x="600" y="125" class="label">Data Collection</text>
-  <text x="980" y="125" class="label">Catch and Delete</text>
-  <text x="1340" y="225" class="label"><tspan x="1340" dy="0">Split Dataset: Train</tspan><tspan x="1340" dy="22">and Validation</tspan></text>
-  <text x="1420" y="440" class="label">Pre-process Images</text>
-  <text x="1310" y="670" class="label">Apply Data Augmentation</text>
-  <text x="955" y="765" class="label"><tspan x="955" dy="0">Train the Convolutional</tspan><tspan x="955" dy="22">Neural Network</tspan></text>
-  <text x="565" y="775" class="label">Save 2 Checkpoints</text>
-  <text x="245" y="670" class="label">Export Models To ONNX</text>
-  <text x="170" y="440" class="label">Generate Offline Metrics</text>
-  <text x="285" y="225" class="label"><tspan x="285" dy="0">Evaluate Models On</tspan><tspan x="285" dy="22">Physical Car</tspan></text>
+  <text x="560" y="136" class="main">Data Collection</text>
+  <text x="560" y="165" class="sub">Camera frames + steering labels</text>
+
+  <text x="970" y="136" class="main">Catch and Delete</text>
+  <text x="970" y="165" class="sub">Review labels; remove bad frames</text>
+
+  <text x="1330" y="232" class="main">Split Dataset:</text>
+  <text x="1330" y="253" class="main">Train and Validation</text>
+  <text x="1330" y="280" class="sub">100-frame windows; about 90% / 10%</text>
+
+  <text x="1430" y="446" class="main">Pre-process Images</text>
+  <text x="1430" y="475" class="sub">Resize to 320 x 180; normalize pixels</text>
+
+  <text x="1305" y="671" class="main">Apply Data Augmentation</text>
+  <text x="1305" y="700" class="sub">Flip, brightness, color, and shadow variants</text>
+
+  <text x="945" y="766" class="main">Train the Convolutional</text>
+  <text x="945" y="787" class="main">Neural Network</text>
+  <text x="945" y="817" class="sub">Optimize model weights with AdamW</text>
+
+  <text x="560" y="781" class="main">Save 2 Checkpoints</text>
+  <text x="560" y="810" class="sub">Final + best-validation checkpoints</text>
+
+  <text x="240" y="671" class="main">Export Models To ONNX</text>
+  <text x="240" y="700" class="sub">Convert checkpoints for deployment</text>
+
+  <text x="165" y="446" class="main">Generate Offline Metrics</text>
+  <text x="165" y="475" class="sub">Frozen 6,952-frame challenge set</text>
+
+  <text x="270" y="228" class="main">Evaluate Models On</text>
+  <text x="270" y="249" class="main">Physical Car</text>
+  <text x="270" y="278" class="sub">Supervised sidewalk field runs</text>
 </svg>
