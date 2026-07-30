@@ -13,7 +13,7 @@ Run this file once on each device, then compare the two JSON reports:
         /tmp/rpi5-v4.1a.json /tmp/jetson-v4.1a.json
 
 The default images are a 180-image timing-only mini test dataset sampled from the
-separate 81,237-image Series 3/4 training corpus. The timed model section measures
+separate original 81,237-image Series 3/4 model-training snapshot. The timed model section measures
 local batch-one ``InferenceSession.run`` calls. It does not include camera capture,
 JPEG encoding, Ethernet transfer, or servo response. A second local-pipeline
 number includes image decode and preprocessing. Process RSS, system memory, and
