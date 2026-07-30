@@ -20,7 +20,7 @@ SidewalkPilot runs across three boards, each doing the job it is best at:
 
 The Jetson Orin Nano supplies the GPU inference that makes the current Series 3/4 self-driving
 path practical near the camera rate. The Raspberry Pi Camera Module 3 Wide remains connected
-to the Raspberry Pi 5 because the current 81,237-image dataset was captured through that
+to the Raspberry Pi 5 because the original 81,237-image model-training snapshot was captured through that
 camera path. Final steering, motor, and AEB decisions remain on the Raspberry Pi 5.
 
 ## What This Exhibit Documents

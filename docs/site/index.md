@@ -18,7 +18,7 @@ The field-selected steering model is **SidewalkPilot v3.4**. In the July 13, 202
 
 The result is supported by two different kinds of evidence:
 
-- [Offline model evaluation](model-evaluation/offline-evaluation/overview.md) compares all 52 Series 1-4 checkpoints on the same frozen 6,952-frame challenge set from the 81,237-image Series 3/4 dataset.
+- [Offline model evaluation](model-evaluation/offline-evaluation/overview.md) compares all 52 Series 1-4 checkpoints on the same frozen 6,952-frame challenge set from the 81,237-image Series 3/4 model-training snapshot.
 - [Field evaluation](model-evaluation/field-evaluation/overview.md) records the qualitative v3.3 through v3.4b comparison and its evidence limits.
 
 Offline scores did not choose the winner by themselves. v3.4b had a slightly lower mean absolute error, but v3.4 had stronger balanced turn behavior and won on the physical car.

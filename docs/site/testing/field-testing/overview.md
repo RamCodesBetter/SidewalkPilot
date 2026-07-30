@@ -23,7 +23,7 @@ Record distance, requested throttle, actual speed, brake response, surface, batt
 - v3.4 was selected in the July 13 shadow/turn comparison.
 - v3.3 and v3.3b regressed in that field comparison; v3.4b was slightly worse than v3.4.
 - All six v4.0 models were driven. v4.0f was viable but mixed against v3.4; v4.0g was worse; v4.0 PC/PCF models echoed prior predictions.
-- Six v4.1 correction models are trained and evaluated offline but not yet integrated or driven.
+- Six v4.1 correction models are trained, evaluated offline, and runtime-supported but not yet driven.
 - The latest center-corridor LiDAR configuration still needs a preserved physical result.
 
 ## Preflight and Run Record

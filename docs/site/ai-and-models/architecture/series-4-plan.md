@@ -115,6 +115,6 @@ Series 4.0 is trained, runtime-supported, and field-tested. None of its models r
 
 ## Possible Learned-Throttle Experiment
 
-The current 81,237-image dataset is not suitable for learning useful variable throttle: 77,590 labels, or 95.51%, are full throttle. A new throttle head would therefore be strongly encouraged to predict full throttle almost everywhere. Series 4 remains steering-only. Learned throttle should be reconsidered only after collecting deliberate examples of normal speed, reduced speed, and stopping in varied turns and obstacle contexts.
+The 81,237-image model-training snapshot is not suitable for learning useful variable throttle: 77,590 labels, or 95.51%, are full throttle. A new throttle head would therefore be strongly encouraged to predict full throttle almost everywhere. Series 4 remains steering-only. Learned throttle should be reconsidered only after collecting deliberate examples of normal speed, reduced speed, and stopping in varied turns and obstacle contexts.
 
 See [Series 4 Models](../model-zoo/series-4.md), [Bal9](../../model-evaluation/offline-evaluation/bal9.md), and [Jetson Orin Nano Inference Link](../../autonomy-stack/camera-steering/jetson-inference-link.md).

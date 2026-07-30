@@ -2,6 +2,20 @@
 
 A usable Series 3/4 sample needs an image that exists and decodes, a parseable logical steering label, and a parseable absolute-throttle field. The current tools check these properties in two stages: a read-only image decoder and the trainer's label scan. Neither stage automatically proves that the command is the correct human target for the scene; that still requires review.
 
+## July 29, 2026 Audit
+
+The full 81,237-image snapshot passed JPEG decoding: no corrupt, black, or blown-out image was found. Review confirmed 268 files for removal from the next training snapshot:
+
+| Reason | Files |
+|---|---:|
+| Garage or other non-sidewalk sequence | 198 |
+| Roadway or camera-tip sequence | 64 |
+| Exact duplicate with the same label | 5 |
+| Exact duplicate with conflicting labels | 1 |
+| **Total** | **268** |
+
+The files were moved into a recoverable local quarantine with the original `labels.json`. The active local root now contains 80,969 images and 80,969 labels. An automated agreement test also queued 1,656 possible label corrections; those labels were not changed because model and temporal agreement is evidence for review, not proof of the correct steering command.
+
 ## Capture Format
 
 The runtime queues `photo_<timestamp>.jpg` into a dated run folder and appends the sampled command to `<run>_labels.csv`. When a capture run ends, `finalize_photo_run()` builds `<run>.json`. A finalized entry has this form:

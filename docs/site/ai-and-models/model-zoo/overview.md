@@ -1,6 +1,6 @@
 # Model Zoo
 
-SidewalkPilot has **52 evaluated checkpoints** across four series. The live selector currently contains 46 versions through Series 4.0; the six Series 4.1 models are trained and offline-evaluated but not yet integrated. Version numbers identify experiments, not guaranteed improvements.
+SidewalkPilot has **52 evaluated checkpoints** across four series, and all 52 are registered in the live selector. The six Series 4.1 models are trained and offline-evaluated but not yet field-tested. Version numbers identify experiments, not guaranteed improvements.
 
 ## Families
 
@@ -13,9 +13,9 @@ SidewalkPilot has **52 evaluated checkpoints** across four series. The live sele
 | 4.0 PC | `320x180` + 3 targets | one 18-value steering horizon | 5,569,186 | rejected after steering echo in field testing |
 | 4.0 CF | `320x180` | four 18-value steering horizons | 5,537,560 | `4.0f` viable; complementary to v3.4 |
 | 4.0 PCF | `320x180` + 3 targets | four 18-value steering horizons | 5,572,696 | rejected after steering echo in field testing |
-| 4.1 PC | `320x180` + 3 targets | corrected history training; one horizon | 5,537,460 | trained and offline-evaluated; integration pending |
-| 4.1 CF | `320x180` | corrected future-target loss; four horizons | 5,537,560 | trained and offline-evaluated; integration pending |
-| 4.1 PCF | `320x180` + 3 targets | corrected history/future training; four horizons | 5,544,480 | trained and offline-evaluated; integration pending |
+| 4.1 PC | `320x180` + 3 targets | corrected history training; one horizon | 5,537,460 | runtime-supported; field test pending |
+| 4.1 CF | `320x180` | corrected future-target loss; four horizons | 5,537,560 | runtime-supported; field test pending |
+| 4.1 PCF | `320x180` + 3 targets | corrected history/future training; four horizons | 5,544,480 | runtime-supported; field test pending |
 
 ## Field and Research State
 

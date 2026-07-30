@@ -19,6 +19,7 @@ stream with these exact parameters (all constants in `vision.py`):
 | Owning file | `code/controller/current/rc_car_app/vision.py` |
 | Capture backend | Picamera2 (`from picamera2 import Picamera2`) |
 | Camera index | `PI_CAMERA_NUM = 0` (from `config.py`) |
+| Sensor mode | 2304 × 1296, 10-bit; full IMX708 field of view |
 | Frame size | `CAMERA_FRAME_WIDTH` × `CAMERA_FRAME_HEIGHT` = 1280 × 720 |
 | Pixel format | `BGR888` (kept in OpenCV BGR order on purpose) |
 | Nominal FPS constant | `CAMERA_FPS = 50`; passed to Picamera2 as the `FrameRate` control, with actual rate measured at runtime |
@@ -31,11 +32,11 @@ horizontal + vertical mirror.
 
 Frames are read on a dedicated daemon thread (`WebcamVisionProcessor._run`), not on
 the main control loop. Each iteration calls `capture.read()`, which returns
-`(ok, frame)` from `Picamera2.capture_array()`. On a good read the frame is fed to
-`_estimate_path_bias`, the resulting analysis is stored under a lock, the latest raw
-frame is stored as the latest frame for preview, photo, and dashboard use, and a rolling `camera_fps` is
-computed from the inter-frame delta. A failed read sleeps 50 ms before retrying instead of
-using a tight retry loop.
+`(ok, frame)` from `Picamera2.capture_array()`. On a good read, the capture timestamp,
+sequence number, frame dimensions, and latest raw frame are stored under a lock for
+inference, preview, photo, and dashboard use. A rolling `camera_fps` is computed from
+the inter-frame delta. A failed read sleeps 50 ms before retrying instead of using a
+tight retry loop.
 
 The size, format, transform, and nominal frame rate are explicit camera-configuration inputs.
 The `CAMERA_FPS` value is a requested Picamera2 control, not a guaranteed capture rate; the
@@ -71,7 +72,7 @@ Series 1 direct-regression output uses approximately `90 +/- 86` degrees and Ser
 
 The registered list contains Series 1/2 PyTorch models and Series 3/4 ONNX models. During model inference, the Raspberry Pi 5 records the requested version and sends it with frames; the Jetson Orin Nano must confirm loading and return a fresh matching result. Current v4.0 PC/PCF requests also carry the latest three manual or predicted steering targets. A dashboard name alone does not prove that the model loaded successfully.
 
-Inference uses latest-frame semantics. Old pending frames are replaced, and Raspberry Pi 5 autonomy rejects Jetson Orin Nano results older than the configured freshness limit.
+Inference uses latest-frame semantics. Old pending frames are replaced, and Raspberry Pi 5 autonomy rejects Jetson Orin Nano results older than the configured freshness or frame-lag limits. Series 4 PC/PCF requests use the steering-history samples that existed at the frame's capture timestamp, so a newer command cannot be paired with an older image.
 
 ## Related Pages
 

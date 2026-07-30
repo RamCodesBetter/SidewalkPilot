@@ -22,7 +22,7 @@ Read: [Project Overview](../../start-here/project-overview.md), [Data Flow](../.
 
 Series 1 proved that a compact CNN could map a 200x66 camera frame to steering. Series 2 refined the data and tested fixed CLAHE lighting preprocessing. Series 3 moved to 320x180 on Jetson Orin Nano and, from v3.1, used nine steering classes plus continuous offsets. v3.4 became the field winner after handling the tested harsh shadows that earlier models followed as fake sidewalk edges.
 
-Series 4 changes the temporal contract while keeping the same 81,237-image dataset and visual backbone. PC uses the previous three target commands; CF learns current plus three future targets from the image; PCF combines both. The v4.0 PC/PCF models led offline but echoed previous predictions on the car. Image-only v4.0f was viable and complementary with v3.4, but did not replace it. Six v4.1 correction models are now trained and evaluated offline; live integration and physical testing remain.
+Series 4 changes the temporal contract while keeping the same 81,237-image model-training snapshot and visual backbone. PC uses the previous three target commands; CF learns current plus three future targets from the image; PCF combines both. The v4.0 PC/PCF models led offline but echoed previous predictions on the car. Image-only v4.0f was viable and complementary with v3.4, but did not replace it. Six v4.1 correction models are now trained, evaluated offline, and runtime-supported; physical testing remains.
 
 Read: [Model Zoo](../../ai-and-models/model-zoo/overview.md) and [Series 4 Temporal Experiments](../../ai-and-models/architecture/series-4-plan.md).
 

@@ -31,6 +31,8 @@ The Raspberry Pi 5 controller is a 50 Hz (20 ms target period) arbitration loop 
 
 Both Jetson Orin Nano and dashboard workers are **latest-value** boundaries. If consumption is slower than capture, old pending work is replaced instead of building an increasingly stale queue.
 
+The 50 Hz controller cap, 50 FPS camera request, and resulting inference-request cadence use the same nominal 20 ms period, but Python threads, camera delivery, JPEG encoding, Ethernet, and model execution are not hardware-locked. Jetson Orin Nano processes requests as quickly as they arrive. The runtime therefore records frame sequence, capture time, capture-to-result latency, and frame lag; it does not infer synchronization from matching configured rates.
+
 ## Offline Jetson Orin Nano Behavior
 
 Jetson Orin Nano uses `10.42.0.2:8770`. A failed TCP connect can consume the complete `0.4 s` socket timeout, but that wait occurs only in `AsyncJetsonSteeringClient`. Manual steering and dashboard updates continue while Jetson Orin Nano is powered off. Autonomous mode receives no fresh model result and hard-stops rather than reusing an old command.

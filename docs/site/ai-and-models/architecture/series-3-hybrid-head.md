@@ -33,7 +33,7 @@ The design still has a discontinuity when the selected class changes. Smoothing,
 
 ## Loss
 
-Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. The v3.4 run used class weighting and deterministic left and right balance flipping. Its sampler drew 50,000 examples per epoch but did not apply steering-bucket or source reweighting. Steering-focused runs can set throttle loss to zero while preserving the 19-value model output.
+Current Series 3 hybrid training combines focal-weighted class loss, Smooth L1 loss between `sigmoid(offset[target_class])` and the target's normalized position inside that class, and optional Smooth L1 loss between `sigmoid(throttle_raw)` and target throttle. These terms are added into one scalar before backpropagation. The v3.4 run used class weighting and deterministic left and right balance flipping. Its sampler drew 50,000 examples per epoch but did not apply steering-bucket or source reweighting. Steering-focused runs can set throttle loss to zero while preserving the 19-value model output. See [Model Framing and Loss](../../research-and-math/machine-learning/loss-function.md) for the exact calculation.
 
 ## Series 4 Relationship
 

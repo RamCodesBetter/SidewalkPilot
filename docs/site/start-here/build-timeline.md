@@ -105,6 +105,6 @@ All 46 checkpoints through Series 4.0 were re-evaluated on one frozen 6,952-fram
 
 All six v4.0 models were driven. Image-only v4.0f was viable but mixed against v3.4, v4.0g was worse, and the PC/PCF models repeatedly echoed earlier steering predictions. v3.4 therefore remained the field-selected baseline.
 
-The next three 25-epoch runs retained the PC, CF, and PCF contracts but changed the history representation, loss terms, history perturbations, and checkpoint selection to address that failure. They produced six v4.1 models. The common report was regenerated for all 52 checkpoints. The v4.1 models are evaluated offline but are not yet integrated into the live selector or physically tested.
+The next three 25-epoch runs retained the PC, CF, and PCF contracts but changed the history representation, loss terms, history perturbations, and checkpoint selection to address that failure. They produced six v4.1 models. The common report was regenerated for all 52 checkpoints, and the six versions were added to the live selector. They are not yet physically tested.
 
 The current deployed research state is maintained in [Current Status](current-status.md).

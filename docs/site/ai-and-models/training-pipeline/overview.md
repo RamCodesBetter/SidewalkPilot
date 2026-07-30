@@ -18,7 +18,7 @@ SidewalkPilot training begins with a supervised field drive and ends only after 
 | Series 4 CF | `series_4_0fg_sidewalkpilot_trainer.py`, `series_4_1fg_sidewalkpilot_trainer.py` | image | four 18-value current/future steering horizons |
 | Series 4 PCF | `series_4_0ac_sidewalkpilot_trainer.py`, `series_4_1ac_sidewalkpilot_trainer.py` | image + three previous targets | four 18-value current/future steering horizons |
 
-Each family still needs its own preprocessing and output decoder. The common evaluator provides those adapters and scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset. Series 3 and experimental Series 4 train on the same 81,237-image dataset.
+Each family still needs its own preprocessing and output decoder. The common evaluator provides those adapters and scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset. Existing Series 3 and Series 4 models train on the same 81,237-image snapshot. The current local corpus contains 80,969 images after 268 confirmed off-domain or duplicate files were quarantined; no existing checkpoint or report was regenerated from that curation.
 
 ## Series 4 Temporal Comparison
 
@@ -60,7 +60,7 @@ The v3.4 and Series 4 runs used class-weighted focal loss, deterministic left an
 
 More augmentation is not automatically better. v3.3/v3.3b increased shadow-hardening pressure but performed worse on the physical car. v3.4 shows why augmentation changes must still be tested on ordinary turns.
 
-The 81,237-image dataset used for the current Series 3 and Series 4 runs contains real field images only. These runs did not use CARLA images or source weighting. Their samplers selected 50,000 examples per epoch without steering-bucket reweighting.
+The 81,237-image snapshot used for the existing Series 3 and Series 4 runs contains real field images only. These runs did not use CARLA images or source weighting. Their samplers selected 50,000 examples per epoch without steering-bucket reweighting.
 
 ## Series 3 Hybrid Loss
 
@@ -70,7 +70,20 @@ For v3.1 and later, the 19-value output is decoded into:
 - An offset within the selected class;
 - Optional throttle.
 
-Training combines focal-weighted classification loss, Smooth L1 loss for the true class's local offset, and optional Smooth L1 throttle loss. Current steering-focused runs set throttle loss to zero because 95.51% of the 81,237 throttle labels are full throttle. That distribution cannot teach useful variable-speed control.
+Training combines focal-weighted classification loss, Smooth L1 loss for the true class's normalized local offset, and optional Smooth L1 throttle loss:
+
+```text
+ce = cross_entropy(class_logits, target_class, class_weights)
+class_loss = mean((1 - exp(-ce))^focal_gamma * ce)
+offset_loss = smooth_l1(sigmoid(offset[target_class]), target_class_fraction)
+throttle_loss = smooth_l1(sigmoid(throttle_raw), target_throttle)
+
+total_loss = class_loss
+           + offset_weight * offset_loss
+           + throttle_weight * throttle_loss
+```
+
+The trainer backpropagates from the one scalar `total_loss`; it does not create 19 separate optimization steps. Cross-entropy affects all nine logits, while the offset term supervises only the target class's offset. Steering-focused runs set throttle weight to zero because 95.51% of the original 81,237 throttle labels are full throttle. That distribution cannot teach useful variable-speed control.
 
 ## Typical Steering-Focused Command
 

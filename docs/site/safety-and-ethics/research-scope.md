@@ -30,7 +30,7 @@ The value is the integration and iteration, not a claim that one neural-network 
 ## Evidence Limits
 
 - The July 13 v3.4 result is qualitative. Exact route, weather, takeover count, and clip identifiers were not preserved.
-- The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 has not yet completed live integration or physical testing.
+- The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 is runtime-supported but has not completed physical testing.
 - Offline metrics do not prove obstacle avoidance, pedestrian response, recovery from a road-edge error, or operation outside the test distribution.
 - The LiDAR policy has automated software tests, but the latest configuration still needs a preserved physical test record.
 - GPS/navigation code exists, but it does not make the car safe for unattended route execution.

@@ -41,7 +41,7 @@ The model family has evolved in four stages:
 - **Series 1:** a compact 200x66 camera model established that image-to-steering learning could control the car.
 - **Series 2:** retained direct steering regression while refining the data and testing HSV/CLAHE preprocessing for difficult lighting.
 - **Series 3:** moved to 320x180 input and a larger network. v3.0 used separate steering and throttle outputs; v3.1 and later use a 19-value hybrid output containing nine steering-class logits, nine class-local regression offsets, and one throttle value.
-- **Series 4:** keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six v4.0 models are runtime-supported and field-tested; six corrected v4.1 models are trained and evaluated offline but not yet integrated.
+- **Series 4:** keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six v4.0 models are runtime-supported and field-tested; six corrected v4.1 models are trained, evaluated offline, and runtime-supported but not yet field-tested.
 
 The current physical-car selection is **v3.4**, not the checkpoint with the lowest raw mean error. The project uses balanced steering metrics and field behavior because a dataset dominated by straight frames can reward a model that avoids turning.
 
@@ -64,7 +64,7 @@ The AEB toggle controls all LiDAR slowdown and braking. When AEB is off, LiDAR d
 
 Driving sessions save camera images with logical `0..180` steering labels and absolute physical throttle fractions. The trainer sorts the images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets. Series 3 and 4 training applies lighting, color, flip, and synthetic-shadow augmentation, then evaluates exact steering classes, adjacent classes, error magnitude, and signed bias.
 
-Series 3 and 4 use the same **81,237 real labeled images** and split procedure. The generated report adapts all four architecture families and scores all 52 checkpoints on a common 6,952-frame challenge subset. Series 1-3 and Series 4.0 model repositories, plus the datasets, are published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat). The v4.1 models remain local while integration and field testing are pending. Training runs are recorded in the project's configured experiment tracker.
+Existing Series 3 and 4 models use the same **81,237-image snapshot** and split procedure. The generated report adapts all four architecture families and scores all 52 checkpoints on a common 6,952-frame challenge subset from that snapshot. A July 29 audit quarantined 268 confirmed off-domain or duplicate files, leaving 80,969 images in the current local corpus; trained checkpoints and the frozen report were not regenerated. Series 1-3 and Series 4.0 model repositories, plus the 81,237-image dataset snapshot, are published on [Hugging Face](https://huggingface.co/ram-shreyas-naik-sabavat). The v4.1 models remain local while physical testing is pending. Training runs are recorded in the project's configured experiment tracker.
 
 ## Physical Hardware
 

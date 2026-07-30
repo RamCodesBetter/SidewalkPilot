@@ -72,7 +72,7 @@
 <text x="1265.0" y="197.5" text-anchor="middle" font-size="16" font-weight="600" fill="#42307D"><tspan x="1265.0" y="187.5">Steering-Class</tspan><tspan x="1265.0" y="207.5">Balance Audit</tspan></text>
 <rect x="1420" y="145" width="310" height="105" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="2" filter="url(#shadow)"/>
 <text x="1575.0" y="188.5" text-anchor="middle" font-size="16" font-weight="600" fill="#14532D"><tspan x="1575.0" y="188.5">Series 3/4 Dataset</tspan></text>
-<text x="1575.0" y="232.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1575.0" y="232.0">81,237 real labeled images</tspan></text>
+<text x="1575.0" y="232.0" text-anchor="middle" font-size="11" font-weight="500" fill="#667085"><tspan x="1575.0" y="232.0">81,237-image training snapshot</tspan></text>
 <rect x="55" y="300" width="220" height="75" rx="7" fill="#E8F7F8" stroke="#0F7C83" stroke-width="2" filter="url(#shadow)"/>
 <text x="165.0" y="337.5" text-anchor="middle" font-size="16" font-weight="600" fill="#14575B"><tspan x="165.0" y="337.5">CARLA Image Generation</tspan></text>
 <rect x="320" y="285" width="260" height="105" rx="7" fill="#ECFDF3" stroke="#16834A" stroke-width="2" filter="url(#shadow)"/>

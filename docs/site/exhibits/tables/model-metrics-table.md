@@ -71,7 +71,7 @@ The July 13 result is qualitative because exact route, conditions, clips, and ta
 |---|---:|---|
 | Series 1/2 field set | 2,224 labeled images | Historical direct-regression training/evaluation |
 | CARLA set | 50,000 generated images used in early work | Synthetic assistance for Series 1/2 history |
-| Series 3/4 set | 81,237 real images | Current Series 3 and experimental Series 4 training |
+| Series 3/4 model-training snapshot | 81,237 real images | Existing Series 3 and experimental Series 4 checkpoints |
 | Common challenge subset | 6,952 anchors | Cross-generation offline comparison |
 
 ## Evidence Matrix

@@ -1,7 +1,8 @@
 # Camera
 
 The camera is the primary sensor for SidewalkPilot: it feeds the steering model and
-it is the source of the current 81,237-image real Series 3/4 dataset. It is a Raspberry Pi Camera Module 3 Wide
+captured the original 81,237-image Series 3/4 snapshot. The current local corpus contains
+80,969 images after the July 29, 2026 data audit. It is a Raspberry Pi Camera Module 3 Wide
 connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2 in
 `code/controller/current/rc_car_app/vision.py`.
 
@@ -11,7 +12,8 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
 
 ## How It Works
 
-- `vision.py` opens the module with `Picamera2(camera_num=PI_CAMERA_NUM)` and configures a
+- `vision.py` opens the module with `Picamera2(camera_num=PI_CAMERA_NUM)`, pins the
+  full-field `2304x1296`, 10-bit IMX708 sensor mode, and outputs a
   `1280x720` (`CAMERA_FRAME_WIDTH` x `CAMERA_FRAME_HEIGHT`) `BGR888` video stream.
   `CAMERA_FPS = 50` is passed to Picamera2 as the nominal `FrameRate` control; runtime
   `camera_fps` remains the measured value.
@@ -28,8 +30,9 @@ connected to the Raspberry Pi 5 over the CSI ribbon and driven through Picamera2
 
 - The Module 3 **Wide** was selected to retain more sidewalk context near the image edges
   during turns. This project has not preserved a controlled wide-versus-standard comparison.
-- The module is integrated through the Raspberry Pi 5 camera path, and the current 81,237-image Series 3/4 dataset was captured
-  with it. Keeping the same camera avoids one source of sensor-domain shift, although
+- The module is integrated through the Raspberry Pi 5 camera path, and the original
+  81,237-image Series 3/4 snapshot was captured with it. Keeping the same camera and
+  full-field sensor mode avoids two sources of sensor-domain shift, although
   lighting, exposure, mounting, route, and weather can still change the image distribution.
 
 ## Verify Before a Run

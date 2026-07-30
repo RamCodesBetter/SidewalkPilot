@@ -7,16 +7,18 @@ result is unavailable.
 
 ## Data Path
 
-1. `WebcamVisionProcessor` captures `1280×720` `BGR888` frames from the Raspberry Pi Camera. The code requests a nominal 50 FPS and measures the actual rate at runtime.
+1. `WebcamVisionProcessor` uses the full-field `2304×1296` IMX708 sensor mode and captures `1280×720` `BGR888` output frames. The code requests a nominal 50 FPS and measures the actual rate at runtime.
 2. `AsyncJetsonSteeringClient.submit()` replaces any unsent frame with the newest frame and selected model version.
 3. Its worker JPEG-encodes and sends the request to Jetson Orin Nano at `10.42.0.2:8770`.
 4. `jetson_inference_server.py` hot-switches to the requested `SidewalkPilot-v<version>` model when needed.
 5. Jetson Orin Nano resizes and normalizes the BGR frame, runs PyTorch CUDA for Series 1/2 or ONNX Runtime CUDA for Series 3/4, decodes steering, and returns the result plus telemetry.
 6. The Raspberry Pi 5 consumes only a result for the selected version that is no more than `0.08 s` (80 ms) old and no more than two camera frames (40 ms at the nominal 50 FPS target) behind.
 
+The camera, controller, and request path share a 20 ms target period, but they are asynchronous workers rather than one hardware-locked clock. Jetson Orin Nano is request-driven and runs each received frame as soon as possible. The measured camera FPS, inference IPS, capture-to-result latency, and frame-lag telemetry determine the actual rate. Capture timestamps and sequence checks prevent a late result or newer steering-history sample from being treated as if it belonged to another frame.
+
 ## Capture and Preprocessing
 
-`WebcamVisionProcessor` uses Picamera2 to capture the Raspberry Pi Camera Module 3 Wide at a nominal 1280x720, 50 FPS, in `BGR888`. The camera is mounted upside down, so the configured libcamera transform flips both axes during capture. Capture and analysis run in a daemon worker; the controller reads the newest completed frame and result rather than waiting for the camera.
+`WebcamVisionProcessor` uses Picamera2 to pin the Raspberry Pi Camera Module 3 Wide to its full-field 2304x1296 sensor mode and output 1280x720 at a nominal 50 FPS in `BGR888`. The camera is mounted upside down, so the configured libcamera transform flips both axes during capture. Capture runs in a daemon worker; the controller reads the newest completed frame and result rather than waiting for the camera.
 
 Runtime preprocessing must match each checkpoint:
 
@@ -61,7 +63,7 @@ Series 3/4 hybrid steering can jump when adjacent class logits exchange the argm
 smoothed = 0.45 * decoded + 0.55 * previous
 ```
 
-This output filter is separate from Series 4 causal target history. Smoothing changes the command sent to the car; PC/PCF history changes the information supplied to the next inference. Excessive smoothing would delay genuine turns, so it does not replace balanced training or field testing.
+This output filter is separate from Series 4 causal target history. Smoothing changes the command sent to the car; PC/PCF history changes the information supplied to the next inference. History retains the approximately 10 Hz spacing used during Series 4 training and is selected at the camera-capture timestamp. Excessive smoothing would delay genuine turns, so it does not replace balanced training or field testing.
 
 Current models do not control live throttle. Series 3 retains a learned throttle value for training and protocol history, while Series 4 removes it. Manual input or autonomous runtime policy supplies the requested throttle, and enabled LiDAR AEB may cap or stop forward motion. Saved training labels remain absolute physical PWM fractions rather than the dashboard's reference moving range.
 

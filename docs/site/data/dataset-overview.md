@@ -7,7 +7,7 @@ SidewalkPilot learns from camera frames paired with recorded steering and thrott
 | Dataset | Local path | Contents | Public repository |
 |---|---|---|---|
 | Series 1 and 2 | `code/ai_models_datasets/series_1_and_2/` | 2,224 labeled field images across 13 sources | [`SidewalkPilot_v1_and_v2`](https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_v1_and_v2) |
-| Series 3 and 4 | `code/ai_models_datasets/series_3_and_4/` | 81,237 labeled real-world images | [`SidewalkPilot_v3_and_v4`](https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_v3_and_v4) |
+| Series 3 and 4 | `code/ai_models_datasets/series_3_and_4/` | 80,969 current local images; 81,237-image published snapshot | [`SidewalkPilot_v3_and_v4`](https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_v3_and_v4) |
 | CARLA | separate synthetic dataset | Pre-generated simulation frames and labels | [`SidewalkPilot_carla`](https://huggingface.co/datasets/ram-shreyas-naik-sabavat/SidewalkPilot_carla) |
 
 The trainers consume files already on disk. They do not connect to a running CARLA simulator or capture simulation frames themselves. Any new CARLA collection requires a separate capture/export step before training.
@@ -34,7 +34,11 @@ This dataset is historically important because it established the complete colle
 
 ## Series 3 and 4 Dataset
 
-Series 3 and Series 4 use the same 81,237 real-world images. The three v4.0 and three v4.1 experiments use the same dataset and split construction, making PC, CF, and PCF architecture comparisons instead of data comparisons.
+The existing Series 3, v4.0, and v4.1 models use the same 81,237-image real-world snapshot and split construction, making PC, CF, and PCF architecture comparisons instead of data comparisons.
+
+On July 29, 2026, a read-only scan decoded all 81,237 JPEGs successfully. Review then confirmed 268 files that should not remain in the next training snapshot: 198 garage/non-sidewalk frames, 64 roadway or camera-tip frames, five duplicate files with matching labels, and one duplicate pair with conflicting labels. Those files and the original labels were moved into a recoverable local quarantine rather than deleted. The current local corpus therefore contains **80,969 images and 80,969 labels**.
+
+This curation does not retroactively change trained models or the frozen 6,952-frame evaluation report. Both still refer to the 81,237-image snapshot. The public Hugging Face dataset also remains that snapshot until a new version is uploaded. A separate queue of 1,656 possible label corrections remains unchanged pending human confirmation.
 
 The dataset includes shadow and turn cases collected after earlier field failures. Adjacent frames are highly correlated, so the Series 3/4 trainer sorts by path and assigns contiguous 100-sample windows to one side of the split. This reduces adjacent-frame leakage, but it is not a capture-run-group split and does not prove complete independence between train and validation.
 
@@ -63,7 +67,7 @@ Manual capture folders remain source evidence until review and promotion. They c
 
 ## Evaluation Use
 
-Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset.
+Architecture compatibility and evaluation distribution are different questions. Series 1/2 require their 200x66 preprocessing and single-output decoder, while Series 3/4 require 320x180 preprocessing and hybrid decoders. The common evaluator adapts each model correctly, then scores all 52 checkpoints on the same frozen 6,952-frame Series 3/4 challenge subset from the 81,237-image model-training snapshot.
 
 That common challenge set measures early models against the later dataset's lighting and shadow distribution. It does not erase the original Series 1/2 historical results, which remain results on their earlier dataset.
 

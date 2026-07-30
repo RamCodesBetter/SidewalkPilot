@@ -8,15 +8,26 @@ Series 1/2 and v3.0 predict continuous controls directly and use Smooth L1-based
 
 ## Class Plus Local Regression
 
-Most Series 3 models predict 19 values: nine steering-class logits, nine local offsets, and throttle. The decoded result remains a continuous steering angle. Its training objective combines focal-weighted class loss, Smooth L1 loss for the true class's offset, and an optional throttle loss:
+Most Series 3 models predict 19 values: nine steering-class logits `z`, nine raw local offsets `o`, and one raw throttle value `t`. A target steering angle is converted into a class index `y` and a fractional position `u` from 0 to 1 inside that class. For each sample, the active code computes:
 
 ```text
-total = focal_cross_entropy(class)
-      + offset_weight * smooth_l1(selected_offset)
-      + throttle_weight * smooth_l1(throttle, target_throttle)
+ce = cross_entropy(z, y, class_weights)
+class_loss = mean((1 - exp(-ce))^focal_gamma * ce)
+
+predicted_offset = sigmoid(o[y])
+offset_loss = smooth_l1(predicted_offset, u)
+
+predicted_throttle = sigmoid(t)
+throttle_loss = smooth_l1(predicted_throttle, target_throttle)
+
+total_loss = class_loss
+           + offset_weight * offset_loss
+           + throttle_weight * throttle_loss
 ```
 
-Series 3 defaults include class-weight power `0.3`, focal gamma `1.5`, and offset weight `1.0`. Steering-focused runs explicitly set throttle weight to zero; current defaults are not evidence of an older checkpoint's command.
+The offset loss does **not** compare all nine offsets with the steering angle. Only the offset belonging to the target class is supervised, and it is compared with the target's normalized within-class fraction. Cross-entropy already uses all nine logits.
+
+Backpropagation starts from the one scalar `total_loss`. Its gradient still flows through every output that contributed to that scalar: all nine class logits, the target class's offset, and throttle when its weight is nonzero. Series 3 defaults include class-weight power `0.3`, focal gamma `1.5`, and offset weight `1.0`. Steering-focused runs explicitly set throttle weight to zero; current defaults are not evidence of an older checkpoint's command.
 
 ## Series 4 Temporal Framing
 
@@ -26,7 +37,17 @@ Series 4 removes throttle and uses an 18-value class-plus-offset steering head p
 - CF (`4.0f/g`) supplies the image and predicts current plus future targets;
 - PCF (`4.0a/c`) combines causal previous-target inputs with current and future supervision.
 
-Future steering values are labels during training. They are never future inputs at deployment. Fixed Series 4 runs use class-weight power `0.5`, focal gamma `1.5`, no sampler balancing, and future-horizon decay `0.70` where applicable.
+Future steering values are labels during training. They are never future inputs at deployment. For `H` predicted horizons, the common base loss is:
+
+```text
+horizon_weight[h] = horizon_decay^h
+
+series4_loss =
+    sum(horizon_weight[h] * (class_loss[h] + offset_weight * offset_loss[h]))
+    / sum(horizon_weight[h])
+```
+
+PC has one horizon, so the normalized weight is 1. CF and PCF have four horizons. Fixed Series 4 runs use class-weight power `0.5`, focal gamma `1.5`, no sampler balancing, and future-horizon decay `0.70` where applicable. Series 4.1 can add separately weighted trajectory, history-consistency, counterfactual-history, or closed-loop terms according to the selected training profile.
 
 ## Gradient Norm and Limits
 

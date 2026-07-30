@@ -29,7 +29,7 @@ safety rules, and controls the hardware, while a Zero 2 W renders the live LED d
 
 **SidewalkPilot v3.4** is the current field-selected steering model. During the July 13, 2026 comparison, v3.4 handled every shadow case presented and the tested normal left and right turns. v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was much worse than v3.2b. The observation is valuable but qualitative because route, clip, weather, and takeover metadata were not preserved.
 
-I am developing Series 3 and Series 4 in parallel on the same 81,237-image Series 3/4 dataset. Series 4 tests whether recent steering targets or future-target supervision improve the image-based steering prediction. The first v4.0 field comparison exposed a steering-echo failure in the PC and PCF models. The image-only v4.0f model was viable but did not clearly outperform v3.4. Six corrective v4.1 models have since been trained and evaluated offline; they are not yet integrated into the live selector or field-tested.
+I developed Series 3 and Series 4 on the same 81,237-image dataset snapshot. Series 4 tests whether recent steering targets or future-target supervision improve image-based steering prediction. The first v4.0 field comparison exposed a steering-echo failure in the PC and PCF models. The image-only v4.0f model was viable but did not clearly outperform v3.4. Six corrective v4.1 models have since been trained, evaluated offline, and added to the live selector; they are not yet field-tested.
 
 | Experiment | Final epoch | Validation-selected epoch | Runtime contract |
 |---|---|---|---|
@@ -73,7 +73,7 @@ The generated [steering-model report](docs/steering_model_report.pdf) evaluates 
 
 ## Data and Training
 
-Field runs record camera images paired with logical steering degrees (`0..180`) and absolute physical throttle (`0..1`). Series 3 and 4 share an 81,237-image real-world dataset. The trainer sorts images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets.
+Field runs record camera images paired with logical steering degrees (`0..180`) and absolute physical throttle (`0..1`). The current local Series 3/4 corpus contains 80,969 real-world images after 268 confirmed off-domain or duplicate frames were quarantined. Existing Series 3/4 checkpoints and the frozen evaluation report use the earlier 81,237-image snapshot. The trainer sorts images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets.
 
 Training runs on an NVIDIA RTX 6000 Ada Generation GPU. The Series 3/4 trainers support lighting, color, flip, and synthetic-shadow augmentation. Each run preserves a final-epoch model and a validation-selected model, exports ONNX, and logs the run for comparison. Physical field testing remains the deciding factor after offline evaluation.
 
@@ -85,7 +85,7 @@ Training runs on an NVIDIA RTX 6000 Ada Generation GPU. The Series 3/4 trainers 
 | Hardware and Safety Controller | Raspberry Pi 5 |
 | Display Controller | Zero 2 W |
 | Chassis | Yahboom Ackermann 520M |
-| Camera | Raspberry Pi Camera Module 3 Wide, 1280x720 at a nominal 50 FPS (20 ms frame period) |
+| Camera | Raspberry Pi Camera Module 3 Wide, full-field 2304x1296 sensor mode with 1280x720 output at a nominal 50 FPS (20 ms frame period) |
 | Obstacle Detection (AEB) | Youyeetoo FHL-LD19 360-degree LiDAR through a CP2102 UART-to-USB Adapter; typical 10 Hz scans (100 ms per revolution) and 4,500 ranging points per second |
 | Steering | PCA9685 Servo Controller at 50 Hz (20 ms period) and high-torque steering servo |
 | Drive | Yahboom AT8236 Motor Controller and JGB37-520 DC motors (12 V, 550 RPM) |

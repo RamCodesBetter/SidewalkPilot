@@ -7,11 +7,11 @@ Version rules keep model, preprocessing, labels, and dataset identity together. 
 | Series | Model | Input | Target | Label fields | Status |
 |---|---|---|---|---|---|
 | 1 / 2 | `SteeringAutonomyV2`, ~0.67M params | 200x66 | steering only (single tanh regression) | `image`, `steering`, `repeat`, `source` | Frozen (2,224 images) |
-| 3 | `SidewalkPilotV3`, 5.53M params | 320x180 | v3.1+ hybrid steering + optional throttle loss | image key, `steering`, `throttle` | shared 81,237-frame dataset |
+| 3 | `SidewalkPilotV3`, 5.53M params | 320x180 | v3.1+ hybrid steering + optional throttle loss | image key, `steering`, `throttle` | shared 81,237-frame training snapshot |
 | 4.0 | PC / CF / PCF, 5.54-5.57M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | all six models field-tested; CF model v4.0f remained viable |
 | 4.1 | PC / CF / PCF, 5.54-5.55M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | trained and evaluated offline; not integrated into the live selector or field-tested |
 
-Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson Orin Nano and the larger 320x180 visual backbone. Series 4 shares the 81,237-frame dataset but removes throttle prediction and adds temporal-target experiments.
+Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson Orin Nano and the larger 320x180 visual backbone. Existing Series 4 checkpoints share the 81,237-frame training snapshot but remove throttle prediction and add temporal-target experiments.
 
 ## The Rules
 
@@ -61,7 +61,7 @@ print("rows", len(rows),
 PY
 ```
 
-An empty list was valid when a new dataset was first initialized. It is not the current state: the Series 3/4 dataset now contains 81,237 labeled frames.
+An empty list was valid when a new dataset was first initialized. It is not the current state: the active local Series 3/4 root contains 80,969 labeled frames after the July 29 audit. Existing models and the published dataset remain tied to the earlier 81,237-frame snapshot.
 
 ## Recovery When a Rule Is Broken
 

@@ -6,7 +6,7 @@ Moving code, datasets, and captured photos from the Mac (my git and photo-pull w
 
 - The source computer holds the branch and data intended for the destination. Confirm the exact current branch and destination on both ends rather than relying on a branch name copied into documentation.
 - The photo runs I want on the PC already live under `media/photos/YYYY_MM_DD_run_N/` (each run may carry a JSON manifest). The trainer reads from the aggregate `sidewalkpilot_dataset`, so the runs have to arrive intact.
-- Disk space on the PC is enough for the batch and the current 81,237-image dataset.
+- Disk space on the PC is enough for the batch and the current 80,969-image local dataset.
 
 ## Steps
 

@@ -21,7 +21,7 @@ sample_weight = bucket_weight * source_weight
 
 The general trainer defaults expose a balance power of `0.3` and relative source factors of correction `3.0`, real `2.0`, and CARLA-tagged `0.6`. Those settings describe trainer capability, not every completed run.
 
-The current v3.4 and Series 4 experiments used 50,000 sampler draws per epoch with `sampler_balance_power = 0.0`, deterministic left and right balance flipping, and class weighting in the loss. Their 81,237-image training root is entirely real, and no correction or CARLA root was loaded, so source factors did not change one sample's probability relative to another. Saved commands and run configuration remain the source of truth for a particular model.
+The recorded v3.4 and Series 4 experiments used 50,000 sampler draws per epoch with `sampler_balance_power = 0.0`, deterministic left and right balance flipping, and class weighting in the loss. Their 81,237-image training snapshot is entirely real, and no correction or CARLA root was loaded, so source factors did not change one sample's probability relative to another. Saved commands and run configuration remain the source of truth for a particular model.
 
 ## Overfitting and Straight Collapse
 
