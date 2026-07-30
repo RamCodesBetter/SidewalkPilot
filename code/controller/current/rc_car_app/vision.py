@@ -84,6 +84,12 @@ YOLO_CONF = 0.20
 CAMERA_FRAME_WIDTH = 1280
 CAMERA_FRAME_HEIGHT = 720
 CAMERA_FPS = CONTROL_LOOP_HZ
+# Camera Module 3's 2304x1296 mode preserves the full IMX708 field of view and
+# supports up to 56 FPS. Pin it so requesting 50 FPS cannot select the cropped
+# 1536x864/120 FPS sensor mode and change the view learned by the models.
+CAMERA_SENSOR_WIDTH = 2304
+CAMERA_SENSOR_HEIGHT = 1296
+CAMERA_SENSOR_BIT_DEPTH = 10
 
 try:
     import cv2
@@ -113,6 +119,10 @@ class _PiCameraCapture:
             # Keep the frame in OpenCV-style BGR order for the rest of the
             # pipeline and avoid any extra channel swaps.
             "main": {"size": (CAMERA_FRAME_WIDTH, CAMERA_FRAME_HEIGHT), "format": "BGR888"},
+            "sensor": {
+                "output_size": (CAMERA_SENSOR_WIDTH, CAMERA_SENSOR_HEIGHT),
+                "bit_depth": CAMERA_SENSOR_BIT_DEPTH,
+            },
             "controls": {"FrameRate": float(CAMERA_FPS)},
         }
         if Transform is not None:

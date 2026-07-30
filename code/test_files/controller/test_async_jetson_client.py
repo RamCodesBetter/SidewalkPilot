@@ -242,6 +242,35 @@ class AsyncJetsonClientTest(unittest.TestCase):
             fake.release_status.set()
             client.close()
 
+    def test_submit_uses_history_from_camera_capture_time(self):
+        fake = RecordingFakeClient()
+        client = AsyncJetsonSteeringClient(
+            "10.42.0.2",
+            status_interval_sec=10.0,
+            history_sample_interval_sec=0.0,
+            client=fake,
+        )
+        try:
+            now = time.monotonic()
+            client.observe_manual_steering(62.0, sampled_at=now - 0.30)
+            client.observe_manual_steering(71.0, sampled_at=now - 0.20)
+            client.observe_manual_steering(83.0, sampled_at=now - 0.10)
+            captured_at = now - 0.05
+
+            # This command happened after the image was captured and must not be
+            # paired with that older image.
+            client.observe_manual_steering(120.0, sampled_at=now)
+            client.submit(
+                "captured-frame",
+                model_version="4.1a",
+                captured_at=captured_at,
+            )
+            self.assertTrue(fake.wait_for_inferences(1))
+
+            self.assertEqual(fake.infer_histories, [(62.0, 71.0, 83.0)])
+        finally:
+            client.close()
+
     def test_result_age_and_metadata_start_at_camera_capture(self):
         fake = RecordingFakeClient()
         client = AsyncJetsonSteeringClient(

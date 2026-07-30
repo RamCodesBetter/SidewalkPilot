@@ -230,6 +230,7 @@ class AsyncJetsonSteeringClient:
         self.last_jpeg = None
         self.bucket_probs = [0.0] * 9
         self._target_history = [90.0, 90.0, 90.0]
+        self._target_timeline = [(float("-inf"), 90.0)] * 3
         self._last_history_sample_time = 0.0
         self._thread = threading.Thread(
             target=self._run,
@@ -246,7 +247,7 @@ class AsyncJetsonSteeringClient:
         source_frame_sequence=None,
         captured_at=None,
     ) -> int:
-        """Queue one frame with the steering history present at submission."""
+        """Queue one frame with the steering history present at camera capture."""
         if frame_bgr is None:
             return 0
         with self._condition:
@@ -262,6 +263,7 @@ class AsyncJetsonSteeringClient:
                 frame_captured_at = submitted_at
             self._request_sequence += 1
             sequence = self._request_sequence
+            target_history = self._history_at_locked(frame_captured_at)
             self._latest_request = (
                 sequence,
                 self._sequence_generation,
@@ -270,10 +272,20 @@ class AsyncJetsonSteeringClient:
                 int(source_frame_sequence or 0),
                 frame_bgr,
                 str(model_version or ""),
-                tuple(self._target_history),
+                target_history,
             )
             self._condition.notify()
             return sequence
+
+    def _history_at_locked(self, sampled_at) -> tuple[float, float, float]:
+        values = [
+            value
+            for timestamp, value in self._target_timeline
+            if timestamp <= float(sampled_at) + 1e-9
+        ][-3:]
+        if len(values) < 3:
+            values = ([90.0] * (3 - len(values))) + values
+        return tuple(values)
 
     def _record_target_locked(self, steering_deg, sampled_at, *, force=False) -> bool:
         value = float(steering_deg)
@@ -296,6 +308,8 @@ class AsyncJetsonSteeringClient:
         ):
             return False
         self._target_history = (self._target_history + [value])[-3:]
+        self._target_timeline.append((sampled_at, value))
+        self._target_timeline = self._target_timeline[-64:]
         self._last_history_sample_time = sampled_at
         return True
 
