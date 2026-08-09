@@ -870,7 +870,11 @@ class WebcamVisionProcessor:
                 self.latest_frame_captured_at = captured_at
                 self.frame_sequence += 1
                 now = time.time()
-                dt = now - self._fps_last_frame_time
-                self.camera_fps = (1.0 / dt) if dt > 0 else 0.0
-                self._fps_last_frame_time = now
+                dt = captured_at - self._fps_last_frame_time
+                instant_fps = (1.0 / dt) if dt > 0 else 0.0
+                if self.camera_fps <= 0.0:
+                    self.camera_fps = instant_fps
+                else:
+                    self.camera_fps = 0.2 * instant_fps + 0.8 * self.camera_fps
+                self._fps_last_frame_time = captured_at
                 self.last_frame_time = now

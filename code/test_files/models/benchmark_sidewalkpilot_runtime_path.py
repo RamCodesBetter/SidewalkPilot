@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Benchmark SidewalkPilot's real JPEG/TCP inference request path on one device.
+"""Benchmark SidewalkPilot's production JPEG/TCP inference request path.
 
-The script launches the production inference server on loopback, sends 1280x720 BGR
-frames through the production client, and measures JPEG encoding, socket round trip,
-server preprocessing/model execution, and total request latency. It excludes camera
-capture, the controller loop, PWM scheduling, and physical steering-servo movement.
+``run`` launches the production server on loopback for a single-device benchmark.
+``remote`` runs on the Raspberry Pi 5 against the live Jetson Orin Nano server so the
+real Ethernet path is included. Both modes exclude camera capture, controller/PWM
+scheduling, and physical steering-servo movement.
 """
 
 from __future__ import annotations
@@ -274,6 +274,169 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
     return report
 
 
+def run_remote_benchmark(args: argparse.Namespace) -> dict[str, Any]:
+    if args.runs <= 0 or args.warmup < 0:
+        raise SystemExit("--runs must be positive and --warmup cannot be negative")
+    if args.status_runs <= 0 or args.status_warmup < 0:
+        raise SystemExit(
+            "--status-runs must be positive and --status-warmup cannot be negative"
+        )
+    if args.target_hz <= 0.0:
+        raise SystemExit("--target-hz must be positive")
+    versions = [value.strip() for value in args.versions.split(",") if value.strip()]
+    invalid_versions = [
+        version
+        for version in versions
+        if MODEL_RE.fullmatch(f"SidewalkPilot-v{version}.onnx") is None
+    ]
+    if not versions or invalid_versions:
+        raise SystemExit("--versions must be a comma-separated list such as 3.4,4.1a")
+
+    frames, fixture_hash = _load_frames(args.images.expanduser().resolve())
+    client = JetsonSteeringClient(
+        args.host,
+        port=args.port,
+        jpeg_quality=80,
+        timeout=args.timeout,
+    )
+    status_ms: list[float] = []
+    try:
+        for index in range(args.status_warmup + args.status_runs):
+            if not client.poll_status():
+                raise RuntimeError(
+                    f"Status request failed for {args.host}:{args.port}"
+                )
+            if index >= args.status_warmup:
+                status_ms.append(client.status_round_trip_ms)
+    finally:
+        # Status requests reset temporal model state. Start inference on a fresh
+        # connection after the status-only link measurement.
+        client.close()
+
+    target_period_ms = 1000.0 / args.target_hz
+    reports = []
+    client = JetsonSteeringClient(
+        args.host,
+        port=args.port,
+        jpeg_quality=80,
+        timeout=args.timeout,
+    )
+    try:
+        for model_index, version in enumerate(versions, start=1):
+            print(
+                f"[{model_index:02d}/{len(versions):02d}] remote runtime path "
+                f"v{version} -> {args.host}:{args.port}"
+            )
+            history = [90.0, 90.0, 90.0]
+            for index in range(args.warmup):
+                result = client.infer(
+                    frames[index % len(frames)],
+                    model_version=version,
+                    target_history=history,
+                )
+                if result is None:
+                    raise RuntimeError(f"Warm-up request failed for v{version}")
+                history = (history + [float(result[0])])[-3:]
+
+            encode_ms: list[float] = []
+            socket_ms: list[float] = []
+            server_ms: list[float] = []
+            transport_decode_reply_ms: list[float] = []
+            total_ms: list[float] = []
+            jpeg_bytes: list[float] = []
+            for index in range(args.runs):
+                result = client.infer(
+                    frames[index % len(frames)],
+                    model_version=version,
+                    target_history=history,
+                )
+                if result is None:
+                    raise RuntimeError(f"Measured request failed for v{version}")
+                history = (history + [float(result[0])])[-3:]
+                encode_ms.append(client.jpeg_encode_ms)
+                socket_ms.append(client.socket_round_trip_ms)
+                server_ms.append(client.infer_ms)
+                transport_decode_reply_ms.append(
+                    max(0.0, client.socket_round_trip_ms - client.infer_ms)
+                )
+                total_ms.append(client.inference_request_ms)
+                jpeg_bytes.append(float(len(client.last_jpeg or b"")))
+
+            total_stats = _stats(total_ms)
+            payload_stats = _stats(jpeg_bytes)
+            sequential_ips = 1000.0 / statistics.fmean(total_ms)
+            row = {
+                "version": version,
+                "series": int(version.split(".", 1)[0]),
+                "warmup_runs": args.warmup,
+                "measured_runs": args.runs,
+                "input_bgr_shape": [1, 720, 1280, 3],
+                "jpeg_quality": 80,
+                "jpeg_payload_bytes": payload_stats,
+                "jpeg_encode_ms": _stats(encode_ms),
+                "socket_round_trip_ms": _stats(socket_ms),
+                "server_preprocess_and_model_ms": _stats(server_ms),
+                "transport_decode_and_reply_ms": _stats(
+                    transport_decode_reply_ms
+                ),
+                "total_inference_request_ms": total_stats,
+                "sequential_request_ips": sequential_ips,
+                "payload_mbps_at_target_hz": (
+                    payload_stats["mean"] * args.target_hz * 8.0 / 1_000_000.0
+                ),
+                "target_hz": args.target_hz,
+                "target_period_ms": target_period_ms,
+                "mean_deadline_met": total_stats["mean"] <= target_period_ms,
+                "p95_deadline_met": total_stats["p95"] <= target_period_ms,
+                "p99_deadline_met": total_stats["p99"] <= target_period_ms,
+            }
+            reports.append(row)
+            print(
+                f"  total p50/p95/p99: {total_stats['median']:.2f}/"
+                f"{total_stats['p95']:.2f}/{total_stats['p99']:.2f} ms; "
+                f"sequential cap: {sequential_ips:.1f} IPS; "
+                f"{args.target_hz:.0f} Hz p95 deadline: "
+                f"{'PASS' if row['p95_deadline_met'] else 'FAIL'}"
+            )
+    finally:
+        client.close()
+
+    report = {
+        "schema_version": 1,
+        "benchmark": "SidewalkPilot-remote-runtime-inference-path-v1",
+        "label": args.label,
+        "timestamp_local": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "host": args.host,
+        "port": args.port,
+        "scope": (
+            "Raspberry Pi 5 1280x720 BGR -> JPEG quality 80 -> real Ethernet TCP "
+            "-> Jetson server JPEG decode -> model preprocessing -> batch-one "
+            "inference -> reply. Excludes camera capture, controller/PWM scheduling, "
+            "and physical servo response. transport_decode_and_reply_ms is the "
+            "measured socket round trip minus server-reported preprocess/model time; "
+            "it is an upper bound, not pure Ethernet latency."
+        ),
+        "status_round_trip_ms": _stats(status_ms),
+        "status_measured_runs": args.status_runs,
+        "fixture_count": len(frames),
+        "fixture_sha256": fixture_hash,
+        "model_count": len(reports),
+        "models": reports,
+    }
+    output = args.output.expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    status = report["status_round_trip_ms"]
+    print(
+        f"Status RTT p50/p95/p99: {status['median']:.2f}/"
+        f"{status['p95']:.2f}/{status['p99']:.2f} ms"
+    )
+    print(f"Saved remote runtime-path report: {output}")
+    return report
+
+
 def _load_report(path: Path) -> dict[str, Any]:
     return json.loads(path.expanduser().resolve().read_text(encoding="utf-8"))
 
@@ -340,6 +503,19 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--timeout", type=float, default=30.0)
     run.add_argument("--label", required=True)
     run.add_argument("--output", type=Path, required=True)
+    remote = commands.add_parser("remote")
+    remote.add_argument("--host", required=True)
+    remote.add_argument("--port", type=int, default=8770)
+    remote.add_argument("--images", type=Path, default=DEFAULT_IMAGES)
+    remote.add_argument("--versions", default="4.1a", help="comma-separated versions")
+    remote.add_argument("--warmup", type=int, default=10)
+    remote.add_argument("--runs", type=int, default=200)
+    remote.add_argument("--status-warmup", type=int, default=5)
+    remote.add_argument("--status-runs", type=int, default=50)
+    remote.add_argument("--target-hz", type=float, default=50.0)
+    remote.add_argument("--timeout", type=float, default=30.0)
+    remote.add_argument("--label", required=True)
+    remote.add_argument("--output", type=Path, required=True)
     compare = commands.add_parser("compare")
     compare.add_argument("baseline", type=Path)
     compare.add_argument("comparison", type=Path)
@@ -351,6 +527,8 @@ def main() -> None:
     if args.command == "run":
         args.models_dir = args.models_dir or DEFAULT_MODEL_DIRS
         run_benchmark(args)
+    elif args.command == "remote":
+        run_remote_benchmark(args)
     else:
         compare_reports(args)
 

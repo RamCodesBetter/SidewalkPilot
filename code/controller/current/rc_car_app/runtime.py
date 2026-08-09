@@ -1525,13 +1525,37 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             if _perf_now >= state.get("_perf_next", 0.0):
                 state["_perf_next"] = _perf_now + 2.0
                 _cam_fps = webcam_vision.camera_fps if webcam_vision is not None else 0.0
+                _latency = jetson_client.get_latency_summary()
                 print(
-                    f"[perf] IPS={state['infer_fps']:.1f}  "
-                    f"FPS={_cam_fps:.1f}  infer={state['infer_ms']:.1f}ms  "
+                    f"[perf] control={state.get('control_loop_hz', 0.0):.1f}Hz  "
+                    f"camera={_cam_fps:.1f}FPS  IPS={state['infer_fps']:.1f}  "
+                    f"infer={state['infer_ms']:.1f}ms  "
                     f"capture-result={state['capture_to_result_ms']:.1f}ms  "
                     f"lag={state['model_frame_lag']}f",
                     flush=True,
                 )
+                if _latency["sample_count"]:
+                    _request = _latency["inference_request_ms"]
+                    _capture = _latency["capture_to_result_ms"]
+                    _socket = _latency["socket_round_trip_ms"]
+                    _deadline_ms = 1000.0 / float(CONTROL_LOOP_HZ)
+                    if _latency["sample_count"] < CONTROL_LOOP_HZ:
+                        _deadline_status = "WARMUP"
+                    else:
+                        _deadline_status = (
+                            "PASS" if _request["p95"] <= _deadline_ms else "FAIL"
+                        )
+                    print(
+                        f"[latency:{_latency['sample_count']}] "
+                        f"request p50/p95/p99={_request['p50']:.1f}/"
+                        f"{_request['p95']:.1f}/{_request['p99']:.1f}ms  "
+                        f"socket+server={_socket['p50']:.1f}/{_socket['p95']:.1f}/"
+                        f"{_socket['p99']:.1f}ms  "
+                        f"capture-result={_capture['p50']:.1f}/{_capture['p95']:.1f}/"
+                        f"{_capture['p99']:.1f}ms  "
+                        f"{CONTROL_LOOP_HZ}Hz-p95={_deadline_status}",
+                        flush=True,
+                    )
             camera_analysis = {
                 "heading_bias": max(-1.0, min(1.0, (jon_steer_deg - 90.0) / 90.0)),
                 "confidence": 1.0,
@@ -2022,6 +2046,19 @@ def run(model_choice=None, inference_host=None):
     try:
         while not shutdown_flag.is_set():
             current_loop_time = time.time()
+            loop_rate_started = state.get("_loop_rate_started")
+            if loop_rate_started is None:
+                state["_loop_rate_started"] = current_loop_time
+                state["_loop_rate_count"] = 0
+            else:
+                state["_loop_rate_count"] = int(state.get("_loop_rate_count", 0)) + 1
+                loop_rate_elapsed = current_loop_time - float(loop_rate_started)
+                if loop_rate_elapsed >= 1.0:
+                    state["control_loop_hz"] = (
+                        float(state["_loop_rate_count"]) / loop_rate_elapsed
+                    )
+                    state["_loop_rate_started"] = current_loop_time
+                    state["_loop_rate_count"] = 0
             try:
                 controller_attached = bool(joystick.get_attached())
             except (AttributeError, pygame.error):
