@@ -27,9 +27,8 @@ CAMERA_TURN_BLEND = 0.35
 # on ambiguous frames: steer = ALPHA*new + (1-ALPHA)*prev.
 #   1.0  = off (raw, jittery)   ~0.5 = balanced   lower = smoother but laggier
 # Tune in the field: raise it if the car corners late, lower it if still twitchy.
-# 0.45 chosen from the 2026-07-03 field log (~8 deg/frame raw jitter) re-tuned at the
-# real 30 fps loop rate: ~40% jitter cut, ~0.13 s turn lag -- a middle between max-smooth
-# (0.30) and snappy (0.60).
+# 0.45 was chosen from the 2026-07-03 field log (~8 deg/frame raw jitter). At the
+# current 50 Hz inference target, it reaches about 91% of a steering step in 80 ms.
 STEERING_SMOOTH_ALPHA = 0.45
 MAX_AUTONOMOUS_SPEED_MPH = 3.2
 MAX_TARGET_HEADING_DEG = 60.0
@@ -93,6 +92,8 @@ USE_PCA9685_SERVO = True
 PCA9685_I2C_ADDRESS = 0x40
 PCA9685_SERVO_CHANNEL = 0
 PCA9685_FREQUENCY_HZ = 50
+# Run steering arbitration no faster than the PCA9685 can emit a new servo pulse.
+CONTROL_LOOP_HZ = PCA9685_FREQUENCY_HZ
 STEERING_SERVO_MIN_PULSE_US = 1000
 STEERING_SERVO_MAX_PULSE_US = 2000
 STEERING_SERVO_ACTUATION_RANGE_DEG = 180
@@ -315,27 +316,24 @@ AUTONOMY_TOGGLE_BUTTON = 0
 AEB_TOGGLE_BUTTON = 14
 PHOTO_BUTTON = 1
 AUTO_PHOTO_BUTTON = 11
-AUTO_PHOTO_MIN_INTERVAL_SEC = 2
-AUTO_PHOTO_MAX_INTERVAL_SEC = 4
 # High-rate run capture: when auto-photo is ON it now captures continuously at this
 # fps (instead of the old 2-4s random) for dense training-data runs. Each frame is
 # labeled with the live logical steering + throttle (appended to a per-run CSV; the
 # JSON is built when the run ends).
 PHOTO_RUN_CAPTURE_FPS = 10.0
 
-# Jetson ("Jon") remote inference. When JETSON_STEERING_HOST is non-empty the Pi
-# does NOT run a steering model: in autonomous mode it sends the camera frame +
-# the active model choice to Jon and steers with the (steering, throttle) it gets
-# back. Empty host = current behavior (Pi runs its own Series-1/2 model locally).
-# If Jon is unreachable the car holds (safe stop), it does not free-run.
-# Jon = Jetson Orin Nano, over the wired Pi<->Jetson Ethernet link. Pi eth0 is
-# 10.42.0.1 (NetworkManager "shared" mode, connection 'jetson-eth-share'); Jon's
-# eth is pinned STATIC to 10.42.0.2 (below the DHCP pool, so it survives reboots).
-# Jon keeps internet via gateway 10.42.0.1. Separate from the 192.168.10.x
-# Pi5<->Zero2W dashboard USB link.
+# Jetson Orin Nano remote inference. The Raspberry Pi 5 sends each camera frame
+# and the active model choice over Ethernet, then applies the returned steering
+# value. A host is required; if the Jetson is unreachable, autonomy holds safely.
+# The Raspberry Pi 5 Ethernet address is
+# 10.42.0.1 (NetworkManager "shared" mode, connection 'jetson-eth-share'); the
+# Jetson Orin Nano is pinned to 10.42.0.2 so the link survives reboots. It keeps
+# internet access through gateway 10.42.0.1. This is separate from the
+# Raspberry Pi 5-to-Zero 2 W dashboard USB link on 192.168.10.x.
 JETSON_STEERING_HOST = "10.42.0.2"
 JETSON_STEERING_PORT = 8770
-JETSON_RESULT_MAX_AGE_SEC = 0.25
+JETSON_RESULT_MAX_AGE_SEC = 0.08
+JETSON_RESULT_MAX_FRAME_LAG = 2
 CONTROL_LOOP_STALL_WARN_SEC = 0.10
 
 # Interruption clip recorder (dad+son suggestion #1). While autonomous, keep a rolling

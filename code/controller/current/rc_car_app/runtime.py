@@ -23,6 +23,8 @@ from .config import (
     JETSON_STEERING_HOST,
     JETSON_STEERING_PORT,
     JETSON_RESULT_MAX_AGE_SEC,
+    JETSON_RESULT_MAX_FRAME_LAG,
+    CONTROL_LOOP_HZ,
     CONTROL_LOOP_STALL_WARN_SEC,
     INTERRUPTION_CLIP_ENABLED,
     INTERRUPTION_CLIP_SECONDS,
@@ -1455,21 +1457,10 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
         "method": "none",
     }
     model_frame_is_stale = True
-    if webcam_vision:
-        camera_analysis, last_frame_time = webcam_vision.get_analysis()
-        model_frame_is_stale = time.time() - last_frame_time > 0.75
-        if model_frame_is_stale:
-            camera_analysis["heading_bias"] = 0.0
-            camera_analysis["confidence"] = 0.0
-            camera_analysis["left_edge_found"] = False
-            camera_analysis["right_edge_found"] = False
-            camera_analysis["corridor_width_px"] = 0.0
-            camera_analysis["method"] = "stale_model_frame"
 
-    # Jetson ("Jon") inference: the Pi sends the live frame + active model choice
-    # through a latest-frame worker and consumes only cached results here. Network,
-    # JPEG, and model latency therefore never block controller events or GPIO writes.
-    # If Jon is unreachable or stale, confidence stays 0 -> safe hard stop below.
+    # The Raspberry Pi 5 sends the live frame and active model choice through a
+    # latest-frame worker. Network, JPEG, and inference waits stay off the control
+    # loop. If the Jetson result is missing, mismatched, or stale, autonomy stops.
     if jetson_client is not None:
         frame_sample = None
         if webcam_vision is not None and hasattr(webcam_vision, "grab_latest_frame_sample"):
@@ -1481,19 +1472,34 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             if frame is not None:
                 frame_sample = (int(state.get("_jon_submitted_frame_sequence", 0)) + 1, frame)
         if frame_sample is not None:
-            frame_sequence, frame = frame_sample
-            jetson_client.submit(frame, model_version=active_model_choice)
+            if len(frame_sample) == 3:
+                frame_sequence, frame_captured_at, frame = frame_sample
+            else:
+                frame_sequence, frame = frame_sample
+                frame_captured_at = time.monotonic()
+            jetson_client.submit(
+                frame,
+                model_version=active_model_choice,
+                source_frame_sequence=frame_sequence,
+                captured_at=frame_captured_at,
+            )
             state["_jon_submitted_frame_sequence"] = int(frame_sequence)
         jon_sample = jetson_client.get_latest_sample(
             model_version=active_model_choice,
             max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
         )
         if jon_sample is not None:
+            source_frame_sequence = int(jon_sample.get("source_frame_sequence", 0))
+            latest_frame_sequence = int(state.get("_jon_submitted_frame_sequence", 0))
+            frame_lag = max(0, latest_frame_sequence - source_frame_sequence)
+            if source_frame_sequence and frame_lag > JETSON_RESULT_MAX_FRAME_LAG:
+                jon_sample = None
+        if jon_sample is not None:
             jon_result = jon_sample["result"]
             jon_steer_deg, _jon_throttle = jon_result
             # Temporal smoothing (EMA): the v3.1 hybrid head can flip steering buckets
             # frame-to-frame (blocky output). Blend with the previous command to damp it.
-            # Apply the EMA once per completed inference, not once per 60 Hz control tick.
+            # Apply the EMA once per completed inference, not once per control tick.
             jon_sequence = int(jon_sample["sequence"])
             if jon_sequence != int(state.get("_jon_result_sequence", 0)):
                 _prev_steer = state.get("steer_smoothed_deg")
@@ -1509,13 +1515,47 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             state["jon_gpu_temp_c"] = float(getattr(jetson_client, "jon_gpu_temp_c", 0.0))
             state["infer_fps"] = float(getattr(jetson_client, "infer_fps", 0.0))
             state["infer_ms"] = float(getattr(jetson_client, "infer_ms", 0.0))
+            state["capture_to_result_ms"] = float(
+                jon_sample.get("capture_to_result_ms", 0.0)
+            )
+            state["model_frame_lag"] = frame_lag
             # perf on the Pi cmdline (Jon is headless): IPS vs FPS + Jon session.run ms, throttled ~2s.
             # If infer_ms is small but IPS<FPS -> Pi-loop/JPEG bound, not the model.
             _perf_now = time.time()
             if _perf_now >= state.get("_perf_next", 0.0):
                 state["_perf_next"] = _perf_now + 2.0
                 _cam_fps = webcam_vision.camera_fps if webcam_vision is not None else 0.0
-                print(f"[perf] IPS={state['infer_fps']:.1f}  FPS={_cam_fps:.1f}  infer={state['infer_ms']:.0f}ms", flush=True)
+                _latency = jetson_client.get_latency_summary()
+                print(
+                    f"[perf] control={state.get('control_loop_hz', 0.0):.1f}Hz  "
+                    f"camera={_cam_fps:.1f}FPS  IPS={state['infer_fps']:.1f}  "
+                    f"infer={state['infer_ms']:.1f}ms  "
+                    f"capture-result={state['capture_to_result_ms']:.1f}ms  "
+                    f"lag={state['model_frame_lag']}f",
+                    flush=True,
+                )
+                if _latency["sample_count"]:
+                    _request = _latency["inference_request_ms"]
+                    _capture = _latency["capture_to_result_ms"]
+                    _socket = _latency["socket_round_trip_ms"]
+                    _deadline_ms = 1000.0 / float(CONTROL_LOOP_HZ)
+                    if _latency["sample_count"] < CONTROL_LOOP_HZ:
+                        _deadline_status = "WARMUP"
+                    else:
+                        _deadline_status = (
+                            "PASS" if _request["p95"] <= _deadline_ms else "FAIL"
+                        )
+                    print(
+                        f"[latency:{_latency['sample_count']}] "
+                        f"request p50/p95/p99={_request['p50']:.1f}/"
+                        f"{_request['p95']:.1f}/{_request['p99']:.1f}ms  "
+                        f"socket+server={_socket['p50']:.1f}/{_socket['p95']:.1f}/"
+                        f"{_socket['p99']:.1f}ms  "
+                        f"capture-result={_capture['p50']:.1f}/{_capture['p95']:.1f}/"
+                        f"{_capture['p99']:.1f}ms  "
+                        f"{CONTROL_LOOP_HZ}Hz-p95={_deadline_status}",
+                        flush=True,
+                    )
             camera_analysis = {
                 "heading_bias": max(-1.0, min(1.0, (jon_steer_deg - 90.0) / 90.0)),
                 "confidence": 1.0,
@@ -1531,6 +1571,8 @@ def apply_autonomous_controls(state, metrics, hardware, webcam_vision, lidar_sca
             model_frame_is_stale = True
             camera_analysis["confidence"] = 0.0
             camera_analysis["method"] = "jetson_unreachable"
+    else:
+        camera_analysis["method"] = "jetson_unavailable"
 
     state["camera_steering_bias"] = camera_analysis["heading_bias"]
     state["camera_confidence"] = camera_analysis["confidence"]
@@ -1811,7 +1853,7 @@ def _ship_logs_to_jon(host=None):
     """On exit, rsync the run CSV logs to Jon (/nvme/logs) and delete the ones that
     transferred (rsync --remove-source-files). Fails safe: keeps logs locally if Jon
     is unreachable or there's no passwordless SSH key. Never raises because shutdown
-    must not depend on it. Local Raspberry Pi inference tests skip this transfer."""
+    must not depend on it."""
     configured_host = JETSON_STEERING_HOST if host is None else host
     host = (configured_host or "").strip()
     if not host:
@@ -1836,7 +1878,7 @@ def _ship_logs_to_jon(host=None):
         print(f"Log ship to Jon skipped (kept locally): {exc}")
 
 
-def run(model_choice=None, inference_host=None, local_inference=False):
+def run(model_choice=None, inference_host=None):
     global photo_status
     shutdown_flag.clear()
     print("RC Car Controller Starting...")
@@ -1845,6 +1887,15 @@ def run(model_choice=None, inference_host=None, local_inference=False):
         valid = ", ".join(STEERING_MODEL_CHOICES)
         raise ValueError(
             f"Unknown steering model '{active_model_choice}'. Valid choices: {valid}"
+        )
+    configured_inference_host = (
+        JETSON_STEERING_HOST if inference_host is None else inference_host
+    )
+    jetson_host = (configured_inference_host or "").strip()
+    if not jetson_host:
+        raise ValueError(
+            "JETSON_STEERING_HOST is required because steering inference is "
+            "Jetson Orin Nano-only."
         )
     state = create_state()
     metrics = Metrics()
@@ -1924,35 +1975,23 @@ def run(model_choice=None, inference_host=None, local_inference=False):
     else:
         print("Yaw-rate PID steering OFF (open-loop). Set STEERING_YAW_PID_MODE=straight|full to enable.")
 
-    configured_inference_host = (
-        JETSON_STEERING_HOST if inference_host is None else inference_host
+    jetson_client = AsyncJetsonSteeringClient(
+        jetson_host,
+        JETSON_STEERING_PORT,
+        history_result_max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
     )
-    jetson_host = (configured_inference_host or "").strip()
-    jetson_client = None
-    if jetson_host:
-        jetson_client = AsyncJetsonSteeringClient(
-            jetson_host,
-            JETSON_STEERING_PORT,
-            history_result_max_age_sec=JETSON_RESULT_MAX_AGE_SEC,
-        )
-        if local_inference:
-            print(
-                "TEMPORARY TEST MODE: autonomy inference runs on the Raspberry Pi "
-                f"CPU through the local server at {jetson_host}:{JETSON_STEERING_PORT}."
-            )
-        else:
-            print(
-                "Autonomy inference on Jetson Orin Nano at "
-                f"{jetson_host}:{JETSON_STEERING_PORT}. Raspberry Pi will not run "
-                "a local steering model."
-            )
+    print(
+        "Autonomy inference on Jetson Orin Nano at "
+        f"{jetson_host}:{JETSON_STEERING_PORT}. The Raspberry Pi 5 captures "
+        "frames and applies fresh returned steering values."
+    )
 
     # Interruption clip recorder: rolling buffer of the exact JPEGs sent to Jon; on every
     # autonomous->manual takeover it saves the 2s-before as a clip (background thread), and
     # ships them to Jon at quit. Only meaningful when Jon is the inference source.
     clip_recorder = InterruptionClipRecorder(
         clip_seconds=INTERRUPTION_CLIP_SECONDS, out_dir=INTERRUPTION_CLIP_DIR,
-        enabled=INTERRUPTION_CLIP_ENABLED and jetson_client is not None)
+        enabled=INTERRUPTION_CLIP_ENABLED)
 
     # Telemetry -> local InfluxDB (non-blocking; disabled if ~/.influxdb.json absent).
     # One run_id per car launch; browse at http://raspberrypi.local:8086.
@@ -1960,9 +1999,7 @@ def run(model_choice=None, inference_host=None, local_inference=False):
     dashboard_run_number = _run_number_today()   # R### shown on z2w V1H1
     influx = InfluxLogger(drive_run_id, base_tags={"model": str(active_model_choice), "device": "rpi5"})
 
-    webcam_vision = WebcamVisionProcessor(
-        model_choice=active_model_choice, camera_only=jetson_client is not None
-    )
+    webcam_vision = WebcamVisionProcessor(model_choice=active_model_choice)
     if not webcam_vision.start():
         webcam_vision = None
 
@@ -2009,6 +2046,19 @@ def run(model_choice=None, inference_host=None, local_inference=False):
     try:
         while not shutdown_flag.is_set():
             current_loop_time = time.time()
+            loop_rate_started = state.get("_loop_rate_started")
+            if loop_rate_started is None:
+                state["_loop_rate_started"] = current_loop_time
+                state["_loop_rate_count"] = 0
+            else:
+                state["_loop_rate_count"] = int(state.get("_loop_rate_count", 0)) + 1
+                loop_rate_elapsed = current_loop_time - float(loop_rate_started)
+                if loop_rate_elapsed >= 1.0:
+                    state["control_loop_hz"] = (
+                        float(state["_loop_rate_count"]) / loop_rate_elapsed
+                    )
+                    state["_loop_rate_started"] = current_loop_time
+                    state["_loop_rate_count"] = 0
             try:
                 controller_attached = bool(joystick.get_attached())
             except (AttributeError, pygame.error):
@@ -2502,7 +2552,7 @@ def run(model_choice=None, inference_host=None, local_inference=False):
                 )
                 last_log_time = current_loop_time
 
-            clock.tick(60)
+            clock.tick(CONTROL_LOOP_HZ)
 
     except KeyboardInterrupt:
         state["event_quit_pressed"] = True
@@ -2544,12 +2594,9 @@ def run(model_choice=None, inference_host=None, local_inference=False):
         hardware.cleanup()
         if csv_file:
             csv_file.close()
-        if not local_inference:
-            _ship_logs_to_jon(jetson_host)
-            if clip_recorder is not None:
-                clip_recorder.ship_to_jon(jetson_host)
-        elif clip_recorder is not None:
-            print("Local inference test: keeping run logs and interruption clips on the Raspberry Pi.")
+        _ship_logs_to_jon(jetson_host)
+        if clip_recorder is not None:
+            clip_recorder.ship_to_jon(jetson_host)
         influx.close()               # drain remaining telemetry to InfluxDB
         cleanup_photo_run_dir()
         pygame.quit()
