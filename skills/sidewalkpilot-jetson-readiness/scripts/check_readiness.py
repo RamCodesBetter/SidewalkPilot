@@ -111,8 +111,14 @@ def installed_nvidia_skill_roots() -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo", default=os.environ.get("SIDEWALKPILOT_ROOT", "/nvme/rc_car_code"))
-    parser.add_argument("--model", default=os.environ.get("RC_CAR_STEERING_MODEL", "3.4"))
+    parser.add_argument(
+        "--repo",
+        default=os.environ.get("SIDEWALKPILOT_ROOT", "/nvme/rc_car_code"),
+    )
+    parser.add_argument(
+        "--model",
+        default=os.environ.get("RC_CAR_STEERING_MODEL", "3.4"),
+    )
     parser.add_argument("--python", default=os.environ.get("SIDEWALKPILOT_PYTHON"))
     parser.add_argument("--expected-ip", default="10.42.0.2")
     parser.add_argument("--port", type=int, default=8770)

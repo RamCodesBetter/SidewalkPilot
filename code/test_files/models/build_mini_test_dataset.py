@@ -143,8 +143,8 @@ def build(args: argparse.Namespace) -> None:
     manifest = {
         "schema_version": 1,
         "description": (
-            "A 180-image mini test dataset sampled from the separate 81,237-image "
-            "Series 3/4 training corpus for Raspberry Pi 5 and Jetson Orin Nano "
+            "A 180-image mini test dataset sampled from the separate original "
+            "81,237-image Series 3/4 model-training snapshot for Raspberry Pi 5 and Jetson Orin Nano "
             "inference-speed tests. This is not the training dataset."
         ),
         "dataset_role": "mini inference-speed test dataset",

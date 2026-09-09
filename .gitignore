@@ -31,6 +31,9 @@ code/ai_models_datasets/series_3_and_4/dataset_real_*/
 *.pth
 *.onnx
 
+# Device benchmark reports are synchronized locally but not committed.
+code/test_files/models/device_benchmark_results/
+
 # Hugging Face publishing artifacts stay local. Dataset/model cards and archives are
 # published to Hugging Face, not tracked on the GitHub branch.
 *.tar

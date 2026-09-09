@@ -158,23 +158,35 @@ class LidarCenterAebTest(unittest.TestCase):
         self.assertEqual(metrics.auto_last_cause_code, "EMR")
 
     def test_autonomous_aeb_off_preserves_model_steering_and_full_throttle(self):
-        class FreshVision:
-            def get_analysis(self):
-                return ({
-                    "heading_bias": 0.0,
-                    "confidence": 1.0,
-                    "left_edge_found": False,
-                    "right_edge_found": False,
-                    "corridor_width_px": 0.0,
-                    "driveway_cut_hint": False,
-                    "steering_angle_deg": 117.0,
-                    "method": "test",
-                }, time.time())
+        class FreshCamera:
+            camera_fps = 50.0
+
+            def grab_latest_frame(self):
+                return "latest-frame"
+
+        class FreshJetson:
+            jon_cpu_temp_c = 48.0
+            jon_gpu_temp_c = 52.0
+            infer_fps = 50.0
+            infer_ms = 6.0
+
+            def submit(self, frame, model_version=None, **metadata):
+                return 1
+
+            def get_latest_sample(self, model_version=None, max_age_sec=None):
+                return {
+                    "sequence": 1,
+                    "model_version": model_version,
+                    "result": (117.0, 0.0),
+                    "age_sec": 0.01,
+                }
 
         scan = [point(0.0, C.LIDAR_OVERRIDE_EMERGENCY_STOP_M - 0.20)]
         policy = lidar_avoidance.evaluate(scan, enabled=False)
         state = C.create_state()
         state["autonomous_mode"] = True
+        state["_perf_next"] = time.time() + 60.0
+        state["_autodbg_next"] = time.time() + 60.0
         metrics = C.Metrics()
         metrics.aeb_enabled = False
 
@@ -182,8 +194,9 @@ class LidarCenterAebTest(unittest.TestCase):
             state,
             metrics,
             hardware=None,
-            webcam_vision=FreshVision(),
+            webcam_vision=FreshCamera(),
             lidar_scan=scan,
+            jetson_client=FreshJetson(),
             active_model_choice="3.4",
             lidar_policy=policy,
         )
@@ -193,34 +206,23 @@ class LidarCenterAebTest(unittest.TestCase):
         self.assertEqual(state["steering_servo_deg"], 117.0)
         self.assertFalse(state["lidar_override_active"])
 
-    def test_autonomous_control_consumes_cached_jetson_result(self):
+    def test_autonomous_control_consumes_latest_jetson_result(self):
         class FreshCamera:
-            camera_fps = 30.0
-
-            def get_analysis(self):
-                return ({
-                    "heading_bias": 0.0,
-                    "confidence": 0.0,
-                    "left_edge_found": False,
-                    "right_edge_found": False,
-                    "corridor_width_px": 0.0,
-                    "driveway_cut_hint": False,
-                    "method": "camera_only",
-                }, time.time())
+            camera_fps = 50.0
 
             def grab_latest_frame(self):
                 return "latest-frame"
 
-        class CachedJetson:
+        class LatestJetson:
             jon_cpu_temp_c = 48.0
             jon_gpu_temp_c = 52.0
-            infer_fps = 30.0
-            infer_ms = 10.0
+            infer_fps = 50.0
+            infer_ms = 6.0
 
             def __init__(self):
                 self.submissions = []
 
-            def submit(self, frame, model_version=None):
+            def submit(self, frame, model_version=None, **metadata):
                 self.submissions.append((frame, model_version))
                 return 8
 
@@ -237,7 +239,7 @@ class LidarCenterAebTest(unittest.TestCase):
         state["_perf_next"] = time.time() + 60.0
         state["_autodbg_next"] = time.time() + 60.0
         metrics = C.Metrics()
-        jetson = CachedJetson()
+        jetson = LatestJetson()
         policy = lidar_avoidance.evaluate([], enabled=True)
 
         started = time.perf_counter()
