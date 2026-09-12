@@ -2,7 +2,7 @@
 
 SidewalkPilot is my RC car that can self-drive on sidewalks. The Jetson Orin Nano is the
 AI brain for every live-selectable steering-model family: Series 1/2 use PyTorch CUDA and
-Series 3/4 use ONNX Runtime CUDA. It returns the steering prediction. A Raspberry Pi 5 captures the camera and sensors, applies
+Series 3/4 use ONNX Runtime CUDA. It returns the steering prediction. A Raspberry Pi 5 captures camera images and reads sensor data, applies
 safety rules, and controls the hardware, while a Zero 2 W renders the live LED dashboard.
 
 <table width="100%">
