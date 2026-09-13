@@ -18,7 +18,7 @@ safety rules, and controls the hardware, while a Zero 2 W renders the live LED d
 - [NVIDIA Feature: NVIDIA Official Blog - "Build AI Anywhere With NVIDIA Jetson"](https://blogs.nvidia.com/blog/build-ai-with-nvidia-jetson/)
 - [NVIDIA Feature: NVIDIA Jetson AI Lab - Community Projects](https://www.jetson-ai-lab.com/projects/)
 - [Seeed Studio Feature: X Post](https://x.com/seeedstudio/status/2097294386652655951)
-- [Seed Studio Feature: LinkedIn Post](https://www.linkedin.com/posts/jetsonai-robotics-edgeai-ugcPost-7503059647386267648-jRQd/)
+- [Seeed Studio Feature: LinkedIn Post](https://www.linkedin.com/posts/jetsonai-robotics-edgeai-ugcPost-7503059647386267648-jRQd/)
 
 </td>
 <td valign="top" align="right">
