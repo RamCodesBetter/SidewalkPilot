@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -298,6 +302,8 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#what-the-project-is">What the Project Is</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#planned-accessibility-research">Planned Accessibility Research</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#what-has-been-demonstrated">What Has Been Demonstrated</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#evidence-limits">Evidence Limits</a>
@@ -356,6 +362,17 @@
 <li>Turning field failures into the next data or code revision.</li>
 </ul>
 <p>The value is the integration and iteration, not a claim that one neural-network score establishes general autonomy.</p>
+<h2 id="planned-accessibility-research">Planned Accessibility Research</h2>
+<p>The <a href="../../research-context/series-5-accessibility-study/">Series 5 study plan</a> proposes
+three SidewalkPilot surveys and one manual survey of the same 1.06-mile route. The model
+will output segmentation masks; downstream code will produce steering and throttle
+commands. Calibrated camera geometry, IMU readings, and encoder counts will support
+physical sidewalk measurements. These measurements, their accuracy, and labor/cost
+reductions have not been established by the existing steering demonstrations.</p>
+<p>Safety supervision counts toward person-hours. Existing LiDAR braking and manual
+takeover remain independent of the planned normal steering/throttle outputs. A generated
+mask is a reference label, not automatically verified ground truth. Field approvals and
+the operating boundaries below still apply.</p>
 <h2 id="what-has-been-demonstrated">What Has Been Demonstrated</h2>
 <ul>
 <li>Physical camera-to-steering runs under operator supervision.</li>
@@ -370,7 +387,7 @@
 <h2 id="evidence-limits">Evidence Limits</h2>
 <ul>
 <li>The July 13 v3.4 result is qualitative. Exact route, weather, takeover count, and clip identifiers were not preserved.</li>
-<li>The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 has not yet completed live integration or physical testing.</li>
+<li>The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 is runtime-registered but has not completed physical testing.</li>
 <li>Offline metrics do not prove obstacle avoidance, pedestrian response, recovery from a road-edge error, or operation outside the test distribution.</li>
 <li>The LiDAR policy has automated software tests, but the latest configuration still needs a preserved physical test record.</li>
 <li>GPS/navigation code exists, but it does not make the car safe for unattended route execution.</li>

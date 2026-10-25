@@ -18,7 +18,9 @@ Every published version is its own Hugging Face repository (`SidewalkPilot-v{ver
 
 **Series 4.0** — [v4.0p](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0p) · [v4.0r](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0r) · [v4.0f](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0f) · [v4.0g](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0g) · [v4.0a](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0a) · [v4.0c](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.0c)
 
-The Series 4.0 cards include their supervised field results: `4.0f` was viable, while the history-input checkpoints were rejected for steering echo. The six Series 4.1 models remain local pending runtime integration and field testing.
+**Series 4.1** - [v4.1p](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.1p), [v4.1r](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.1r), [v4.1f](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.1f), [v4.1g](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.1g), [v4.1a](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.1a), [v4.1c](https://huggingface.co/ram-shreyas-naik-sabavat/SidewalkPilot-v4.1c).
+
+The Series 4.0 cards include their supervised field results: `4.0f` was viable, while the history-input checkpoints were rejected for steering echo. The six Series 4.1 ONNX models, individual cards, and SHA-256 manifests were published on October 25, 2026. They are registered in the Pi selector and Jetson runtime, but remain pending physical testing. Release checks include ONNX validation, PyTorch/ONNX output comparisons, and a repeat of the shared 6,952-anchor offline evaluation. Publication is not field validation or model promotion; v3.4 remains the default.
 
 ## Datasets
 

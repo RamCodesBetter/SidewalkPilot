@@ -15,7 +15,7 @@ Commands are machine-specific. Confirm the shell prompt before running anything 
 | Raspberry Pi 5 | `ping -c 3 192.168.10.2` | USB network reaches the dashboard |
 | Zero 2 W | `ping -c 3 192.168.10.1` | Return path reaches the Raspberry Pi 5 |
 
-The live controller has no `--model` flag. Select a registered model through the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup. The current selector includes Series 1 through 3 and Series 4.0; Series 4.1 has not yet been integrated.
+The live controller has no `--model` flag. Select a registered model through the dashboard model page, or set `RC_CAR_STEERING_MODEL` before startup. The current selector includes all 52 versions through Series 4.1. Runtime registration is not a physical field-test verdict.
 
 ## Logs
 

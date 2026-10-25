@@ -1,0 +1,181 @@
+file,current_steering,decision,proposed_steering,reason
+b0_00.jpg,41,fix,90,Isolated hard-left label on an unchanged straight sidewalk frame.
+b0_01.jpg,19,fix,90,Isolated hard-left label on an unchanged straight sidewalk frame.
+b0_02.jpg,41,fix,90,Isolated hard-left label on an unchanged straight sidewalk frame.
+b0_03.jpg,2,drop,,Vehicle is driving on the roadway and no usable sidewalk corridor is visible.
+b0_04.jpg,41,keep,41,Visible sidewalk bend supports the left command.
+b0_05.jpg,0,keep,0,Visible hard-left path geometry supports the command.
+b0_06.jpg,0,keep,0,Visible hard-left path geometry supports the command.
+b0_07.jpg,0,drop,,Roadway dominates the frame and no usable sidewalk corridor is visible.
+b0_08.jpg,25,keep,25,Left command is plausible through the sidewalk and driveway transition.
+b0_09.jpg,1,keep,1,Visible hard-left turn supports the command.
+b0_10.jpg,40,keep,40,Sidewalk visibly bends left.
+b0_11.jpg,0,keep,0,Hard-left maneuver around the bin is visually plausible.
+b0_12.jpg,37,keep,37,Sidewalk visibly curves left.
+b0_13.jpg,37,keep,37,Left command is plausible through the broad driveway crossing.
+b0_14.jpg,41,keep,41,Sidewalk continuation bends left through the crossing.
+b0_15.jpg,33,keep,33,Adjacent frames confirm a sustained left recovery rather than a one-frame spike.
+b0_16.jpg,1,drop,,Camera faces into a garage area and no sidewalk corridor is visible.
+b0_17.jpg,34,fix,90,Hard-left value is an isolated spike on a visually straight blurred sidewalk.
+b0_18.jpg,40,fix,75,Left correction is plausible but the labeled magnitude is too aggressive for the visible path.
+b0_19.jpg,43,fix,75,Left correction is plausible but the labeled magnitude is too aggressive for the visible path.
+b1_00.jpg,58,keep,58,Adjacent frames confirm a sustained left recovery.
+b1_01.jpg,54,fix,90,Isolated left label on an unchanged straight sidewalk frame.
+b1_02.jpg,58,fix,90,Isolated left label on an unchanged straight sidewalk frame.
+b1_03.jpg,49,keep,49,Left correction is visually plausible near the sidewalk edge.
+b1_04.jpg,45,keep,45,Left correction is visually plausible away from the right edge.
+b1_05.jpg,59,fix,90,Isolated left label on an unchanged straight sidewalk frame.
+b1_06.jpg,55,fix,90,Isolated left label on an unchanged straight sidewalk frame.
+b1_07.jpg,58,fix,90,Isolated left label on an unchanged straight sidewalk frame.
+b1_08.jpg,54,fix,90,Isolated left label on an unchanged straight sidewalk frame.
+b1_09.jpg,56,keep,56,Left correction is plausible through the shadowed sidewalk section.
+b1_10.jpg,46,keep,46,Visible path alignment supports a left correction.
+b1_11.jpg,47,keep,47,Left correction is plausible through the driveway crossing.
+b1_12.jpg,56,keep,56,Visible path alignment supports a left correction.
+b1_13.jpg,49,keep,49,Left correction is plausible away from the broken right edge.
+b1_14.jpg,58,fix,80,Left correction is plausible but the labeled magnitude is too aggressive.
+b1_15.jpg,49,keep,49,Visible path alignment supports a left correction.
+b1_16.jpg,56,keep,56,Left correction is plausible through the crossing.
+b1_17.jpg,50,keep,50,Left correction is plausible in the shadowed corridor.
+b1_18.jpg,55,keep,55,Left correction is plausible away from the road-side edge.
+b1_19.jpg,57,keep,57,Visible path alignment supports a left correction.
+b2_00.jpg,74,keep,74,Mild left correction is visually plausible.
+b2_01.jpg,65,keep,65,Mild left correction is visually plausible.
+b2_02.jpg,69,keep,69,Mild left correction is visually plausible.
+b2_03.jpg,61,fix,120,Large bin is on the left and the open corridor passes to its right.
+b2_04.jpg,66,keep,66,Mild left correction is visually plausible.
+b2_05.jpg,68,keep,68,Mild left correction is visually plausible.
+b2_06.jpg,67,keep,67,Mild left correction is visually plausible.
+b2_07.jpg,73,keep,73,Mild left correction is visually plausible.
+b2_08.jpg,71,keep,71,Mild left correction is plausible in the motion-blurred frame.
+b2_09.jpg,68,keep,68,Mild left correction is plausible in the shadowed corridor.
+b2_10.jpg,68,keep,68,Mild left correction is plausible through the crossing.
+b2_11.jpg,62,keep,62,Mild left correction is visually plausible.
+b2_12.jpg,73,keep,73,Mild left correction is visually plausible.
+b2_13.jpg,65,keep,65,Mild left correction is plausible away from the right edge.
+b2_14.jpg,69,keep,69,Mild left correction is visually plausible.
+b2_15.jpg,63,keep,63,Mild left correction is plausible despite motion blur.
+b2_16.jpg,73,keep,73,Mild left correction is visually plausible.
+b2_17.jpg,73,keep,73,Mild left correction is plausible away from the right edge.
+b2_18.jpg,68,keep,68,Mild left correction is plausible through the crossing.
+b2_19.jpg,72,keep,72,Mild left correction is visually plausible.
+b3_00.jpg,81,keep,81,Near-straight left correction is visually plausible.
+b3_01.jpg,84,keep,84,Near-straight left correction is visually plausible.
+b3_02.jpg,79,keep,79,Near-straight left correction is visually plausible.
+b3_03.jpg,77,keep,77,Near-straight left correction is plausible through the driveway crossing.
+b3_04.jpg,80,keep,80,Near-straight left correction is visually plausible.
+b3_05.jpg,84,keep,84,Near-straight left correction is visually plausible.
+b3_06.jpg,77,keep,77,Near-straight left correction is visually plausible.
+b3_07.jpg,78,keep,78,Near-straight left correction is visually plausible.
+b3_08.jpg,81,keep,81,Near-straight left correction is visually plausible.
+b3_09.jpg,81,keep,81,Near-straight left correction is visually plausible.
+b3_10.jpg,82,keep,82,Near-straight left correction is visually plausible.
+b3_11.jpg,76,keep,76,Near-straight left correction is visually plausible.
+b3_12.jpg,75,keep,75,Near-straight left correction is visually plausible.
+b3_13.jpg,79,keep,79,Near-straight left correction is visually plausible.
+b3_14.jpg,79,keep,79,Near-straight left correction is plausible beside the parked vehicle.
+b3_15.jpg,79,keep,79,Near-straight left correction is plausible in the shadowed corridor.
+b3_16.jpg,75,keep,75,Near-straight left correction is plausible in the blurred frame.
+b3_17.jpg,83,keep,83,Near-straight left correction is visually plausible.
+b3_18.jpg,81,keep,81,Near-straight left correction is visually plausible.
+b3_19.jpg,79,keep,79,Motion-blurred frame still contains a valid corridor and plausible mild correction.
+b4_00.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_01.jpg,91,keep,91,Straight label matches the visible corridor.
+b4_02.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_03.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_04.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_05.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_06.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_07.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_08.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_09.jpg,90,keep,90,Straight label matches the visible corridor beside the road.
+b4_10.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_11.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_12.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_13.jpg,88,keep,88,Near-straight label matches the visible corridor.
+b4_14.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_15.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_16.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_17.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_18.jpg,90,keep,90,Straight label matches the visible corridor.
+b4_19.jpg,90,keep,90,Straight label matches the visible corridor.
+b5_00.jpg,104,keep,104,Near-straight right correction is visually plausible.
+b5_01.jpg,102,keep,102,Near-straight right correction is visually plausible.
+b5_02.jpg,104,keep,104,Near-straight right correction is visually plausible.
+b5_03.jpg,104,keep,104,Near-straight right correction is visually plausible.
+b5_04.jpg,96,keep,96,Near-straight right correction is visually plausible.
+b5_05.jpg,99,keep,99,Near-straight right correction is visually plausible.
+b5_06.jpg,97,keep,97,Near-straight right correction is visually plausible.
+b5_07.jpg,97,keep,97,Near-straight right correction is visually plausible.
+b5_08.jpg,104,keep,104,Near-straight right correction is visually plausible.
+b5_09.jpg,104,keep,104,Near-straight right correction is visually plausible.
+b5_10.jpg,97,keep,97,Near-straight right correction is visually plausible.
+b5_11.jpg,98,keep,98,Motion-blurred frame still contains a valid corridor and plausible mild correction.
+b5_12.jpg,98,keep,98,Near-straight right correction is visually plausible.
+b5_13.jpg,98,keep,98,Near-straight right correction is visually plausible.
+b5_14.jpg,101,keep,101,Near-straight right correction is visually plausible.
+b5_15.jpg,100,keep,100,Motion-blurred shadow frame still contains a valid corridor.
+b5_16.jpg,102,keep,102,Near-straight right correction is visually plausible.
+b5_17.jpg,95,keep,95,Near-straight right correction is visually plausible.
+b5_18.jpg,95,keep,95,Near-straight right correction is visually plausible.
+b5_19.jpg,103,keep,103,Near-straight right correction is visually plausible.
+b6_00.jpg,105,keep,105,Mild right correction is visually plausible.
+b6_01.jpg,113,keep,113,Mild right correction follows the visible bend.
+b6_02.jpg,118,keep,118,Mild right correction is visually plausible.
+b6_03.jpg,106,keep,106,Mild right correction is plausible through the crossing.
+b6_04.jpg,114,keep,114,Mild right correction is visually plausible.
+b6_05.jpg,108,keep,108,Mild right correction is visually plausible.
+b6_06.jpg,108,keep,108,Mild right correction is visually plausible.
+b6_07.jpg,111,keep,111,Mild right correction is visually plausible.
+b6_08.jpg,112,keep,112,Mild right correction is visually plausible.
+b6_09.jpg,118,keep,118,Mild right correction follows the sidewalk beside the road.
+b6_10.jpg,114,keep,114,Mild right correction is visually plausible.
+b6_11.jpg,110,keep,110,Mild right correction is plausible in the shadowed frame.
+b6_12.jpg,116,keep,116,Mild right correction is plausible near the parked vehicle.
+b6_13.jpg,105,keep,105,Adjacent frames show a real transition within a sustained right maneuver.
+b6_14.jpg,112,keep,112,Mild right correction is plausible in the overexposed frame.
+b6_15.jpg,119,keep,119,Mild right correction is plausible through the crossing.
+b6_16.jpg,116,keep,116,Mild right correction is visually plausible.
+b6_17.jpg,114,keep,114,Mild right correction is visually plausible.
+b6_18.jpg,107,keep,107,Mild right correction is visually plausible.
+b6_19.jpg,110,keep,110,Mild right correction is plausible through the crossing.
+b7_00.jpg,134,keep,134,Right correction is visually plausible.
+b7_01.jpg,133,keep,133,Right correction is visually plausible.
+b7_02.jpg,121,keep,121,Right correction is visually plausible.
+b7_03.jpg,122,keep,122,Moderate right correction is plausible and remains within nearby right-command values.
+b7_04.jpg,132,fix,90,Isolated right label on an unchanged straight sidewalk frame.
+b7_05.jpg,129,keep,129,Right correction is plausible through the driveway area.
+b7_06.jpg,130,keep,130,Adjacent frames confirm a sustained right maneuver.
+b7_07.jpg,126,keep,126,Right correction is visually plausible.
+b7_08.jpg,123,keep,123,Right correction is visually plausible.
+b7_09.jpg,130,keep,130,Right correction is visually plausible.
+b7_10.jpg,134,keep,134,Right correction is visually plausible.
+b7_11.jpg,127,keep,127,Right correction is plausible in the shadowed corridor.
+b7_12.jpg,130,keep,130,Right correction is plausible through the crossing.
+b7_13.jpg,120,keep,120,Right correction is visually plausible.
+b7_14.jpg,134,keep,134,Right correction is plausible in the shadowed corridor.
+b7_15.jpg,128,keep,128,Right correction is visually plausible.
+b7_16.jpg,134,keep,134,Visible path alignment supports a right correction.
+b7_17.jpg,120,keep,120,Right correction is plausible despite motion blur.
+b7_18.jpg,126,keep,126,Right correction is visually plausible.
+b7_19.jpg,134,keep,134,Visible path alignment supports a right correction.
+b8_00.jpg,137,keep,137,Right maneuver around the sidewalk-side bin is visually plausible.
+b8_01.jpg,137,keep,137,Right correction is plausible through the obstructed driveway crossing.
+b8_02.jpg,175,fix,140,Path bends right but the isolated near-maximum label is too aggressive.
+b8_03.jpg,180,fix,100,Near-maximum right label is unsupported by the nearly straight crossing.
+b8_04.jpg,139,keep,139,Adjacent frames confirm a sustained right maneuver.
+b8_05.jpg,142,keep,142,Sidewalk visibly curves right.
+b8_06.jpg,135,keep,135,Adjacent frames support a moderate right correction.
+b8_07.jpg,164,fix,115,Right correction is plausible but the isolated labeled magnitude is too aggressive.
+b8_08.jpg,173,fix,110,Sidewalk requires only a mild right correction beside the road.
+b8_09.jpg,174,fix,90,Isolated near-maximum right label on an unchanged straight frame.
+b8_10.jpg,180,keep,180,Adjacent frames confirm a sustained hard-right alignment onto the sidewalk.
+b8_11.jpg,178,keep,178,Adjacent frames confirm a sustained hard-right maneuver through the crossing.
+b8_12.jpg,139,keep,139,Right correction is plausible around the parked vehicle.
+b8_13.jpg,149,keep,149,Right correction is visually plausible.
+b8_14.jpg,159,keep,159,Adjacent labels ramp into a sustained right maneuver.
+b8_15.jpg,142,keep,142,Right correction is visually plausible.
+b8_16.jpg,137,keep,137,Right correction is visually plausible.
+b8_17.jpg,146,keep,146,Right correction is visually plausible.
+b8_18.jpg,154,fix,90,Isolated right label on an unchanged straight shadowed frame.
+b8_19.jpg,142,keep,142,Right correction is plausible through the crossing.

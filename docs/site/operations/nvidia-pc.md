@@ -39,7 +39,7 @@ python3 -m py_compile code/ai_models_datasets/series_3_and_4/series_3_sidewalkpi
 - **Trainer picks the wrong labels or corrections:** confirm the dataset root and printed scan counts. The Series 1/2 directory has a checked-in `steering_corrections.json`; the current Series 3/4 repository uses `sidewalkpilot_dataset/labels.json` and has no checked-in corrections file.
 - **Selected model does not load:** the version string must be present in `STEERING_MODEL_VERSIONS` in `vision.py`, and the matching PTH or ONNX file must exist in the Jetson Orin Nano's `code/ai_models` directory. Check the inference-server log for the resolved filename, backend, and GPU provider.
 
-Field-test verdicts are tracked separately from training. The July 13 comparison selected v3.4. The later 4.0 comparison found `4.0f` viable and rejected the history-input models for steering echo. Series 4.1 awaits runtime integration and field testing.
+Field-test verdicts are tracked separately from training. The July 13 comparison selected v3.4. The later 4.0 comparison found `4.0f` viable and rejected the history-input models for steering echo. Series 4.1 is runtime-registered and published; hardware verification and field testing remain pending.
 
 ## Raspberry Pi 5 Controller
 

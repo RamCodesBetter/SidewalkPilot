@@ -28,7 +28,7 @@ The July 13 comparison is an operator-observed, bounded field result:
 This record does not contain enough repeated-route quantitative measurements to
 claim a universal success rate. In a later supervised v4.0 comparison, v4.0f was
 viable and complementary with v3.4, v4.0g was worse, and the PC/PCF models echoed
-prior steering predictions. The v4.1 correction models remain offline-only.
+prior steering predictions. The v4.1 correction models are published and runtime-registered, with offline evidence only.
 
 ## Run Record
 

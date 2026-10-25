@@ -36,6 +36,7 @@ from .config import (
     CSV_FILENAME,
     CSV_HEADERS,
     DEBUG_CONTROLLER_INPUTS,
+    DASHBOARD_TELEMETRY_HZ,
     DASHBOARD_PAGE_AXIS,
     DASHBOARD_PAGE_AXIS_THRESHOLD,
     DASHBOARD_PAGE_COUNT,
@@ -129,15 +130,20 @@ from .jetson_client import AsyncJetsonSteeringClient
 from .influx_logger import InfluxLogger
 from .interruption_recorder import InterruptionClipRecorder
 from . import lidar_avoidance
-from .vision import DEFAULT_STEERING_MODEL_CHOICE, STEERING_MODEL_CHOICES, WebcamVisionProcessor
+from .vision import (
+    CAMERA_FPS,
+    DEFAULT_STEERING_MODEL_CHOICE,
+    STEERING_MODEL_CHOICES,
+    WebcamVisionProcessor,
+)
 
 shutdown_flag = threading.Event()
 current_photo_run_dir: Path | None = None
 photo_status: str = "GOOD"
 MANUAL_THROTTLE_DEADZONE = 0.05
 NAVIGATION_UPDATE_INTERVAL_SEC = 0.10
-DASHBOARD_CAMERA_UPDATE_INTERVAL_SEC = 0.10
-DASHBOARD_LIDAR_UPDATE_INTERVAL_SEC = 0.10
+DASHBOARD_CAMERA_UPDATE_INTERVAL_SEC = HUB75_DASHBOARD_SEND_INTERVAL_SEC
+DASHBOARD_LIDAR_UPDATE_INTERVAL_SEC = HUB75_DASHBOARD_SEND_INTERVAL_SEC
 
 
 class AsyncDashboardSender:
@@ -147,17 +153,31 @@ class AsyncDashboardSender:
         self.sender_lock = threading.Lock()
         self.latest_args = None
         self.latest_kwargs = None
+        self.latest_sequence = 0
+        self.sent_sequence = 0
         self.last_payload_json = ""
         self.last_send_ok = False
+        self.pending_page_transition = None
+        self.page_transition_sequence = 0
         self.running = True
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
 
     def send(self, *args, **kwargs):
         with self.lock:
+            if not self.running:
+                return False
+            transition = str(kwargs.get("dashboard_page_transition", ""))
+            if transition:
+                self.page_transition_sequence += 1
+                self.pending_page_transition = (
+                    self.page_transition_sequence,
+                    transition,
+                )
             self.latest_args = args
             self.latest_kwargs = dict(kwargs)
-            return self.last_send_ok
+            self.latest_sequence += 1
+            return True
 
     def queue_notification(self, cells: list[str], duration_sec: float = 2.0):
         with self.sender_lock:
@@ -186,7 +206,12 @@ class AsyncDashboardSender:
             with self.lock:
                 args = self.latest_args
                 kwargs = dict(self.latest_kwargs or {})
-            if args is None:
+                sequence = self.latest_sequence
+                already_sent = sequence <= self.sent_sequence
+                pending_page_transition = self.pending_page_transition
+                if pending_page_transition is not None:
+                    kwargs["dashboard_page_transition"] = pending_page_transition[1]
+            if args is None or already_sent:
                 sent = False
             else:
                 try:
@@ -201,7 +226,10 @@ class AsyncDashboardSender:
                 if args is not None:
                     self.last_send_ok = bool(sent)
                     if sent:
+                        self.sent_sequence = max(self.sent_sequence, sequence)
                         self.last_payload_json = payload_json
+                        if self.pending_page_transition == pending_page_transition:
+                            self.pending_page_transition = None
             time.sleep(max(0.01, HUB75_DASHBOARD_SEND_INTERVAL_SEC * 0.25))
 
 
@@ -1910,6 +1938,7 @@ def run(model_choice=None, inference_host=None):
     latest_nav = navigation.update({"fix": False, "sats": 0}, 0.0, 0.0)
     navigation_operator_last = ""
     last_navigation_update = 0.0
+    last_dashboard_telemetry_update = 0.0
     last_dashboard_camera_update = 0.0
     cached_dashboard_camera_pixels = []
     last_dashboard_lidar_update = 0.0
@@ -2039,13 +2068,17 @@ def run(model_choice=None, inference_host=None):
             )
         else:
             print("Hub75 dashboard linked shutdown disabled; receiver stays alive after controller exit.")
+    print(
+        f"Runtime rates: control/safety={CONTROL_LOOP_HZ} Hz, "
+        f"camera target={CAMERA_FPS} FPS, dashboard={DASHBOARD_TELEMETRY_HZ} Hz."
+    )
     clock = pygame.time.Clock()
-    last_update_time = time.time()
-    last_log_time = time.time()
+    last_update_time = time.monotonic()
+    last_log_time = time.monotonic()
 
     try:
         while not shutdown_flag.is_set():
-            current_loop_time = time.time()
+            current_loop_time = time.monotonic()
             loop_rate_started = state.get("_loop_rate_started")
             if loop_rate_started is None:
                 state["_loop_rate_started"] = current_loop_time
@@ -2468,23 +2501,29 @@ def run(model_choice=None, inference_host=None):
                 set_dashboard_page(state, STEERING_TRIM_DASHBOARD_PAGE)     # v1h4 -> v1h3
                 metrics.dashboard_page_transition = "left"
 
-            camera_pixels = []
-            if state["dashboard_page"] == 11 and webcam_vision is not None:
-                if current_loop_time - last_dashboard_camera_update >= DASHBOARD_CAMERA_UPDATE_INTERVAL_SEC:
-                    last_dashboard_camera_update = current_loop_time
-                    cached_dashboard_camera_pixels = webcam_vision.get_dashboard_camera_pixels()
-                camera_pixels = cached_dashboard_camera_pixels
-            else:
-                cached_dashboard_camera_pixels = []
-            lidar_dashboard_points = []
-            if state["dashboard_page"] == LIDAR_DASHBOARD_PAGE:
-                if current_loop_time - last_dashboard_lidar_update >= DASHBOARD_LIDAR_UPDATE_INTERVAL_SEC:
-                    last_dashboard_lidar_update = current_loop_time
-                    cached_dashboard_lidar_points = format_lidar_dashboard_points(latest_scan)
-                lidar_dashboard_points = cached_dashboard_lidar_points
-            else:
-                cached_dashboard_lidar_points = []
-            if dashboard_sender is not None:
+            dashboard_update_due = (
+                dashboard_sender is not None
+                and current_loop_time - last_dashboard_telemetry_update
+                >= HUB75_DASHBOARD_SEND_INTERVAL_SEC
+            )
+            if dashboard_update_due:
+                last_dashboard_telemetry_update = current_loop_time
+                camera_pixels = []
+                if state["dashboard_page"] == 11 and webcam_vision is not None:
+                    if current_loop_time - last_dashboard_camera_update >= DASHBOARD_CAMERA_UPDATE_INTERVAL_SEC:
+                        last_dashboard_camera_update = current_loop_time
+                        cached_dashboard_camera_pixels = webcam_vision.get_dashboard_camera_pixels()
+                    camera_pixels = cached_dashboard_camera_pixels
+                else:
+                    cached_dashboard_camera_pixels = []
+                lidar_dashboard_points = []
+                if state["dashboard_page"] == LIDAR_DASHBOARD_PAGE:
+                    if current_loop_time - last_dashboard_lidar_update >= DASHBOARD_LIDAR_UPDATE_INTERVAL_SEC:
+                        last_dashboard_lidar_update = current_loop_time
+                        cached_dashboard_lidar_points = format_lidar_dashboard_points(latest_scan)
+                    lidar_dashboard_points = cached_dashboard_lidar_points
+                else:
+                    cached_dashboard_lidar_points = []
                 dashboard_sent = dashboard_sender.send(
                     metrics.smoothed_speed_mph,
                     state["gear_mode"],

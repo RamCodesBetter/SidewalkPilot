@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -351,7 +355,7 @@
 <h2 id="preconditions">Preconditions</h2>
 <ul>
 <li>A test route is chosen. For AI/manual navigation segments, the route must already exist in <code>code/controller/current/rc_car_app/trossachs_nav_graph.json</code>; the current route manager uses GPS/odometry state with A* over that graph. The separate compass hardware is not an active route-planning input.</li>
-<li>The steering model is selected before leaving. All live-selectable families run on the Jetson Orin Nano at <code>10.42.0.2:8770</code>: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. v3.4 is the current field-selected baseline. v4.0 has a bounded field result; v4.1 is not yet live-selectable.</li>
+<li>The steering model is selected before leaving. All live-selectable families run on the Jetson Orin Nano at <code>10.42.0.2:8770</code>: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. v3.4 is the current field-selected baseline. v4.0 has a bounded field result; v4.1 is live-selectable but still requires hardware checks and has no field verdict.</li>
 <li>The latest code is on the Raspberry Pi 5. The Raspberry Pi 5's <code>~/rc_car_code</code> is the git repo; the Zero 2 W's copy is synced by rsync/scp and is not a repo, so a code change only takes effect after each device re-imports it.</li>
 </ul>
 <h2 id="steps">Steps</h2>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Series 5 Accessibility Study - SidewalkPilot RC Car</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Series 5 Accessibility Study";
+        var mkdocs_page_input_path = "research-context/series-5-accessibility-study.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> SidewalkPilot RC Car
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Start Here</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../start-here/project-overview/">Project Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../start-here/mission/">Mission</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../start-here/current-status/">Current Status</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../start-here/build-timeline/">Build Timeline</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Project Evidence</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/5-minute-technical-tour/">5-Minute Technical Tour</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Autonomy Stack</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/architecture/data-flow/">Control Architecture and Data Flow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/architecture/decision-priority/">Decision Priority</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/camera-steering/overview/">Camera Steering Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/camera-steering/model-inference/">Model Inference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/camera-steering/series-differences/">Series Differences</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/lidar-safety/overview/">LiDAR Safety Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/lidar-safety/aeb/">Autonomous Emergency Braking</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/navigation/overview/">Navigation Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../autonomy-stack/navigation/crosswalk-handoff/">Crosswalk Handoff</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Engineering Process</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/requirements/">Requirements and Success Criteria</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/augmentation-vs-fixed-preprocessing/">Augmentation Versus Fixed Preprocessing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/lidar-priority/">LiDAR Priority</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/pca9685-servo-control/">PCA9685 Servo Control</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/dashboard-udp-telemetry/">Dashboard UDP Telemetry</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/pi-plus-jetson-compute-split/">Jetson Orin Nano and Raspberry Pi 5 Compute Split</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/design-decisions/hybrid-head-vs-regression/">Hybrid Head vs Regression</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/iteration-records/model-iteration-method/">Model Iteration Method</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/iteration-records/field-failure-to-dataset/">Field Failure to Dataset</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../engineering-process/iteration-records/turn-vs-shadow-tradeoff/">Turn vs Shadow Tradeoff</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Research and Math</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/geometry/haversine-distance/">Navigation Geometry and Routing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/algorithms/speed-from-hall-pulses/">Speed Measurement and Control</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/algorithms/weighted-sampling/">Training Split and Sampling</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/machine-learning/loss-function/">Model Framing and Loss</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/machine-learning/sim-to-real-gap/">Sim-to-Real Gap</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../novelty-and-contributions/">Research Context and Contributions</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Series 5 Accessibility Study</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#scope">Scope</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#model-preparation">Model Preparation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#planned-control-and-measurements">Planned Control and Measurements</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#final-comparison-trials">Final Comparison Trials</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#analysis-and-limits">Analysis and Limits</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Runtime Code</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/controller-mapping/">Controller Mapping and Driving Modes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/config/servo-settings/">Runtime Configuration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/hardware/hardware-class/">Hardware Integration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/vision/camera-capture/">Vision Runtime</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/dashboard/sender/">Dashboard Runtime</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Hardware</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/build-overview/">Build Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/chassis/">Chassis</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/power/">Power</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/compute/">Compute</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/steering-servo/">Steering Servo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/motors/">Motors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/camera/">Camera</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/lidar/">LiDAR</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/gps-compass/">GPS and Compass</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/imu/">IMU</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/dashboard-display/">Dashboard Display</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/wiring/pin-map/">Wiring and Pin Map</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware/pcb/overview/">PCB Development</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">AI and Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/training-pipeline/overview/">Training Pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/architecture/cnn/">CNN Architecture</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/architecture/series-3-hybrid-head/">Series 3 Hybrid Head</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/architecture/series-4-plan/">Series 4 Temporal Experiments</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/model-zoo/overview/">Model Zoo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/model-zoo/series-3/">Series 3 Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/model-zoo/series-4/">Series 4 Models</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/deployment/overview/">Model Deployment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ai-and-models/deployment/jetson-runtime/">Jetson Orin Nano Runtime</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Model Evaluation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/offline-evaluation/overview/">Offline Evaluation and Metrics</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/offline-evaluation/bal9/">Balanced Nine-Class Accuracy</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/offline-evaluation/confusion-matrix/">Confusion Matrix</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/offline-evaluation/per-dataset-breakdown/">Per-Dataset Breakdown</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/field-evaluation/overview/">Field Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/comparisons/offline-vs-field/">Offline and Field Comparison</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model-evaluation/comparisons/model-selection-rubric/">Model Selection Rubric</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/dataset-overview/">Dataset and Labels</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/relabeling/workflow/">Relabeling Workflow</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Governance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data-governance/labeling/label-schema/">Labeling Standard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data-governance/dataset-versioning/version-rules/">Dataset Versioning</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data-governance/data-quality/image-quality-checks/">Data Quality</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/field-testing/overview/">Field Testing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/failures/overview/">Failure Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/bench-tests/overview/">Bench Tests</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Safety Case</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../safety-case/safety-overview/">Safety Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../safety-case/hazard-analysis/road-entry/">Hazard Analysis</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../safety-case/fault-handling/manual-override/">Fault Handling</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../safety-case/operating-limits/where-it-can-run/">Operating Limits</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operations</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/environment-setup/">Environment Setup</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/nvidia-pc/">Computer Operations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/mac-pc-sync/">Mac and Computer Sync</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/command-cookbook/">Command Cookbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/troubleshooting/">Troubleshooting</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/telemetry/">Telemetry</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Runbooks</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runbooks/field-test-day/before-leaving/">Field Test Day</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runbooks/training-day/before-training/">Training Day</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../runbooks/sync-day/mac-to-pc/">Sync Day</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Publishing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../publishing/reports/">Reports and PDF</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../publishing/huggingface/">Hugging Face</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../publishing/mkdocs-site/">MkDocs Site</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Exhibits</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../exhibits/media/video-index/">Media Index</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../exhibits/diagrams/system-diagram/">System Diagrams</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../exhibits/tables/model-metrics-table/">Evidence Tables</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../code-reference/file-index/">Repository Reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../code-reference/test-files/">Test Files</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Safety and Ethics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../safety-and-ethics/research-scope/">Research Scope and Limits</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../safety-and-ethics/privacy/">Privacy</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Roadmap</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/next-steps/">Next Steps</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../roadmap/reproducibility/">Reproducibility</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">SidewalkPilot RC Car</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Series 5 Accessibility Study</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="series-5-accessibility-study-plan">Series 5 Accessibility Study Plan</h1>
+<p>Last revised: September 12, 2026.</p>
+<p>This AI-assisted documentation summarizes the student's current planning decisions. It
+is not the student's official research-plan submission, an approval to test, or a report
+of completed Series 5 work. Existing Series 1-4 results remain separate.</p>
+<h2 id="scope">Scope</h2>
+<p>The proposed study compares clear sidewalk width, passing-space width and length,
+passing-space intervals, and running and cross slopes against physical measurements
+from a laser measuring tool and digital inclinometer. It also compares person-hours
+and recurring cost per surveyed mile with a one-person manual field survey.</p>
+<h2 id="model-preparation">Model Preparation</h2>
+<ul>
+<li>Generate segmentation reference masks for the existing Series 3/4 images using
+  Grounded SAM 2. Preserve the source images and mask provenance.</li>
+<li>Review 200 masks and correct identified errors. At least 80% correct (160 of 200)
+  does not trigger a dataset-wide relabel. Otherwise check 200 additional masks.
+  Fewer than 75% correct (fewer than 150 of the additional 200) triggers relabeling
+  with Grounded SAM 2. The denominator for the second threshold is the additional
+  sample, not all 400 images; review fractions describe labels before correction.</li>
+<li>Establish an 80/10/10 training/validation/test split before training. Keep adjacent
+  or near-duplicate images in one partition, rather than exposing almost-identical
+  frames during both training and testing. Different examples of the same class may
+  still occur in all three partitions.</li>
+<li>Train an image-to-semantic-mask model and evaluate its predictions against reference
+  masks using IoU, precision, recall, and F1. Record the references' review status.</li>
+</ul>
+<p>The two sample thresholds are student-selected review criteria, not measured model
+accuracy. The second threshold is less strict than the first. Sample selection, the
+definition of a correctly labeled mask, and review after relabeling remain to be
+specified before execution. Generated references are not automatically verified ground
+truth, and a passing sample does not prove that every remaining label is correct.</p>
+<h2 id="planned-control-and-measurements">Planned Control and Measurements</h2>
+<p>The selected model will run on the Jetson Orin Nano. Downstream geometry and path-planning
+code will feed steering and throttle control on the Raspberry Pi 5. The segmentation
+model does not directly output those commands, and this plan adds no normal braking
+output. Existing LiDAR AEB, manual takeover, and failure-stop behavior remain separate.</p>
+<p>Accessibility data will be collected during each survey drive:</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th>Planned inputs and calculation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Clear width and passing-space dimensions</td>
+<td>Mask boundaries projected through calibrated camera geometry; along-path distance for passing-space length</td>
+</tr>
+<tr>
+<td>Running and cross slope</td>
+<td>Calibrated orientation estimated from timestamped IMU accelerometer and gyroscope readings received over USB</td>
+</tr>
+<tr>
+<td>Passing-space intervals</td>
+<td>Accumulated Hall-effect encoder pulse count multiplied by calibrated distance per pulse</td>
+</tr>
+</tbody>
+</table>
+<p>Raw IMU readings are not themselves slopes. Encoder pulses per second give a pulse
+rate; accumulated pulse count gives distance after calibration. Measurements, timestamps,
+route distance, and validity will be retained in per-run CSV logs. Manual measurements
+use a recording sheet and spreadsheet, with stopwatch records retained separately.
+See the <a href="../../hardware/build-overview/">hardware overview</a> and
+<a href="https://1drv.ms/x/c/9685d41907cf4e28/IQAZPTqPm5FDRLypIrzf-Jv5AapVDVfyFpqjfn2W666oeXk?e=3MadEB">project BOM</a>
+for materials; those references do not establish that planned measurement code is ready.</p>
+<h2 id="final-comparison-trials">Final Comparison Trials</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Final surveys</th>
+<th>Planned distance per survey</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SidewalkPilot</td>
+<td>Three complete runs</td>
+<td>1.06 sidewalk miles</td>
+</tr>
+<tr>
+<td>Manual field survey</td>
+<td>One complete run</td>
+<td>Same 1.06-mile route and direction</td>
+</tr>
+</tbody>
+</table>
+<p>Offline evaluation, stationary control/safety checks, and low-speed supervised navigation
+tests precede the final comparison. Development runs have no fixed count and are not
+included as final trials. Keep the final model, hardware, and calibration fixed across
+the three SidewalkPilot runs. Record actual surveyed sidewalk distance and route changes.</p>
+<p>The manual survey records applicable features at approximately 10-foot stations and at
+passing spaces. Match each SidewalkPilot run to the same manual reference locations.
+Record temporary changes rather than treating a changed obstruction as measurement
+error. Three repeated passes over one route are not three independent environments.</p>
+<p>The operator remains with the controller in hand. Existing logging records takeover
+triggers, not automatically the underlying reason; the reason is determined during
+review. Approximately two seconds of preceding camera footage can be retained when
+enough footage is available, subject to verification in the final runtime configuration.
+Required safety and approval steps still apply before field testing.</p>
+<h2 id="analysis-and-limits">Analysis and Limits</h2>
+<ul>
+<li>Calculate MAE and RMSE separately for each physical measurement and each SidewalkPilot
+  run. Report per-run results and the mean and spread across the three runs, along with
+  missing measurements and coverage. Segmentation IoU/F1 are separate metrics.</li>
+<li>Include preparation, surveying or active safety supervision, interruptions, road
+  crossings, data entry, and final checking in person-hours. Normalize each run by its
+  actual surveyed sidewalk miles. Compare the mean of the three SidewalkPilot per-mile
+  rates with the single manual survey's rate, not three runs' combined effort with one.</li>
+<li>Report recurring cost per mile per run and the SidewalkPilot mean. Keep upfront
+  equipment separate; reusing the vehicle does not triple its purchase cost. Disclose
+  development, labeling, and training costs separately from recurring deployment costs.</li>
+<li>Compare observed results with the hypothesis and estimate break-even distance from
+  the cost model. Existing per-mile theoretical predictions are unchanged by trial count
+  and must not be described as experimental findings.</li>
+</ul>
+<p>One manual survey cannot establish between-survey manual labor/cost variability.
+Station-level repeatability checks are not repeated full manual surveys. Three
+SidewalkPilot runs on one route give limited repeatability evidence, not broad evidence
+of performance on other routes. Accessibility screening is not compliance certification.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../novelty-and-contributions/" class="btn btn-neutral float-left" title="Research Context and Contributions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../runtime-code/runtime-loop/" class="btn btn-neutral float-right" title="Runtime Loop and Entrypoint">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../novelty-and-contributions/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../runtime-code/runtime-loop/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -53,8 +53,8 @@ normal-turn and harsh-shadow cases. This supports v3.4 as the current field base
 does not prove complete shadow robustness across routes, seasons, or camera conditions.
 v4.0 also has a bounded field comparison: image-only v4.0f remained viable, while the
 history-input models exposed a closed-loop steering-echo failure that open-loop metrics did
-not predict. v4.1 correction models have common-set offline results but still need live
-integration and physical comparison.
+not predict. v4.1 correction models have common-set offline results and runtime registration but still need
+end-to-end hardware verification and physical comparison.
 
 ## Reporting Rule
 

@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -529,7 +533,7 @@
 </tr>
 </tbody>
 </table>
-<p>All three 4.1 runs completed 25 epochs and exported six ONNX models. They are not yet supported by the live model selector and have not been tested on the car. Their purpose is to test whether the 4.0 history failure can be corrected without collecting a new dataset.</p>
+<p>All three 4.1 runs completed 25 epochs and exported six ONNX models. They are registered in the live model selector and Jetson server but have not been tested on the car. Their purpose is to test whether the 4.0 history failure can be corrected without collecting a new dataset. Individual cards, ONNX files, and verified manifests were published on October 25, 2026; see <a href="../../../publishing/huggingface/">Hugging Face releases</a>.</p>
 <h2 id="41-common-evaluation">4.1 Common Evaluation</h2>
 <table>
 <thead>
@@ -560,7 +564,7 @@
 <td style="text-align: right;">17.8%</td>
 <td style="text-align: right;">9.2%</td>
 <td style="text-align: right;">37.2%</td>
-<td style="text-align: right;">87.5%</td>
+<td style="text-align: right;">87.4%</td>
 <td style="text-align: right;"><strong>13.382</strong></td>
 <td style="text-align: right;"><strong>1.431</strong></td>
 <td style="text-align: right;">-5.765</td>
@@ -569,7 +573,7 @@
 <td><code>4.1f</code></td>
 <td style="text-align: right;">25.1%</td>
 <td style="text-align: right;">22.9%</td>
-<td style="text-align: right;"><strong>57.9%</strong></td>
+<td style="text-align: right;"><strong>57.8%</strong></td>
 <td style="text-align: right;">61.5%</td>
 <td style="text-align: right;">15.466</td>
 <td style="text-align: right;">7.218</td>
@@ -597,7 +601,7 @@
 </tr>
 <tr>
 <td><code>4.1c</code></td>
-<td style="text-align: right;">23.2%</td>
+<td style="text-align: right;">23.1%</td>
 <td style="text-align: right;">19.5%</td>
 <td style="text-align: right;">52.3%</td>
 <td style="text-align: right;">75.0%</td>

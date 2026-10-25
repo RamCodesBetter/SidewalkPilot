@@ -23,6 +23,15 @@ The result is supported by two different kinds of evidence:
 
 Offline scores did not choose the winner by themselves. v3.4b had a slightly lower mean absolute error, but v3.4 had stronger balanced turn behavior and won on the physical car.
 
+## Planned Series 5 Study
+
+The [Series 5 accessibility study](research-context/series-5-accessibility-study.md)
+plans image-to-mask segmentation, downstream steering and throttle control, and calibrated
+sidewalk measurements during each survey drive. The final comparison is **three
+SidewalkPilot runs and one manual survey on the same 1.06-mile route**. Development runs
+remain separate. Accuracy, person-hours, and recurring cost per mile are research
+questions, not reported results or already implemented measurement capabilities.
+
 ## What the Car Does
 
 1. The Raspberry Pi Camera Module 3 Wide captures a forward sidewalk view.

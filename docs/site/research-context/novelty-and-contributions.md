@@ -44,8 +44,8 @@ not unavailable future inputs at deployment.
 
 The v4.0 comparison demonstrated why closed-loop testing matters: PC/PCF ranked strongly
 offline but echoed earlier predictions on the car. Image-only v4.0f was viable and mixed
-against v3.4. The six v4.1 models test corrections to that failure and remain pending live
-integration and field testing.
+against v3.4. The six v4.1 models test corrections to that failure. They are published and runtime-registered,
+with end-to-end hardware checks and field testing still pending.
 
 ## 4. Integrated Jetson Orin Nano, Raspberry Pi 5, Sensors, and Dashboard
 

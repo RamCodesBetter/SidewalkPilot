@@ -5,7 +5,7 @@ Before Leaving is the packing-and-readiness runbook run at home, before the car 
 ## Preconditions
 
 - A test route is chosen. For AI/manual navigation segments, the route must already exist in `code/controller/current/rc_car_app/trossachs_nav_graph.json`; the current route manager uses GPS/odometry state with A* over that graph. The separate compass hardware is not an active route-planning input.
-- The steering model is selected before leaving. All live-selectable families run on the Jetson Orin Nano at `10.42.0.2:8770`: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. v3.4 is the current field-selected baseline. v4.0 has a bounded field result; v4.1 is not yet live-selectable.
+- The steering model is selected before leaving. All live-selectable families run on the Jetson Orin Nano at `10.42.0.2:8770`: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. v3.4 is the current field-selected baseline. v4.0 has a bounded field result; v4.1 is live-selectable but still requires hardware checks and has no field verdict.
 - The latest code is on the Raspberry Pi 5. The Raspberry Pi 5's `~/rc_car_code` is the git repo; the Zero 2 W's copy is synced by rsync/scp and is not a repo, so a code change only takes effect after each device re-imports it.
 
 ## Steps

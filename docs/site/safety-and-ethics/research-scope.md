@@ -16,6 +16,20 @@ SidewalkPilot is a physical RC-scale platform used to study the complete camera-
 
 The value is the integration and iteration, not a claim that one neural-network score establishes general autonomy.
 
+## Planned Accessibility Research
+
+The [Series 5 study plan](../research-context/series-5-accessibility-study.md) proposes
+three SidewalkPilot surveys and one manual survey of the same 1.06-mile route. The model
+will output segmentation masks; downstream code will produce steering and throttle
+commands. Calibrated camera geometry, IMU readings, and encoder counts will support
+physical sidewalk measurements. These measurements, their accuracy, and labor/cost
+reductions have not been established by the existing steering demonstrations.
+
+Safety supervision counts toward person-hours. Existing LiDAR braking and manual
+takeover remain independent of the planned normal steering/throttle outputs. A generated
+mask is a reference label, not automatically verified ground truth. Field approvals and
+the operating boundaries below still apply.
+
 ## What Has Been Demonstrated
 
 - Physical camera-to-steering runs under operator supervision.
@@ -30,7 +44,7 @@ The value is the integration and iteration, not a claim that one neural-network 
 ## Evidence Limits
 
 - The July 13 v3.4 result is qualitative. Exact route, weather, takeover count, and clip identifiers were not preserved.
-- The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 has not yet completed live integration or physical testing.
+- The v4.0 field result is qualitative rather than a repeated route-controlled benchmark. v4.1 is runtime-registered but has not completed physical testing.
 - Offline metrics do not prove obstacle avoidance, pedestrian response, recovery from a road-edge error, or operation outside the test distribution.
 - The LiDAR policy has automated software tests, but the latest configuration still needs a preserved physical test record.
 - GPS/navigation code exists, but it does not make the car safe for unattended route execution.

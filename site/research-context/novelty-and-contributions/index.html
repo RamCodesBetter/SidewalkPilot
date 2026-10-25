@@ -143,6 +143,10 @@
     </ul>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -381,8 +385,8 @@ backbone and 18-value steering head comparable. Future targets are training supe
 not unavailable future inputs at deployment.</p>
 <p>The v4.0 comparison demonstrated why closed-loop testing matters: PC/PCF ranked strongly
 offline but echoed earlier predictions on the car. Image-only v4.0f was viable and mixed
-against v3.4. The six v4.1 models test corrections to that failure and remain pending live
-integration and field testing.</p>
+against v3.4. The six v4.1 models test corrections to that failure. They are published and runtime-registered,
+with end-to-end hardware checks and field testing still pending.</p>
 <h2 id="4-integrated-jetson-orin-nano-raspberry-pi-5-sensors-and-dashboard">4. Integrated Jetson Orin Nano, Raspberry Pi 5, Sensors, and Dashboard</h2>
 <p><strong>Status: implemented engineering.</strong> The Jetson Orin Nano runs every steering-model family on its GPU: Series 1/2 through PyTorch CUDA and Series 3/4 through ONNX Runtime CUDA. The Raspberry Pi 5 owns controller input, sensors, steering and motor output, logging, and dashboard telemetry. The Zero 2 W renders the USB-linked dashboard. Splitting hardware I/O from heavier
 inference is an established systems pattern; the contribution is the working integration
@@ -409,7 +413,7 @@ straight collapse that one aggregate error number can conceal.</p>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../../research-and-math/machine-learning/sim-to-real-gap/" class="btn btn-neutral float-left" title="Sim-to-Real Gap"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../runtime-code/runtime-loop/" class="btn btn-neutral float-right" title="Runtime Loop and Entrypoint">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../series-5-accessibility-study/" class="btn btn-neutral float-right" title="Series 5 Accessibility Study">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -435,7 +439,7 @@ straight collapse that one aggregate error number can conceal.</p>
       <span><a href="../../research-and-math/machine-learning/sim-to-real-gap/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../runtime-code/runtime-loop/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../series-5-accessibility-study/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

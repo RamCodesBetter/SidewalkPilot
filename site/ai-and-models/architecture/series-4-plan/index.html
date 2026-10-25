@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -419,7 +423,7 @@
 <li>CF/PCF use current-dominant horizon weighting and a trajectory-delta loss so later horizons support the current decision instead of dominating it;</li>
 <li>Checkpoint selection includes closed-loop replay criteria in addition to ordinary validation metrics.</li>
 </ul>
-<p>These changes are hypotheses encoded in the trainers. The six v4.1 models are trained and evaluated offline, but they are not in the live model selector and have not been driven.</p>
+<p>These changes are hypotheses encoded in the trainers. The six v4.1 models are trained and evaluated offline, and registered in the live model selector, but have not been driven.</p>
 <h2 id="size">Size</h2>
 <table>
 <thead>
@@ -614,7 +618,7 @@
 </ul>
 <p>The versioned TCP request carries three big-endian float32 history values alongside the selected model and JPEG. The Jetson Orin Nano validates the model input names, output shape, and history length before CUDA inference.</p>
 <h2 id="promotion-gate">Promotion Gate</h2>
-<p>Series 4.0 is trained, runtime-supported, and field-tested. None of its models replaced v3.4: <code>4.0f</code> was viable but mixed, <code>4.0g</code> was worse, and the PC/PCF models failed from steering echo. Series 4.1 is trained and offline-evaluated but still needs live integration, closed-loop replay, and supervised physical testing. The checked-in default remains v3.4.</p>
+<p>Series 4.0 is trained, runtime-supported, and field-tested. None of its models replaced v3.4: <code>4.0f</code> was viable but mixed, <code>4.0g</code> was worse, and the PC/PCF models failed from steering echo. Series 4.1 is trained and offline-evaluated and runtime-registered, but still needs end-to-end hardware checks, failure-case replay, and supervised physical testing. The checked-in default remains v3.4.</p>
 <h2 id="possible-learned-throttle-experiment">Possible Learned-Throttle Experiment</h2>
 <p>The current 81,237-image dataset is not suitable for learning useful variable throttle: 77,590 labels, or 95.51%, are full throttle. A new throttle head would therefore be strongly encouraged to predict full throttle almost everywhere. Series 4 remains steering-only. Learned throttle should be reconsidered only after collecting deliberate examples of normal speed, reduced speed, and stopping in varied turns and obstacle contexts.</p>
 <p>See <a href="../../model-zoo/series-4/">Series 4 Models</a>, <a href="../../../model-evaluation/offline-evaluation/bal9/">Bal9</a>, and <a href="../../../autonomy-stack/camera-steering/jetson-inference-link/">Jetson Orin Nano Inference Link</a>.</p>
