@@ -33,7 +33,7 @@ safety rules, and controls the hardware, while a Zero 2 W renders the live LED d
 
 **SidewalkPilot v3.4** is the current field-selected steering model. During the July 13, 2026 comparison, v3.4 handled every shadow case presented and the tested normal left and right turns. v3.4b was slightly worse, v3.3 was worse than v3.2, and v3.3b was much worse than v3.2b. The observation is valuable but qualitative because route, clip, weather, and takeover metadata were not preserved.
 
-I am developing Series 3 and Series 4 in parallel on the same 81,237-image Series 3/4 dataset. Series 4 tests whether recent steering targets or future-target supervision improve the image-based steering prediction. The first v4.0 field comparison exposed a steering-echo failure in the PC and PCF models. The image-only v4.0f model was viable but did not clearly outperform v3.4. Six corrective v4.1 models have since been trained and evaluated offline; they are not yet integrated into the live selector or field-tested.
+I am developing Series 3 and Series 4 in parallel on the same 81,237-image Series 3/4 dataset. Series 4 tests whether recent steering targets or future-target supervision improve the image-based steering prediction. The first v4.0 field comparison exposed a steering-echo failure in the PC and PCF models. The image-only v4.0f model was viable but did not clearly outperform v3.4. Six corrective v4.1 models have since been trained, evaluated offline, registered in the live selector, and published with individual cards on Hugging Face. They have not been field-tested.
 
 | Experiment | Final epoch | Validation-selected epoch | Runtime contract |
 |---|---|---|---|
@@ -41,7 +41,26 @@ I am developing Series 3 and Series 4 in parallel on the same 81,237-image Serie
 | Current + future (CF) | v4.0f | v4.0g | image -> current plus three future steering horizons |
 | Previous + current + future (PCF) | v4.0a | v4.0c | image + three prior targets -> current plus three future horizons |
 
-The six v4.0 ONNX models are supported by the live Jetson Orin Nano runtime and have been field-tested. The six v4.1 ONNX models retain the same three runtime contracts but still require integration and supervised physical testing. v3.4 remains the field-selected default.
+The six v4.0 ONNX models are supported by the live Jetson Orin Nano runtime and have been field-tested. The six v4.1 ONNX models retain the same three runtime contracts and are runtime-supported, but still require end-to-end hardware checks and supervised physical testing. v3.4 remains the field-selected default. All model links are on the [Hugging Face publishing page](docs/site/publishing/huggingface.md).
+
+## Planned Accessibility Research
+
+The September 12, 2026 study plan adds Series 5 semantic segmentation and sidewalk
+accessibility measurements. It uses the existing Series 3/4 images with Grounded SAM 2
+reference masks and an 80/10/10 grouped split established before training. The model
+outputs a mask; downstream code produces steering and throttle commands. LiDAR emergency
+braking and manual takeover remain separate safety layers.
+
+The final comparison is **three SidewalkPilot surveys and one manual survey** on the same
+planned **1.06-mile route**. Calibrated camera geometry, IMU readings, and accumulated
+wheel-encoder pulses will support width, passing-space, and slope measurements during
+each driving run. Accuracy will be compared against physical reference measurements;
+person-hours and recurring cost per mile will be reported per run and averaged across
+the three SidewalkPilot runs, not summed against the one manual run.
+
+This is planned research, not a completed capability or an experimental result. See the
+[Series 5 accessibility study plan](docs/site/research-context/series-5-accessibility-study.md)
+for mask-review thresholds, trial details, and evidence limits.
 
 ## System Architecture
 

@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -218,6 +222,8 @@
     <li class="toctree-l2"><a class="reference internal" href="#series-1-and-2-dataset">Series 1 and 2 Dataset</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#series-3-and-4-dataset">Series 3 and 4 Dataset</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#planned-series-5-segmentation-labels">Planned Series 5 Segmentation Labels</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#corrections-and-provenance">Corrections and Provenance</a>
     </li>
@@ -419,7 +425,28 @@
 <li>PCF uses three previous targets as inputs and current plus three future targets as supervision.</li>
 </ul>
 <p>Future targets are training labels only. They are never supplied to the deployed model.</p>
+<h2 id="planned-series-5-segmentation-labels">Planned Series 5 Segmentation Labels</h2>
+<p>Series 5 will use the current Series 3/4 source images with a separate Grounded SAM 2
+segmentation-reference layer; it does not replace historical steering/throttle labels.
+The revised plan reviews 200 masks, checks 200 additional masks if the first sample is
+below 80% correct, and triggers relabeling if that additional sample is below 75% correct.
+Those sample-review thresholds are not evidence that every unreviewed mask is correct.</p>
+<p>The planned split is 80/10/10 training/validation/test, assigned before training with
+near-duplicate frames grouped into the same partition. It does not retroactively change
+the Series 3/4 splits described above. Segmentation uses IoU, precision, recall, and F1
+against reference masks with recorded provenance and review status. See the
+<a href="../../research-context/series-5-accessibility-study/">Series 5 study plan</a> for the full
+current review and evaluation scope.</p>
 <h2 id="corrections-and-provenance">Corrections and Provenance</h2>
+<p>On October 25, 2026, all 268 images from the July 29 local quarantine were restored
+with their original steering/throttle labels, returning the active folder to 81,237
+images and matching label records. Those labels match the original published Hub
+snapshot; this was a local restoration, not a new collection or a label correction.
+The original audit manifest, pre-restoration label backup, and restoration hashes are
+preserved locally. The flags cover 198 garage/non-sidewalk frames, 64 road/camera-tip
+frames, five same-label duplicates, and one conflicting-label duplicate. Restoring a
+frame does not certify its suitability or label correctness. Duplicate and sequence
+grouping still matters for the planned Series 5 split.</p>
 <p>The Series 3 trainer can merge base <code>labels.json</code> data with optional reviewed correction records. When a correction identifies the same image as a base label, the correction wins. The current Series 4 temporal engine uses the base labels directly and has no correction-file argument. Ordered, run-prefixed filenames support temporal construction and help audit capture batches; release metadata should preserve any additional provenance.</p>
 <p>Large image folders, dataset cards, and generated archives are intentionally not tracked in GitHub. GitHub carries source code and documentation; Hugging Face carries the published models and datasets.</p>
 <p>Optional Series 3 correction files can be a list of sample objects, a <code>samples</code> object, or

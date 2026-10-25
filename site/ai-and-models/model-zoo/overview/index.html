@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -341,7 +345,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="model-zoo">Model Zoo</h1>
-<p>SidewalkPilot has <strong>52 evaluated checkpoints</strong> across four series. The live selector currently contains 46 versions through Series 4.0; the six Series 4.1 models are trained and offline-evaluated but not yet integrated. Version numbers identify experiments, not guaranteed improvements.</p>
+<p>SidewalkPilot has <strong>52 evaluated checkpoints</strong> across four series. The live selector contains all 52 versions through Series 4.1. The six Series 4.1 models are trained, offline-evaluated, and published, but have no physical field verdict. Version numbers identify experiments, not guaranteed improvements.</p>
 <h2 id="families">Families</h2>
 <table>
 <thead>
@@ -408,27 +412,27 @@
 <td><code>320x180</code> + 3 targets</td>
 <td>corrected history training; one horizon</td>
 <td style="text-align: right;">5,537,460</td>
-<td>trained and offline-evaluated; integration pending</td>
+<td>published and runtime-registered; field testing pending</td>
 </tr>
 <tr>
 <td>4.1 CF</td>
 <td><code>320x180</code></td>
 <td>corrected future-target loss; four horizons</td>
 <td style="text-align: right;">5,537,560</td>
-<td>trained and offline-evaluated; integration pending</td>
+<td>published and runtime-registered; field testing pending</td>
 </tr>
 <tr>
 <td>4.1 PCF</td>
 <td><code>320x180</code> + 3 targets</td>
 <td>corrected history/future training; four horizons</td>
 <td style="text-align: right;">5,544,480</td>
-<td>trained and offline-evaluated; integration pending</td>
+<td>published and runtime-registered; field testing pending</td>
 </tr>
 </tbody>
 </table>
 <h2 id="field-and-research-state">Field and Research State</h2>
 <p>Regular <strong>v3.4</strong> is the current field-selected model. It won the July 13, 2026 comparison across every shadow case presented and the tested normal left and right turns.</p>
-<p>Series 4.0 was field-tested. <code>4.0f</code> was viable and traded two passed/failed cases with v3.4, but it did not establish a clear promotion case. <code>4.0p/r/a/c</code> repeated prior steering predictions and were rejected. Series 4.1 was trained to address that failure and still needs runtime integration and physical testing.</p>
+<p>Series 4.0 was field-tested. <code>4.0f</code> was viable and traded two passed/failed cases with v3.4, but it did not establish a clear promotion case. <code>4.0p/r/a/c</code> repeated prior steering predictions and were rejected. Series 4.1 was trained to address that failure and still needs end-to-end hardware verification and physical testing.</p>
 <h2 id="paired-checkpoints">Paired Checkpoints</h2>
 <p>Series 1-3 use a numeric model and a <code>b</code> checkpoint. Series 4 uses contract-specific letters:</p>
 <table>

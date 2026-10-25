@@ -29,7 +29,7 @@ The class-balanced ranking uses Bal9, turn exact, turn +/-1, ST exact, MAE, medi
 error, and signed error. MAE is supporting evidence rather than the sole selection rule.
 The current offline leader by Bal9 is v4.0p. Physical testing rejected its history behavior,
 while v4.0f remained viable but did not clearly beat v3.4. The six v4.1 models are included
-in the report but have not yet been integrated into the live selector or field-tested.
+in the report and registered in the live selector, but have not been field-tested.
 
 ## Reproduce
 

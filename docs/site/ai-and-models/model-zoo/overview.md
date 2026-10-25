@@ -1,6 +1,6 @@
 # Model Zoo
 
-SidewalkPilot has **52 evaluated checkpoints** across four series. The live selector currently contains 46 versions through Series 4.0; the six Series 4.1 models are trained and offline-evaluated but not yet integrated. Version numbers identify experiments, not guaranteed improvements.
+SidewalkPilot has **52 evaluated checkpoints** across four series. The live selector contains all 52 versions through Series 4.1. The six Series 4.1 models are trained, offline-evaluated, and published, but have no physical field verdict. Version numbers identify experiments, not guaranteed improvements.
 
 ## Families
 
@@ -13,15 +13,15 @@ SidewalkPilot has **52 evaluated checkpoints** across four series. The live sele
 | 4.0 PC | `320x180` + 3 targets | one 18-value steering horizon | 5,569,186 | rejected after steering echo in field testing |
 | 4.0 CF | `320x180` | four 18-value steering horizons | 5,537,560 | `4.0f` viable; complementary to v3.4 |
 | 4.0 PCF | `320x180` + 3 targets | four 18-value steering horizons | 5,572,696 | rejected after steering echo in field testing |
-| 4.1 PC | `320x180` + 3 targets | corrected history training; one horizon | 5,537,460 | trained and offline-evaluated; integration pending |
-| 4.1 CF | `320x180` | corrected future-target loss; four horizons | 5,537,560 | trained and offline-evaluated; integration pending |
-| 4.1 PCF | `320x180` + 3 targets | corrected history/future training; four horizons | 5,544,480 | trained and offline-evaluated; integration pending |
+| 4.1 PC | `320x180` + 3 targets | corrected history training; one horizon | 5,537,460 | published and runtime-registered; field testing pending |
+| 4.1 CF | `320x180` | corrected future-target loss; four horizons | 5,537,560 | published and runtime-registered; field testing pending |
+| 4.1 PCF | `320x180` + 3 targets | corrected history/future training; four horizons | 5,544,480 | published and runtime-registered; field testing pending |
 
 ## Field and Research State
 
 Regular **v3.4** is the current field-selected model. It won the July 13, 2026 comparison across every shadow case presented and the tested normal left and right turns.
 
-Series 4.0 was field-tested. `4.0f` was viable and traded two passed/failed cases with v3.4, but it did not establish a clear promotion case. `4.0p/r/a/c` repeated prior steering predictions and were rejected. Series 4.1 was trained to address that failure and still needs runtime integration and physical testing.
+Series 4.0 was field-tested. `4.0f` was viable and traded two passed/failed cases with v3.4, but it did not establish a clear promotion case. `4.0p/r/a/c` repeated prior steering predictions and were rejected. Series 4.1 was trained to address that failure and still needs end-to-end hardware verification and physical testing.
 
 ## Paired Checkpoints
 

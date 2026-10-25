@@ -615,7 +615,7 @@ def serve(model, host, port):
                     conn.sendall(struct.pack(">15f", 90.0, 0.0, jcpu, jgpu, ifps, 0.0, *([0.0] * 9)))
                     continue
                 # inference rate (EMA) + Jetson temps, reported back to the Pi dashboard
-                now = time.time()
+                now = time.perf_counter()
                 if last_frame_ts:
                     dt_f = now - last_frame_ts
                     if dt_f > 0.0:
@@ -632,13 +632,13 @@ def serve(model, host, port):
                     except ValueError as exc:
                         print(f"[jon] rejected steering history: {exc}", flush=True)
                         break
-                t_inf = time.time()
+                t_inf = time.perf_counter()
                 try:
                     steering, throttle, probs9 = model.infer(frame)   # preprocess + session.run
                 except Exception as exc:
                     print(f"[jon] inference rejected: {exc}", flush=True)
                     break
-                infer_ms = (time.time() - t_inf) * 1000.0
+                infer_ms = (time.perf_counter() - t_inf) * 1000.0
                 # reply: steering, throttle, jcpu, jgpu, infer_fps, infer_ms + 9 bucket probs (15x f32)
                 conn.sendall(struct.pack(">15f", steering, throttle, jcpu, jgpu, ifps, infer_ms,
                                          *[float(p) for p in probs9]))

@@ -6,7 +6,7 @@ This page maps important SidewalkPilot claims to the strongest available proof a
 |---|---|---|---|
 | The software controls a physical car | Runtime source, systemd units, field videos, hardware photos | Camera, controller, steering, motors, sensors, and dashboard have operated together | A demonstration does not prove safe behavior in every environment |
 | v3.4 is the current field-selected model | July 13 comparison, Series 3 table, v3.4 model card | v3.4 beat v3.4b/v3.3/v3.3b in the tested shadow and turn cases | Route, weather, clips, and takeover counts were not preserved |
-| Twelve Series 4 models were trained | Six trainer runs, Weights & Biases records, ONNX models, and signatures | v4.0 and v4.1 each produced PC, CF, and PCF final/validation-selected pairs | v4.1 still needs live integration and field testing |
+| Twelve Series 4 models were trained | Six trainer runs, Weights & Biases records, ONNX models, and signatures | v4.0 and v4.1 each produced PC, CF, and PCF final/validation-selected pairs | v4.1 is runtime-registered; hardware verification and field testing remain |
 | v4.0 was tested on the car | Supervised field observations, interruption clips, Series 4 model cards | v4.0f was viable but mixed against v3.4; v4.0g was worse; PC/PCF echoed steering | The comparison was not a repeated route-controlled benchmark |
 | All model families were compared on later data | `docs/steering_model_report.pdf`, evaluation JSON, evaluator source | 52 checkpoints were decoded correctly and scored on one frozen 6,952-frame S3/4 subset | Offline labels cannot measure road-edge risk, oscillation, or recovery behavior |
 | Current Series 3/4 training data is real and published | Hugging Face dataset repositories and label metadata | The Series 3/4 real dataset contains 81,237 labeled images | Public metadata should be checked against the exact snapshot used for a run; early Series 1/2 training also used separate CARLA data |
@@ -50,7 +50,7 @@ The current assembly uses the Jetson Orin Nano for inference, Raspberry Pi 5 for
 | Dashboard | Physical HUB75 display, sender/receiver source, layout tests | Operational and observable; dashboard failure does not control vehicle motion |
 | v3.1b night failure | Operator note describing warm-light bias and blocky steering | Historical observation only; matching clip, CSV, route, and model file hash are not indexed |
 | Series 4.0 | Training runs, ONNX models, CUDA/runtime checks, common evaluation, and supervised field observations | v4.0f was viable but mixed; PC/PCF models failed from steering echo |
-| Series 4.1 | Training runs, ONNX models, and common evaluation | Live integration, replay, and physical testing remain open |
+| Series 4.1 | Training runs, ONNX models, and common evaluation | Runtime registration is implemented; end-to-end checks, replay, and physical testing remain open |
 
 ## Direct Evidence Index
 

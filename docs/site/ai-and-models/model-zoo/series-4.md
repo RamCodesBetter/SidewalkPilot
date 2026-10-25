@@ -53,18 +53,18 @@ The 4.1 runs were created after reviewing the 4.0 failure clips. They keep the s
 | `4.1fg` | emphasize the current horizon and add trajectory-delta consistency across future horizons | `4.1f` | `4.1g`, epoch 15 |
 | `4.1ac` | combine robust history handling with future-trajectory supervision | `4.1a` | `4.1c`, epoch 10 |
 
-All three 4.1 runs completed 25 epochs and exported six ONNX models. They are not yet supported by the live model selector and have not been tested on the car. Their purpose is to test whether the 4.0 history failure can be corrected without collecting a new dataset.
+All three 4.1 runs completed 25 epochs and exported six ONNX models. They are registered in the live model selector and Jetson server but have not been tested on the car. Their purpose is to test whether the 4.0 history failure can be corrected without collecting a new dataset. Individual cards, ONNX files, and verified manifests were published on October 25, 2026; see [Hugging Face releases](../../publishing/huggingface.md).
 
 ## 4.1 Common Evaluation
 
 | Model | Bal9 | Turn exact | Turn +/-1 | ST exact | MAE | Median | Signed |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | `4.1p` | 25.1% | 23.1% | 56.5% | 65.7% | 14.585 | 5.048 | -0.144 |
-| `4.1r` | 17.8% | 9.2% | 37.2% | 87.5% | **13.382** | **1.431** | -5.765 |
-| `4.1f` | 25.1% | 22.9% | **57.9%** | 61.5% | 15.466 | 7.218 | +1.183 |
+| `4.1r` | 17.8% | 9.2% | 37.2% | 87.4% | **13.382** | **1.431** | -5.765 |
+| `4.1f` | 25.1% | 22.9% | **57.8%** | 61.5% | 15.466 | 7.218 | +1.183 |
 | `4.1g` | 24.0% | 21.2% | 56.8% | 67.4% | 14.652 | 4.659 | +0.555 |
 | `4.1a` | **25.3%** | 22.9% | 57.0% | 63.2% | 14.805 | 6.352 | +0.130 |
-| `4.1c` | 23.2% | 19.5% | 52.3% | 75.0% | 13.566 | 2.270 | -0.984 |
+| `4.1c` | 23.1% | 19.5% | 52.3% | 75.0% | 13.566 | 2.270 | -0.984 |
 
 The 4.1 open-loop results do not beat the strongest 4.0 PC/PCF rows. That is not sufficient to reject the correction, because 4.1 was designed around the closed-loop failure those open-loop rows missed. `4.1r` also shows a familiar warning pattern: very high straight recall, weak turn recall, and low median error. It should not be selected from MAE alone.
 

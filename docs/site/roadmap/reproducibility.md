@@ -28,7 +28,7 @@ SidewalkPilot publishes code, model files, dataset releases, and evaluation repo
 - The image datasets do not belong in Git history.
 - GPU libraries and nondeterministic kernels can prevent byte-identical reruns even with the same seed.
 - Offline metrics do not replace field validation.
-- v4.0 completed training, export, offline evaluation, supervised field testing, and public model-card review. v4.1 completed training, export, and offline evaluation but still needs live integration and field testing.
+- v4.0 completed training, export, offline evaluation, supervised field testing, and public model-card review. v4.1 completed training, export, offline evaluation, runtime registration, and public release; end-to-end hardware verification and field testing remain pending.
 - TensorRT engines are not part of the present reproducibility claim.
 
 The useful target is a traceable experiment that produces comparable behavior and metrics, not byte-identical model files on unrelated systems.

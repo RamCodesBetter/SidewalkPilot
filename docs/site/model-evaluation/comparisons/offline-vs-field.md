@@ -20,7 +20,7 @@ The July 13, 2026 comparison rejected v3.3 and v3.3b, found v3.4b slightly worse
 than v3.4, and selected v3.4. Its route and clip record was incomplete, so the
 verdict is qualitative rather than a repeatable benchmark. The later v4.0 test
 also produced a qualitative verdict: v4.0f was viable but mixed against v3.4,
-while the history-input models failed from steering echo. v4.1 remains offline-only.
+while the history-input models failed from steering echo. v4.1 is published and runtime-registered, with offline evidence only.
 
 ## Promotion Rule
 

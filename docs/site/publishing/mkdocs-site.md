@@ -43,8 +43,8 @@ will overwrite the change.
 Before a build is treated as publishable, check:
 
 1. **Accuracy** - facts on the page match the actual source code, config, and current model
-   versions; Series 4.0 has its bounded field verdict, Series 4.1 is labeled as not yet
-   integrated or field-tested, and Jetson Orin Nano quantization remains future work.
+   versions; Series 4.0 has its bounded field verdict, Series 4.1 is labeled as runtime-registered but not yet
+   field-tested, and Jetson Orin Nano quantization remains future work.
 2. **Privacy** - no credentials, personal addresses, private hostnames, workstation
    usernames/paths, or unreviewed media appear on a public page. The fixed isolated-link
    addresses documented as part of the car's architecture are intentional.

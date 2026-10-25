@@ -125,6 +125,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -415,7 +419,7 @@
 <p>The confusion matrix supplies the evidence behind these summaries. A strong model should not concentrate all predictions in the straight column or systematically shift one direction.</p>
 <h2 id="offline-and-field-evidence">Offline and Field Evidence</h2>
 <p>Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. That limitation was visible in v4.0: PC and PCF ranked strongly offline but echoed their own earlier steering predictions on the car. v4.0f was viable but mixed against v3.4, so v3.4 remains the default.</p>
-<p>The next model test begins only after v4.1 runtime integration and closed-loop bench replay. It should use v3.4 and v4.0f as controls while testing the six v4.1 correction models under the same route and conditions.</p>
+<p>The next model test begins only after v4.1 end-to-end hardware verification and closed-loop bench replay. It should use v3.4 and v4.0f as controls while testing the six v4.1 correction models under the same route and conditions.</p>
 <h2 id="reproduce">Reproduce</h2>
 <p>On the evaluation workstation with ONNX Runtime GPU installed:</p>
 <pre><code class="language-bash">cd ~/rc_car_code

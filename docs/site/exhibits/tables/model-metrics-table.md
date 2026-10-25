@@ -61,7 +61,7 @@ The table makes the tradeoff visible. v4.0p leads balanced and turn metrics; v4.
 | v4.0f | Viable and complementary with v3.4; each passed two cases the other failed |
 | v4.0g | Tested; worse than v4.0f |
 | v4.0p/r/a/c | Tested; rejected for repeated prior steering predictions |
-| v4.1p/r/f/g/a/c | Offline-evaluated; live integration and field testing pending |
+| v4.1p/r/f/g/a/c | Published, offline-evaluated, and runtime-registered; hardware verification and field testing pending |
 
 The July 13 result is qualitative because exact route, conditions, clips, and takeover counts were not preserved.
 
@@ -81,7 +81,7 @@ The July 13 result is qualitative because exact route, conditions, clips, and ta
 | Model architecture | Trainers, ONNX contracts, parameter counts | Independent reproduction |
 | Offline capability | Evaluator JSON/PDF and confusion matrices | Distribution/field transfer |
 | v3.4 field selection | July 13 operator comparison | Complete route, clips, and takeover record |
-| Series 4 | Training runs, models, evaluator, runtime smoke tests | v4.1 integration and physical field comparison |
+| Series 4 | Training runs, models, evaluator, runtime smoke tests | v4.1 end-to-end hardware verification and physical field comparison |
 | LiDAR AEB | Source and deterministic tests | Preserved stopping-distance/false-trigger field test |
 | Hardware | Wiring/config, photos, bench utilities | Finished matching PCB revision |
 

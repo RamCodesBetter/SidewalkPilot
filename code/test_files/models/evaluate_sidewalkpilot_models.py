@@ -1454,10 +1454,10 @@ def build_pdf(results, samples, s34_samples, pdf_out):
         "The shared-set comparison measures each complete checkpoint and training pipeline. It does not isolate architecture from differences in training data or augmentation.",
         "Historical checkpoint source mixes are not inferred from trainer defaults. A model should be called CARLA-assisted only when its saved command, run configuration, or source-count log proves that CARLA roots were used.",
         "The Series 3/4 report set is held out by the frozen 100-frame window split and requires three valid previous and three valid future frames without split crossings or timestamp gaps.",
-        f"The shared source dataset contains 81,237 curated real field frames across five manual-driving runs from July 2 through July 12, 2026; {len(s34_samples):,} anchors satisfy the common report contract.",
+        f"The original shared source snapshot contains 81,237 real field frames across five manual-driving runs from July 2 through July 12, 2026; {len(s34_samples):,} anchors satisfy the common report contract. A later data audit does not retroactively change this frozen report input.",
         "The hold-last baseline repeats the most recent previous target. It is a persistence reference for Series 4 history models, not a deployed controller behavior.",
         "Series 3 throttle labels are near-constant at full throttle, so this report evaluates steering only; throttle control remains disabled pending varied-throttle data.",
-        "The July 13 field comparison selected v3.4 from the cases presented. A later supervised comparison found v4.0f viable but not clearly better than v3.4; v4.0p/v4.0r/v4.0a/v4.0c repeatedly held prior steering predictions and were not drivable. The v4.1 checkpoints are offline-only pending runtime integration and field testing.",
+        "The July 13 field comparison selected v3.4 from the cases presented. A later supervised comparison found v4.0f viable but not clearly better than v3.4; v4.0p/v4.0r/v4.0a/v4.0c repeatedly held prior steering predictions and were not drivable. The v4.1 checkpoints are runtime-supported but remain pending field testing.",
     ]
     for note in notes:
         story.append(paragraph(f"- {note}", normal))

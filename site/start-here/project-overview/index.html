@@ -151,6 +151,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -408,7 +412,7 @@ GPS and Hall-effect wheel-speed sensor -----+         +--&gt; logs and photos
 <li><strong>Series 1:</strong> a compact 200x66 camera model established that image-to-steering learning could control the car.</li>
 <li><strong>Series 2:</strong> retained direct steering regression while refining the data and testing HSV/CLAHE preprocessing for difficult lighting.</li>
 <li><strong>Series 3:</strong> moved to 320x180 input and a larger network. v3.0 used separate steering and throttle outputs; v3.1 and later use a 19-value hybrid output containing nine steering-class logits, nine class-local regression offsets, and one throttle value.</li>
-<li><strong>Series 4:</strong> keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six v4.0 models are runtime-supported and field-tested; six corrected v4.1 models are trained and evaluated offline but not yet integrated.</li>
+<li><strong>Series 4:</strong> keeps the Series 3 visual backbone, removes throttle learning, and compares image-only future supervision against causal three-target steering history. Six v4.0 models are runtime-supported and field-tested; six corrected v4.1 models are trained, evaluated offline, published, and runtime-registered, but not field-tested.</li>
 </ul>
 <p>The current physical-car selection is <strong>v3.4</strong>, not the checkpoint with the lowest raw mean error. The project uses balanced steering metrics and field behavior because a dataset dominated by straight frames can reward a model that avoids turning.</p>
 <p>Read the <a href="../../ai-and-models/model-zoo/series-3/">Series 3 Model Zoo</a>, <a href="../../ai-and-models/model-zoo/series-4/">Series 4 Model Zoo</a>, and <a href="../../portfolio-evidence/reader-paths/evidence-map/">Evidence Map</a>.</p>
@@ -424,7 +428,7 @@ GPS and Hall-effect wheel-speed sensor -----+         +--&gt; logs and photos
 <p>The AEB toggle controls all LiDAR slowdown and braking. When AEB is off, LiDAR does not change the car's motion in manual or autonomous mode. Before a run, the operator must confirm that the LiDAR is connected and updating.</p>
 <h2 id="data-and-training">Data and Training</h2>
 <p>Driving sessions save camera images with logical <code>0..180</code> steering labels and absolute physical throttle fractions. The trainer sorts the images by path and groups them into 100-frame windows. Each window goes entirely into training or validation, which keeps most neighboring frames together. One capture run can still appear in both sets. Series 3 and 4 training applies lighting, color, flip, and synthetic-shadow augmentation, then evaluates exact steering classes, adjacent classes, error magnitude, and signed bias.</p>
-<p>Series 3 and 4 use the same <strong>81,237 real labeled images</strong> and split procedure. The generated report adapts all four architecture families and scores all 52 checkpoints on a common 6,952-frame challenge subset. Series 1-3 and Series 4.0 model repositories, plus the datasets, are published on <a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face</a>. The v4.1 models remain local while integration and field testing are pending. Training runs are recorded in the project's configured experiment tracker.</p>
+<p>Series 3 and 4 use the same <strong>81,237 real labeled images</strong> and split procedure. The generated report adapts all four architecture families and scores all 52 checkpoints on a common 6,952-frame challenge subset. Series 1-3 and Series 4.0 model repositories, plus the datasets, are published on <a href="https://huggingface.co/ram-shreyas-naik-sabavat">Hugging Face</a>. The six v4.1 ONNX models and cards are also published; end-to-end hardware checks and field testing remain pending. Training runs are recorded in the project's configured experiment tracker.</p>
 <h2 id="physical-hardware">Physical Hardware</h2>
 <table>
 <thead>

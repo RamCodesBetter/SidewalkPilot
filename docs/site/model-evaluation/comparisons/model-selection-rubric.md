@@ -40,6 +40,6 @@ The field-selected model remains the baseline even if another checkpoint has low
 - **Viable 4.0 comparison model:** `4.0f`; it showed complementary wins and failures against v3.4, not a clear promotion case.
 - **Rejected 4.0 history models:** `4.0p`, `4.0r`, `4.0a`, and `4.0c` because of closed-loop steering echo.
 - **Lower-ranked 4.0 CF checkpoint:** `4.0g`, which was worse than `4.0f` in the supervised comparison.
-- **Pending:** all six 4.1 checkpoints have common-set results but still require runtime integration, closed-loop replay, and physical testing.
+- **Pending:** all six 4.1 checkpoints have common-set results and runtime registration but still require end-to-end hardware checks, failure-case replay, and physical testing.
 
 Final-versus-best naming is descriptive, not a deployment rule. Both checkpoints must pass the same gates.

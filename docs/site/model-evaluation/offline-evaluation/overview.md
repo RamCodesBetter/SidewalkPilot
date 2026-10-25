@@ -52,7 +52,7 @@ The confusion matrix supplies the evidence behind these summaries. A strong mode
 
 Offline results can find collapse, bias, and promising candidates. They cannot reproduce tire load, servo hysteresis, network delay, a particular shadow angle, or compounding closed-loop mistakes. That limitation was visible in v4.0: PC and PCF ranked strongly offline but echoed their own earlier steering predictions on the car. v4.0f was viable but mixed against v3.4, so v3.4 remains the default.
 
-The next model test begins only after v4.1 runtime integration and closed-loop bench replay. It should use v3.4 and v4.0f as controls while testing the six v4.1 correction models under the same route and conditions.
+The next model test begins only after v4.1 end-to-end hardware verification and closed-loop bench replay. It should use v3.4 and v4.0f as controls while testing the six v4.1 correction models under the same route and conditions.
 
 ## Reproduce
 

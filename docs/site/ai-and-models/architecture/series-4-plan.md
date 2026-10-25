@@ -54,7 +54,7 @@ The v4.0 physical test exposed a closed-loop failure that offline metrics did no
 - CF/PCF use current-dominant horizon weighting and a trajectory-delta loss so later horizons support the current decision instead of dominating it;
 - Checkpoint selection includes closed-loop replay criteria in addition to ordinary validation metrics.
 
-These changes are hypotheses encoded in the trainers. The six v4.1 models are trained and evaluated offline, but they are not in the live model selector and have not been driven.
+These changes are hypotheses encoded in the trainers. The six v4.1 models are trained and evaluated offline, and registered in the live model selector, but have not been driven.
 
 ## Size
 
@@ -111,7 +111,7 @@ The versioned TCP request carries three big-endian float32 history values alongs
 
 ## Promotion Gate
 
-Series 4.0 is trained, runtime-supported, and field-tested. None of its models replaced v3.4: `4.0f` was viable but mixed, `4.0g` was worse, and the PC/PCF models failed from steering echo. Series 4.1 is trained and offline-evaluated but still needs live integration, closed-loop replay, and supervised physical testing. The checked-in default remains v3.4.
+Series 4.0 is trained, runtime-supported, and field-tested. None of its models replaced v3.4: `4.0f` was viable but mixed, `4.0g` was worse, and the PC/PCF models failed from steering echo. Series 4.1 is trained and offline-evaluated and runtime-registered, but still needs end-to-end hardware checks, failure-case replay, and supervised physical testing. The checked-in default remains v3.4.
 
 ## Possible Learned-Throttle Experiment
 

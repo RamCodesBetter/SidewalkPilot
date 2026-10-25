@@ -157,6 +157,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -425,7 +429,7 @@
 <p>All 46 checkpoints through Series 4.0 were re-evaluated on one frozen 6,952-frame Series 3/4 challenge subset. This common test made the offline comparison more informative than comparing each family on a different image distribution.</p>
 <h2 id="july-2026-series-4-field-test-and-v41-corrections">July 2026: Series 4 Field Test and v4.1 Corrections</h2>
 <p>All six v4.0 models were driven. Image-only v4.0f was viable but mixed against v3.4, v4.0g was worse, and the PC/PCF models repeatedly echoed earlier steering predictions. v3.4 therefore remained the field-selected baseline.</p>
-<p>The next three 25-epoch runs retained the PC, CF, and PCF contracts but changed the history representation, loss terms, history perturbations, and checkpoint selection to address that failure. They produced six v4.1 models. The common report was regenerated for all 52 checkpoints. The v4.1 models are evaluated offline but are not yet integrated into the live selector or physically tested.</p>
+<p>The next three 25-epoch runs retained the PC, CF, and PCF contracts but changed the history representation, loss terms, history perturbations, and checkpoint selection to address that failure. They produced six v4.1 models. The common report was regenerated for all 52 checkpoints. At the July review, v4.1 was offline-only. The October 25 release registers all six models in the live selector and publishes their ONNX files and cards; physical testing remains pending.</p>
 <p>The current deployed research state is maintained in <a href="../current-status/">Current Status</a>.</p>
               
             </div>

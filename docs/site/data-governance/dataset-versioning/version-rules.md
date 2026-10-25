@@ -9,7 +9,7 @@ Version rules keep model, preprocessing, labels, and dataset identity together. 
 | 1 / 2 | `SteeringAutonomyV2`, ~0.67M params | 200x66 | steering only (single tanh regression) | `image`, `steering`, `repeat`, `source` | Frozen (2,224 images) |
 | 3 | `SidewalkPilotV3`, 5.53M params | 320x180 | v3.1+ hybrid steering + optional throttle loss | image key, `steering`, `throttle` | shared 81,237-frame dataset |
 | 4.0 | PC / CF / PCF, 5.54-5.57M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | all six models field-tested; CF model v4.0f remained viable |
-| 4.1 | PC / CF / PCF, 5.54-5.55M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | trained and evaluated offline; not integrated into the live selector or field-tested |
+| 4.1 | PC / CF / PCF, 5.54-5.55M params | 320x180 plus optional previous targets | steering horizons only | same Series 3/4 base records | published, offline-evaluated, and registered in the live selector; not field-tested |
 
 Series 1/2 use the earlier direct-regression architecture. Series 3/4 use Jetson Orin Nano and the larger 320x180 visual backbone. Series 4 shares the 81,237-frame dataset but removes throttle prediction and adds temporal-target experiments.
 
