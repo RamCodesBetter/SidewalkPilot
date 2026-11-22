@@ -12,6 +12,8 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" / "tools"
 sys.path.insert(0, str(ROOT))
+from workspace import activate, source_path
+activate()
 import package_review
 import diagnose_reviews
 import sam_point_diagnostic
@@ -19,13 +21,13 @@ import label_assisted_pilot
 import prepare_assisted_pilot
 import audit_sam_implementations as sam_audit
 import compare_sam3_sidewalk as sam3_compare
-SPEC = importlib.util.spec_from_file_location("label_grounded_sam2", ROOT / "label_grounded_sam2.py")
+SPEC = importlib.util.spec_from_file_location("label_grounded_sam2", source_path('label_grounded_sam2.py'))
 label = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(label)
-REVIEW_SPEC = importlib.util.spec_from_file_location("review_masks", ROOT / "review_masks.py")
+REVIEW_SPEC = importlib.util.spec_from_file_location("review_masks", source_path('review_masks.py'))
 review = importlib.util.module_from_spec(REVIEW_SPEC)
 REVIEW_SPEC.loader.exec_module(review)
-TAXONOMY = json.loads((ROOT / "taxonomy.json").read_text())
+TAXONOMY = json.loads((source_path('taxonomy.json')).read_text())
 
 
 class LabelingTests(unittest.TestCase):

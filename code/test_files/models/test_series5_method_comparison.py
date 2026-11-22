@@ -10,6 +10,8 @@ from PIL import Image
 
 HERE = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" / "tools"
 sys.path.insert(0, str(HERE))
+from workspace import activate, source_path
+activate()
 from compare_class1_methods import aggregate, checked_asset, check_identity
 from evaluate_class1_corrections import metrics
 from label_grounded_sam2 import sha256, build_caption, compose_mask
@@ -17,8 +19,8 @@ from label_grounded_sam2 import sha256, build_caption, compose_mask
 
 class MethodComparisonTests(unittest.TestCase):
     def test_sidewalk_first_is_one_concept_without_reference_inputs(self):
-        config = json.loads((HERE / "label_config_sidewalk_first.json").read_text())
-        taxonomy = json.loads((HERE / "taxonomy.json").read_text())
+        config = json.loads((source_path('label_config_sidewalk_first.json')).read_text())
+        taxonomy = json.loads((source_path('taxonomy.json')).read_text())
         self.assertEqual(config["prompt_groups"], [[1]])
         self.assertEqual(config["diagnostic_class_ids"], [1])
         self.assertEqual(config["prompt_overrides"], {"1": ["sidewalk"]})

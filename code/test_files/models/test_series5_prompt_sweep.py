@@ -7,6 +7,8 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate
+activate()
 
 from compare_class1_methods import aggregate
 from compare_sam31_sidewalk import COMMIT, CHECKPOINT_SHA256, SAM3_CHECKPOINT_SHA256

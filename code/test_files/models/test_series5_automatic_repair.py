@@ -11,6 +11,8 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'
 sys.path.insert(0, str(HERE))
+from workspace import activate, source_path
+activate()
 from automatic_repair import (automatic_prompts, bounded_merge, iou, regions,
                               run, validate_config, validate_run_record)
 from label_grounded_sam2 import save_mask, sha256
@@ -21,7 +23,7 @@ from PIL import Image
 
 class AutomaticRepairTests(unittest.TestCase):
     def setUp(self):
-        self.cfg = json.loads((HERE / 'automatic_repair_config.json').read_text())
+        self.cfg = json.loads((source_path('automatic_repair_config.json')).read_text())
         self.base = np.zeros((100, 160), bool)
         self.base[25:90, 35:125] = True
 

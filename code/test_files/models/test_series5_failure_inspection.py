@@ -8,6 +8,8 @@ import unittest
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate
+activate()
 from inspect_paired_failures import detection_summary, mask_diagnostics, review_group
 
 

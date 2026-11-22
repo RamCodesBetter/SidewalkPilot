@@ -15,6 +15,8 @@ from PIL import Image
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate
+activate()
 import package_model_review as review
 
 

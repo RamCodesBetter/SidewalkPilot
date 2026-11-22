@@ -10,6 +10,8 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate, source_path
+activate()
 import label_series5_campaign as campaign
 from label_grounded_sam2 import digest_json, sha256, write_json
 from prepare_reviewed_dataset import read_json
@@ -53,8 +55,8 @@ class CampaignTests(unittest.TestCase):
     def make_run(self, selection_path, output, limit=0):
         selection = read_json(selection_path)
         contract = dict(policy=POLICY, runtime={"test": True}, selection_sha256=sha256(selection_path),
-                        runner_sha256=sha256(campaign.HERE / "label_series5_pseudo.py"),
-                        filter_sha256=sha256(campaign.HERE / "pseudo_mask_filter.py"))
+                        runner_sha256=sha256(source_path('label_series5_pseudo.py')),
+                        filter_sha256=sha256(source_path('pseudo_mask_filter.py')))
         ch = digest_json(contract)
         for name in ("records", "raw", "masks"):
             (output / name).mkdir(exist_ok=True, parents=True)

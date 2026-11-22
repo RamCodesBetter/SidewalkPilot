@@ -85,7 +85,7 @@ def organize(root, apply=False):
     temporary = journal.with_suffix(".tmp")
     if temporary.exists() or temporary.is_symlink():
         raise FileExistsError(f"Inspect an interrupted migration journal before continuing: {temporary}")
-    for name in ("reviews", "docs", "notebook"):
+    for name in ("reviews", "docs"):
         target = safe_destination(root, name)
         if target.exists() and not target.is_dir():
             raise FileExistsError(f"Workspace category is not a directory: {target}")
@@ -107,13 +107,13 @@ def organize(root, apply=False):
         for row in reversed(completed):
             (root / row["new"]).rename(root / row["old"])
         raise
-    for name in ("reviews", "docs", "notebook"):
+    for name in ("reviews", "docs"):
         safe_destination(root, name).mkdir(exist_ok=True)
     # The root taxonomy was tracked source; keep a copy with the legacy data too.
     legacy = root / "reviews/legacy-class1"
     extras = []
     if legacy.is_dir():
-        assets = [(root / "tools/taxonomy.json", legacy / "taxonomy.json")]
+        assets = [(root / "tools/configs/taxonomy.json", legacy / "taxonomy.json")]
         assets += [(root / "tools/review" / name, legacy / name) for name in
                    ("index.html", "corrections.css", "corrections.js", "lucide.min.js", "LUCIDE-LICENSE.txt")]
         for source, target in assets:

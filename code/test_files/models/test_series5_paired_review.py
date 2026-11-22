@@ -10,6 +10,8 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate
+activate()
 from prepare_paired_review import dhash, image_names, near_time, quotas, timestamp
 from package_paired_review import encode_binary
 from score_paired_review import score

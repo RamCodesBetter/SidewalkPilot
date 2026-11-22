@@ -262,7 +262,7 @@ const {chromium} = require('playwright');
     assert.equal(await page.locator('#review-count').textContent(),'1 / 200');
     assert.equal(await page.evaluate(()=>localStorage.getItem('sp-review:another-dataset')),'preserve');
     assert.deepEqual(errors, []);
-    const server = spawn('python3', [path.join(root,'review_masks.py'),dataset,'--no-browser'], {stdio:['pipe','pipe','pipe']});
+    const server = spawn('python3', [path.join(root,'review/review_masks.py'),dataset,'--no-browser'], {stdio:['pipe','pipe','pipe']});
     const stopped = new Promise(resolve=>server.on('exit',resolve));
     try {
       const url = await new Promise((resolve,reject)=>{

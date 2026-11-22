@@ -13,7 +13,10 @@ import numpy as np
 from PIL import Image
 import torch
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate
+activate()
 from series_5_a_sidewalkpilot_trainer import (
     DEFAULTS, MixedBatchSampler, SidewalkDataset, atomic_checkpoint, confusion_counts,
     confusion_metrics, evaluate, load_checkpoint, make_model, segmentation_loss,

@@ -12,6 +12,8 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
+from workspace import activate
+activate()
 from prepare_reviewed_dataset import (
     Inputs, binary_labels, candidate_pixels, pixel_counts, pixel_hash,
     prepare, select_candidate, sha256, verify_dataset,

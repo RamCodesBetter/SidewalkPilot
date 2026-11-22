@@ -4,16 +4,23 @@ Keep work on `series-5`. This is a folder cleanup, not a new model recipe.
 
 | Folder | Contents |
 | --- | --- |
-| `tools/` | Python training, labeling, evaluation and packaging code; configs and taxonomy |
-| `tools/review/` | Reusable HTML/CSS/JavaScript viewer source |
+| `series_5_*_sidewalkpilot_trainer.py` | A/B/C training entry points, directly in this folder |
+| `tools/labeling/` | SAM inference, labeling campaigns, and mask repair |
+| `tools/datasets/` | Dataset and review selection, splits, training targets |
+| `tools/evaluation/` | Audits, diagnostics, comparisons, and scoring |
+| `tools/packaging/` | Portable review bundles and comparison viewers |
+| `tools/models/` | Model architecture and export code |
+| `tools/filtering/` | Mask filtering policies |
+| `tools/configs/` | Model/labeling configs and class taxonomy |
+| `tools/review/` | Viewer HTML/CSS/JavaScript and terminal review launcher |
 | `reviews/` | Complete local review bundles, including their images, masks and exports |
 | `docs/` | Local architecture PDF, LaTeX/Typst source and related documents |
-| `notebook/` | Local research journal and supporting records |
 
 Generated artifacts are ignored by Git. On the Mac, the workspace is
 `~/Desktop/rc_car_code/code/ai_models_datasets/series_5/`.
 The Linux history store stays at `~/sidewalkpilot-labels`; checkpoint paths there
 have not moved. Published model exports stay in `code/ai_models/`.
+The recovered Mac journal is `~/Desktop/notebook/`, outside this workspace.
 
 ## Open on the Mac
 
@@ -34,14 +41,17 @@ clear or approve any review decisions.
 Run from the repository root; add the existing dataset, split and output arguments.
 
 ```sh
-python code/ai_models_datasets/series_5/tools/series_5_c_sidewalkpilot_trainer.py --help
-python code/ai_models_datasets/series_5/tools/label_series5_campaign.py --help
-python code/ai_models_datasets/series_5/tools/package_beta_comparison.py --help
+python code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py --help
+python code/ai_models_datasets/series_5/tools/labeling/label_series5_campaign.py --help
+python code/ai_models_datasets/series_5/tools/packaging/package_beta_comparison.py --help
 ```
 
-The A/B trainers, architecture, configs, frozen label-policy files and historical
-diagnostics are kept together under `tools/` so local imports and saved recipe
-dependencies remain easy to inspect. Do not re-create loose scripts at the root.
+All three trainers live directly in `series_5/`. Architecture, configs, frozen
+label-policy files, viewer templates and historical diagnostics stay in `tools/`.
+The entry points resolve those paths without changing the working directory.
+`tools/workspace.py` centralizes source lookup and direct-script import paths.
+Archived run contracts and code hashes remain historical records. Do not rewrite
+them to bypass a resume check after this source-layout change.
 
 ## Migrate an Existing Flat Workspace
 

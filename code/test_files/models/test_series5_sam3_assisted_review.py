@@ -11,6 +11,8 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'))
+from workspace import activate
+activate()
 from label_grounded_sam2 import digest_json, sha256, write_json
 from sam3_assisted_review import CHECKPOINT_SHA256, MODEL_REVISION, build, load_inputs, load_selection, revise
 
