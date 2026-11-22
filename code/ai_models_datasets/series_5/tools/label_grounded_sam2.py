@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_SOURCE = HERE.parent / "series_3_and_4" / "sidewalkpilot_dataset"
+DEFAULT_SOURCE = HERE.parents[1] / "series_3_and_4" / "sidewalkpilot_dataset"
 
 
 def utc_now():

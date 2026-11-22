@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'))
 from component_filter import largest_component
 from package_component_review import select_cases
 

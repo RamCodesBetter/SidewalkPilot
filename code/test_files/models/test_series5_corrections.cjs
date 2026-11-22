@@ -7,7 +7,7 @@ const {chromium} = require('playwright');
 
 (async () => {
   const source = process.argv[2]; assert(source, 'Pass an extracted review package');
-  const root = path.resolve(__dirname, '../../ai_models_datasets/series_5');
+  const root = path.resolve(__dirname, '../../ai_models_datasets/series_5/tools');
   const out = fs.mkdtempSync(path.join(os.tmpdir(), 'series5-corrections-qa-'));
   const dataset = path.join(out, 'dataset'); fs.mkdirSync(dataset);
   for (const name of ['manifest.json','taxonomy.json','images','masks','records','overlays']) fs.cpSync(path.join(source,name), path.join(dataset,name), {recursive:true});

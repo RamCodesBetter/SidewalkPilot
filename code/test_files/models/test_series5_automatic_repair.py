@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-HERE = Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5'
+HERE = Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'
 sys.path.insert(0, str(HERE))
 from automatic_repair import (automatic_prompts, bounded_merge, iou, regions,
                               run, validate_config, validate_run_record)

@@ -8,7 +8,7 @@ import unittest
 import numpy as np
 from PIL import Image
 
-HERE = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5"
+HERE = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" / "tools"
 sys.path.insert(0, str(HERE))
 from compare_class1_methods import aggregate, checked_asset, check_identity
 from evaluate_class1_corrections import metrics

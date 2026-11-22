@@ -10,7 +10,7 @@ import unittest
 import numpy as np
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5"
+ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" / "tools"
 sys.path.insert(0, str(ROOT))
 import package_review
 import diagnose_reviews

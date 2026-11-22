@@ -8,7 +8,7 @@ import unittest
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
 from evaluate_class1_corrections import metrics
 from evaluate_targeted_corrections import edit_counts, grouped_metrics, validate_pair, validate_selection
 

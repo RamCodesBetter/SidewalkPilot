@@ -5,7 +5,7 @@ import unittest
 import tempfile
 import numpy as np
 
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'ai_models_datasets/series_5'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'ai_models_datasets/series_5/tools'))
 from hybrid_repair_pilot import merge_local, rectangle
 from package_hybrid_review import guarded_region, reconstruct, polygon_region
 from label_grounded_sam2 import save_mask, sha256

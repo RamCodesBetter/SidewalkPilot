@@ -5,7 +5,7 @@ import unittest
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'ai_models_datasets/series_5'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'ai_models_datasets/series_5/tools'))
 from package_local_mask_revision import apply_edits, flagged_ids, revision_inventory
 
 

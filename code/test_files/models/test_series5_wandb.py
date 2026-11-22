@@ -14,7 +14,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets"
 sys.path.insert(0, str(ROOT / "series_3_and_4"))
-sys.path.insert(0, str(ROOT / "series_5"))
+sys.path.insert(0, str(ROOT / "series_5" / "tools"))
 from wandb_logger import WandbLogger
 from series_5_a_sidewalkpilot_trainer import main, start_wandb
 

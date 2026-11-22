@@ -7,7 +7,7 @@ const {chromium} = require('playwright');
 
 (async () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), 'series5-review-qa-'));
-  const root = path.resolve(__dirname, '../../ai_models_datasets/series_5');
+  const root = path.resolve(__dirname, '../../ai_models_datasets/series_5/tools');
   const dataset = process.argv[2] || path.join(os.homedir(), 'sidewalkpilot-labels/series5-12-pilot-v1');
   const reviewer = process.argv[3] || path.join(root, 'review/index.html');
   const errors = [];

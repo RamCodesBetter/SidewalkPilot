@@ -9,7 +9,7 @@ from unittest.mock import patch
 import numpy as np
 from PIL import Image
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
 import label_series5_campaign as campaign
 from label_grounded_sam2 import digest_json, sha256, write_json
 from prepare_reviewed_dataset import read_json

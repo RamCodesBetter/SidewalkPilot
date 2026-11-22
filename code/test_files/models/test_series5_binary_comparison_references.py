@@ -10,7 +10,7 @@ from PIL import Image
 
 import test_series5_beta_comparison as fixtures
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'ai_models_datasets/series_5'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'ai_models_datasets/series_5/tools'))
 import derive_beta_references as references
 
 

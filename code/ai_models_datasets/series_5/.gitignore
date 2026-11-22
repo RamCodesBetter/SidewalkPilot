@@ -1,4 +1,9 @@
 # Generated review datasets stay local; source and reusable viewer code are tracked.
+!/readme.md
+/reviews/
+/docs/
+/workspace-migration.json
+# Retained until every existing workspace has run the non-destructive migration.
 /5.a-test/
 /5.a-vs-5.b/
 /5.c-architecture/

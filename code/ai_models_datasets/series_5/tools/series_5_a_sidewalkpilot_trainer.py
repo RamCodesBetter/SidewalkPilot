@@ -339,7 +339,7 @@ def training_config(args, precision, *, model_definition=None):
 
 
 def start_wandb(output, cfg, identity, metadata, partitions, history):
-    sys.path.insert(0, str(HERE.parent / "series_3_and_4"))
+    sys.path.insert(0, str(HERE.parents[1] / "series_3_and_4"))
     from wandb_logger import WandbLogger
 
     receipt_path = output / "wandb-run.json"

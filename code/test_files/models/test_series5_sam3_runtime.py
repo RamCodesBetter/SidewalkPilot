@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--runtime", type=Path, required=True)
 args, remaining = parser.parse_known_args()
 sys.path.insert(0, str(args.runtime.resolve()))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" / "tools"))
 
 import numpy as np
 import torch

@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'))
 from label_grounded_sam2 import digest_json, sha256, write_json
 from prepare_reviewed_dataset import pixel_hash, pixel_counts
 from prepare_series5_pseudo_dataset import build, load_mixed_partition
