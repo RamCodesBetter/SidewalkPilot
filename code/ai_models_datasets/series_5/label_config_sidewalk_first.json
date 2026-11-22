@@ -1,0 +1,27 @@
+{
+  "version": "grounded-sam2-development-sidewalk-first-v19",
+  "diagnostic_class_ids": [1],
+  "detector": "IDEA-Research/grounding-dino-base",
+  "detector_revision": "12bdfa3120f3e7ec7b434d90674b3396eccf88eb",
+  "segmenter": "facebook/sam2.1-hiera-large",
+  "segmenter_revision": "665f8e2ad61cf5f53d65644ff27c8ee525124610",
+  "box_threshold": 0.25,
+  "text_threshold": 0.20,
+  "sam_quality_threshold": 0.70,
+  "class_conflict_margin": 0.05,
+  "box_nms_iou": 0.75,
+  "max_detections": 100,
+  "sam_box_batch": 8,
+  "precision": "float32",
+  "class_assignment": "prompt_token_scores",
+  "prompt_groups": [[1]],
+  "prompt_overrides": {"1": ["sidewalk"]},
+  "overlap_mode": "confidence",
+  "image_space": "original RGB pixels; no crop, undistortion, or geometric calibration applied",
+  "overlap_policy": "Only sidewalk candidates are generated and unioned. No other class can overwrite them. Unassigned pixels remain ignore 255, not verified negatives.",
+  "development_note": "Fixed single-concept diagnostic, not an approved full-dataset recipe. Unlike v9, this changes the detector input as well as composition. Unlike v2, it excludes synonyms/curb-ramp prompts and never composes twelve classes. No corrected pixels, per-image points, filenames, or reference-selected candidates enter inference. Shadow, driveway, and actual obstacle errors still require review.",
+  "sources": [
+    "https://github.com/IDEA-Research/Grounded-SAM-2",
+    "https://github.com/IDEA-Research/GroundingDINO"
+  ]
+}

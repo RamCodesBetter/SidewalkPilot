@@ -1,0 +1,27 @@
+{
+  "version": "grounded-sam2-diagnostic-v6-simple-surface-prompts",
+  "detector": "IDEA-Research/grounding-dino-base",
+  "detector_revision": "12bdfa3120f3e7ec7b434d90674b3396eccf88eb",
+  "segmenter": "facebook/sam2.1-hiera-large",
+  "segmenter_revision": "665f8e2ad61cf5f53d65644ff27c8ee525124610",
+  "box_threshold": 0.25,
+  "text_threshold": 0.20,
+  "sam_quality_threshold": 0.70,
+  "class_conflict_margin": 0.05,
+  "box_nms_iou": 0.75,
+  "max_detections": 100,
+  "sam_box_batch": 8,
+  "precision": "float32",
+  "class_assignment": "prompt_token_scores",
+  "prompt_groups": [[0, 1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11]],
+  "prompt_overrides": {
+    "1": ["sidewalk"],
+    "2": ["road", "driveway"],
+    "3": ["grass", "soil", "gravel"],
+    "10": ["curb", "stairs", "ledge"]
+  },
+  "overlap_mode": "confidence",
+  "image_space": "original RGB pixels; no crop, undistortion, or geometric calibration applied",
+  "development_note": "Controlled development experiment on 20 previously reviewed images. Short surface nouns remove material adjectives and curb-ramp alternatives; unchanged class IDs and confidence composition. No geometric sidewalk prior or human correction applied. Not accuracy validation.",
+  "sources": ["https://github.com/IDEA-Research/GroundingDINO"]
+}

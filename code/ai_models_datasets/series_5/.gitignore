@@ -1,0 +1,27 @@
+# Generated review datasets stay local; source and reusable viewer code are tracked.
+/5.a-test/
+/5.a-vs-5.b/
+/5.c-architecture/
+/before-after/
+/correction-results/
+/failure-analysis/
+/images/
+/implementation-audit/
+/masks/
+/method-comparison/
+/notebook/
+/overlays/
+/paired-review/
+/random-30-comparison/
+/records/
+/reference-comparison/
+/targeted-corrections/
+/CORRECTIONS.txt
+/READ-ME.txt
+/correction-selection.json
+/integrity-check.json
+/manifest.json
+/package.json
+/selection.json
+/summary.json
+/visual-qa.json

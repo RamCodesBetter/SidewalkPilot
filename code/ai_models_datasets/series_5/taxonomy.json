@@ -1,0 +1,31 @@
+{
+  "version": "sidewalkpilot-s5-12-v3",
+  "status": "student-selected pilot taxonomy; automatic masks require review",
+  "ignore_id": 255,
+  "classes": [
+    {"id": 0, "name": "Background/other", "color": [112, 120, 128], "prompts": ["sky", "building"], "layer": 0},
+    {"id": 1, "name": "Sidewalk/path", "color": [38, 190, 148], "prompts": ["sidewalk", "footpath", "curb ramp"], "layer": 1},
+    {"id": 2, "name": "Road/driveway", "color": [215, 106, 105], "prompts": ["road", "driveway", "parking lot"], "layer": 1},
+    {"id": 3, "name": "Ground beside path", "color": [183, 195, 56], "prompts": ["grass", "soil", "mulch", "gravel"], "layer": 1},
+    {"id": 4, "name": "Vegetation obstacle", "color": [33, 113, 55], "prompts": ["tree", "bush", "hedge"], "layer": 2},
+    {"id": 5, "name": "Person/mobility equipment", "color": [255, 151, 56], "prompts": ["person", "wheelchair", "walker", "stroller"], "layer": 2},
+    {"id": 6, "name": "Animal", "color": [224, 85, 180], "prompts": ["dog", "cat", "bird", "animal"], "layer": 2},
+    {"id": 7, "name": "Bicycle/scooter", "color": [50, 170, 230], "prompts": ["bicycle", "scooter", "skateboard"], "layer": 2},
+    {"id": 8, "name": "Vehicle", "color": [58, 84, 213], "prompts": ["car", "truck", "bus", "motorcycle"], "layer": 2},
+    {"id": 9, "name": "Fixed object/furniture", "color": [174, 116, 225], "prompts": ["pole", "sign", "mailbox", "fire hydrant", "bench", "trash bin", "utility box"], "layer": 2},
+    {"id": 10, "name": "Raised curb/drop-off", "color": [247, 206, 65], "prompts": ["raised curb", "stairs", "ledge"], "layer": 2},
+    {"id": 11, "name": "Barrier/debris", "color": [232, 58, 73], "prompts": ["traffic cone", "barricade", "fence", "debris", "fallen branch", "pothole"], "layer": 2}
+  ],
+  "prompt_groups": [[0, 1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11]],
+  "annotation_rules": [
+    "Unmatched or ambiguous pixels are 255, not background. Background needs positive evidence or manual review.",
+    "Label visible pixels, not imagined ground beneath objects. These labels do not grant traversability.",
+    "Cast shadows and their lighting boundaries retain the underlying visible surface class. Visible sidewalk under a shadow is class 1, not a person or ignore merely because it is dark. Actual occluding people or objects keep their own classes; visually indeterminate surfaces remain 255.",
+    "Ordinary sidewalk cracks, slab seams, expansion joints, and surface stains remain class 1. Do not cut out a joint merely because it is dark or green-tinted. Separately visible objects or protruding vegetation retain their own classes; ambiguous pixels remain 255. This does not reclassify actual holes, raised curb faces, or missing pavement as sidewalk.",
+    "For human review, a visibly continuous sidewalk corridor across a driveway stays class 1; the vehicle access surface outside it is class 2. If the boundary cannot be established visually, mark 255. Automatic prompts do not enforce this contextual rule.",
+    "Attached vegetation is class 4; a detached branch lying on the path is class 11. Unclear cases are 255.",
+    "A curb ramp is class 1; a raised curb face, step, or visible ledge is class 10. Do not infer invisible drop-offs.",
+    "Thin edges, holes, distant objects, driveway crossings, and broad surfaces need particular review. Failure to detect them is not evidence of absence.",
+    "Original 16-class fine annotations do not yet exist. This direct 12-class run cannot recover merged distinctions without new labeling."
+  ]
+}

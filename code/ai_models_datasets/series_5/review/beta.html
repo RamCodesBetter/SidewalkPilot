@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SidewalkPilot | 5.A / 5.B</title><link rel="stylesheet" href="comparison.css"><link rel="stylesheet" href="beta.css"></head>
+<body class="loading">
+<header><div><h1>SidewalkPilot <span>/ 5.A + 5.B</span></h1><p id="scope"></p></div>
+<div class="actions"><span id="progress"></span>
+<button class="icon" id="import" aria-label="Import review" title="Import review"><i data-lucide="upload"></i></button>
+<button class="icon primary" id="export" aria-label="Export review" title="Export review"><i data-lucide="download"></i></button>
+<button class="icon" id="clear" aria-label="Clear this review" title="Clear this review"><i data-lucide="trash-2"></i></button></div></header>
+<input type="file" id="import-file" accept="application/json" hidden>
+<main>
+<div class="toolbar">
+<div class="actions"><button class="icon" id="previous" aria-label="Previous image" title="Previous image (Left)"><i data-lucide="chevron-left"></i></button>
+<input id="position" type="number" min="1" value="1" aria-label="Image number"><span id="total"></span>
+<button class="icon" id="next" aria-label="Next image" title="Next image (Enter)"><i data-lucide="chevron-right"></i></button></div>
+<fieldset class="segments modes"><legend class="sr-only">Mask view</legend>
+<label><input type="radio" name="mode" value="overlay" checked>Overlay</label>
+<label><input type="radio" name="mode" value="mask">Mask</label>
+<label><input type="radio" name="mode" value="source">Original</label></fieldset>
+<label class="slider">Opacity <input type="range" id="opacity" min="0" max="100" value="40"><output id="opacity-value">40%</output></label>
+<div class="actions"><button class="icon" id="zoom-out" aria-label="Zoom out" title="Zoom out"><i data-lucide="zoom-out"></i></button>
+<output id="zoom-value">100%</output><button class="icon" id="zoom-in" aria-label="Zoom in" title="Zoom in"><i data-lucide="zoom-in"></i></button>
+<button class="icon" id="fit" aria-label="Fit image" title="Fit image"><i data-lucide="maximize"></i></button></div>
+<label class="toggle"><input id="reference" type="checkbox">Reference</label>
+<fieldset class="segments"><legend class="sr-only">Layout</legend>
+<button class="icon" data-layout="columns" aria-label="Side by side" title="Side by side" aria-pressed="true"><i data-lucide="columns-3"></i></button>
+<button class="icon" data-layout="stack" aria-label="Stacked" title="Stacked" aria-pressed="false"><i data-lucide="rows-3"></i></button></fieldset>
+</div>
+<div class="meta"><span id="filename"></span><div class="legend"><span class="swatch sidewalk"></span>Sidewalk <span class="swatch background"></span>Background <span id="unknown-legend"><span class="swatch uncertain"></span> Unknown</span></div></div>
+<div id="message" role="status" aria-live="polite"></div>
+<div id="panes" class="panes" data-layout="columns"></div>
+<p id="metric-scope"></p>
+<div class="review-bar"><div class="actions"><fieldset class="segments modes"><legend class="sr-only">Review model</legend>
+<label title="Review 5.A (A)"><input type="radio" name="target" value="a" checked>5.A</label>
+<label title="Review 5.B (B)"><input type="radio" name="target" value="b">5.B</label></fieldset><strong id="rating"></strong></div>
+<div class="actions">
+<button class="decision" data-decision="correct" title="Correct (1)"><i data-lucide="check"></i>Correct</button>
+<button class="decision" data-decision="needs_correction" title="Needs correction (2)"><i data-lucide="flag"></i>Needs correction</button>
+<button class="decision" data-decision="uncertain" title="Uncertain (3)"><i data-lucide="circle-help"></i>Uncertain</button>
+<button class="icon" data-decision="unreviewed" title="Clear current rating" aria-label="Clear current rating"><i data-lucide="rotate-ccw"></i></button></div>
+<label class="toggle"><input id="auto-advance" type="checkbox" checked>Auto-advance</label></div>
+<label class="notes-label"><span id="notes-title">5.A notes</span><textarea id="notes" rows="2" maxlength="20000"></textarea></label>
+<footer><span id="saved"></span><span id="provenance"></span></footer>
+</main>
+<dialog id="correction-dialog" aria-labelledby="correction-title"><div class="dialog-heading"><h2 id="correction-title">Correction level</h2>
+<button class="icon" id="close-correction" title="Cancel (Esc)" aria-label="Cancel"><i data-lucide="x"></i></button></div>
+<div class="level-options"><button data-level="1" title="Minor corrections (1)">1 - Minor</button>
+<button data-level="2" title="Moderate corrections (2)">2 - Moderate</button><button data-level="3" title="Major corrections (3)">3 - Major</button></div></dialog>
+<script src="data.js"></script><script src="lucide.min.js"></script><script src="model_metrics.js"></script><script src="beta.js"></script>
+</body></html>
