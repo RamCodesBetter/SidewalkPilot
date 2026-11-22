@@ -5,3 +5,4 @@
 - Use lowercase folder names and lowercase trainer filenames such as `series_5_a_sidewalkpilot_trainer.py`, following the Series 3/4 convention. Preserve model identifiers and data filename case.
 - Keep published 5A/5B `.pth` and `.onnx` exports in `code/ai_models`; exclude model weights and generated review/dataset assets from Git commits.
 - The Linux `/home/rsabavat/sidewalkpilot-labels` directory remains the separate training and review history store.
+- For every small completed change: create a focused commit, push it to `origin/series-5`, then update the Mac checkout and its local artifacts. Follow this order automatically; do not wait for another reminder.
