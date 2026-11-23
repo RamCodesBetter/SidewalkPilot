@@ -20,23 +20,31 @@ import series_5_b_sidewalkpilot_trainer as previous
 import segmentation_losses
 import checkpoint_names
 import boundary_metrics
+import campaign10k
 
 DEFAULTS = read_json(workspace.CONFIGS / "series_5_c_config.json")
 
 
 def load_partition(dataset, split):
     manifest = read_json(dataset / "manifest.json")
+    if manifest.get("schema") == "sidewalkpilot-campaign10k-v1":
+        return campaign10k.load(dataset, split)
     if manifest.get("schema") == "sidewalkpilot-mixed-pseudo-dataset-v1":
         return load_mixed_partition(dataset, split)
     return base.load_partition(dataset, split)
 
 
-def run_training(args):
+def run_training(args, variant="5.C"):
     if args.precision != "fp32":
         raise ValueError("5.C is FP32 only")
     # A setup smoke check may use old development labels; the full 5.C run may not.
     manifest = read_json(args.dataset / "manifest.json")
-    if not args.smoke and (manifest.get("schema") != "sidewalkpilot-mixed-pseudo-dataset-v1"
+    campaign = manifest.get("schema") == "sidewalkpilot-campaign10k-v1"
+    if variant == "5.E" and not campaign:
+        raise ValueError("5.E requires the shared campaign-only split")
+    if campaign and args.loss != "focal":
+        raise ValueError("Campaign-only comparison uses focal loss; no reviewed Dice targets")
+    if not args.smoke and (not campaign and manifest.get("schema") != "sidewalkpilot-mixed-pseudo-dataset-v1"
                            or manifest.get("accepted_pseudo", 0) < 10000):
         raise ValueError("Full 5.C training needs a frozen 10,000-label pseudo dataset; current labels are not ready")
     if args.loss not in ("focal", "focal-dice"):
@@ -47,8 +55,8 @@ def run_training(args):
         gamma=args.focal_gamma, background_weight=args.background_weight,
         sidewalk_weight=args.sidewalk_weight, class_weight_cap=args.class_weight_cap,
         dice_weight=args.dice_weight if args.loss == "focal-dice" else 0.0)
-    args.model_name = DEFAULTS["model_name"]
-    args.experiment = DEFAULTS["experiment"]
+    args.model_name = variant
+    args.experiment = DEFAULTS["experiment"].replace("5.C",variant)
     args.training_policy = {
         "version": "5.C-convnext-unet-fp32-focal-v2",
         "loss": args.loss, "focal_gamma": args.focal_gamma,
@@ -72,7 +80,12 @@ def run_training(args):
         "boundary_metrics_sha256": sha256(Path(boundary_metrics.__file__)),
         "checkpoint_naming_sha256": sha256(Path(checkpoint_names.__file__)),
     }
-    result = base.train(args, partition_loader=load_partition, sampler_class=previous.ScreenedBatchSampler,
+    if campaign:
+        args.training_policy.update(campaign_only=True, human_references_per_batch=0,
+            encoder_frozen_epochs=2 if variant=="5.E" else 0,
+            scope="8000/1000/1000; validation and test quantify agreement with original SAM 3 pseudo-labels.",
+            sampler_sha256=sha256(Path(campaign10k.__file__)))
+    result = base.train(args, partition_loader=load_partition, sampler_class=campaign10k.CampaignSampler if campaign else previous.ScreenedBatchSampler,
                         loss_function=loss_function, model_definition=model_definition)
     if not args.smoke and result["status"] == "complete":
         result["checkpoint_selection"] = checkpoint_names.publish_completed_run(args.output, args.model_name)
@@ -110,10 +123,10 @@ def parser():
     return result
 
 
-def main():
+def main(variant="5.C"):
     args = parser().parse_args()
     if args.command == "train":
-        result = run_training(args)
+        result = run_training(args,variant)
     elif args.command == "evaluate":
         result = base.evaluate_checkpoint(args, model_definition=model_definition, partition_loader=load_partition)
     else:

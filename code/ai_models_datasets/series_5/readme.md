@@ -17,6 +17,18 @@ If the eligible pool runs out first, the status reports the shortfall without re
 
 ## Checkpoint Names
 
+The C/E campaign-only pair uses `tools/datasets/campaign10k.py` and the
+original 10,000 candidate JPEG/PNG pairs only. The superseded 12,809-image
+proposal is not used. The common split is exactly 8,000/1,000/1,000;
+adjacent frames (same run, <=0.5 s) and perceptual matches (64-bit DCT hash
+distance <=4) stay together transitively. The 30 inspected frames stay in
+training. Every training ID occurs once per epoch. Both runs use the same
+FP32 initialization, weighted focal objective and sampler seed. C updates
+the encoder immediately; E keeps it frozen and in eval mode for the first
+two epochs, then trains it with the decoder. Metrics on this cohort measure
+agreement with SAM 3 pseudo-labels, not independently measured mask accuracy.
+Neither trainer evaluates the test partition during training.
+
 Completed non-smoke C runs publish these names inside their run directory:
 
 | Name | Meaning |

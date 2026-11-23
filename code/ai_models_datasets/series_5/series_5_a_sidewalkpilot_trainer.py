@@ -251,7 +251,7 @@ def save_preview(source, prediction, reference, output):
 
 
 @torch.inference_mode()
-def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, limit=0, *, boundaries=False):
+def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, limit=0, *, boundaries=False, campaign_only=False):
     model.eval()
     data = SidewalkDataset(dataset, rows, size, original_targets=True)
     counts = torch.zeros((2, 2), dtype=torch.int64)
@@ -268,7 +268,7 @@ def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, li
             logits = model(image.unsqueeze(0).to(device))["out"]
         logits = F.interpolate(logits.float(), size=target.shape, mode="bilinear", align_corners=False)
         prediction = logits.argmax(1)[0].cpu()
-        if strong:
+        if strong or (campaign_only and rows[index]["supervision"] == "pseudo-binary"):
             current = confusion_counts(prediction, target)
             counts += current
             reference_images += 1
@@ -294,7 +294,8 @@ def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, li
                            "warning": "Positive-only masks cannot measure false positives, IoU, precision, or F1."},
         "per_binary_reference_image": per_image,
         "evaluation_resolution": "Original reference resolution; bilinear logits resize before argmax; ignored pixels excluded.",
-        "limitations": "Development labels, not independent test ground truth. Only binary references select checkpoints.",
+        "limitations": ("Agreement with unverified SAM 3 pseudo-labels, not human ground truth." if campaign_only else
+                        "Development labels, not independent test ground truth. Only binary references select checkpoints."),
     }
 
 
@@ -474,11 +475,18 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
             torch.manual_seed(args.seed + epoch)
             sampler.epoch = epoch
             train_mode(model)
+            policy = cfg.get("training_policy", {})
+            if policy.get("campaign_only"):
+                frozen = epoch < policy["encoder_frozen_epochs"]
+                model.backbone.requires_grad_(not frozen)
+                model.backbone.train(not frozen)
             totals, steps, updates = np.zeros(3), 0, 0
             component_totals = Counter()
             for images, targets, strong, _ in loader:
                 images, targets, strong = images.to(device), targets.to(device), strong.to(device)
-                if not (strong & (targets != 255).flatten(1).any(1)).any():
+                if policy.get("campaign_only") and not (targets != 255).any():
+                    raise ValueError("Campaign batch has no supervised pixels")
+                if not policy.get("campaign_only") and not (strong & (targets != 255).flatten(1).any(1)).any():
                     raise ValueError("Batch has no usable binary reference pixels after resize")
                 optimizer.zero_grad(set_to_none=True)
                 with autocast(device, precision):
@@ -516,7 +524,8 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
                 raise RuntimeError("Insufficient successful optimizer updates; not saving a misleading checkpoint")
             report = evaluate(model, dataset, validation_rows, size, device, precision,
                               preview_dir=output / f"validation-epoch-{epoch + 1:03d}", limit=2 if args.smoke else 0,
-                              **({"boundaries": True} if smart_selection else {}))
+                              **({"boundaries": True} if smart_selection else {}),
+                              **({"campaign_only": True} if policy.get("campaign_only") else {}))
             iou = report["binary_reference"]["sidewalk_iou"]
             if iou is None or not math.isfinite(iou):
                 raise RuntimeError("Validation has no finite sidewalk IoU")
@@ -587,6 +596,7 @@ def evaluate_checkpoint(args, *, model_definition=None, partition_loader=None):
     cfg = state["config"]
     result = evaluate(model.to(device), args.dataset.resolve(), partitions[args.partition], (cfg["width"], cfg["height"]),
                       device, precision, preview_dir=args.output / "previews",
+                      campaign_only=cfg.get("training_policy", {}).get("campaign_only", False),
                       boundaries=cfg.get("training_policy", {}).get("smart_selection") == checkpoint_names.SMART_RULE)
     result.update(partition=args.partition, checkpoint_sha256=sha256(args.checkpoint), precision=precision,
                   data_identity=identity, smoke_only=cfg["smoke_only"])
