@@ -2,6 +2,19 @@
 
 Keep work on `series-5`. Historical A/B artifacts retain their original recipes.
 
+## Single-sidewalk labeling campaign
+
+`tools/labeling/run_single_corridor_campaign.py` screens unique training-eligible frames in
+128-image loops. A pass requires two matching confident, near-camera sidewalk proposals
+and a final target with one connected sidewalk region; temporal drafts never count.
+Passed masks are automatic, not verified semantic references. Training and the final
+holdout are not touched. Each completed loop is committed before the next starts.
+The output includes `STATUS.txt` (one line per loop) and `progress.json` (latest counts).
+Re-run with the same inputs/output to resume; policy or source-identity mismatches stop it.
+With `--mac`, the status files mirror to `reviews/single-sidewalk/pass-10000/` on the Mac.
+Only at 10,000 passes is a 30-image variety review built there under `review30/`.
+If the eligible pool runs out first, the status reports the shortfall without relaxing gates.
+
 ## Checkpoint Names
 
 Completed non-smoke C runs publish these names inside their run directory:
