@@ -1,0 +1,512 @@
+# SidewalkPilot Series 5: 20 Major Decisions
+
+## November 21, 2026 Architecture and Precision Clarification
+
+The student reconfirmed ConvNeXt-Tiny with a modest U-Net-style decoder and
+explicit skip connections as the primary model. The next beta, 5.C, uses FP32
+for model parameters, forward computation, gradients, optimizer tensors, and
+PyTorch evaluation. AMP, FP16, BF16, and TF32 are disabled for this model.
+This supersedes Decision 9's mixed-precision training choice and defers Decision
+10's FP16/INT8 deployment optimization ladder unless the student requests it
+again. FP32 ONNX export and Jetson runtime checks are still required; an engine
+or field-ready model is not claimed by this clarification.
+
+Existing 5.A and 5.B artifacts remain LR-ASPP/MobileNetV3-Large binary baselines,
+trained with BF16 autocast and saved in FP32. They are not the locked primary
+ConvNeXt/U-Net architecture and are not retroactively renamed or converted.
+The MobileNetV3 architecture remains a lightweight comparator candidate. A fair
+comparison still requires matching data, resolution, loss, and evaluation.
+
+The 5.C implementation currently predicts sidewalk/background because the current
+labeling work is binary. It does not establish that the planned twelve-class
+taxonomy or complete September training/control recipe is implemented. The
+architecture has 28,855,298 parameters and passed a local FP32 setup smoke check;
+full training, deployment, and accuracy/latency qualification remain pending.
+
+## October 25, 2026 Amendment
+
+The student selected the proposed 12-class taxonomy and authorized starting its labeling
+pilot. This supersedes Decision 5's initial 16-class starting point. The current source
+pool has 81,237 images after the recorded restoration of 268 quarantined images, which
+supersedes Decision 3's 80,969-image count for new work only. Historical training counts
+and the original decision text below are preserved as history.
+
+The authoritative pilot class IDs, prompts, and annotation rules are now in
+`rc_car_code/code/ai_models_datasets/series_5/taxonomy.json`. The pilot uses Grounding DINO
+and SAM 2.1, with separate indexed PNG masks and source hashes. No original 16-class
+masks have been generated; splitting the merged categories would require new labeling.
+The 200-image pilot must be reviewed before the complete source pool is labeled. This
+amendment is a local engineering record, not an edit to submitted fair forms or a claim
+of completed human review.
+
+Last revised: September 12, 2026 (mask review and research-trial clarification).
+This is an AI-assisted local planning register, not the student's submitted research
+plan or evidence that the proposed work has been completed. September 1 dates below
+are the original scheduling targets, not completion claims.
+
+This register replaces the former 100-decision version. All previous lock states are
+discarded. The project will resolve exactly 20 system-level decisions; implementation
+details inside a chosen design are engineering tasks, not additional decision rounds.
+
+Each decision should eventually be marked `LOCKED`, with the chosen option and any
+explicit modification recorded in the same entry.
+
+## 1. Project Scope and September 1 Boundary [LOCKED: A]
+
+**Option A:** Complete the Series 5 navigation stack first, target September 1, 2026,
+then begin a separately versioned PROWAG inspection track on September 1. Series 5 owns
+semantic perception, free-space planning, steering, and normal speed control.
+
+**Option B:** Build navigation and PROWAG defect inspection together as one first system.
+
+**Option C:** Build navigation only and remove PROWAG inspection from the roadmap.
+
+**Decision: A.** Complete the Series 5 navigation stack first, target September 1, 2026,
+and begin a separately versioned PROWAG inspection track on September 1. Navigation and
+inspection retain different labels, outputs, metrics, and failure handling. September 1
+controls the work transition; Decision 20 defines the evidence required before calling
+the navigation stack promoted.
+
+The trained Series 5 model outputs a semantic segmentation mask. Downstream planning
+and control code converts perception into a path and steering and throttle commands;
+this does not add learned steering or throttle output heads.
+
+The September 12 research plan retains one final manual survey and three final
+SidewalkPilot survey runs on the same planned 1.06-mile route. Accessibility measurements
+are to be logged during each survey run, not in a separate drive afterward. Development
+and navigation checks remain separate from the final comparison and have no fixed run
+count. Normal Series 5 outputs remain steering and throttle; existing manual braking,
+LiDAR AEB, and failure-stop behavior are not removed.
+
+## 2. Series Definition and Relationship to Series 3/4 [LOCKED: A]
+
+**Option A:** Treat a Series 5 release as one reproducible end-to-end configuration:
+segmentation model, taxonomy, preprocessing, calibration, policy map, planner,
+controller, speed policy, and runtime protocol. Continue Series 3 and 4 experiments,
+while preserving the existing v3.4 checkpoint unchanged as the field baseline and
+rollback.
+
+**Option B:** Use “v5” only for the segmentation model and replace v3.4 when that model
+first runs.
+
+**Option C:** Freeze Series 3 and 4 completely and devote all development to Series 5.
+
+**Decision: A, with model naming modified.** A Series 5 release identifies the complete
+reproducible stack. The first segmentation model is named `SidewalkPilot-v5.0`, not
+`v5.0a`; a materially changed retraining advances to `v5.1` rather than adding a letter
+suffix. Taxonomy, calibration, planner, controller, speed policy, and runtime protocol
+retain separate component identifiers. Series 3, Series 4, and Series 5 development may
+continue, while the existing v3.4 checkpoint remains unchanged as the baseline and
+rollback.
+
+## 3. Shared Images and Separate Annotation Layers [LOCKED: A, 80,969 ACTIVE IMAGES]
+
+**Option A:** Keep one immutable source-image pool. Series 3/4 owns steering/throttle
+labels; Series 5 owns indexed PNG masks, taxonomy, splits, and provenance. Link every
+annotation to its source image by SHA-256. Audit the documented 81,237-image historical
+snapshot against the current 80,969-image local folder and record the 268-image
+difference. Initial v5.0 uses existing images; new captures occur only after measured
+failures or support gaps.
+
+**Option B:** Copy every JPEG into an independent Series 5 dataset and maintain two image
+collections.
+
+**Option C:** Ignore the Series 3/4 images and collect a new segmentation-only dataset.
+
+**Decision: A, with the active pool fixed at 80,969 images.** The current 80,969-image
+folder becomes the canonical complete source pool for all new Series 3, Series 4, and
+Series 5 training. Series 3/4 owns steering and throttle annotations; Series 5 owns
+indexed PNG masks, taxonomy, split assignments, and semantic-label provenance. The
+source JPEGs are shared and are not duplicated. Existing checkpoints retain the dataset
+count recorded by their original run; historical provenance is not retroactively changed
+if an older model actually trained on the former 81,237-image snapshot.
+
+## 4. Dataset Split and Independent Evidence [LOCKED: A]
+
+**Option A:** Use an 80/10/10 similarity-group split. Automatically group adjacent or
+visually near-identical photos, keep each group in one split, assign groups with a fixed
+seed while balancing semantic coverage, shuffle training normally, and freeze validation
+and test manifests. Follow offline testing with separate outdoor testing.
+
+**Option B:** Use an 85/10/5 similarity-group split, giving approximately 4,000 additional
+images to training and approximately 4,000 fewer to test.
+
+**Option C:** Randomly split individual photos, accepting that near-identical frames can
+cross partitions.
+
+**Decision: A.** Use an 80% training, 10% validation, and 10% test similarity-group split.
+Establish the split before training. Automatically group adjacent or visually
+near-identical images, keep each group in one
+partition, assign groups with a recorded seed while balancing semantic coverage, and
+freeze the validation and test manifests. Complete runs are not split units. Training is
+shuffled normally each epoch after sequence-aware sampling.
+
+Keeping a group together means that near-duplicate frames do not cross training,
+validation, and test boundaries. It does not mean that all images of the same semantic
+class must be placed in one partition.
+
+## 5. Semantic Taxonomy and Driving Policy [LOCKED: C, 16 TO 14 TO 12 TO 10]
+
+**Option A:** Lock a detailed 16-class taxonomy immediately and train every class even if
+some have weak support.
+
+**Option B:** Begin with a smaller 10-12-class taxonomy by merging most obstacles and
+ground materials.
+
+**Option C:** Define a 16-class fine taxonomy plus explicit 14- and 12-class merge maps.
+Use the labeling pilot to retain only supported distinctions. Reserve pixel value 255 for
+ignore/uncertain regions. Keep semantic identity separate from a versioned driving-policy
+table containing traversability, cost, inflation, and speed behavior.
+
+**Decision: C with iterative two-class reduction.** Begin with the 16-class fine taxonomy
+and reserve pixel value 255 for ignore/uncertain regions. After the labeling pilot,
+measure image support, pixel support, confusion, boundary consistency, and automatic-label
+quality. If 16 classes are not supported, apply a predefined evidence-based merge to 14,
+then repeat at 12 and 10 if necessary. Preserve the original fine labels even when the
+deployed model uses merged IDs. Semantic identity remains separate from the later
+driving-policy table.
+
+## 6. Automatic Labeling and Human Quality Control [LOCKED: MODIFIED A]
+
+**Option A (revised September 12):** Generate segmentation labels for the current Series
+3/4 images with Grounded SAM 2, review an initial 200 masks, and review 200 additional
+masks if the first sample does not meet the selected threshold. Preserve indexed PNG
+masks, review records, and label provenance.
+
+**Option B:** Accept all automatically generated masks as ground truth with only visual
+spot checks.
+
+**Option C:** Draw and correct every mask manually.
+
+**Decision: modified A with 200 plus 200 review, September 12.** Generate segmentation
+labels for each image in the current Series 3/4 dataset using Grounded SAM 2. Review
+200 generated masks and correct identified errors. If at least 80% (160 of 200) were
+correctly labeled, do not trigger a dataset-wide relabel. Otherwise review 200 additional
+masks, bringing the review total to 400. If fewer than 75% (fewer than 150) of those
+additional 200 masks were correctly labeled, relabel the dataset using Grounded SAM 2.
+Compute the review fractions before applying corrections and retain the corrected masks
+and review provenance. This replaces the previous 200/400/400 review schedule.
+
+These are student-selected sample-review thresholds, not measured segmentation accuracy
+or proof that every unreviewed mask is correct. The 75% second-sample threshold is less
+strict than the initial 80% threshold. Sample selection, the definition of a correctly
+labeled mask, and the review after a relabel remain to be specified before execution.
+Automatically generated masks are reference labels; calling them ground truth requires
+documenting their verification. IoU, precision, recall, and F1 evaluate segmentation
+predictions against those references, not raw IMU or encoder readings.
+
+## 7. Camera Calibration, Geometry, and Input Resolution [LOCKED: A]
+
+**Option A:** Retain the current 1280x720 Camera Module 3 Wide runtime view, calibrate that
+exact mounted pipeline, undistort training and runtime frames consistently, project
+ground-plane points into metric vehicle coordinates, and benchmark 320x180 against
+512x288 model input. Use RGB and pretrained-model normalization when required by the
+encoder.
+
+**Option B:** Use four manually selected image points and a fixed homography without full
+camera calibration.
+
+**Option C:** Plan directly in image pixels and avoid metric projection.
+
+**Decision: A.** Retain the current uncropped 1280x720 Camera Module 3 Wide runtime view
+and calibrate the exact fixed, mounted pipeline. Apply consistent undistortion during
+label preparation and runtime, measure camera position relative to the vehicle reference,
+and project valid ground-plane points into metric vehicle coordinates. Benchmark 320x180
+against 512x288 and select the deployed model resolution from critical-class and boundary
+accuracy, small-obstacle performance, Jetson latency, memory use, and path-update rate.
+
+## 8. Segmentation Architecture [LOCKED: A]
+
+**Option A:** Use an ImageNet-pretrained ConvNeXt-Tiny encoder with a modest U-Net-style
+decoder, explicit skip connections, and logits upsampled to model-input resolution. Train
+one controlled lightweight encoder comparator under the same data and loss.
+
+**Option B:** Use only a lightweight MobileNet-style encoder to minimize latency.
+
+**Option C:** build a large custom encoder-decoder from scratch.
+
+**Decision: A.** Use an ImageNet-pretrained ConvNeXt-Tiny encoder with a modest U-Net-style
+decoder and explicit skip-feature fusion as the primary SidewalkPilot-v5.0 architecture.
+Upsample logits to the model-input resolution. Train one MobileNetV3-based comparator
+under the same images, masks, split, resolution, loss, augmentation, and evaluation
+contract so the larger architecture must demonstrate useful gains rather than receiving
+automatic preference.
+
+## 9. Training Recipe and Checkpoint Selection [LOCKED: A]
+
+**Option A:** Use AdamW, pretrained-encoder warmup followed by lower-rate unfreezing,
+cosine decay with warmup, mixed-precision training with finite-gradient checks,
+sequence-aware sampling followed by normal batch shuffling, capped class weights, and
+restrained geometry-consistent augmentation. Compare weighted focal loss against focal
+plus Dice. Select checkpoints using a frozen safety-aware score rather than pixel
+accuracy alone.
+
+**Option B:** Copy Series 3 hyperparameters, batch size, augmentation, and loss directly.
+
+**Option C:** Run a broad optimizer/loss/architecture sweep before establishing a
+baseline.
+
+**Decision: A.** Use AdamW with pretrained-encoder warmup, lower-rate encoder unfreezing,
+cosine decay with warmup, mixed-precision training with finite-loss and finite-gradient
+checks, sequence-aware sampling followed by normal batch shuffling, capped class weights,
+and restrained image/mask-consistent augmentation. Establish weighted focal loss as the
+baseline and retain focal plus Dice only if frozen validation evidence improves. Select
+checkpoints with a safety-aware score covering critical-class recall, macro IoU, boundary
+quality, false-drivable error, and planner validity rather than pixel accuracy alone.
+
+## 10. ONNX Export and Jetson Deployment Precision [LOCKED: MODIFIED A]
+
+**Option A:** Export one static ONNX model per tested resolution, establish FP32 ONNX
+Runtime CUDA as the reference, require and log the CUDA provider, then compare FP16 only
+after output-equivalence tests. Record model hashes and p50/p95/p99 timing.
+
+**Option B:** Deploy FP16 immediately without an FP32 reference.
+
+**Option C:** Begin with INT8 or TensorRT optimization before validating the model and
+runtime contract.
+
+**Decision: modified A with an Orin-supported optimization ladder.** Establish static
+FP32 ONNX Runtime CUDA as the correctness reference and reject CPU fallback. After
+PyTorch/ONNX equivalence, frozen offline evaluation, and Jetson timing pass, build and
+measure an FP16 TensorRT engine. Then evaluate calibrated or quantization-aware INT8
+TensorRT only if further improvement is needed. NVFP4 is excluded because Jetson Orin
+Nano uses an Ampere GPU and does not provide Blackwell FP4 Tensor Core acceleration.
+Every engine records its source-model hash, build environment, precision, calibration
+data when applicable, p50/p95/p99 timing, memory, semantic disagreement, planner
+disagreement, and field result before promotion.
+
+## 11. Mask Decoding, Confidence, and Temporal Stabilization [LOCKED: A]
+
+**Option A:** Convert logits to softmax probabilities, use argmax for the semantic mask,
+and measure uncertainty in the ground region and proposed driving corridor. Establish a
+single-frame baseline, then add only short confidence-aware stabilization that does not
+delay new obstacles.
+
+**Option B:** Use argmax IDs only and discard all probability information.
+
+**Option C:** heavily average masks over time for maximum visual smoothness.
+
+**Decision: A.** Compute per-pixel softmax probabilities and select classes with
+`argmax(softmax(logits))`. Retain probabilities to measure maximum confidence, top-two
+margin, and entropy in the ground region, sidewalk boundary, obstacle boundary, and
+proposed driving corridor. Establish a single-frame baseline. Add only short,
+confidence-aware stabilization if measured flicker requires it, and allow newly detected
+obstacles to affect the latest result immediately rather than waiting for an average.
+
+## 12. Semantic Mask to Metric Free Space [LOCKED: A]
+
+**Option A:** Apply the versioned class-policy table, select free space connected to the
+vehicle footprint, project valid ground-contact regions into a metric bird's-eye-view
+grid, inflate non-drivable space by half vehicle width plus a measured margin, and mark
+geometry invalid when safe ground contact cannot be estimated.
+
+**Option B:** Treat every sidewalk-class pixel as directly drivable and plan through the
+raw image mask.
+
+**Option C:** Train another network to output the final free-space path directly.
+
+**Decision: A.** Apply the versioned semantic-class policy to produce traversability,
+base cost, inflation, and speed effects. Select the free-space component connected to
+the vehicle's projected starting region so the planner cannot jump to a disconnected
+sidewalk or background region. Project only geometrically valid ground-plane pixels into
+a metric bird's-eye-view grid. For above-ground objects, estimate and project the
+ground-contact region, inflate it into occupied space, and mark the relevant geometry
+unknown when safe ground contact cannot be estimated. Inflate all non-drivable space by
+half the measured vehicle width plus a measured safety margin. Preserve free, occupied,
+and unknown state together with semantic cost and confidence for the planner.
+
+## 13. Path-Planning Algorithm [LOCKED: A]
+
+**Option A:** Begin with Euclidean clearance in metric bird's-eye view and choose a path
+that balances maximum clearance with continuity. Return invalid when minimum clearance,
+connected length, confidence, or reachability fails. Add dynamic programming only if
+frozen planner cases expose a weakness.
+
+**Option B:** Choose the maximum-clearance point independently in every image row.
+
+**Option C:** Implement A*, dynamic programming, or another global planner before creating
+the simpler baseline.
+
+**Decision: A.** Compute Euclidean obstacle clearance in the metric bird's-eye-view grid
+and select a forward path that rewards clearance and progress while penalizing lateral
+jumps, curvature, semantic risk, and uncertain space. Constrain candidate points to
+reachable connected free space. Return no valid path when minimum clearance, reachable
+length, confidence, or geometric validity fails. Establish and test this continuity-aware
+baseline first; introduce dynamic programming or another global search method only when
+frozen planner cases demonstrate a specific failure that the added method resolves.
+
+## 14. Steering Controller [LOCKED: A]
+
+**Option A:** Have the Jetson return compact metric waypoints and run Pure Pursuit on the
+Raspberry Pi 5. Begin with a fixed look-ahead at low fixed speed, then make look-ahead
+speed-adaptive. Output logical steering, apply the existing physical calibration once,
+and enforce steering and steering-rate limits before considering additional EMA.
+
+**Option B:** Convert image-center error directly into proportional steering.
+
+**Option C:** Begin with Stanley control or model-predictive control.
+
+**Decision: A.** The Jetson Orin Nano returns compact metric path waypoints and the
+Raspberry Pi 5 runs Pure Pursuit. Begin at low fixed speed with a fixed look-ahead,
+calculate path curvature from a selected metric waypoint, and convert curvature into a
+logical steering angle using the measured wheelbase. Apply the existing physical servo
+calibration exactly once, followed by steering-angle and steering-rate limits. Introduce
+speed-adaptive look-ahead only after the fixed configuration passes controlled tests;
+add further steering smoothing only when measured oscillation requires it.
+
+## 15. Normal Throttle and Speed Control [LOCKED: MODIFIED A]
+
+**Option A:** Begin field control at one low fixed speed, then compute deterministic target
+speed or throttle limits from path curvature, clearance, confidence, visibility, path
+validity, and Hall-sensor speed. Series 5 may accelerate, slow, or stop.
+
+**Option B:** Add a learned throttle head immediately.
+
+**Option C:** Keep one fixed throttle permanently.
+
+**Decision: modified A using normalized throttle rather than MPH.** Series 5 owns normal
+forward-throttle control using a normalized command from `0.0` to `1.0`, where `0.0`
+requests no propulsion and `1.0` means 100% of the configured safe maximum. Begin field
+testing at one low fixed command. After steering is stable, deterministically reduce or
+zero the command for high curvature, low clearance, low confidence, limited visible/reachable
+path, or an invalid path, and permit a bounded increase only on a clear, sufficiently
+straight, confident path. Hall-sensor measurements may verify and stabilize behavior,
+but the initial policy does not require an MPH target. Do not add a learned throttle head
+until a deliberately collected variable-speed dataset can support one. Zero throttle
+alone does not establish that the vehicle has stopped; existing safety-stop behavior
+remains separate from normal steering and throttle control.
+
+## 16. Jetson/Raspberry Pi Runtime Contract [LOCKED: MODIFIED A]
+
+**Option A:** Run segmentation, free-space generation, and planning on the Jetson Orin
+Nano. Return a compact versioned path response containing capture/result timestamps,
+model/calibration/policy/planner IDs, validity, confidence, clearance, waypoints, and
+latency. Let the Raspberry Pi 5 validate freshness/model match, run Pure Pursuit and speed
+policy, arbitrate safety, write hardware commands, and log runtime state. Preserve the
+Series 3/4 steering-response protocol.
+
+**Option B:** Let the Jetson directly write steering and motor commands.
+
+**Option C:** Send full-resolution probability tensors to the Raspberry Pi 5 for all
+planning.
+
+**Decision: modified A with a measured 50 Hz steering-path requirement.** Run Series 5
+segmentation, metric free-space generation, and planning on the Jetson Orin Nano. Return
+a compact, versioned path response containing capture and result timestamps,
+model/calibration/policy/planner identifiers, validity, confidence, minimum clearance,
+metric waypoints, and stage latency. The Raspberry Pi 5 validates response freshness and
+version match, runs Pure Pursuit and the normalized throttle policy, arbitrates manual
+takeover and LiDAR AEB, writes final hardware commands, and records runtime state. Preserve
+the Series 3/4 steering-response protocol. The camera-to-command path targets 50 fresh
+updates per second where the selected camera mode, model, and planner can sustain it;
+measure Ethernet round-trip and end-to-end p50/p95/p99 latency under the complete runtime
+rather than inferring latency from model throughput. Use latest-frame replacement instead
+of an accumulating request queue. Hardware-limited sensors and the dashboard retain their
+native or intentionally bounded rates and must expose freshness rather than replaying data
+to appear to run at 50 Hz.
+
+## 17. LiDAR AEB, Manual Takeover, and Failure Behavior [LOCKED: A]
+
+**Option A:** Series 5 owns normal steering and speed; LiDAR owns only independent AEB.
+The existing AEB toggle can fully disengage LiDAR intervention during controlled tests
+while measurements remain logged. Manual takeover always overrides autonomy. Stale,
+mismatched, invalid, or no-path results cause a controlled stop rather than reuse without
+limit.
+
+**Option B:** Remove LiDAR before Series 5 field testing.
+
+**Option C:** Fuse LiDAR into Series 5 steering and free-space planning.
+
+**Recommendation: A.** It tests camera-based normal avoidance while retaining a
+controllable independent emergency layer.
+
+**Decision: A.** Series 5 owns normal steering and normalized forward-throttle control.
+LiDAR does not steer or shape the normal Series 5 path; it remains an independent AEB
+layer that can slow or stop the car when enabled. The existing AEB toggle fully disables
+LiDAR intervention during deliberate, supervised model-only tests while LiDAR measurements
+and potential-intervention events continue to be recorded. Manual steering, throttle,
+braking, and quit commands always override autonomy. A stale response, model or protocol
+mismatch, invalid geometry, invalid path, insufficient path confidence, or missing Jetson
+response causes a controlled stop instead of reusing a path without limit. Re-enabling AEB
+restores LiDAR intervention immediately without changing the Series 5 model or planner.
+
+## 18. Offline Test Report and Metrics [LOCKED: A]
+
+**Option A:** Build a local Roboflow-style HTML report for the frozen test split with
+original image, gold mask, predicted mask, overlay, class filtering, confidence/error
+inspection, confusion matrix, per-class IoU/precision/recall, macro metrics, boundary
+quality, false-drivable error, planner output, and timing. Use training/validation for
+changes; if test inspection causes a change, define a new final test for that version.
+
+**Option B:** Report only aggregate segmentation metrics.
+
+**Option C:** Review only a rendered demonstration video.
+
+**Recommendation: A.** Aggregate scores and videos can both hide dangerous local errors;
+the report connects metrics to inspectable evidence.
+
+**Decision: A.** Build a local, Roboflow-style HTML report for the frozen test split.
+For each inspected sample, show the original image, gold mask, predicted mask, blended
+overlay, class-filtered views, confidence and uncertainty, error regions, the generated
+free-space representation, planner validity, proposed path, clearance, and stage timing.
+Include a confusion matrix; per-class IoU, precision, recall, and F1; macro metrics;
+boundary quality; false-drivable and false-obstacle errors; planner-validity rate; path
+clearance and continuity metrics; and p50/p95/p99 latency. Support filtering and sorting
+by class, confidence, error type, route/capture source, and planner outcome. Training and
+validation evidence guides development. If inspecting the frozen test set causes a model,
+policy, threshold, calibration, or planner change, record that use and create a new final
+test split for the changed release rather than repeatedly tuning against the old test set.
+
+## 19. Outdoor Validation Sequence [LOCKED: A]
+
+**Option A:** Progress through recorded replay, live shadow mode with no hardware control,
+stationary hardware tests, low-speed supervised staged obstacles, controlled AEB-on and
+AEB-off tests, and repeated full-route comparisons. Include direct sunlight and tree
+shadows from the beginning. Compare `v3.4 start -> candidate -> v3.4 end` to detect
+condition changes.
+
+**Option B:** Move directly from offline metrics to a full-route autonomous run.
+
+**Option C:** stop at shadow mode and call the system validated without physical control.
+
+**Recommendation: A.** Each stage adds one new source of risk and produces attributable
+evidence before the next stage.
+
+**Decision: A.** Validate Series 5 in ordered stages: frozen recorded replay; live camera
+and Jetson processing with no hardware control; stationary steering, throttle, freshness,
+fallback, and takeover checks; low-speed supervised driving with staged sidewalk edges,
+shadows, turns, and obstacles; controlled LiDAR AEB-on and AEB-off comparisons; and then
+repeated full-route trials. Include direct sunlight, tree shadows, ordinary turns, narrow
+segments, mailboxes, trash bins, and supervised pedestrian scenarios from the relevant
+stages onward. Advance only after the current stage's failures are understood and its
+safety checks pass. For route comparisons, run `v3.4 start -> v5.0 candidate -> v3.4 end`
+under the closest practical conditions and record interventions, causes, distance, time,
+path validity, latency, and AEB state so environmental changes are visible.
+
+## 20. Promotion Gate and PROWAG Transition [LOCKED: A]
+
+**Option A:** Promote Series 5 only after frozen perception/planner tests, measured runtime
+tail latency, no accepted stale paths, correct stops/fallbacks, repeated no-contact field
+runs, and lower intervention rate than v3.4. Begin the separate PROWAG track on September
+1 as planned; if Series 5 has not passed promotion, describe it accurately as an active
+prototype and continue its remaining validation alongside PROWAG work.
+
+**Option B:** Declare Series 5 complete on September 1 regardless of evidence and replace
+v3.4.
+
+**Option C:** Delay all PROWAG work until Series 5 passes every promotion gate.
+
+**Recommendation: A.** The date controls project scheduling, while evidence controls the
+engineering claim.
+
+**Decision: A.** Promote SidewalkPilot-v5.0 only after its frozen perception and planner
+tests pass; Raspberry Pi 5-to-Jetson Orin Nano p50/p95/p99 latency is measured under the
+complete runtime; stale, mismatched, invalid, and missing responses always produce the
+specified controlled stop; manual takeover and both AEB states behave correctly; and
+repeated supervised field runs complete without contact while improving the defined
+intervention result relative to the v3.4 controls. Record the exact model, calibration,
+class policy, planner, controller, runtime, dataset split, and hashes for the promoted
+configuration. Begin the separately versioned PROWAG inspection track on September 1,
+2026 as scheduled. If Series 5 has not passed promotion by then, retain the current proven
+driving baseline, describe Series 5 as an active prototype, and continue its remaining
+validation alongside PROWAG development without weakening either track's evidence.

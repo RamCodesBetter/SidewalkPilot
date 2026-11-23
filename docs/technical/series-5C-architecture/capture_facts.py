@@ -19,6 +19,7 @@ import workspace
 workspace.activate()
 import convnext_tiny_unet as architecture
 from series_5_b_sidewalkpilot_trainer import conservative_loss
+from segmentation_losses import ReviewedFocalLoss
 from verify_teaching_examples import verify
 
 
@@ -72,10 +73,20 @@ def main():
     assert abs(float(weighted.detach()) - expected_loss) < 1e-6
     weighted.backward()
     assert torch.allclose(sample.grad[0, 1, 0], torch.tensor([2 * 0.8 / 3, -0.2 / 3]), atol=1e-6)
+    # Current 5.C focal example; older CE/AdamW examples above remain explicitly pedagogical.
+    focal_sample = sample.detach().clone().requires_grad_()
+    focal, _, _ = ReviewedFocalLoss(gamma=cfg["focal_gamma"])(focal_sample, target, torch.tensor([True]))
+    expected_focal = (-2 * .8**1.5 * math.log(.2) - .2**1.5 * math.log(.8)) / 3
+    assert abs(float(focal.detach()) - expected_focal) < 1e-6
+    focal.backward()
+    def factor(probability):
+        return (1-probability)**1.5 - 1.5 * probability * (1-probability)**.5 * math.log(probability)
+    assert torch.allclose(focal_sample.grad[0, 1, 0],
+                          torch.tensor([2 * .8 * factor(.2) / 3, -.2 * factor(.8) / 3]), atol=1e-6)
     sources = []
     for name in ("convnext_tiny_unet.py", "series_5_c_config.json", "series_5_c_sidewalkpilot_trainer.py",
                  "series_5_a_sidewalkpilot_trainer.py", "series_5_b_sidewalkpilot_trainer.py",
-                 "pseudo_mask_filter.py", "pseudo_training_targets.py"):
+                 "pseudo_mask_filter.py", "pseudo_training_targets.py", "segmentation_losses.py"):
         path = workspace.source_path(name)
         sources.append(dict(path=str(path.relative_to(REPO)), sha256=digest(path)))
     library = Path(torchvision.__file__).parent / "models/convnext.py"
@@ -86,7 +97,8 @@ def main():
                  teaching=teaching,
                  teaching_audit_sha256=digest(ROOT / "verify_teaching_examples.py"),
                  fp32_weights_mib=parameters["total"] * 4 / 1024**2,
-                 toy=dict(probability=1 / (1 + math.exp(-1)), loss=float(loss.detach()),
+                 focal_example=dict(loss=expected_focal, gradient=focal_sample.grad.tolist()),
+                 toy=dict(scope="CE-only teaching example, not current 5.C focal loss", probability=1 / (1 + math.exp(-1)), loss=float(loss.detach()),
                           gradient=gradient, updated_weight=float(weight.detach()), weighted_loss=expected_loss),
                  sources=sources, torchvision_convnext_sha256=digest(library))
     (ROOT / "implementation-facts.json").write_text(json.dumps(facts, indent=2) + "\n")

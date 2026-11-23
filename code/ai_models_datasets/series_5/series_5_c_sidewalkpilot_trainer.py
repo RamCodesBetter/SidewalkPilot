@@ -16,7 +16,8 @@ from label_grounded_sam2 import sha256
 from prepare_reviewed_dataset import read_json
 from prepare_series5_pseudo_dataset import load_mixed_partition
 import series_5_a_sidewalkpilot_trainer as base
-from series_5_b_sidewalkpilot_trainer import ScreenedBatchSampler, conservative_loss
+import series_5_b_sidewalkpilot_trainer as previous
+import segmentation_losses
 
 DEFAULTS = read_json(workspace.CONFIGS / "series_5_c_config.json")
 
@@ -36,20 +37,36 @@ def run_training(args):
     if not args.smoke and (manifest.get("schema") != "sidewalkpilot-mixed-pseudo-dataset-v1"
                            or manifest.get("accepted_pseudo", 0) < 10000):
         raise ValueError("Full 5.C training needs a frozen 10,000-label pseudo dataset; current labels are not ready")
+    if args.loss not in ("focal", "focal-dice"):
+        raise ValueError("Unknown 5.C loss")
+    if args.loss == "focal-dice" and args.dice_weight <= 0:
+        raise ValueError("focal-dice requires a positive Dice weight")
+    loss_function = segmentation_losses.ReviewedFocalLoss(
+        gamma=args.focal_gamma, background_weight=args.background_weight,
+        sidewalk_weight=args.sidewalk_weight, class_weight_cap=args.class_weight_cap,
+        dice_weight=args.dice_weight if args.loss == "focal-dice" else 0.0)
     args.model_name = DEFAULTS["model_name"]
     args.experiment = DEFAULTS["experiment"]
     args.training_policy = {
-        "version": "5.C-convnext-unet-fp32-v1",
-        "background_loss_weight": 2.0, "human_references_per_batch": 4,
+        "version": "5.C-convnext-unet-fp32-focal-v2",
+        "loss": args.loss, "focal_gamma": args.focal_gamma,
+        "requested_class_weights": [args.background_weight, args.sidewalk_weight],
+        "class_weight_cap": args.class_weight_cap,
+        "class_weights": list(loss_function.class_weights),
+        "dice_weight": loss_function.dice_weight, "dice_smooth": loss_function.dice_smooth,
+        "dice_scope": "mean of both classes, per reviewed image; ignore unknown pixels; no weak Dice",
+        "human_references_per_batch": 4,
         "weak_loss_weight": args.partial_weight, "require_live_wandb": True,
         "batch_log_interval": 20,
-        "scope": "Architecture/precision change; uses the 5.B weak-label loss, not the entire final research training recipe",
+        "scope": "Binary development; restores focal baseline/optional Dice, not final split/warmup/safety-score recipe",
         "entrypoint_sha256": sha256(Path(__file__)),
         "model_sha256": sha256(Path(model_definition.__file__)),
         "base_trainer_sha256": sha256(Path(base.__file__)),
+        "sampler_sha256": sha256(Path(previous.__file__)),
+        "loss_sha256": sha256(Path(segmentation_losses.__file__)),
     }
-    return base.train(args, partition_loader=load_partition, sampler_class=ScreenedBatchSampler,
-                      loss_function=conservative_loss, model_definition=model_definition)
+    return base.train(args, partition_loader=load_partition, sampler_class=previous.ScreenedBatchSampler,
+                      loss_function=loss_function, model_definition=model_definition)
 
 
 def parser():
@@ -71,9 +88,11 @@ def parser():
     prediction.add_argument("--image", type=Path, required=True)
     for key in ("width", "height", "batch_size", "epochs", "patience", "seed"):
         training.add_argument("--" + key.replace("_", "-"), type=int, default=DEFAULTS[key])
-    for key in ("backbone_lr", "head_lr", "weight_decay", "partial_weight"):
+    for key in ("backbone_lr", "head_lr", "weight_decay", "partial_weight", "focal_gamma",
+                "background_weight", "sidewalk_weight", "class_weight_cap", "dice_weight"):
         training.add_argument("--" + key.replace("_", "-"), type=float, default=DEFAULTS[key])
     training.add_argument("--workers", type=int, default=2)
+    training.add_argument("--loss", choices=("focal", "focal-dice"), default=DEFAULTS["loss"])
     training.add_argument("--weights", choices=("imagenet", "none"), default="imagenet")
     training.add_argument("--resume", action="store_true")
     training.add_argument("--smoke", action="store_true")

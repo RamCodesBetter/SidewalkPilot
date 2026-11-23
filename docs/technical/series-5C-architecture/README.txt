@@ -9,6 +9,13 @@ Short matrix-shape companion:
 Read: sidewalkpilot-5C-math-and-cs.pdf
 Edit: sidewalkpilot-5C-math-and-cs.tex
 
+November 22 loss restoration and plan audit:
+  Sections 17/17a now document focal and the optional reviewed-only Dice term.
+  The CE teaching examples remain explicitly labeled gamma=0 simplifications.
+  Read training-plan-audit.txt for all 20 saved decisions versus current code.
+  planning-register-snapshot.txt preserves the source register unchanged.
+  These files do not change submitted forms or imply full training/deployment.
+
 The current PDF is compiled with real LaTeX and classic Computer Modern
 text/math fonts. The .tex source is standalone: no screenshots of equations,
 external equation images, generated math font substitutions, or project

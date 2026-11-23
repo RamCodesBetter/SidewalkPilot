@@ -13,5 +13,11 @@
   "head_lr": 0.001,
   "weight_decay": 0.0001,
   "partial_weight": 0.5,
+  "loss": "focal",
+  "focal_gamma": 1.5,
+  "background_weight": 2.0,
+  "sidewalk_weight": 1.0,
+  "class_weight_cap": 4.0,
+  "dice_weight": 0.5,
   "seed": 20261121
 }

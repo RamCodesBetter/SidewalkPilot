@@ -465,6 +465,7 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
             sampler.epoch = epoch
             train_mode(model)
             totals, steps, updates = np.zeros(3), 0, 0
+            component_totals = Counter()
             for images, targets, strong, _ in loader:
                 images, targets, strong = images.to(device), targets.to(device), strong.to(device)
                 if not (strong & (targets != 255).flatten(1).any(1)).any():
@@ -486,13 +487,17 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
                 updates += int(scaler.get_scale() >= previous_scale)
                 totals += [float(loss.detach()), float(binary_loss.detach()), float(partial_loss.detach())]
                 steps += 1
+                components = {f"loss_{name}": float(value)
+                              for name, value in getattr(loss_function, "last_metrics", {}).items()}
+                component_totals.update(components)
                 interval = cfg.get("training_policy", {}).get("batch_log_interval", 0)
                 if tracker and interval and (steps == 1 or steps % interval == 0):
                     tracker.run.log({"train_step": epoch * len(sampler) + steps,
                                      "batch/loss": float(loss.detach()),
                                      "batch/binary_loss": float(binary_loss.detach()),
                                      "batch/weak_loss": float(partial_loss.detach()),
-                                     "batch/epoch_progress": epoch + steps / len(sampler)})
+                                     "batch/epoch_progress": epoch + steps / len(sampler),
+                                     **{f"batch/{name}": value for name, value in components.items()}})
                 if steps == 1 or steps % 20 == 0:
                     print(f"epoch={epoch + 1} step={steps}/{len(sampler)} loss={float(loss.detach()):.4f}", flush=True)
                 if args.smoke and (updates >= 2 or steps >= 10):
@@ -513,6 +518,7 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
                    "validation_recall": report["binary_reference"]["recall"], "validation_f1": report["binary_reference"]["f1"],
                    "backbone_lr": optimizer.param_groups[0]["lr"], "head_lr": optimizer.param_groups[1]["lr"],
                    "elapsed_seconds": time.monotonic() - began}
+            row.update({name: value / steps for name, value in component_totals.items()})
             history.append(row)
             scheduler.step()
             state = {"schema": "sidewalkpilot-series5-binary-checkpoint-v1", "config": cfg, "data_identity": identity,

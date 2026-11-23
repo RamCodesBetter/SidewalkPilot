@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-22T16:32:07.105199-08:00",
+  "captured_at": "2026-11-22T18:39:05.130723-08:00",
   "scope": "Code/shape audit and isolated numerical examples, not trained-model results",
   "torch": "2.7.1+cu118",
   "torchvision": "0.22.1+cu118",
@@ -18,6 +18,12 @@
     "head_lr": 0.001,
     "weight_decay": 0.0001,
     "partial_weight": 0.5,
+    "loss": "focal",
+    "focal_gamma": 1.5,
+    "background_weight": 2.0,
+    "sidewalk_weight": 1.0,
+    "class_weight_cap": 4.0,
+    "dice_weight": 0.5,
     "seed": 20261121
   },
   "parameters": {
@@ -210,7 +216,27 @@
   },
   "teaching_audit_sha256": "2b8410000aeb2564000191d094b1fd66d77f8bddd4f014e871fa891fcc2137cc",
   "fp32_weights_mib": 110.07422637939453,
+  "focal_example": {
+    "loss": 0.7743995385835644,
+    "gradient": [
+      [
+        [
+          [
+            -0.6119462847709656,
+            0.013946274295449257
+          ]
+        ],
+        [
+          [
+            0.6119462847709656,
+            -0.013946274295449257
+          ]
+        ]
+      ]
+    ]
+  },
   "toy": {
+    "scope": "CE-only teaching example, not current 5.C focal loss",
     "probability": 0.7310585786300049,
     "loss": 0.31326165795326233,
     "gradient": -0.5378828048706055,
@@ -224,15 +250,15 @@
     },
     {
       "path": "code/ai_models_datasets/series_5/tools/configs/series_5_c_config.json",
-      "sha256": "c64177c9242cfb1c1bfe5cfc41178193803bb89ef32f628b6271f09bd8922e4e"
+      "sha256": "e1d4af16079a0d6c966e5bb25022f788337fd85e911d0fc39d15ecf89a62b3c6"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py",
-      "sha256": "a0edb3be2b5919cb07ba9680a09efea7b4646dbbce94bcf2b6dcf856934e6d4f"
+      "sha256": "65bd3889eda6795f5b5d4cbac9fee48629cb8ea94083c9d1cbddbb812d9eb20e"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_a_sidewalkpilot_trainer.py",
-      "sha256": "fa1d2c21b1b7a4a47a1419646ae9b9eadac3a51dc683db286b2382cbdfa75ae5"
+      "sha256": "024cde87446bf86738a35109ceb35fbf3234c112b37fa737ace39daa7b55b2fe"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_b_sidewalkpilot_trainer.py",
@@ -245,6 +271,10 @@
     {
       "path": "code/ai_models_datasets/series_5/tools/datasets/pseudo_training_targets.py",
       "sha256": "39814970beba06e979adad441b90db701a957685c3b702312583db1687258c07"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/models/segmentation_losses.py",
+      "sha256": "a04b7cbd431b35677bc67f05979d58146dd97084d655c6da067b51e72eb9d24b"
     }
   ],
   "torchvision_convnext_sha256": "b4fef7b47faeb3a87629275570fca9117f48ce4e65b2bf362ac193d799a3e0d1"

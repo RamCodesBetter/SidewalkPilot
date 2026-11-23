@@ -126,12 +126,30 @@ class ConvNeXtTests(unittest.TestCase):
                      validation=[strong], test=[])
         args = SimpleNamespace(**{**trainer.DEFAULTS, "weights": "none", "width": 64, "height": 32,
                     "dataset": dataset, "split": dataset / "split.json", "output": self.root / "smoke",
-                    "device": "cpu", "workers": 0, "smoke": True, "resume": False, "wandb": False})
-        with patch.object(trainer, "load_partition", return_value=parts), contextlib.redirect_stdout(io.StringIO()):
+                    "device": "cpu", "workers": 0, "smoke": True, "resume": False, "wandb": True,
+                    "loss": "focal-dice"})
+        with patch.object(trainer, "load_partition", return_value=parts), \
+                patch.object(base, "start_wandb") as mocked_wandb, contextlib.redirect_stdout(io.StringIO()):
             trainer.run_training(args)
+        # Mock the boundary: verify live payloads without uploading any data.
+        live = mocked_wandb.return_value.run.log.call_args.args[0]
+        self.assertIn("batch/loss_strong_focal", live)
+        self.assertIn("batch/loss_weighted_dice", live)
+        self.assertAlmostEqual(live["batch/binary_loss"],
+                               live["batch/loss_strong_focal"] + live["batch/loss_weighted_dice"], places=6)
+        self.assertIn("loss_strong_soft_dice", mocked_wandb.return_value.push.call_args.args[1])
         model, state = base.load_checkpoint(args.output / "last.pt", model_definition=definition)
         self.assertEqual(state["config"]["architecture"], definition.ARCHITECTURE)
         self.assertEqual(state["config"]["precision"], "fp32")
+        policy = state["config"]["training_policy"]
+        self.assertEqual(policy["loss"], "focal-dice")
+        self.assertEqual(policy["dice_weight"], .5)
+        self.assertEqual(policy["class_weights"], [2., 1.])
+        self.assertEqual(len(policy["loss_sha256"]), 64)
+        self.assertEqual(len(policy["sampler_sha256"]), 64)
+        row = state["history"][0]
+        self.assertAlmostEqual(row["binary_loss"], row["loss_strong_focal"] + row["loss_weighted_dice"], places=6)
+        self.assertAlmostEqual(row["loss"], row["binary_loss"] + .5 * row["partial_loss"], places=6)
         self.assertEqual(state["scaler"], {})
         self.assertTrue(all(p.dtype == torch.float32 for p in model.parameters()))
         for values in state["optimizer"]["state"].values():
@@ -140,6 +158,23 @@ class ConvNeXtTests(unittest.TestCase):
                     self.assertEqual(value.dtype, torch.float32)
         runtime = json.loads((args.output / "runtime.json").read_text())
         self.assertEqual(runtime["purpose"], "SMOKE TEST ONLY")
+        args.resume = True
+        args.focal_gamma += .5
+        with patch.object(trainer, "load_partition", return_value=parts), self.assertRaisesRegex(ValueError, "Resume configuration"):
+            trainer.run_training(args)
+
+    def test_default_loss_and_optional_dice_policy(self):
+        (self.root / "manifest.json").write_text("{}")
+        for mode in ("focal", "focal-dice"):
+            args = trainer.parser().parse_args(["train", "--dataset", str(self.root),
+                "--split", "unused.json", "--output", "unused-output", "--smoke", "--loss", mode])
+            with patch.object(base, "train") as train:
+                trainer.run_training(args)
+            policy = args.training_policy
+            self.assertEqual(policy["focal_gamma"], 1.5)
+            self.assertEqual(policy["dice_weight"], .5 if mode == "focal-dice" else 0)
+            self.assertEqual(train.call_args.kwargs["loss_function"].dice_weight, policy["dice_weight"])
+        self.assertEqual(trainer.DEFAULTS["loss"], "focal")
 
 
 if __name__ == "__main__":

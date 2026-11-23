@@ -669,40 +669,66 @@ Loss is a training objective, not an accuracy percentage. Two predictions can se
 
 \note{A \textbf{model weight} is a learned parameter. A \textbf{class weight} such as the background coefficient 2 is a configured penalty multiplier. The \textbf{weak-group weight} 0.5 is another configured coefficient. These are three different uses of the word ``weight.''}
 
-\guidepage{17. The implemented loss}{Two-class cross-entropy, background weighting, and weaker supervision.}
+\guidepage{17. The implemented loss}{Weighted focal loss: the restored Series 5 baseline.}
 \subsection*{Scores become probabilities}
 For image $n$, pixel $i$, and class $c\in\{0,1\}$, the network produces logits $z_{n,i,c}$. Softmax defines
 \[
 p_{n,i,c}=\frac{\exp(z_{n,i,c})}{\exp(z_{n,i,0})+\exp(z_{n,i,1})}.
 \]
-A logit is any real score, not a probability. Only relative scores matter. Cross-entropy for known target $y_{n,i}$ is $-\ln p_{n,i,y_{n,i}}$. PyTorch computes this stably from logits; do not apply softmax first when calling \code{cross_entropy}.
+A logit is any real score. Write $p_t=p_{n,i,y_{n,i}}$ for the correct-class probability. Unweighted cross-entropy is $-\ln p_t$. Focal loss multiplies it by $(1-p_t)^\gamma$: easy, confident correct pixels contribute less. The configured $\gamma=1.5$ is a hyperparameter, not a learned weight.
 
 \subsection*{Pixel weighting and image averaging}
 Define $a_{n,i}=2$ for known background, $1$ for known sidewalk, and $0$ for ignored pixels. Then the implemented per-image loss is
 \[
-\ell_n=\frac{\sum_i a_{n,i}\bigl[-\ln p_{n,i,y_{n,i}}\bigr]}{\max\!\left(1,\sum_i a_{n,i}\right)}.
+\ell_n=\frac{\sum_i a_{n,i}(1-p_t)^{1.5}\bigl[-\ln p_t\bigr]}{\sum_i a_{n,i}}.
 \]
-Ignored terms are omitted; no nonexistent class-255 probability is looked up. If $S$ is the set of valid strong images and $W$ the valid weak images:
+Unknown-only images are omitted; no class-255 probability is looked up. For valid strong images $S$ and valid weak images $W$:
 \[
 L_s=\frac{1}{|S|}\sum_{n\in S}\ell_n,
 \qquad L_w=\frac{1}{|W|}\sum_{n\in W}\ell_n,
 \qquad \boxed{L=L_s+0.5L_w.}
 \]
-$|S|$ means the number of images in set $S$; $n\in S$ means ``image $n$ belongs to $S$.'' $W$ here is the weak-image set, not a weight matrix. An empty group contributes differentiable zero. Group means are separate: this is \textbf{not} one unweighted mean across all pixels in all eight images. [C4]
+$|S|$ counts images; $n\in S$ means membership. An empty group contributes differentiable zero. Group means remain separate. Requested positive class weights are capped at 4 (defaults 2 and 1). Compute $p_t$ from \textbf{unweighted} CE, then apply class weights outside the focal factor. [C6]
 
 \subsection*{A two-pixel calculation}
 Suppose both pixels predict sidewalk probability 0.8. One is actually background; the other is sidewalk. Their image loss is
 \[
-\ell=\frac{-2\ln(0.2)-\ln(0.8)}{3}\approx1.14734.
+\ell=\frac{-2(0.8)^{1.5}\ln(0.2)-(0.2)^{1.5}\ln(0.8)}{3}\approx0.774400.
 \]
-The model is penalized strongly for the false sidewalk prediction. The class weighting discourages flooding, but does not prohibit it. The 0.5 group coefficient reduces the weak pool's contribution; it does not make a wrong pseudo-label correct.
+The wrong background pixel gets focal factor $0.8^{1.5}\approx0.716$, versus $0.2^{1.5}\approx0.0894$ for the correct sidewalk pixel. This does not guarantee cleaner edges. Wrong labels may also become hard examples. The 0.5 coefficient reduces weak supervision, not its mistakes.
 
-\note{\textbf{Implemented:} weighted cross-entropy and separate strong/weak group means. \textbf{Not implemented here:} Dice loss, focal loss, a boundary loss, or a hard constraint that masks stay inside the sidewalk. Earlier plans for different losses are not descriptions of this trainer.}
+\note{The saved plan specified weighted focal, with focal plus Dice only if validation improves. This revision restores that choice; historical 5.A/5.B losses and checkpoints stay unchanged. Gamma, weight cap, and optional Dice strength are explicit starting settings, not recovered historical constants or measured optima.}
 
-{\small The companion numerical audit verifies this example and its logit gradients against the real \code{conservative_loss} function. [C4, R4]}
+{\small Code uses stable CE and \code{-expm1(-CE)} for $1-p_t$, floored at FP32 epsilon before the fractional power to keep saturated gradients finite. Setting $\gamma=0$ recovers weighted CE. No argmax is used inside this loss.}
+
+\guidepage{17a. The optional Dice comparison}{Overlap is an additional objective, not a replacement for reliable labels.}
+The default is \code{--loss focal}. A separate run with \code{--loss focal-dice} adds soft Dice only on reviewed binary references. Unknown pixels are excluded in both modes. Automatically generated and positive-only weak targets receive focal supervision, \textbf{not Dice}.
+
+\subsection*{A soft overlap for each class}
+For reviewed image $n$, let $K_n$ be its known pixels. For class $c$, write $g_{i,c}=1$ when the reference is class $c$, otherwise 0; $p_{i,c}$ is the model's softmax probability. With $\epsilon=10^{-6}$:
+\[
+D_{n,c}=\frac{2\sum_{i\in K_n}p_{i,c}g_{i,c}+\epsilon}
+{\sum_{i\in K_n}p_{i,c}+\sum_{i\in K_n}g_{i,c}+\epsilon}.
+\]
+The numerator measures soft overlap; the denominator includes predicted and reference area. Epsilon makes an empty denominator safe. Probabilities remain continuous so gradients can flow: do not turn them into a hard mask first.
+\[
+L_D=\frac{1}{|S|}\sum_{n\in S}\frac{(1-D_{n,0})+(1-D_{n,1})}{2},
+\qquad L=L_s+0.5L_w+\lambda_D L_D.
+\]
+We average background and sidewalk, then reviewed images. The optional starting coefficient is $\lambda_D=0.5$; the default focal-only run has $\lambda_D=0$. Unknown-only images are omitted and an empty reviewed group contributes zero.
+
+\subsection*{A two-pixel example}
+One pixel is background, one sidewalk; both predict probabilities $(0.5,0.5)$. For either class, summed prediction is 1, reference area is 1, and soft intersection is 0.5. Thus $D\approx0.5$ and $L_D\approx0.5$. At $\lambda_D=0.5$, Dice adds about 0.25 to the batch objective.
+
+\subsection*{What this comparison can establish}
+Keep the same data, split, seed, architecture, and training budget. Compare validation precision, recall, IoU, and boundary errors. Do not use held-out test inspection to tune this choice. A lower training loss from a differently scaled objective is not a fair quality comparison.
+
+\note{Dice is computed on known pixels in reviewed references, not invented background in unknown regions. It cannot penalize false positives in ignored areas. A precise mask still depends on annotation quality, resolution, and learned features.}
+
+{\small Focal source: Lin et al., \emph{Focal Loss for Dense Object Detection}, \href{https://arxiv.org/abs/1708.02002}{arXiv:1708.02002}. Dice-based segmentation background: Milletari et al., \emph{V-Net}, \href{https://arxiv.org/abs/1606.04797}{arXiv:1606.04797}. Our two-class linear-denominator variant is defined above, not claimed to be V-Net's identical objective.}
 
 \guidepage{18. How weights and bias learn}{A forward pass makes the error; a backward pass assigns its derivatives.}
-Use the same toy neuron: $x=[0.2,0.8]$, $w=[1.5,-0.5]$, $b=0.3$. Its sidewalk logit is $z=0.2$; background logit is fixed at zero. The target is sidewalk. This is an unweighted single-pixel example, not 5.C's whole batch loss.
+Use the same toy neuron: $x=[0.2,0.8]$, $w=[1.5,-0.5]$, $b=0.3$. Its sidewalk logit is $z=0.2$; background logit is fixed at zero. The target is sidewalk. This is an unweighted \textbf{cross-entropy teaching example} ($\gamma=0$), not 5.C's focal objective.
 \begin{center}
 \begin{tikzpicture}[font=\small]
 \node[block] (w1) at (0,1.6) {$w_1=1.5$};
@@ -736,13 +762,16 @@ The new logit is about $0.275628$, so this example's sidewalk probability rises.
 
 \guidepage{19. Backpropagation}{How error at the mask reaches millions of weights.}
 \subsection*{Mathematics view}
-For a known pixel, differentiating the per-image loss with respect to logit $z_{n,i,c}$ gives
+For a known pixel, weighted focal's logit gradient is the CE gradient times $q(p_t)$:
 \[
 \frac{\partial\ell_n}{\partial z_{n,i,c}}
-=\frac{a_{n,i}}{D_n}\left(p_{n,i,c}-\mathbf{1}[c=y_{n,i}]\right),
-\qquad D_n=\sum_i a_{n,i}.
+=\frac{a_{n,i}}{D_n}q(p_t)\left(p_{n,i,c}-\mathbf{1}[c=y_{n,i}]\right),
+\quad D_n=\sum_i a_{n,i},
 \]
-$\mathbf{1}$ is 1 when its condition is true and 0 otherwise. For the total batch loss, multiply by $1/|S|$ for a strong image or $0.5/|W|$ for a weak one.
+\[
+q(p_t)=(1-p_t)^\gamma-\gamma p_t(1-p_t)^{\gamma-1}\ln p_t.
+\]
+$\mathbf{1}$ is 1 when true, otherwise 0. Multiply by $1/|S|$ for a strong image or $0.5/|W|$ for a weak one. At $\gamma=0$, $q=1$: the earlier CE example. Below the numerical floor, code differentiates the clamped factor instead. Optional Dice adds its own reviewed-pixel derivatives.
 
 If the true class is sidewalk and sidewalk probability is too low, its logit derivative is negative. A small negative-gradient step tends to increase that logit. If the true class is background and sidewalk probability is high, the derivative instead pushes the sidewalk score down.
 
@@ -783,7 +812,7 @@ Operations are elementwise except the earlier global clipping. The defaults are 
 The encoder starts at learning rate $10^{-4}$ and decoder at $10^{-3}$. Both use the same decay. There are no special bias/norm decay exclusions in the current optimizer groups.
 
 \subsection*{One pixel, one scalar weight}
-This is a teaching example, \textbf{not} a real complete network. Let input $x=2$, parameter $w=0.5$, logits $(z_0,z_1)=(0,wx)=(0,1)$, and target sidewalk:
+This is a \textbf{cross-entropy teaching example} ($\gamma=0$), not the full focal objective. Let input $x=2$, parameter $w=0.5$, logits $(z_0,z_1)=(0,wx)=(0,1)$, and target sidewalk:
 \begin{align*}
 p_1&=\frac{e^1}{1+e^1}\approx0.731059,\\
 L&=-\ln(p_1)\approx0.313262,\\
@@ -835,6 +864,7 @@ optimizer = AdamW([
     {"params": model.classifier.parameters(), "lr": 1e-3},
 ], weight_decay=1e-4)
 scheduler = CosineAnnealingLR(optimizer, T_max=20)
+objective = ReviewedFocalLoss(gamma=1.5)  # Dice off
 
 for epoch in range(20):
     model.train()                    # stochastic depth ON
@@ -842,7 +872,7 @@ for epoch in range(20):
     for images, targets, strong in training_batches:
         optimizer.zero_grad(set_to_none=True)
         logits = model(images)["out"]  # FP32 forward
-        loss = conservative_loss(logits, targets, strong)[0]
+        loss = objective(logits, targets, strong)[0]
         require_finite(loss)
         loss.backward()             # compute gradients
         clip_grad_norm_(model.parameters(), 1.0)
@@ -1000,7 +1030,8 @@ C1 & \path{tools/models/convnext_tiny_unet.py} & Encoder, decoder, FP32 checks\\
 C2 & \path{tools/configs/series_5_c_config.json} and \path{series_5_c_sidewalkpilot_trainer.py} & 5.C defaults, data-count gate, model wiring\\
 C3 & \path{series_5_a_sidewalkpilot_trainer.py} & Shared data transforms, sampler, training, checkpoints, evaluation, prediction\\
 C4 & \path{series_5_b_sidewalkpilot_trainer.py} & Screened batch composition and conservative loss\\
-C5 & \path{tools/filtering/pseudo_mask_filter.py} and \path{tools/datasets/pseudo_training_targets.py} & Pseudo-label filtering and target preparation\\\bottomrule
+C5 & \path{tools/filtering/pseudo_mask_filter.py} and \path{tools/datasets/pseudo_training_targets.py} & Pseudo-label filtering and target preparation\\
+C6 & \path{tools/models/segmentation_losses.py} & 5.C focal baseline and reviewed-only Dice\\\bottomrule
 \end{tabularx}}
 
 \subsection*{Reproducible document checks}
@@ -1031,7 +1062,7 @@ $\sum_{j=1}^{M}q_j$ & Add $q_1+q_2+\cdots+q_M$. $j$ is a summation index; $M$ is
 $x_{c,h,w}$ & Select one tensor entry using channel, row, and column indices. Subscripts do not mean multiplication.\\
 $x^2,\sqrt{x}$ & Square $x$; take its nonnegative square root (for $x\ge0$). A superscript is a power here, not an index.\\
 $\theta,\eta,\lambda$ & Theta: parameter(s). Eta: learning rate. Lambda: decay strength. These are Greek letters, not special computer types.\\
-$\gamma,\beta,\epsilon$ & Gamma: learned residual scale here. Beta: optimizer retention factor. Epsilon: a small stabilizing constant, whose value depends on the operation.\\
+$\gamma,\beta,\epsilon$ & Gamma: learned residual scale or configured focal exponent, depending on context. Beta: optimizer retention factor. Epsilon: a small stabilizing constant.\\
 $\partial L/\partial\theta$ & Partial derivative of loss with respect to one parameter, holding other independent parameters fixed.\\
 $\lVert g\rVert_2$ & Euclidean length of a vector: square entries, add them, take the square root.\\
 $\bar u,\widehat m$ & U bar: a mean here. M hat: corrected optimizer estimate. A hat can also denote a prediction, as in $\widehat y$.\\

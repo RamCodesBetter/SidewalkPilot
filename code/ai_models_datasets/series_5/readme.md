@@ -1,6 +1,34 @@
 # Series 5 Workspace
 
-Keep work on `series-5`. This is a folder cleanup, not a new model recipe.
+Keep work on `series-5`. Historical A/B artifacts retain their original recipes.
+
+## 5.C Loss and Plan Audit (November 22, 2026)
+
+5.C now defaults to **class-weighted focal loss**, restoring Decision 9 of the
+saved Series 5 plan. `train --loss focal-dice --dice-weight 0.5` enables the
+separate comparison. Dice is a per-image, two-class soft overlap loss on reviewed
+binary references only; unknown (`255`) pixels and weak masks do not enter Dice.
+Both modes preserve separate strong/weak means and the weak coefficient 0.5.
+
+The newly explicit starting defaults are gamma 1.5, background/sidewalk weights
+2/1, a class-weight cap of 4, and optional Dice weight 0.5. The historical plan
+specified the loss families, not these exact S5 coefficients. Set `--focal-gamma
+0 --loss focal` for a weighted-CE ablation. Gamma, effective class weights, Dice
+settings, and loss source hash enter the run contract; a changed objective cannot
+resume an old run. Use distinct output directories for each comparison.
+
+Local history and approved W&B runs include `loss_strong_focal`, `loss_weak_focal`,
+`loss_strong_soft_dice`, and `loss_weighted_dice`, plus live `batch/loss_*` values.
+`binary_loss` includes weighted Dice when enabled; `partial_loss` is weak focal.
+Dice metrics are zero when the term is disabled. This change starts no full run,
+uploads nothing, and does not modify A/B losses or trained artifacts.
+
+See the full decision-by-decision audit in
+[`training-plan-audit.txt`](../../../docs/technical/series-5C-architecture/training-plan-audit.txt).
+The current development split, staged encoder warmup, sequence-aware sampling,
+final holdout, safety-aware checkpoint score, and Jetson/planner qualification
+remain outstanding. FP32-only, ConvNeXt-Tiny/U-Net, and binary beta naming remain
+the newer choices; do not revert them to historical settings.
 
 | Folder | Contents |
 | --- | --- |
