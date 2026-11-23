@@ -152,6 +152,7 @@ class ConvNeXtTests(unittest.TestCase):
         self.assertFalse((args.output / "5.C.pt").exists())
         self.assertFalse((args.output / "checkpoint-selection.json").exists())
         row = state["history"][0]
+        self.assertIn("validation_boundary_f1", row)
         self.assertAlmostEqual(row["binary_loss"], row["loss_strong_focal"] + row["loss_weighted_dice"], places=6)
         self.assertAlmostEqual(row["loss"], row["binary_loss"] + .5 * row["partial_loss"], places=6)
         self.assertEqual(state["scaler"], {})

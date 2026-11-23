@@ -900,7 +900,7 @@ After each epoch, binary validation references supply the checkpoint-selection m
 \subsection*{Checkpoints}
 \code{best.pt} contains the best validation-IoU state; \code{last.pt} contains the latest saved epoch state. Atomic writes reduce the risk of leaving a partially replaced checkpoint if the process is interrupted.
 
-Completed non-smoke runs also publish \code{5.C.pt} (end, including normal early stopping) and \code{5.Cb.pt} (best validation sidewalk IoU; earliest tie wins). \code{5.Cs} is reserved: no smart-selection checkpoint exists until its criterion is defined. \code{checkpoint-selection.json} records the selected epochs and rules. Named files are fixed snapshots, not moving symlinks. An interrupted run keeps \code{last.pt} for recovery, not a completed-model name. [C2]
+Completed runs publish \code{5.C.pt} (end) and \code{5.Cb.pt} (best validation sidewalk IoU). Within one percentage point of that best IoU, \code{5.Cs.pt} selects highest defined sidewalk precision, then higher IoU, then earliest epoch. Boundary F1 (two reference pixels) is reported separately, never used for selection. All comparisons use reviewed binary validation masks. \code{checkpoint-selection.json} records the selections; interrupted and smoke runs do not publish these names. [C2]
 
 \begin{tabularx}{\linewidth}{@{}lY@{}}\toprule
 \textbf{Saved item} & \textbf{Why it matters}\\\midrule

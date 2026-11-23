@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-22T19:53:19.816741-08:00",
+  "captured_at": "2026-11-22T20:10:16.489609-08:00",
   "scope": "Code/shape audit and isolated numerical examples, not trained-model results",
   "torch": "2.7.1+cu118",
   "torchvision": "0.22.1+cu118",
@@ -254,11 +254,11 @@
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py",
-      "sha256": "3c43cad05186c6f44edb9d019147aa4be81065a6e59a5575ef3e8c5736c0cf5e"
+      "sha256": "f58c439439b09ecb5401801170604192d2569f72d8d08e6187471ede4d1aeb9b"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_a_sidewalkpilot_trainer.py",
-      "sha256": "024cde87446bf86738a35109ceb35fbf3234c112b37fa737ace39daa7b55b2fe"
+      "sha256": "436f5b9f5dc6d988ca74f0e88d70bbf247acb072292a1fe2eef68525468921d9"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_b_sidewalkpilot_trainer.py",
@@ -278,7 +278,11 @@
     },
     {
       "path": "code/ai_models_datasets/series_5/tools/models/checkpoint_names.py",
-      "sha256": "960eeffd54bd17a5047b188b8798aaac41c6bc4f7aaae3cba712b4017c1d40f8"
+      "sha256": "88efbc5fda977631195b9cc7b175e1fce9469fba89b8dd736519d129ae151789"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/evaluation/boundary_metrics.py",
+      "sha256": "f52e838033c88d859119322367428f2959d99a0057fb76f3dc520c4b691d0503"
     }
   ],
   "torchvision_convnext_sha256": "b4fef7b47faeb3a87629275570fca9117f48ce4e65b2bf362ac193d799a3e0d1"

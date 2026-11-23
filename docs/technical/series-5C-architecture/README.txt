@@ -18,7 +18,9 @@ November 22 loss restoration and plan audit:
 
 Checkpoint naming update (section 23):
   5.C.pt = completed end state; 5.Cb.pt = best validation sidewalk IoU.
-  5.Cs is reserved until smart selection is defined, with no fake s file.
+  5.Cs.pt = highest precision within one percentage point of best validation
+  sidewalk IoU; ties favor higher IoU, then earlier epoch. Boundary F1 at
+  two reference pixels is reported separately, not used for selection.
   Interrupted runs retain last.pt for resume; smoke runs are not promoted.
   No historical A/B files, training schedules, or splits were changed.
 

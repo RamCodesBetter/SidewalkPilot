@@ -3,6 +3,12 @@ Audit date: November 22, 2026 (America/Los_Angeles)
 
 Scope
 -----
+Subsequent binary-beta decision: the formerly reserved s suffix now selects
+highest validation sidewalk precision within one percentage point of best
+sidewalk IoU (inclusive), then higher IoU, then earliest epoch. Boundary F1
+is reported independently at 2 reference pixels. Findings below describe the
+earlier audit; this new rule is not a validated planner safety score.
+
 This is an engineering audit, not a new research plan, approval, notebook entry,
 completed experiment, or request to restart field work. No submitted forms,
 existing data, splits, review decisions, or checkpoints were changed by this audit.

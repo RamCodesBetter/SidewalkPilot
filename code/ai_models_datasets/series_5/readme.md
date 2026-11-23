@@ -10,9 +10,18 @@ Completed non-smoke C runs publish these names inside their run directory:
 | --- | --- |
 | `5.C.pt` | End state: last completed epoch, including normal early stopping |
 | `5.Cb.pt` | Best validation sidewalk IoU only; earliest epoch wins ties |
-| `5.Cs` | Reserved for smart selection; no checkpoint is produced until its criterion exists |
+| `5.Cs.pt` | Highest sidewalk precision among epochs within 1 percentage point of best validation sidewalk IoU (inclusive); ties: higher IoU, then earlier epoch |
 
 The same convention applies to future base names: `5.0`, `5.0b`, `5.0s`.
+The smart rule uses pooled reviewed binary validation pixels only. An undefined
+precision cannot win. No eligible defined precision means no smart file.
+Validation boundary F1 is reported separately, never used to rank epochs:
+match inner sidewalk edge pixels (4-neighbor sidewalk/background transitions)
+within Euclidean distance 2 at original reference resolution, pooling directed
+match counts over images. Unknown pixels and the image frame are not background.
+Two empty boundary sets score null; a one-sided empty set scores zero.
+Working snapshots of potentially eligible epochs live in `smart-candidates/`;
+as the best IoU improves, the final cutoff may exclude an earlier candidate.
 `best.pt` and `last.pt` remain compatible working/resume checkpoints. Named files
 are snapshots, not symlinks that follow later replacements. The trainer writes
 `checkpoint-selection.json` with each selected epoch and criterion. Smoke and

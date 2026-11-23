@@ -19,6 +19,7 @@ import series_5_a_sidewalkpilot_trainer as base
 import series_5_b_sidewalkpilot_trainer as previous
 import segmentation_losses
 import checkpoint_names
+import boundary_metrics
 
 DEFAULTS = read_json(workspace.CONFIGS / "series_5_c_config.json")
 
@@ -66,6 +67,9 @@ def run_training(args):
         "sampler_sha256": sha256(Path(previous.__file__)),
         "loss_sha256": sha256(Path(segmentation_losses.__file__)),
         "checkpoint_names": checkpoint_names.checkpoint_names(args.model_name),
+        "smart_selection": checkpoint_names.SMART_RULE,
+        "boundary_tolerance_px": boundary_metrics.RADIUS,
+        "boundary_metrics_sha256": sha256(Path(boundary_metrics.__file__)),
         "checkpoint_naming_sha256": sha256(Path(checkpoint_names.__file__)),
     }
     result = base.train(args, partition_loader=load_partition, sampler_class=previous.ScreenedBatchSampler,

@@ -1,6 +1,7 @@
 """Publish named end/best snapshots without promoting incomplete training runs."""
 
 import errno
+from decimal import Decimal
 import math
 from pathlib import Path
 import re
@@ -9,6 +10,24 @@ from uuid import uuid4
 
 from label_grounded_sam2 import write_json
 from prepare_reviewed_dataset import read_json
+
+
+SMART_RULE = "Within 1 percentage point of maximum validation sidewalk IoU (inclusive); highest validation sidewalk precision, then higher IoU, then earliest epoch"
+
+
+def eligible(iou, best):
+    return Decimal(str(iou)) >= Decimal(str(best)) - Decimal("0.01")
+
+
+def candidate_path(epoch):
+    return f"smart-candidates/epoch-{epoch:03d}.pt"
+
+
+def smart_epoch(history, best):
+    candidates = [row for row in history if eligible(row["validation_sidewalk_iou"], best)
+                  and row["validation_precision"] is not None]
+    return max(candidates, key=lambda r: (r["validation_precision"], r["validation_sidewalk_iou"],
+                                          -r["epoch"]), default=None)
 
 
 def checkpoint_names(model_name):
@@ -54,6 +73,11 @@ def publish_completed_run(output, model_name):
         "end": ("last.pt", history[-1], "last completed epoch, including normal early stopping"),
         "best_iou": ("best.pt", best, "maximum validation sidewalk IoU; earliest epoch wins ties"),
     }
+    smart_enabled = config.get("training_policy", {}).get("smart_selection") == SMART_RULE
+    if smart_enabled:
+        smart = smart_epoch(history, best["validation_sidewalk_iou"])
+        if smart is not None:
+            selections["smart"] = (candidate_path(smart["epoch"]), smart, SMART_RULE)
     for source, _, _ in selections.values():
         if not (output / source).is_file():
             raise FileNotFoundError(output / source)
@@ -64,8 +88,14 @@ def publish_completed_run(output, model_name):
         artifacts[role] = dict(model_name=names[role], filename=filename, source=source,
                                epoch=row["epoch"], criterion=criterion,
                                validation_sidewalk_iou=row["validation_sidewalk_iou"])
-    artifacts["smart"] = dict(model_name=names["smart"], filename=None, status="reserved",
-                               reason="Smart-selection criterion has not been defined or implemented")
+        if smart_enabled:
+            artifacts[role].update(validation_precision=row["validation_precision"],
+                                   validation_boundary_f1=row["validation_boundary_f1"])
+    if "smart" not in artifacts:
+        artifacts["smart"] = dict(model_name=names["smart"], filename=None,
+                                  status="unavailable" if smart_enabled else "reserved",
+                                  reason="No eligible epoch with defined precision" if smart_enabled
+                                  else "This run did not enable precision-based selection")
     record = dict(schema="sidewalkpilot-checkpoint-selection-v1", model_name=model_name,
                   early_stopped=status.get("early_stopped", False), artifacts=artifacts,
                   selection_partition="validation", test_used_for_selection=False)

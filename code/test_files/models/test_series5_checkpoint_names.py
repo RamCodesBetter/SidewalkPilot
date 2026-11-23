@@ -10,6 +10,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets
 from workspace import activate
 activate()
 import checkpoint_names as naming
+import boundary_metrics as boundary
+import numpy as np
 
 
 class CheckpointNamesTests(unittest.TestCase):
@@ -54,6 +56,39 @@ class CheckpointNamesTests(unittest.TestCase):
         replacement.write_bytes(b"later resume")
         replacement.replace(self.root / "last.pt")
         self.assertEqual((self.root / "5.C.pt").read_bytes(), b"end epoch 3")
+
+    def test_smart_uses_final_inclusive_band_not_boundary_score(self):
+        rows = [dict(epoch=i, validation_sidewalk_iou=v, validation_precision=p,
+                     validation_boundary_f1=f) for i, (v, p, f) in enumerate(
+                         ((.8899, 1., 1.), (.89, .98, .2), (.9, .96, .99)), 1)]
+        self.write("history.json", rows)
+        self.write("config.json", dict(model_name="5.C", smoke_only=False,
+                                      training_policy=dict(smart_selection=naming.SMART_RULE)))
+        candidate = self.root / naming.candidate_path(2)
+        candidate.parent.mkdir()
+        candidate.write_bytes(b"epoch 2 despite lower edge score")
+        record = naming.publish_completed_run(self.root, "5.C")["artifacts"]
+        self.assertEqual(record["smart"]["epoch"], 2)
+        self.assertEqual(record["smart"]["validation_boundary_f1"], .2)
+        self.assertEqual((self.root / "5.Cs.pt").read_bytes(), candidate.read_bytes())
+        self.assertEqual(record["best_iou"]["epoch"], 3)
+
+    def test_smart_ties_and_undefined_precision(self):
+        rows = [dict(epoch=i, validation_precision=p, validation_sidewalk_iou=v)
+                for i, (p, v) in enumerate(((.98, .89), (.98, .9), (.98, .9), (None, .9)), 1)]
+        self.assertEqual(naming.smart_epoch(rows, .9)["epoch"], 2)
+        self.assertIsNone(naming.smart_epoch(rows[-1:], .9))
+
+    def test_boundary_tolerance_empty_and_unknown(self):
+        target = np.zeros((8, 12), dtype=np.uint8)
+        target[:, :4] = 1
+        for shift, expected in ((0, 1.), (2, 1.), (3, 0.)):
+            prediction = np.zeros_like(target)
+            prediction[:, :4 + shift] = 1
+            self.assertEqual(boundary.boundary_f1(boundary.boundary_counts(prediction, target)), expected)
+        self.assertEqual(boundary.boundary_f1(boundary.boundary_counts(target*0, target)), 0.)
+        target[:, 4:] = 255
+        self.assertIsNone(boundary.boundary_f1(boundary.boundary_counts(target == 1, target)))
 
     def test_copy_fallback_on_unsupported_hardlinks(self):
         with patch.object(Path, "hardlink_to", side_effect=OSError(errno.ENOTSUP, "unsupported")):

@@ -32,6 +32,8 @@ workspace.activate()
 
 from label_grounded_sam2 import digest_json, sha256, utc_now, write_json
 from prepare_reviewed_dataset import read_json, safe_file, verify_dataset
+import checkpoint_names
+import boundary_metrics
 
 
 DEFAULTS = read_json(workspace.CONFIGS / "series_5_a_config.json")
@@ -249,12 +251,13 @@ def save_preview(source, prediction, reference, output):
 
 
 @torch.inference_mode()
-def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, limit=0):
+def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, limit=0, *, boundaries=False):
     model.eval()
     data = SidewalkDataset(dataset, rows, size, original_targets=True)
     counts = torch.zeros((2, 2), dtype=torch.int64)
     reference_images, partial_images, partial_tp, partial_total = 0, 0, 0, 0
     per_image = []
+    boundary_total = np.zeros(4, dtype=np.int64)
     if preview_dir:
         preview_dir.mkdir(parents=True, exist_ok=True)
     for index in range(len(data)):
@@ -270,6 +273,10 @@ def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, li
             counts += current
             reference_images += 1
             per_image.append({"id": rows[index]["id"], **confusion_metrics(current)})
+            if boundaries:
+                edge_counts = boundary_metrics.boundary_counts(prediction.numpy(), target.numpy())
+                boundary_total += edge_counts
+                per_image[-1]["boundary_f1"] = boundary_metrics.boundary_f1(edge_counts)
             if preview_dir and reference_images <= 4:
                 save_preview(safe_file(dataset, rows[index]["image"]), prediction.numpy(), target.numpy(),
                              preview_dir / f"{reference_images:02d}.jpg")
@@ -279,7 +286,9 @@ def evaluate(model, dataset, rows, size, device, precision, preview_dir=None, li
             partial_total += int(positive.sum())
             partial_tp += int(((prediction == 1) & positive).sum())
     return {
-        "binary_reference": {"images": reference_images, **confusion_metrics(counts)},
+        "binary_reference": {"images": reference_images, **confusion_metrics(counts),
+                             **({"boundary_f1": boundary_metrics.boundary_f1(boundary_total),
+                                 "boundary_tolerance_px": boundary_metrics.RADIUS} if boundaries else {})},
         "partial_labels": {"images": partial_images, "known_sidewalk_pixels": partial_total,
                            "known_sidewalk_recall_only": partial_tp / partial_total if partial_total else None,
                            "warning": "Positive-only masks cannot measure false positives, IoU, precision, or F1."},
@@ -398,6 +407,7 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
     device = torch.device(args.device)
     precision = select_precision(args.precision, device)
     cfg = training_config(args, precision, model_definition=model_definition)
+    smart_selection = cfg.get("training_policy", {}).get("smart_selection") == checkpoint_names.SMART_RULE
     model_factory = model_definition.make_model if model_definition else make_model
     identity = {"manifest_sha256": sha256(dataset / "manifest.json"), "split_sha256": sha256(args.split)}
     torch.manual_seed(args.seed)
@@ -505,7 +515,8 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
             if updates == 0 or (args.smoke and updates < 2):
                 raise RuntimeError("Insufficient successful optimizer updates; not saving a misleading checkpoint")
             report = evaluate(model, dataset, validation_rows, size, device, precision,
-                              preview_dir=output / f"validation-epoch-{epoch + 1:03d}", limit=2 if args.smoke else 0)
+                              preview_dir=output / f"validation-epoch-{epoch + 1:03d}", limit=2 if args.smoke else 0,
+                              **({"boundaries": True} if smart_selection else {}))
             iou = report["binary_reference"]["sidewalk_iou"]
             if iou is None or not math.isfinite(iou):
                 raise RuntimeError("Validation has no finite sidewalk IoU")
@@ -519,6 +530,8 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
                    "backbone_lr": optimizer.param_groups[0]["lr"], "head_lr": optimizer.param_groups[1]["lr"],
                    "elapsed_seconds": time.monotonic() - began}
             row.update({name: value / steps for name, value in component_totals.items()})
+            if smart_selection:
+                row["validation_boundary_f1"] = report["binary_reference"]["boundary_f1"]
             history.append(row)
             scheduler.step()
             state = {"schema": "sidewalkpilot-series5-binary-checkpoint-v1", "config": cfg, "data_identity": identity,
@@ -527,7 +540,14 @@ def train(args, *, partition_loader=None, sampler_class=None, loss_function=None
                      "stale_epochs": stale, "history": history}
             if improved:
                 atomic_checkpoint(output / "best.pt", state)
-            atomic_checkpoint(output / "last.pt", state)
+            if (smart_selection and not args.smoke and row["validation_precision"] is not None
+                    and checkpoint_names.eligible(iou, best_iou)):
+                candidate = output / checkpoint_names.candidate_path(epoch + 1)
+                candidate.parent.mkdir(exist_ok=True)
+                atomic_checkpoint(candidate, state)
+                checkpoint_names.snapshot(candidate, output / "last.pt")
+            else:
+                atomic_checkpoint(output / "last.pt", state)
             write_json(output / f"validation-{epoch + 1:03d}.json", report)
             save_history(output, history)
             if tracker:
@@ -566,7 +586,8 @@ def evaluate_checkpoint(args, *, model_definition=None, partition_loader=None):
     args.output.mkdir(parents=True)
     cfg = state["config"]
     result = evaluate(model.to(device), args.dataset.resolve(), partitions[args.partition], (cfg["width"], cfg["height"]),
-                      device, precision, preview_dir=args.output / "previews")
+                      device, precision, preview_dir=args.output / "previews",
+                      boundaries=cfg.get("training_policy", {}).get("smart_selection") == checkpoint_names.SMART_RULE)
     result.update(partition=args.partition, checkpoint_sha256=sha256(args.checkpoint), precision=precision,
                   data_identity=identity, smoke_only=cfg["smoke_only"])
     write_json(args.output / "metrics.json", result)
