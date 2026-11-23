@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SidewalkPilot | Labeling history</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column;
+    color: #17251f; background: white; font: 16px system-ui, sans-serif; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+  h1 { margin: 0; font-size: 18px; }
+  button { background: white; color: inherit; border: 1px solid #adb9b2; border-radius: 4px;
+    font: inherit; padding: 4px 10px; cursor: pointer; }
+  main { flex: 1; min-height: 0; overflow-x: auto; }
+  section { min-width: 80ch; height: 100%; display: flex; flex-direction: column; font: 13px monospace; }
+  pre { flex: none; margin: 0; padding: 8px; font: inherit; font-weight: bold;
+    background: #e7f1eb; border-block: 1px solid #abc3b3; }
+  iframe { display: block; width: 100%; flex: 1; min-height: 0; border: 0; }
+</style>
+<header><h1>Labeling history</h1><button id="refresh" type="button" aria-label="Refresh labeling history">Refresh</button></header>
+<main><section aria-label="Full pipeline history">
+<pre>Loop   Attempted  Passed  Deferred  Total passed  Still needed (of 10,000)</pre>
+<iframe title="All completed loops" src="STATUS.txt"></iframe>
+</section></main>
+<script>
+  document.querySelector('#refresh').onclick = () => {
+    document.querySelector('iframe').src = 'STATUS.txt?updated=' + Date.now();
+  };
+</script>
+</html>
