@@ -66,9 +66,27 @@ if(report){
   $('state').textContent=report.state.replaceAll('_',' ');
   $('bar').value=report.passed;$('pct').textContent=(100*report.passed/10000).toFixed(1)+'%';
   $('stamp').textContent=report.rows.length+' loops | Updated '+new Date(report.updated_utc).toLocaleTimeString();
+  const scroll=document.querySelector('.scroll'), saved=history.state;
   try{$('order').value=sessionStorage.getItem('history-order')==='asc'?'asc':'desc'}catch{}
+  if(saved?.order)$('order').value=saved.order;
   $('order').onchange=()=>{try{sessionStorage.setItem('history-order',$('order').value)}catch{}draw();document.querySelector('.scroll').scrollTop=0};draw();
+  // In newest-first order, extra rows appear above the reader between snapshots.
+  const rowHeight=()=>$('rows').firstElementChild?.getBoundingClientRect().height||0;
+  if(saved){
+    const added=saved.order==='desc'&&saved.top>0?Math.max(0,report.rows.length-saved.count):0;
+    scroll.scrollTo(saved.left,saved.top+added*rowHeight());
+  }
+  function reload(){
+    history.replaceState({order:$('order').value,top:scroll.scrollTop,left:scroll.scrollLeft,count:report.rows.length},'');
+    location.reload();
+  }
+  $('refresh').onclick=reload;
+  if(report.state==='running'){
+    $('stamp').append(' | Auto-refresh: 15s');
+    setInterval(()=>{if(!document.hidden)reload()},15000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)reload()});
+  }
 }else{$('state').textContent='No snapshot'}
-$('refresh').onclick=()=>location.reload();
+if(!report)$('refresh').onclick=()=>location.reload();
 </script>
 </html>
