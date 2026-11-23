@@ -1,5 +1,11 @@
 SidewalkPilot 5.C architecture guide
 
+Short matrix-shape companion:
+  Read sidewalkpilot-layer-shapes.pdf; edit sidewalkpilot-layer-shapes.typ.
+  Rebuild/check: python build_layer_shapes.py (requires typst and pymupdf).
+  Covers neurons vs layers, batching, bias broadcasting, GELU shapes,
+  a numerical example, and the 5.C 1x1 head. Uses New Computer Modern math.
+
 Read: sidewalkpilot-5C-math-and-cs.pdf
 Edit: sidewalkpilot-5C-math-and-cs.tex
 
