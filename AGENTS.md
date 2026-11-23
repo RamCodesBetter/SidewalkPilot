@@ -1,5 +1,7 @@
 # Series 5 workflow
 
+- Integrate learning into substantive SidewalkPilot coding tasks without blocking implementation on a quiz: point to the real function and input/output contract, explain the design choice and a failure mode, show a reproducible check, and offer one hard prediction/debugging question about the change. Keep trivial maintenance brief. Distinguish student decisions, AI implementation, measured results, and planned work.
+
 - Keep Series 5 work on the existing `series-5` branch (the user's “s5” branch).
 - The canonical Mac label/review workspace is `/Users/ramsabavat/Desktop/rc_car_code/code/ai_models_datasets/series_5`. The old Desktop `SidewalkPilot-Labels` and repository-root `sp-labels` folders have been retired.
 - Inside that workspace, keep the A/B/C trainer entry points directly in `series_5/`. Group supporting tools into `tools/labeling`, `datasets`, `evaluation`, `packaging`, `models`, `filtering`, `configs`, and `review`. Keep generated review bundles in `reviews/` and architecture documents in `docs/`. The Mac journal lives at `/Users/ramsabavat/Desktop/notebook`, outside the repository; do not recreate `series_5/notebook`. Do not scatter generated artifacts back across the workspace root.
