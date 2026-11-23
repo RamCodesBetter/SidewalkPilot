@@ -3,7 +3,7 @@
   'use strict';
   const data = window.COMPARISON_DATA;
   const $ = id => document.getElementById(id);
-  const methods = ['gsam2', 'sam3', 'codex'];
+  const methods = Object.keys(data.methods);
   const reviewMethods = data.review_methods || methods;
   if(!reviewMethods.length || reviewMethods.some(m=>!methods.includes(m)))throw Error('Invalid review scope.');
   const sides = ['original', ...methods];
