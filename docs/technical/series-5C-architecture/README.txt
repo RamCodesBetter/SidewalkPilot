@@ -1,0 +1,36 @@
+SidewalkPilot 5.C architecture guide
+
+Read: sidewalkpilot-5C-math-and-cs.pdf
+Edit: sidewalkpilot-5C-math-and-cs.tex
+
+The current PDF is compiled with real LaTeX and classic Computer Modern
+text/math fonts. The .tex source is standalone: no screenshots of equations,
+external equation images, generated math font substitutions, or project
+source files are needed to typeset it.
+
+Compile with Tectonic:
+  tectonic sidewalkpilot-5C-math-and-cs.tex
+
+It can also be compiled with a standard LaTeX installation or Overleaf.
+
+The original .typ file is retained as the earlier Typst edition. Future
+content revisions target .tex; the two formats are not automatically synced.
+implementation-facts.json is the current code and numerical audit, not an
+archived Typst-only artifact.
+
+The expanded teaching edition begins on PDF page 2 with mu and sigma.
+It includes original TikZ weight/bias, convolution, normalization,
+encoder/decoder, and gradient diagrams, plus worked numerical examples.
+The small teaching networks are distinct from the real 5.C architecture.
+
+Workstation-only verification, from this directory in the repository:
+  /home/rsabavat/.gpu-env/bin/python capture_facts.py
+  /home/rsabavat/.venvs/sidewalkpilot-docs/bin/python build_latex.py
+
+capture_facts.py checks actual model shapes and numerical examples without
+training the research model. build_latex.py checks the repository snapshot,
+typesets from cached TeX resources, and verifies fonts and page layout.
+The first Tectonic build must fetch its required TeX resources.
+
+build.py is the original Typst builder. It now writes a separate
+sidewalkpilot-5C-math-and-cs-typst.pdf so it cannot overwrite the LaTeX PDF.
