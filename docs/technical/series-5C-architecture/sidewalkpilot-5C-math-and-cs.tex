@@ -93,7 +93,7 @@ Start on page 2: every part of image normalization is unpacked before the archit
 
 The diagrams use original examples and are drawn directly in LaTeX. They build intuition with small numbers; they are not copied book illustrations or visualizations of learned 5.C weights. Small teaching networks are explicitly distinguished from the implemented model.
 
-{\small\textbf{Status:} architecture and numerical checks are implemented. A short setup smoke test is not a completed 5.C experiment. This document does not launch training, claim final accuracy, or establish real-time Jetson performance. The data campaign and release still require quality checks.}
+{\small\textbf{Scope:} the FP32 architecture and the shared 10,000-image 5.C/5.E campaign. This guide distinguishes the actual focal-only objective from optional experiments. It does not claim final accuracy, safe autonomous operation, or measured Jetson speed.}
 
 \guidepage{1. Meet mu and sigma}{Read the normalization equation one symbol at a time.}
 \label{normalization}
@@ -583,29 +583,28 @@ The network still has \textbf{two} output channels. Ignore ID 255 is an annotati
 \subsection*{Strong labels versus pseudo-labels}
 Reviewed binary references provide verified positive and negative supervision. Positive-only references and screened SAM-generated masks belong to the weaker supervision pool. SAM is a \textbf{label-generation tool}, not a component inside this ConvNeXt network. A mask passing automatic checks is still a pseudo-label, not established ground truth.
 
-\subsection*{The current development split}
-\begin{tabularx}{\linewidth}{@{}YYYY@{}}\toprule
-\textbf{Partition} & \textbf{Date group} & \textbf{Binary} & \textbf{Partial}\\\midrule
-Train & July 2, 2026 & 29 & 218\\
-Validation & July 12, 2026 & 13 & 105\\
-Test & July 7, 2026 & 5 & 28\\\bottomrule
+\subsection*{The shared 5.C / 5.E campaign split}
+Only the 10,000 accepted SAM 3 image/mask pairs enter this experiment. The earlier 398-image reviewed cohort is not added. The 30 inspected frames stay in training with their groups; frames 3 and 6 use their original masks.
+
+\begin{tabularx}{\linewidth}{@{}lrY@{}}\toprule
+Partition & Images & Use\\\midrule
+Train & 8,000 & Backpropagate errors and update parameters.\\
+Validation & 1,000 & Compare epochs and select checkpoints; no gradients.\\
+Test & 1,000 & Held out of updates and checkpoint selection.\\\bottomrule
 \end{tabularx}
 
-These are \textbf{398 usable reviewed images}, before adding pseudo-labels; two of the 400 reviewed records were excluded. Grouping by acquisition day keeps those days separate. Nearby images are correlated, so a random frame-level split could make results look stronger than genuine generalization. Grouping does not prove the days contain independent routes.
+\code{campaign10k.py} links consecutive frames from the same run at most 0.5 seconds apart, and also links images whose perceptual hashes differ by at most four bits. Links are transitive: if A links to B and B to C, all three stay together. The loader checks that groups do not cross partitions and that the file hashes match.
 
-\note{This is a development split, not the research plan's final 80/10/10 experiment and not an untouched final benchmark. Previously inspected test examples can no longer support an ``unseen throughout development'' claim. Labeling all 81k images must not mean training on the held-out images.}
-
-{\small The full-run 5.C entry point requires a mixed-dataset manifest with at least 10,000 accepted pseudo-labels, except for a smoke run. That metadata gate and loader checks do not certify mask accuracy. The 10k target is not yet a completed quality-verified dataset. [C2--C5]}
+\note{A held-out photo is not an independent human label. Matching the SAM mask measures how well the model reproduces that labeling process. Both could make the same mistake at a driveway.}
 
 \guidepage{15. Batches and augmentation}{What one epoch actually contains.}
 \subsection*{Computer science view}
-The default batch has \textbf{8 images}: 4 strong binary references plus 4 weak examples. Weak examples can be positive-only references or screened pseudo-labeled images. Each pool is shuffled using the seed and epoch; a pool cycles when exhausted. The combined batch is also shuffled.
-
-If $n_s$ and $n_w$ are the pool sizes, the default number of updates in one epoch is
+The campaign's \code{CampaignSampler} shuffles the 8,000 training indices using the seed plus epoch index. It emits slices of eight indices, with an augmentation seed for each. There is no separate pool of human examples.
 \[
-T_{\mathrm{epoch}}=\max\!\left(\left\lceil\frac{n_s}{4}\right\rceil,\left\lceil\frac{n_w}{4}\right\rceil\right).
+T_{\mathrm{epoch}}=\left\lceil\frac{n_{\mathrm{train}}}{B}\right\rceil
+=\left\lceil\frac{8{,}000}{8}\right\rceil=1{,}000.
 \]
-With 29 strong images, those same reviewed examples are visited repeatedly while the much larger weak pool is traversed. The final weak batch can also repeat a few entries. Therefore an epoch is not necessarily ``every image exactly once.'' [C3, C4]
+$B$ counts images per batch, not channels or pixels. One batch gives one optimizer step. Each training image appears once per completed epoch. At 20 epochs without early stopping there would be 20,000 updates, not 20,000 distinct images.
 
 \subsection*{Mathematics view: useful variation}
 Training applies paired horizontal flips to image and target with probability 0.5. It changes image brightness, contrast, and saturation, but \textbf{does not} apply these color changes to the class mask:
@@ -854,6 +853,27 @@ The model needs $\theta$, including its learned biases. It does not need AdamW's
 
 \note{The worked scalar update on the previous page uses actual AdamW. The earlier two-input example used plain gradient descent solely to show signs and the chain rule. Their different step sizes are not a discrepancy in the trainer.}
 
+\guidepage{21b. Reading the campaign run}{What changes when the optimizer takes one step?}
+\subsection*{Decode the six batch loss curves}
+In \code{ReviewedFocalLoss}, $F_n$ is the class-weighted focal loss of image $n$, normalized by the sum of class weights on known pixels (section 17). All campaign training masks are weak even though the PNG contains class IDs: weak describes the label source, not a third pixel class.
+
+\begin{tabularx}{\linewidth}{@{}lY@{}}\toprule
+W\&B key (prefix \code{batch/}) & Value on the campaign path\\\midrule
+\code{loss_weak_focal} & Mean $F_n$ across valid weak images.\\
+\code{weak_loss} & The same unscaled mean returned by the objective.\\
+\code{loss_strong_focal} & Zero: no strong examples in the batch.\\
+\code{loss_strong_soft_dice} & Zero: reviewed-only Dice is inactive.\\
+\code{loss_weighted_dice} & Zero: Dice coefficient is zero.\\
+\code{loss} & $0.5$ times weak focal; this scalar is differentiated.\\\bottomrule
+\end{tabularx}
+
+For example, a weak focal mean of $0.24$ gives a total loss of $0.12$. A flat zero Dice curve is expected, not evidence of perfect overlap. If total and weak focal also stay flat, check whether optimizer steps are happening and whether any pixels are valid.
+
+\subsection*{5.C versus 5.E: same data, different first two epochs}
+5.C updates both encoder and decoder from step one. In 5.E epochs 1 and 2, the trainer disables gradients for backbone parameters and sets the backbone to evaluation mode. Its features still flow into the decoder; the decoder trains normally. At epoch 3 both train. Unfreezing does not rewind the decoder or restart its optimizer.
+
+\textbf{Debugging question:} the decoder weights change after the first 5.E step but the encoder weights do not. Is that a failed update? No: that is the intended freeze. After epoch 2, check gradient flags and parameter changes again. Evaluation mode alone would not disable gradient computation.
+
 \guidepage{22. The training program}{The outer loop coordinates many small updates.}
 \subsection*{Computer science view}
 The following is explanatory pseudocode matching the main sequence. The real trainer also validates data, handles failures, writes files, and logs metrics.
@@ -867,7 +887,8 @@ scheduler = CosineAnnealingLR(optimizer, T_max=20)
 objective = ReviewedFocalLoss(gamma=1.5)  # Dice off
 
 for epoch in range(20):
-    model.train()                    # stochastic depth ON
+    model.train()
+    # 5.E only: freeze backbone and set it to eval for epochs 0,1.
     sampler.epoch = epoch
     for images, targets, strong in training_batches:
         optimizer.zero_grad(set_to_none=True)
@@ -892,7 +913,7 @@ With initial rate $\eta_0$, the rate used at zero-indexed epoch $e$ is
 At $e=0$ it is the initial rate; at $e=10$ it is half. The scheduler reaches zero after the twentieth epoch; that value is for a next epoch that is not run. There is no warmup or cosine restart in this configuration. [C3, R7]
 
 \subsection*{Validation is a different phase}
-After each epoch, binary validation references supply the checkpoint-selection metrics; partial references also supply known-sidewalk recall. Neither updates weights. A strict improvement in \textbf{sidewalk IoU} selects \code{best.pt}; otherwise the stale-epoch count increases. Training stops after five consecutive non-improving epochs or the 20-epoch limit. The loop does not automatically evaluate the held-out test partition.
+After each epoch the campaign evaluates 1,000 validation pseudo-masks without changing weights. A strict increase in sidewalk IoU selects \code{best.pt}; five consecutive epochs without improvement stop training, subject to the 20-epoch limit. The test partition is not used here.
 
 {\small The base trainer retains a GradScaler interface, but it is disabled for 5.C. The pseudocode shows the equivalent ordinary FP32 operations rather than implying mixed precision is active.}
 
@@ -900,7 +921,7 @@ After each epoch, binary validation references supply the checkpoint-selection m
 \subsection*{Checkpoints}
 \code{best.pt} contains the best validation-IoU state; \code{last.pt} contains the latest saved epoch state. Atomic writes reduce the risk of leaving a partially replaced checkpoint if the process is interrupted.
 
-Completed runs publish \code{5.C.pt} (end) and \code{5.Cb.pt} (best validation sidewalk IoU). Within one percentage point of that best IoU, \code{5.Cs.pt} selects highest defined sidewalk precision, then higher IoU, then earliest epoch. Boundary F1 (two reference pixels) is reported separately, never used for selection. All comparisons use reviewed binary validation masks. \code{checkpoint-selection.json} records the selections; interrupted and smoke runs do not publish these names. [C2]
+For either variant the unsuffixed file is the end state; \code{b} maximizes validation sidewalk IoU. Among epochs within 0.01 of that maximum, \code{s} maximizes defined sidewalk precision, breaking ties by higher IoU then earlier epoch. Example: \code{5.E.pt}, \code{5.Eb.pt}, \code{5.Es.pt}. Boundary F1 at two reference pixels is reported separately. Selection uses campaign validation pseudo-masks, not human ground truth. \code{checkpoint-selection.json} records selected epochs; interrupted and smoke runs do not publish these names. [C2]
 
 \begin{tabularx}{\linewidth}{@{}lY@{}}\toprule
 \textbf{Saved item} & \textbf{Why it matters}\\\midrule
@@ -926,6 +947,27 @@ Local history, validation reports, status files, and checkpoints remain the prim
 The established telemetry scope is losses, validation metrics, hyperparameters, split/dataset identities, and machine statistics. It excludes photos, masks, source code, and checkpoints. Obtain the appropriate full-run authorization before starting uploads; this document build uploads nothing to W\&B.
 
 \note{An offline record should distinguish ``experiment completed,'' ``smoke test completed,'' ``interrupted,'' and ``not started.'' Never promote the two-update setup smoke test into evidence of trained accuracy.}
+
+\guidepage{23a. Trace one camera frame}{Which file is input, which is the answer, and which is bookkeeping?}
+The manifest tells the loader where the RGB photo and target mask live. A hash checks file identity. Neither the JSON text nor the mask PNG is appended to the input photo. During training the RGB tensor goes to the network; the integer target goes to the loss. For prediction you need the photo but not its target.
+
+\begin{lstlisting}
+scores = model(images)["out"]       # float32 [N,2,540,960]
+pixel = scores[0, :, 0, 1]          # both logits at row 0, column 1
+labels = scores.argmax(dim=1)       # integer [N,540,960]
+\end{lstlisting}
+Example at just four positions. The matrices are channels, not two photos:
+\[
+ Z_0=\begin{bmatrix}3&0\\1&2\end{bmatrix},\qquad
+ Z_1=\begin{bmatrix}1&4\\3&2\end{bmatrix},\qquad
+ \widehat Y=\begin{bmatrix}0&1\\1&0\end{bmatrix}.
+\]
+At the upper right, $4>0$, so sidewalk wins. At the lower right, equality selects the first class (background). These decisions come from one tensor operation, not four calls to the model. For native-resolution evaluation resize the logits first, then take the winner.
+
+\subsection*{How the review viewer stores the answer}
+Run-length encoding (RLE) represents consecutive equal values by a value and count. Read the mask across rows: $[0,1,1,0]$. The viewer stores $[0,1,\;1,2,\;0,1]$: one zero, two ones, one zero. A run can cross a row boundary. The counts sum to four, exactly height times width. In your manifest, the first pair $[0,126098]$ means 126,098 consecutive class-0 pixels, not a probability or coordinate.
+
+\note{Could you recover the logits from this RLE? No. It preserves every class decision, but argmax already discarded the margin by which each class won.}
 
 \guidepage{24. A normal prediction}{Same weights, no loss, no backward, no optimizer.}
 \subsection*{The runtime sequence}

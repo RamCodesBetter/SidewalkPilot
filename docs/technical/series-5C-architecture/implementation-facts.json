@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-22T20:10:16.489609-08:00",
+  "captured_at": "2026-11-22T23:51:25.521972-08:00",
   "scope": "Code/shape audit and isolated numerical examples, not trained-model results",
   "torch": "2.7.1+cu118",
   "torchvision": "0.22.1+cu118",
@@ -254,11 +254,11 @@
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py",
-      "sha256": "f58c439439b09ecb5401801170604192d2569f72d8d08e6187471ede4d1aeb9b"
+      "sha256": "50ee01f45a104ae93701452a8cc2ffc3dded7f61fc8da0df61961ea1c1347cb8"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_a_sidewalkpilot_trainer.py",
-      "sha256": "436f5b9f5dc6d988ca74f0e88d70bbf247acb072292a1fe2eef68525468921d9"
+      "sha256": "56b1287e6ce685e777f9be912dac4b0864167dcce6bec47546d09f27b9fb8a95"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_b_sidewalkpilot_trainer.py",
@@ -283,6 +283,18 @@
     {
       "path": "code/ai_models_datasets/series_5/tools/evaluation/boundary_metrics.py",
       "sha256": "f52e838033c88d859119322367428f2959d99a0057fb76f3dc520c4b691d0503"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/datasets/campaign10k.py",
+      "sha256": "35e586c48a14ad9a223c6716c84ba26e74ed073eee192d6f8582224c902f3a39"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/series_5_e_sidewalkpilot_trainer.py",
+      "sha256": "59def33c71455987ac3b78ed045679808c447a76b5b23ad60feb2131f05715af"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/packaging/package_model_review.py",
+      "sha256": "6e86bafd12f2a2bf8ad30cb4e870a0915f65905810428474bd5376d93d44c163"
     }
   ],
   "torchvision_convnext_sha256": "b4fef7b47faeb3a87629275570fca9117f48ce4e65b2bf362ac193d799a3e0d1"

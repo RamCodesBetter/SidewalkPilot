@@ -9,6 +9,11 @@ Short matrix-shape companion:
 Read: sidewalkpilot-5C-math-and-cs.pdf
 Edit: sidewalkpilot-5C-math-and-cs.tex
 
+Campaign edition: sections 14-15 use the actual 8,000/1,000/1,000 split.
+Section 21b explains the six batch loss curves and the C/E freeze schedule.
+Section 23a traces a photo to logits to the viewer's run-length encoding.
+The dated plan audit below is historical, not the active run configuration.
+
 November 22 loss restoration and plan audit:
   Sections 17/17a now document focal and the optional reviewed-only Dice term.
   The CE teaching examples remain explicitly labeled gamma=0 simplifications.
