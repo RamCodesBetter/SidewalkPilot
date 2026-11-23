@@ -147,6 +147,10 @@ class ConvNeXtTests(unittest.TestCase):
         self.assertEqual(policy["class_weights"], [2., 1.])
         self.assertEqual(len(policy["loss_sha256"]), 64)
         self.assertEqual(len(policy["sampler_sha256"]), 64)
+        self.assertEqual(policy["checkpoint_names"], dict(end="5.C", best_iou="5.Cb", smart="5.Cs"))
+        self.assertEqual(len(policy["checkpoint_naming_sha256"]), 64)
+        self.assertFalse((args.output / "5.C.pt").exists())
+        self.assertFalse((args.output / "checkpoint-selection.json").exists())
         row = state["history"][0]
         self.assertAlmostEqual(row["binary_loss"], row["loss_strong_focal"] + row["loss_weighted_dice"], places=6)
         self.assertAlmostEqual(row["loss"], row["binary_loss"] + .5 * row["partial_loss"], places=6)
@@ -175,6 +179,28 @@ class ConvNeXtTests(unittest.TestCase):
             self.assertEqual(policy["dice_weight"], .5 if mode == "focal-dice" else 0)
             self.assertEqual(train.call_args.kwargs["loss_function"].dice_weight, policy["dice_weight"])
         self.assertEqual(trainer.DEFAULTS["loss"], "focal")
+
+    def test_completed_full_run_invokes_named_checkpoint_publication(self):
+        (self.root / "manifest.json").write_text(json.dumps(
+            dict(schema="sidewalkpilot-mixed-pseudo-dataset-v1", accepted_pseudo=10000)))
+        args = trainer.parser().parse_args(["train", "--dataset", str(self.root),
+            "--split", "unused.json", "--output", str(self.root / "run")])
+        with patch.object(base, "train", return_value=dict(status="complete")), \
+                patch.object(trainer.checkpoint_names, "publish_completed_run", return_value={}) as publish:
+            result = trainer.run_training(args)
+        publish.assert_called_once_with(args.output, "5.C")
+        self.assertEqual(result["checkpoint_selection"], {})
+
+    def test_interrupted_training_does_not_publish_named_checkpoints(self):
+        (self.root / "manifest.json").write_text(json.dumps(
+            dict(schema="sidewalkpilot-mixed-pseudo-dataset-v1", accepted_pseudo=10000)))
+        args = trainer.parser().parse_args(["train", "--dataset", str(self.root),
+            "--split", "unused.json", "--output", str(self.root / "run")])
+        with patch.object(base, "train", side_effect=KeyboardInterrupt), \
+                patch.object(trainer.checkpoint_names, "publish_completed_run") as publish:
+            with self.assertRaises(KeyboardInterrupt):
+                trainer.run_training(args)
+        publish.assert_not_called()
 
 
 if __name__ == "__main__":

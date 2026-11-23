@@ -18,6 +18,7 @@ from prepare_series5_pseudo_dataset import load_mixed_partition
 import series_5_a_sidewalkpilot_trainer as base
 import series_5_b_sidewalkpilot_trainer as previous
 import segmentation_losses
+import checkpoint_names
 
 DEFAULTS = read_json(workspace.CONFIGS / "series_5_c_config.json")
 
@@ -64,9 +65,14 @@ def run_training(args):
         "base_trainer_sha256": sha256(Path(base.__file__)),
         "sampler_sha256": sha256(Path(previous.__file__)),
         "loss_sha256": sha256(Path(segmentation_losses.__file__)),
+        "checkpoint_names": checkpoint_names.checkpoint_names(args.model_name),
+        "checkpoint_naming_sha256": sha256(Path(checkpoint_names.__file__)),
     }
-    return base.train(args, partition_loader=load_partition, sampler_class=previous.ScreenedBatchSampler,
-                      loss_function=loss_function, model_definition=model_definition)
+    result = base.train(args, partition_loader=load_partition, sampler_class=previous.ScreenedBatchSampler,
+                        loss_function=loss_function, model_definition=model_definition)
+    if not args.smoke and result["status"] == "complete":
+        result["checkpoint_selection"] = checkpoint_names.publish_completed_run(args.output, args.model_name)
+    return result
 
 
 def parser():

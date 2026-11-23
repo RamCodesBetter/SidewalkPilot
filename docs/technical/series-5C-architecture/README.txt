@@ -16,6 +16,12 @@ November 22 loss restoration and plan audit:
   planning-register-snapshot.txt preserves the source register unchanged.
   These files do not change submitted forms or imply full training/deployment.
 
+Checkpoint naming update (section 23):
+  5.C.pt = completed end state; 5.Cb.pt = best validation sidewalk IoU.
+  5.Cs is reserved until smart selection is defined, with no fake s file.
+  Interrupted runs retain last.pt for resume; smoke runs are not promoted.
+  No historical A/B files, training schedules, or splits were changed.
+
 The current PDF is compiled with real LaTeX and classic Computer Modern
 text/math fonts. The .tex source is standalone: no screenshots of equations,
 external equation images, generated math font substitutions, or project

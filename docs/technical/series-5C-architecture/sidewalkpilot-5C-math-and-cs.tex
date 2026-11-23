@@ -900,6 +900,8 @@ After each epoch, binary validation references supply the checkpoint-selection m
 \subsection*{Checkpoints}
 \code{best.pt} contains the best validation-IoU state; \code{last.pt} contains the latest saved epoch state. Atomic writes reduce the risk of leaving a partially replaced checkpoint if the process is interrupted.
 
+Completed non-smoke runs also publish \code{5.C.pt} (end, including normal early stopping) and \code{5.Cb.pt} (best validation sidewalk IoU; earliest tie wins). \code{5.Cs} is reserved: no smart-selection checkpoint exists until its criterion is defined. \code{checkpoint-selection.json} records the selected epochs and rules. Named files are fixed snapshots, not moving symlinks. An interrupted run keeps \code{last.pt} for recovery, not a completed-model name. [C2]
+
 \begin{tabularx}{\linewidth}{@{}lY@{}}\toprule
 \textbf{Saved item} & \textbf{Why it matters}\\\midrule
 Model state & Learned encoder and decoder parameter tensors\\
@@ -916,7 +918,7 @@ To resume training properly, restore the optimizer and scheduler as well as weig
 \subsection*{What resuming can and cannot do}
 The current resume path continues from the last \textbf{completed, saved epoch}, not the precise interrupted image or batch. Dataset/configuration checks protect against silently changing the experiment. The sampler is seeded by epoch. A seed helps reproducibility but does not guarantee bitwise-identical behavior across GPU types, PyTorch versions, or all execution settings.
 
-Keep source version, environment versions, data hashes, class policy, random seeds, and the actual configuration with the run. A filename such as \code{5.C} alone cannot identify these choices.
+Keep source version, environment, data hashes, class policy, seeds, and configuration with the run; the name \code{5.C} alone cannot identify these choices.
 
 \subsection*{Local records and W\&B}
 Local history, validation reports, status files, and checkpoints remain the primary run artifacts. W\&B is a live view of metrics and approved metadata; it is not the optimizer and does not perform learning. A disconnected dashboard is not by itself proof that training stopped.

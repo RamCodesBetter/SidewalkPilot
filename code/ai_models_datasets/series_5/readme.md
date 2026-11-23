@@ -2,6 +2,33 @@
 
 Keep work on `series-5`. Historical A/B artifacts retain their original recipes.
 
+## Checkpoint Names
+
+Completed non-smoke C runs publish these names inside their run directory:
+
+| Name | Meaning |
+| --- | --- |
+| `5.C.pt` | End state: last completed epoch, including normal early stopping |
+| `5.Cb.pt` | Best validation sidewalk IoU only; earliest epoch wins ties |
+| `5.Cs` | Reserved for smart selection; no checkpoint is produced until its criterion exists |
+
+The same convention applies to future base names: `5.0`, `5.0b`, `5.0s`.
+`best.pt` and `last.pt` remain compatible working/resume checkpoints. Named files
+are snapshots, not symlinks that follow later replacements. The trainer writes
+`checkpoint-selection.json` with each selected epoch and criterion. Smoke and
+interrupted runs do not publish completed-model names. No historical A/B
+artifacts are renamed, and this change does not alter training or early stopping.
+
+The current trainer updates encoder and decoder together from the first batch.
+Planned staged warmup would update only the decoder first, then both; the decoder
+would continue without a reset. That schedule is not implemented by naming files.
+
+The old A development dataset contains 247 training, 118 validation, and 33 test
+images. All 33 appear in the A/B comparison viewer; this does not establish that
+the user inspected every image or that every mask is a complete binary reference.
+They are not the final 10% of the full corpus. Preserve development provenance
+while preparing the planned grouped 80/10/10 split and unexposed final holdout.
+
 ## 5.C Loss and Plan Audit (November 22, 2026)
 
 5.C now defaults to **class-weighted focal loss**, restoring Decision 9 of the

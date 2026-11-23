@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-22T18:39:05.130723-08:00",
+  "captured_at": "2026-11-22T19:53:19.816741-08:00",
   "scope": "Code/shape audit and isolated numerical examples, not trained-model results",
   "torch": "2.7.1+cu118",
   "torchvision": "0.22.1+cu118",
@@ -254,7 +254,7 @@
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py",
-      "sha256": "65bd3889eda6795f5b5d4cbac9fee48629cb8ea94083c9d1cbddbb812d9eb20e"
+      "sha256": "3c43cad05186c6f44edb9d019147aa4be81065a6e59a5575ef3e8c5736c0cf5e"
     },
     {
       "path": "code/ai_models_datasets/series_5/series_5_a_sidewalkpilot_trainer.py",
@@ -275,6 +275,10 @@
     {
       "path": "code/ai_models_datasets/series_5/tools/models/segmentation_losses.py",
       "sha256": "a04b7cbd431b35677bc67f05979d58146dd97084d655c6da067b51e72eb9d24b"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/models/checkpoint_names.py",
+      "sha256": "960eeffd54bd17a5047b188b8798aaac41c6bc4f7aaae3cba712b4017c1d40f8"
     }
   ],
   "torchvision_convnext_sha256": "b4fef7b47faeb3a87629275570fca9117f48ce4e65b2bf362ac193d799a3e0d1"

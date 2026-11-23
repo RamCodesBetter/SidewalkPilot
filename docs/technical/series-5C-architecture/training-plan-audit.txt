@@ -6,8 +6,8 @@ Scope
 This is an engineering audit, not a new research plan, approval, notebook entry,
 completed experiment, or request to restart field work. No submitted forms,
 existing data, splits, review decisions, or checkpoints were changed by this audit.
-Only the focal-loss restoration, optional Dice comparison, logging, tests, and
-related documentation were implemented. Remaining items below are findings,
+The focal-loss restoration, optional Dice comparison, logging, completed-run
+checkpoint naming, tests, and related documentation were implemented. Remaining items below are findings,
 not newly implemented functionality or automatic permission to change the study.
 
 Planning source: planning-register-snapshot.txt, copied without edits from
@@ -39,6 +39,11 @@ The new 5.C policy is 5.C-convnext-unet-fp32-focal-v2:
   * A/B objectives and artifacts are unchanged. New focal and focal+Dice runs
     need distinct output directories and the same frozen data/split/seed/budget.
   * Only synthetic unit/smoke checks ran, not full research-model training.
+  * Later naming decision: 5.C = end, 5.Cb = best validation sidewalk IoU,
+    5.Cs = reserved smart selection. Completed non-smoke runs publish the first
+    two .pt snapshots and checkpoint-selection.json. Interrupted runs retain
+    last.pt for resume; smoke runs are not promoted. No s checkpoint is created
+    until a genuine smart-selection criterion exists. A/B artifacts stay intact.
 
 Evidence: code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py
           code/ai_models_datasets/series_5/tools/models/segmentation_losses.py
@@ -89,9 +94,12 @@ HIGH-PRIORITY REMAINING FINDINGS
    tools/configs/label_config_descriptive.json;
    series_5_a_sidewalkpilot_trainer.py::SidewalkDataset.
 
-6. Existing test images have been inspected (Decision 18).
+6. Existing test images were exposed through development viewers (Decision 18).
    A/B comparison viewers contain all 33 test images and identify development
-   exposure. test_evaluated=false in a training run means only that its training
+   exposure. This does not establish that the user personally reviewed every
+   one of the 33 images or that all masks are full binary references. These are
+   from the 398-image A development dataset, not the final 10% of the full corpus.
+   test_evaluated=false in a training run means only that its training
    loop did not evaluate test: it does NOT undo separate viewer inspection.
    Exact influence of each review is unknown. After test-informed changes, a
    genuinely unexposed final holdout is needed; provenance must survive that work.
@@ -126,6 +134,8 @@ D1  Scope/timing: navigation and measurement separation remains a design contrac
     reports January 10 as experimentation end; this audit does not modify forms.
 D2  Release identity: complete-stack versioning still pending. Newer explicit
     5.A/5.B/5.C beta naming overrides the older no-letter model-naming wording.
+    Base/b/s now distinguish end, best-IoU, and reserved smart-selection states.
+    This changes checkpoint naming, not architecture, optimizer, or selection score.
 D3  Images/provenance: the 81237-file amendment supersedes 80969. Hash-linked
     immutable source provenance exists, but builders COPY JPEGs into frozen
     datasets despite the old literal no-duplication promise. Decide whether to
