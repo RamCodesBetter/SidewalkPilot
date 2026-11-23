@@ -82,8 +82,9 @@ if(report){
   }
   $('refresh').onclick=reload;
   if(report.state==='running'){
-    $('stamp').append(' | Auto-refresh: 15s');
-    setInterval(()=>{if(!document.hidden)reload()},15000);
+    const refreshSeconds=5;
+    $('stamp').append(' | Auto-refresh: '+refreshSeconds+'s');
+    setInterval(()=>{if(!document.hidden)reload()},refreshSeconds*1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)reload()});
   }
 }else{$('state').textContent='No snapshot'}
