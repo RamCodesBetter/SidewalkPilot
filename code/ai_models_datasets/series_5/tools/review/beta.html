@@ -1,15 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SidewalkPilot | 5.A / 5.B</title><link rel="stylesheet" href="comparison.css"><link rel="stylesheet" href="beta.css"></head>
+<title>SidewalkPilot | Model comparison</title><link rel="stylesheet" href="comparison.css"><link rel="stylesheet" href="beta.css"></head>
 <body class="loading">
-<header><div><h1>SidewalkPilot <span>/ 5.A + 5.B</span></h1><p id="scope"></p></div>
+<header><div><h1>SidewalkPilot <span>/ Model comparison</span></h1><p id="scope"></p></div>
 <div class="actions"><span id="progress"></span>
 <button class="icon" id="import" aria-label="Import review" title="Import review"><i data-lucide="upload"></i></button>
 <button class="icon primary" id="export" aria-label="Export review" title="Export review"><i data-lucide="download"></i></button>
 <button class="icon" id="clear" aria-label="Clear this review" title="Clear this review"><i data-lucide="trash-2"></i></button></div></header>
 <input type="file" id="import-file" accept="application/json" hidden>
 <main>
+<fieldset id="model-picker"><legend>Compare models</legend></fieldset>
 <div class="toolbar">
 <div class="actions"><button class="icon" id="previous" aria-label="Previous image" title="Previous image (Left)"><i data-lucide="chevron-left"></i></button>
 <input id="position" type="number" min="1" value="1" aria-label="Image number"><span id="total"></span>
@@ -32,8 +33,7 @@
 <div id="panes" class="panes" data-layout="columns"></div>
 <p id="metric-scope"></p>
 <div class="review-bar"><div class="actions"><fieldset class="segments modes"><legend class="sr-only">Review model</legend>
-<label title="Review 5.A (A)"><input type="radio" name="target" value="a" checked>5.A</label>
-<label title="Review 5.B (B)"><input type="radio" name="target" value="b">5.B</label></fieldset><strong id="rating"></strong></div>
+</fieldset><strong id="rating"></strong></div>
 <div class="actions">
 <button class="decision" data-decision="correct" title="Correct (1)"><i data-lucide="check"></i>Correct</button>
 <button class="decision" data-decision="needs_correction" title="Needs correction (2)"><i data-lucide="flag"></i>Needs correction</button>

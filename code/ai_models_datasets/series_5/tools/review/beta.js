@@ -2,13 +2,14 @@
 (() => {
   'use strict';
   const data=window.BETA_COMPARISON_DATA, $=id=>document.getElementById(id);
-  const sides=['original','a','b','reference'], models=['a','b'];
+  const models=Object.keys(data.models), sides=['original',...models,'reference'];
+  let visible=models.includes('e')?['c','e']:models.slice(0,2);
   const labels={unreviewed:'Unreviewed',correct:'Correct',needs_correction:'Needs correction',uncertain:'Uncertain'};
   const levels={1:'Minor fixes',2:'Moderate fixes',3:'Major fixes'};
   const storageKey='sp-beta-comparison:'+data.package_id;
   const compatiblePackages=[data.package_id,...(data.compatible_review_package_ids||[])];
-  const metricFields=[['p','precision'],['r','recall'],['f1','f1'],['iou','sidewalk_iou'],['miou','miou']];
-  const state={index:0,target:'a',mode:'overlay',opacity:40,zoom:1,reviews:{}};
+  const metricFields=[['p','precision'],['r','recall'],['f1','f1'],['iou','sidewalk_iou'],['ioub','background_iou'],['miou','miou']];
+  const state={index:0,target:visible[0],mode:'overlay',opacity:40,zoom:1,reviews:{}};
   let ready=false, generation=0, pixels={}, syncing=false;
   const frame=()=>data.frames[state.index];
   const notice=text=>{$('message').textContent=text;};
@@ -16,13 +17,32 @@
   const record=(f,side)=>side==='reference'?(f.comparison_reference||f.reference):f.predictions[side];
   const referenceKind=f=>f.comparison_reference?.kind||f.supervision;
 
+  const targetBox=document.querySelector('.review-bar fieldset');
+  for(const key of models){
+    const name=data.models[key].name;
+    for(const [parent,type] of [[$('model-picker'),'checkbox'],[targetBox,'radio']]){
+      const label=document.createElement('label'),input=document.createElement('input');
+      input.type=type;input.value=key;input.name=type==='radio'?'target':'visible';
+      label.append(input,' '+name);parent.append(label);
+      if(type==='checkbox')input.title=name+' / epoch '+data.models[key].epoch;
+    }
+  }
+  function layout(){
+    for(const key of models){
+      const on=visible.includes(key);
+      $('pane-'+key).hidden=!on;
+      document.querySelector(`input[name=target][value=${key}]`).parentElement.hidden=!on;
+      const box=document.querySelector(`input[name=visible][value=${key}]`);
+      box.checked=on;box.disabled=on&&visible.length===1;
+    }
+  }
   for(const side of sides) {
     const model=models.includes(side), title=model?data.models[side].name:side==='original'?'Original':'Reference';
     const pane=document.createElement('section');pane.className='pane';pane.id='pane-'+side;pane.hidden=side==='reference';
     pane.innerHTML=`<div class="pane-heading">${model?`<button class="pane-title" data-select="${side}" title="Review ${title}">${title}</button>`:`<h2>${title}</h2>`}
       <span class="status" id="status-${side}"></span>${model?`<button class="icon" data-download="${side}" title="Download ${title} mask" aria-label="Download ${title} mask"><i data-lucide="image-down"></i></button>`:''}</div>
       <div class="stage" id="stage-${side}"><div class="imagebox"><img id="image-${side}" alt="${title} sidewalk image">${side==='original'?'':`<canvas id="canvas-${side}" aria-label="${title} mask"></canvas>`}</div></div>
-      ${model?`<dl class="metrics"><div><dt title="Precision">P</dt><dd id="metric-${side}-p"></dd></div><div><dt id="recall-${side}" title="Recall">R</dt><dd id="metric-${side}-r"></dd></div><div><dt>F1</dt><dd id="metric-${side}-f1"></dd></div><div><dt title="Sidewalk intersection over union">IoU</dt><dd id="metric-${side}-iou"></dd></div><div><dt title="Mean of sidewalk and background IoU; classes with zero union excluded">mIoU</dt><dd id="metric-${side}-miou"></dd></div></dl><div class="pane-stat" id="rating-${side}"></div>`:''}`;
+      ${model?`<dl class="metrics"><div><dt title="Precision">P</dt><dd id="metric-${side}-p"></dd></div><div><dt id="recall-${side}" title="Recall">R</dt><dd id="metric-${side}-r"></dd></div><div><dt>F1</dt><dd id="metric-${side}-f1"></dd></div><div><dt title="Sidewalk intersection over union">IoUs</dt><dd id="metric-${side}-iou"></dd></div><div><dt title="Background intersection over union">IoUb</dt><dd id="metric-${side}-ioub"></dd></div><div><dt title="Mean of sidewalk and background IoU; classes with zero union excluded">mIoU</dt><dd id="metric-${side}-miou"></dd></div></dl><div class="pane-stat" id="rating-${side}"></div>`:''}`;
     $('panes').append(pane);
   }
   function decode(rle,size) {
@@ -57,7 +77,7 @@
       prediction_sha256:f.predictions[side].sha256,decision:'unreviewed',notes:''};
   }
   function persist() {
-    try {localStorage.setItem(storageKey,JSON.stringify({index:state.index,target:state.target,autoAdvance:$('auto-advance').checked,reviews:state.reviews}));$('saved').textContent='Saved in this browser';}
+    try {localStorage.setItem(storageKey,JSON.stringify({index:state.index,target:state.target,visible,autoAdvance:$('auto-advance').checked,reviews:state.reviews}));$('saved').textContent='Saved in this browser';}
     catch(_){$('saved').textContent='Browser storage unavailable';notice('Export the review to preserve ratings.');}
   }
   function updateReview() {
@@ -70,16 +90,17 @@
     }
     document.querySelectorAll('[data-decision]').forEach(b=>{b.disabled=!ready;b.setAttribute('aria-pressed',String(b.dataset.decision===r.decision));});
     const count=Object.values(state.reviews).filter(r=>r.decision!=='unreviewed').length;
-    $('progress').textContent=`${count} / ${data.count*2} masks reviewed`;
+    $('progress').textContent=`${count} / ${data.count*models.length} masks reviewed`;
   }
-  function select(side) {state.target=side;updateReview();persist();}
+  function select(side) {if(!visible.includes(side))return;state.target=side;updateReview();persist();}
   function rate(decision,level) {
     if(!ready)return;
     const row={...currentReview(),decision};delete row.correction_level;
     if(level)row.correction_level=level;
     state.reviews[reviewKey(state.target)]=row;updateReview();persist();
     if($('auto-advance').checked&&decision!=='unreviewed') {
-      if(state.target==='a')select('b');
+      const next=visible.indexOf(state.target)+1;
+      if(next<visible.length)select(visible[next]);
       else if(state.index<data.count-1)show(state.index+1);
       else notice('End of image set.');
     }
@@ -93,7 +114,7 @@
   }
   function draw() {
     if(!ready)return;
-    for(const side of ['a','b','reference']) {
+    for(const side of [...visible,'reference']) {
       const canvas=$('canvas-'+side);canvas.style.display=state.mode==='source'?'none':'block';
       const ctx=canvas.getContext('2d'), image=ctx.createImageData(canvas.width,canvas.height), mask=pixels[side];
       for(let i=0;i<mask.length;i++) {
@@ -107,7 +128,7 @@
   function showMetrics() {
     const kind=referenceKind(frame()),binary=kind!=='sidewalk-positive-only',derived=kind==='derived-binary-reference';let m;
     const scores={};
-    for(const side of models) {
+    for(const side of visible) {
       m=window.MODEL_REVIEW_METRICS.score(pixels[side],pixels.reference,kind);
       scores[side]=m;
       for(const [short,key] of metricFields) {
@@ -120,17 +141,21 @@
       $('recall-'+side).textContent=binary?'R':'R (known)';
     }
     for(const [short,key] of metricFields) {
-      const better=window.MODEL_REVIEW_METRICS.higherDisplayed(scores.a[key],scores.b[key]);
-      for(const side of models) {
+      const values=visible.filter(k=>Number.isFinite(scores[k][key])).map(k=>Number((100*scores[k][key]).toFixed(2)));
+      const best=Math.max(...values),competitive=values.some(value=>value<best);
+      for(const side of visible) {
         const el=$(`metric-${side}-${short}`);
-        el.dataset.better=String(side===better);
-        if(side===better)el.title+=' Higher displayed value for this image.';
-        el.setAttribute('aria-label',`${short==='iou'?'Sidewalk IoU':short==='miou'?'mIoU':short.toUpperCase()}: ${el.textContent}${side===better?', higher displayed value':''}`);
+        const wins=competitive&&Number.isFinite(scores[side][key])&&Number((100*scores[side][key]).toFixed(2))===best;
+        el.dataset.better=String(wins);
+        if(wins)el.title+=' Higher displayed value for this image.';
+        el.setAttribute('aria-label',`${short==='iou'?'Sidewalk IoU':short==='miou'?'mIoU':short.toUpperCase()}: ${el.textContent}${wins?', higher displayed value':''}`);
       }
     }
     $('metric-scope').dataset.provisional=String(derived);
     $('metric-scope').textContent=derived
       ?`Provisional scores / derived binary reference: outside the accepted sidewalk outline is assumed background (${frame().comparison_reference.assumed_background_pixels.toLocaleString()} formerly unknown pixels). Not independently verified.`
+      :kind==='pseudo-binary'
+      ?`SAM 3 reference / ${m.scored_pixels.toLocaleString()} scored pixels / ${m.ignored.toLocaleString()} ignored`
       :binary
       ?`Binary reference / ${m.scored_pixels.toLocaleString()} scored pixels / ${m.ignored.toLocaleString()} ignored`
       :`Positive-only reference / ${m.scored_pixels.toLocaleString()} known sidewalk pixels / P, F1, IoU and mIoU unavailable`;
@@ -144,12 +169,12 @@
     if(!Number.isInteger(index))index=state.index;
     if($('correction-dialog').open)$('correction-dialog').close();
     const ticket=++generation;ready=false;document.body.classList.add('loading');
-    state.index=Math.max(0,Math.min(data.count-1,index));if(!keepTarget)state.target='a';
+    state.index=Math.max(0,Math.min(data.count-1,index));if(!keepTarget||!visible.includes(state.target))state.target=visible[0];layout();
     const f=frame();notice('');$('position').value=state.index+1;$('position').max=data.count;$('total').textContent='/ '+data.count;
     $('previous').disabled=state.index===0;$('next').disabled=state.index===data.count-1;
     $('filename').textContent=f.name;$('status-original').textContent=f.size.join(' x ');
     const kind=referenceKind(f);
-    $('status-reference').textContent=kind==='derived-binary-reference'?'Derived / provisional':kind==='binary-reference'?'Binary reference':'Positive-only';
+    $('status-reference').textContent=kind==='derived-binary-reference'?'Derived / provisional':kind==='binary-reference'?'Binary reference':kind==='pseudo-binary'?'SAM 3 pseudo-label':'Positive-only';
     for(const side of models) {
       $('status-'+side).textContent=(100*f.predictions[side].positive_pixels/(f.size[0]*f.size[1])).toFixed(1)+'% area';
       for(const [metric] of metricFields) {
@@ -163,7 +188,7 @@
       await new Promise((resolve,reject)=>{loaded.onload=resolve;loaded.onerror=()=>reject(Error('Image unavailable. Keep the images folder beside index.html.'));loaded.src=f.image;});
       if(ticket!==generation)return;
       if(loaded.naturalWidth!==f.size[0]||loaded.naturalHeight!==f.size[1])throw Error('Image dimensions differ from this package.');
-      for(const side of sides) {
+      for(const side of ['original',...visible,'reference']) {
         $('image-'+side).src=f.image;$('stage-'+side).style.aspectRatio=f.size.join('/');
         $('stage-'+side).firstElementChild.style.aspectRatio=f.size.join('/');
         if(side!=='original') {
@@ -183,6 +208,10 @@
     if(!ready)return;const side=b.dataset.download;
     download(Uint8Array.from(atob(frame().predictions[side].png_base64),c=>c.charCodeAt(0)), 'image/png',
       frame().name.replace(/\.[^.]+$/,'')+'-'+data.models[side].name+'-mask.png');
+  });
+  document.querySelectorAll('input[name=visible]').forEach(box=>box.onchange=()=>{
+    visible=models.filter(k=>document.querySelector(`input[name=visible][value=${k}]`).checked);
+    show(state.index,true);
   });
   $('previous').onclick=()=>show(state.index-1);$('next').onclick=()=>show(state.index+1);
   $('position').onchange=()=>show(Number($('position').value)-1);
@@ -221,7 +250,7 @@
   $('export').onclick=()=>download(JSON.stringify({schema:'sidewalkpilot-beta-comparison-ratings-v1',package_id:data.package_id,
     models:data.models,partition:data.partition,comparison_reference_id:data.comparison_reference_id||null,
     exported_utc:new Date().toISOString(),reviews:state.reviews},null,2),
-    'application/json','sidewalkpilot-5.A-5.B-review.json');
+    'application/json','sidewalkpilot-model-review.json');
   $('import').onclick=()=>$('import-file').click();
   $('import-file').onchange=async()=>{
     try {
@@ -238,11 +267,11 @@
   $('clear').onclick=()=>{if(confirm('Clear ratings and notes for this comparison only?')){state.reviews={};updateReview();persist();notice('Review cleared.');}};
   try {
     const saved=JSON.parse(compatiblePackages.map(id=>localStorage.getItem('sp-beta-comparison:'+id)).find(Boolean)||'null');
-    if(saved){state.reviews=checkedReviews(saved.reviews);if(Number.isInteger(saved.index))state.index=saved.index;if(models.includes(saved.target))state.target=saved.target;if(typeof saved.autoAdvance==='boolean')$('auto-advance').checked=saved.autoAdvance;}
+    if(saved){if(Array.isArray(saved.visible)&&saved.visible.some(k=>models.includes(k)))visible=models.filter(k=>saved.visible.includes(k));state.reviews=checkedReviews(saved.reviews);if(Number.isInteger(saved.index))state.index=saved.index;if(models.includes(saved.target))state.target=saved.target;if(typeof saved.autoAdvance==='boolean')$('auto-advance').checked=saved.autoAdvance;}
   }catch(_){notice('Saved review could not be loaded. Original masks are unchanged.');}
-  $('scope').textContent=`Development ${data.partition} / ${data.count} images / 5.A epoch ${data.models.a.epoch} / 5.B epoch ${data.models.b.epoch}`;
+  $('scope').textContent=data.population?`C/E test partition / ${data.count} of ${data.population.toLocaleString()} images / ${models.length} checkpoints`:`Development ${data.partition} / ${data.count} images`;
   $('unknown-legend').hidden=data.frames.every(f=>record(f,'reference').ignored_pixels===0);
-  $('provenance').textContent=data.comparison_reference_id
+  $('provenance').textContent=data.population?`Random seed ${data.seed} / frozen predictions`:data.comparison_reference_id
     ?`${data.comparison_reference_summary.preserved_binary} original binary / ${data.comparison_reference_summary.derived_binary} derived references / frozen predictions`
     :`${data.binary_references} binary / ${data.partial_references} partial references / frozen predictions`;
   lucide.createIcons();show(state.index,true);

@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   function score(prediction, reference, supervision) {
-    if (prediction.length!==reference.length || !['binary-reference','derived-binary-reference','sidewalk-positive-only'].includes(supervision)) {
+    if (prediction.length!==reference.length || !['binary-reference','derived-binary-reference','sidewalk-positive-only','pseudo-binary'].includes(supervision)) {
       throw Error('Invalid metric inputs.');
     }
     let tp=0,fp=0,fn=0,tn=0,ignored=0;
