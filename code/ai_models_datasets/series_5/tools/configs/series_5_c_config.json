@@ -1,0 +1,23 @@
+{
+  "model_name": "5.C",
+  "experiment": "series-5.C-convnext-unet-fp32-development",
+  "architecture": "convnext_tiny_unet",
+  "precision": "fp32",
+  "weights": "imagenet",
+  "width": 960,
+  "height": 540,
+  "batch_size": 8,
+  "epochs": 20,
+  "patience": 5,
+  "backbone_lr": 0.0001,
+  "head_lr": 0.001,
+  "weight_decay": 0.0001,
+  "partial_weight": 0.5,
+  "loss": "focal",
+  "focal_gamma": 1.5,
+  "background_weight": 2.0,
+  "sidewalk_weight": 1.0,
+  "class_weight_cap": 4.0,
+  "dice_weight": 0.5,
+  "seed": 20261121
+}

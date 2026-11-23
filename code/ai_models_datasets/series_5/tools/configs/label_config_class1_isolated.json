@@ -1,0 +1,33 @@
+{
+  "version": "grounded-sam2-diagnostic-v9-isolated-class1-candidates",
+  "diagnostic_class_ids": [1],
+  "detector": "IDEA-Research/grounding-dino-base",
+  "detector_revision": "12bdfa3120f3e7ec7b434d90674b3396eccf88eb",
+  "segmenter": "facebook/sam2.1-hiera-large",
+  "segmenter_revision": "665f8e2ad61cf5f53d65644ff27c8ee525124610",
+  "box_threshold": 0.25,
+  "text_threshold": 0.20,
+  "sam_quality_threshold": 0.70,
+  "class_conflict_margin": 0.05,
+  "box_nms_iou": 0.75,
+  "max_detections": 100,
+  "sam_box_batch": 8,
+  "precision": "float32",
+  "class_assignment": "prompt_token_scores",
+  "prompt_groups": [[0, 1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11]],
+  "prompt_overrides": {
+    "1": ["concrete sidewalk", "pedestrian walkway", "curb ramp"],
+    "2": ["asphalt road", "residential driveway", "parking lot"],
+    "3": ["grass lawn", "bare soil", "mulch bed", "gravel ground"],
+    "10": ["raised street curb", "stair steps", "ledge"]
+  },
+  "overlap_mode": "confidence",
+  "image_space": "original RGB pixels; no crop, undistortion, or geometric calibration applied",
+  "overlap_policy": "Highest detector_score*sam_quality across classes; close competing scores become ignore. No foreground override.",
+  "development_note": "Same v5 detection and segmentation, but only class-1 candidates are composed. All other pixels are ignore 255. This isolates mask shape from label competition; it is NOT a replacement 12-class recipe. No hard-coded geometric sidewalk region or human point edits.",
+  "sources": [
+    "https://github.com/IDEA-Research/GroundingDINO#-explanationstips-for-grounding-dino-inputs-and-outputs",
+    "https://github.com/IDEA-Research/Grounded-SAM-2",
+    "https://huggingface.co/docs/transformers/v4.57.1/model_doc/sam2"
+  ]
+}

@@ -1,0 +1,45 @@
+const assert=require('node:assert/strict');
+const {score,higherDisplayed}=require('../../ai_models_datasets/series_5/tools/review/model_metrics.js');
+
+const p=[1,1,0,0,1,0],r=[1,0,1,0,255,255];
+const binary=score(p,r,'binary-reference');
+assert.equal(binary.precision,0.5);assert.equal(binary.recall,0.5);assert.equal(binary.f1,0.5);
+assert.equal(binary.ignored,2);assert.equal(binary.scored_pixels,4);
+assert.equal(binary.sidewalk_iou,1/3);assert.equal(binary.background_iou,1/3);assert.equal(binary.miou,1/3);
+assert.deepEqual(score([1,1,0,0,0,1],r,'binary-reference'),binary,'Ignored predictions cannot affect metrics');
+const partial=score(p,[1,255,1,255,255,255],'sidewalk-positive-only');
+assert.equal(partial.precision,null);assert.equal(partial.f1,null);assert.equal(partial.recall,0.5);
+assert.equal(partial.fp,null);assert.equal(partial.tn,null);assert.equal(partial.scored_pixels,2);
+assert.equal(partial.sidewalk_iou,null);assert.equal(partial.background_iou,null);assert.equal(partial.miou,null);
+const empty=score([0,0],[255,255],'binary-reference');
+assert.equal(empty.precision,null);assert.equal(empty.recall,null);assert.equal(empty.f1,null);
+assert.equal(empty.miou,null);
+const missed=score([0,0],[1,1],'binary-reference');
+assert.equal(missed.precision,null);assert.equal(missed.recall,0);assert.equal(missed.f1,0);
+const falsePositive=score([1,0],[0,0],'binary-reference');
+assert.equal(falsePositive.precision,0);assert.equal(falsePositive.recall,null);assert.equal(falsePositive.f1,0);
+const correct=score([0,1],[0,1],'binary-reference');
+assert.equal(correct.precision,1);assert.equal(correct.recall,1);assert.equal(correct.f1,1);
+assert.equal(correct.sidewalk_iou,1);assert.equal(correct.background_iou,1);assert.equal(correct.miou,1);
+const oneClass=score([0,0],[0,0],'binary-reference');
+assert.equal(oneClass.sidewalk_iou,null);assert.equal(oneClass.background_iou,1);assert.equal(oneClass.miou,1);
+const derived=score([1,1,0,0],[1,0,1,0],'derived-binary-reference');
+assert.equal(derived.scope,'provisional-derived-reference');assert.equal(derived.miou,1/3);
+const unequal=score([0,0,0,0,1,0],[0,0,0,1,1,1],'binary-reference');
+assert.equal(unequal.sidewalk_iou,1/3);assert.equal(unequal.background_iou,3/5);
+assert.equal(unequal.miou,(1/3+3/5)/2,'mIoU averages classes, not foreground-only IoU');
+assert.throws(()=>score([1],[255],'derived-binary-reference'));
+assert.throws(()=>score([1],[1,0],'binary-reference'));
+assert.throws(()=>score([1],[1],'unknown'));
+assert.throws(()=>score([255],[1],'binary-reference'));
+assert.throws(()=>score([1],[2],'binary-reference'));
+assert.equal(higherDisplayed(0.9288,0.9527),'b');
+assert.equal(higherDisplayed(0.9997,0.9993),'a');
+assert.equal(higherDisplayed(0.5,0.5),null);
+assert.equal(higherDisplayed(0.999701,0.999702),null,'Equal displayed values stay neutral');
+assert.equal(higherDisplayed(0,0.1),'b');
+for(const unavailable of [null,undefined,NaN,Infinity]) {
+  assert.equal(higherDisplayed(unavailable,0.8),null);
+  assert.equal(higherDisplayed(0.8,unavailable),null);
+}
+console.log('PASS: P/R/F1/IoU/mIoU, partial/derived references, ignored pixels, absent classes, invalid labels.');

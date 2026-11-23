@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SidewalkPilot | Mask comparison</title><link rel="stylesheet" href="comparison.css"></head>
+<body>
+<header><h1>SidewalkPilot <span>/ Mask comparison</span></h1><div class="actions"><span id="progress">0 / 90 ratings</span>
+<button class="icon" id="import" title="Import review" aria-label="Import review"><i data-lucide="upload"></i></button>
+<button class="icon primary" id="export" title="Export review" aria-label="Export review"><i data-lucide="download"></i></button>
+<button class="icon" id="clear" title="Clear this review" aria-label="Clear this review"><i data-lucide="trash-2"></i></button></div></header>
+<input type="file" id="import-file" accept="application/json" hidden>
+<main><div class="toolbar">
+<div class="actions"><button class="icon" id="previous" title="Previous image (Left arrow)" aria-label="Previous image"><i data-lucide="chevron-left"></i></button>
+<input id="position" type="number" min="1" value="1" aria-label="Image number"><span id="total">/ 30</span>
+<button class="icon" id="next" title="Next image (Enter)" aria-label="Next image"><i data-lucide="chevron-right"></i></button></div>
+<fieldset class="segments"><legend class="sr-only">Layout</legend>
+<button class="icon" data-layout="grid" aria-pressed="true" title="Four-panel grid" aria-label="Four-panel grid"><i data-lucide="grid-2x2"></i></button>
+<button class="icon" data-layout="columns" aria-pressed="false" title="Side-by-side columns" aria-label="Side-by-side columns"><i data-lucide="columns-4"></i></button>
+<button class="icon" data-layout="focus" aria-pressed="false" title="Focus selected method" aria-label="Focus selected method"><i data-lucide="square"></i></button></fieldset>
+<fieldset class="segments modes"><legend class="sr-only">Mask view</legend>
+<label><input type="radio" name="mode" value="source">Source</label><label><input type="radio" name="mode" value="overlay" checked>Overlay</label><label><input type="radio" name="mode" value="mask">Mask</label></fieldset>
+<label class="slider">Opacity <input type="range" id="opacity" min="0" max="100" value="40"><output id="opacity-value">40%</output></label>
+<div class="actions"><button class="icon" id="zoom-out" title="Zoom out" aria-label="Zoom out"><i data-lucide="zoom-out"></i></button><output id="zoom-value">100%</output>
+<button class="icon" id="zoom-in" title="Zoom in" aria-label="Zoom in"><i data-lucide="zoom-in"></i></button><button class="icon" id="fit" title="Fit image" aria-label="Fit image"><i data-lucide="maximize"></i></button></div>
+</div>
+<div class="meta"><span id="filename"></span><div class="legend"><span class="swatch sidewalk"></span>Sidewalk <span class="swatch uncertain"></span><span id="uncertain-label">Codex uncertain</span> <span class="scope">Unverified masks</span></div></div>
+<div id="message" role="status" aria-live="polite"></div>
+<div id="panes" class="panes" data-layout="grid"></div>
+<div class="review-bar"><label>Selected method <select id="method"><option value="gsam2">GSAM 2</option><option value="sam3">SAM 3</option><option value="codex" selected>Codex visual annotation</option></select></label>
+<div class="actions"><button class="decision" data-decision="correct" title="Correct (1)"><i data-lucide="check"></i>Correct</button>
+<button class="decision" data-decision="needs_correction" title="Needs correction (2)"><i data-lucide="flag"></i>Needs correction</button>
+<button class="decision" data-decision="uncertain" title="Uncertain (3)"><i data-lucide="circle-help"></i>Uncertain</button>
+<button class="icon" data-decision="unreviewed" title="Clear selected rating" aria-label="Clear selected rating"><i data-lucide="rotate-ccw"></i></button></div></div>
+<div class="notes-row"><label>Review notes<textarea id="notes" rows="2"></textarea></label><div><h2 id="annotation-heading">Codex annotation notes</h2><p id="annotation-notes"></p></div></div>
+<footer><span id="saved">Unreviewed</span><span id="sample"></span></footer></main>
+<dialog id="correction-dialog" aria-labelledby="correction-title">
+<div class="dialog-heading"><h2 id="correction-title">Correction level</h2><button class="icon" id="close-correction" aria-label="Close correction level" title="Close without changing level (Esc)"><i data-lucide="x"></i></button></div>
+<p id="correction-context"></p>
+<div class="level-options">
+<button data-level="1" title="Level 1 (1)"><strong>1 - Minor</strong><span>Barely any fixes needed</span></button>
+<button data-level="2" title="Level 2 (2)"><strong>2 - Moderate</strong><span>Several areas need fixing</span></button>
+<button data-level="3" title="Level 3 (3)"><strong>3 - Major</strong><span>Large changes or redraw needed</span></button>
+</div></dialog>
+<script src="data.js"></script><script src="lucide.min.js"></script><script src="comparison.js"></script>
+</body></html>

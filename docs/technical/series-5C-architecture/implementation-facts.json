@@ -1,0 +1,301 @@
+{
+  "captured_at": "2026-11-22T23:51:25.521972-08:00",
+  "scope": "Code/shape audit and isolated numerical examples, not trained-model results",
+  "torch": "2.7.1+cu118",
+  "torchvision": "0.22.1+cu118",
+  "config": {
+    "model_name": "5.C",
+    "experiment": "series-5.C-convnext-unet-fp32-development",
+    "architecture": "convnext_tiny_unet",
+    "precision": "fp32",
+    "weights": "imagenet",
+    "width": 960,
+    "height": 540,
+    "batch_size": 8,
+    "epochs": 20,
+    "patience": 5,
+    "backbone_lr": 0.0001,
+    "head_lr": 0.001,
+    "weight_decay": 0.0001,
+    "partial_weight": 0.5,
+    "loss": "focal",
+    "focal_gamma": 1.5,
+    "background_weight": 2.0,
+    "sidewalk_weight": 1.0,
+    "class_weight_cap": 4.0,
+    "dice_weight": 0.5,
+    "seed": 20261121
+  },
+  "parameters": {
+    "encoder": 27818592,
+    "decoder": 1036706,
+    "total": 28855298
+  },
+  "trace": [
+    {
+      "name": "backbone.features.0",
+      "shape": [
+        1,
+        96,
+        135,
+        240
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.1",
+      "shape": [
+        1,
+        96,
+        135,
+        240
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.2",
+      "shape": [
+        1,
+        192,
+        67,
+        120
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.3",
+      "shape": [
+        1,
+        192,
+        67,
+        120
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.4",
+      "shape": [
+        1,
+        384,
+        33,
+        60
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.5",
+      "shape": [
+        1,
+        384,
+        33,
+        60
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.6",
+      "shape": [
+        1,
+        768,
+        16,
+        30
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "backbone.features.7",
+      "shape": [
+        1,
+        768,
+        16,
+        30
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "classifier.bottleneck",
+      "shape": [
+        1,
+        256,
+        16,
+        30
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "classifier.up16",
+      "shape": [
+        1,
+        128,
+        33,
+        60
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "classifier.up8",
+      "shape": [
+        1,
+        64,
+        67,
+        120
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "classifier.up4",
+      "shape": [
+        1,
+        32,
+        135,
+        240
+      ],
+      "dtype": "torch.float32"
+    },
+    {
+      "name": "classifier.head",
+      "shape": [
+        1,
+        2,
+        135,
+        240
+      ],
+      "dtype": "torch.float32"
+    }
+  ],
+  "output_shape": [
+    1,
+    2,
+    540,
+    960
+  ],
+  "teaching": {
+    "normalized_red": 0.0740645603219454,
+    "mean": 0.4,
+    "variance": 0.049999999999999996,
+    "standardized": [
+      -1.341640786499874,
+      -0.4472135954999581,
+      0.44721359549995787,
+      1.3416407864998736
+    ],
+    "layernorm_affine": [
+      -1.8999990000007498,
+      0.29999975000018747
+    ],
+    "gelu": [
+      -0.15865525393145702,
+      0.0,
+      0.841344746068543
+    ],
+    "neuron_score": 0.2,
+    "probability": 0.549833997312478,
+    "loss": 0.5981388693815918,
+    "gradients": [
+      -0.09003320053750441,
+      -0.36013280215001764,
+      -0.45016600268752205
+    ],
+    "sgd_parameters": [
+      1.5090033200537505,
+      -0.4639867197849982,
+      0.3450166002687522
+    ],
+    "updated_score": 0.2756278884515037,
+    "updated_loss": 0.5647996691514955,
+    "documented_values": {
+      "0.0740646": 0.0740645603219454,
+      "0.223607": 0.22360679774997896,
+      "0.549834": 0.549833997312478,
+      "0.598139": 0.5981388693815918,
+      "1.5090033": 1.5090033200537505,
+      "-0.4639867": -0.4639867197849982,
+      "0.3450166": 0.3450166002687522
+    },
+    "class_head_parameters": 66
+  },
+  "teaching_audit_sha256": "2b8410000aeb2564000191d094b1fd66d77f8bddd4f014e871fa891fcc2137cc",
+  "fp32_weights_mib": 110.07422637939453,
+  "focal_example": {
+    "loss": 0.7743995385835644,
+    "gradient": [
+      [
+        [
+          [
+            -0.6119462847709656,
+            0.013946274295449257
+          ]
+        ],
+        [
+          [
+            0.6119462847709656,
+            -0.013946274295449257
+          ]
+        ]
+      ]
+    ]
+  },
+  "toy": {
+    "scope": "CE-only teaching example, not current 5.C focal loss",
+    "probability": 0.7310585786300049,
+    "loss": 0.31326165795326233,
+    "gradient": -0.5378828048706055,
+    "updated_weight": 0.500999927520752,
+    "weighted_loss": 1.1473397920608035
+  },
+  "sources": [
+    {
+      "path": "code/ai_models_datasets/series_5/tools/models/convnext_tiny_unet.py",
+      "sha256": "e9cdbfefa4689ccf1b156ebc0a180aecc5345fbb1bbfc4934ee0607457d8e777"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/configs/series_5_c_config.json",
+      "sha256": "e1d4af16079a0d6c966e5bb25022f788337fd85e911d0fc39d15ecf89a62b3c6"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/series_5_c_sidewalkpilot_trainer.py",
+      "sha256": "50ee01f45a104ae93701452a8cc2ffc3dded7f61fc8da0df61961ea1c1347cb8"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/series_5_a_sidewalkpilot_trainer.py",
+      "sha256": "56b1287e6ce685e777f9be912dac4b0864167dcce6bec47546d09f27b9fb8a95"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/series_5_b_sidewalkpilot_trainer.py",
+      "sha256": "2eb83602fa8a5af1f81df501bb6391548381245a617468ea9f212aeaf5862fab"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/filtering/pseudo_mask_filter.py",
+      "sha256": "f20a961d8ca85a7dc87a830805275476ca08fc1cdf1e61cf9bcf4e2fa9ba87fb"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/datasets/pseudo_training_targets.py",
+      "sha256": "39814970beba06e979adad441b90db701a957685c3b702312583db1687258c07"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/models/segmentation_losses.py",
+      "sha256": "a04b7cbd431b35677bc67f05979d58146dd97084d655c6da067b51e72eb9d24b"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/models/checkpoint_names.py",
+      "sha256": "88efbc5fda977631195b9cc7b175e1fce9469fba89b8dd736519d129ae151789"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/evaluation/boundary_metrics.py",
+      "sha256": "f52e838033c88d859119322367428f2959d99a0057fb76f3dc520c4b691d0503"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/datasets/campaign10k.py",
+      "sha256": "35e586c48a14ad9a223c6716c84ba26e74ed073eee192d6f8582224c902f3a39"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/series_5_e_sidewalkpilot_trainer.py",
+      "sha256": "59def33c71455987ac3b78ed045679808c447a76b5b23ad60feb2131f05715af"
+    },
+    {
+      "path": "code/ai_models_datasets/series_5/tools/packaging/package_model_review.py",
+      "sha256": "6e86bafd12f2a2bf8ad30cb4e870a0915f65905810428474bd5376d93d44c163"
+    }
+  ],
+  "torchvision_convnext_sha256": "b4fef7b47faeb3a87629275570fca9117f48ce4e65b2bf362ac193d799a3e0d1"
+}

@@ -1,0 +1,22 @@
+{
+  "version": "gsam2-bounded-auto-repair-v2",
+  "scope": "Class 1 proposals only; never automatically accepted training labels",
+  "boundary_pixels_at_720p": 16,
+  "core_pixels_at_720p": 24,
+  "thin_hole_radius_at_720p": 3,
+  "max_hole_fraction": 0.001,
+  "minimum_sam_quality": 0.7,
+  "minimum_proposal_agreement": 0.8,
+  "maximum_change_fraction": 0.02,
+  "maximum_outside_change_fraction": 0.005,
+  "maximum_disagreement_fraction": 0.01,
+  "minimum_coverage": 0.05,
+  "maximum_coverage": 0.95,
+  "minimum_blur_variance": 30,
+  "component_fraction": 0.005,
+  "grid_cells_per_axis": 4,
+  "use_proposal_mask_feedback": true,
+  "mask_feedback_logit": 2.0,
+  "seed": 20261108,
+  "policy": "Derive all prompts from the raw proposal, never from reference masks or image-specific annotations. Two point-prompt passes must agree on each edit. Preserve deep interiors and substantial enclosed holes. Large edits or failures retain the baseline and are deferred. Geometry/quality checks are not semantic proof; true driveway pavement, road, leaves, cracks and shadows still require review. Non-sidewalk pixels remain unassigned (255)."
+}

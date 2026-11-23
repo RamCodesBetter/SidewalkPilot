@@ -1,0 +1,20 @@
+{
+  "model_name": "5.A",
+  "experiment": "series-5.A-binary-development",
+  "architecture": "lraspp_mobilenet_v3_large",
+  "train_days": ["2026_07_02"],
+  "validation_days": ["2026_07_12"],
+  "test_days": ["2026_07_07"],
+  "width": 640,
+  "height": 360,
+  "batch_size": 8,
+  "epochs": 30,
+  "patience": 8,
+  "backbone_lr": 0.0001,
+  "head_lr": 0.001,
+  "weight_decay": 0.0001,
+  "partial_weight": 0.25,
+  "seed": 20261120,
+  "precision": "auto",
+  "weights": "imagenet"
+}

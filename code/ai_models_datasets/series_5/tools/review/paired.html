@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SidewalkPilot | Paired Review</title><link rel="stylesheet" href="paired.css"></head>
+<body>
+<header><h1>SidewalkPilot <span>/ Paired Review</span></h1><div class="actions">
+<span id="progress">0 / 200 pairs</span>
+<button class="icon" id="import" title="Import decisions" aria-label="Import decisions"><i data-lucide="upload"></i></button>
+<button class="icon primary" id="export" title="Export decisions" aria-label="Export decisions"><i data-lucide="download"></i></button>
+<button class="icon" id="clear" title="Clear this review" aria-label="Clear this review"><i data-lucide="trash-2"></i></button>
+</div></header><input id="import-file" type="file" accept="application/json" hidden>
+<main>
+<div class="toolbar">
+<div class="actions"><button class="icon" id="previous" title="Previous image (Left arrow)" aria-label="Previous image"><i data-lucide="chevron-left"></i></button>
+<input id="position" type="number" min="1" max="200" value="1" aria-label="Image number"><span id="total">/ 200</span>
+<button class="icon" id="next" title="Next image without marking (Enter)" aria-label="Next image"><i data-lucide="chevron-right"></i></button>
+<button class="icon" id="pending" title="Next incomplete pair" aria-label="Next incomplete pair"><i data-lucide="skip-forward"></i></button></div>
+<fieldset class="segments"><legend class="sr-only">View</legend>
+<label><input type="radio" name="mode" value="source">Source</label><label><input type="radio" name="mode" value="overlay" checked>Overlay</label><label><input type="radio" name="mode" value="mask">Mask</label></fieldset>
+<label class="opacity">Opacity <input type="range" id="opacity" min="0" max="90" value="40"><output id="opacity-value">40%</output></label>
+<div class="actions"><button class="icon" id="zoom-out" title="Zoom out" aria-label="Zoom out"><i data-lucide="zoom-out"></i></button><output id="zoom-value">100%</output><button class="icon" id="zoom-in" title="Zoom in" aria-label="Zoom in"><i data-lucide="zoom-in"></i></button><button class="icon" id="fit" title="Fit image" aria-label="Fit image"><i data-lucide="maximize"></i></button></div>
+<label><input id="auto" type="checkbox" checked>Auto next image</label>
+</div>
+<div id="message" role="status" aria-live="polite"></div>
+<p id="filename"></p>
+<div class="pair-grid">
+<section class="pane" id="pane-A" aria-label="Candidate A">
+<div class="pane-title"><button class="side" data-side="A" aria-pressed="true">A</button><span id="status-A">Unreviewed</span><span class="swatch"></span><span>Sidewalk</span></div>
+<div class="stage" id="stage-A" tabindex="0" aria-label="Candidate A image"><div class="imagebox" id="box-A"><img id="image-A" alt="Source image for candidate A"><canvas id="canvas-A" width="1280" height="720" aria-label="Candidate A mask"></canvas></div></div>
+<div class="decisions" data-side="A">
+<button data-decision="correct" title="Correct (1 when A is selected)"><i data-lucide="check"></i>Correct</button>
+<button data-decision="needs_correction" title="Needs correction (2 when A is selected)"><i data-lucide="flag"></i>Needs correction</button>
+<button data-decision="uncertain" title="Uncertain (3 when A is selected)"><i data-lucide="circle-help"></i>Uncertain</button>
+<button class="icon" data-decision="unreviewed" title="Clear A decision" aria-label="Clear A decision"><i data-lucide="rotate-ccw"></i></button>
+</div></section>
+<section class="pane" id="pane-B" aria-label="Candidate B">
+<div class="pane-title"><button class="side" data-side="B" aria-pressed="false">B</button><span id="status-B">Unreviewed</span><span class="swatch"></span><span>Sidewalk</span></div>
+<div class="stage" id="stage-B" tabindex="0" aria-label="Candidate B image"><div class="imagebox" id="box-B"><img id="image-B" alt="Source image for candidate B"><canvas id="canvas-B" width="1280" height="720" aria-label="Candidate B mask"></canvas></div></div>
+<div class="decisions" data-side="B">
+<button data-decision="correct" title="Correct (1 when B is selected)"><i data-lucide="check"></i>Correct</button>
+<button data-decision="needs_correction" title="Needs correction (2 when B is selected)"><i data-lucide="flag"></i>Needs correction</button>
+<button data-decision="uncertain" title="Uncertain (3 when B is selected)"><i data-lucide="circle-help"></i>Uncertain</button>
+<button class="icon" data-decision="unreviewed" title="Clear B decision" aria-label="Clear B decision"><i data-lucide="rotate-ccw"></i></button>
+</div></section>
+</div>
+<div class="details"><div><h2 id="detail-heading">Candidate A</h2><label>Estimated correction effort <select id="effort"><option value="not_estimated">Not estimated</option><option value="none">None</option><option value="minor">Minor</option><option value="major">Major</option></select></label></div>
+<label class="notes">Notes<textarea id="notes" rows="2"></textarea></label></div>
+<footer><span id="saved">Unreviewed</span><span id="decisions-count">0 / 400 decisions</span><span id="correct-count">0 marked correct</span></footer>
+</main>
+<dialog id="correction-dialog" aria-labelledby="correction-title">
+<div class="dialog-heading"><h2 id="correction-title">Correction level</h2><button class="icon" id="close-correction" aria-label="Close correction level" title="Close without advancing (Esc)"><i data-lucide="x"></i></button></div>
+<p id="correction-context"></p>
+<div class="level-options">
+<button data-level="1" title="Minor correction (1)"><strong>1 - Minor</strong><span>Barely any fixes needed</span></button>
+<button data-level="2" title="Moderate correction (2)"><strong>2 - Moderate</strong><span>Several areas need fixing</span></button>
+<button data-level="3" title="Major correction (3)"><strong>3 - Major</strong><span>Large changes or redraw needed</span></button>
+</div></dialog>
+<script src="data.js"></script><script src="lucide.min.js"></script><script src="paired.js?v=paired-navigation-v2"></script>
+</body></html>
