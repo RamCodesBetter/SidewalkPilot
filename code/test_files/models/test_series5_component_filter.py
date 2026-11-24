@@ -8,7 +8,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets
 from workspace import activate
 activate()
 from component_filter import largest_component
-from package_component_review import select_cases
 
 
 class ComponentFilterTests(unittest.TestCase):
@@ -68,23 +67,6 @@ class ComponentFilterTests(unittest.TestCase):
         second, report = largest_component(first)
         np.testing.assert_array_equal(first, second)
         self.assertEqual(report['removed_pixels'], 0)
-
-    def test_targeted_selection_preserves_case_ids_and_controls(self):
-        pairs = [dict(id=f'pair-{i:03d}', source_name=f'{i}.jpg') for i in range(1, 41)]
-        trials = {p['source_name']:dict(removed_pixels=i if i < 30 else 0)
-                  for i,p in enumerate(pairs, 1)}
-        ratings = {p['id']:dict(decision='correct' if i % 2 else 'needs_correction', correction_level=3)
-                   for i,p in enumerate(pairs, 1)}
-        selected, reasons = select_cases(pairs, trials, ratings)
-        self.assertEqual((selected,reasons), select_cases(pairs,trials,ratings))
-        self.assertEqual(selected[0]['id'], 'pair-008')
-        self.assertEqual(len({p['id'] for p in selected}), 20)
-        self.assertEqual(sum(trials[p['source_name']]['removed_pixels'] == 0 for p in selected), 4)
-        self.assertEqual(sum(r == 'previously accepted mask changed; regression control'
-                             for r in reasons.values()), 4)
-        with self.assertRaises(ValueError):
-            select_cases(pairs[:5], trials, ratings)
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-22T23:51:25.521972-08:00",
+  "captured_at": "2026-11-23T22:21:49.838223-08:00",
   "scope": "Code/shape audit and isolated numerical examples, not trained-model results",
   "torch": "2.7.1+cu118",
   "torchvision": "0.22.1+cu118",
@@ -293,8 +293,8 @@
       "sha256": "59def33c71455987ac3b78ed045679808c447a76b5b23ad60feb2131f05715af"
     },
     {
-      "path": "code/ai_models_datasets/series_5/tools/packaging/package_model_review.py",
-      "sha256": "6e86bafd12f2a2bf8ad30cb4e870a0915f65905810428474bd5376d93d44c163"
+      "path": "code/ai_models_datasets/series_5/tools/packaging/package_model_lab.py",
+      "sha256": "32c94e4c41e18606ee999216b91850a4ff8eebe61cfb70df650eb5bd862d963d"
     }
   ],
   "torchvision_convnext_sha256": "b4fef7b47faeb3a87629275570fca9117f48ce4e65b2bf362ac193d799a3e0d1"

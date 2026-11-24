@@ -18,11 +18,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import workspace
 workspace.activate()
 import convnext_tiny_unet
-from package_beta_comparison import ASSETS
 from label_grounded_sam2 import digest_json, sha256, write_json
-from package_model_review import mask_record
+from package_visual_comparison import encode_labels
 from prepare_reviewed_dataset import safe_file
 from series_5_a_sidewalkpilot_trainer import SidewalkDataset, autocast, load_checkpoint
+
+
+ASSETS = ("beta.html", "beta.js", "beta.css", "comparison.css", "model_metrics.js",
+          "lucide.min.js", "LUCIDE-LICENSE.txt")
+
+
+def mask_record(path, root, labels):
+    return {"path": str(path.relative_to(root)), "sha256": sha256(path),
+            "positive_pixels": int((labels == 1).sum()),
+            "ignored_pixels": int((labels == 255).sum()), "rle": encode_labels(labels)}
 
 
 def sample_rows(data, seed, count):

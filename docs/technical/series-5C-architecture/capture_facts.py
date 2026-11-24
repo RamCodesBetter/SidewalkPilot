@@ -88,7 +88,7 @@ def main():
                  "series_5_a_sidewalkpilot_trainer.py", "series_5_b_sidewalkpilot_trainer.py",
                  "pseudo_mask_filter.py", "pseudo_training_targets.py", "segmentation_losses.py",
                  "checkpoint_names.py", "boundary_metrics.py", "campaign10k.py",
-                 "series_5_e_sidewalkpilot_trainer.py", "package_model_review.py"):
+                 "series_5_e_sidewalkpilot_trainer.py", "package_model_lab.py"):
         path = workspace.source_path(name)
         sources.append(dict(path=str(path.relative_to(REPO)), sha256=digest(path)))
     library = Path(torchvision.__file__).parent / "models/convnext.py"

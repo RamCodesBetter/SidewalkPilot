@@ -3,7 +3,6 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
-import tarfile
 import tempfile
 import unittest
 
@@ -14,7 +13,6 @@ ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" /
 sys.path.insert(0, str(ROOT))
 from workspace import activate, source_path
 activate()
-import package_review
 import diagnose_reviews
 import sam_point_diagnostic
 import label_assisted_pilot
@@ -24,9 +22,6 @@ import compare_sam3_sidewalk as sam3_compare
 SPEC = importlib.util.spec_from_file_location("label_grounded_sam2", source_path('label_grounded_sam2.py'))
 label = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(label)
-REVIEW_SPEC = importlib.util.spec_from_file_location("review_masks", source_path('review_masks.py'))
-review = importlib.util.module_from_spec(REVIEW_SPEC)
-REVIEW_SPEC.loader.exec_module(review)
 TAXONOMY = json.loads((source_path('taxonomy.json')).read_text())
 
 
@@ -326,16 +321,6 @@ class LabelingTests(unittest.TestCase):
             with Image.open(root / "overlay.jpg") as overlay:
                 self.assertEqual(overlay.size, (8, 33))
 
-    def test_review_server_blocks_path_traversal(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "inside.txt").write_text("test")
-            self.assertEqual(review.resolve_file(root, "inside.txt"), root / "inside.txt")
-            with self.assertRaises(FileNotFoundError):
-                review.resolve_file(root, "../outside.txt")
-            with self.assertRaises(FileNotFoundError):
-                review.resolve_file(root, "%2Fetc%2Fpasswd")
-
     def test_existing_record_checks_output_and_source_hashes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -348,90 +333,6 @@ class LabelingTests(unittest.TestCase):
             (root / "source.jpg").write_bytes(b"changed")
             with self.assertRaises(ValueError):
                 label.verify_record(root, record, root)
-
-    def test_portable_package_contains_only_verified_selected_files(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            dataset, source = root / "pilot", root / "source"
-            dataset.mkdir()
-            source.mkdir()
-            (dataset / "records").mkdir()
-            (dataset / "masks").mkdir()
-            (dataset / "overlays").mkdir()
-            Image.new("RGB", (8, 8)).save(source / "image.jpg")
-            Image.new("L", (8, 8), 255).save(dataset / "masks/image.png")
-            Image.new("RGB", (16, 40)).save(dataset / "overlays/image.jpg")
-            record = {"image":"image.jpg","source_sha256":label.sha256(source/"image.jpg"),
-                      "mask":"masks/image.png","mask_sha256":label.sha256(dataset/"masks/image.png"),
-                      "overlay":"overlays/image.jpg","overlay_sha256":label.sha256(dataset/"overlays/image.jpg")}
-            label.write_json(dataset / "records/image.json", record)
-            (dataset / "label_grounded_sam2.py").write_text("# fixture\n")
-            label.write_json(dataset / "manifest.json", {"images":["image.jpg"],"contract":{
-                "source":str(source),"source_count":1,"runner_sha256":label.sha256(dataset/"label_grounded_sam2.py")}})
-            for name in ("taxonomy.json","label_config.json","summary.json"):
-                label.write_json(dataset/name,{})
-            result = package_review.package(dataset, root / "review.tar")
-            self.assertEqual(result["images"],1)
-            with tarfile.open(root / "review.tar") as archive:
-                information = json.load(archive.extractfile("pilot/package.json"))
-                self.assertFalse(information["full_dataset"])
-                self.assertTrue(information["human_review_required"])
-                self.assertEqual(information["count"],1)
-                self.assertIn("pilot/images/image.jpg",archive.getnames())
-                self.assertIn("pilot/review_masks.py",archive.getnames())
-                self.assertTrue(all(m.isfile() and m.uid == 0 and m.gid == 0 for m in archive.getmembers()))
-            with self.assertRaises(FileExistsError):
-                package_review.package(dataset, root / "review.tar")
-            # Diagnostic archives retain the alternate runner, point selection, and helpers.
-            (dataset / "point_runner.py").write_text("# alternate runner fixture\n")
-            (dataset / "selection.json").write_text('{"images": ["image.jpg"]}\n')
-            manifest = json.loads((dataset / "manifest.json").read_text())
-            manifest["contract"].update({"runner_file": "point_runner.py", "runner_sha256": label.sha256(dataset/"point_runner.py"),
-                                         "helper_files_sha256": {"label_grounded_sam2.py": label.sha256(dataset/"label_grounded_sam2.py")},
-                                         "selection_sha256": label.sha256(dataset/"selection.json")})
-            label.write_json(dataset / "manifest.json", manifest)
-            package_review.package(dataset, root / "diagnostic.tar")
-            with tarfile.open(root / "diagnostic.tar") as archive:
-                self.assertIn("pilot/selection.json", archive.getnames())
-                self.assertIn("pilot/point_runner.py", archive.getnames())
-                self.assertIn("pilot/label_grounded_sam2.py", archive.getnames())
-            (dataset / "Before-after").mkdir()
-            label.write_json(dataset / "Before-after/comparison.json", {"images": [{"image": "image.jpg"}]})
-            Image.new("RGB", (24, 8)).save(dataset / "Before-after/01.jpg")
-            Image.new("RGB", (24, 8)).save(dataset / "Before-after/sheet-1.jpg")
-            package_review.package(dataset, root / "comparison.tar")
-            with tarfile.open(root / "comparison.tar") as archive:
-                info = json.load(archive.extractfile("pilot/package.json"))
-                for name in ("comparison.json", "01.jpg", "sheet-1.jpg"):
-                    self.assertIn("pilot/Before-after/" + name, archive.getnames())
-                    self.assertEqual(info["files_sha256"]["Before-after/" + name],
-                                     label.sha256(dataset / "Before-after" / name))
-            label.write_json(dataset / "Before-after/comparison.json", {"images": [{"image": "different.jpg"}]})
-            with self.assertRaisesRegex(ValueError, "ordered package images"):
-                package_review.package(dataset, root / "mismatch.tar")
-            label.write_json(dataset / "Before-after/comparison.json", {"images": [{"image": "image.jpg"}]})
-            (dataset / "Before-after/01.jpg").rename(dataset / "Before-after/missing.jpg")
-            with self.assertRaisesRegex(ValueError, "missing file"):
-                package_review.package(dataset, root / "missing.tar")
-            (dataset / "Before-after/missing.jpg").rename(dataset / "Before-after/01.jpg")
-            for name in ("point_runner.py", "label_grounded_sam2.py", "selection.json"):
-                original = (dataset / name).read_bytes()
-                (dataset / name).write_bytes(b"changed")
-                with self.assertRaises(ValueError):
-                    package_review.package(dataset, root / "tampered.tar")
-                self.assertFalse((root / "tampered.tar").exists())
-                (dataset / name).write_bytes(original)
-            (dataset / "masks/image.png").write_bytes(b"changed")
-            with self.assertRaises(ValueError):
-                package_review.package(dataset, root / "bad.tar")
-            self.assertFalse((root / "bad.tar").exists())
-
-    def test_package_member_rejects_escape_and_absolute_paths(self):
-        with tempfile.TemporaryDirectory() as directory:
-            for name in ("/etc/passwd", "../outside", "..\\outside"):
-                with self.assertRaises(ValueError):
-                    package_review.safe_member(Path(directory), name)
-
 
 if __name__ == "__main__":
     unittest.main()
