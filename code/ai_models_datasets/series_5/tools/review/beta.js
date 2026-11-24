@@ -36,6 +36,16 @@
       box.checked=on;box.disabled=on&&visible.length===1;
     }
   }
+  if(data.schema==='sidewalkpilot-model-lab-v1'){
+    for(const [key,policy] of [['d','No encoder freeze'],['f','Encoder frozen for epochs 1 and 2']]){
+      if(models.includes(key))continue;
+      const label=document.createElement('label'),box=document.createElement('input');
+      box.type='checkbox';box.disabled=true;
+      label.append(box,' 5.'+key.toUpperCase()+' (pending)');
+      label.title=policy+'; no trained checkpoint in this package';
+      $('model-picker').append(label);
+    }
+  }
   for(const side of sides) {
     const model=models.includes(side), title=model?data.models[side].name:side==='original'?'Original':'Reference';
     const pane=document.createElement('section');pane.className='pane';pane.id='pane-'+side;pane.hidden=side==='reference';

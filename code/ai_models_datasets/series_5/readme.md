@@ -4,6 +4,21 @@ Keep work on `series-5`. Historical A/B artifacts retain their original recipes.
 
 ## Single-sidewalk labeling campaign
 
+For the full D/F inventory, run `tools/labeling/screen_full_inventory.py HISTORY OUTPUT`
+on the GPU workstation. It verifies the original strict policy and mask hashes,
+reuses both passed and deferred decisions, and screens the remaining distinct
+photos. Re-run with the same paths to resume. See `progress.json` for counters
+and `sources.json` for both directories of per-frame loop receipts. Deferred is
+not background: it means the frame needs correction or adjudication. Screening
+completion is not training readiness.
+
+5.D is the full-inventory no-freeze experiment; 5.F is the matched two-epoch
+encoder-freeze experiment. Before training, resolve the deferred labels and
+freeze one grouped 80/10/10 split that protects the existing C/E partitions.
+Do not automatically assign all screened frames to training. The same 50-image
+viewer accepts D/F checkpoints with `--df-split`, checks split identities, and
+does not show predictions for a checkpoint that has not been trained.
+
 `tools/labeling/run_single_corridor_campaign.py` screens unique training-eligible frames in
 128-image loops. A pass requires two matching confident, near-camera sidewalk proposals
 and a final target with one connected sidewalk region; temporal drafts never count.

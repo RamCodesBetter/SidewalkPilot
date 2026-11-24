@@ -41,10 +41,21 @@ def sample_rows(data, seed, count):
 
 
 @torch.inference_mode()
-def package(data, output, checkpoints, seed, count, device):
+def package(data, output, checkpoints, seed, count, device, df_split=None):
     if output.exists():
         raise FileExistsError(output)
     rows, identity = sample_rows(data, seed, count)
+    df_identity = None
+    if any(name[2:3] in ("D", "F") for name, _ in checkpoints):
+        if df_split is None:
+            raise ValueError("D/F comparison requires the training run's frozen --df-split")
+        split = json.loads(df_split.read_text())
+        df_identity = dict(manifest_sha256=split["manifest_sha256"], split_sha256=sha256(df_split))
+        old = json.loads((data / "split.json").read_text())["partitions"]
+        parts = {k:set(split["partitions"][k]) for k in ("train","validation","test")}
+        if (any(not set(old[k]) <= parts[k] for k in parts) or parts["test"] & parts["train"]
+                or parts["test"] & parts["validation"] or parts["train"] & parts["validation"]):
+            raise ValueError("D/F split does not preserve the C/E partitions")
     frames = []
     manifest = dict(schema="sidewalkpilot-model-lab-v1", partition="test", count=count,
                     population=1000, seed=seed, data_identity=identity, models={}, frames=frames,
@@ -74,13 +85,14 @@ def package(data, output, checkpoints, seed, count, device):
                                recording_run=r["recording_run"], reference=mask_record(ref, root, labels), predictions={}))
         for name, path in checkpoints:
             key = name.removeprefix("5.").lower()
-            if not re.fullmatch(r"5\.[ABCE](?:[bs])?", name) or key in manifest["models"]:
+            if not re.fullmatch(r"5\.[A-F](?:[bs])?", name) or key in manifest["models"]:
                 raise ValueError(f"Invalid or duplicate checkpoint label {name}")
-            ce = name[2] in "CE"
-            model, state = load_checkpoint(path, model_definition=convnext_tiny_unet if ce else None)
+            convnext = name[2] in "CDEF"
+            expected = df_identity if name[2] in "DF" else identity
+            model, state = load_checkpoint(path, model_definition=convnext_tiny_unet if convnext else None)
             cfg = state["config"]
             if (cfg["smoke_only"] or cfg["model_name"] != name[:3] or
-                    (ce and (state["data_identity"] != identity or path.stem != name))):
+                    (convnext and (state["data_identity"] != expected or path.stem != name))):
                 raise ValueError(f"Checkpoint identity mismatch: {path}")
             model.to(device).eval()
             size = [cfg["width"], cfg["height"]]
@@ -117,6 +129,7 @@ if __name__ == "__main__":
     p.add_argument("--checkpoint", nargs=2, action="append", required=True, metavar=("NAME","PATH"))
     p.add_argument("--seed", type=int, default=20261123)
     p.add_argument("--count", type=int, default=50)
+    p.add_argument("--df-split", type=Path)
     args = p.parse_args()
     package(args.dataset, args.output, [(n, Path(f)) for n,f in args.checkpoint],
-            args.seed, args.count, torch.device("cuda"))
+            args.seed, args.count, torch.device("cuda"), args.df_split)
