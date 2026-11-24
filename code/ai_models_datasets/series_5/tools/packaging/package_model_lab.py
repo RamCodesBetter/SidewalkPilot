@@ -34,6 +34,14 @@ def mask_record(path, root, labels):
             "ignored_pixels": int((labels == 255).sum()), "rle": encode_labels(labels)}
 
 
+def save_prediction_preview(root, relative_prediction, labels):
+    preview = root / "prediction-previews" / relative_prediction
+    preview.parent.mkdir(parents=True, exist_ok=True)
+    if labels.dtype != np.uint8 or labels.ndim != 2 or labels.max() > 1:
+        raise ValueError("Expected a binary class-ID prediction, not a reference or preview")
+    Image.fromarray(labels * np.uint8(255)).save(preview)
+
+
 def sample_rows(data, seed, count):
     split_path, manifest_path = data / "split.json", data / "manifest.json"
     split = json.loads(split_path.read_text())
@@ -120,6 +128,7 @@ def package(data, output, checkpoints, seed, count, device, df_split=None):
                 labels = labels.argmax(1)[0].cpu().numpy().astype(np.uint8)
                 dest = folder / f"{i+1:03}.png"
                 Image.fromarray(labels).save(dest)
+                save_prediction_preview(root, dest.relative_to(root / "predictions"), labels)
                 f["predictions"][key] = {**mask_record(dest, root, labels),
                     "png_base64": base64.b64encode(dest.read_bytes()).decode("ascii")}
             print(f"{name} epoch {state['epoch']}: {count} predictions", flush=True)

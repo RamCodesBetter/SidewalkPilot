@@ -115,7 +115,12 @@ the newer choices; do not revert them to historical settings.
 | Train A/B/C/E | The corresponding `series_5_*_sidewalkpilot_trainer.py` in this directory |
 | Build the unified model comparison | `tools/packaging/package_model_lab.py` |
 | Open the offline model viewer on the Mac | `reviews/model-lab-test50/index.html` |
+| View predicted masks in Finder (white = sidewalk, black = background) | `reviews/model-lab-test50/prediction-previews/<model>/` |
 | Inspect ten training photos, masks and the viewer-format manifest | `label-sample/` (local data, not published) |
+
+The `predictions/` PNGs store class IDs (0 and 1), so both classes look black in
+a photo app. The matching `prediction-previews/` PNGs use intensities 0 and
+255 for display only. Do not use previews as labels: 255 means ignore in reference masks.
 
 The model viewer compares checkpoint predictions on the same 50 photos. The
 progress dashboard reads loop receipts, not photos. Neither is a label editor.
