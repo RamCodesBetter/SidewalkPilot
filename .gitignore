@@ -50,9 +50,8 @@ code/ai_models_datasets/**/wandb/
 code/ai_models_datasets/**/wandb_runs_local/
 
 # Field data: photo runs (images + label manifests) — hosted on Hugging Face.
-# Ignore the contents but keep the folder present via .gitkeep.
+# The controller creates the photo directory when capture starts.
 media/photos/*
-!media/photos/.gitkeep
 
 # Training dataset images (data, not source) — hosted on Hugging Face
 code/ai_models_datasets/**/*.jpg
