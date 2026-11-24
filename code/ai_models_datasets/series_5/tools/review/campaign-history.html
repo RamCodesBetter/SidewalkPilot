@@ -34,12 +34,12 @@ footer{display:flex;gap:10px;justify-content:space-between;padding:10px 0}a{colo
 <main>
 <div class="heading"><h1>Labeling history</h1><span id="state"></span></div>
 <section class="numbers" aria-label="Campaign totals">
-<div><span class="label">Passed automatic checks</span><b class="pass"><span id="passed"></span> <small>/ 10,000</small></b></div>
-<div><span class="label">Attempted</span><b id="attempted"></b></div>
-<div><span class="label">Deferred</span><b id="deferred" class="defer"></b></div>
-<div><span class="label">Still needed</span><b id="remaining"></b></div>
+<div><span class="label">Passed automatic checks</span><b class="pass"><span id="passed"></span> <small id="goal">/ 10,000</small></b></div>
+<div><span class="label" id="attempt-label">Attempted</span><b id="attempted"></b></div>
+<div><span class="label" id="defer-label">Deferred</span><b id="deferred" class="defer"></b></div>
+<div><span class="label" id="remaining-label">Still needed</span><b id="remaining"></b></div>
 </section>
-<div class="progress-label"><span>Target progress</span><strong id="pct"></strong></div>
+<div class="progress-label"><span id="bar-label">Target progress</span><strong id="pct"></strong></div>
 <progress id="bar" max="10000" value="0" aria-label="Target progress"></progress>
 <div class="section-head"><h2>Loop history</h2><div class="actions">
 <select id="order" aria-label="Loop order"><option value="desc">Newest first</option><option value="asc">Oldest first</option></select>
@@ -64,7 +64,15 @@ function draw(){
 if(report){
   for(const k of ['passed','attempted','deferred','remaining']) $(k).textContent=fmt(report[k]);
   $('state').textContent=report.state.replaceAll('_',' ');
-  $('bar').value=report.passed;$('pct').textContent=(100*report.passed/10000).toFixed(1)+'%';
+  const full=report.unique!=null, goal=full?report.unique:10000, progress=full?report.attempted:report.passed;
+  if(full){
+    document.querySelector('h1').textContent='5.D / 5.F labeling history';
+    $('goal').textContent='/ '+fmt(goal);$('attempt-label').textContent='Screened';
+    $('defer-label').textContent='Need repair';$('remaining-label').textContent='Not yet screened';
+    document.querySelector('thead th:last-child').textContent='Not yet screened';
+    $('bar-label').textContent='Inventory screened';$('bar').setAttribute('aria-label','Inventory screened');
+  }
+  $('bar').max=goal;$('bar').value=progress;$('pct').textContent=(100*progress/goal).toFixed(1)+'%';
   $('stamp').textContent=report.rows.length+' loops | Updated '+new Date(report.updated_utc).toLocaleTimeString();
   const scroll=document.querySelector('.scroll'), saved=history.state;
   try{$('order').value=sessionStorage.getItem('history-order')==='asc'?'asc':'desc'}catch{}
@@ -81,7 +89,7 @@ if(report){
     location.reload();
   }
   $('refresh').onclick=reload;
-  if(report.state==='running'){
+  if(report.state==='running'||report.state==='screening'){
     const refreshSeconds=5;
     $('stamp').append(' | Auto-refresh: '+refreshSeconds+'s');
     setInterval(()=>{if(!document.hidden)reload()},refreshSeconds*1000);
