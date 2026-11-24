@@ -10,6 +10,7 @@ __pycache__/
 *.mp4
 
 # temporary / cache files
+.ruff_cache/
 *.log
 *.tmp
 # HuggingFace upload-staging cache (huggingface_hub upload_large_folder writes one
