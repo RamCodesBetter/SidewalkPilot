@@ -19,7 +19,7 @@ Prediction here means the SAM label used as a target, not a 5.C output.
 These are sample/viewer records; production trainer manifests have their own
 schema. Renaming a key in one format doesn't change how another loader works.
 
-Example (run from this code/ai directory with Pillow installed):
+Example (run from the series_5 directory with Pillow installed):
 
     from pathlib import Path
     import json

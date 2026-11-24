@@ -13,7 +13,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import workspace
 workspace.activate()
 from label_grounded_sam2 import digest_json, sha256, write_json
-from package_visual_comparison import encode_labels
+from mask_encoding import encode_labels
 from prepare_reviewed_dataset import read_json
 
 

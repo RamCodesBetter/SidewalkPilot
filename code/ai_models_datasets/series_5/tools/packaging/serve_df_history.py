@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from render_campaign_history import TEMPLATE
+TEMPLATE = Path(__file__).resolve().parents[1] / "review/campaign-history.html"
 
 
 class History:

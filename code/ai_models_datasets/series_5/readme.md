@@ -115,11 +115,13 @@ the newer choices; do not revert them to historical settings.
 | Train A/B/C/E | The corresponding `series_5_*_sidewalkpilot_trainer.py` in this directory |
 | Build the unified model comparison | `tools/packaging/package_model_lab.py` |
 | Open the offline model viewer on the Mac | `reviews/model-lab-test50/index.html` |
+| Inspect ten training photos, masks and the viewer-format manifest | `label-sample/` (local data, not published) |
 
 The model viewer compares checkpoint predictions on the same 50 photos. The
 progress dashboard reads loop receipts, not photos. Neither is a label editor.
-Mask-repair, pretraining dataset preparation, and corridor-sample packaging
-are separate workflows; some still share code with the strict SAM 3 worker.
+Dataset preparation and corridor-sample packaging are separate workflows that
+share code with the strict SAM 3 worker. The retired paired-viewer and manual
+repair pilots are available at commit `09957af`; they are not the D/F screening pass.
 
 Keep `tools/workspace.py`: the entry points use it to find configs and import
 helpers by filename when started from any directory. `models` defines the

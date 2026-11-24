@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard random selection and independently drawn polygon-mask semantics."""
+"""Guard random selection and class-ID mask encoding."""
 
 from pathlib import Path
 import random
@@ -11,7 +11,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"))
 from workspace import activate
 activate()
-from package_visual_comparison import encode_labels, rasterize
+from mask_encoding import encode_labels
 from prepare_random_comparison import random_names
 
 
@@ -28,24 +28,6 @@ class VisualComparisonTests(unittest.TestCase):
         for names, count in ((["a", "a"], 1), (["a"], 0), (["a"], 2), (list(map(str, range(201))), 201)):
             with self.assertRaises(ValueError):
                 random_names(names, count, 1)
-
-    def test_polygon_exclusion_and_explicit_uncertainty(self):
-        entry = {"sidewalk": [[[0, 0], [7, 0], [7, 7], [0, 7]]],
-                 "exclude": [[[1, 1], [3, 1], [3, 3], [1, 3]]],
-                 "uncertain": [[[2, 2], [4, 2], [4, 4], [2, 4]]], "notes": "test"}
-        mask = rasterize(entry, (9, 9))
-        self.assertEqual(mask.shape, (9, 9))
-        self.assertEqual(mask[0, 0], 1)
-        self.assertEqual(mask[1, 1], 0)
-        self.assertEqual(mask[2, 2], 255)
-        self.assertEqual(mask[8, 8], 0)
-        np.testing.assert_array_equal(mask, rasterize(entry, (9, 9)))
-
-    def test_invalid_polygons_rejected(self):
-        for polygon in ([[0, 0], [1, 1]], [[0, 0], [1, 1], [9, 8]],
-                        [[0, 0], [1, 1], [2.5, 3]], [[0, 0], [1, 1], [-1, 0]]):
-            with self.assertRaises(ValueError):
-                rasterize({"sidewalk": [polygon], "exclude": [], "uncertain": [], "notes": "x"}, (9, 9))
 
     def test_rle_round_trip_retains_uncertainty(self):
         for mask in (np.array([[0, 0, 1], [255, 255, 0]], dtype=np.uint8),

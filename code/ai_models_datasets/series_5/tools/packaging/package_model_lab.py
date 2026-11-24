@@ -19,7 +19,7 @@ import workspace
 workspace.activate()
 import convnext_tiny_unet
 from label_grounded_sam2 import digest_json, sha256, write_json
-from package_visual_comparison import encode_labels
+from mask_encoding import encode_labels
 from prepare_reviewed_dataset import safe_file
 from series_5_a_sidewalkpilot_trainer import SidewalkDataset, autocast, load_checkpoint
 

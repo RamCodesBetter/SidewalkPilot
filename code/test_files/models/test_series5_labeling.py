@@ -16,7 +16,6 @@ activate()
 import diagnose_reviews
 import sam_point_diagnostic
 import label_assisted_pilot
-import prepare_assisted_pilot
 import audit_sam_implementations as sam_audit
 import compare_sam3_sidewalk as sam3_compare
 SPEC = importlib.util.spec_from_file_location("label_grounded_sam2", source_path('label_grounded_sam2.py'))
@@ -123,23 +122,6 @@ class LabelingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             label_assisted_pilot.refinement_seed(masks, [.5], [[0, 0]], [1])
 
-    def test_fresh_selection_is_balanced_reproducible_and_spaced(self):
-        names = [f"run_{r}__photo_20261025_1200{s:02d}_000000.jpg" for r in range(5) for s in range(60)]
-        excluded = [n for n in names if "120030" in n]
-        selected = prepare_assisted_pilot.fresh_selection(names, excluded, per_run=5)
-        self.assertEqual(selected, prepare_assisted_pilot.fresh_selection(list(reversed(names)), excluded, per_run=5))
-        self.assertEqual(len(set(selected)), 25)
-        for run in range(5):
-            group = [n for n in selected if n.startswith(f"run_{run}__")]
-            self.assertEqual(len(group), 5)
-            times = sorted(prepare_assisted_pilot.frame_time(n) for n in group)
-            self.assertTrue(all(b - a > 2 for a, b in zip(times, times[1:])))
-            old = prepare_assisted_pilot.frame_time(excluded[run])
-            self.assertTrue(all(abs(t - old) > 2 for t in times))
-        with self.assertRaises(ValueError):
-            prepare_assisted_pilot.fresh_selection(names[:2], [], per_run=40)
-        with self.assertRaises(ValueError):
-            prepare_assisted_pilot.fresh_selection(names, [], per_run=0)
 
     def test_annotation_batches_require_complete_unique_indices(self):
         with tempfile.TemporaryDirectory() as directory:

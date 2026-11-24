@@ -2,6 +2,8 @@
 !/readme.md
 /reviews/
 /docs/
+/label-sample/*
+!/label-sample/README.txt
 /workspace-migration.json
 # Retained until every existing workspace has run the non-destructive migration.
 /5.a-test/
