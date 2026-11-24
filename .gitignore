@@ -1,5 +1,6 @@
 # macOS junk
 .DS_Store
+.lgd-nfy0
 
 # python
 __pycache__/
@@ -57,14 +58,9 @@ media/photos/*
 # Training dataset images (data, not source) — hosted on Hugging Face
 code/ai_models_datasets/**/*.jpg
 
-# Dataset folders themselves (images + labels.json) — data, hosted on Hugging Face,
-# not GitHub. Ignore the CONTENTS but keep the folder present via .gitkeep so the
-# trainer's --roots path exists in a fresh clone. Trainer source and tests live
-# one level up and stay tracked; dataset cards remain Hub-only by policy above.
-code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/*
-code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/*
-!code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/.gitkeep
-!code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/.gitkeep
+# Populate these roots from the datasets before running the steering trainers.
+code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/
+code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/
 
 # runtime logs now live in ~/logs (outside the repo)
 logs/

@@ -1,0 +1,6344 @@
+{
+  "scope": "50 frozen viewer images sampled from 1,000 C/E test images; not a full test evaluation",
+  "sampling_seed": 20261123,
+  "split_identity": {
+    "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+    "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+  },
+  "reference": "Original SAM 3 pseudo-labels. Ignore 255; never infer missing background.",
+  "prediction": "Native-size bilinear logits then raw argmax; no filtering.",
+  "aggregation": "Pool non-ignored pixels across the 50 images before computing ratios. Metrics are fractions; undefined denominators are null. mIoU averages defined class IoUs.",
+  "axes": "Rows: reference [background, sidewalk]; columns: prediction [background, sidewalk].",
+  "metrics": {
+    "precision": "TP/(TP+FP)",
+    "recall": "TP/(TP+FN)",
+    "f1": "2TP/(2TP+FP+FN)",
+    "sidewalk_iou": "TP/(TP+FP+FN)",
+    "background_iou": "TN/(TN+FP+FN)",
+    "miou": "mean of defined class IoUs"
+  },
+  "checkpoints": {
+    "5.A": {
+      "name": "5.A",
+      "epoch": 8,
+      "checkpoint_sha256": "969a5501cb0a99697e4a0dfebc771db85a28036964806fd47386d90ca7bf2101",
+      "input_size": [
+        640,
+        360
+      ],
+      "precision": "bf16",
+      "data_identity": {
+        "manifest_sha256": "54aff7ac296a594dbe588b685ac865e01cd109b87721562bbf10ab89fec6fe85",
+        "split_sha256": "c17c3aeaeb33550d6b7121440bee88e62802759629cc44bd34b20c7fdd9c405a"
+      },
+      "matrix": [
+        [
+          12523108,
+          436840
+        ],
+        [
+          59021,
+          32197077
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9866139268540763,
+        "recall": 0.9981702374540157,
+        "f1": 0.9923584391219512,
+        "sidewalk_iou": 0.9848327794828351,
+        "background_iou": 0.9619124217900819,
+        "miou": 0.9733726006364585
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              230423,
+              4681
+            ],
+            [
+              18,
+              674125
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              355019,
+              10408
+            ],
+            [
+              701,
+              539247
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258476,
+              1872
+            ],
+            [
+              525,
+              625284
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              280820,
+              349
+            ],
+            [
+              292,
+              627237
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              236829,
+              39253
+            ],
+            [
+              592,
+              630403
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248190,
+              2888
+            ],
+            [
+              362,
+              654621
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              229213,
+              22759
+            ],
+            [
+              253,
+              625390
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              295474,
+              7796
+            ],
+            [
+              61,
+              602503
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              244555,
+              14445
+            ],
+            [
+              2,
+              648643
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248969,
+              799
+            ],
+            [
+              1057,
+              656700
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251929,
+              4087
+            ],
+            [
+              422,
+              653182
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              218192,
+              15111
+            ],
+            [
+              29,
+              671561
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246674,
+              1233
+            ],
+            [
+              1044,
+              653054
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              244801,
+              2825
+            ],
+            [
+              30,
+              659901
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250459,
+              2550
+            ],
+            [
+              1860,
+              652533
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              224338,
+              32633
+            ],
+            [
+              1143,
+              649791
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              302539,
+              8561
+            ],
+            [
+              234,
+              586672
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              234400,
+              13587
+            ],
+            [
+              678,
+              661230
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              274293,
+              3985
+            ],
+            [
+              642,
+              630166
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              237190,
+              5595
+            ],
+            [
+              55,
+              664545
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              200965,
+              1452
+            ],
+            [
+              2241,
+              703358
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249448,
+              2223
+            ],
+            [
+              11462,
+              622375
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              286315,
+              6212
+            ],
+            [
+              115,
+              615586
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252324,
+              1884
+            ],
+            [
+              4224,
+              641440
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              263045,
+              3319
+            ],
+            [
+              136,
+              640569
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              267899,
+              237
+            ],
+            [
+              92,
+              640558
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              244566,
+              11458
+            ],
+            [
+              236,
+              649769
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              238388,
+              951
+            ],
+            [
+              660,
+              668479
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              254947,
+              2535
+            ],
+            [
+              567,
+              649549
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              208495,
+              37600
+            ],
+            [
+              7,
+              660006
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              255570,
+              29225
+            ],
+            [
+              0,
+              620893
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              253018,
+              2450
+            ],
+            [
+              65,
+              644559
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247633,
+              12089
+            ],
+            [
+              1712,
+              644630
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              227727,
+              3987
+            ],
+            [
+              955,
+              672882
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              241813,
+              9503
+            ],
+            [
+              35,
+              657256
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250920,
+              7931
+            ],
+            [
+              2346,
+              647321
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246347,
+              2783
+            ],
+            [
+              332,
+              658140
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              362471,
+              2126
+            ],
+            [
+              2948,
+              541312
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              247359,
+              9385
+            ],
+            [
+              528,
+              648625
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              238270,
+              22077
+            ],
+            [
+              5,
+              646076
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              187185,
+              8306
+            ],
+            [
+              9227,
+              700224
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              228849,
+              20247
+            ],
+            [
+              0,
+              631170
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              261230,
+              1857
+            ],
+            [
+              1025,
+              634133
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242223,
+              4546
+            ],
+            [
+              1476,
+              658029
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              230997,
+              662
+            ],
+            [
+              1877,
+              670144
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231790,
+              16883
+            ],
+            [
+              375,
+              652164
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248457,
+              1286
+            ],
+            [
+              546,
+              658199
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              237790,
+              17842
+            ],
+            [
+              81,
+              652752
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249088,
+              95
+            ],
+            [
+              4918,
+              648087
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255196,
+              272
+            ],
+            [
+              830,
+              652004
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.B": {
+      "name": "5.B",
+      "epoch": 10,
+      "checkpoint_sha256": "2309a3ace6bab7c763fe7e60018d7db3aafabe8acc59408be23a703225301d04",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "bf16",
+      "data_identity": {
+        "manifest_sha256": "f21285b68ee69b54a1ee908042e90d9cec96ca3c27799521d23bbca5dbab523b",
+        "split_sha256": "0509bcd093e31f624a2a39c01728c08a1030edf7cdb0669e3705f69bab87731d"
+      },
+      "matrix": [
+        [
+          12858298,
+          101650
+        ],
+        [
+          50642,
+          32205456
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9968536333771276,
+        "recall": 0.9984300022897996,
+        "f1": 0.9976411951302788,
+        "sidewalk_iou": 0.9952934919945603,
+        "background_iou": 0.9882947660329009,
+        "miou": 0.9917941290137307
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              234801,
+              303
+            ],
+            [
+              10,
+              674133
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              359379,
+              6048
+            ],
+            [
+              1235,
+              538713
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260016,
+              332
+            ],
+            [
+              104,
+              625705
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281120,
+              49
+            ],
+            [
+              62,
+              627467
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              275354,
+              728
+            ],
+            [
+              646,
+              630349
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251014,
+              64
+            ],
+            [
+              498,
+              654485
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247010,
+              4962
+            ],
+            [
+              342,
+              625301
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              302116,
+              1154
+            ],
+            [
+              3449,
+              599115
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255625,
+              3375
+            ],
+            [
+              166,
+              648479
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249461,
+              307
+            ],
+            [
+              659,
+              657098
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255176,
+              840
+            ],
+            [
+              43,
+              653561
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              227650,
+              5653
+            ],
+            [
+              97,
+              671493
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247798,
+              109
+            ],
+            [
+              1012,
+              653086
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247426,
+              200
+            ],
+            [
+              191,
+              659740
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              234290,
+              18719
+            ],
+            [
+              260,
+              654133
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256461,
+              510
+            ],
+            [
+              671,
+              650263
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              309164,
+              1936
+            ],
+            [
+              192,
+              586714
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242153,
+              5834
+            ],
+            [
+              104,
+              661804
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276414,
+              1864
+            ],
+            [
+              1728,
+              629080
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242442,
+              343
+            ],
+            [
+              229,
+              664371
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              201142,
+              1275
+            ],
+            [
+              146,
+              705453
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249402,
+              2269
+            ],
+            [
+              1302,
+              632535
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292040,
+              487
+            ],
+            [
+              2501,
+              613200
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              253694,
+              514
+            ],
+            [
+              1841,
+              643823
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266098,
+              266
+            ],
+            [
+              149,
+              640556
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              267858,
+              278
+            ],
+            [
+              195,
+              640455
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              254864,
+              1160
+            ],
+            [
+              28,
+              649977
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239312,
+              27
+            ],
+            [
+              54,
+              669085
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256547,
+              935
+            ],
+            [
+              634,
+              649482
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              245137,
+              958
+            ],
+            [
+              309,
+              659704
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              283033,
+              1762
+            ],
+            [
+              171,
+              620722
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255400,
+              68
+            ],
+            [
+              539,
+              644085
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259136,
+              586
+            ],
+            [
+              500,
+              645842
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              225109,
+              6605
+            ],
+            [
+              273,
+              673564
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249929,
+              1387
+            ],
+            [
+              164,
+              657127
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              257212,
+              1639
+            ],
+            [
+              1485,
+              648182
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242465,
+              6665
+            ],
+            [
+              129,
+              658343
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364508,
+              89
+            ],
+            [
+              1207,
+              543053
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256263,
+              481
+            ],
+            [
+              3725,
+              645428
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              249309,
+              11038
+            ],
+            [
+              1943,
+              644138
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              193753,
+              1738
+            ],
+            [
+              16633,
+              692818
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              245137,
+              3959
+            ],
+            [
+              402,
+              630768
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262716,
+              371
+            ],
+            [
+              455,
+              634703
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246277,
+              492
+            ],
+            [
+              236,
+              659269
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231583,
+              76
+            ],
+            [
+              577,
+              671444
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247891,
+              782
+            ],
+            [
+              342,
+              652197
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249593,
+              150
+            ],
+            [
+              189,
+              658556
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              253536,
+              2096
+            ],
+            [
+              48,
+              652785
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249178,
+              5
+            ],
+            [
+              1931,
+              651074
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255306,
+              162
+            ],
+            [
+              836,
+              651998
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.C": {
+      "name": "5.C",
+      "epoch": 20,
+      "checkpoint_sha256": "ff2d7324c2b645ffc6b49c0eaa87e1e61c2ac9b0906ad6e52e28ed97cd43d5be",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "fp32",
+      "data_identity": {
+        "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+        "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+      },
+      "matrix": [
+        [
+          12953239,
+          6709
+        ],
+        [
+          26715,
+          32229383
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9997918792389598,
+        "recall": 0.9991717845103273,
+        "f1": 0.9994817356954385,
+        "sidewalk_iou": 0.9989640083083905,
+        "background_iou": 0.9974262826408908,
+        "miou": 0.9981951454746407
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              235089,
+              15
+            ],
+            [
+              5,
+              674138
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              365119,
+              308
+            ],
+            [
+              99,
+              539849
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260301,
+              47
+            ],
+            [
+              287,
+              625522
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281169,
+              0
+            ],
+            [
+              0,
+              627529
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276038,
+              44
+            ],
+            [
+              31,
+              630964
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251077,
+              1
+            ],
+            [
+              22,
+              654961
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251296,
+              676
+            ],
+            [
+              115,
+              625528
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              302913,
+              357
+            ],
+            [
+              13,
+              602551
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259000,
+              0
+            ],
+            [
+              633,
+              648012
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249590,
+              178
+            ],
+            [
+              80,
+              657677
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256015,
+              1
+            ],
+            [
+              14,
+              653590
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              233283,
+              20
+            ],
+            [
+              45,
+              671545
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247855,
+              52
+            ],
+            [
+              53,
+              654045
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247451,
+              175
+            ],
+            [
+              45,
+              659886
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252999,
+              10
+            ],
+            [
+              161,
+              654232
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256894,
+              77
+            ],
+            [
+              48,
+              650886
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              311086,
+              14
+            ],
+            [
+              4546,
+              582360
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247809,
+              178
+            ],
+            [
+              6,
+              661902
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              278261,
+              17
+            ],
+            [
+              53,
+              630755
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242775,
+              10
+            ],
+            [
+              42,
+              664558
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              202403,
+              14
+            ],
+            [
+              20,
+              705579
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250703,
+              968
+            ],
+            [
+              6,
+              633831
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292504,
+              23
+            ],
+            [
+              77,
+              615624
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              254196,
+              12
+            ],
+            [
+              806,
+              644858
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266364,
+              0
+            ],
+            [
+              67,
+              640638
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              267984,
+              152
+            ],
+            [
+              0,
+              640650
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256024,
+              0
+            ],
+            [
+              43,
+              649962
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239337,
+              2
+            ],
+            [
+              0,
+              669139
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              257482,
+              0
+            ],
+            [
+              282,
+              649834
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246002,
+              93
+            ],
+            [
+              29,
+              659984
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              284330,
+              465
+            ],
+            [
+              22,
+              620871
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255467,
+              1
+            ],
+            [
+              40,
+              644584
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259683,
+              39
+            ],
+            [
+              3,
+              646339
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              231594,
+              120
+            ],
+            [
+              429,
+              673408
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251279,
+              37
+            ],
+            [
+              0,
+              657291
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258347,
+              504
+            ],
+            [
+              759,
+              648908
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249124,
+              6
+            ],
+            [
+              98,
+              658374
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364584,
+              13
+            ],
+            [
+              20,
+              544240
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256532,
+              212
+            ],
+            [
+              126,
+              649027
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              259365,
+              982
+            ],
+            [
+              1472,
+              644609
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              195442,
+              49
+            ],
+            [
+              15777,
+              693674
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248769,
+              327
+            ],
+            [
+              57,
+              631113
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262808,
+              279
+            ],
+            [
+              8,
+              635150
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246766,
+              3
+            ],
+            [
+              76,
+              659429
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231655,
+              4
+            ],
+            [
+              1,
+              672020
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248488,
+              185
+            ],
+            [
+              103,
+              652436
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249741,
+              2
+            ],
+            [
+              0,
+              658745
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255601,
+              31
+            ],
+            [
+              26,
+              652807
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249179,
+              4
+            ],
+            [
+              70,
+              652935
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255466,
+              2
+            ],
+            [
+              0,
+              652834
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.Cb": {
+      "name": "5.Cb",
+      "epoch": 17,
+      "checkpoint_sha256": "923f9ce16d36a412c42ca07f7b6c878b2c3f499fbebf9dc733bff0a91dd9ae2f",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "fp32",
+      "data_identity": {
+        "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+        "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+      },
+      "matrix": [
+        [
+          12953698,
+          6250
+        ],
+        [
+          27204,
+          32228894
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9998061122357635,
+        "recall": 0.9991566245861481,
+        "f1": 0.9994812628976815,
+        "sidewalk_iou": 0.9989630636926984,
+        "background_iou": 0.9974240695727593,
+        "miou": 0.9981935666327288
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              235089,
+              15
+            ],
+            [
+              5,
+              674138
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              365095,
+              332
+            ],
+            [
+              134,
+              539814
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260335,
+              13
+            ],
+            [
+              135,
+              625674
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281169,
+              0
+            ],
+            [
+              0,
+              627529
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276038,
+              44
+            ],
+            [
+              32,
+              630963
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251078,
+              0
+            ],
+            [
+              24,
+              654959
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251084,
+              888
+            ],
+            [
+              122,
+              625521
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              303002,
+              268
+            ],
+            [
+              18,
+              602546
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259000,
+              0
+            ],
+            [
+              764,
+              647881
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249596,
+              172
+            ],
+            [
+              123,
+              657634
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256016,
+              0
+            ],
+            [
+              13,
+              653591
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              233283,
+              20
+            ],
+            [
+              67,
+              671523
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247863,
+              44
+            ],
+            [
+              77,
+              654021
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247479,
+              147
+            ],
+            [
+              9,
+              659922
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252999,
+              10
+            ],
+            [
+              207,
+              654186
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256916,
+              55
+            ],
+            [
+              53,
+              650881
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              311076,
+              24
+            ],
+            [
+              3560,
+              583346
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247812,
+              175
+            ],
+            [
+              21,
+              661887
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              278265,
+              13
+            ],
+            [
+              74,
+              630734
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242775,
+              10
+            ],
+            [
+              58,
+              664542
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              202414,
+              3
+            ],
+            [
+              20,
+              705579
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250726,
+              945
+            ],
+            [
+              11,
+              633826
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292514,
+              13
+            ],
+            [
+              111,
+              615590
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              254198,
+              10
+            ],
+            [
+              873,
+              644791
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266364,
+              0
+            ],
+            [
+              108,
+              640597
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              267976,
+              160
+            ],
+            [
+              0,
+              640650
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256024,
+              0
+            ],
+            [
+              46,
+              649959
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239339,
+              0
+            ],
+            [
+              0,
+              669139
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              257482,
+              0
+            ],
+            [
+              428,
+              649688
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246049,
+              46
+            ],
+            [
+              30,
+              659983
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              284303,
+              492
+            ],
+            [
+              21,
+              620872
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255466,
+              2
+            ],
+            [
+              36,
+              644588
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259688,
+              34
+            ],
+            [
+              9,
+              646333
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              231614,
+              100
+            ],
+            [
+              525,
+              673312
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251301,
+              15
+            ],
+            [
+              0,
+              657291
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258668,
+              183
+            ],
+            [
+              935,
+              648732
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249127,
+              3
+            ],
+            [
+              114,
+              658358
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364581,
+              16
+            ],
+            [
+              26,
+              544234
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256503,
+              241
+            ],
+            [
+              188,
+              648965
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              259431,
+              916
+            ],
+            [
+              1763,
+              644318
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              195488,
+              3
+            ],
+            [
+              16117,
+              693334
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248662,
+              434
+            ],
+            [
+              31,
+              631139
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262845,
+              242
+            ],
+            [
+              15,
+              635143
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246766,
+              3
+            ],
+            [
+              91,
+              659414
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231655,
+              4
+            ],
+            [
+              2,
+              672019
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248558,
+              115
+            ],
+            [
+              105,
+              652434
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249741,
+              2
+            ],
+            [
+              0,
+              658745
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255602,
+              30
+            ],
+            [
+              25,
+              652808
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249177,
+              6
+            ],
+            [
+              78,
+              652927
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255466,
+              2
+            ],
+            [
+              0,
+              652834
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.Cs": {
+      "name": "5.Cs",
+      "epoch": 9,
+      "checkpoint_sha256": "882b537958888bcf77050a3d55ad5ffd0d9404a34572b3f8abb2478ca4e68fda",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "fp32",
+      "data_identity": {
+        "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+        "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+      },
+      "matrix": [
+        [
+          12958118,
+          1830
+        ],
+        [
+          569782,
+          31686316
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9999422496980417,
+        "recall": 0.9823356811477941,
+        "f1": 0.9910607747587101,
+        "sidewalk_iou": 0.9822799530087611,
+        "background_iou": 0.9577514111515899,
+        "miou": 0.9700156820801755
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              235089,
+              15
+            ],
+            [
+              1,
+              674142
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              365338,
+              89
+            ],
+            [
+              2184,
+              537764
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260348,
+              0
+            ],
+            [
+              68975,
+              556834
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281168,
+              1
+            ],
+            [
+              5,
+              627524
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276037,
+              45
+            ],
+            [
+              148,
+              630847
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251078,
+              0
+            ],
+            [
+              756,
+              654227
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251964,
+              8
+            ],
+            [
+              31338,
+              594305
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              303129,
+              141
+            ],
+            [
+              2979,
+              599585
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259000,
+              0
+            ],
+            [
+              1944,
+              646701
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249628,
+              140
+            ],
+            [
+              287,
+              657470
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256016,
+              0
+            ],
+            [
+              43,
+              653561
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              233281,
+              22
+            ],
+            [
+              306,
+              671284
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247873,
+              34
+            ],
+            [
+              1367,
+              652731
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247594,
+              32
+            ],
+            [
+              780,
+              659151
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252998,
+              11
+            ],
+            [
+              1755,
+              652638
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256907,
+              64
+            ],
+            [
+              468,
+              650466
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              311100,
+              0
+            ],
+            [
+              241966,
+              344940
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247810,
+              177
+            ],
+            [
+              233,
+              661675
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              278266,
+              12
+            ],
+            [
+              859,
+              629949
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242755,
+              30
+            ],
+            [
+              289,
+              664311
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              202416,
+              1
+            ],
+            [
+              199,
+              705400
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251433,
+              238
+            ],
+            [
+              9172,
+              624665
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292493,
+              34
+            ],
+            [
+              1392,
+              614309
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              254195,
+              13
+            ],
+            [
+              1514,
+              644150
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266364,
+              0
+            ],
+            [
+              291,
+              640414
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              268136,
+              0
+            ],
+            [
+              60,
+              640590
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256024,
+              0
+            ],
+            [
+              178,
+              649827
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239336,
+              3
+            ],
+            [
+              0,
+              669139
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              257429,
+              53
+            ],
+            [
+              1830,
+              648286
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246092,
+              3
+            ],
+            [
+              14352,
+              645661
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              284721,
+              74
+            ],
+            [
+              412,
+              620481
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255466,
+              2
+            ],
+            [
+              35,
+              644589
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259684,
+              38
+            ],
+            [
+              618,
+              645724
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              231627,
+              87
+            ],
+            [
+              1550,
+              672287
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251304,
+              12
+            ],
+            [
+              22,
+              657269
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258815,
+              36
+            ],
+            [
+              2322,
+              647345
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249123,
+              7
+            ],
+            [
+              2237,
+              656235
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364585,
+              12
+            ],
+            [
+              219,
+              544041
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256731,
+              13
+            ],
+            [
+              1210,
+              647943
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              260324,
+              23
+            ],
+            [
+              11075,
+              635006
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              195491,
+              0
+            ],
+            [
+              18359,
+              691092
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249067,
+              29
+            ],
+            [
+              11346,
+              619824
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262796,
+              291
+            ],
+            [
+              201,
+              634957
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246764,
+              5
+            ],
+            [
+              648,
+              658857
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231654,
+              5
+            ],
+            [
+              84,
+              671937
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248673,
+              0
+            ],
+            [
+              133249,
+              519290
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249730,
+              13
+            ],
+            [
+              9,
+              658736
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255630,
+              2
+            ],
+            [
+              85,
+              652748
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249180,
+              3
+            ],
+            [
+              430,
+              652575
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255456,
+              12
+            ],
+            [
+              0,
+              652834
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.E": {
+      "name": "5.E",
+      "epoch": 20,
+      "checkpoint_sha256": "70319525b613f1313508d81e361c9ba8d67aeac9e0c0105860787b00ad4a875b",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "fp32",
+      "data_identity": {
+        "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+        "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+      },
+      "matrix": [
+        [
+          12950386,
+          9562
+        ],
+        [
+          31177,
+          32224921
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9997033611489906,
+        "recall": 0.9990334540774275,
+        "f1": 0.9993682953484323,
+        "sidewalk_iou": 0.9987373882945522,
+        "background_iou": 0.9968640899075331,
+        "miou": 0.9978007391010426
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              235089,
+              15
+            ],
+            [
+              0,
+              674143
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364855,
+              572
+            ],
+            [
+              110,
+              539838
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260296,
+              52
+            ],
+            [
+              283,
+              625526
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281169,
+              0
+            ],
+            [
+              0,
+              627529
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276063,
+              19
+            ],
+            [
+              5,
+              630990
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251074,
+              4
+            ],
+            [
+              8,
+              654975
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250566,
+              1406
+            ],
+            [
+              137,
+              625506
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              302804,
+              466
+            ],
+            [
+              6,
+              602558
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258999,
+              1
+            ],
+            [
+              599,
+              648046
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249602,
+              166
+            ],
+            [
+              27,
+              657730
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255987,
+              29
+            ],
+            [
+              12,
+              653592
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              233226,
+              77
+            ],
+            [
+              0,
+              671590
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247850,
+              57
+            ],
+            [
+              68,
+              654030
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247580,
+              46
+            ],
+            [
+              20,
+              659911
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252998,
+              11
+            ],
+            [
+              117,
+              654276
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256938,
+              33
+            ],
+            [
+              82,
+              650852
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              311098,
+              2
+            ],
+            [
+              12758,
+              574148
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247526,
+              461
+            ],
+            [
+              1,
+              661907
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              278234,
+              44
+            ],
+            [
+              32,
+              630776
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242772,
+              13
+            ],
+            [
+              58,
+              664542
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              202412,
+              5
+            ],
+            [
+              14,
+              705585
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250816,
+              855
+            ],
+            [
+              132,
+              633705
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292502,
+              25
+            ],
+            [
+              43,
+              615658
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              254201,
+              7
+            ],
+            [
+              799,
+              644865
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266364,
+              0
+            ],
+            [
+              32,
+              640673
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              267903,
+              233
+            ],
+            [
+              5,
+              640645
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256024,
+              0
+            ],
+            [
+              23,
+              649982
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239335,
+              4
+            ],
+            [
+              0,
+              669139
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              257479,
+              3
+            ],
+            [
+              627,
+              649489
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246005,
+              90
+            ],
+            [
+              65,
+              659948
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              284301,
+              494
+            ],
+            [
+              33,
+              620860
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255467,
+              1
+            ],
+            [
+              36,
+              644588
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259676,
+              46
+            ],
+            [
+              22,
+              646320
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              231362,
+              352
+            ],
+            [
+              99,
+              673738
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251097,
+              219
+            ],
+            [
+              0,
+              657291
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258530,
+              321
+            ],
+            [
+              854,
+              648813
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249126,
+              4
+            ],
+            [
+              170,
+              658302
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364590,
+              7
+            ],
+            [
+              66,
+              544194
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256553,
+              191
+            ],
+            [
+              171,
+              648982
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              259576,
+              771
+            ],
+            [
+              321,
+              645760
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              195327,
+              164
+            ],
+            [
+              11691,
+              697760
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247257,
+              1839
+            ],
+            [
+              0,
+              631170
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262713,
+              374
+            ],
+            [
+              30,
+              635128
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246766,
+              3
+            ],
+            [
+              114,
+              659391
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231652,
+              7
+            ],
+            [
+              0,
+              672021
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248668,
+              5
+            ],
+            [
+              1365,
+              651174
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249729,
+              14
+            ],
+            [
+              0,
+              658745
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255594,
+              38
+            ],
+            [
+              63,
+              652770
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249178,
+              5
+            ],
+            [
+              79,
+              652926
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255457,
+              11
+            ],
+            [
+              0,
+              652834
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.Eb": {
+      "name": "5.Eb",
+      "epoch": 17,
+      "checkpoint_sha256": "66aca1c3a3915b1983bdd124058dbf174d37af65cfcd49e8a2d4e2d3470a6e3e",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "fp32",
+      "data_identity": {
+        "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+        "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+      },
+      "matrix": [
+        [
+          12950506,
+          9442
+        ],
+        [
+          28031,
+          32228067
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9997071113652113,
+        "recall": 0.99913098602317,
+        "f1": 0.9994189656658528,
+        "sidewalk_iou": 0.9988386061414128,
+        "background_iou": 0.9971147936103069,
+        "miou": 0.9979766998758599
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              235089,
+              15
+            ],
+            [
+              0,
+              674143
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364856,
+              571
+            ],
+            [
+              156,
+              539792
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260288,
+              60
+            ],
+            [
+              128,
+              625681
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281169,
+              0
+            ],
+            [
+              0,
+              627529
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276063,
+              19
+            ],
+            [
+              7,
+              630988
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251074,
+              4
+            ],
+            [
+              9,
+              654974
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250285,
+              1687
+            ],
+            [
+              131,
+              625512
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              302867,
+              403
+            ],
+            [
+              10,
+              602554
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259000,
+              0
+            ],
+            [
+              652,
+              647993
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249578,
+              190
+            ],
+            [
+              45,
+              657712
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255993,
+              23
+            ],
+            [
+              24,
+              653580
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              233224,
+              79
+            ],
+            [
+              3,
+              671587
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247848,
+              59
+            ],
+            [
+              75,
+              654023
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247575,
+              51
+            ],
+            [
+              0,
+              659931
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252998,
+              11
+            ],
+            [
+              118,
+              654275
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256945,
+              26
+            ],
+            [
+              85,
+              650849
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              311100,
+              0
+            ],
+            [
+              10275,
+              576631
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247658,
+              329
+            ],
+            [
+              4,
+              661904
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              278231,
+              47
+            ],
+            [
+              40,
+              630768
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242772,
+              13
+            ],
+            [
+              60,
+              664540
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              202411,
+              6
+            ],
+            [
+              14,
+              705585
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              250843,
+              828
+            ],
+            [
+              139,
+              633698
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292503,
+              24
+            ],
+            [
+              73,
+              615628
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              254198,
+              10
+            ],
+            [
+              830,
+              644834
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266364,
+              0
+            ],
+            [
+              45,
+              640660
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              267950,
+              186
+            ],
+            [
+              11,
+              640639
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256024,
+              0
+            ],
+            [
+              22,
+              649983
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239335,
+              4
+            ],
+            [
+              0,
+              669139
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              257479,
+              3
+            ],
+            [
+              616,
+              649500
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246045,
+              50
+            ],
+            [
+              55,
+              659958
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              284250,
+              545
+            ],
+            [
+              39,
+              620854
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255467,
+              1
+            ],
+            [
+              41,
+              644583
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259679,
+              43
+            ],
+            [
+              66,
+              646276
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              231378,
+              336
+            ],
+            [
+              95,
+              673742
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251186,
+              130
+            ],
+            [
+              0,
+              657291
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258668,
+              183
+            ],
+            [
+              985,
+              648682
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249127,
+              3
+            ],
+            [
+              186,
+              658286
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364589,
+              8
+            ],
+            [
+              104,
+              544156
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256574,
+              170
+            ],
+            [
+              195,
+              648958
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              259641,
+              706
+            ],
+            [
+              635,
+              645446
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              195450,
+              41
+            ],
+            [
+              10489,
+              698962
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246977,
+              2119
+            ],
+            [
+              0,
+              631170
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262709,
+              378
+            ],
+            [
+              27,
+              635131
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246766,
+              3
+            ],
+            [
+              142,
+              659363
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231652,
+              7
+            ],
+            [
+              0,
+              672021
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248670,
+              3
+            ],
+            [
+              1249,
+              651290
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249729,
+              14
+            ],
+            [
+              0,
+              658745
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255595,
+              37
+            ],
+            [
+              68,
+              652765
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249178,
+              5
+            ],
+            [
+              83,
+              652922
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255456,
+              12
+            ],
+            [
+              0,
+              652834
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    },
+    "5.Es": {
+      "name": "5.Es",
+      "epoch": 9,
+      "checkpoint_sha256": "2648e77ed12172354f67041518cf93bba3848a046444d813d6fa747be798313b",
+      "input_size": [
+        960,
+        540
+      ],
+      "precision": "fp32",
+      "data_identity": {
+        "manifest_sha256": "aa6219216c424905382d25d4a8c0a4482c2e9e90e10e468bb5e670a9f6373048",
+        "split_sha256": "c9017e5f38e7a8702f5eef76089538ab675c60c7889d94da6f9a8c5ce977e55e"
+      },
+      "matrix": [
+        [
+          12956861,
+          3087
+        ],
+        [
+          524063,
+          31732035
+        ]
+      ],
+      "scored_pixels": 45216046,
+      "ignored_pixels": 863954,
+      "ground_counts": {
+        "background": 12959948,
+        "sidewalk": 32256098
+      },
+      "scores": {
+        "precision": 0.9999027260711334,
+        "recall": 0.9837530565538336,
+        "f1": 0.9917621511201068,
+        "sidewalk_iou": 0.9836589176074969,
+        "background_iou": 0.9609055495430847,
+        "miou": 0.9722822335752908
+      },
+      "frames": [
+        {
+          "image_id": "bf9327fd9523fae792a9bd3da248a590f2c161fbcb52c89c43da9d105e51fcc8",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              235092,
+              12
+            ],
+            [
+              6,
+              674137
+            ]
+          ],
+          "ignored": 12353
+        },
+        {
+          "image_id": "8f6c185e2f17dc45ca41e1afb0e60a0a2fb0ef89a69bb997dcc682869d64e3d5",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              365345,
+              82
+            ],
+            [
+              2650,
+              537298
+            ]
+          ],
+          "ignored": 16225
+        },
+        {
+          "image_id": "ea13f99ebdf991d9050ac001aa72d6449196d6f6900334e77c52d9c72c635a8d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              260348,
+              0
+            ],
+            [
+              85218,
+              540591
+            ]
+          ],
+          "ignored": 35443
+        },
+        {
+          "image_id": "fc46fa9dbb305642fe2e1b5c34373f28f1f795962b6416d008a39a44a6ccafb2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              281169,
+              0
+            ],
+            [
+              1,
+              627528
+            ]
+          ],
+          "ignored": 12902
+        },
+        {
+          "image_id": "a69bd2af17cee1703f21da521abb532aa230f72f2aa906cbdee9cc794fb7439f",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              276018,
+              64
+            ],
+            [
+              39,
+              630956
+            ]
+          ],
+          "ignored": 14523
+        },
+        {
+          "image_id": "7c59367ab01639fd6d2f796c39edd121991be2bfceb2f9ee9ef5edc32c0ec67b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251078,
+              0
+            ],
+            [
+              881,
+              654102
+            ]
+          ],
+          "ignored": 15539
+        },
+        {
+          "image_id": "28aa693023d93dd69b3c7791fa1739f33ad097351515ad27b026b9a97f5f6571",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251931,
+              41
+            ],
+            [
+              17371,
+              608272
+            ]
+          ],
+          "ignored": 43985
+        },
+        {
+          "image_id": "2c7a3060f348880f3555971c474f36b5226e37a3170b8da3e8fdaddf38b2912e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              303122,
+              148
+            ],
+            [
+              853,
+              601711
+            ]
+          ],
+          "ignored": 15766
+        },
+        {
+          "image_id": "d190c73bb1d6a63f0bb2a9c7a01e34c2c4f185eae4f2cb889243356f66aa5575",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259000,
+              0
+            ],
+            [
+              1257,
+              647388
+            ]
+          ],
+          "ignored": 13955
+        },
+        {
+          "image_id": "8cef34a0591256792368567798eaa7055c6785fba99efa54e24e754676fbed84",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249588,
+              180
+            ],
+            [
+              40,
+              657717
+            ]
+          ],
+          "ignored": 14075
+        },
+        {
+          "image_id": "170296c5c137c76f0ae7c17399087f578c60528674ed974c050ea123965b5b13",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256006,
+              10
+            ],
+            [
+              30,
+              653574
+            ]
+          ],
+          "ignored": 11980
+        },
+        {
+          "image_id": "87042099b5db11ef219872ce73d41c9f081e09a581f6f25923e4652fc3aa1cd7",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              233278,
+              25
+            ],
+            [
+              218,
+              671372
+            ]
+          ],
+          "ignored": 16707
+        },
+        {
+          "image_id": "ddd3fad9ff841213d3ce62e767c83443ac10bf06d89bdf04deb5679f56d3aa29",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247854,
+              53
+            ],
+            [
+              313,
+              653785
+            ]
+          ],
+          "ignored": 19595
+        },
+        {
+          "image_id": "601b45c63d8ff663d16e56ca43153482f74278ea20a0021f2454df98ff839598",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247616,
+              10
+            ],
+            [
+              1302,
+              658629
+            ]
+          ],
+          "ignored": 14043
+        },
+        {
+          "image_id": "62e2b572763b00008560892c34afa2c8ef5c1f1c96faaf68fe8aab2c9c9e3e75",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              252995,
+              14
+            ],
+            [
+              2452,
+              651941
+            ]
+          ],
+          "ignored": 14198
+        },
+        {
+          "image_id": "b955e9bf46ac4b898451a02939b21d0b82d3af1af109bc338565b37faba3e5de",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              256939,
+              32
+            ],
+            [
+              204,
+              650730
+            ]
+          ],
+          "ignored": 13695
+        },
+        {
+          "image_id": "3071782d2d7fc5400493042984add186c1e11bc0750e31c50e241a11e7aea2d0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              311100,
+              0
+            ],
+            [
+              220853,
+              366053
+            ]
+          ],
+          "ignored": 23594
+        },
+        {
+          "image_id": "0985cb5b3a4071bf95a46ce676756e26308bdcdb5517e9d1de9f5f0d95e9874b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              247831,
+              156
+            ],
+            [
+              67,
+              661841
+            ]
+          ],
+          "ignored": 11705
+        },
+        {
+          "image_id": "13d8d898b62e17f5be0d20806a5df4f0529865eddd94c90bb0479c64a76abc97",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              278260,
+              18
+            ],
+            [
+              82,
+              630726
+            ]
+          ],
+          "ignored": 12514
+        },
+        {
+          "image_id": "1cac0f4116a62beabc76e255fef3ec5cf8bf23a8fb5c7606dd890aafecd7336a",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              242764,
+              21
+            ],
+            [
+              374,
+              664226
+            ]
+          ],
+          "ignored": 14215
+        },
+        {
+          "image_id": "6a387a7c99eacc9a289951b1c9f21750d1eaff45470a2443202ea5ca5f6689a0",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              202416,
+              1
+            ],
+            [
+              120,
+              705479
+            ]
+          ],
+          "ignored": 13584
+        },
+        {
+          "image_id": "a6699d15d7a6dafb12261b5e54d0b7cdc7bd9fa3c91cf77eb40fb5d2659d22f4",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251423,
+              248
+            ],
+            [
+              1845,
+              631992
+            ]
+          ],
+          "ignored": 36092
+        },
+        {
+          "image_id": "475e960a6db56327e1d855c75307be2c1e3a845f2518d9ed63b28065480b5edb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              292496,
+              31
+            ],
+            [
+              1037,
+              614664
+            ]
+          ],
+          "ignored": 13372
+        },
+        {
+          "image_id": "b57cd55fbb96b61da7aa3a3b74cfadc8767433012487077fa90be0a8fe7d0887",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              254141,
+              67
+            ],
+            [
+              1311,
+              644353
+            ]
+          ],
+          "ignored": 21728
+        },
+        {
+          "image_id": "1f55768210377b830095db018a14f78a1793b68aee5745442c45df67330809e3",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              266364,
+              0
+            ],
+            [
+              329,
+              640376
+            ]
+          ],
+          "ignored": 14531
+        },
+        {
+          "image_id": "a9e68ce1cbde1fd8618a6e3b09bcc175693472c6dc97cbe4dec96ecbf5bc75cf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              268114,
+              22
+            ],
+            [
+              45,
+              640605
+            ]
+          ],
+          "ignored": 12814
+        },
+        {
+          "image_id": "ce61faa7fe55751d0cf566896b99726d574002fa774f9dbe75271f3bf4db0941",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256024,
+              0
+            ],
+            [
+              93,
+              649912
+            ]
+          ],
+          "ignored": 15571
+        },
+        {
+          "image_id": "0d869c15e2a21a60fdb3066889966c5eaf1519d0447cab85423fb5e180153a6d",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              239336,
+              3
+            ],
+            [
+              9,
+              669130
+            ]
+          ],
+          "ignored": 13122
+        },
+        {
+          "image_id": "48ab6b5dcc512b69401b0b331478e3008c4027ea8eb3a237326afaec0a0d3b78",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              257448,
+              34
+            ],
+            [
+              1982,
+              648134
+            ]
+          ],
+          "ignored": 14002
+        },
+        {
+          "image_id": "569df7c1553112d83b754d69396e7e919765ab3c70cb6e1fc3405d734d983383",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246069,
+              26
+            ],
+            [
+              3537,
+              656476
+            ]
+          ],
+          "ignored": 15492
+        },
+        {
+          "image_id": "758ad388d7afe40115623fe9ad494e4c1547bb83ce993ec6c0e135149a122ea3",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              284683,
+              112
+            ],
+            [
+              58,
+              620835
+            ]
+          ],
+          "ignored": 15912
+        },
+        {
+          "image_id": "a7f8fb45005ef83980fe17d5030b223547cf6941319f211912fbe4833ec136f2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255466,
+              2
+            ],
+            [
+              49,
+              644575
+            ]
+          ],
+          "ignored": 21508
+        },
+        {
+          "image_id": "53b0e0bcca57ab61198843a34381f8e68249a806437917f65c37b1a02cd9ce4b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              259674,
+              48
+            ],
+            [
+              242,
+              646100
+            ]
+          ],
+          "ignored": 15536
+        },
+        {
+          "image_id": "0c38c58d7850d3903418aa9d592916f8ec19af2012622c4506e3bb384c7b0870",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              231205,
+              509
+            ],
+            [
+              302,
+              673535
+            ]
+          ],
+          "ignored": 16049
+        },
+        {
+          "image_id": "f80e8d9141d7197d18f31d19ec75928791f452b6b8e46fadfcaba4908a89e216",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              251274,
+              42
+            ],
+            [
+              0,
+              657291
+            ]
+          ],
+          "ignored": 12993
+        },
+        {
+          "image_id": "0fb159e5c08351425672ca77ddf235896bb505de1e272761c2b93f14091fb70e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              258576,
+              275
+            ],
+            [
+              1351,
+              648316
+            ]
+          ],
+          "ignored": 13082
+        },
+        {
+          "image_id": "c1441e0244efc82b85f54a55c11420faf04f988eec7490fed38293c6500028d2",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249127,
+              3
+            ],
+            [
+              120,
+              658352
+            ]
+          ],
+          "ignored": 13998
+        },
+        {
+          "image_id": "0d3a22cdfe51f4d51adbba2efdb78da687997df4a986acbe2302cf2ec62fce79",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              364587,
+              10
+            ],
+            [
+              190,
+              544070
+            ]
+          ],
+          "ignored": 12743
+        },
+        {
+          "image_id": "767405c0bcb8b4a37473b05f0337ddae57a568eff2c53a5a74f6cc43c02fa688",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              256580,
+              164
+            ],
+            [
+              566,
+              648587
+            ]
+          ],
+          "ignored": 15703
+        },
+        {
+          "image_id": "d49506a19914c4a34f6f776d311f001ed91780b5951e700737e227e77032f93f",
+          "recording_run": "2026_07_02_run_1",
+          "matrix": [
+            [
+              260280,
+              67
+            ],
+            [
+              4623,
+              641458
+            ]
+          ],
+          "ignored": 15172
+        },
+        {
+          "image_id": "e0d0d90150f37ec4ed17d9137863e94cb5c554d138ef730a52a379e8f0f1186b",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              195402,
+              89
+            ],
+            [
+              18244,
+              691207
+            ]
+          ],
+          "ignored": 16658
+        },
+        {
+          "image_id": "c0e119bfa64e67801478ca0a7ad7aced451894348c7f1552bd5ae3765a396332",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248967,
+              129
+            ],
+            [
+              6442,
+              624728
+            ]
+          ],
+          "ignored": 41334
+        },
+        {
+          "image_id": "8d84dfecdc5159617f78a7a2e188083e5cc8ad051c550c53e3767bed3d0e551e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              262857,
+              230
+            ],
+            [
+              348,
+              634810
+            ]
+          ],
+          "ignored": 23355
+        },
+        {
+          "image_id": "3c42dedda544440a2593144e90d854cbe70bafcf64dd4c6ebef1e6012e543515",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              246764,
+              5
+            ],
+            [
+              293,
+              659212
+            ]
+          ],
+          "ignored": 15326
+        },
+        {
+          "image_id": "32f6462939b96335c4f7655f8b3ccc38f2075025ebf0cb8e37b36f1b01764cfa",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              231646,
+              13
+            ],
+            [
+              50,
+              671971
+            ]
+          ],
+          "ignored": 17920
+        },
+        {
+          "image_id": "d56bcc277f942f1cab109466e3e4c884538db4a9c7e2a7dd6e9ad73074595fcf",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              248673,
+              0
+            ],
+            [
+              146265,
+              506274
+            ]
+          ],
+          "ignored": 20388
+        },
+        {
+          "image_id": "e8d09e7378b89a25665b4904ebf184334dcf7cecd9c1668035fcb0192b777458",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249727,
+              16
+            ],
+            [
+              1,
+              658744
+            ]
+          ],
+          "ignored": 13112
+        },
+        {
+          "image_id": "b5709ce96887879162ca2b55ae688419097e49ac892b5e2c583ea579b1be9b8e",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255585,
+              47
+            ],
+            [
+              49,
+              652784
+            ]
+          ],
+          "ignored": 13135
+        },
+        {
+          "image_id": "77e62051b339bec3b8d9fe738d3b43a63bbe82b6ee9e85e49e849af9fdb94970",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              249173,
+              10
+            ],
+            [
+              339,
+              652666
+            ]
+          ],
+          "ignored": 19412
+        },
+        {
+          "image_id": "948543c16ced86b9569976a016f61f4f2b46dc63aa0b377bcb3784d80a75becb",
+          "recording_run": "2026_07_02_run_2",
+          "matrix": [
+            [
+              255450,
+              18
+            ],
+            [
+              12,
+              652822
+            ]
+          ],
+          "ignored": 13298
+        }
+      ]
+    }
+  },
+  "viewer_package_id": "05e2319111db5aefe7dfc8027a8b8d10b9d63ec58e2e02131fccf7f4be2454cd",
+  "previous_viewer_package_id": "d5c89e3c1851accadfe49cdc5c969c987946eacf7b2a692f0a2950a5826967cc"
+}

@@ -100,7 +100,7 @@ Dice metrics are zero when the term is disabled. This change starts no full run,
 uploads nothing, and does not modify A/B losses or trained artifacts.
 
 See the full decision-by-decision audit in
-[`training-plan-audit.txt`](../../../docs/technical/series-5C-architecture/training-plan-audit.txt).
+`~/Desktop/technical/series-5C-architecture/training-plan-audit.txt` on the Mac.
 The current development split, staged encoder warmup, sequence-aware sampling,
 final holdout, safety-aware checkpoint score, and Jetson/planner qualification
 remain outstanding. FP32-only, ConvNeXt-Tiny/U-Net, and binary beta naming remain
@@ -115,15 +115,25 @@ the newer choices; do not revert them to historical settings.
 | Train A/B/C/E | The corresponding `series_5_*_sidewalkpilot_trainer.py` in this directory |
 | Build the unified model comparison | `tools/packaging/package_model_lab.py` |
 | Open the offline model viewer on the Mac | `reviews/model-lab-test50/index.html` |
-| View predicted masks in Finder (white = sidewalk, black = background) | `reviews/model-lab-test50/prediction-previews/<model>/` |
+| View predicted masks in Finder (white = sidewalk, black = background) | `reviews/model-lab-test50/predictions/<model>/` |
 | Inspect ten training photos, masks and the viewer-format manifest | `label-sample/` (local data, not published) |
 
-The `predictions/` PNGs store class IDs (0 and 1), so both classes look black in
-a photo app. The matching `prediction-previews/` PNGs use intensities 0 and
+The `prediction-class-ids/` PNGs store class IDs (0 and 1), so both classes look black in
+a photo app. The matching `predictions/` PNGs use intensities 0 and
 255 for display only. Do not use previews as labels: 255 means ignore in reference masks.
 
 The model viewer compares checkpoint predictions on the same 50 photos. The
 progress dashboard reads loop receipts, not photos. Neither is a label editor.
+
+The [segmentation report](../../../docs/segmentation_model_report.pdf) and
+[counts and scores](../../../docs/segmentation_eval_current_labels.json) cover
+that 50-image sample, not the full test split. The steering reports (Series 1-4)
+count one decision per image: reference angle bucket on rows, predicted angle
+bucket on columns. Their "off by one" count includes exact matches as well as
+neighbors. Series 5 instead counts one decision per non-ignored pixel, with
+background first and sidewalk second on both axes: `[[TN, FP], [FN, TP]]`.
+The reference is a pseudo-label, not an independent human measurement.
+
 Dataset preparation and corridor-sample packaging are separate workflows that
 share code with the strict SAM 3 worker. The retired paired-viewer and manual
 repair pilots are available at commit `09957af`; they are not the D/F screening pass.
