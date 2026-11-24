@@ -111,7 +111,7 @@ the newer choices; do not revert them to historical settings.
 | Workflow | Entry point |
 | --- | --- |
 | Full D/F label screening and resume | `tools/labeling/screen_full_inventory.py` |
-| Live aggregate progress (five-second refresh) | `tools/packaging/serve_df_history.py` |
+| Live aggregate progress (ten-second refresh) | `tools/packaging/serve_df_history.py` |
 | Train A/B/C/E | The corresponding `series_5_*_sidewalkpilot_trainer.py` in this directory |
 | Build the unified model comparison | `tools/packaging/package_model_lab.py` |
 | Open the offline model viewer on the Mac | `reviews/model-lab-test50/index.html` |

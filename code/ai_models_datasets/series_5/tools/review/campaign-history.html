@@ -90,7 +90,7 @@ if(report){
   }
   $('refresh').onclick=reload;
   if(report.state==='running'||report.state==='screening'){
-    const refreshSeconds=5;
+    const refreshSeconds=10;
     $('stamp').append(' | Auto-refresh: '+refreshSeconds+'s');
     setInterval(()=>{if(!document.hidden)reload()},refreshSeconds*1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)reload()});
