@@ -6,7 +6,7 @@ import unittest
 
 import torch
 
-SERIES5 = Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5"
+SERIES5 = Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5"
 sys.path.insert(0, str(SERIES5))
 sys.path.insert(0, str(SERIES5 / "tools"))
 from workspace import activate

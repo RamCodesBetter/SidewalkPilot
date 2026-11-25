@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 
-ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets/series_5/tools"
+ROOT = Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5/tools"
 sys.path.insert(0, str(ROOT))
 from workspace import activate, source_path
 activate()

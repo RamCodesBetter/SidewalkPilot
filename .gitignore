@@ -59,7 +59,8 @@ media/photos/*
 code/ai_models_datasets/**/*.jpg
 
 # Populate these roots from the datasets before running the steering trainers.
-code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/
+code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/*
+!code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/labels.json
 code/ai_models_datasets/series_3_and_4/sidewalkpilot_dataset/
 
 # runtime logs now live in ~/logs (outside the repo)

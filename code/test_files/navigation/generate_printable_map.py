@@ -3,8 +3,11 @@ import json
 import math
 from collections import Counter, defaultdict
 
-GRAPH_FILE = "trossachs_nav_graph.json"
-OUTPUT_FILE = "trossachs_printable_map.svg"
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+GRAPH_FILE = ROOT / "graphs/trossachs_nav_graph.json"
+OUTPUT_FILE = ROOT / "maps/trossachs_printable_map.svg"
 
 WIDTH = 7200
 HEIGHT = 5400

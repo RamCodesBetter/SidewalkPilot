@@ -54,7 +54,7 @@ The Series 3 trainer prints `skipped bad labels`, `skipped missing images`, and 
 ```bash
 python3 - <<'PY'
 import json
-rows = json.load(open("code/ai_models_datasets/series_1_and_2/steering_corrections.json"))
+rows = json.load(open("code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/labels.json"))
 print("rows", len(rows),
       "throttle-fields (should be 0 for S1/2)",
       sum("throttle" in r for r in rows))

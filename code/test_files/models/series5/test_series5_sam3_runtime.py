@@ -2,16 +2,21 @@
 """Check the isolated SAM 3 postprocessor API without downloading model weights."""
 
 import argparse
+import os
 from pathlib import Path
 import sys
 from types import SimpleNamespace
 import unittest
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--runtime", type=Path, required=True)
+parser.add_argument("--runtime", type=Path, default=os.environ.get("SAM3_TEST_RUNTIME"))
 args, remaining = parser.parse_known_args()
+if args.runtime is None:
+    if __name__ == "__main__":
+        parser.error("supply --runtime or SAM3_TEST_RUNTIME")
+    raise unittest.SkipTest("set SAM3_TEST_RUNTIME to the isolated SAM 3 runtime")
 sys.path.insert(0, str(args.runtime.resolve()))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "ai_models_datasets" / "series_5" / "tools"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets" / "series_5" / "tools"))
 from workspace import activate
 activate()
 

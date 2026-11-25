@@ -1,6 +1,7 @@
 import json
 import math
 import argparse
+from pathlib import Path
 from collections import defaultdict
 
 ALNUM = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -50,9 +51,10 @@ UNRELATED_FALLBACK_MIN_CONNECTOR_M = 20.0
 UNRELATED_FALLBACK_MAX_CONNECTOR_M = LOCAL_HOUSE_SIDEWALK_MAX_M
 UNRELATED_FALLBACK_ROAD_MARGIN_M = 10.0
 
-INPUT_GEOJSON = "trossachs.geojson"
-OUTPUT_GRAPH = "trossachs_nav_graph.json"
-OVERRIDE_FILE = "house_stop_overrides.json"
+ROOT = Path(__file__).resolve().parent
+INPUT_GEOJSON = str(ROOT / "maps/trossachs.geojson")
+OUTPUT_GRAPH = str(ROOT / "graphs/trossachs_nav_graph.json")
+OVERRIDE_FILE = ROOT / "house_stop_overrides.json"
 
 
 def label(i):

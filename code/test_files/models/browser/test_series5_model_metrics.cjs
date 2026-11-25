@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {score,higherDisplayed}=require('../../ai_models_datasets/series_5/tools/review/model_metrics.js');
+const {score,higherDisplayed}=require('../../../ai_models_datasets/series_5/tools/review/model_metrics.js');
 
 const p=[1,1,0,0,1,0],r=[1,0,1,0,255,255];
 const binary=score(p,r,'binary-reference');

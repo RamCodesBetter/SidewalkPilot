@@ -13,8 +13,8 @@ import numpy as np
 from PIL import Image
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'ai_models_datasets/series_5/tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'ai_models_datasets/series_5'))
 from workspace import activate
 activate()
 from label_grounded_sam2 import digest_json, sha256, write_json

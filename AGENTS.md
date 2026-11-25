@@ -1,11 +1,16 @@
-# SidewalkPilot model workflow
+# SidewalkPilot model development
 
-- Integrate learning into substantive SidewalkPilot coding tasks without blocking implementation on a quiz: point to the real function and input/output contract, explain the design choice and a failure mode, show a reproducible check, and offer one hard prediction/debugging question about the change. Keep trivial maintenance brief. Distinguish student decisions, AI implementation, measured results, and planned work.
+## Model contracts
 
-- Work on the branch selected for the task. The active model development branch is `series-5`; do not switch to main for cleanup.
-- Use each model family's existing workspace under `code/ai_models_datasets/`. Keep trainer entry points at its root and supporting tools grouped by function. Keep generated review bundles under `reviews/`; do not create parallel Desktop review workspaces.
-- Keep the student's technical study materials in `~/Desktop/technical` and journal in `~/Desktop/notebook` on the Mac, outside Git. Publishable evaluation reports belong in repo `docs/`.
-- Use lowercase folders and trainer filenames. Preserve model identifiers and data filename case.
-- Keep published local model exports in `code/ai_models`; exclude weights and generated review/dataset assets from Git commits.
-- The Linux `/home/rsabavat/sidewalkpilot-labels` directory remains the separate training and review history store.
-- For each completed change, commit only the relevant files, push to the matching remote branch, then fast-forward the Mac checkout and sync its local artifacts. Do not wait for another reminder.
+- Series 1 and 2 predict a continuous steering target from a camera frame. Preserve the preprocessing, output scale and steering convention of the specific export.
+- Series 3.0 predicts steering and throttle. Later Series 3 networks emit steering-class logits, within-class offsets and throttle. Decode these outputs before comparing steering angles.
+- Series 4 predicts hybrid steering targets without throttle. Its input history and number of output horizons depend on the variant; do not interchange model signatures.
+- Series 5 performs pixel classification, not direct steering. The A/B binary baselines use MobileNetV3-Large with LR-ASPP. C/E use FP32 ConvNeXt-Tiny with a U-Net-style decoder. Preserve RGB normalization, class IDs, the ignore value and the spatial alignment between logits and reference masks.
+
+## Repository conventions
+
+- Work on the selected branch. Keep trainer entry points in the corresponding family root under `code/ai_models_datasets/`. Use lowercase source paths and preserve case-sensitive model identifiers.
+- Keep deployment artifacts under `code/ai_models/`, generated review bundles under the family’s `reviews/`, and publishable reports under `docs/`. Do not commit weights, source photos or generated review bundles.
+- Record the checkpoint, preprocessing, reference provenance, split identity and aggregation method for reported metrics. Automated reference agreement is not human verification or proof of safe vehicle operation.
+- For substantive changes document the input/output contract, rationale, failure mode and reproducible verification. Distinguish implemented changes from measured results and proposed work.
+- Commit only scoped files, push to the matching branch and fast-forward the Mac checkout. Transfer untracked artifacts separately. Preserve unrelated changes.

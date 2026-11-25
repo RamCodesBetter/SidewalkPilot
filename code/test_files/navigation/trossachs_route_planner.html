@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Trossachs Fast Route Planner</title>
-  <script src="trossachs_nav_graph_embed.js"></script>
+  <script src="graphs/trossachs_nav_graph_embed.js"></script>
   <style>
     :root {
       --bg: #edf1f5;
@@ -496,9 +496,9 @@
 
   <script>
     const MAP_CONFIG = {
-      trossachs: { label: "Trossachs", graph: "trossachs_nav_graph.json", embed: "trossachs_nav_graph_embed.js" },
-      sammamish: { label: "Sammamish", graph: "sammamish_nav_graph.json", embed: "sammamish_nav_graph_embed.js" },
-      issaquah: { label: "Issaquah", graph: "issaquah_nav_graph.json", embed: "issaquah_nav_graph_embed.js" },
+      trossachs: { label: "Trossachs", graph: "graphs/trossachs_nav_graph.json", embed: "graphs/trossachs_nav_graph_embed.js" },
+      sammamish: { label: "Sammamish", graph: "graphs/sammamish_nav_graph.json", embed: "graphs/sammamish_nav_graph_embed.js" },
+      issaquah: { label: "Issaquah", graph: "graphs/issaquah_nav_graph.json", embed: "graphs/issaquah_nav_graph_embed.js" },
     };
     let currentMapKey = "trossachs";
     let graphLoadToken = 0;

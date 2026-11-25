@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 
-ROOT = Path(__file__).resolve().parents[2] / "ai_models_datasets"
+ROOT = Path(__file__).resolve().parents[3] / "ai_models_datasets"
 sys.path.insert(0, str(ROOT / "series_3_and_4"))
 sys.path.insert(0, str(ROOT / "series_5" / "tools"))
 sys.path.insert(0, str(ROOT / "series_5"))

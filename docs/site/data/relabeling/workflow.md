@@ -30,7 +30,7 @@ identity and temporal ordering.
    `repeat` weighting.
 
 The current Series 3/4 repository contains the base `labels.json` and no
-`steering_corrections.json`. Correction support is implemented, but its use in a
+`sidewalkpilot_dataset/labels.json`. Correction support is implemented, but its use in a
 training run must be demonstrated by that run's command and scan log.
 
 ## Review Rules

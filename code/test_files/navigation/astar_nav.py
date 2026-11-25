@@ -4,7 +4,9 @@ import math
 import sys
 import argparse
 
-GRAPH_FILE = "trossachs_nav_graph.json"
+from pathlib import Path
+
+GRAPH_FILE = Path(__file__).resolve().parent / "graphs/trossachs_nav_graph.json"
 HOME = "PNX"  # fallback; refreshed from graph home_candidates at runtime
 SIDEWALK_TYPES = {"footway", "pedestrian", "steps", "crosswalk"}
 WALK_EDGE_KINDS = {

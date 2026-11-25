@@ -7,7 +7,7 @@ import unittest
 
 from PIL import Image
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ai_models_datasets/series_5/tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'ai_models_datasets/series_5/tools'))
 from workspace import activate
 activate()
 from label_grounded_sam2 import digest_json, sha256, write_json

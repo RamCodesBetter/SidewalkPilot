@@ -1219,9 +1219,13 @@ def train(roots, args):
     print("[start] train_autonomy_v2.py", flush=True)
     print(f"[start] device={DEVICE}", flush=True)
     print(f"[start] roots={[str(r) for r in roots]}", flush=True)
-    correction_items = load_correction_items(args.corrections)
+    corrections = args.corrections
+    local_root = SCRIPT_DIR / "sidewalkpilot_dataset"
+    if corrections is None and local_root.resolve() in {Path(r).resolve() for r in roots}:
+        corrections = [local_root / "labels.json"]
+    correction_items = load_correction_items(corrections)
     if correction_items:
-        print(f"[start] correction samples={len(correction_items)} files={args.corrections}", flush=True)
+        print(f"[start] correction samples={len(correction_items)} files={corrections}", flush=True)
     print(
         f"[start] epochs={args.epochs} batch_size={args.batch_size} workers={args.workers} "
         f"lr={args.lr} weight_decay={args.weight_decay} grad_clip={args.grad_clip}",

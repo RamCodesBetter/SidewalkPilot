@@ -25,8 +25,11 @@ result, and date separately.
 
 ## Support Assets
 
-GeoJSON files, navigation graphs, the route-planner HTML, and
-`house_stop_overrides.json` live under `code/test_files/navigation/`.
+Under `code/test_files/navigation/`, `maps/` contains GeoJSON sources and
+the printable map, and `graphs/` contains generated graphs and browser embeds.
+The planner HTML, scripts and stop overrides stay at the navigation root.
+Under `models/`, Series 5 Python tests live in `series5/` and browser checks
+in `browser/`; benchmarks and steering evaluation entry points remain at the root.
 `mg24_yaw_firmware/` and `camera/hsv_clahe_comparisons/` are checked-in supporting
 directories. Local generated caches or reports under `data/` are not part of the
 published repository merely because they appear in a working copy.

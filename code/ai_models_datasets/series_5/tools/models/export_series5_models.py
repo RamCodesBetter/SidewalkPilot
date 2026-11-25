@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export a Series 5 A/B checkpoint and verify ONNX logits against PyTorch."""
+"""Export a named Series 5 checkpoint and verify ONNX logits against PyTorch."""
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
@@ -32,7 +32,13 @@ class Logits(torch.nn.Module):
 
 
 def export(checkpoint, output, name):
-    model, state = load_checkpoint(checkpoint)
+    import convnext_tiny_unet
+    families = {"SidewalkPilot-v5." + suffix: convnext_tiny_unet
+                for suffix in ("C", "Cb", "Cs", "E", "Eb", "Es")}
+    families.update({"SidewalkPilot-v5.A": None, "SidewalkPilot-v5.B": None})
+    model, state = load_checkpoint(checkpoint, model_definition=families[name])
+    if name.split("-v")[1].rstrip("bs") != state["config"]["model_name"]:
+        raise ValueError("Artifact name disagrees with checkpoint model_name")
     model = Logits(model.eval())
     width, height = state["config"]["width"], state["config"]["height"]
     sample = torch.randn(1, 3, height, width, generator=torch.Generator().manual_seed(20261121))
