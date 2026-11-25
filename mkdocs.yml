@@ -1,6 +1,7 @@
 site_name: SidewalkPilot RC Car
 docs_dir: docs/site
 exclude_docs: |
+  research-context/**
   .DS_Store
   **/.DS_Store
 theme:
@@ -47,8 +48,6 @@ nav:
     - Training Split and Sampling: research-and-math/algorithms/weighted-sampling.md
     - Model Framing and Loss: research-and-math/machine-learning/loss-function.md
     - Sim-to-Real Gap: research-and-math/machine-learning/sim-to-real-gap.md
-  - Research Context and Contributions: research-context/novelty-and-contributions.md
-  - Series 5 Accessibility Study: research-context/series-5-accessibility-study.md
   - Runtime Code:
     - Runtime Loop and Entrypoint: runtime-code/runtime-loop.md
     - Controller Mapping and Driving Modes: runtime-code/controller-mapping.md

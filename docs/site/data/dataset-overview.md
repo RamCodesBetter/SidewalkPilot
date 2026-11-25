@@ -46,21 +46,6 @@ Series 4 derives temporal target sequences from the ordered labels:
 
 Future targets are training labels only. They are never supplied to the deployed model.
 
-## Planned Series 5 Segmentation Labels
-
-Series 5 will use the current Series 3/4 source images with a separate Grounded SAM 2
-segmentation-reference layer; it does not replace historical steering/throttle labels.
-The revised plan reviews 200 masks, checks 200 additional masks if the first sample is
-below 80% correct, and triggers relabeling if that additional sample is below 75% correct.
-Those sample-review thresholds are not evidence that every unreviewed mask is correct.
-
-The planned split is 80/10/10 training/validation/test, assigned before training with
-near-duplicate frames grouped into the same partition. It does not retroactively change
-the Series 3/4 splits described above. Segmentation uses IoU, precision, recall, and F1
-against reference masks with recorded provenance and review status. See the
-[Series 5 study plan](../research-context/series-5-accessibility-study.md) for the full
-current review and evaluation scope.
-
 ## Corrections and Provenance
 
 On October 25, 2026, all 268 images from the July 29 local quarantine were restored

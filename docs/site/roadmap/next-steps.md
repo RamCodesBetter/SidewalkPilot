@@ -2,20 +2,6 @@
 
 This page contains work that is not yet a proven capability.
 
-## Series 5 and Accessibility Study
-
-The [September 12 study plan](../research-context/series-5-accessibility-study.md) adds
-Grounded SAM 2 reference masks for the existing Series 3/4 images, an 80/10/10 grouped
-split before training, semantic-segmentation evaluation, and downstream steering/throttle
-control. Calibrated camera, IMU, and accumulated encoder-pulse measurements are to be
-logged during survey drives; the model itself still outputs a mask.
-
-The final comparison is **three SidewalkPilot runs and one manual survey on the same
-1.06-mile route**. Development and safety checks come first and have no fixed run count.
-Report each final run and the SidewalkPilot mean for accuracy, person-hours, and recurring
-cost per mile. This plan does not change historical Series 3/4 results or turn theoretical
-savings into findings.
-
 ## Existing Steering Workstreams
 
 | Priority | Planned work | Dependency | Success gate |
