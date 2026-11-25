@@ -81,7 +81,7 @@ def package(root,out):
     write_json(out/'manifest.json',data)
     (out/'data.js').write_text('window.COMPARISON_DATA='+json.dumps(data,separators=(',',':'))+';')
     for name in ('comparison.css','comparison.js','comparison.html','lucide.min.js','LUCIDE-LICENSE.txt'):
-        shutil.copy2(workspace.TOOLS/'review'/name,out/('index.html' if name=='comparison.html' else name))
+        shutil.copy2(Path(__file__).parent/'assets'/name,out/('index.html' if name=='comparison.html' else name))
 
 
 if __name__=='__main__':

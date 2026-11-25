@@ -11,7 +11,7 @@
 
 `workspace.py` only locates code and settings for imports. `configs/` stores defaults and class definitions. Neither loads a photo, runs a network or decides whether a mask passes.
 
-**Full-inventory workflow:** `labeling/screen_full_inventory.py` reads the source inventory and first campaign receipts, skips already screened IDs, runs the strict detector on remaining frames, and writes new masks, per-loop decisions and progress. `packaging/serve_df_history.py` serves that history. A deferred record is not an accepted training mask. Neither program trains a model.
+**Full-inventory workflow:** `labeling/screen_full_inventory.py` reads the source inventory and first campaign receipts, skips already screened IDs, runs the strict detector on remaining frames, and writes new masks, per-loop decisions and progress. `review/serve_df_history.py` serves that history. A deferred record is not an accepted training mask. Neither program trains a model.
 
 **Training and viewing:** datasets tools freeze image membership and supervision; the family-root trainers update weights. Evaluation measures predictions, packaging bundles data for offline use, and review contains the browser assets. Earlier pilots are retained for reproducing comparisons and as dependencies; they are not steps to rerun for every batch.
 
@@ -31,7 +31,7 @@
 | `evaluation/compare_sam3_sidewalk.py` | Compare SAM 3 text-only proposals on the fixed ten-frame SAM 2 audit set. |
 | `evaluation/diagnose_reviews.py` | Validate a class-1 review, select diagnostic frames, and render paired comparisons. |
 | `evaluation/evaluate_class1_corrections.py` | Validate pixel-reference exports and evaluate frozen GSAM 2 diagnostic outputs. |
-| `filtering/pseudo_mask_filter.py` | Conservative SAM prompt-agreement filter for explicitly unverified pseudo-labels. |
+| `labeling/pseudo_mask_filter.py` | Conservative SAM prompt-agreement filter for explicitly unverified pseudo-labels. |
 | `labeling/label_assisted_pilot.py` | Generate at most 200 class-1 masks from explicit, per-image assisted points. |
 | `labeling/label_grounded_sam2.py` | Resumable, review-gated Grounding DINO + SAM 2.1 pilot on existing images. |
 | `labeling/label_series5_campaign.py` | Screen the corpus resumably without weakening filters or leaking held-out days. |
@@ -42,15 +42,15 @@
 | `labeling/sam_point_diagnostic.py` | Small SAM 2 point-prompt diagnostic, explicitly assisted rather than automatic. |
 | `labeling/screen_full_inventory.py` | Screen every distinct inventory image once; preserve strict passes and deferred cases. |
 | `models/convert_series5_checkpoint_to_onnx.py` | Convert a Series 5 PyTorch checkpoint to ONNX and verify its logits against PyTorch. |
-| `packaging/mask_encoding.py` | Encode class-ID masks in the offline viewers' row-major [value, count] format. |
-| `packaging/package_corridor_sample.py` | Package a deterministic variety sample of 30 single-sidewalk candidates for offline review. |
-| `packaging/package_model_lab.py` | Build one offline comparison from a reproducible sample of the frozen C/E test split. |
-| `packaging/serve_df_history.py` | Serve only aggregate D/F progress and loop counts, never files from the dataset. |
+| `review/mask_encoding.py` | Encode class-ID masks in the offline viewers' row-major [value, count] format. |
+| `review/package_corridor_sample.py` | Package a deterministic variety sample of 30 single-sidewalk candidates for offline review. |
+| `review/package_model_lab.py` | Build one offline comparison from a reproducible sample of the frozen C/E test split. |
+| `review/serve_df_history.py` | Serve only aggregate D/F progress and loop counts, never files from the dataset. |
 | `workspace.py` | Shared source locations for direct CLI entry points and flat module imports. |
-| `review/beta.html, beta.js, beta.css` | Unified model comparison: select checkpoints and compare their masks and metrics. |
-| `review/comparison.html, comparison.js, comparison.css` | Side-by-side annotation reviewer, correction severity, keyboard navigation and review export; shared styling is also used by the model viewer. |
-| `review/model_metrics.js` | Compute per-image pixel scores and handle unknown or undefined metrics. |
-| `review/campaign-history.html` | Render screening counts and loop history; not a mask viewer. |
-| `review/lucide.min.js, LUCIDE-LICENSE.txt` | Bundled offline icons and their license. |
+| `review/assets/beta.html, beta.js, beta.css` | Unified model comparison: select checkpoints and compare their masks and metrics. |
+| `review/assets/comparison.html, comparison.js, comparison.css` | Side-by-side annotation reviewer, correction severity, keyboard navigation and review export; shared styling is also used by the model viewer. |
+| `review/assets/model_metrics.js` | Compute per-image pixel scores and handle unknown or undefined metrics. |
+| `review/assets/campaign-history.html` | Render screening counts and loop history; not a mask viewer. |
+| `review/assets/lucide.min.js, LUCIDE-LICENSE.txt` | Bundled offline icons and their license. |
 | `configs/series_5_a_config.json, series_5_c_config.json` | Default trainer settings for the baseline and ConvNeXt experiments. |
 | `configs/label_config.json, taxonomy.json` | Labeling settings and class definitions; the binary model outputs only sidewalk/background. |

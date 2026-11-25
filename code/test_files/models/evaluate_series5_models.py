@@ -204,7 +204,7 @@ if __name__=="__main__":
     root=(args.bundle or args.history/"model-lab-test50").resolve()
     if args.infer:
         import torch
-        sys.path.insert(0,str(Path(__file__).resolve().parents[2]/"ai_models_datasets/series_5/tools/packaging"))
+        sys.path.insert(0,str(Path(__file__).resolve().parents[2]/"ai_models_datasets/series_5/tools/review"))
         from package_model_lab import package
         names = ("5.A","5.B","5.C","5.Cb","5.Cs","5.E","5.Eb","5.Es")
         checkpoints = [(n,args.history/RUNS[n[:3]]/("best.pt" if n in ("5.A","5.B") else n+".pt")) for n in names]

@@ -150,7 +150,7 @@ def package(data, output, checkpoints, seed, count, device, df_split=None):
         write_json(root / "manifest.json", manifest)
         (root / "data.js").write_text("window.BETA_COMPARISON_DATA="+json.dumps(manifest,separators=(",",":"))+";\n")
         for name in ASSETS:
-            shutil.copyfile(workspace.TOOLS / "review" / name, root / ("index.html" if name=="beta.html" else name))
+            shutil.copyfile(Path(__file__).parent / "assets" / name, root / ("index.html" if name=="beta.html" else name))
         root.rename(output)
 
 
