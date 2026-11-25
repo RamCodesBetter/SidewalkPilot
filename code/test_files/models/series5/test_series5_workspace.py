@@ -16,7 +16,7 @@ class WorkspaceTests(unittest.TestCase):
     def test_entry_points_work_from_an_unrelated_directory(self):
         paths = [ROOT.parent / f"series_5_{name}_sidewalkpilot_trainer.py" for name in "ABCE"]
         paths += [source_path(f"{name}.py") for name in (
-            "export_series5_models", "screen_full_inventory",
+            "convert_series5_checkpoint_to_onnx", "screen_full_inventory",
             "package_model_lab", "serve_df_history", "prepare_series5_pseudo_dataset")]
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)

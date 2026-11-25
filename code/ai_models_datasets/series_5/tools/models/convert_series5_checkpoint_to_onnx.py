@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export a named Series 5 checkpoint and verify ONNX logits against PyTorch."""
+"""Convert a Series 5 PyTorch checkpoint to ONNX and verify its logits against PyTorch."""
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))

@@ -41,7 +41,7 @@
 | `labeling/sam3_corridor_batch.py` | Screen cached native SAM 3 labels and attempt a same-run temporal repair of deferred frames. |
 | `labeling/sam_point_diagnostic.py` | Small SAM 2 point-prompt diagnostic, explicitly assisted rather than automatic. |
 | `labeling/screen_full_inventory.py` | Screen every distinct inventory image once; preserve strict passes and deferred cases. |
-| `models/export_series5_models.py` | Export a named Series 5 checkpoint and verify ONNX logits against PyTorch. |
+| `models/convert_series5_checkpoint_to_onnx.py` | Convert a Series 5 PyTorch checkpoint to ONNX and verify its logits against PyTorch. |
 | `packaging/mask_encoding.py` | Encode class-ID masks in the offline viewers' row-major [value, count] format. |
 | `packaging/package_corridor_sample.py` | Package a deterministic variety sample of 30 single-sidewalk candidates for offline review. |
 | `packaging/package_model_lab.py` | Build one offline comparison from a reproducible sample of the frozen C/E test split. |
