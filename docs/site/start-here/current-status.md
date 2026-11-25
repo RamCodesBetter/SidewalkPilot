@@ -8,18 +8,6 @@ Hugging Face cards and verified manifests. The current code registers them in th
 selector and Jetson server; physical testing remains pending. The 268 quarantined
 images were restored with original labels, returning the active dataset to 81,237.
 
-## Series 5 and Accessibility Planning
-
-The final study now explicitly uses **three SidewalkPilot survey runs and one manual
-survey** of the same planned **1.06-mile route**. Series 5 will output segmentation
-masks, with downstream steering and throttle control. Calibrated camera geometry, IMU
-orientation, and accumulated Hall-pulse distance will provide measurements during each
-survey run. Existing safety braking and manual takeover remain separate.
-
-The [current study plan](../research-context/series-5-accessibility-study.md) records the
-200-plus-200 mask review, 80/10/10 grouped split before training, per-run recording, and
-per-mile analysis. These are planned procedures, not completed trials or measured gains.
-
 ## Working Baseline
 
 - **Field-selected steering model:** v3.4, running as FP32 ONNX on the Jetson Orin Nano.

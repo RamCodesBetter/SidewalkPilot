@@ -121,14 +121,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/machine-learning/sim-to-real-gap/">Sim-to-Real Gap</a>
                   </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
-                </li>
-              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -414,8 +406,11 @@ exercise; the directory root contains folders rather than a second unsorted tool
 on the current hardware revision. Test records must preserve the command, device,
 result, and date separately.</p>
 <h2 id="support-assets">Support Assets</h2>
-<p>GeoJSON files, navigation graphs, the route-planner HTML, and
-<code>house_stop_overrides.json</code> live under <code>code/test_files/navigation/</code>.
+<p>Under <code>code/test_files/navigation/</code>, <code>maps/</code> contains GeoJSON sources and
+the printable map, and <code>graphs/</code> contains generated graphs and browser embeds.
+The planner HTML, scripts and stop overrides stay at the navigation root.
+Under <code>models/</code>, Series 5 Python tests live in <code>series5/</code> and browser checks
+in <code>browser/</code>; benchmarks and steering evaluation entry points remain at the root.
 <code>mg24_yaw_firmware/</code> and <code>camera/hsv_clahe_comparisons/</code> are checked-in supporting
 directories. Local generated caches or reports under <code>data/</code> are not part of the
 published repository merely because they appear in a working copy.</p>

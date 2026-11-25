@@ -121,14 +121,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../../research-and-math/machine-learning/sim-to-real-gap/">Sim-to-Real Gap</a>
                   </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
-                </li>
-              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -428,7 +420,7 @@ inventing provenance that the saved files do not contain.</p>
 <p>The Series 3 trainer prints <code>skipped bad labels</code>, <code>skipped missing images</code>, and per-source counts every time it loads a dataset; a fresh capture with a nonzero bad-label count means throttle is missing somewhere. Series 1/2 shape can be checked directly:</p>
 <pre><code class="language-bash">python3 - &lt;&lt;'PY'
 import json
-rows = json.load(open(&quot;code/ai_models_datasets/series_1_and_2/steering_corrections.json&quot;))
+rows = json.load(open(&quot;code/ai_models_datasets/series_1_and_2/sidewalkpilot_dataset/labels.json&quot;))
 print(&quot;rows&quot;, len(rows),
       &quot;throttle-fields (should be 0 for S1/2)&quot;,
       sum(&quot;throttle&quot; in r for r in rows))

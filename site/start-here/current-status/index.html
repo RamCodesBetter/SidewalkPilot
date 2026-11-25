@@ -52,8 +52,6 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Current Status</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#series-5-and-accessibility-planning">Series 5 and Accessibility Planning</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#working-baseline">Working Baseline</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#series-4-results">Series 4 Results</a>
@@ -136,14 +134,6 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/machine-learning/sim-to-real-gap/">Sim-to-Real Gap</a>
                   </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
-                </li>
               </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
@@ -357,15 +347,6 @@ below retain their July 18, 2026 review date; this planning update is not a new 
 Hugging Face cards and verified manifests. The current code registers them in the Pi
 selector and Jetson server; physical testing remains pending. The 268 quarantined
 images were restored with original labels, returning the active dataset to 81,237.</p>
-<h2 id="series-5-and-accessibility-planning">Series 5 and Accessibility Planning</h2>
-<p>The final study now explicitly uses <strong>three SidewalkPilot survey runs and one manual
-survey</strong> of the same planned <strong>1.06-mile route</strong>. Series 5 will output segmentation
-masks, with downstream steering and throttle control. Calibrated camera geometry, IMU
-orientation, and accumulated Hall-pulse distance will provide measurements during each
-survey run. Existing safety braking and manual takeover remain separate.</p>
-<p>The <a href="../../research-context/series-5-accessibility-study/">current study plan</a> records the
-200-plus-200 mask review, 80/10/10 grouped split before training, per-run recording, and
-per-mile analysis. These are planned procedures, not completed trials or measured gains.</p>
 <h2 id="working-baseline">Working Baseline</h2>
 <ul>
 <li><strong>Field-selected steering model:</strong> v3.4, running as FP32 ONNX on the Jetson Orin Nano.</li>

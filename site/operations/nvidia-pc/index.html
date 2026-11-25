@@ -121,14 +121,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../research-and-math/machine-learning/sim-to-real-gap/">Sim-to-Real Gap</a>
                   </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../research-context/novelty-and-contributions/">Research Context and Contributions</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../../research-context/series-5-accessibility-study/">Series 5 Accessibility Study</a>
-                </li>
-              </ul>
               <p class="caption"><span class="caption-text">Runtime Code</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../runtime-code/runtime-loop/">Runtime Loop and Entrypoint</a>
@@ -385,7 +377,7 @@ python3 -m py_compile code/ai_models_datasets/series_3_and_4/series_3_sidewalkpi
 </code></pre>
 <h2 id="failure-and-recovery">Failure and Recovery</h2>
 <ul>
-<li><strong>Trainer picks the wrong labels or corrections:</strong> confirm the dataset root and printed scan counts. The Series 1/2 directory has a checked-in <code>steering_corrections.json</code>; the current Series 3/4 repository uses <code>sidewalkpilot_dataset/labels.json</code> and has no checked-in corrections file.</li>
+<li><strong>Trainer picks the wrong labels or corrections:</strong> confirm the dataset root and printed scan counts. The Series 1/2 directory has a checked-in <code>sidewalkpilot_dataset/labels.json</code>; the current Series 3/4 repository uses <code>sidewalkpilot_dataset/labels.json</code> and has no checked-in corrections file.</li>
 <li><strong>Selected model does not load:</strong> the version string must be present in <code>STEERING_MODEL_VERSIONS</code> in <code>vision.py</code>, and the matching PTH or ONNX file must exist in the Jetson Orin Nano's <code>code/ai_models</code> directory. Check the inference-server log for the resolved filename, backend, and GPU provider.</li>
 </ul>
 <p>Field-test verdicts are tracked separately from training. The July 13 comparison selected v3.4. The later 4.0 comparison found <code>4.0f</code> viable and rejected the history-input models for steering echo. Series 4.1 is runtime-registered and published; hardware verification and field testing remain pending.</p>
