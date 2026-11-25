@@ -17,11 +17,11 @@ import torch.nn.functional as F
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import workspace
 workspace.activate()
-import convnext_tiny_unet
+from series_5_sidewalkpilot_trainer import ConvNeXtRecipe
 from label_grounded_sam2 import digest_json, sha256, write_json
 from mask_encoding import encode_labels
 from prepare_reviewed_dataset import safe_file
-from series_5_A_sidewalkpilot_trainer import SidewalkDataset, autocast, load_checkpoint
+from series_5_sidewalkpilot_trainer import SidewalkDataset, autocast, load_checkpoint
 
 
 ASSETS = ("beta.html", "beta.js", "beta.css", "comparison.css", "model_metrics.js",
@@ -118,7 +118,7 @@ def package(data, output, checkpoints, seed, count, device, df_split=None):
                 raise ValueError(f"Invalid or duplicate checkpoint label {name}")
             convnext = name[2] in "CDEF"
             expected = df_identity if name[2] in "DF" else identity
-            model, state = load_checkpoint(path, model_definition=convnext_tiny_unet if convnext else None)
+            model, state = load_checkpoint(path, model_definition=ConvNeXtRecipe if convnext else None)
             cfg = state["config"]
             if name in split_hashes and state["data_identity"]["split_sha256"] != split_hashes[name]:
                 raise ValueError(f"Unexpected training split for {name}")

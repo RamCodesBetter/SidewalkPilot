@@ -9,8 +9,8 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5/tools"))
 from workspace import activate
 activate()
-import checkpoint_names as naming
-import boundary_metrics as boundary
+import series_5_sidewalkpilot_trainer as naming
+import series_5_sidewalkpilot_trainer as boundary
 import numpy as np
 
 

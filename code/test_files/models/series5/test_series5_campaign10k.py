@@ -3,7 +3,8 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5/tools/datasets"))
-from campaign10k import CampaignSampler, allocate
+from campaign10k import allocate
+from series_5_sidewalkpilot_trainer import CampaignSampler
 
 
 class CampaignTests(unittest.TestCase):

@@ -19,7 +19,7 @@ import torch
 
 
 from label_grounded_sam2 import sha256
-from series_5_A_sidewalkpilot_trainer import load_checkpoint, MEAN, STD
+from series_5_sidewalkpilot_trainer import load_checkpoint, MEAN, STD
 
 
 class Logits(torch.nn.Module):
@@ -32,8 +32,8 @@ class Logits(torch.nn.Module):
 
 
 def export(checkpoint, output, name):
-    import convnext_tiny_unet
-    families = {"SidewalkPilot-v5." + suffix: convnext_tiny_unet
+    from series_5_sidewalkpilot_trainer import ConvNeXtRecipe
+    families = {"SidewalkPilot-v5." + suffix: ConvNeXtRecipe
                 for suffix in ("C", "Cb", "Cs", "E", "Eb", "Es")}
     families.update({"SidewalkPilot-v5.A": None, "SidewalkPilot-v5.B": None})
     model, state = load_checkpoint(checkpoint, model_definition=families[name])

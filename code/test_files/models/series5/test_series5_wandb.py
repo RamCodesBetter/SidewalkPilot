@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / "series_5"))
 from workspace import activate
 activate()
 from wandb_logger import WandbLogger
-from series_5_A_sidewalkpilot_trainer import main, start_wandb
+from series_5_sidewalkpilot_trainer import run_a as main, start_wandb
 
 
 class FakeSummary(dict):
@@ -77,7 +77,7 @@ class WandbTests(unittest.TestCase):
     def test_cli_enables_tracking_by_default_with_local_opt_out(self):
         command = ["trainer", "train", "--dataset", "data", "--split", "split.json", "--output", "run"]
         for extra, expected in (([], True), (["--no-wandb"], False), (["--wandb"], True)):
-            with mock.patch.object(sys, "argv", command + extra), mock.patch("series_5_A_sidewalkpilot_trainer.train", return_value={}) as train:
+            with mock.patch.object(sys, "argv", command + extra), mock.patch("series_5_sidewalkpilot_trainer.train", return_value={}) as train:
                 main()
                 self.assertEqual(train.call_args.args[0].wandb, expected)
 

@@ -1,6 +1,7 @@
-"""5.E: identical campaign-only recipe to 5.C, with two encoder-frozen epochs."""
-from series_5_C_sidewalkpilot_trainer import main
+#!/usr/bin/env python3
+"""Run the fixed 5.E training recipe."""
+from series_5_sidewalkpilot_trainer import run_fixed_experiment
 
 
 if __name__ == "__main__":
-    main("5.E")
+    run_fixed_experiment("5.E")

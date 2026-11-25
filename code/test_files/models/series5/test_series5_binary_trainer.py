@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5/tools"))
 from workspace import activate
 activate()
-from series_5_A_sidewalkpilot_trainer import (
+from series_5_sidewalkpilot_trainer import (
     DEFAULTS, MixedBatchSampler, SidewalkDataset, atomic_checkpoint, confusion_counts,
     confusion_metrics, evaluate, load_checkpoint, make_model, segmentation_loss,
     select_precision, train, train_mode, training_config, validate_split,
@@ -232,8 +232,8 @@ class BinaryTrainerTests(unittest.TestCase):
                 raise KeyboardInterrupt()
             return evaluate(*positional, **keywords)
 
-        with mock.patch("series_5_A_sidewalkpilot_trainer.load_partition", return_value=partitions):
-            with mock.patch("series_5_A_sidewalkpilot_trainer.evaluate", side_effect=interrupted_evaluate):
+        with mock.patch("series_5_sidewalkpilot_trainer.load_partition", return_value=partitions):
+            with mock.patch("series_5_sidewalkpilot_trainer.evaluate", side_effect=interrupted_evaluate):
                 with self.assertRaises(KeyboardInterrupt):
                     train(args)
             args.resume = True

@@ -20,8 +20,8 @@ activate()
 from label_grounded_sam2 import digest_json, sha256, write_json
 from prepare_reviewed_dataset import pixel_hash, pixel_counts
 from prepare_series5_pseudo_dataset import build, load_mixed_partition
-from series_5_A_sidewalkpilot_trainer import DEFAULTS, train
-from series_5_B_sidewalkpilot_trainer import ScreenedBatchSampler, conservative_loss, TRAINING_POLICY
+from series_5_sidewalkpilot_trainer import DEFAULTS, train
+from series_5_sidewalkpilot_trainer import ScreenedBatchSampler, conservative_loss, TRAINING_POLICY
 from pseudo_training_targets import prepare_target
 
 
@@ -291,7 +291,7 @@ class PseudoTrainerTests(unittest.TestCase):
         # Ensure at least two batches for the two-update smoke contract.
         parts = load_mixed_partition(self.data, self.root/'split.json')
         parts['train'] = parts['train'][:1] + parts['train'][1:] * 5
-        with mock.patch('series_5_A_sidewalkpilot_trainer.evaluate', return_value={
+        with mock.patch('series_5_sidewalkpilot_trainer.evaluate', return_value={
                 'binary_reference': {'sidewalk_iou': .5, 'precision': .6, 'recall': .7, 'f1': .64}}) as evaluate:
             result = train(args, partition_loader=lambda *_: parts, sampler_class=ScreenedBatchSampler,
                            loss_function=conservative_loss)

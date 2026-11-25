@@ -10,21 +10,6 @@ import tempfile
 from freeze_ce_partitions import digest, phash, read
 
 
-class CampaignSampler:
-    def __init__(self, rows, batch_size, seed):
-        self.n,self.batch_size,self.seed,self.epoch=len(rows),batch_size,seed,0
-
-    def __len__(self):
-        return (self.n+self.batch_size-1)//self.batch_size
-
-    def __iter__(self):
-        rng=random.Random(self.seed+self.epoch)
-        ids=list(range(self.n))
-        rng.shuffle(ids)
-        for k in range(0,self.n,self.batch_size):
-            yield [(i,rng.getrandbits(32)) for i in ids[k:k+self.batch_size]]
-
-
 def allocate(groups, forced, seed):
     pool = sorted(set(groups) - forced)
     rng = random.Random(seed)

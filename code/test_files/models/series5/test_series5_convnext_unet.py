@@ -16,9 +16,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5"))
 from workspace import activate
 activate()
-import convnext_tiny_unet as definition
-import series_5_A_sidewalkpilot_trainer as base
-import series_5_C_sidewalkpilot_trainer as trainer
+from series_5_sidewalkpilot_trainer import ConvNeXtRecipe as definition
+import series_5_sidewalkpilot_trainer as base
+import series_5_sidewalkpilot_trainer as trainer
 
 
 class ConvNeXtTests(unittest.TestCase):
@@ -32,7 +32,7 @@ class ConvNeXtTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
 
     def config(self):
-        args = SimpleNamespace(**trainer.DEFAULTS, smoke=True, workers=0)
+        args = SimpleNamespace(**trainer.CONVNEXT_DEFAULTS, smoke=True, workers=0)
         return base.training_config(args, "fp32", model_definition=definition)
 
     def test_encoder_skip_shapes_and_full_resolution_output(self):
@@ -77,7 +77,7 @@ class ConvNeXtTests(unittest.TestCase):
         self.assertEqual(cfg["precision"], "fp32")
         self.assertEqual(cfg["backbone_weights"], "ConvNeXt_Tiny_Weights.IMAGENET1K_V1")
         self.assertFalse(cfg["precision_policy"]["autocast"])
-        args = SimpleNamespace(**trainer.DEFAULTS, smoke=True, workers=0)
+        args = SimpleNamespace(**trainer.CONVNEXT_DEFAULTS, smoke=True, workers=0)
         for precision in ("auto", "fp16", "bf16"):
             with self.assertRaisesRegex(ValueError, "explicit fp32"):
                 base.training_config(args, precision, model_definition=definition)
@@ -124,11 +124,11 @@ class ConvNeXtTests(unittest.TestCase):
         weak = dict(id="weak", image="source.jpg", mask="mask.png", supervision="pseudo-binary")
         parts = dict(train=[strong] + [{**weak, "id": f"weak-{i}"} for i in range(5)],
                      validation=[strong], test=[])
-        args = SimpleNamespace(**{**trainer.DEFAULTS, "weights": "none", "width": 64, "height": 32,
+        args = SimpleNamespace(**{**trainer.CONVNEXT_DEFAULTS, "weights": "none", "width": 64, "height": 32,
                     "dataset": dataset, "split": dataset / "split.json", "output": self.root / "smoke",
                     "device": "cpu", "workers": 0, "smoke": True, "resume": False, "wandb": True,
                     "loss": "focal-dice"})
-        with patch.object(trainer, "load_partition", return_value=parts), \
+        with patch.object(trainer, "load_convnext_partition", return_value=parts), \
                 patch.object(base, "start_wandb") as mocked_wandb, contextlib.redirect_stdout(io.StringIO()):
             trainer.run_training(args)
         # Mock the boundary: verify live payloads without uploading any data.
@@ -165,7 +165,7 @@ class ConvNeXtTests(unittest.TestCase):
         self.assertEqual(runtime["purpose"], "SMOKE TEST ONLY")
         args.resume = True
         args.focal_gamma += .5
-        with patch.object(trainer, "load_partition", return_value=parts), self.assertRaisesRegex(ValueError, "Resume configuration"):
+        with patch.object(trainer, "load_convnext_partition", return_value=parts), self.assertRaisesRegex(ValueError, "Resume configuration"):
             trainer.run_training(args)
 
     def test_default_loss_and_optional_dice_policy(self):
@@ -179,7 +179,7 @@ class ConvNeXtTests(unittest.TestCase):
             self.assertEqual(policy["focal_gamma"], 1.5)
             self.assertEqual(policy["dice_weight"], .5 if mode == "focal-dice" else 0)
             self.assertEqual(train.call_args.kwargs["loss_function"].dice_weight, policy["dice_weight"])
-        self.assertEqual(trainer.DEFAULTS["loss"], "focal")
+        self.assertEqual(trainer.CONVNEXT_DEFAULTS["loss"], "focal")
 
     def test_completed_full_run_invokes_named_checkpoint_publication(self):
         (self.root / "manifest.json").write_text(json.dumps(
@@ -187,7 +187,7 @@ class ConvNeXtTests(unittest.TestCase):
         args = trainer.parser().parse_args(["train", "--dataset", str(self.root),
             "--split", "unused.json", "--output", str(self.root / "run")])
         with patch.object(base, "train", return_value=dict(status="complete")), \
-                patch.object(trainer.checkpoint_names, "publish_completed_run", return_value={}) as publish:
+                patch.object(trainer, "publish_completed_run", return_value={}) as publish:
             result = trainer.run_training(args)
         publish.assert_called_once_with(args.output, "5.C")
         self.assertEqual(result["checkpoint_selection"], {})
@@ -198,7 +198,7 @@ class ConvNeXtTests(unittest.TestCase):
         args = trainer.parser().parse_args(["train", "--dataset", str(self.root),
             "--split", "unused.json", "--output", str(self.root / "run")])
         with patch.object(base, "train", side_effect=KeyboardInterrupt), \
-                patch.object(trainer.checkpoint_names, "publish_completed_run") as publish:
+                patch.object(trainer, "publish_completed_run") as publish:
             with self.assertRaises(KeyboardInterrupt):
                 trainer.run_training(args)
         publish.assert_not_called()

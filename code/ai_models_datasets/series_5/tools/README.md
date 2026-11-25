@@ -5,7 +5,7 @@
 1. **Labeling proposes pixels.** SAM sees an RGB photo and returns candidate regions. In the strict detector, the first prompt is `concrete sidewalk`. The detector checks score, anchoring and fragmentation, then seeks agreement from a second prompt. A missing region, a low score and a failed anchor can all produce the same stored deferral reason.
 2. **Filtering decides whether to trust a proposal for training.** Two confident masks are not enough: their overlap must pass the policy too. Disputed boundary pixels can be marked 255 (ignore). A passing mask is still an automatic label, not a human observation.
 3. **Datasets decide where examples go.** A manifest pairs each image ID with the right target; a split assigns it to training, validation or test. Dataset code does not predict the mask. The trainers one directory up read those pairs and update the network.
-4. **Models define what is learned.** Architecture maps pixels to logits, loss turns logits and reference labels into a training signal, checkpoint rules select saved epochs, and export converts a trained network for inference. None of these steps is a SAM labeling pass.
+4. **Training lives one directory up.** The shared Series 5 trainer defines the networks, losses, batch samplers, epoch loop, boundary metric and checkpoint selection. The A/B/C/E scripts each select one fixed recipe. The standalone model export tool converts a finished checkpoint to ONNX; it does not train.
 5. **Evaluation measures errors.** These tools compare predictions and references, audit labeling methods, or measure boundary agreement. The cross-checkpoint PDF and JSON are now produced by `code/test_files/models/evaluate_series5_models.py`: default mode scores saved masks; `--infer` runs the checkpoints again.
 6. **Packaging prepares files; review displays them.** Packaging writes a browser-readable bundle or serves progress counts. The browser code shows photos, overlays and scores and records ratings. A colored overlay is for people; the PNG containing class IDs is what the evaluator reads.
 
@@ -27,7 +27,6 @@
 | `datasets/pseudo_training_targets.py` | Avoid learning questionable tiny negative regions from SAM pseudo-labels. |
 | `evaluation/audit_sam_implementations.py` | Fixed ten-frame implementation comparison; never overwrites reviewed labels. |
 | `evaluation/audit_series5_pseudo.py` | Report training-reference agreement and create retained-label inspection panels. |
-| `evaluation/boundary_metrics.py` | Micro-averaged sidewalk boundary F1 at original reference resolution. |
 | `evaluation/compare_sam31_sidewalk.py` | Run the official SAM 3.1 per-frame detector on the fixed ten-image audit. |
 | `evaluation/compare_sam3_sidewalk.py` | Compare SAM 3 text-only proposals on the fixed ten-frame SAM 2 audit set. |
 | `evaluation/diagnose_reviews.py` | Validate a class-1 review, select diagnostic frames, and render paired comparisons. |
@@ -42,10 +41,7 @@
 | `labeling/sam3_corridor_batch.py` | Screen cached native SAM 3 labels and attempt a same-run temporal repair of deferred frames. |
 | `labeling/sam_point_diagnostic.py` | Small SAM 2 point-prompt diagnostic, explicitly assisted rather than automatic. |
 | `labeling/screen_full_inventory.py` | Screen every distinct inventory image once; preserve strict passes and deferred cases. |
-| `models/checkpoint_names.py` | Publish named end/best snapshots without promoting incomplete training runs. |
-| `models/convnext_tiny_unet.py` | Primary Series 5 encoder/decoder, with an explicit full-FP32 contract. |
 | `models/export_series5_models.py` | Export a named Series 5 checkpoint and verify ONNX logits against PyTorch. |
-| `models/segmentation_losses.py` | 5.C binary focal objectives; keep historical 5.A/5.B losses unchanged. |
 | `packaging/mask_encoding.py` | Encode class-ID masks in the offline viewers' row-major [value, count] format. |
 | `packaging/package_corridor_sample.py` | Package a deterministic variety sample of 30 single-sidewalk candidates for offline review. |
 | `packaging/package_model_lab.py` | Build one offline comparison from a reproducible sample of the frozen C/E test split. |
