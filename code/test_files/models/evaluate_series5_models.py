@@ -74,7 +74,14 @@ def evaluate(bundle, history):
                 recording_run=f["recording_run"],matrix=matrix,ignored=int((~valid).sum())))
     if any(len(m["frames"])!=len(ids) for m in models.values()):
         raise ValueError("Incomplete predictions")
-    return dict(seed=manifest["seed"],population=manifest["population"],reference=manifest["reference_policy"],
+    source = history/"series5-ce-grouped/campaign-only-v1"
+    inventory = json.loads((source/"manifest.json").read_text())["records"]
+    runs_by_id = {r["id"]: r["recording_run"] for r in inventory}
+    test_ids = json.loads((source/"split.json").read_text())["partitions"]["test"]
+    if not ids <= set(test_ids) or len(test_ids) != manifest["population"]:
+        raise ValueError("Viewer sample does not match the campaign test population")
+    return dict(campaign_by_drive=Counter(runs_by_id.values()),test_by_drive=Counter(runs_by_id[i] for i in test_ids),
+                seed=manifest["seed"],population=manifest["population"],reference=manifest["reference_policy"],
                 split=manifest["data_identity"],overlap=overlaps,checkpoints=models)
 
 
@@ -123,9 +130,9 @@ def render(data, output, bundle):
          "Counts are pooled before division. Green marks a better value within each column, not a safety threshold.")
     para(f"{ranking[0]} ranked first at {pct(scores(clean[ranking[0]])[-1])} mIoU; {ranking[1]} followed at {pct(scores(clean[ranking[1]])[-1])}. "
          "A small difference on two drives does not establish a better field system. None of these scores measures sidewalk width in centimeters.")
-    page("Which photos and models were tested?","The recording breakdown shows whether a single drive dominates the ranking. Same-day neighboring frames can remain similar even after exact duplicates are excluded.")
-    runs=sorted({f["recording_run"] for f in sample})
-    table([["Recording","Sampled","Scored","Excluded"]]+[[r,(a:=sum(f["recording_run"]==r for f in sample)),
+    page("Why only two July 2 drives?","Read each row left to right. The 10,000 accepted training-experiment images came from just two recordings. The viewer randomly drew 50 from the frozen test split, not from the full camera archive. Five sampled photos had been used to train or validate A/B, so all models were compared on the same remaining 45. These results do not test another day's conditions.")
+    runs=sorted(data["campaign_by_drive"])
+    table([["Recording","In original 10,000","In 1,000 test","Drawn for viewer","Scored","Excluded"]]+[[r,data["campaign_by_drive"][r],data["test_by_drive"].get(r,0),(a:=sum(f["recording_run"]==r for f in sample)),
              (b:=sum(f["recording_run"]==r for f in clean["5.C"])),a-b] for r in runs])
     table([["Checkpoint","Training architecture","Model input (W x H)","Evaluation precision","Saved epoch"]]+
           [[n,"MobileNetV3 / LR-ASPP" if n[2] in "AB" else "ConvNeXt-Tiny / U-Net",
@@ -144,12 +151,14 @@ def render(data, output, bundle):
     plot(fig,630,190)
     table([["Model","Background kept (TN)","Spill (FP)","Missed (FN)","Sidewalk found (TP)"]]+
           [[n,*[f"{v:,}" for v in row]] for n,row in zip(names,cm)])
-    page("How much did scores vary by photo?","Each photo counts once in this table. The 10th percentile describes the lower-scoring end of the sample; the minimum identifies a specific image to inspect. The last columns pool pixels within each recording, not across the two drives.")
-    rows=[["Model","Worst photo #","Minimum","10th percentile","Median","Mean"]+runs]
+    scored=sum(counts(clean["5.C"]))
+    ignored=sum(f["ignored"] for f in clean["5.C"])
+    para(f"Unit: pixels, not photos. Across {eligible} photos the masks contain {scored+ignored:,} pixels. Skip {ignored:,} unknown reference pixels. Each row then sorts the same {scored:,} pixels into four outcomes; a pixel appears exactly once per model.")
+    page("Can a high average hide a bad mask?","First compute one mIoU per photo: average the sidewalk IoU and background IoU. Sort the 45 photo scores from lowest to highest. Minimum is the lowest; the 10th percentile is near the fifth-lowest; median is the middle (23rd); mean is the sum divided by 45. Photo numbers match the viewer.")
+    rows=[["Model","Worst photo #","Minimum","10th percentile","Median","Mean"]]
     for n in names:
         fs=clean[n]; vals=[scores([f])[-1] for f in fs]
-        rows.append([n,fs[int(np.argmin(vals))]["position"],*map(pct,[min(vals),np.percentile(vals,10),np.median(vals),mean(vals)]),
-                    *[pct(scores([f for f in fs if f["recording_run"]==r])[-1]) for r in runs]])
+        rows.append([n,fs[int(np.argmin(vals))]["position"],*map(pct,[min(vals),np.percentile(vals,10),np.median(vals),mean(vals)])])
     table(rows,{i:"high" for i in range(2,len(rows[0]))})
     para("Why report more than the average?","Heading2")
     para("A model can agree on most pixels in most photos while missing an entire stretch of path in one. "
