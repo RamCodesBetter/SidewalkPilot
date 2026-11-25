@@ -13,7 +13,7 @@ from pathlib import Path
 import cv2
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_DATASET = (
     REPO_ROOT
     / "code"
@@ -21,7 +21,7 @@ DEFAULT_DATASET = (
     / "series_3_and_4"
     / "sidewalkpilot_dataset"
 )
-DEFAULT_OUTPUT = Path(__file__).resolve().parent / "mini_test_dataset"
+DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "mini_test_dataset"
 STEERING_BINS = (
     ("hard_left_0_45", 0.0, 45.0),
     ("left_45_60", 45.0, 60.0),

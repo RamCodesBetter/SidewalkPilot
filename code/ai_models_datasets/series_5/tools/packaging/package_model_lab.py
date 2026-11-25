@@ -21,7 +21,7 @@ import convnext_tiny_unet
 from label_grounded_sam2 import digest_json, sha256, write_json
 from mask_encoding import encode_labels
 from prepare_reviewed_dataset import safe_file
-from series_5_a_sidewalkpilot_trainer import SidewalkDataset, autocast, load_checkpoint
+from series_5_A_sidewalkpilot_trainer import SidewalkDataset, autocast, load_checkpoint
 
 
 ASSETS = ("beta.html", "beta.js", "beta.css", "comparison.css", "model_metrics.js",

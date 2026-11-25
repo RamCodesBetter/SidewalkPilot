@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_DATASET_DIR = SCRIPT_DIR / "mini_test_dataset"
+DEFAULT_DATASET_DIR = SCRIPT_DIR.parent / "mini_test_dataset"
 DEFAULT_OUTPUT = DEFAULT_DATASET_DIR / "manual_review.csv"
 OUTPUT_FIELDS = [
     "file",

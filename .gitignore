@@ -52,6 +52,9 @@ code/ai_models_datasets/**/wandb/
 code/ai_models_datasets/**/wandb_runs_local/
 
 # Field data: photo runs (images + label manifests) — hosted on Hugging Face.
+docs/site/research-context/
+docs/series_5_model_report.pdf
+docs/series_5_evaluation.json
 # The controller creates the photo directory when capture starts.
 media/photos/*
 

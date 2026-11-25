@@ -16,9 +16,9 @@ from typing import Any
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[2]
+REPO_ROOT = SCRIPT_DIR.parents[3]
 BENCHMARK_SCRIPT = SCRIPT_DIR / "benchmark_v41a_devices.py"
-DEFAULT_IMAGES = SCRIPT_DIR / "mini_test_dataset"
+DEFAULT_IMAGES = SCRIPT_DIR.parent / "mini_test_dataset"
 DEFAULT_MODEL_DIRS = [
     REPO_ROOT / "code" / "ai_models",
 ]

@@ -13,7 +13,7 @@ import torch.nn as nn
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[2]
+REPO_ROOT = SCRIPT_DIR.parents[3]
 MODELS_DIR = REPO_ROOT / "code" / "ai_models"
 DEFAULT_OUTPUT = MODELS_DIR
 SERVER_DIR = REPO_ROOT / "code" / "controller" / "current" / "rc_car_app"

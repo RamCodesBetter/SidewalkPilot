@@ -1,5 +1,16 @@
 # Series 5 tool map
 
+## Follow one photograph
+
+1. **Labeling proposes pixels.** SAM sees an RGB photo and returns candidate regions. In the strict detector, the first prompt is `concrete sidewalk`. The detector checks score, anchoring and fragmentation, then seeks agreement from a second prompt. A missing region, a low score and a failed anchor can all produce the same stored deferral reason.
+2. **Filtering decides whether to trust a proposal for training.** Two confident masks are not enough: their overlap must pass the policy too. Disputed boundary pixels can be marked 255 (ignore). A passing mask is still an automatic label, not a human observation.
+3. **Datasets decide where examples go.** A manifest pairs each image ID with the right target; a split assigns it to training, validation or test. Dataset code does not predict the mask. The trainers one directory up read those pairs and update the network.
+4. **Models define what is learned.** Architecture maps pixels to logits, loss turns logits and reference labels into a training signal, checkpoint rules select saved epochs, and export converts a trained network for inference. None of these steps is a SAM labeling pass.
+5. **Evaluation measures errors.** These tools compare predictions and references, audit labeling methods, or measure boundary agreement. The cross-checkpoint PDF and JSON are now produced by `code/test_files/models/evaluate_series5_models.py`: default mode scores saved masks; `--infer` runs the checkpoints again.
+6. **Packaging prepares files; review displays them.** Packaging writes a browser-readable bundle or serves progress counts. The browser code shows photos, overlays and scores and records ratings. A colored overlay is for people; the PNG containing class IDs is what the evaluator reads.
+
+`workspace.py` only locates code and settings for imports. `configs/` stores defaults and class definitions. Neither loads a photo, runs a network or decides whether a mask passes.
+
 **Full-inventory workflow:** `labeling/screen_full_inventory.py` reads the source inventory and first campaign receipts, skips already screened IDs, runs the strict detector on remaining frames, and writes new masks, per-loop decisions and progress. `packaging/serve_df_history.py` serves that history. A deferred record is not an accepted training mask. Neither program trains a model.
 
 **Training and viewing:** datasets tools freeze image membership and supervision; the family-root trainers update weights. Evaluation measures predictions, packaging bundles data for offline use, and review contains the browser assets. Earlier pilots are retained for reproducing comparisons and as dependencies; they are not steps to rerun for every batch.
@@ -21,7 +32,6 @@
 | `evaluation/compare_sam3_sidewalk.py` | Compare SAM 3 text-only proposals on the fixed ten-frame SAM 2 audit set. |
 | `evaluation/diagnose_reviews.py` | Validate a class-1 review, select diagnostic frames, and render paired comparisons. |
 | `evaluation/evaluate_class1_corrections.py` | Validate pixel-reference exports and evaluate frozen GSAM 2 diagnostic outputs. |
-| `evaluation/segmentation_report.py` | Render the offline segmentation report from saved pixel counts and split identities. |
 | `filtering/pseudo_mask_filter.py` | Conservative SAM prompt-agreement filter for explicitly unverified pseudo-labels. |
 | `labeling/label_assisted_pilot.py` | Generate at most 200 class-1 masks from explicit, per-image assisted points. |
 | `labeling/label_grounded_sam2.py` | Resumable, review-gated Grounding DINO + SAM 2.1 pilot on existing images. |

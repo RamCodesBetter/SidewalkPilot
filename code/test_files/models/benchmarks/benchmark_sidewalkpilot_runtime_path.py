@@ -27,7 +27,7 @@ import numpy as np
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[2]
+REPO_ROOT = SCRIPT_DIR.parents[3]
 SERVER = (
     REPO_ROOT
     / "code"
@@ -37,7 +37,7 @@ SERVER = (
     / "jetson_inference_server.py"
 )
 CLIENT_DIR = SERVER.parent
-DEFAULT_IMAGES = SCRIPT_DIR / "mini_test_dataset"
+DEFAULT_IMAGES = SCRIPT_DIR.parent / "mini_test_dataset"
 DEFAULT_MODEL_DIRS = [
     REPO_ROOT / "code" / "ai_models",
 ]

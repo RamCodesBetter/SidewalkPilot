@@ -14,7 +14,7 @@ import workspace
 workspace.activate()
 
 from prepare_series5_pseudo_dataset import load_mixed_partition
-from series_5_a_sidewalkpilot_trainer import MixedBatchSampler, train
+from series_5_A_sidewalkpilot_trainer import MixedBatchSampler, train
 from label_grounded_sam2 import sha256
 
 TRAINING_POLICY = {

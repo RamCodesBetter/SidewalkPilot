@@ -3,13 +3,13 @@
 
 Run this file once on each device, then compare the two JSON reports:
 
-    python3 code/test_files/models/benchmark_v41a_devices.py run \
+    python3 code/test_files/models/benchmarks/benchmark_v41a_devices.py run \
         --label raspberry-pi-5 --provider cpu --output /tmp/rpi5-v4.1a.json
 
-    python3 code/test_files/models/benchmark_v41a_devices.py run \
+    python3 code/test_files/models/benchmarks/benchmark_v41a_devices.py run \
         --label jetson-orin-nano --provider cuda --output /tmp/jetson-v4.1a.json
 
-    python3 code/test_files/models/benchmark_v41a_devices.py compare \
+    python3 code/test_files/models/benchmarks/benchmark_v41a_devices.py compare \
         /tmp/rpi5-v4.1a.json /tmp/jetson-v4.1a.json
 
 The default images are a 180-image timing-only mini test dataset sampled from the
@@ -51,9 +51,9 @@ except ImportError as exc:  # pragma: no cover - depends on the target device
     ) from exc
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_MODEL = REPO_ROOT / "code" / "ai_models" / "SidewalkPilot-v4.1a.onnx"
-DEFAULT_IMAGES = Path(__file__).resolve().parent / "mini_test_dataset"
+DEFAULT_IMAGES = Path(__file__).resolve().parents[1] / "mini_test_dataset"
 MIB = 1024.0 * 1024.0
 MODEL_RE = re.compile(r"^SidewalkPilot-v(?P<version>\d+\.\d+[a-z]?)\.onnx$")
 CLAHE_VERSIONS = {"2.0", "2.0b"}

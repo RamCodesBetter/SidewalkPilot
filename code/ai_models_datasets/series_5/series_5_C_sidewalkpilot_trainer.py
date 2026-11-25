@@ -15,8 +15,8 @@ import convnext_tiny_unet as model_definition
 from label_grounded_sam2 import sha256
 from prepare_reviewed_dataset import read_json
 from prepare_series5_pseudo_dataset import load_mixed_partition
-import series_5_a_sidewalkpilot_trainer as base
-import series_5_b_sidewalkpilot_trainer as previous
+import series_5_A_sidewalkpilot_trainer as base
+import series_5_B_sidewalkpilot_trainer as previous
 import segmentation_losses
 import checkpoint_names
 import boundary_metrics

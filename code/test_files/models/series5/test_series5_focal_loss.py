@@ -12,7 +12,7 @@ sys.path.insert(0, str(SERIES5 / "tools"))
 from workspace import activate
 activate()
 from segmentation_losses import ReviewedFocalLoss
-from series_5_b_sidewalkpilot_trainer import conservative_loss
+from series_5_B_sidewalkpilot_trainer import conservative_loss
 
 
 class FocalLossTests(unittest.TestCase):

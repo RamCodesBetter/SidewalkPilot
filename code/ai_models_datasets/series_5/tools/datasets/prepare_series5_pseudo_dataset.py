@@ -21,7 +21,7 @@ from PIL import Image
 from label_grounded_sam2 import digest_json, sha256, utc_now, write_json
 from label_series5_pseudo import load_selection
 from prepare_reviewed_dataset import read_json, pixel_hash, pixel_counts, safe_file, verify_dataset
-from series_5_a_sidewalkpilot_trainer import validate_split
+from series_5_A_sidewalkpilot_trainer import validate_split
 from pseudo_training_targets import POLICY as TARGET_POLICY, prepare_target
 
 

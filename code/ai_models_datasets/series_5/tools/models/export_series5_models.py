@@ -19,7 +19,7 @@ import torch
 
 
 from label_grounded_sam2 import sha256
-from series_5_a_sidewalkpilot_trainer import load_checkpoint, MEAN, STD
+from series_5_A_sidewalkpilot_trainer import load_checkpoint, MEAN, STD
 
 
 class Logits(torch.nn.Module):
