@@ -42,7 +42,7 @@ def save_prediction_preview(root, relative_prediction, labels):
     Image.fromarray(labels * np.uint8(255)).save(preview)
 
 
-def sample_rows(data, seed, count):
+def sample_rows(data, seed, count, blocked=()):
     split_path, manifest_path = data / "split.json", data / "manifest.json"
     split = json.loads(split_path.read_text())
     manifest = json.loads(manifest_path.read_text())
@@ -53,7 +53,11 @@ def sample_rows(data, seed, count):
     if len(test) != 1000 or len(parts["test"]) != 1000 or test.intersection(parts["train"]) or test.intersection(parts["validation"]):
         raise ValueError("Wrong or overlapping test partition")
     rows = {r["id"]: r for r in manifest["records"]}
-    chosen = random.Random(seed).sample(sorted(test), count)
+    rng = random.Random(seed)
+    chosen = rng.sample(sorted(test), count)
+    blocked = set(blocked)
+    replacements = iter(rng.sample(sorted(test - blocked - set(chosen)), len(blocked.intersection(chosen))))
+    chosen = [next(replacements) if i in blocked else i for i in chosen]
     return [rows[i] for i in chosen], dict(manifest_sha256=split["manifest_sha256"], split_sha256=sha256(split_path))
 
 
@@ -61,7 +65,15 @@ def sample_rows(data, seed, count):
 def package(data, output, checkpoints, seed, count, device, df_split=None):
     if output.exists():
         raise FileExistsError(output)
-    rows, identity = sample_rows(data, seed, count)
+    blocked = set()
+    split_hashes = {}
+    for name, path in checkpoints:
+        if name in ("5.A", "5.B"):
+            split_path = path.parent / "split.json"
+            split_hashes[name] = sha256(split_path)
+            parts = json.loads(split_path.read_text())["partitions"]
+            blocked.update(parts["train"] + parts["validation"])
+    rows, identity = sample_rows(data, seed, count, blocked)
     df_identity = None
     if any(name[2:3] in ("D", "F") for name, _ in checkpoints):
         if df_split is None:
@@ -108,6 +120,8 @@ def package(data, output, checkpoints, seed, count, device, df_split=None):
             expected = df_identity if name[2] in "DF" else identity
             model, state = load_checkpoint(path, model_definition=convnext_tiny_unet if convnext else None)
             cfg = state["config"]
+            if name in split_hashes and state["data_identity"]["split_sha256"] != split_hashes[name]:
+                raise ValueError(f"Unexpected training split for {name}")
             if (cfg["smoke_only"] or cfg["model_name"] != name[:3] or
                     (convnext and (state["data_identity"] != expected or path.stem != name))):
                 raise ValueError(f"Checkpoint identity mismatch: {path}")

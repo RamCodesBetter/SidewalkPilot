@@ -130,7 +130,7 @@ def render(data, output, bundle):
          "Counts are pooled before division. Green marks a better value within each column, not a safety threshold.")
     para(f"{ranking[0]} ranked first at {pct(scores(clean[ranking[0]])[-1])} mIoU; {ranking[1]} followed at {pct(scores(clean[ranking[1]])[-1])}. "
          "A small difference on two drives does not establish a better field system. None of these scores measures sidewalk width in centimeters.")
-    page("Why only two July 2 drives?","Read each row left to right. The 10,000 accepted training-experiment images came from just two recordings. The viewer randomly drew 50 from the frozen test split, not from the full camera archive. Five sampled photos had been used to train or validate A/B, so all models were compared on the same remaining 45. These results do not test another day's conditions.")
+    page("Why only two July 2 drives?",f"The 10,000 accepted images came from two recordings. The viewer samples the frozen test split, not the full camera archive. Scored: {eligible} of {total} viewer photos after checking training and validation membership. These results do not test another day's conditions.")
     runs=sorted(data["campaign_by_drive"])
     table([["Recording","In original 10,000","In 1,000 test","Drawn for viewer","Scored","Excluded"]]+[[r,data["campaign_by_drive"][r],data["test_by_drive"].get(r,0),(a:=sum(f["recording_run"]==r for f in sample)),
              (b:=sum(f["recording_run"]==r for f in clean["5.C"])),a-b] for r in runs])
@@ -138,7 +138,7 @@ def render(data, output, bundle):
           [[n,"MobileNetV3 / LR-ASPP" if n[2] in "AB" else "ConvNeXt-Tiny / U-Net",
             " x ".join(map(str,m["input_size"])),m["precision"],m["epoch"]] for n,m in models.items()])
     para("A/B are development baselines. C trained its encoder immediately; E kept it frozen for the first two epochs. For C/E, no suffix means final epoch; b selects by validation sidewalk IoU; s favors validation precision near the best IoU. The test photos did not select those checkpoints.")
-    para("Excluded photo numbers: "+", ".join(str(f["position"]) for f in sample if f["image_id"] in excluded)+
+    para("Excluded photo numbers: "+(", ".join(str(f["position"]) for f in sample if f["image_id"] in excluded) or "none")+
          ". Scores compare stored class IDs at the original resolution; label 255 is unknown and never counted as background.")
     page("Where did each model add or miss sidewalk?","False positives are background mislabeled as sidewalk (spill). False negatives are sidewalk mislabeled as background (misses). The graph divides each error count by its own reference class size, so class imbalance does not hide mistakes.")
     names=list(models)
@@ -154,7 +154,7 @@ def render(data, output, bundle):
     scored=sum(counts(clean["5.C"]))
     ignored=sum(f["ignored"] for f in clean["5.C"])
     para(f"Unit: pixels, not photos. Across {eligible} photos the masks contain {scored+ignored:,} pixels. Skip {ignored:,} unknown reference pixels. Each row then sorts the same {scored:,} pixels into four outcomes; a pixel appears exactly once per model.")
-    page("Can a high average hide a bad mask?","First compute one mIoU per photo: average the sidewalk IoU and background IoU. Sort the 45 photo scores from lowest to highest. Minimum is the lowest; the 10th percentile is near the fifth-lowest; median is the middle (23rd); mean is the sum divided by 45. Photo numbers match the viewer.")
+    page("Can a high average hide a bad mask?",f"Compute one mIoU per photo by averaging sidewalk and background IoU. Sort the {eligible} scores: minimum is the worst, the 10th percentile marks the low end, and the median marks the middle. Mean is the sum divided by {eligible}. Photo numbers match the viewer.")
     rows=[["Model","Worst photo #","Minimum","10th percentile","Median","Mean"]]
     for n in names:
         fs=clean[n]; vals=[scores([f])[-1] for f in fs]
