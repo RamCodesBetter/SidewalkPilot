@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deferred masks | SidewalkPilot</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:16px/1.45 system-ui;color:#202822;background:#fafbf9}main{max-width:1580px;margin:auto;padding:20px}header,nav{display:flex;align-items:center;flex-wrap:wrap;gap:12px}header{justify-content:space-between;border-bottom:1px solid #a6b1a7;padding-bottom:12px}h1{font-size:22px;margin:0}button,select{padding:7px;font:inherit;max-width:100%}nav{margin:15px 0}section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}figure{margin:0}img{width:100%;aspect-ratio:16/9;object-fit:contain;background:#eee}figcaption,small{color:#45574b}strong{color:#793924}#name{overflow-wrap:anywhere}p{margin:.6em 0}select:focus-visible,button:focus-visible{outline:3px solid #208657}@media(max-width:700px){section{grid-template-columns:1fr}main{padding:12px}}
+</style><main>
+<header><h1>Deferred mask diagnostics</h1><nav><button id="prev" aria-label="Previous photo" title="Previous photo">←</button><b id="count"></b><button id="next" aria-label="Next photo" title="Next photo">→</button></nav></header>
+<p id="name"></p><strong id="why"></strong><p id="match"></p>
+<nav><label>Stage <select id="stage"></select></label><label>Proposal <select id="candidate"></select></label></nav>
+<section><figure><img id="orig" alt="Original sidewalk photograph"><figcaption>Original</figcaption></figure><figure><img id="mask" alt="Selected diagnostic image"><figcaption id="caption"></figcaption></figure></section>
+<p id="detail"></p><small id="skip"></small></main><script src="data.js"></script><script>
+const el=id=>document.getElementById(id);let pos=0;
+function showStage(){
+ const f=frames[pos], key=el('stage').value, p=f.prompts[Number(key)], c=el('candidate');
+ c.replaceChildren();
+ if(p){p.candidates.forEach((v,i)=>c.add(new Option((i+1)+' · score '+v.score.toFixed(3),i)));if(!c.options.length)c.add(new Option('None',''));}
+ else c.add(new Option('Combined',''));
+ c.disabled=c.options.length<2;
+ function show(){
+ let rec=p?.candidates[c.selectedIndex], d=p?null:f[key];el('mask').src=rec?.overlay||d?.overlay||f.original;
+ el('caption').textContent=rec?'SAM proposal · '+rec.gate:(d?'Diagnostic foreground':'Original repeated: no returned mask.');
+ el('detail').textContent=p?('Prompt threshold '+p.threshold+' · '+p.candidates.length+' returned · '+p.decision.replaceAll('_',' ')+(rec?' · Area '+(100*rec.area).toFixed(1)+'%':'')):
+ (key==='pair'?'Prompt overlap '+(100*d.prompt_iou).toFixed(1)+'% (requires 90%) · Sidewalk area '+(100*d.positive_fraction).toFixed(1)+'% (requires 15–94%)':'Known background '+(100*d.background).toFixed(1)+'% · '+(d.anchor||('Detached pixels: '+d.detached)));
+ } c.onchange=show;show();
+}
+function draw(){
+ const f=frames[pos], s=el('stage');s.replaceChildren();f.prompts.forEach((p,i)=>s.add(new Option(p.prompt,i)));
+ for(const [k,n] of [['pair','Prompt agreement'],['final','Final corridor']])if(f[k].overlay)s.add(new Option(n,k));
+ s.selectedIndex=s.options.length-1;el('orig').src=f.original;el('name').textContent=f.name;el('why').textContent=f.explanation;
+ el('match').textContent='Recorded: '+f.original_reasons.join(', ')+' · Replay: '+(f.reasons.join(', ')||'passed (not promoted)');
+ el('count').textContent=(pos+1)+' / '+frames.length;el('prev').disabled=pos===0;el('next').disabled=pos===frames.length-1;
+ el('skip').textContent='Prompts not reached: '+(['concrete sidewalk','sidewalk','paved pedestrian walkway'].slice(f.prompts.length).join(', ')||'none');showStage();
+}
+function move(n){pos=Math.max(0,Math.min(frames.length-1,pos+n));draw()}
+el('stage').onchange=showStage;el('prev').onclick=()=>move(-1);el('next').onclick=()=>move(1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='SELECT'||(e.target.tagName==='BUTTON'&&e.key==='Enter'))return;if(['ArrowRight','Enter','ArrowLeft'].includes(e.key)){e.preventDefault();move(e.key==='ArrowLeft'?-1:1)}});draw();
+</script></html>
