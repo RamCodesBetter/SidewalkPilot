@@ -17,10 +17,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "ai_models_datasets/series_5/tools"))
 from workspace import activate
 activate()
+from reviewed_day_split import validate_split
 from series_5_sidewalkpilot_trainer import (
     DEFAULTS, MixedBatchSampler, SidewalkDataset, atomic_checkpoint, confusion_counts,
     confusion_metrics, evaluate, load_checkpoint, make_model, segmentation_loss,
-    select_precision, train, train_mode, training_config, validate_split,
+    select_precision, train, train_mode, training_config,
 )
 
 

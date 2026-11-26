@@ -19,6 +19,7 @@
 |---|---|
 | `labeling/deferred_pilot.py` | Reconcile both screening ledgers, group deferred frames by the complete reason set and sample up to 30 for diagnosis. Does not relabel or promote frames. |
 | `datasets/campaign10k.py` | Package exactly the original 10k campaign pairs for a shared grouped C/E experiment. |
+| `datasets/reviewed_day_split.py` | Create, load and validate the 5.A reviewed-data split by recording day; separate from the C/E grouped split. |
 | `datasets/freeze_ce_partitions.py` | Freeze C/E membership before annotation. Never invent missing reference masks. |
 | `datasets/prepare_paired_review.py` | Freeze a new, review-disjoint sample and a private balanced A/B assignment. |
 | `datasets/prepare_random_comparison.py` | Freeze a uniform random image sample for named, three-method comparison. |
