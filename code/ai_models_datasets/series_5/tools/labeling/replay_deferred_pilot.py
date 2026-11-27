@@ -41,20 +41,52 @@ def replay(detector, photo, stem, out):
         return name
 
     select, compare, prepare = campaign.instance, campaign.filter_masks, campaign.prepare_target
+    adapt = campaign.hf_outputs
+    captured = {}
+    def scoring_head(_module, _args, output):
+        # Last decoder layer, before presence is folded into the detection logit.
+        captured["logits"] = output[-1, 0, :, 0].detach().clone()
+
+    def capture_components(raw, joint):
+        outputs = adapt(raw, joint)
+        presence = raw["presence_logit_dec"].reshape(()).detach()
+        scores = outputs.pred_logits[0].sigmoid()
+        if not joint:
+            scores = scores * presence.sigmoid()
+        logits = captured.pop("logits")
+        if logits.shape != scores.shape:
+            raise ValueError("Unaligned SAM query logits")
+        keep = scores > .4
+        captured.update(scores=scores[keep].tolist(), candidate=logits[keep].float().tolist(),
+                        presence=float(presence))
+        return outputs
+
     def instance(masks, scores, threshold):
         idx = len(prompts)
         info = dict(prompt=campaign.PROMPTS[idx], threshold=threshold, candidates=[])
         prompts.append(info)
+        if scores != captured["scores"]:
+            raise ValueError("Returned proposals differ from the diagnostic score order")
+        eligible = []
         for n, (raw, score) in enumerate(zip(masks, scores)):
             fg = raw.reshape(raw.shape[-2:]).astype(bool)
             check, extra = geometry(fg)
             reason = ("Score below prompt threshold" if score < threshold else check or
                       ("Too many detached pixels" if extra > 128*fg.size/(1280*720)
                        else "Eligible for instance selection"))
+            if reason == "Eligible for instance selection":
+                eligible.append((score, n, campaign.anchored(fg)))
             info["candidates"].append(dict(score=score, area=float(fg.mean()), gate=reason,
+                 candidate_logit=captured["candidate"][n], presence_logit=captured["presence"],
                  detached=extra, overlay=overlay(fg, f"{idx}-{n}")))
         picked, reason = select(masks, scores, threshold)
         info["decision"] = reason or "selected"
+        eligible.sort(key=lambda item: -item[0])
+        if eligible:
+            _, best, region = eligible[0]
+            info["selected"] = best+1 if picked is not None else None
+            info["conflicts"] = [[best+1, n+1, overlap] for _, n, r in eligible[1:]
+                                 if (overlap := campaign.iou(region,r)) < .90]
         return picked, reason
 
     def filtered(*args):
@@ -73,7 +105,8 @@ def replay(detector, photo, stem, out):
         return result
 
     with ExitStack() as stack:
-        for key, fn in [("instance",instance), ("filter_masks",filtered), ("prepare_target",prepared)]:
+        stack.enter_context(detector.model.dot_prod_scoring.register_forward_hook(scoring_head))
+        for key, fn in [("hf_outputs",capture_components), ("instance",instance), ("filter_masks",filtered), ("prepare_target",prepared)]:
             stack.enter_context(patch.object(campaign, key, fn))
         labels, reasons, _ = detector.predict(photo)
     if reasons == ["no_confident_anchored_instance"]:
